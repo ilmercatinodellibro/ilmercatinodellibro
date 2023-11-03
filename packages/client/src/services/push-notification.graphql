@@ -1,0 +1,7 @@
+mutation subscribeToPushNotifications($input: PushSubscriptionInput!) {
+  subscribeToPushNotifications(input: $input)
+}
+
+mutation unsubscribeFromPushNotifications($input: PushSubscriptionInput!) {
+  unsubscribeFromPushNotifications(input: $input)
+}

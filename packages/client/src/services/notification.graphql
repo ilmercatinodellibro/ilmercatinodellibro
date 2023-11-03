@@ -1,0 +1,26 @@
+fragment Notification on Notification {
+  id
+  readAt
+
+  event {
+    ...Event
+  }
+}
+
+query getNotifications {
+  notifications {
+    ...Notification
+  }
+}
+
+subscription newNotification {
+  newNotification {
+    ...Notification
+  }
+}
+
+mutation setNotificationReadStatus($input: SetNotificationReadStatusInput!) {
+  setNotificationReadStatus(input: $input) {
+    ...Notification
+  }
+}

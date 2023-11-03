@@ -1,0 +1,21 @@
+fragment User on User {
+  id
+  firstname
+  lastname
+  role
+  email
+}
+
+query users {
+  users {
+    ...User
+  }
+}
+
+mutation removeUser($input: RemoveUserPayload!) {
+  removeUser(input: $input)
+}
+
+mutation updateRole($input: UpdateRolePayload!) {
+  updateRole(input: $input)
+}

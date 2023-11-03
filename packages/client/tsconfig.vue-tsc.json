@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "dist",
+    ".quasar",
+    "node_modules",
+
+    // src-pwa/tsconfig.json doesn't get picked up by vue-tsc, so we need to exclude it here to avoid errors
+    "src-pwa"
+  ]
+}

@@ -1,0 +1,51 @@
+fragment UserSummary on User {
+  id
+  firstname
+  lastname
+  email
+  role
+  emailVerified
+  createdAt
+  updatedAt
+}
+
+fragment AuthSummary on AuthPayload {
+  jwt
+  user {
+    ...UserSummary
+  }
+}
+
+mutation register($input: RegisterPayload!) {
+  register(input: $input)
+}
+
+mutation registerWithToken($input: RegisterPayload!) {
+  registerWithToken(input: $input)
+}
+
+mutation login($input: LoginPayload!) {
+  login(input: $input) {
+    ...AuthSummary
+  }
+}
+
+mutation refreshToken {
+  refreshToken
+}
+
+mutation resetPassword($input: PasswordResetPayload!) {
+  resetPassword(input: $input)
+}
+
+mutation sendPasswordResetLink($input: PasswordResetLinkPayload!) {
+  sendPasswordResetLink(input: $input)
+}
+
+mutation resetForgottenPassword($input: ResetForgottenPasswordPayload!) {
+  resetForgottenPassword(input: $input)
+}
+
+mutation sendRegistrationInvite($input: RegistrationInviteLinkPayload!) {
+  sendRegistrationInvite(input: $input)
+}

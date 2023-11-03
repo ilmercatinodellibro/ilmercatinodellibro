@@ -1,0 +1,100 @@
+// app global css in SCSS form
+@import "utilities";
+
+$default-reserved-space-for-the-toolbar: 20px;
+$icons-dimension: 24px;
+$icons-gap: 16px;
+$separator-gap: 13px;
+$reserved-space-for-the-toolbar-addition: calc(
+  #{$icons-dimension} + #{$separator-gap} * 2 - #{$default-reserved-space-for-the-toolbar}
+);
+
+// Change the default text color system-wide
+// It helps us avoiding too many `text-black-87` classes around
+html,
+body {
+  color: rgb(0 0 0 / 87%);
+}
+
+.cursor-grabbing {
+  cursor: grabbing;
+}
+
+.cursor-grab {
+  cursor: grab;
+}
+
+// Default apexchart toolbar icons style is not what asked.
+// It must be changed in order to give different color, dimensions, padding and create a separator line
+.apexchart-custom-icons {
+  .apexcharts-canvas {
+    padding-top: $reserved-space-for-the-toolbar-addition;
+
+    /* stylelint-disable max-nesting-depth */
+    .apexcharts-toolbar {
+      border-bottom: 1px $primary solid;
+      border-radius: 0;
+      justify-content: flex-end;
+      left: 0;
+      max-width: unset !important;
+      padding-bottom: 13px;
+
+      /* stylelint-disable selector-max-compound-selectors */
+      > * {
+        margin-left: $icons-gap;
+        transform: unset !important;
+      }
+
+      svg {
+        fill: $secondary !important;
+        stroke: unset !important;
+        width: $icons-dimension;
+      }
+
+      .apexcharts-selected svg {
+        fill: rgb(0 0 0 / 87%) !important;
+      }
+      /* stylelint-enable selector-max-compound-selectors */
+    }
+    /* stylelint-enable max-nesting-depth */
+  }
+}
+
+// When creating a dialog sometimes you need to manage it's height and width in order to react to the content or the screen.
+// Also you probably need to make some content scrollable and not others.
+// In order to keep consistent behaviors between dialogs and manage common problems faster use next set of classes.
+.mobile-responsive-dialog {
+  // Create a dialog and put this class at it's first element inside the tag "q-dialog"
+  display: flex;
+  flex-flow: column nowrap;
+  transition: width 0.4s;
+
+  // This class must be applied to all the elements that must be scrollable. An example could be a dialog with title, bottom actions and a scrollable content.
+  .scrollable-content-container {
+    flex-grow: 1;
+    min-height: 100px;
+    overflow: auto;
+  }
+
+  // Stepper components must be treated different from simpler container so they need this set of classes to achieve similar scroll behavior
+  .scrollable-stepper {
+    /* stylelint-disable max-nesting-depth */
+    .stepper-header {
+      background-color: inherit;
+      border-bottom: solid thin rgb(0 0 0 / 10%);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .q-stepper__content {
+      flex-grow: 1;
+    }
+    /* stylelint-enable max-nesting-depth */
+  }
+}
+
+.q-dialog__title {
+  background-color: $primary;
+  color: #fff;
+}

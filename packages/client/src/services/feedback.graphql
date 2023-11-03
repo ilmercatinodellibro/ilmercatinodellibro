@@ -1,0 +1,3 @@
+mutation feedback($input: FeedbackRequestPayload!) {
+  feedback(input: $input)
+}

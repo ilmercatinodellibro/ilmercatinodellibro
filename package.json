@@ -1,0 +1,68 @@
+{
+  "name": "ilmercatinodellibro-monorepo",
+  "version": "0.0.1",
+  "repository": "https://github.com/ilmercatinodellibro/ilmercatinodellibro",
+  "private": true,
+  "license": "MIT",
+  "author": "Dreamonkey Srl <info@dreamonkey.com> (https://dreamonkey.com)",
+  "contributors": [
+    "Paolo Caleffi <p.caleffi@dreamonkey.com>",
+    "Francesco Bonacini <f.bonacini@dreamonkey.com>",
+    "Alessandro Vandelli <a.vandelli@dreamonkey.com>"
+  ],
+  "description": "Il Mercatino del Libro monorepo",
+  "packageManager": "pnpm@8.9.2",
+  "scripts": {
+    "clean": "pnpm --filter \"./packages/**\" clean",
+    "generate": "pnpm --filter \"./packages/server\" generate && pnpm --filter \"./packages/client\" generate",
+    "lint": "pnpm --filter \"./packages/**\" lint",
+    "format:root": "prettier --write \"**/*.{json,md,graphql,vue,js,ts,yml}\" \"!packages/**\" --ignore-path .gitignore",
+    "format": "pnpm format:root && pnpm --filter \"./packages/**\" format",
+    "client:build": "pnpm --filter \"./packages/client\" build:pwa",
+    "server:build": "pnpm --filter \"./packages/server\" build",
+    "build": "pnpm clean && pnpm generate && pnpm client:build && pnpm server:build",
+    "serve": "pnpm --filter \"./packages/server\" start:prod",
+    "test": "echo \"See package.json => scripts for available tests.\" && exit 0",
+    "client:dev": "pnpm --filter \"./packages/client\" dev",
+    "server:dev": "pnpm --filter \"./packages/server\" dev",
+    "server:migrate:reset": "pnpm --filter \"./packages/server\" migrate:reset",
+    "db:start": "pnpm --filter \"./packages/server\" db:start",
+    "db:stop": "pnpm --filter \"./packages/server\" db:stop",
+    "prepare": "husky install && pnpm generate",
+    "preinstall": "npx only-allow pnpm"
+  },
+  "devDependenciesComments": {
+    "stylelint": "We are forced to pin stylelint to 15.10.0 because vite-plugin-checker breaks with meow@10 which is full-ESM: https://github.com/fi3ework/vite-plugin-checker/issues/260"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "eslint": "^8.52.0",
+    "eslint-config-coralloy": "^0.2.1",
+    "graphql-config": "^5.0.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2",
+    "postcss": "^8.4.31",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.5",
+    "stylelint": "15.10.0",
+    "stylelint-config-coralloy": "^0.4.1",
+    "typescript": "^5.2.2"
+  },
+  "overridesComments": {
+    "vite": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077",
+    "@vitejs/plugin-vue": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "^4.0.0",
+      "@vitejs/plugin-vue": "^4.0.0"
+    },
+    "patchedDependencies": {
+      "prisma-nestjs-graphql@19.2.0": "patches/prisma-nestjs-graphql@19.2.0.patch"
+    }
+  },
+  "engines": {
+    "node": "^18.12.0",
+    "pnpm": ">=7.5"
+  }
+}

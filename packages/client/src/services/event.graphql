@@ -1,0 +1,17 @@
+fragment Event on Event {
+  id
+  name
+  description
+
+  createdAt
+
+  owner {
+    ...UserSummary
+  }
+}
+
+query getEvents {
+  events {
+    ...Event
+  }
+}

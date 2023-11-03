@@ -1,0 +1,18 @@
+diff --git a/generate.cjs b/generate.cjs
+index f00f7c4947bcfc20a3e2972b65c38e07ce0b4296..b00c9b170f460c2689c3092a33276ab09dd35a9d 100755
+--- a/generate.cjs
++++ b/generate.cjs
+@@ -459,7 +459,12 @@ function getGraphqlImport(args) {
+       name: typeName
+     }).getFilePath()
+   );
+-  return { name: typeName, specifier };
++  return {
++    name: typeName,
++    specifier: config.reExport === 'All' && specifier.startsWith('../')
++      ? '../'
++      : specifier
++  };
+ }
+
+ function getGraphqlInputType(inputTypes, pattern) {

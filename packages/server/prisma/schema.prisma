@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// TODO: automatically transform camelCase column names to snake_case while generating
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  binaryTargets   = ["native"]
+}
+
+generator nestgraphql {
+  provider                              = "node node_modules/prisma-nestjs-graphql"
+  output                                = "../src/@generated"
+  // We need to import directly from 'src/@generated' instead of subfolders to avoid circular dependencies
+  // So, we enable this option to make it possible to import everything from the same folder
+  // This is why we need the patch applied to PNPM on PrismaNestJSGraphQL
+  reExport                              = All
+  requireSingleFieldsInWhereUniqueInput = true
+  noAtomicOperations                    = true
+
+  // Use JSON scalar from graphql-scalars instead of the default (graphql-type-json)
+  graphqlScalars_Json_name      = "GraphQLJSON"
+  graphqlScalars_Json_specifier = "graphql-scalars"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  OPERATOR
+  ADMIN
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  // Prevents password field to be leaked in the GraphQL API
+  /// @HideField()
+  password      String
+  firstname     String
+  lastname      String
+  emailVerified Boolean  @default(false)
+  role          Role     @default(USER)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  /// @HideField()
+  events            Event[]
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
+}
+
+model Event {
+  id          String @id @default(uuid())
+  name        String
+  description String
+
+  ownerId String @map("owner_id")
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  notifications Notification[]
+}
+
+model Notification {
+  id      String    @id @default(uuid())
+  userId  String    @map("user_id")
+  user    User      @relation(fields: [userId], references: [id])
+  eventId String    @map("event_id")
+  event   Event     @relation(fields: [eventId], references: [id])
+  readAt  DateTime? @map("read_at") @db.Timestamptz()
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+}
+
+model PushSubscription {
+  userId      String @map("user_id")
+  user        User   @relation(fields: [userId], references: [id])
+  deviceToken String @map("device_token")
+
+  @@unique([userId, deviceToken])
+}

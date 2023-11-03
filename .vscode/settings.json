@@ -1,0 +1,22 @@
+{
+  "cSpell.words": ["apexchart", "apexcharts"],
+
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "editor.codeActionsOnSave": [
+    "source.organizeImports",
+    "source.fixAll.eslint",
+    "source.fixAll.stylelint"
+  ],
+
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
+  "stylelint.validate": ["css", "scss", "vue"],
+
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

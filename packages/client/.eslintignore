@@ -1,0 +1,14 @@
+/dist
+/src-capacitor
+/src-cordova
+/.quasar
+/node_modules
+.eslintrc.js
+/src-ssr
+
+# Test coverage related
+/coverage
+/.nyc_output
+
+/src/@generated
+/src/**/*.graphql.ts

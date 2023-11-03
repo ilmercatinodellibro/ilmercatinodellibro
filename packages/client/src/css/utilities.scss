@@ -1,0 +1,179 @@
+$additional-colors: (
+  event-fatal: $negative,
+  event-error: #f44336,
+  event-warning: $warning,
+  event-info: #2196f3,
+);
+
+@each $color-name, $color in $additional-colors {
+  .bg-#{$color-name} {
+    background-color: $color !important;
+  }
+
+  .text-#{$color-name} {
+    color: $color !important;
+  }
+}
+
+$white: #fff;
+$black: #000;
+$alpha-map: (
+  "87" 0.87,
+  "54" 0.54,
+  "38" 0.38,
+  "28" 0.28,
+  "focused-dark" 0.24,
+  "focused-light" 0.12,
+  "12" 0.12,
+  "activated-dark" 0.24,
+  "activated-light" 0.12,
+  "selected" 0.08,
+  "hover" 0.04
+);
+$color-map: (
+  "primary" $primary,
+  "secondary" $secondary,
+  "accent" $accent,
+  "black" $black,
+  "white" $white,
+  "negative" $negative
+);
+
+@each $alpha-name, $alpha in $alpha-map {
+  @each $color-name, $color in $color-map {
+    .bg-#{$color-name}-#{$alpha-name} {
+      background-color: rgba($color, $alpha);
+    }
+
+    .text-#{$color-name}-#{$alpha-name} {
+      color: rgba($color, $alpha);
+    }
+  }
+}
+
+// flex/grid gap and overlap (negative gap)
+$gap-size-list: 4, 6, 8, 10, 12, 16, 18, 24, 32, 48;
+
+@each $gap-size in $gap-size-list {
+  .gap-#{$gap-size} {
+    gap: $gap-size + px !important;
+  }
+
+  .overlap-#{$gap-size}:not(.reverse) > *:not(:first-child) {
+    margin-left: -$gap-size + px !important;
+  }
+
+  .overlap-#{$gap-size}.reverse > *:not(:last-child) {
+    margin-left: -$gap-size + px !important;
+  }
+}
+
+// text sizes
+$text-size-list: 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48;
+
+@each $text-size in $text-size-list {
+  .text-size-#{$text-size} {
+    font-size: $text-size + px !important;
+  }
+}
+
+// letter spacings
+$letter-spacing-list: 5, 10, 15, 25, 40, 44, 75, 100, 225, 263, 300, 375, 450,
+  675;
+
+@each $letter-spacing in $letter-spacing-list {
+  .letter-spacing-#{$letter-spacing} {
+    letter-spacing: ($letter-spacing / 100) + px !important;
+  }
+}
+
+// font weight
+$font-weight-list: 100, 200, 300, 400, 500, 600, 700, 800, 900;
+
+@each $font-weight in $font-weight-list {
+  .font-weight-#{$font-weight} {
+    font-weight: ($font-weight) !important;
+  }
+}
+
+// app line heights
+$line-heights-list: 16, 20, 28, 50, 75;
+
+@each $line-height in $line-heights-list {
+  .line-height-#{$line-height} {
+    line-height: 1 + ($line-height / 100) !important;
+  }
+}
+
+// widths
+$widths-list: 32, 180, 200, 250, 315, 1024;
+
+@each $width in $widths-list {
+  .width-#{$width} {
+    width: $width + px !important;
+  }
+
+  .min-width-#{$width} {
+    min-width: $width + px !important;
+  }
+
+  .max-width-#{$width} {
+    max-width: $width + px !important;
+  }
+}
+
+.round {
+  border-radius: 50% !important;
+}
+
+.text-vertical {
+  writing-mode: vertical-lr;
+}
+
+.text-underline {
+  text-decoration: underline;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+/*
+  `overflow` property and an `height` with a fixed value forces flexbox child to manage
+  the overflow instead of its parent, `flex-grow` then force the child to expand to all
+  available space ignoring the defined `height` rule
+
+  When you need to use a q-scroll-area inside context where the height of the container isn't set you may not obtain the expected result.
+  In order to provide an height value to the container you can set the height of that element to 0 and than let it expand using "flex-grow".
+
+*/
+.height-0 {
+  flex-grow: 1;
+  height: 0;
+  overflow: auto;
+}
+
+// Use this class every time you want a string to line break where you want using the special "\n" character
+.white-space-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.sticky {
+  position: sticky;
+
+  &-bottom {
+    position: sticky;
+    bottom: 0;
+  }
+}
+
+// min-height
+$min-height-row: 52px;
+
+.min-height-52.min-height-52 {
+  min-height: $min-height-row;
+}
+
+.vertical-align-middle {
+  vertical-align: middle;
+}
