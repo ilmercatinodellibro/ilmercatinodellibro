@@ -23,7 +23,7 @@ CREATE TABLE "RetailLocation" (
 -- CreateTable
 CREATE TABLE "Book" (
     "id" TEXT NOT NULL,
-    "isbnCode" TEXT NOT NULL,
+    "isbn_code" TEXT NOT NULL,
     "subject" TEXT NOT NULL,
     "authors_full_name" TEXT NOT NULL,
     "title" TEXT NOT NULL,

@@ -125,7 +125,7 @@ model RetailLocation {
 
 model Book {
   id               String         @id @default(uuid())
-  isbnCode         String
+  isbnCode         String         @map("isbn_code")
   subject          String
   authorsFullName  String         @map("authors_full_name")
   title            String
