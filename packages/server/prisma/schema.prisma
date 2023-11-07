@@ -85,3 +85,52 @@ model PushSubscription {
 
   @@unique([userId, deviceToken])
 }
+
+// Schools and Books
+// model School {
+//   code String @id
+
+//   courses StudyCourse[] @relation("SchoolStudyCourses")
+// }
+
+// model StudyCourse {
+//   id          String @id @default(uuid())
+//   sectionName String @map("section_name")
+//   year        Int
+
+//   schoolCode String @map("school_code")
+//   school     School @relation("SchoolStudyCourses", fields: [schoolCode], references: [code])
+// }
+
+model RetailLocation {
+  id                    String  @id @default(uuid())
+  name                  String
+  registrationEnabled   Boolean @default(false) @map("registration_enabled")
+  payOffEnabled         Boolean @default(false) @map("pay_off_enabled")
+  fullAddress           String  @map("full_address")
+  humanReadableId       String  @unique @map("human_readable_id")
+  email                 String  @unique
+  phoneNumber           String  @default("") @map("phone_number")
+  facebookLink          String  @default("") @map("facebook_link")
+  instagramLink         String  @default("") @map("instagram_link")
+  whoAreWeContent       String  @default("") @map("who_are_we_content")
+  joinUsContent         String  @default("") @map("join_us_content")
+  buyRate               Float   @default(35) @map("buy_rate")
+  sellRate              Float   @default(55) @map("sell_rate")
+  maxBookingDays        Int     @default(7) @map("max_booking_days")
+  warehouseMaxBlockSize Int     @default(10) @map("warehouse_max_block_size")
+
+  books Book[] @relation("RetailLocationBooks")
+}
+
+model Book {
+  id               String         @id @default(uuid())
+  isbnCode         String
+  subject          String
+  authorsFullName  String         @map("authors_full_name")
+  title            String
+  originalPrice    Float          @map("original_price")
+  publisherName    String         @map("publisher_name")
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation("RetailLocationBooks", fields: [retailLocationId], references: [id])
+}
