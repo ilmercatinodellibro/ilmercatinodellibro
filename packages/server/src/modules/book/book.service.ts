@@ -2,18 +2,29 @@ import { join as joinPath } from "path";
 import { Injectable /*, UnprocessableEntityException */ } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 
-const FILES_PATH = joinPath(__dirname, "books-source.csv");
+const FILES_PATH = `${joinPath(
+  process.cwd(),
+  "tmp-files",
+  "books-source.csv",
+)}`;
 
 @Injectable()
 export class BookService {
   constructor(private readonly prisma: PrismaService) {}
 
   async loadBooksIntoDb() {
+    //console.log("Show me details: ", FILES_PATH);
+
+    // HAHA, no. This does not work. Because the DB is inside a docker instance. Thus it has no access to the outside world file instance
     await this.prisma.$executeRaw`
-    COPY "Book" 
-    FROM ${FILES_PATH} 
+    COPY public."Book" 
+    FROM ${FILES_PATH}
     WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
     `;
+
+    // console.log("result of operation: ", result);
+
+    return false;
   }
 }
 

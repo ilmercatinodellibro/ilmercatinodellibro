@@ -129,6 +129,7 @@ export default {
     },
   },
   routesNames: {
+    [AvailableRouteNames.Catalog]: "Books catalog",
     [AvailableRouteNames.Events]: "Events",
     [AvailableRouteNames.Theme]: "Theme",
     [AvailableRouteNames.ResetPassword]: "Reset Password",

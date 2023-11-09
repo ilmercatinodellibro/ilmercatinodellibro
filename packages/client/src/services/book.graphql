@@ -8,3 +8,7 @@ query getBooks($input: BookQueryPayload!) {
     originalPrice
   }
 }
+
+mutation loadBooksIntoDatabase {
+  loadBooksIntoDatabase
+}

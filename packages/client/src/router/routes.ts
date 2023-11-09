@@ -85,6 +85,11 @@ const routes: RouteRecordRaw[] = [
         name: AvailableRouteNames.RolesAndPermissions,
         component: () => import("src/pages/roles-and-permissions.vue"),
       },
+      {
+        path: "books-catalog",
+        name: AvailableRouteNames.Catalog,
+        component: () => import("src/pages/catalog.vue"),
+      },
     ],
   },
 

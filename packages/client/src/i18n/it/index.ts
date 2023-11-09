@@ -135,6 +135,7 @@ export default {
   },
   routesNames: {
     [AvailableRouteNames.Events]: "Eventi",
+    [AvailableRouteNames.Catalog]: "Catalogo libri",
     [AvailableRouteNames.Theme]: "Tema",
     [AvailableRouteNames.ResetPassword]: "Reimposta password",
     [AvailableRouteNames.ForgotPassword]: "Password dimenticata",

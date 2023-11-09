@@ -51,4 +51,11 @@ export class BookResolver {
       },
     });
   }
+
+  @Mutation(() => Boolean)
+  async loadBooksIntoDatabase() {
+    const result = await this.bookService.loadBooksIntoDb();
+
+    return result;
+  }
 }
