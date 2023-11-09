@@ -89,6 +89,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useAuthService } from "src/services/auth";
 
 const userParam = ref({
   firstname: "",
@@ -96,6 +97,15 @@ const userParam = ref({
   email: "",
   message: "",
 });
+
+const userData = useAuthService();
+if (userData.isAuthenticated.value) {
+  if (userData.user.value) {
+    userParam.value.firstname = userData.user.value.firstname;
+    userParam.value.lastname = userData.user.value.lastname;
+    userParam.value.email = userData.user.value.email;
+  }
+}
 
 const userHints = ref({
   firstname: "",
