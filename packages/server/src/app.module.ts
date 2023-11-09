@@ -21,6 +21,7 @@ import {
 } from "./modules/auth/auth.models";
 import { AuthModule } from "./modules/auth/auth.module";
 import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth-guard";
+import { BookModule } from "./modules/book/book.module";
 import { EventModule } from "./modules/event/event.module";
 import { FeedbackModule } from "./modules/feedback/feedback.module";
 import { MailModule } from "./modules/mail/mail.module";
@@ -124,6 +125,7 @@ import { UserModule } from "./modules/user/user.module";
     }),
     PrismaModule,
     AuthModule,
+    BookModule,
     MailModule,
     EventModule,
     NotificationModule,
