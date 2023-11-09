@@ -64,6 +64,11 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: "/", redirect: { name: AvailableRouteNames.Events } },
       {
+        path: "contacts",
+        name: AvailableRouteNames.Contacts,
+        component: () => import("src/pages/contacts.vue"),
+      },
+      {
         path: "events",
         name: AvailableRouteNames.Events,
         component: () => import("src/pages/events.vue"),
