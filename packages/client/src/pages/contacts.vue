@@ -52,25 +52,6 @@
               </span>
             </q-btn>
           </a>
-          <!--
-            q-btn outline no-caps color="primary" class="socials-button">
-            <span class="button-container">
-            <q-icon
-            class="button-icon"
-            color="primary"
-            name="svguse:icons.svg#instagram"
-            />
-            <span class="button-text-container">
-            <span class="button-text"> {{ "Instagram" }} </span>
-            <q-icon
-            class="button-icon"
-            name="mdi-arrow-right"
-            color="black-54"
-            />
-            </span>
-            </span>
-            </q-btn
-          -->
         </div>
       </div>
     </q-card>
@@ -80,9 +61,9 @@
       </span>
       <span class="form-content">
         <q-input
-          v-for="(key, field) in user"
+          v-for="(key, field) in userParam"
           :key="field"
-          v-model="user[field]"
+          v-model="userParam[field]"
           outlined
           :label="$t('contacts.form.' + field)"
           class="black-54 form-text"
@@ -92,7 +73,7 @@
         >
           <template #hint>
             <span class="text-hint">
-              {{ hints[field as keyof typeof hints] }}
+              {{ userHints[field] }}
             </span>
           </template>
         </q-input>
@@ -109,29 +90,20 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-let userParam = {
-  name: "Monkey",
-  surname: "Dream",
-  email: "mojo@dreamonkey.com",
-  message: "I like bananas",
-};
-
-let userHints = {
-  name: "",
-  surname: "",
+const userParam = ref({
+  firstname: "",
+  lastname: "",
   email: "",
   message: "",
-};
+});
 
-function a(data: object) {
-  return data;
-}
+const userHints = ref({
+  firstname: "",
+  lastname: "",
+  email: "",
+  message: "",
+});
 
-userHints = a(userHints) as typeof userHints;
-userParam = a(userParam) as typeof userParam;
-
-const user = ref(userParam);
-const hints = ref(userHints);
 const phoneNumber = "3515472756";
 const socials = ["https://www.facebook.com", "https://www.google.com"];
 

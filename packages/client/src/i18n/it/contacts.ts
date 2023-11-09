@@ -8,8 +8,8 @@ export default {
   findUs: "Ci trovi anche su",
   form: {
     title: "Oppure compila il modulo",
-    name: "Nome",
-    surname: "Cognome",
+    firstname: "Nome",
+    lastname: "Cognome",
     email: "Indirizzo Email",
     message: "Il tuo messaggio",
     send: "Invia",

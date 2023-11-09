@@ -8,8 +8,8 @@ export default {
   findUs: "You can also find us on",
   form: {
     title: "Or fill in the form",
-    name: "First name",
-    surname: "Last name",
+    firstname: "First name",
+    lastname: "Last name",
     email: "Email address",
     message: "Your message",
     send: "Send",
