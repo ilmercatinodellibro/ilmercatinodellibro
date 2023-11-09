@@ -16,18 +16,18 @@ export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   facebookLink: "https://www.facebook.com/IlMercatinoDelLibroRE/",
   instagramLink: "https://www.instagram.com/ilmercatinodellibrore/",
   fullAddress: "Via Francesco Cassoli, 1, 42123 Reggio Emilia RE",
-  humanReadableId: "re01",
+  humanReadableId: "re",
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
 };
 
 export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   name: "Il Mercatino del Libro - MO",
-  email: "info.mo@ilmercatinodellibro.com",
-  facebookLink: "https://www.facebook.com/IlMercatinoDelLibroRE/",
-  instagramLink: "https://www.instagram.com/ilmercatinodellibrore/",
-  fullAddress: "Boh che ne so - Modena MO",
-  humanReadableId: "mo01",
+  email: " info-mo@ilmercatinodellibro.com",
+  facebookLink: "https://www.facebook.com/IlMercatinoDelLibroMO/",
+  instagramLink: "https://www.instagram.com/ilmercatinodellibromo/",
+  fullAddress: "Strada Nazionale Canaletto Sud, 43L, 41121 - Modena MO",
+  humanReadableId: "mo",
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
 };

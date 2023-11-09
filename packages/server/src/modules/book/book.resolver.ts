@@ -3,15 +3,15 @@ import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookCreatePayload, BookQueryPayload } from "./book.args";
-// import { GraphQLVoid } from "graphql-scalars";
-// import { UserService } from "./user.service";
+import { BookService } from "./book.service";
 // import { CurrentUser } from "../auth/decorators/current-user.decorator";
 // @CurrentUser() { id: userId, firstname, lastname }: User,
 
 @Resolver()
 export class BookResolver {
   constructor(
-    private readonly prisma: PrismaService /*,private readonly userService: UserService*/,
+    private readonly prisma: PrismaService,
+    private readonly bookService: BookService,
   ) {}
 
   @Query(() => [Book])
@@ -29,28 +29,26 @@ export class BookResolver {
   createBook(
     @Input()
     {
-      title,
       authorsFullName,
       isbnCode,
       originalPrice,
       publisherName,
       retailLocationId,
       subject,
+      title,
     }: BookCreatePayload,
   ) {
-    // TODO: implement this
-    // eslint-disable-next-line no-console
-    console.log(
-      "book: ",
-      title,
-      authorsFullName,
-      isbnCode,
-      originalPrice,
-      publisherName,
-      retailLocationId,
-      subject,
-    );
-
-    return this.prisma.book.findMany();
+    // TODO: add guard for user. Must ensure that role is operator or higher and that it is inserting the user for a retail point for which they have permission to do that.
+    return this.prisma.book.create({
+      data: {
+        authorsFullName,
+        isbnCode,
+        originalPrice,
+        publisherName,
+        retailLocationId,
+        subject,
+        title,
+      },
+    });
   }
 }
