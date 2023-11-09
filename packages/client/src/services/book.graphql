@@ -1,0 +1,10 @@
+query getBooks($input: BookQueryPayload!) {
+  books(input: $input) {
+    id
+    isbnCode
+    subject
+    authorsFullName
+    title
+    originalPrice
+  }
+}
