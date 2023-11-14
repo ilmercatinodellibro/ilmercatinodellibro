@@ -1,6 +1,6 @@
 query getRetailLocations {
   retailLocations {
-    humanReadableId
+    id
     maxBookingDays
     joinUsContent
     instagramLink

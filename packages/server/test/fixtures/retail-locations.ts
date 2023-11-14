@@ -16,7 +16,7 @@ export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   facebookLink: "https://www.facebook.com/IlMercatinoDelLibroRE/",
   instagramLink: "https://www.instagram.com/ilmercatinodellibrore/",
   fullAddress: "Via Francesco Cassoli, 1, 42123 Reggio Emilia RE",
-  humanReadableId: "re",
+  id: "re",
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
 };
@@ -27,7 +27,7 @@ export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   facebookLink: "https://www.facebook.com/IlMercatinoDelLibroMO/",
   instagramLink: "https://www.instagram.com/ilmercatinodellibromo/",
   fullAddress: "Strada Nazionale Canaletto Sud, 43L, 41121 - Modena MO",
-  humanReadableId: "mo",
+  id: "mo",
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
 };

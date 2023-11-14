@@ -4,7 +4,4 @@ import { Field, InputType } from "@nestjs/graphql";
 export class RetailLocationQueryPayload {
   @Field()
   id?: string;
-
-  @Field()
-  humanReadableId?: string;
 }

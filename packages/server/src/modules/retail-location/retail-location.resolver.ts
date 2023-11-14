@@ -17,20 +17,12 @@ export class RetailLocationResolver {
   @Query(() => RetailLocation)
   retailLocation(
     @Input()
-    { id, humanReadableId }: RetailLocationQueryPayload,
+    { id }: RetailLocationQueryPayload,
   ) {
     if (id) {
       return this.prisma.retailLocation.findUniqueOrThrow({
         where: {
-          humanReadableId: id,
-        },
-      });
-    }
-
-    if (humanReadableId) {
-      return this.prisma.retailLocation.findUniqueOrThrow({
-        where: {
-          humanReadableId,
+          id,
         },
       });
     }

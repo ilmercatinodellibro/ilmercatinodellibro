@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "RetailLocation" (
-    "human_readable_id" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "registration_enabled" BOOLEAN NOT NULL DEFAULT false,
     "pay_off_enabled" BOOLEAN NOT NULL DEFAULT false,
@@ -16,7 +16,7 @@ CREATE TABLE "RetailLocation" (
     "max_booking_days" INTEGER NOT NULL DEFAULT 7,
     "warehouse_max_block_size" INTEGER NOT NULL DEFAULT 10,
 
-    CONSTRAINT "RetailLocation_pkey" PRIMARY KEY ("human_readable_id")
+    CONSTRAINT "RetailLocation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -37,4 +37,4 @@ CREATE TABLE "Book" (
 CREATE UNIQUE INDEX "RetailLocation_email_key" ON "RetailLocation"("email");
 
 -- AddForeignKey
-ALTER TABLE "Book" ADD CONSTRAINT "Book_retail_location_id_fkey" FOREIGN KEY ("retail_location_id") REFERENCES "RetailLocation"("human_readable_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Book" ADD CONSTRAINT "Book_retail_location_id_fkey" FOREIGN KEY ("retail_location_id") REFERENCES "RetailLocation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
