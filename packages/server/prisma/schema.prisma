@@ -85,3 +85,41 @@ model PushSubscription {
 
   @@unique([userId, deviceToken])
 }
+
+// Schools and Books
+model RetailLocation {
+  id                    String  @id
+  name                  String
+  registrationEnabled   Boolean @default(false) @map("registration_enabled")
+  payOffEnabled         Boolean @default(false) @map("pay_off_enabled")
+  fullAddress           String  @map("full_address")
+  email                 String  @unique
+  phoneNumber           String  @default("") @map("phone_number")
+  facebookLink          String  @default("") @map("facebook_link")
+  instagramLink         String  @default("") @map("instagram_link")
+  whoAreWeContent       String  @default("") @map("who_are_we_content")
+  joinUsContent         String  @default("") @map("join_us_content")
+  buyRate               Float   @default(30) @map("buy_rate")
+  sellRate              Float   @default(55) @map("sell_rate")
+  maxBookingDays        Int     @default(7) @map("max_booking_days")
+  warehouseMaxBlockSize Int     @default(10) @map("warehouse_max_block_size")
+
+  books Book[] @relation("RetailLocationBooks")
+}
+
+model Book {
+  // The id here is typed like this for a few reasons:
+  // - using the standard method showed here https://www.prisma.io/docs/concepts/components/prisma-schema/features-without-psl-equivalent#native-database-functions
+  // in the first example only tells Prisma to autogenerate a uuid, which is done only when queries to that entity are run through Prisma's APIs.
+  // The second method showcased there is actually the one needed here to instruct the DB to actually create a UUID field which is automatically populated by the DB and not by Prisma itself
+  // This is needed at import time when the code is using the Postgre COPY command to import books into the DB.
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  isbnCode         String         @map("isbn_code")
+  subject          String
+  authorsFullName  String         @map("authors_full_name")
+  title            String
+  originalPrice    Float          @map("original_price")
+  publisherName    String         @map("publisher_name")
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation("RetailLocationBooks", fields: [retailLocationId], references: [id])
+}

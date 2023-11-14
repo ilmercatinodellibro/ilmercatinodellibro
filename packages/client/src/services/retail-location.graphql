@@ -1,0 +1,17 @@
+query getRetailLocations {
+  retailLocations {
+    id
+    maxBookingDays
+    joinUsContent
+    instagramLink
+    fullAddress
+    facebookLink
+    buyRate
+    whoAreWeContent
+    payOffEnabled
+    name
+    warehouseMaxBlockSize
+    phoneNumber
+    sellRate
+  }
+}

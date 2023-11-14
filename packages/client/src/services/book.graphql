@@ -1,0 +1,14 @@
+query getBooks($page: Int!, $rows: Int!) {
+  books(page: $page, rows: $rows) {
+    id
+    isbnCode
+    subject
+    authorsFullName
+    title
+    originalPrice
+  }
+}
+
+mutation loadBooksIntoDatabase {
+  loadBooksIntoDatabase
+}

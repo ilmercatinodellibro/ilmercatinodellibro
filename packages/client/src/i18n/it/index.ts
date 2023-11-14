@@ -6,6 +6,7 @@ import {
 import { AvailableRouteNames } from "src/models/routes";
 import actions from "./actions";
 import auth from "./auth";
+import book from "./book";
 import events from "./events";
 import general from "./general";
 import network from "./network";
@@ -35,6 +36,7 @@ const durations = {
 export default {
   actions,
   auth,
+  book,
   durationNames,
   durations,
   events,
@@ -133,6 +135,7 @@ export default {
   },
   routesNames: {
     [AvailableRouteNames.Events]: "Eventi",
+    [AvailableRouteNames.Catalog]: "Catalogo libri",
     [AvailableRouteNames.Theme]: "Tema",
     [AvailableRouteNames.ResetPassword]: "Reimposta password",
     [AvailableRouteNames.ForgotPassword]: "Password dimenticata",
