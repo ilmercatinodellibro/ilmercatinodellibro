@@ -1,11 +1,11 @@
-import { Field, InputType, OmitType } from "@nestjs/graphql";
+import { ArgsType, Field, InputType, Int, OmitType } from "@nestjs/graphql";
 import { BookCreateWithoutRetailLocationInput } from "src/@generated";
 
-@InputType()
-export class BookQueryPayload {
-  @Field()
+@ArgsType()
+export class BookQueryArgs {
+  @Field(() => Int)
   page?: number;
-  @Field()
+  @Field(() => Int)
   rows?: number;
 }
 

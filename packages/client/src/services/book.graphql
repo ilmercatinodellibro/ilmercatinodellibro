@@ -1,5 +1,5 @@
-query getBooks($input: BookQueryPayload!) {
-  books(input: $input) {
+query getBooks($page: Int!, $rows: Int!) {
+  books(page: $page, rows: $rows) {
     id
     isbnCode
     subject

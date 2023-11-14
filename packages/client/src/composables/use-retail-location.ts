@@ -12,9 +12,7 @@ const selectedRetailLocation = computed(() => {
     return undefined;
   }
 
-  return locations.find(
-    ({ humanReadableId }) => humanReadableId === humanLocationId,
-  );
+  return locations.find(({ id }) => id === humanLocationId);
 });
 
 export function useRetailLocations() {

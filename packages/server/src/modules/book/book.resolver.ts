@@ -1,9 +1,9 @@
 import { UnprocessableEntityException } from "@nestjs/common";
-import { Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
-import { BookCreateInput, BookQueryPayload } from "./book.args";
+import { BookCreateInput, BookQueryArgs } from "./book.args";
 import { BookService } from "./book.service";
 // import { CurrentUser } from "../auth/decorators/current-user.decorator";
 // @CurrentUser() { id: userId, firstname, lastname }: User,
@@ -17,8 +17,8 @@ export class BookResolver {
 
   @Query(() => [Book])
   async books(
-    @Input()
-    { page = 0, rows = 100 }: BookQueryPayload,
+    @Args()
+    { page = 0, rows = 100 }: BookQueryArgs,
   ) {
     return this.prisma.book.findMany({
       skip: page * rows,
