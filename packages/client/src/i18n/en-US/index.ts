@@ -140,6 +140,7 @@ export default {
     [AvailableRouteNames.ChangePassword]: "Change Password",
     [AvailableRouteNames.RolesAndPermissions]: "Roles And Permissions",
     [AvailableRouteNames.RegisterWithToken]: "Invite",
+    [AvailableRouteNames.Login]: "Login",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",

@@ -8,4 +8,5 @@ export enum AvailableRouteNames {
   ChangePassword = "change-password",
   RolesAndPermissions = "roles-and-permissions",
   RegisterWithToken = "invite",
+  Login = "login",
 }

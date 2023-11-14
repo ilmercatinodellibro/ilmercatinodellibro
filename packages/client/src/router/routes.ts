@@ -5,9 +5,36 @@ import {
   redirectIfAuthenticated,
   redirectIfGuest,
   redirectIfNotAdmin,
+  useAuthService,
 } from "src/services/auth";
 
 const routes: RouteRecordRaw[] = [
+  {
+    path: "/",
+    component: () =>
+      import(
+        `layouts/${
+          useAuthService().isAuthenticated.value
+            ? "authenticated-layout"
+            : "guest-layout"
+        }.vue`
+      ),
+    children: [
+      {
+        path: "/",
+        redirect: {
+          name: useAuthService().isAuthenticated.value
+            ? AvailableRouteNames.Events
+            : "login",
+        },
+      },
+      {
+        path: "contacts",
+        name: "contacts",
+        component: () => import("pages/contacts.vue"),
+      },
+    ],
+  },
   {
     path: "/",
     component: () => import("layouts/guest-layout.vue"),
