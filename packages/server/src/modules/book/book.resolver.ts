@@ -1,3 +1,4 @@
+import { UnprocessableEntityException } from "@nestjs/common";
 import { Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
@@ -55,6 +56,12 @@ export class BookResolver {
   @Mutation(() => Boolean)
   async loadBooksIntoDatabase() {
     const result = await this.bookService.loadBooksIntoDb();
+
+    if (!result) {
+      throw new UnprocessableEntityException(
+        "Unable to process and import the books from the source file.",
+      );
+    }
 
     return result;
   }
