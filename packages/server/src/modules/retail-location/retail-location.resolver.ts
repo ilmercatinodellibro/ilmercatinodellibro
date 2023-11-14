@@ -22,7 +22,7 @@ export class RetailLocationResolver {
     if (id) {
       return this.prisma.retailLocation.findUniqueOrThrow({
         where: {
-          id,
+          humanReadableId: id,
         },
       });
     }
