@@ -18,28 +18,3 @@ export class BookCreateInput extends OmitType(
   @Field(() => String, { nullable: false })
   retailLocationId!: string;
 }
-
-/*
-
-@Field(() => String, { nullable: false })
-  isbnCode!: string;
-
-  @Field(() => String, { nullable: false })
-  subject!: string;
-
-  @Field(() => String, { nullable: false })
-  authorsFullName!: string;
-
-  @Field(() => String, { nullable: false })
-  title!: string;
-
-  @Field(() => Number, { nullable: false })
-  originalPrice!: number;
-
-  @Field(() => String, { nullable: false })
-  publisherName!: string;
-
-  @Field(() => String, { nullable: false })
-  retailLocationId!: string;
-
-*/
