@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { seedE2eTests } from "./e2e-tests";
 import { seedEvents } from "./events";
+import { seedRetailLocations } from "./retail-locations";
 
 const prisma = new PrismaClient();
 
@@ -10,6 +11,8 @@ async function main() {
   await seedE2eTests(prisma);
 
   await seedEvents(prisma);
+
+  await seedRetailLocations(prisma);
 }
 
 main()

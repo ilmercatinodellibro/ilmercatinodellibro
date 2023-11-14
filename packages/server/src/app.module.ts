@@ -21,12 +21,14 @@ import {
 } from "./modules/auth/auth.models";
 import { AuthModule } from "./modules/auth/auth.module";
 import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth-guard";
+import { BookModule } from "./modules/book/book.module";
 import { EventModule } from "./modules/event/event.module";
 import { FeedbackModule } from "./modules/feedback/feedback.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { NotificationModule } from "./modules/notification/notification.module";
 import { PrismaModule } from "./modules/prisma/prisma.module";
 import { PushNotificationModule } from "./modules/push-notification/push-notification.module";
+import { RetailLocationModule } from "./modules/retail-location/retail-location.module";
 import { UserModule } from "./modules/user/user.module";
 
 @Module({
@@ -124,10 +126,12 @@ import { UserModule } from "./modules/user/user.module";
     }),
     PrismaModule,
     AuthModule,
+    BookModule,
     MailModule,
     EventModule,
     NotificationModule,
     PushNotificationModule,
+    RetailLocationModule,
     FeedbackModule,
     UserModule,
   ],
