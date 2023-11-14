@@ -142,6 +142,23 @@ export class DashboardResolver {
 
 Remember to disable generic SQL extension for this workspace and install the PostgreSQL one, when first adding.
 
+### Quick access to data on Windows
+
+Docker for Windows has a GUI executable that can be used to perform many different actions.
+
+One of them is being able to run commands directly inside the Docker instances. This can be useful if a developer needs to quickly access the data from the native Postgre tables.
+To do so, follow these steps (_Docker version 4.25.0_):
+
+1. Launch Docker and make sure the proper container for Mercatino is running.
+2. Expand the group of the container for the Mercatino and click on the `ilmercatinodellibro-postgres` container.
+3. A number of tabs should be shown to you.
+4. Click on the tab named `Exec`. A terminal should be shown inside the tab panel.
+5. in there type the following command, substituting the `${values}` with the ones coming from your `.env` file: `psql -d ${postgres_database_name} -U ${postgres_database_user}` and then press `Enter`.
+6. The terminal should change and bring you into something labelled as `postgres=#`.
+7. To select the records from a table then run, for example: `select human_readable_id from public."RetailLocation";`.
+
+Of course you can change the names of the entities to query from as you need.
+
 ## Push notifications
 
 We have different drivers for sending push notifications:
