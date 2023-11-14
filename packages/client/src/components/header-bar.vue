@@ -40,9 +40,10 @@
 </template>
 
 <script setup lang="ts">
-import { Dialog } from "quasar";
-import { inject } from "vue";
+import { Dialog, Screen } from "quasar";
+import { computed, provide } from "vue";
 import { useI18n } from "vue-i18n";
+import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
 import { provideHeaderBackButton } from "src/composables/header-features/use-header-back-button";
 import { provideHeaderFilters } from "src/composables/header-features/use-header-filters";
 import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
@@ -52,6 +53,7 @@ import { useTheme } from "src/composables/use-theme";
 import { useAuthService } from "src/services/auth";
 import FeedbackDialog from "./feedback-dialog.vue";
 import kToolbar from "./k-toolbar.vue";
+import userItem from "./user-item.vue";
 
 const { isDrawerOpen, showLateralDrawer } = useLateralDrawer();
 const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
@@ -64,8 +66,9 @@ const {
 } = provideHeaderFilters();
 const { headerName } = provideHeaderName();
 const { theme } = useTheme();
-const user = useAuthService();
-const isLayoutHeaderXs = inject("isLayoutHeaderXs");
+const { user } = useAuthService();
+const isLayoutHeaderXs = computed(() => Screen.lt.sm);
+provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 const { t } = useI18n();
 
 function openFeedbackDialog() {
