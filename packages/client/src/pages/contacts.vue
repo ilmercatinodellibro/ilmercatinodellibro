@@ -17,10 +17,10 @@
         <span class="contacts-text"> {{ $t("contacts.text[1]") }} </span>
         <span class="contacts-text text-secondary">
           <a
-            :href="'tel:+39' + phoneNumber"
+            :href="'tel:+39' + locationData.phoneNumber"
             class="contacts-details text-secondary"
           >
-            {{ formatPhone(phoneNumber) }}
+            {{ formatPhone(locationData.phoneNumber) }}
           </a>
         </span>
         <span class="contacts-subtext text-black-54">
@@ -29,29 +29,14 @@
         <q-separator class="black-12" />
         <span class="contacts-text"> {{ $t("contacts.findUs") }} </span>
         <div class="contacts-socials">
-          <a v-for="index in 2" :key="index" :href="socials[index - 1]">
-            <q-btn outline no-caps color="primary" class="socials-button">
-              <span class="button-container">
-                <q-icon
-                  class="button-icon"
-                  color="primary"
-                  :name="
-                    'svguse:icons.svg#' + (index - 1 ? 'instagram' : 'facebook')
-                  "
-                />
-                <span class="button-text-container">
-                  <span class="button-text">
-                    {{ index - 1 ? "Instagram" : "Facebook" }}
-                  </span>
-                  <q-icon
-                    class="button-icon"
-                    color="black-54"
-                    name="mdi-arrow-right"
-                  />
-                </span>
-              </span>
-            </q-btn>
-          </a>
+          <socials-button
+            :link="locationData.socials.facebook"
+            name="facebook"
+          />
+          <socials-button
+            :link="locationData.socials.instagram"
+            name="instagram"
+          />
         </div>
       </div>
     </q-card>
@@ -88,7 +73,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { reactive, ref, watch } from "vue";
+import socialsButton from "src/components/socials-button.vue";
+import { useRetailLocations } from "src/composables/use-retail-location";
 import { useAuthService } from "src/services/auth";
 
 const userParam = ref({
@@ -99,12 +86,10 @@ const userParam = ref({
 });
 
 const userData = useAuthService();
-if (userData.isAuthenticated.value) {
-  if (userData.user.value) {
-    userParam.value.firstname = userData.user.value.firstname;
-    userParam.value.lastname = userData.user.value.lastname;
-    userParam.value.email = userData.user.value.email;
-  }
+if (userData.isAuthenticated.value && userData.user.value) {
+  userParam.value.firstname = userData.user.value.firstname;
+  userParam.value.lastname = userData.user.value.lastname;
+  userParam.value.email = userData.user.value.email;
 }
 
 const userHints = ref({
@@ -114,14 +99,36 @@ const userHints = ref({
   message: "",
 });
 
-const phoneNumber = "3515472756";
-const socials = ["https://www.facebook.com", "https://www.google.com"];
+const locationDataQuery = useRetailLocations();
 
-function formatPhone(unformattedNumber: string): string {
-  return `${unformattedNumber.slice(0, 3)} ${unformattedNumber.slice(
-    3,
-    6,
-  )} ${unformattedNumber.slice(6, 10)}`;
+const locationData = reactive({
+  phoneNumber: "",
+  socials: reactive({
+    facebook: "",
+    instagram: "",
+  }),
+});
+
+watch(locationDataQuery.loading, () => {
+  if (!locationDataQuery.loading.value) {
+    // Since the selectedRetailLocation object is empty, the information relative to the Reggio Emilia site is loaded for now
+    useRetailLocations().retailLocations.value.forEach((location) => {
+      if (location.id === "re") {
+        locationData.phoneNumber = location.phoneNumber;
+        locationData.socials.facebook = location.facebookLink;
+        locationData.socials.instagram = location.instagramLink;
+      }
+    });
+  }
+});
+
+function formatPhone(unformattedNumber: string | undefined): string {
+  return !unformattedNumber
+    ? ""
+    : `${unformattedNumber.slice(0, 3)} ${unformattedNumber.slice(
+        3,
+        6,
+      )} ${unformattedNumber.slice(6, 10)}`;
 }
 </script>
 
@@ -180,43 +187,6 @@ function formatPhone(unformattedNumber: string): string {
     flex-direction: column;
     gap: 8px;
   }
-}
-
-.socials-button {
-  border-radius: 8px;
-  height: 48px;
-  width: 100%;
-}
-
-.button-container {
-  align-items: center;
-  display: flex;
-  gap: 32px;
-  height: 100%;
-  justify-content: center;
-  width: 100%;
-}
-
-.button-text {
-  color: $primary;
-  display: inline-block;
-  font-size: 16px;
-  font-weight: normal;
-  line-height: 28px;
-  text-align: left;
-  width: 100%;
-
-  &-container {
-    align-items: center;
-    display: flex;
-    gap: 16px;
-    width: 100%;
-  }
-}
-
-.button-icon {
-  height: 24px;
-  width: 24px;
 }
 
 .form {

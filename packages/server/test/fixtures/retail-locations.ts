@@ -19,6 +19,7 @@ export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   id: "re",
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
+  phoneNumber: "3516215189",
 };
 
 export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
@@ -30,6 +31,7 @@ export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   id: "mo",
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
+  phoneNumber: "3515472756",
 };
 
 export default [MO_RETAIL_POINT, RE_RETAIL_POINT];
