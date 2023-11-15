@@ -55,14 +55,21 @@ export class BookResolver {
 
   @Mutation(() => Boolean)
   async loadBooksIntoDatabase() {
-    const result = await this.bookService.loadBooksIntoDb();
+    try {
+      const result = await this.bookService.loadBooksIntoDb();
 
-    if (!result) {
+      if (!result) {
+        throw new UnprocessableEntityException(
+          "Unable to process and import the books from the source file.",
+        );
+      }
+
+      return result;
+    } catch {
+      // TODO: improve error catching here
       throw new UnprocessableEntityException(
-        "Unable to process and import the books from the source file.",
+        "Cannot import or process files on server.",
       );
     }
-
-    return result;
   }
 }
