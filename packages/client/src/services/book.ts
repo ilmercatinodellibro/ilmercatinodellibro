@@ -4,10 +4,19 @@ import {
   useLoadBooksIntoDatabaseMutation,
 } from "src/services/book.graphql";
 
-export function useBookService(page: Ref<number>, rows: Ref<number>) {
-  const { books, loading } = useGetBooksQuery(() => ({
+export function useBookService(
+  page: Ref<number>,
+  rows: Ref<number>,
+  filter: Ref<string | undefined>,
+) {
+  const {
+    books,
+    loading,
+    refetch: refetchBooks,
+  } = useGetBooksQuery(() => ({
     page: page.value,
     rows: rows.value,
+    filter: filter.value,
   }));
 
   const loadBooksMutation = useLoadBooksIntoDatabaseMutation();
@@ -16,5 +25,6 @@ export function useBookService(page: Ref<number>, rows: Ref<number>) {
     books,
     loading,
     loadBooksMutation,
+    refetchBooks,
   };
 }

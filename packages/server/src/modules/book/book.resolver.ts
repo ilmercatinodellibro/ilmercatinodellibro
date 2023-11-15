@@ -18,11 +18,51 @@ export class BookResolver {
   @Query(() => [Book])
   async books(
     @Args()
-    { page = 0, rows = 100 }: BookQueryArgs,
+    { page = 0, rows = 100, filter: dirtyFilter = "" }: BookQueryArgs,
   ) {
+    const filter = dirtyFilter.trim();
+
     return this.prisma.book.findMany({
       skip: page * rows,
       take: rows,
+      ...(filter
+        ? {
+            where: {
+              OR: [
+                {
+                  authorsFullName: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  isbnCode: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  publisherName: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  title: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  subject: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            },
+          }
+        : {}),
     });
   }
 
