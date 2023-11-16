@@ -5,16 +5,22 @@
         {{ $t("contacts.title") }}
       </span>
       <div class="contacts-wrapper">
-        <span class="contacts-text"> {{ $t("contacts.text[0]") }} </span>
         <span class="contacts-text">
-          <a
-            href="mailto:info@ilmercatinodellibro.com"
-            class="contacts-details text-secondary"
-          >
-            {{ "info@ilmercatinodellibro.com" }}
-          </a>
+          <i18n-t keypath="contacts.text">
+            <template #email>
+              <span class="contacts-mail">
+                <a
+                  href="mailto:info@ilmercatinodellibro.com"
+                  class="contacts-details text-secondary"
+                  rel="noopener"
+                  target="_blank"
+                >
+                  {{ "info@ilmercatinodellibro.com" }}
+                </a>
+              </span>
+            </template>
+          </i18n-t>
         </span>
-        <span class="contacts-text"> {{ $t("contacts.text[1]") }} </span>
         <span class="contacts-text text-secondary">
           <a
             :href="'tel:+39' + locationData.phoneNumber"
@@ -24,16 +30,16 @@
           </a>
         </span>
         <span class="contacts-subtext text-black-54">
-          {{ $t("contacts.text[2]") }}
+          {{ $t("contacts.subtext") }}
         </span>
         <q-separator class="black-12" />
         <span class="contacts-text"> {{ $t("contacts.findUs") }} </span>
         <div class="contacts-socials">
-          <socials-button
+          <social-button
             :link="locationData.socials.facebook"
             name="facebook"
           />
-          <socials-button
+          <social-button
             :link="locationData.socials.instagram"
             name="instagram"
           />
@@ -74,7 +80,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from "vue";
-import socialsButton from "src/components/socials-button.vue";
+import socialButton from "src/components/social-button.vue";
 import { useRetailLocations } from "src/composables/use-retail-location";
 import { useAuthService } from "src/services/auth";
 
@@ -132,14 +138,16 @@ function formatPhone(unformattedNumber: string | undefined): string {
 }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 .contacts {
   &-container {
-    align-items: center;
+    align-items: stretch;
     display: flex;
+    flex-wrap: wrap;
     gap: 24px;
+    height: min-content;
     justify-content: center;
-    margin: 0 320px;
+    margin: 0 24px;
     padding: 164px 0;
   }
 
@@ -150,6 +158,8 @@ function formatPhone(unformattedNumber: string | undefined): string {
     flex-direction: column;
     flex-shrink: 1;
     gap: 48px;
+    height: 100%;
+    min-height: 622px;
     padding: 24px;
     width: 500px;
   }
@@ -176,6 +186,11 @@ function formatPhone(unformattedNumber: string | undefined): string {
     word-break: break-all;
   }
 
+  &-mail {
+    display: block;
+    line-height: 76px;
+  }
+
   &-subtext {
     font-size: 16px;
     line-height: 28px;
@@ -191,6 +206,7 @@ function formatPhone(unformattedNumber: string | undefined): string {
 
 .form {
   &-card {
+    align-items: stretch;
     gap: 24px;
   }
 
@@ -201,20 +217,17 @@ function formatPhone(unformattedNumber: string | undefined): string {
   }
 
   &-content {
-    align-items: center;
+    align-items: stretch;
+    align-self: stretch;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    flex-grow: 2;
+    gap: 16px;
     width: 100%;
   }
 
   &-text {
     width: 100%;
-  }
-
-  &-textarea {
-    height: 222px;
-    resize: none !important;
   }
 
   &-button {
@@ -226,16 +239,21 @@ function formatPhone(unformattedNumber: string | undefined): string {
   height: 16px;
 }
 
-.q-field__bottom {
+:global(.form-textarea) {
+  height: 190px;
+  resize: none !important;
+}
+
+:global(.q-field__bottom) {
   height: 16px;
   min-height: 0;
 }
 
-.q-field--with-bottom {
+:global(.q-field--with-bottom) {
   padding-bottom: 16px;
 }
 
-.q-field__control {
+:global(.q-field__control) {
   border-radius: 8px !important;
 }
 </style>

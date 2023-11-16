@@ -1,5 +1,5 @@
 <template>
-  <a :href="link">
+  <a :href="link" rel="noopener" target="_blank">
     <q-btn outline no-caps color="primary" class="socials-button">
       <span class="button-container">
         <q-icon
@@ -9,7 +9,7 @@
         />
         <span class="button-text-container">
           <span class="button-text">
-            {{ name[0]?.toUpperCase() + name.slice(1, name.length) }}
+            {{ name }}
           </span>
           <q-icon class="button-icon" color="black-54" name="mdi-arrow-right" />
         </span>
@@ -25,7 +25,13 @@ defineProps({
 });
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
+.socials-button {
+  border-radius: 8px;
+  height: 48px;
+  width: 100%;
+}
+
 .button-container {
   align-items: center;
   display: flex;
@@ -42,6 +48,7 @@ defineProps({
   font-weight: normal;
   line-height: 28px;
   text-align: left;
+  text-transform: capitalize;
   width: 100%;
 
   &-container {
