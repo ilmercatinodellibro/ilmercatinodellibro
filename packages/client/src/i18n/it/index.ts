@@ -7,6 +7,7 @@ import { AvailableRouteNames } from "src/models/routes";
 import actions from "./actions";
 import auth from "./auth";
 import book from "./book";
+import contacts from "./contacts";
 import events from "./events";
 import general from "./general";
 import network from "./network";
@@ -37,6 +38,7 @@ export default {
   actions,
   auth,
   book,
+  contacts,
   durationNames,
   durations,
   events,
@@ -134,6 +136,7 @@ export default {
     },
   },
   routesNames: {
+    [AvailableRouteNames.Contacts]: "Contatti",
     [AvailableRouteNames.Events]: "Eventi",
     [AvailableRouteNames.Catalog]: "Catalogo libri",
     [AvailableRouteNames.Theme]: "Tema",
@@ -142,6 +145,7 @@ export default {
     [AvailableRouteNames.ChangePassword]: "Cambia password",
     [AvailableRouteNames.RolesAndPermissions]: "Ruoli e autorizzazioni",
     [AvailableRouteNames.RegisterWithToken]: "Invitare",
+    [AvailableRouteNames.Login]: "Login",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",

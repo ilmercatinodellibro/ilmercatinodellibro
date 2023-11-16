@@ -1,49 +1,6 @@
 <template>
   <q-layout view="lHh LpR fFf">
-    <q-header>
-      <k-toolbar
-        v-model:drawer="isDrawerOpen"
-        v-model:search-text="searchText"
-        :back-route-location="headerBackButtonRouteLocation"
-        :compare-function="compareFunction"
-        :enable-drawer="showLateralDrawer"
-        :filter-options="filterOptions"
-        :is-header-filters-enabled="isHeaderFiltersEnabled"
-        :selected-filter="selectedFilter"
-        :show-search-bar="isHeaderSearchEnabled"
-        :title="headerName"
-      >
-        <template #left>
-          <img :src="theme.logo" class="header-logo" />
-          <q-separator vertical inset color="white-12" class="q-mx-md" />
-        </template>
-
-        <div v-if="!isOnline" class="flex gap-6 items-center">
-          <q-icon :name="mdiCloudOffOutline" size="sm" />
-
-          <span>{{ t("network.offline") }}</span>
-        </div>
-
-        <notification-bell v-if="isWebPushEnabled" />
-
-        <!-- [1] - We're already sure of user existence thanks to auth route guards, this check is only needed to make TS happy -->
-        <!-- [1] -->
-        <user-item
-          v-if="user && !isLayoutHeaderXs"
-          :user="user"
-          class="q-mx-md"
-          data-cy="user-item"
-        />
-        <q-btn
-          :label="t('general.helpAndFeedback')"
-          class="feedbackButton"
-          color="secondary"
-          no-wrap
-          outline
-          @click="openFeedbackDialog"
-        />
-      </k-toolbar>
-    </q-header>
+    <header-bar />
 
     <q-drawer
       v-if="showLateralDrawer"
@@ -226,25 +183,18 @@ import {
   mdiWeb,
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
-import { Dialog, Notify, QTooltipProps, Screen } from "quasar";
+import { Notify, QTooltipProps, Screen } from "quasar";
 import { computed, provide, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { setLanguage } from "src/boot/i18n";
-import FeedbackDialog from "src/components/feedback-dialog.vue";
-import KToolbar from "src/components/k-toolbar.vue";
-import NotificationBell from "src/components/notification-bell.vue";
+import headerBar from "src/components/header-bar.vue";
 import UserItem from "src/components/user-item.vue";
 import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
-import { provideHeaderBackButton } from "src/composables/header-features/use-header-back-button";
-import { provideHeaderFilters } from "src/composables/header-features/use-header-filters";
-import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
-import { provideHeaderSearch } from "src/composables/header-features/use-header-search";
 import {
   DRAWER_BREAKPOINT,
   DRAWER_WIDTH,
   useLateralDrawer,
 } from "src/composables/use-lateral-drawer";
-import { useTheme } from "src/composables/use-theme";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useNotificationService } from "src/services/notification";
@@ -259,11 +209,7 @@ const TOOLTIP_SHARED_PROPS: QTooltipProps = {
   self: "center left",
 };
 
-const isWebPushEnabled = process.env.WEB_PUSH_ENABLED === "true";
-
 const { t, locale } = useI18n();
-
-const { theme } = useTheme();
 
 interface Language {
   code: string;
@@ -303,16 +249,6 @@ const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 
-const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
-const {
-  compareFunction,
-  filterOptions,
-  isHeaderFiltersEnabled,
-  selectedFilter,
-} = provideHeaderFilters();
-const { headerBackButtonRouteLocation } = provideHeaderBackButton();
-const { headerName } = provideHeaderName();
-
 const { logout } = useLogoutMutation();
 const { user } = useAuthService();
 
@@ -320,12 +256,6 @@ const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
   useLateralDrawer();
 
 const { unreadNotificationsCount } = useNotificationService();
-
-function openFeedbackDialog() {
-  Dialog.create({
-    component: FeedbackDialog,
-  });
-}
 </script>
 
 <style lang="scss" scoped>
@@ -346,7 +276,6 @@ $header-height: 64px;
   height: 36px;
 }
 
-.k-toolbar,
 .drawer-toggler {
   height: $header-height;
 }

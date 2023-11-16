@@ -1,5 +1,6 @@
 export enum AvailableRouteNames {
   Catalog = "catalog",
+  Contacts = "contacts",
   Events = "events",
   Theme = "theme",
   ResetPassword = "reset-password",
@@ -7,4 +8,5 @@ export enum AvailableRouteNames {
   ChangePassword = "change-password",
   RolesAndPermissions = "roles-and-permissions",
   RegisterWithToken = "invite",
+  Login = "login",
 }
