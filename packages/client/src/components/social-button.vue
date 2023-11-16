@@ -1,21 +1,23 @@
 <template>
-  <a :href="link" rel="noopener" target="_blank">
-    <q-btn outline no-caps color="primary" class="socials-button">
-      <span class="button-container">
-        <q-icon
-          class="button-icon"
-          color="primary"
-          :name="'svguse:icons.svg#' + name"
-        />
-        <span class="button-text-container">
-          <span class="button-text">
-            {{ name }}
-          </span>
-          <q-icon class="button-icon" color="black-54" name="mdi-arrow-right" />
+  <q-btn
+    outline
+    no-caps
+    color="primary"
+    class="socials-button"
+    :href="link"
+    rel="noopener"
+    target="_blank"
+  >
+    <span class="button-container">
+      <q-icon color="primary" :name="'svguse:icons.svg#' + name" />
+      <span class="button-text-container">
+        <span class="button-text">
+          {{ name }}
         </span>
+        <q-icon color="black-54" name="mdi-arrow-right" />
       </span>
-    </q-btn>
-  </a>
+    </span>
+  </q-btn>
 </template>
 
 <script setup lang="ts">
@@ -57,10 +59,5 @@ defineProps({
     gap: 16px;
     width: 100%;
   }
-}
-
-.button-icon {
-  height: 24px;
-  width: 24px;
 }
 </style>

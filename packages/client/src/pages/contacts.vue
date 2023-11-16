@@ -34,10 +34,11 @@
         </span>
         <q-separator class="black-12" />
         <span class="contacts-text"> {{ $t("contacts.findUs") }} </span>
-        <div class="contacts-socials">
+        <div>
           <social-button
             :link="locationData.socials.facebook"
             name="facebook"
+            class="q-mb-sm"
           />
           <social-button
             :link="locationData.socials.instagram"
@@ -80,7 +81,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from "vue";
-import socialButton from "src/components/social-button.vue";
+import SocialButton from "src/components/social-button.vue";
 import { useRetailLocations } from "src/composables/use-retail-location";
 import { useAuthService } from "src/services/auth";
 
@@ -148,11 +149,11 @@ function formatPhone(unformattedNumber: string | undefined): string {
     height: min-content;
     justify-content: center;
     margin: 0 24px;
-    padding: 164px 0;
   }
 
   &-card {
     align-items: center;
+    align-self: center;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -195,12 +196,6 @@ function formatPhone(unformattedNumber: string | undefined): string {
     font-size: 16px;
     line-height: 28px;
     text-align: center;
-  }
-
-  &-socials {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
   }
 }
 
