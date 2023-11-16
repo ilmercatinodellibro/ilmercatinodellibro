@@ -2,6 +2,7 @@ import { UnprocessableEntityException } from "@nestjs/common";
 import { Query, Resolver } from "@nestjs/graphql";
 import { RetailLocation } from "src/@generated/retail-location";
 import { Input } from "../auth/decorators/input.decorator";
+import { Public } from "../auth/decorators/public-route.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { RetailLocationQueryPayload } from "./retail-location.args";
 
@@ -9,11 +10,13 @@ import { RetailLocationQueryPayload } from "./retail-location.args";
 export class RetailLocationResolver {
   constructor(private readonly prisma: PrismaService) {}
 
+  @Public()
   @Query(() => [RetailLocation])
   async retailLocations() {
     return this.prisma.retailLocation.findMany();
   }
 
+  @Public()
   @Query(() => RetailLocation)
   retailLocation(
     @Input()
