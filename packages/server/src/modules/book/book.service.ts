@@ -1,5 +1,12 @@
-import * as fs from "fs";
-import * as path from "path";
+import {
+  WriteStream,
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { join as joinPath } from "node:path";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { parse, transform } from "csv";
 import { PrismaService } from "../prisma/prisma.service";
@@ -38,23 +45,23 @@ export class BookService {
   }
 
   async #parseCsvBooksContent(locationsPrefixes: string[] = ["MO", "RE"]) {
-    const dataSource = path.join(
+    const dataSource = joinPath(
       process.cwd(),
       "./tmp-files/ALTEMILIAROMAGNA.csv",
     );
-    if (!fs.existsSync(dataSource)) {
+    if (!existsSync(dataSource)) {
       throw new NotFoundException("The CSV file was not found.");
     }
 
-    const dataDestination = path.join(
+    const dataDestination = joinPath(
       process.cwd(),
       "./tmp-files/books-source.csv",
     );
 
-    fs.rmSync(dataDestination);
+    rmSync(dataDestination);
 
-    const sourceStream = fs.createReadStream(dataSource);
-    const destinationStream = fs.createWriteStream(dataDestination);
+    const sourceStream = createReadStream(dataSource);
+    const destinationStream = createWriteStream(dataDestination);
     const schoolsList: string[] = [];
     const locationBooks: Record<string, string[]> = {};
 
@@ -122,8 +129,8 @@ export class BookService {
         sourceStream.close();
         destinationStream.close();
 
-        fs.writeFileSync(
-          path.join(process.cwd(), "./tmp-files/school_codes.csv"),
+        writeFileSync(
+          joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
           schoolsList.join("\n"),
         );
 
@@ -139,7 +146,7 @@ export class BookService {
     });
   }
 
-  #writeStreamPromise(stream: fs.WriteStream, content: string) {
+  #writeStreamPromise(stream: WriteStream, content: string) {
     return new Promise<void>((resolve, reject) => {
       stream.write(content, (possibleError) => {
         if (possibleError) {
