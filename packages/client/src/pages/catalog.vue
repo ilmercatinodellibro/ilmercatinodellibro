@@ -4,10 +4,16 @@
 
     <span v-if="bookLoading">{{ t("book.loading") }}</span>
     <div v-else>
-      <div v-if="!books.length">{{ t("book.noResult") }}</div>
-      <div v-for="book in books" :key="book.id">
-        {{ book.isbnCode }}
+      <div class="row">
+        <q-input v-model="filter" debounce="400" type="text" />
       </div>
+
+      <div v-if="!books.length">{{ t("book.noResult") }}</div>
+      <template v-else>
+        <div v-for="book in books" :key="book.id">
+          {{ book.isbnCode + " " + book.title }}
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -20,12 +26,13 @@ const { t } = useI18n();
 
 const currentPage = ref(0);
 const numnberOfRows = ref(50);
+const filter = ref(undefined);
 
 const {
   books,
   loading: bookLoading,
   loadBooksMutation,
-} = useBookService(currentPage, numnberOfRows);
+} = useBookService(currentPage, numnberOfRows, filter);
 
 async function loadBooks() {
   await loadBooksMutation.loadBooksIntoDatabase();

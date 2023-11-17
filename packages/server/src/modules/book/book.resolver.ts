@@ -18,11 +18,51 @@ export class BookResolver {
   @Query(() => [Book])
   async books(
     @Args()
-    { page = 0, rows = 100 }: BookQueryArgs,
+    { page = 0, rows = 100, filter: dirtyFilter = "" }: BookQueryArgs,
   ) {
+    const filter = dirtyFilter.trim();
+
     return this.prisma.book.findMany({
       skip: page * rows,
       take: rows,
+      ...(filter
+        ? {
+            where: {
+              OR: [
+                {
+                  authorsFullName: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  isbnCode: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  publisherName: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  title: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  subject: {
+                    contains: filter,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            },
+          }
+        : {}),
     });
   }
 
@@ -55,14 +95,20 @@ export class BookResolver {
 
   @Mutation(() => Boolean)
   async loadBooksIntoDatabase() {
-    const result = await this.bookService.loadBooksIntoDb();
+    try {
+      const result = await this.bookService.loadBooksIntoDb();
 
-    if (!result) {
+      if (!result) {
+        throw new UnprocessableEntityException(
+          "Unable to process and import the books from the source file.",
+        );
+      }
+
+      return result;
+    } catch {
       throw new UnprocessableEntityException(
-        "Unable to process and import the books from the source file.",
+        "Cannot import or process files on server.",
       );
     }
-
-    return result;
   }
 }

@@ -7,6 +7,8 @@ export class BookQueryArgs {
   page?: number;
   @Field(() => Int)
   rows?: number;
+  @Field({ nullable: true })
+  filter?: string;
 }
 
 @InputType()
