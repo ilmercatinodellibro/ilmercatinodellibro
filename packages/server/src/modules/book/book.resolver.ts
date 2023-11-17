@@ -1,4 +1,7 @@
-import { UnprocessableEntityException } from "@nestjs/common";
+import {
+  ConflictException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
@@ -67,7 +70,7 @@ export class BookResolver {
   }
 
   @Mutation(() => Book, { nullable: true })
-  createBook(
+  async createBook(
     @Input()
     {
       authorsFullName,
@@ -79,6 +82,18 @@ export class BookResolver {
       title,
     }: BookCreateInput,
   ) {
+    const bookExistsForRetailLocation = await this.prisma.book.findFirst({
+      where: {
+        retailLocationId,
+        isbnCode,
+      },
+    });
+    if (bookExistsForRetailLocation) {
+      throw new ConflictException(
+        "Book already exists for the specified retail location.",
+      );
+    }
+
     // TODO: add guard for user. Must ensure that role is operator or higher and that it is inserting the user for a retail point for which they have permission to do that.
     return this.prisma.book.create({
       data: {
