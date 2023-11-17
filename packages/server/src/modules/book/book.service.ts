@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { parse, transform } from "csv";
 import { PrismaService } from "../prisma/prisma.service";
 import { IngestedCsvRow } from "./book-csv.types";
@@ -42,6 +42,10 @@ export class BookService {
       process.cwd(),
       "./tmp-files/ALTEMILIAROMAGNA.csv",
     );
+    if (!fs.existsSync(dataSource)) {
+      throw new NotFoundException("The CSV file was not found.");
+    }
+
     const dataDestination = path.join(
       process.cwd(),
       "./tmp-files/books-source.csv",
@@ -96,7 +100,7 @@ export class BookService {
           : ` - ${rowSubtitle}`;
       return (
         [
-          row[6],
+          row[6], // Be aware that there may be some books which do not have a proper ISBN code. This is because those books are older than when the ISBN system was first introduced. Example: Divina Commedia.
           `"${row[5]}"`, // [1] - Mandatory: there are some lines that needs this on order to escape the comma inside titles
           `"${row[7]}"`, // [1]
           `"${row[8] + subtitle}"`, // [1]

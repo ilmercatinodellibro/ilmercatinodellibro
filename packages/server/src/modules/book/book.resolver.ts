@@ -106,7 +106,6 @@ export class BookResolver {
 
       return result;
     } catch {
-      // TODO: improve error catching here
       throw new UnprocessableEntityException(
         "Cannot import or process files on server.",
       );
