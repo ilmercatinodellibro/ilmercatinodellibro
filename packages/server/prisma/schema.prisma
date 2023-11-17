@@ -49,9 +49,17 @@ model User {
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   /// @HideField()
-  events            Event[]
-  notifications     Notification[]
-  pushSubscriptions PushSubscription[]
+  events             Event[]
+  notifications      Notification[]
+  pushSubscriptions  PushSubscription[]
+  bookCopies         BookCopy[]         @relation("BookCopyOwner")
+  returnedBookCopies BookCopy[]         @relation("CopyReturnedBy")
+  createdBookCopies  BookCopy[]         @relation("CopyCreatedBy")
+  updatedBookCopies  BookCopy[]         @relation("CopyUpdatedBy")
+  reportedProblems   Problem[]          @relation("ProblemReportedBy")
+  resolvedProblems   Problem[]          @relation("ProblemResolvedBy")
+  purchases          Sale[]             @relation("CopyPurchasedBy")
+  refundedCopySale   Sale[]             @relation("CopySaleRefundedBy")
 }
 
 model Event {
@@ -122,4 +130,71 @@ model Book {
   publisherName    String         @map("publisher_name")
   retailLocationId String         @map("retail_location_id")
   retailLocation   RetailLocation @relation("RetailLocationBooks", fields: [retailLocationId], references: [id])
+
+  copies BookCopy[]
+}
+
+model BookCopy {
+  id           String  @id @default(uuid())
+  code         String
+  originalCode String  @map("original_code")
+  donatedAt    String? @map("donated_at")
+
+  bookId  String @map("book_id") @db.Uuid
+  book    Book   @relation(fields: [bookId], references: [id])
+  ownerId String @map("owner_id")
+  owner   User   @relation("BookCopyOwner", fields: [ownerId], references: [id])
+
+  returnedAt   DateTime? @map("returned_at")
+  returnedById String?   @map("returned_by_id")
+  returnedBy   User?     @relation("CopyReturnedBy", fields: [returnedById], references: [id])
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("CopyCreatedBy", fields: [createdById], references: [id])
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedById String   @map("updated_by_id")
+  updatedBy   User     @relation("CopyUpdatedBy", fields: [updatedById], references: [id])
+
+  problems Problem[] @relation("BookCopyProblem")
+  sales    Sale[]    @relation("BookCopySale")
+}
+
+enum ProblemType {
+  INCOMPLETE
+  LOST
+  CUSTOM
+}
+
+model Problem {
+  id         String      @id @default(uuid())
+  type       ProblemType @default(CUSTOM)
+  details    String
+  solution   String?
+  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
+  bookCopyId String      @map("book_copy_id")
+  bookCopy   BookCopy    @relation("BookCopyProblem", fields: [bookCopyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("ProblemReportedBy", fields: [createdById], references: [id])
+
+  resolvedAt   DateTime? @map("resolved_at")
+  resolvedById String    @map("resolved_by_id")
+  resolvedBy   User      @relation("ProblemResolvedBy", fields: [resolvedById], references: [id])
+}
+
+model Sale {
+  id                  String   @id @default(uuid())
+  bookCopyId          String   @map("book_copy_id")
+  bookCopy            BookCopy @relation("BookCopySale", fields: [bookCopyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  iseeDiscountApplied Boolean  @default(false) @map("isee_discount_applied")
+
+  purchasedAt   DateTime @default(now()) @map("purchased_at") @db.Timestamptz()
+  purchasedById String   @map("purchased_by_id")
+  purchasedBy   User     @relation("CopyPurchasedBy", fields: [purchasedById], references: [id])
+
+  refundedAt   DateTime? @map("refunded_at")
+  refundedById String?   @map("refunded_by_id")
+  refundedBy   User?     @relation("CopySaleRefundedBy", fields: [refundedById], references: [id])
 }
