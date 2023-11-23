@@ -59,16 +59,13 @@
         </div>
         <q-table
           :columns="columns"
-          :rows="tableRows"
+          :rows="rows"
           row-key="name"
           class="book-table"
           :pagination="pagination"
           table-header-class="table-header"
           square
-          :filter="{ searchQuery, filters }"
-          :filter-method="(rows, terms) => filterRows(terms, rows as Book[])"
         >
-          <!-- TODO: add the right value checks for colors and icon -->
           <template #body-cell-status="{ value }">
             <q-td>
               <div class="cell-wrapper">
@@ -95,36 +92,16 @@
                 <q-chip
                   square
                   :ripple="false"
-                  :color="
-                    colorFromValue(
-                      value,
-                      utilityLowThreshold,
-                      utilityHighThreshold,
-                    )
-                  "
-                  :dark="
-                    colorFromValue(
-                      value,
-                      utilityLowThreshold,
-                      utilityHighThreshold,
-                    ) !== 'yellow'
-                  "
+                  :color="colorFromValue(value)"
+                  :dark="colorFromValue(value) !== 'yellow'"
                   class="utility-chip"
                 >
                   {{
                     $t(
                       `book.utility.${
-                        colorFromValue(
-                          value,
-                          utilityLowThreshold,
-                          utilityHighThreshold,
-                        ) === "red"
+                        colorFromValue(value) === "red"
                           ? "low"
-                          : colorFromValue(
-                              value,
-                              utilityLowThreshold,
-                              utilityHighThreshold,
-                            ) === "yellow"
+                          : colorFromValue(value) === "yellow"
                           ? "medium"
                           : "high"
                       }`,
@@ -141,13 +118,8 @@
 </template>
 
 <script lang="ts" setup>
-import { cloneDeep } from "lodash-es";
-import { Dialog } from "quasar";
 import { ComputedRef, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { Book } from "src/@generated/graphql";
-import addBookDialog from "src/components/add-book-dialog.vue";
-import filterBySchoolDialogVue from "src/components/filter-by-school-dialog.vue";
 import { useBookService } from "src/services/book";
 import {
   capitalizeFirstLetter,
@@ -157,211 +129,144 @@ import {
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const { t, tm, rt } = useI18n();
 
-const currentPage = ref(0),
-  numberOfRows = ref(100);
+const currentPage = ref(0);
+const numberOfRows = ref(100);
+const searchQuery = ref("");
+const filters = ref("");
 
-const searchQuery = ref();
-
-const filterTranslations = computed((): string[] => {
-  return tm("book.filters.options").map((element) => rt(element));
-});
-
-const filterOptions = ref<string[]>(
-  /* This creates an array populated with the values ['0', '1', ...] in order
-  to have the right amount of options and one unique key for each option */
-  Array.apply(null, Array(filterTranslations.value.length)).map(
-    (element, index) => index.toString(),
-  ),
-);
-
-//TODO: Add actual logic with server fetch
-const schoolFilterOptions = [
-  ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
-  ["Address0", "Address1", "Address2", "Address3", "Address4"],
-];
-
-const subjects = ["Subject1", "Subject2"];
-
-const filters = ref<string[]>(),
-  schoolFilters = ref<string[][]>();
-
-const utilityLowThreshold = ref(0.33),
-  utilityHighThreshold = ref(0.66);
+const utilityLowThreshold = ref(0.33);
+const utilityHighThreshold = ref(0.66);
 
 const {
   books,
   loading: bookLoading,
-  refetchBooks,
-} = useBookService(currentPage, numberOfRows, ref<string>());
+  loadBooksMutation,
+} = useBookService(currentPage, numberOfRows);
 
-const tableRows = ref<typeof books.value>();
+const rows: Ref<typeof books.value> = ref([]);
 
-const columns: ComputedRef<{ name: string; label: string; field: string }[]> =
-  computed(() => [
-    {
-      name: "isbn",
-      label: t("book.columns.isbn"),
-      field: "isbnCode",
-      align: "left",
-      format: (value: string) => formatISBN(value),
-      sortable: true,
-      classes: "small-column ellipsis",
-    },
-    {
-      name: "author",
-      label: t("book.columns.author"),
-      field: "authorsFullName",
-      align: "left",
-      format: (val: string) => capitalizeFirstLetter(val),
-      sortable: true,
-      classes: "small-column ellipsis",
-    },
-    {
-      name: "publisher",
-      label: t("book.columns.publisher"),
-      field: "publisherName",
-      align: "left",
-      format: (val: string) => capitalizeFirstLetter(val),
-      sortable: true,
-      classes: "small-column ellipsis",
-    },
-    {
-      name: "subject",
-      label: t("book.columns.subject"),
-      field: "subject",
-      align: "left",
-      format: (val: string) => capitalizeFirstLetter(val),
-      sortable: true,
-      classes: "small-column ellipsis",
-    },
-    {
-      name: "title",
-      label: t("book.columns.title"),
-      field: "title",
-      align: "left",
-      format: (val: string) => capitalizeFirstLetter(val),
-      sortable: true,
-      classes: "large-column ellipsis",
-    },
-    {
-      name: "price",
-      label: t("book.columns.price"),
-      field: "originalPrice",
-      align: "left",
-      format: (val: string) => formatPrice(val),
-      sortable: true,
-    },
-    {
-      name: "status",
-      label: t("book.columns.status"),
-      //TODO: add the field name
-      field: "",
-      align: "left",
-      sortable: true,
-    },
-    {
-      name: "utility",
-      label: t("book.columns.utility"),
-      //TODO: add the field name
-      field: "",
-      align: "left",
-      sortable: true,
-      classes: "x-small-column",
-    },
-  ]);
+const columns: ComputedRef<
+  { name: string; label: string; field: string; align: "left" }[]
+> = computed(() => [
+  {
+    name: "isbn",
+    label: t("book.columns.isbn"),
+    field: "isbnCode",
+    align: "left",
+    format: (value: string) => formatISBN(value),
+    sortable: true,
+    classes: "small-column",
+  },
+  {
+    name: "author",
+    label: t("book.columns.author"),
+    field: "authorsFullName",
+    align: "left",
+    format: (val: string) => capitalizeFirstLetter(val),
+    sortable: true,
+    classes: "small-column",
+  },
+  {
+    name: "publisher",
+    label: t("book.columns.publisher"),
+    field: "publisherName",
+    align: "left",
+    format: (val: string) => capitalizeFirstLetter(val),
+    sortable: true,
+    classes: "small-column",
+  },
+  {
+    name: "subject",
+    label: t("book.columns.subject"),
+    field: "subject",
+    align: "left",
+    format: (val: string) => capitalizeFirstLetter(val),
+    sortable: true,
+    classes: "small-column",
+  },
+  {
+    name: "title",
+    label: t("book.columns.title"),
+    field: "title",
+    align: "left",
+    format: (val: string) => capitalizeFirstLetter(val),
+    sortable: true,
+    classes: "large-column",
+  },
+  {
+    name: "price",
+    label: t("book.columns.price"),
+    field: "originalPrice",
+    align: "left",
+    format: (val: string) => formatPrice(val),
+    sortable: true,
+  },
+  {
+    name: "status",
+    label: t("book.columns.status"),
+    //TODO: add the field name
+    field: "",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "utility",
+    label: t("book.columns.utility"),
+    //TODO: add the field name
+    field: "",
+    align: "left",
+    sortable: true,
+    classes: "x-small-column",
+  },
+]);
 
 const pagination = computed(() => {
   return { rowsPerPage: numberOfRows.value };
 });
 
+async function loadBooks() {
+  await loadBooksMutation.loadBooksIntoDatabase();
+}
+
 onMounted(() => {
-  refetchBooks()
-    ?.then(() => {
-      tableRows.value = books.value;
+  loadBooks()
+    .then(() => {
+      rows.value = books.value;
     })
-    .catch((error) => {
-      console.error("Something went wrong: ", error);
+    .catch(() => {
+      console.error("Something went wrong");
     });
 });
 
-function colorFromValue(
-  value: string,
-  utilityLowThreshold: number,
-  utilityHighThreshold: number,
-): string {
-  return parseFloat(value) < utilityLowThreshold
+function capitalizeFirstLetter(text: string) {
+  return text
+    .split(" ")
+    .map((word: string) => {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
+function formatPrice(price: string): string {
+  return parseFloat(price).toFixed(2).toLocaleString() + " €";
+}
+
+function formatISBN(isbnCode: string): string {
+  return [
+    isbnCode.slice(0, 3),
+    isbnCode.slice(3, 5),
+    isbnCode.slice(5, 10),
+    isbnCode.slice(10, 12),
+    isbnCode.slice(12, 13),
+  ].join("-");
+}
+
+function colorFromValue(value: string): string {
+  return parseFloat(value) < utilityLowThreshold.value
     ? "red"
-    : parseFloat(value) < utilityHighThreshold
+    : parseFloat(value) < utilityHighThreshold.value
     ? "yellow"
     : "green";
-}
-
-function openDialog() {
-  Dialog.create({
-    component: filterBySchoolDialogVue,
-    componentProps: {
-      filters: schoolFilterOptions,
-      selectedFilters: schoolFilters.value,
-    },
-  }).onOk((payload: string[][]) => {
-    schoolFilters.value = cloneDeep(payload);
-  });
-}
-
-function filterRows(
-  terms: { searchQuery?: string; filters?: string[] },
-  rows?: Book[],
-) {
-  const filteredRows = ref<Book[]>([]);
-
-  if (rows) {
-    for (const row of rows) {
-      let field: keyof Book;
-      for (field in row) {
-        if (
-          field !== "__typename" &&
-          field !== "id" &&
-          field !== "retailLocation" &&
-          field !== "retailLocationId" &&
-          row[field]
-            .toString()
-            .toLowerCase()
-            .includes(terms.searchQuery?.toLowerCase() ?? "")
-        ) {
-          filteredRows.value.push(row);
-          break;
-        }
-      }
-      if (filters.value) {
-        for (const filter of filters.value) {
-          //TODO: Insert actual logic once the Book fields are updated
-          if (Math.floor(parseInt(filter) / 3)) {
-            filteredRows.value.pop();
-            break;
-          }
-        }
-      }
-      // TODO: Add checks for school filters
-    }
-  }
-
-  return terms.filters?.length ?? terms.searchQuery
-    ? filteredRows.value
-    : rows ?? Array<Book[]>([]);
-}
-
-function bookDialog() {
-  Dialog.create({
-    component: addBookDialog,
-    componentProps: {
-      titles: columns.value
-        .slice(0, columns.value.length - 2)
-        .map((element) => element.label),
-      subjects,
-    },
-  }).onOk((payload: string[]) => {
-    payload; // TODO: Load the new book in the database with the data passed from the dialog
-  });
 }
 </script>
 
