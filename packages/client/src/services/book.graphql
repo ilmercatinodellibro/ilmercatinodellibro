@@ -6,6 +6,7 @@ query getBooks($page: Int!, $rows: Int!, $filter: String) {
     authorsFullName
     title
     originalPrice
+    publisherName
   }
 }
 
