@@ -1,11 +1,15 @@
 import { ForbiddenException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Role, User } from "src/@generated";
-import { Book } from "src/@generated/book";
+import { BookCopy } from "src/@generated/book-copy";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
-import { BookCopyCreateInput, BookCopyQueryArgs } from "./book-copy.args";
+import {
+  BookCopyByOwnerQueryArgs,
+  BookCopyCreateInput,
+  BookCopyQueryArgs,
+} from "./book-copy.args";
 import { BookCopyService } from "./book-copy.service";
 
 @Resolver()
@@ -15,7 +19,7 @@ export class BookCopyResolver {
     private readonly bookService: BookCopyService,
   ) {}
 
-  @Query(() => [Book])
+  @Query(() => [BookCopy])
   async bookCopies(
     @Args()
     { bookId }: BookCopyQueryArgs,
@@ -27,8 +31,24 @@ export class BookCopyResolver {
     });
   }
 
-  @Mutation(() => Book, { nullable: true })
-  async createBookCopy(
+  @Query(() => [BookCopy])
+  async bookCopiesByOwner(
+    @Args()
+    { ownerId }: BookCopyByOwnerQueryArgs,
+  ) {
+    const currentRetailLocationId = "re"; // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
+    return this.prisma.bookCopy.findMany({
+      where: {
+        ownerId,
+        book: {
+          retailLocationId: currentRetailLocationId,
+        },
+      },
+    });
+  }
+
+  @Mutation(() => BookCopy, { nullable: true })
+  async createBookCopies(
     @Input()
     { bookIds, ownerId }: BookCopyCreateInput,
     @CurrentUser() { id: userId, role: userRole }: User,
@@ -60,7 +80,7 @@ export class BookCopyResolver {
       );
     }
 
-    const bookCopy = this.prisma.$transaction(async (prisma) => {
+    const bookCopies = this.prisma.$transaction(async (prisma) => {
       const booksCodes = await this.bookService.calculateBookCodes(
         prisma,
         bookIds,
@@ -79,6 +99,6 @@ export class BookCopyResolver {
       });
     });
 
-    return bookCopy;
+    return bookCopies;
   }
 }
