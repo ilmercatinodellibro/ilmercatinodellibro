@@ -15,7 +15,7 @@ export class BookCopyByOwnerQueryArgs {
 
 @InputType()
 export class BookCopyCreateInput {
-  @Field(() => String, { nullable: false })
+  @Field(() => [String], { nullable: false })
   bookIds!: string[];
 
   @Field(() => String, { nullable: false })

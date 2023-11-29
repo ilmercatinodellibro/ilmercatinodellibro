@@ -28,9 +28,10 @@ export class BookResolver {
     return this.prisma.book.findMany({
       skip: page * rows,
       take: rows,
-      ...(filter
-        ? {
-            where: {
+      where: {
+        retailLocationId: "re",
+        ...(filter
+          ? {
               OR: [
                 {
                   authorsFullName: {
@@ -63,9 +64,9 @@ export class BookResolver {
                   },
                 },
               ],
-            },
-          }
-        : {}),
+            }
+          : {}),
+      },
     });
   }
 
