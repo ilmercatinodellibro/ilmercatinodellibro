@@ -3,6 +3,12 @@ import { seedE2eTests } from "./e2e-tests";
 import { seedEvents } from "./events";
 import { seedRetailLocations } from "./retail-locations";
 
+// Prisma doesn't export a specific type for this. We need it because we are passing the client around within transactions.
+export type PrismaTransactionClient = Omit<
+  PrismaClient,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;
+
 const prisma = new PrismaClient();
 
 // Be careful about the execution/completion order with relations
