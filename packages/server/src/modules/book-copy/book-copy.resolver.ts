@@ -1,5 +1,5 @@
 import { ForbiddenException } from "@nestjs/common";
-import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Role, User } from "src/@generated";
 import { BookCopy } from "src/@generated/book-copy";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
@@ -47,7 +47,7 @@ export class BookCopyResolver {
     });
   }
 
-  @Mutation(() => BookCopy, { nullable: true })
+  @Mutation(() => Int, { nullable: true })
   async createBookCopies(
     @Input()
     { bookIds, ownerId }: BookCopyCreateInput,
@@ -80,7 +80,7 @@ export class BookCopyResolver {
       );
     }
 
-    const bookCopies = this.prisma.$transaction(async (prisma) => {
+    const bookCopies = await this.prisma.$transaction(async (prisma) => {
       const booksCodes = await this.bookService.calculateBookCodes(
         prisma,
         bookIds,
@@ -99,6 +99,6 @@ export class BookCopyResolver {
       });
     });
 
-    return bookCopies;
+    return bookCopies.count;
   }
 }

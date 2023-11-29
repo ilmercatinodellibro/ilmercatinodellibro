@@ -1,0 +1,39 @@
+fragment BookSummary on Book {
+  id
+  isbnCode
+  subject
+  authorsFullName
+  title
+  publisherName
+  retailLocationId
+}
+
+fragment BookCopiesSummary on BookCopy {
+  id
+  updatedAt
+  updatedById
+  book {
+    ...BookSummary
+  }
+  returnedAt
+  returnedById
+  createdAt
+  createdById
+  code
+}
+
+query getBookCopies($bookId: String!) {
+  bookCopies(bookId: $bookId) {
+    ...BookCopiesSummary
+  }
+}
+
+query getBookCopiesByOwner($ownerId: String!) {
+  bookCopiesByOwner(ownerId: $ownerId) {
+    ...BookCopiesSummary
+  }
+}
+
+mutation createBookCopies($input: BookCopyCreateInput!) {
+  createBookCopies(input: $input)
+}
