@@ -180,8 +180,8 @@ model Problem {
   createdBy   User     @relation("ProblemReportedBy", fields: [createdById], references: [id])
 
   resolvedAt   DateTime? @map("resolved_at")
-  resolvedById String    @map("resolved_by_id")
-  resolvedBy   User      @relation("ProblemResolvedBy", fields: [resolvedById], references: [id])
+  resolvedById String?   @map("resolved_by_id")
+  resolvedBy   User?     @relation("ProblemResolvedBy", fields: [resolvedById], references: [id])
 }
 
 model Sale {

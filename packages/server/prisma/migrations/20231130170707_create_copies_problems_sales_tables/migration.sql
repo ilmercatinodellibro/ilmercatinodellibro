@@ -30,7 +30,7 @@ CREATE TABLE "Problem" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_by_id" TEXT NOT NULL,
     "resolved_at" TIMESTAMP(3),
-    "resolved_by_id" TEXT NOT NULL,
+    "resolved_by_id" TEXT,
 
     CONSTRAINT "Problem_pkey" PRIMARY KEY ("id")
 );
@@ -70,7 +70,7 @@ ALTER TABLE "Problem" ADD CONSTRAINT "Problem_book_copy_id_fkey" FOREIGN KEY ("b
 ALTER TABLE "Problem" ADD CONSTRAINT "Problem_created_by_id_fkey" FOREIGN KEY ("created_by_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Problem" ADD CONSTRAINT "Problem_resolved_by_id_fkey" FOREIGN KEY ("resolved_by_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Problem" ADD CONSTRAINT "Problem_resolved_by_id_fkey" FOREIGN KEY ("resolved_by_id") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Sale" ADD CONSTRAINT "Sale_book_copy_id_fkey" FOREIGN KEY ("book_copy_id") REFERENCES "BookCopy"("id") ON DELETE CASCADE ON UPDATE CASCADE;
