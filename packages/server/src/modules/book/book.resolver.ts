@@ -29,7 +29,7 @@ export class BookResolver {
       skip: page * rows,
       take: rows,
       where: {
-        retailLocationId: "re",
+        retailLocationId: "re", // TODO: update this when retailLocations are properly handled
         ...(filter
           ? {
               OR: [

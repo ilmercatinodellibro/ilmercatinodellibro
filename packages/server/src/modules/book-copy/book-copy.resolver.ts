@@ -84,7 +84,7 @@ export class BookCopyResolver {
       const booksCodes = await this.bookService.calculateBookCodes(
         prisma,
         bookIds,
-        "re",
+        currentRetailLocationId,
       );
 
       return prisma.bookCopy.createMany({

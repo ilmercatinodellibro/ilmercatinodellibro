@@ -1,5 +1,4 @@
-import { ArgsType, Field, InputType, PickType } from "@nestjs/graphql";
-import { BookCopyCreateWithoutBookInput } from "src/@generated";
+import { ArgsType, Field, InputType } from "@nestjs/graphql";
 
 @ArgsType()
 export class BookCopyQueryArgs {
@@ -21,10 +20,3 @@ export class BookCopyCreateInput {
   @Field(() => String, { nullable: false })
   ownerId!: string;
 }
-
-@InputType()
-export class BookCopyUpdateInput extends PickType(
-  BookCopyCreateWithoutBookInput,
-  ["returnedBy", "id", "donatedAt"],
-  InputType,
-) {}

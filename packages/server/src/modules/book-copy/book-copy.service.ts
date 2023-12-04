@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaTransactionClient } from "prisma/seeds";
+import { PrismaTransactionClient } from "../../helpers/prisma";
 
 @Injectable()
 export class BookCopyService {
@@ -40,7 +40,9 @@ export class BookCopyService {
           book: {
             retailLocationId,
           },
-          // Those copies must not have been sold, this means that all its sales have been refunded
+          // Only book copies that were not sold must be considered. To control this, one these two conditions must be met:
+          // 1 - all existing sale records related to that copy must have been refunded -> means the book copy status is currently not sold
+          // 2 - or that book copy does not have any sale record at all
           sales: {
             every: {
               refundedAt: {
@@ -48,19 +50,17 @@ export class BookCopyService {
               },
             },
           },
-          problems: {
-            every: {
-              resolvedAt: {
-                not: null,
-              },
-            },
+          // Book copy was not returned to the original owner during settlement operation
+          returnedBy: {
+            is: null,
           },
+          // All books outside these three conditions, even if they have problems, must be considered present for the purposes of this function
         },
         orderBy: {
           code: "asc",
         },
       })
-    ).map(({ code }) => Number(code.split("/")[0]));
+    ).map(({ code }) => parseInt(code.split("/")[0]));
 
     if (currentlyAssignedCodes.length === 0 || !useFragmentation) {
       // When registering new books at the end of the current codes, we must consider also books that have been sold/returned.
