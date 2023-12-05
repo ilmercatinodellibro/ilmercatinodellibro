@@ -5,7 +5,7 @@ CREATE TYPE "ProblemType" AS ENUM ('INCOMPLETE', 'LOST', 'CUSTOM');
 CREATE TABLE "BookCopy" (
     "id" TEXT NOT NULL,
     "code" TEXT NOT NULL,
-    "original_code" TEXT NOT NULL,
+    "original_code" TEXT,
     "donated_at" TEXT,
     "book_id" UUID NOT NULL,
     "owner_id" TEXT NOT NULL,

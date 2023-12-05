@@ -142,7 +142,7 @@ model BookCopy {
   code         String
   // The original code is a special field. Contains a copy of the value of the first code field that was specified for a BookCopy
   // This is meant to keep track of the fact that a book copy was returned and to the retailLocation for some reason and it is now available again.
-  originalCode String  @map("original_code")
+  originalCode String? @map("original_code")
   donatedAt    String? @map("donated_at")
 
   bookId String @map("book_id") @db.Uuid

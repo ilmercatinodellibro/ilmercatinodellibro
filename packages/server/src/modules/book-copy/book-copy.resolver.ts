@@ -93,7 +93,6 @@ export class BookCopyResolver {
           code: generatedCode,
           createdById: userId,
           ownerId,
-          originalCode: generatedCode,
           updatedById: userId,
         })),
       });
