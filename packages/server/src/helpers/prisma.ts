@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 /**
  * Prisma doesn't allow everything to be used as an input value.
@@ -7,3 +7,9 @@ import { Prisma } from "@prisma/client";
  */
 export const toPrismaJSONInput = (input: unknown) =>
   (JSON.parse(JSON.stringify(input)) ?? undefined) as Prisma.InputJsonValue;
+
+// Prisma doesn't export a specific type for this. We need it because we are passing the client around within transactions.
+export type PrismaTransactionClient = Omit<
+  PrismaClient,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;
