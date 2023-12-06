@@ -5,15 +5,16 @@ export default {
   columns: {
     isbn: "Codice ISBN",
     author: "Autore",
+    title: "Titolo",
     publisher: "Editore",
     subject: "Materia",
-    title: "Titolo",
     price: "Prezzo di Copertina",
     status: "Stato",
     utility: "Utilità",
   },
   search: "Cerca",
   addBook: "Aggiungi un libro",
+  addBookDialog: "Aggiungi Libro",
   filter: "Filtra",
   utility: {
     high: "Alta",
@@ -24,4 +25,24 @@ export default {
     available: "Disponibile",
     notAvailable: "Non Disponibile",
   },
+  filters: {
+    options: [
+      "Disponibili",
+      "Venduti",
+      "Prenotati",
+      "Utilità Alta",
+      "Utilità Media",
+      "Utilità Bassa",
+    ],
+    school: "Filtra per Scuola",
+    schoolFilter: {
+      fields: {
+        school: "Scuola",
+        address: "Indirizzo",
+      },
+    },
+    filterError: "Riempi almeno un campo",
+  },
+  cancel: "Annulla",
+  add: "Aggiungi",
 };
