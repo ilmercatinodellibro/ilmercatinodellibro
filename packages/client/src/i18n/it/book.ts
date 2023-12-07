@@ -2,7 +2,7 @@ export default {
   loading: "Caricamento libri",
   loadBooksButton: "Carica libri nel database",
   noResult: "Nessun libro trovato",
-  columns: {
+  fields: {
     isbn: "Codice ISBN",
     author: "Autore",
     title: "Titolo",
@@ -45,4 +45,5 @@ export default {
   },
   cancel: "Annulla",
   add: "Aggiungi",
+  requiredField: "Per favore compila questo campo",
 };

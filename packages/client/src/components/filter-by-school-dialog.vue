@@ -28,7 +28,11 @@
       <q-separator />
       <q-card-actions align="right">
         <q-btn :label="$t('book.cancel')" flat @click="onDialogCancel()" />
-        <q-btn :label="$t('book.add')" flat @click="onDialogOK(newFilters)" />
+        <q-btn
+          :label="$t('book.filter')"
+          flat
+          @click="onDialogOK(newFilters)"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
