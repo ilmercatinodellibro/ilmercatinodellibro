@@ -55,8 +55,12 @@ model User {
   pushSubscriptions PushSubscription[]
 
   // Any type of user
-  bookCopies BookCopy[] @relation("BookCopyOwner")
-  purchases  Sale[]     @relation("CopyPurchasedBy")
+  bookCopies          BookCopy[]    @relation("BookCopyOwner")
+  purchases           Sale[]        @relation("CopyPurchasedBy")
+  createdReservations Reservation[] @relation("ReservationMadeBy") // reservations can be made also by operators
+  deletedReservations Reservation[] @relation("ReservationDeletedBy")
+  reservations        Reservation[] @relation("ReservationUser") // Keeps track of the user for who the reservation was made
+  requestedBooks      BookRequest[] @relation("BookRequestUser")
 
   // Operator/admin relations
   returnedBookCopies BookCopy[] @relation("CopyReturnedBy")
@@ -136,7 +140,9 @@ model Book {
   retailLocationId String         @map("retail_location_id")
   retailLocation   RetailLocation @relation("RetailLocationBooks", fields: [retailLocationId], references: [id])
 
-  copies BookCopy[]
+  copies       BookCopy[]
+  reservations Reservation[] @relation("BookReservations")
+  requests     BookRequest[] @relation("BookRequested")
 }
 
 model BookCopy {
@@ -208,4 +214,44 @@ model Sale {
   refundedAt   DateTime? @map("refunded_at")
   refundedById String?   @map("refunded_by_id")
   refundedBy   User?     @relation("CopySaleRefundedBy", fields: [refundedById], references: [id])
+
+  reservation Reservation? @relation("ReservationSale")
+  bookRequest BookRequest? @relation("BookRequestSale")
+}
+
+model Reservation {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User?  @relation("ReservationUser", fields: [userId], references: [id])
+  bookId String @map("book_id") @db.Uuid
+  book   Book   @relation("BookReservations", fields: [bookId], references: [id])
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("ReservationMadeBy", fields: [createdById], references: [id])
+
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by_id")
+  deletedBy   User?     @relation("ReservationDeletedBy", fields: [deletedById], references: [id])
+
+  expiresAt DateTime? @map("expires_at")
+
+  saleId String? @unique() @map("sale_id")
+  sale   Sale?   @relation("ReservationSale", fields: [saleId], references: [id])
+}
+
+model BookRequest {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User?  @relation("BookRequestUser", fields: [userId], references: [id])
+  bookId String @map("book_id") @db.Uuid
+  book   Book   @relation("BookRequested", fields: [bookId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  deletedAt DateTime? @map("deleted_at")
+
+  saleId String? @unique() @map("sale_id")
+  sale   Sale?   @relation("BookRequestSale", fields: [saleId], references: [id])
 }
