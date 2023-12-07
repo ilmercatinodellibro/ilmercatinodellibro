@@ -25,7 +25,7 @@ export class ProblemResolver {
 
   @ResolveField(() => User)
   async createdBy(@Root() problem: Problem) {
-    return this.prisma.user.findMany({
+    return this.prisma.user.findUnique({
       where: {
         id: problem.createdById,
       },
@@ -34,7 +34,7 @@ export class ProblemResolver {
 
   @ResolveField(() => BookCopy)
   async bookCopy(@Root() problem: Problem) {
-    return this.prisma.bookCopy.findFirst({
+    return this.prisma.bookCopy.findUnique({
       where: {
         id: problem.bookCopyId,
       },

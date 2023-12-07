@@ -8,7 +8,7 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Book, BookCopy, Problem, Role, User } from "src/@generated";
+import { Book, BookCopy, Problem, Role, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -40,6 +40,46 @@ export class BookCopyResolver {
     return this.prisma.problem.findMany({
       where: {
         bookCopyId: bookCopy.id,
+      },
+    });
+  }
+
+  @ResolveField(() => User)
+  async createdBy(@Root() bookCopy: BookCopy) {
+    return this.prisma.user.findUnique({
+      where: {
+        id: bookCopy.createdById,
+      },
+    });
+  }
+
+  @ResolveField(() => User, { nullable: true })
+  async returnedBy(@Root() bookCopy: BookCopy) {
+    if (!bookCopy.returnedById) {
+      return null;
+    }
+
+    return this.prisma.user.findUnique({
+      where: {
+        id: bookCopy.returnedById,
+      },
+    });
+  }
+
+  @ResolveField(() => User)
+  async updatedBy(@Root() bookCopy: BookCopy) {
+    return this.prisma.user.findUnique({
+      where: {
+        id: bookCopy.updatedById,
+      },
+    });
+  }
+
+  @ResolveField(() => [Sale])
+  async sales(@Root() bookCopy: BookCopy) {
+    return this.prisma.sale.findMany({
+      where: {
+        bookCopyId: bookCopy.bookId,
       },
     });
   }
