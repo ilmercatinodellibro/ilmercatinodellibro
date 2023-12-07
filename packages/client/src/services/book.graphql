@@ -1,12 +1,17 @@
 query getBooks($page: Int!, $rows: Int!, $filter: String) {
   books(page: $page, rows: $rows, filter: $filter) {
-    id
-    isbnCode
-    subject
-    authorsFullName
-    title
-    originalPrice
-    publisherName
+    filter
+    page
+    rows {
+      id
+      isbnCode
+      subject
+      authorsFullName
+      title
+      originalPrice
+      publisherName
+    }
+    rowsCount
   }
 }
 
