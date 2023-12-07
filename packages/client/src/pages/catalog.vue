@@ -1,9 +1,7 @@
 <template>
   <q-page class="catalog-page">
-    <span v-if="bookLoading">{{ t("book.loading") }}</span>
-    <div v-else class="loaded-wrapper">
-      <div v-if="!books.length">{{ t("book.noResult") }}</div>
-      <q-card v-else class="catalog-wrapper">
+    <div class="loaded-wrapper">
+      <q-card class="catalog-wrapper">
         <div class="catalog-header">
           <q-input
             v-model="searchQuery"
@@ -63,15 +61,19 @@
         </div>
 
         <q-table
+          ref="tableRef"
+          v-model:pagination="pagination"
           :columns="columns"
+          :filter="searchQuery"
+          :loading="bookLoading"
+          :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           :rows="tableRows"
-          row-key="name"
-          class="book-table"
-          :pagination="pagination"
-          table-header-class="table-header"
+          binary-state-sort
+          row-key="isbn"
           square
-          :filter="{ searchQuery, filters }"
-          :filter-method="(rows, terms) => filterRows(terms, rows as Book[])"
+          table-header-class="table-header"
+          class="book-table"
+          @request="onRequest"
         >
           <!-- TODO: add the right value checks for colors and icon -->
           <template #body-cell-status="{ value }">
@@ -116,7 +118,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Dialog } from "quasar";
+import { Dialog, QTable } from "quasar";
 import { ComputedRef, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Book } from "src/@generated/graphql";
@@ -131,10 +133,24 @@ import {
 } from "../composables/use-misc-formats";
 const { t } = useI18n();
 
+const tableRef = ref<QTable>();
+
 const currentPage = ref(0);
 const numberOfRows = ref(100);
 
-const searchQuery = ref();
+const searchQuery = ref<string>("");
+
+type BookSummary = Pick<
+  Book,
+  | "__typename"
+  | "authorsFullName"
+  | "id"
+  | "isbnCode"
+  | "originalPrice"
+  | "publisherName"
+  | "subject"
+  | "title"
+>;
 
 const filterOptions = useFilters();
 
@@ -152,13 +168,17 @@ const schoolFilters = ref<string[][]>();
 const UTILITY_LOW_THRESHOLD = 0.33;
 const UTILITY_HIGH_THRESHOLD = 0.66;
 
-const {
-  books,
-  loading: bookLoading,
-  refetchBooks,
-} = useBookService(currentPage, numberOfRows, ref<string>());
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
-const tableRows = ref<Book[]>();
+const { refetchBooks, booksPaginationDetails } = useBookService(
+  currentPage,
+  numberOfRows,
+  searchQuery,
+);
+
+const bookLoading = ref(false);
+
+const tableRows = ref<BookSummary[]>([]);
 
 const columns: ComputedRef<{ name: string; label: string; field: string }[]> =
   computed(() => [
@@ -226,19 +246,56 @@ const columns: ComputedRef<{ name: string; label: string; field: string }[]> =
     },
   ]);
 
-const pagination = computed(() => {
-  return { rowsPerPage: numberOfRows.value };
+const pagination = ref({
+  rowsPerPage: numberOfRows.value,
+  rowsNumber: booksPaginationDetails.value.rowCount,
+  page: currentPage.value,
+  descending: false,
+  sortBy: "title",
 });
 
 onMounted(() => {
-  refetchBooks()
-    ?.then(() => {
-      tableRows.value = books.value as Book[];
+  tableRef.value?.requestServerInteraction();
+});
+
+function onRequest(props: {
+  pagination: {
+    page: number;
+    rowsPerPage: number;
+    descending: boolean;
+    sortBy: string;
+  };
+  filter?: string;
+}) {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+  const filter = props.filter;
+
+  bookLoading.value = true;
+
+  refetchBooks({
+    page: props.pagination.page - 1,
+    rows: props.pagination.rowsPerPage,
+    filter: filter ?? "",
+  })
+    ?.then((payload) => {
+      pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+
+      tableRows.value.splice(
+        0,
+        tableRows.value.length,
+        ...payload.data.books.rows,
+      );
+
+      pagination.value.page = page;
+      pagination.value.rowsPerPage = rowsPerPage;
+      pagination.value.sortBy = sortBy;
+      pagination.value.descending = descending;
+      bookLoading.value = false;
     })
     .catch((error) => {
-      console.error("Something went wrong: ", error);
+      console.error("Couldn't fetch books: ", error);
     });
-});
+}
 
 function colorFromValue(value: string) {
   return parseFloat(value) < UTILITY_LOW_THRESHOLD
@@ -258,51 +315,6 @@ function openSchoolFilterDialog() {
   }).onOk((payload: string[][]) => {
     schoolFilters.value = payload;
   });
-}
-
-function filterRows(
-  terms: { searchQuery?: string; filters?: string[] },
-  rows?: Book[],
-) {
-  const filteredRows = ref<Book[]>([]);
-
-  if (rows) {
-    for (const row of rows) {
-      let field: keyof Book;
-      for (field in row) {
-        if (
-          field !== "__typename" &&
-          field !== "id" &&
-          field !== "retailLocation" &&
-          field !== "retailLocationId" &&
-          field !== "_count" &&
-          field !== "copies" &&
-          field !== "originalPrice" &&
-          row[field]
-            .toString()
-            .toLowerCase()
-            .includes(terms.searchQuery?.toLowerCase() ?? "")
-        ) {
-          filteredRows.value.push(row);
-          break;
-        }
-      }
-      if (filters.value) {
-        for (const filter of filters.value) {
-          //TODO: Insert actual logic once the Book fields are updated
-          if (Math.floor(parseInt(filter) / 3)) {
-            filteredRows.value.pop();
-            break;
-          }
-        }
-      }
-      // TODO: Add checks for school filters
-    }
-  }
-
-  return terms.filters?.length ?? terms.searchQuery
-    ? filteredRows.value
-    : rows ?? Array<Book[]>([]);
 }
 
 function openBookDialog() {
