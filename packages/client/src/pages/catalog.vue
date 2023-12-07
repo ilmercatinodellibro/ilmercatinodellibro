@@ -251,7 +251,6 @@ const pagination = ref({
   rowsNumber: booksPaginationDetails.value.rowCount,
   page: currentPage.value,
   descending: false,
-  sortBy: "title",
 });
 
 onMounted(() => {
@@ -263,11 +262,10 @@ function onRequest(props: {
     page: number;
     rowsPerPage: number;
     descending: boolean;
-    sortBy: string;
   };
   filter?: string;
 }) {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+  const { page, rowsPerPage, descending } = props.pagination;
   const filter = props.filter;
 
   bookLoading.value = true;
@@ -288,7 +286,6 @@ function onRequest(props: {
 
       pagination.value.page = page;
       pagination.value.rowsPerPage = rowsPerPage;
-      pagination.value.sortBy = sortBy;
       pagination.value.descending = descending;
       bookLoading.value = false;
     })
