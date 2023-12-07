@@ -1,7 +1,14 @@
 import { ForbiddenException } from "@nestjs/common";
-import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { Role, User } from "src/@generated";
-import { BookCopy } from "src/@generated/book-copy";
+import {
+  Args,
+  Int,
+  Mutation,
+  Query,
+  ResolveField,
+  Resolver,
+  Root,
+} from "@nestjs/graphql";
+import { Book, BookCopy, Problem, Role, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -12,12 +19,30 @@ import {
 } from "./book-copy.args";
 import { BookCopyService } from "./book-copy.service";
 
-@Resolver()
+@Resolver(BookCopy)
 export class BookCopyResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly bookService: BookCopyService,
   ) {}
+
+  @ResolveField(() => Book)
+  async book(@Root() bookCopy: BookCopy) {
+    return this.prisma.book.findUnique({
+      where: {
+        id: bookCopy.bookId,
+      },
+    });
+  }
+
+  @ResolveField(() => [Problem])
+  async problems(@Root() bookCopy: BookCopy) {
+    return this.prisma.problem.findMany({
+      where: {
+        bookCopyId: bookCopy.id,
+      },
+    });
+  }
 
   @Query(() => [BookCopy])
   async bookCopies(

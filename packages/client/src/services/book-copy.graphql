@@ -1,16 +1,32 @@
 fragment BookCopiesSummary on BookCopy {
   id
-  updatedAt
-  updatedById
+  createdAt
+  createdById
+  code
   book {
     ...BookSummary
     retailLocationId
   }
+  problems {
+    createdAt
+    createdBy {
+      firstname
+      lastname
+    }
+    details
+    resolvedAt
+    resolvedBy {
+      firstname
+      lastname
+    }
+    solution
+    type
+    updatedAt
+  }
   returnedAt
   returnedById
-  createdAt
-  createdById
-  code
+  updatedAt
+  updatedById
 }
 
 query getBookCopies($bookId: String!) {
@@ -27,4 +43,21 @@ query getBookCopiesByOwner($ownerId: String!) {
 
 mutation createBookCopies($input: BookCopyCreateInput!) {
   createBookCopies(input: $input)
+}
+
+mutation reportProblem($input: ProblemCreateInput!) {
+  reportProblem(input: $input) {
+    id
+    bookCopyId
+    details
+  }
+}
+
+mutation resolveProblem($input: ProblemResolveInput!) {
+  resolveProblem(input: $input) {
+    id
+    bookCopyId
+    details
+    solution
+  }
 }
