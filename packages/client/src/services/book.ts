@@ -1,4 +1,4 @@
-import { Ref } from "vue";
+import { Ref, computed } from "vue";
 import {
   useGetBooksQuery,
   useLoadBooksIntoDatabaseMutation,
@@ -10,7 +10,7 @@ export function useBookService(
   filter: Ref<string | undefined>,
 ) {
   const {
-    books,
+    books: booksData,
     loading,
     refetch: refetchBooks,
   } = useGetBooksQuery(() => ({
@@ -20,9 +20,20 @@ export function useBookService(
   }));
 
   const loadBooksMutation = useLoadBooksIntoDatabaseMutation();
+  const books = computed(() => booksData.value?.rows ?? []);
+  const booksPaginationDetails = computed(() => {
+    const currentData = booksData.value;
+
+    return {
+      page: currentData?.page ?? 0,
+      filter: currentData?.filter ?? "",
+      rowCount: currentData?.rowsCount ?? 0,
+    };
+  });
 
   return {
     books,
+    booksPaginationDetails,
     loading,
     loadBooksMutation,
     refetchBooks,
