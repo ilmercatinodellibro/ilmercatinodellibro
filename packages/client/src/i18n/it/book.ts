@@ -26,14 +26,7 @@ export default {
     notAvailable: "Non Disponibile",
   },
   filters: {
-    options: [
-      "Disponibili",
-      "Venduti",
-      "Prenotati",
-      "Utilità Alta",
-      "Utilità Media",
-      "Utilità Bassa",
-    ],
+    options: ["Disponibili", "Utilità Alta", "Utilità Media", "Utilità Bassa"],
     school: "Filtra per Scuola",
     schoolFilter: {
       fields: {

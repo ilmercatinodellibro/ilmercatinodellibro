@@ -26,14 +26,7 @@ export default {
     notAvailable: "Not Available",
   },
   filters: {
-    options: [
-      "Available",
-      "Sold",
-      "Booked",
-      "High Utility",
-      "Medium Utility",
-      "Low Utility",
-    ],
+    options: ["Available", "High Utility", "Medium Utility", "Low Utility"],
     school: "Filter by School",
     schoolFilter: {
       fields: {
