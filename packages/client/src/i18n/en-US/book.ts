@@ -2,7 +2,7 @@ export default {
   loading: "Loading books",
   loadBooksButton: "Load books into database",
   noResult: "No books found",
-  columns: {
+  fields: {
     isbn: "ISBN Code",
     author: "Author",
     title: "Title",
@@ -45,4 +45,5 @@ export default {
   },
   cancel: "Cancel",
   add: "Add",
+  requiredField: "Please fill this field",
 };

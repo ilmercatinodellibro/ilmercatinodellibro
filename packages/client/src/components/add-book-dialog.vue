@@ -11,23 +11,20 @@
         <q-card-section class="q-col-gutter-sm q-pa-lg">
           <div v-for="(title, index) in titles" :key="title">
             <q-input
-              v-if="title !== $t('book.columns.subject')"
+              v-if="title !== $t('book.fields.subject')"
               v-model="newBook[index]"
               :label="title"
-              :rules="[
-                (val) =>
-                  (val !== undefined && val !== '') || 'Please fill this field',
-              ]"
-              :type="title === $t('book.columns.title') ? 'textarea' : 'text'"
+              :rules="[(val) => !!val || $t('book.requiredField')]"
+              :type="title === $t('book.fields.title') ? 'textarea' : 'text'"
               lazy-rules
               outlined
             />
             <q-select
               v-else
-              v-model="newBook[titles.indexOf($t('book.columns.subject'))]"
+              v-model="newBook[titles.indexOf($t('book.fields.subject'))]"
               :options="subjects"
-              :label="$t('book.columns.subject')"
-              :rules="[(val) => val !== undefined || 'Please select a subject']"
+              :label="$t('book.fields.subject')"
+              :rules="[(val) => !!val || $t('book.requiredField')]"
               lazy-rules
               outlined
             />
