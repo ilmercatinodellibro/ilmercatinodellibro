@@ -261,11 +261,9 @@ function onRequest(props: {
   pagination: {
     page: number;
     rowsPerPage: number;
-    descending: boolean;
   };
   filter?: string;
 }) {
-  const { page, rowsPerPage, descending } = props.pagination;
   const filter = props.filter;
 
   bookLoading.value = true;
@@ -284,9 +282,8 @@ function onRequest(props: {
         ...payload.data.books.rows,
       );
 
-      pagination.value.page = page;
-      pagination.value.rowsPerPage = rowsPerPage;
-      pagination.value.descending = descending;
+      pagination.value.page = props.pagination.page;
+      pagination.value.rowsPerPage = props.pagination.rowsPerPage;
       bookLoading.value = false;
     })
     .catch((error) => {
