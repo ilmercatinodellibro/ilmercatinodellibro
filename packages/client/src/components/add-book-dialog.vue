@@ -7,7 +7,7 @@
         </div>
       </q-card-section>
       <q-separator />
-      <q-form @submit="onDialogOK">
+      <q-form @submit="onDialogOK(newBook)">
         <q-card-section class="q-col-gutter-sm q-pa-lg">
           <div v-for="(title, index) in titles" :key="title">
             <q-input
