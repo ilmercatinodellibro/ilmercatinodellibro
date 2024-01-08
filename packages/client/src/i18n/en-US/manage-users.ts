@@ -41,5 +41,12 @@ export default {
     retrieveBtn: "Retrieve all the books in the list",
     searchHint: "Insert an ISBN code to add the book to the list",
   },
-  actions: "Azioni",
+  booksMovementsDialog: {
+    purchasedTitle: "Books purchased by {0} {1}",
+    soldTitle: "Books sold by {0} {1}",
+    purchasedAt: "Purchased at",
+    soldTo: "Sold to",
+    theVendor: "The vendor",
+  },
+  actions: "Actions",
 };

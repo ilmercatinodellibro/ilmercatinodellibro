@@ -46,5 +46,12 @@ export default {
     retrieveBtn: "Ritira tutti i libri nella lista",
     searchHint: "Inserisci un codice ISBN per aggiungere il libro alla lista",
   },
+  booksMovementsDialog: {
+    purchasedTitle: "Libri acquistati da {0} {1}",
+    soldTitle: "Libri venduti da {0} {1}",
+    purchasedAt: "Acquistato a",
+    soldTo: "Venduto a",
+    theVendor: "Il venditore",
+  },
   actions: "Azioni",
 };
