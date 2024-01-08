@@ -4,6 +4,8 @@ fragment User on User {
   lastname
   role
   email
+  phoneNumber
+  discount
 }
 
 query users {

@@ -97,19 +97,7 @@
             </q-td>
           </template>
           <template #body-cell-utility="{ value }">
-            <q-td>
-              <div class="cell-wrapper">
-                <q-chip
-                  square
-                  :ripple="false"
-                  :color="colorFromValue(value).color"
-                  :dark="colorFromValue(value).color !== 'yellow'"
-                  class="utility-chip"
-                >
-                  {{ $t(`book.utility.${colorFromValue(value).label}`) }}
-                </q-chip>
-              </div>
-            </q-td>
+            <utility-chip :value="value" />
           </template>
         </q-table>
       </q-card>
@@ -124,7 +112,8 @@ import { useI18n } from "vue-i18n";
 import { Book } from "src/@generated/graphql";
 import addBookDialog from "src/components/add-book-dialog.vue";
 import filterBySchoolDialogVue from "src/components/filter-by-school-dialog.vue";
-import { useFilters } from "src/composables/use-filter-translations";
+import utilityChip from "src/components/utility-chip.vue";
+import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { useBookService } from "src/services/book";
 import {
   capitalizeFirstLetter,
@@ -152,7 +141,16 @@ type BookSummary = Pick<
   | "title"
 >;
 
-const filterOptions = useFilters();
+enum BookFilters {
+  Available,
+  Sold,
+  Booked,
+  HighUtility,
+  MediumUtility,
+  LowUtility,
+}
+
+const filterOptions = useTranslatedFilters<BookFilters>("book.filters.options");
 
 //TODO: Add actual logic with server fetch
 const schoolFilterOptions = [
@@ -164,9 +162,6 @@ const subjects = ["Subject1", "Subject2"];
 
 const filters = ref<string[]>();
 const schoolFilters = ref<string[][]>();
-
-const UTILITY_LOW_THRESHOLD = 0.33;
-const UTILITY_HIGH_THRESHOLD = 0.66;
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -291,14 +286,6 @@ function onRequest(props: {
     });
 }
 
-function colorFromValue(value: string) {
-  return parseFloat(value) < UTILITY_LOW_THRESHOLD
-    ? { color: "red", label: "low" }
-    : parseFloat(value) < UTILITY_HIGH_THRESHOLD
-    ? { color: "yellow", label: "medium" }
-    : { color: "green", label: "high" };
-}
-
 function openSchoolFilterDialog() {
   Dialog.create({
     component: filterBySchoolDialogVue,
@@ -383,13 +370,6 @@ function openBookDialog() {
   font-size: 14px;
   line-height: 16px;
   user-select: none;
-}
-
-:deep(.cell-wrapper) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
 }
 
 :deep(.small-column) {

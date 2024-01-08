@@ -39,4 +39,7 @@ export default {
   cancel: "Annulla",
   add: "Aggiungi",
   requiredField: "Per favore compila questo campo",
+  conditions: "Condizioni",
+  code: "Codice",
+  originalCode: "Codice Originale",
 };

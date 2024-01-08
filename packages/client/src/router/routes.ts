@@ -117,6 +117,12 @@ const routes: RouteRecordRaw[] = [
         name: AvailableRouteNames.Catalog,
         component: () => import("src/pages/catalog.vue"),
       },
+      {
+        path: "users-management",
+        name: AvailableRouteNames.UserManagement,
+        beforeEnter: redirectIfNotAdmin,
+        component: () => import("src/pages/manage-users.vue"),
+      },
     ],
   },
 
