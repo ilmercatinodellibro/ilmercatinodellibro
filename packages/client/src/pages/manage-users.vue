@@ -181,7 +181,7 @@ import { Dialog, QTable, QTableColumn } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import EditUserBookedDialog from "src/components/manage-users/edit-user-booked-dialog.vue";
-import EditUserBooksDialog from "src/components/manage-users/edit-user-books-dialog.vue";
+import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
 import EditUserDetailsDialog from "src/components/manage-users/edit-user-details-dialog.vue";
 import EditUserStockdataDialog from "src/components/manage-users/edit-user-stockdata-dialog.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
@@ -426,7 +426,10 @@ function openCellEditDialog(
           // Only other two remaining cases, could be in 'default:' instead
           case "sold":
           case "purchased":
-            return { component: EditUserBooksDialog };
+            return {
+              component: EditUserBooksMovementsDialog,
+              componentProps: { userData, type: column.name },
+            };
 
           default:
             return {};
