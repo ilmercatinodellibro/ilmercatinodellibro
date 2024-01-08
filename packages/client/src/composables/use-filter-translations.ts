@@ -1,23 +1,13 @@
 import { computed } from "vue";
-import { useI18n } from "vue-i18n";
+import { MessageFunction, VueMessageType, useI18n } from "vue-i18n";
 
-enum filterValues {
-  Available,
-  Sold,
-  Booked,
-  HighUtility,
-  MediumUtility,
-  LowUtility,
-}
-
-export function useFilters() {
+export function useTranslatedFilters<T>(key: string) {
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const { tm, rt } = useI18n();
-  return computed(() => {
-    return tm("book.filters.options")
-      .map((filter) => rt(filter))
-      .map((filter, index) => {
-        return { key: index as filterValues, label: filter };
-      });
-  });
+  return computed(() =>
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    (tm(key) as VueMessageType[] | MessageFunction<VueMessageType>[]).map(
+      (filter, key) => ({ key: key as T, label: rt(filter) }),
+    ),
+  );
 }

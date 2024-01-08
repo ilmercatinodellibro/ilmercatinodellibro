@@ -43,6 +43,8 @@ model User {
   password      String
   firstname     String
   lastname      String
+  phoneNumber   String   @default("")
+  discount      Boolean  @default(false)
   emailVerified Boolean  @default(false)
   role          Role     @default(USER)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()

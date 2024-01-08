@@ -10,6 +10,7 @@ import book from "./book";
 import contacts from "./contacts";
 import events from "./events";
 import general from "./general";
+import manageUsers from "./manage-users";
 import network from "./network";
 import validators from "./validators";
 
@@ -43,6 +44,7 @@ export default {
   durations,
   events,
   general,
+  manageUsers,
   network,
   validators,
   feedbackType,
@@ -141,6 +143,8 @@ export default {
     [AvailableRouteNames.RolesAndPermissions]: "Roles And Permissions",
     [AvailableRouteNames.RegisterWithToken]: "Invite",
     [AvailableRouteNames.Login]: "Login",
+
+    [AvailableRouteNames.UserManagement]: "Users and Movements",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",

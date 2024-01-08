@@ -9,4 +9,5 @@ export enum AvailableRouteNames {
   RolesAndPermissions = "roles-and-permissions",
   RegisterWithToken = "invite",
   Login = "login",
+  UserManagement = "user-management",
 }
