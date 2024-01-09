@@ -10,7 +10,7 @@
           v-model="searchQuery"
           class="col full-width search-bar"
           outlined
-          :placeholder="$t('book.search')"
+          :placeholder="$t('common.search')"
           type="text"
         >
           <template #append> <q-icon name="mdi-magnify" /> </template>

@@ -1,6 +1,4 @@
 export default {
-  loading: "Loading books",
-  loadBooksButton: "Load books into database",
   noResult: "No books found",
   fields: {
     isbn: "ISBN Code",
@@ -12,7 +10,6 @@ export default {
     status: "Status",
     utility: "Utility",
   },
-  search: "Search",
   addBook: "Add a book",
   addBookDialog: "Add Book",
   filter: "Filter",
@@ -34,11 +31,7 @@ export default {
         address: "Address",
       },
     },
-    filterError: "Fill at least one field",
   },
-  cancel: "Cancel",
-  add: "Add",
-  requiredField: "Please fill this field",
 
   conditions: "Conditions",
   code: "Code",

@@ -1,6 +1,4 @@
 export default {
-  loading: "Caricamento libri",
-  loadBooksButton: "Carica libri nel database",
   noResult: "Nessun libro trovato",
   fields: {
     isbn: "Codice ISBN",
@@ -12,7 +10,6 @@ export default {
     status: "Stato",
     utility: "Utilità",
   },
-  search: "Cerca",
   addBook: "Aggiungi un libro",
   addBookDialog: "Aggiungi Libro",
   filter: "Filtra",
@@ -34,11 +31,7 @@ export default {
         address: "Indirizzo",
       },
     },
-    filterError: "Riempi almeno un campo",
   },
-  cancel: "Annulla",
-  add: "Aggiungi",
-  requiredField: "Per favore compila questo campo",
   conditions: "Condizioni",
   code: "Codice",
   originalCode: "Codice Originale",

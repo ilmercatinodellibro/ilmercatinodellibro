@@ -15,7 +15,7 @@
           :label="
             $t(
               `book.filters.schoolFilter.fields.${
-                index ? 'address' : 'school'
+                index === 0 ? 'address' : 'school'
               }`,
             )
           "
@@ -27,7 +27,7 @@
       </q-card-section>
       <q-separator />
       <q-card-actions align="right">
-        <q-btn :label="$t('book.cancel')" flat @click="onDialogCancel()" />
+        <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn
           :label="$t('book.filter')"
           flat
@@ -48,9 +48,7 @@ const props = defineProps<{
   selectedFilters: string[][] | undefined;
 }>();
 
-const newFilters = ref<string[][]>(
-  cloneDeep(props.selectedFilters) ?? Array<string[]>(),
-);
+const newFilters = ref(cloneDeep(props.selectedFilters) ?? ([] as string[][]));
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent();
