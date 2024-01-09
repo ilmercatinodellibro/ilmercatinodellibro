@@ -1,65 +1,69 @@
 <template>
   <q-page class="catalog-page">
-    <div class="loaded-wrapper">
-      <q-card class="catalog-wrapper">
-        <div class="catalog-header">
-          <q-input
-            v-model="searchQuery"
-            type="search"
-            class="search-bar"
-            bg-color="white"
-            outlined
-            :placeholder="$t('book.search')"
-          >
-            <template #append>
-              <q-icon name="mdi-magnify" />
-            </template>
-          </q-input>
-          <q-select
-            v-model="filters"
-            fit
-            :options="filterOptions.map((filter) => filter.key)"
-            class="search-filter"
-            bg-color="white"
-            outlined
-            multiple
-          >
-            <template #option="{ itemProps, opt, selected, toggleOption }">
-              <q-item v-bind="itemProps" class="non-selectable">
-                <q-item-section side top>
-                  <q-checkbox
-                    :model-value="selected"
-                    @update:model-value="toggleOption(opt)"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label> {{ filterOptions[opt]?.label }} </q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-            <template #after-options>
-              <q-item
-                clickable
-                class="non-selectable"
-                @click="openSchoolFilterDialog"
-              >
-                <q-item-section>
-                  {{ $t("book.filters.school") }}
-                </q-item-section>
-              </q-item>
-            </template>
-            <template #selected>
-              {{ $t("book.filter") }}
-            </template>
-          </q-select>
+    <q-card
+      class="absolute-full column no-wrap q-col-gutter-y-md q-ma-md q-pb-none q-px-none"
+    >
+      <q-card-section
+        class="col-auto flex-center no-wrap q-col-gutter-md q-pr-none row"
+      >
+        <q-input
+          v-model="searchQuery"
+          type="search"
+          class="col full-width search-bar"
+          outlined
+          :placeholder="$t('common.search')"
+        >
+          <template #append>
+            <q-icon name="mdi-magnify" />
+          </template>
+        </q-input>
+        <q-select
+          v-model="filters"
+          fit
+          :options="filterOptions.map(({ key }) => key)"
+          class="search-filter"
+          bg-color="white"
+          outlined
+          multiple
+        >
+          <template #option="{ itemProps, opt, selected, toggleOption }">
+            <q-item v-bind="itemProps">
+              <q-item-section side top>
+                <q-checkbox
+                  :model-value="selected"
+                  @update:model-value="toggleOption(opt)"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label> {{ filterOptions[opt]?.label }} </q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+          <template #after-options>
+            <q-item clickable @click="openSchoolFilterDialog">
+              <q-item-section>
+                {{ $t("book.filters.school") }}
+              </q-item-section>
+            </q-item>
+          </template>
+          <template #selected>
+            {{ $t("book.filter") }}
+          </template>
+        </q-select>
+
+        <q-space />
+        <q-item class="col col-shrink row">
           <q-btn
             :label="$t('book.addBook')"
-            class="add-book-btn q-mx-none"
+            class="q-ma-sm"
             color="secondary"
+            icon="mdi-plus"
             @click="openBookDialog"
           />
-        </div>
+        </q-item>
+      </q-card-section>
 
+      <q-card-section class="col flex q-pb-none q-px-none">
         <q-table
           ref="tableRef"
           v-model:pagination="pagination"
@@ -72,7 +76,7 @@
           row-key="isbn"
           square
           table-header-class="table-header"
-          class="book-table"
+          class="col"
           @request="onRequest"
         >
           <!-- TODO: add the right value checks for colors and icon -->
@@ -100,26 +104,23 @@
             <utility-chip :value="value" />
           </template>
         </q-table>
-      </q-card>
-    </div>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 
 <script lang="ts" setup>
-import { Dialog, QTable } from "quasar";
-import { ComputedRef, computed, onMounted, ref } from "vue";
+import { startCase, toLower } from "lodash-es";
+import { Dialog, QTable, QTableProps } from "quasar";
+import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Book } from "src/@generated/graphql";
-import addBookDialog from "src/components/add-book-dialog.vue";
-import filterBySchoolDialogVue from "src/components/filter-by-school-dialog.vue";
-import utilityChip from "src/components/utility-chip.vue";
+import AddBookDialog from "src/components/add-book-dialog.vue";
+import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
+import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { useBookService } from "src/services/book";
-import {
-  capitalizeFirstLetter,
-  formatISBN,
-  formatPrice,
-} from "../composables/use-misc-formats";
+import { formatPrice } from "../composables/use-misc-formats";
 const { t } = useI18n();
 
 const tableRef = ref<QTable>();
@@ -160,8 +161,8 @@ const schoolFilterOptions = [
 
 const subjects = ["Subject1", "Subject2"];
 
-const filters = ref<string[]>();
-const schoolFilters = ref<string[][]>();
+const filters = ref([]);
+const schoolFilters = ref([] as string[][]);
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -173,73 +174,74 @@ const { refetchBooks, booksPaginationDetails } = useBookService(
 
 const bookLoading = ref(false);
 
-const tableRows = ref<BookSummary[]>([]);
+const tableRows = ref([] as BookSummary[]);
 
-const columns: ComputedRef<{ name: string; label: string; field: string }[]> =
-  computed(() => [
-    {
-      name: "isbn",
-      label: t("book.fields.isbn"),
-      field: "isbnCode",
-      align: "left",
-      format: (value: string) => formatISBN(value),
-      classes: "small-column ellipsis",
-    },
-    {
-      name: "author",
-      label: t("book.fields.author"),
-      field: "authorsFullName",
-      align: "left",
-      format: (val: string) => capitalizeFirstLetter(val),
-      classes: "small-column ellipsis",
-    },
-    {
-      name: "publisher",
-      label: t("book.fields.publisher"),
-      field: "publisherName",
-      align: "left",
-      format: (val: string) => capitalizeFirstLetter(val),
-      classes: "small-column ellipsis",
-    },
-    {
-      name: "subject",
-      label: t("book.fields.subject"),
-      field: "subject",
-      align: "left",
-      format: (val: string) => capitalizeFirstLetter(val),
-      classes: "small-column ellipsis",
-    },
-    {
-      name: "title",
-      label: t("book.fields.title"),
-      field: "title",
-      align: "left",
-      format: (val: string) => capitalizeFirstLetter(val),
-      classes: "large-column ellipsis",
-    },
-    {
-      name: "price",
-      label: t("book.fields.price"),
-      field: "originalPrice",
-      align: "left",
-      format: (val: string) => formatPrice(val),
-    },
-    {
-      name: "status",
-      label: t("book.fields.status"),
-      //TODO: add the field name
-      field: "",
-      align: "left",
-    },
-    {
-      name: "utility",
-      label: t("book.fields.utility"),
-      //TODO: add the field name
-      field: "",
-      align: "left",
-      classes: "x-small-column",
-    },
-  ]);
+const columns = computed(
+  () =>
+    [
+      {
+        name: "isbn",
+        label: t("book.fields.isbn"),
+        field: "isbnCode",
+        align: "left",
+        classes: "col col-shrink ellipsis",
+      },
+      {
+        name: "author",
+        label: t("book.fields.author"),
+        field: "authorsFullName",
+        align: "left",
+        format: (val: string) => startCase(toLower(val)),
+        classes: "col col-shrink ellipsis",
+      },
+      {
+        name: "publisher",
+        label: t("book.fields.publisher"),
+        field: "publisherName",
+        align: "left",
+        format: (val: string) => startCase(toLower(val)),
+        classes: "col col-shrink ellipsis",
+      },
+      {
+        name: "subject",
+        label: t("book.fields.subject"),
+        field: "subject",
+        align: "left",
+        format: (val: string) => startCase(toLower(val)),
+        classes: "col col-shrink ellipsis",
+      },
+      {
+        name: "title",
+        label: t("book.fields.title"),
+        field: "title",
+        align: "left",
+        format: (val: string) => startCase(toLower(val)),
+        classes: "col col-grow ellipsis",
+      },
+      {
+        name: "price",
+        label: t("book.fields.price"),
+        field: "originalPrice",
+        align: "left",
+        format: (val: string) => formatPrice(val),
+      },
+      {
+        name: "status",
+        label: t("book.fields.status"),
+        //TODO: add the field name
+        field: "",
+        align: "left",
+      },
+      {
+        name: "utility",
+        label: t("book.fields.utility"),
+        //TODO: add the field name
+        field: "",
+        align: "left",
+        classes: "col",
+      },
+    ] satisfies QTableProps["columns"],
+);
 
 const pagination = ref({
   rowsPerPage: numberOfRows.value,
@@ -252,21 +254,13 @@ onMounted(() => {
   tableRef.value?.requestServerInteraction();
 });
 
-function onRequest(props: {
-  pagination: {
-    page: number;
-    rowsPerPage: number;
-  };
-  filter?: string;
-}) {
-  const filter = props.filter;
-
+const onRequest: QTable["onRequest"] = function (props) {
   bookLoading.value = true;
 
   refetchBooks({
     page: props.pagination.page - 1,
     rows: props.pagination.rowsPerPage,
-    filter: filter ?? "",
+    filter: searchQuery.value,
   })
     ?.then((payload) => {
       pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
@@ -284,11 +278,11 @@ function onRequest(props: {
     .catch((error) => {
       console.error("Couldn't fetch books: ", error);
     });
-}
+};
 
 function openSchoolFilterDialog() {
   Dialog.create({
-    component: filterBySchoolDialogVue,
+    component: FilterBySchoolDialog,
     componentProps: {
       filters: schoolFilterOptions,
       selectedFilters: schoolFilters.value,
@@ -300,11 +294,8 @@ function openSchoolFilterDialog() {
 
 function openBookDialog() {
   Dialog.create({
-    component: addBookDialog,
+    component: AddBookDialog,
     componentProps: {
-      titles: columns.value
-        .slice(0, columns.value.length - 2)
-        .map((element) => element.label),
       subjects,
     },
   }).onOk((payload: string[]) => {
@@ -314,55 +305,12 @@ function openBookDialog() {
 </script>
 
 <style scoped lang="scss">
-.catalog {
-  &-page {
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    height: calc(100vh - 64px);
-  }
-
-  &-header {
-    align-items: center;
-    display: flex;
-    gap: 16px;
-    padding: 16px;
-    width: 100%;
-  }
-
-  &-wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-  }
-}
-
-.loaded-wrapper {
-  width: 100%;
-  height: 100%;
-}
-
 .search-bar {
   max-width: 600px;
-  width: 100%;
-  height: 56px;
 }
 
 .search-filter {
   width: 200px;
-  height: 56px;
-}
-
-.book-table {
-  height: calc(100% - 92px);
-}
-
-.add-book-btn {
-  margin-right: 10px;
-  margin-left: auto;
-  height: min-content;
 }
 
 :deep(.utility-chip) {
@@ -370,20 +318,6 @@ function openBookDialog() {
   font-size: 14px;
   line-height: 16px;
   user-select: none;
-}
-
-:deep(.small-column) {
-  max-width: 160px;
-  overflow: hidden;
-}
-
-:deep(.large-column) {
-  max-width: 566px;
-  overflow: hidden;
-}
-
-:deep(.x-small-column) {
-  max-width: 90px;
 }
 
 :deep(thead) {
