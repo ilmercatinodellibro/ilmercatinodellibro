@@ -436,8 +436,8 @@ function openCellEditDialog(
         }
       })(),
     ).onOk((payload) => {
-      // eslint-disable-next-line no-console
-      console.log("Yo", payload);
+      //TODO: add functionalities if there are any, or remove this
+      payload;
     });
   }
 }

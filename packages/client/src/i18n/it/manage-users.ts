@@ -54,4 +54,7 @@ export default {
     theVendor: "Il venditore",
   },
   actions: "Azioni",
+  bookedBooksDialog: {
+    title: "Libri prenotati da {0} {1}",
+  },
 };
