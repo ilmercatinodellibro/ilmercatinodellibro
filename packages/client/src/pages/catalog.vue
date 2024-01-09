@@ -100,6 +100,7 @@
               </div>
             </q-td>
           </template>
+
           <template #body-cell-utility="{ value }">
             <utility-chip :value="value" />
           </template>
@@ -154,15 +155,15 @@ enum BookFilters {
 const filterOptions = useTranslatedFilters<BookFilters>("book.filters.options");
 
 //TODO: Add actual logic with server fetch
-const schoolFilterOptions = [
-  ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
-  ["Address0", "Address1", "Address2", "Address3", "Address4"],
-];
+const schoolFilterOptions = {
+  schoolCodes: ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
+  addresses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
+};
 
 const subjects = ["Subject1", "Subject2"];
 
 const filters = ref([]);
-const schoolFilters = ref([] as string[][]);
+const schoolFilters = ref({} as typeof schoolFilterOptions);
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -254,30 +255,25 @@ onMounted(() => {
   tableRef.value?.requestServerInteraction();
 });
 
-const onRequest: QTable["onRequest"] = function (props) {
+const onRequest: QTable["onRequest"] = async function (requestProps) {
   bookLoading.value = true;
 
-  refetchBooks({
-    page: props.pagination.page - 1,
-    rows: props.pagination.rowsPerPage,
+  const newBooks = await refetchBooks({
+    page: requestProps.pagination.page - 1,
+    rows: requestProps.pagination.rowsPerPage,
     filter: searchQuery.value,
-  })
-    ?.then((payload) => {
-      pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+  });
+  pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
-      tableRows.value.splice(
-        0,
-        tableRows.value.length,
-        ...payload.data.books.rows,
-      );
+  tableRows.value.splice(
+    0,
+    tableRows.value.length,
+    ...(newBooks?.data.books.rows ?? tableRows.value),
+  );
 
-      pagination.value.page = props.pagination.page;
-      pagination.value.rowsPerPage = props.pagination.rowsPerPage;
-      bookLoading.value = false;
-    })
-    .catch((error) => {
-      console.error("Couldn't fetch books: ", error);
-    });
+  pagination.value.page = requestProps.pagination.page;
+  pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
+  bookLoading.value = false;
 };
 
 function openSchoolFilterDialog() {
@@ -287,7 +283,7 @@ function openSchoolFilterDialog() {
       filters: schoolFilterOptions,
       selectedFilters: schoolFilters.value,
     },
-  }).onOk((payload: string[][]) => {
+  }).onOk((payload: typeof schoolFilterOptions) => {
     schoolFilters.value = payload;
   });
 }
@@ -311,13 +307,6 @@ function openBookDialog() {
 
 .search-filter {
   width: 200px;
-}
-
-:deep(.utility-chip) {
-  text-transform: uppercase;
-  font-size: 14px;
-  line-height: 16px;
-  user-select: none;
 }
 
 :deep(thead) {
