@@ -49,4 +49,7 @@ export default {
     theVendor: "The vendor",
   },
   actions: "Actions",
+  bookedBooksDialog: {
+    title: "Books reserved by {0} {1}",
+  },
 };
