@@ -52,6 +52,7 @@
             color="secondary"
             icon="mdi-plus"
             :label="$t('manageUsers.createUser')"
+            @click="addNewUser"
           />
         </q-item>
       </q-card-section>
@@ -180,6 +181,7 @@
 import { Dialog, QTable, QTableColumn } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
 import EditUserBookedDialog from "src/components/manage-users/edit-user-booked-dialog.vue";
 import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
 import EditUserDetailsDialog from "src/components/manage-users/edit-user-details-dialog.vue";
@@ -353,6 +355,15 @@ onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
 
+function addNewUser() {
+  Dialog.create({
+    component: AddNewUserDialog,
+  }).onOk((payload) => {
+    // TODO: add new user
+    payload;
+  });
+}
+
 const onRequest: QTable["onRequest"] = async function (requestProps) {
   loading.value = true;
 
@@ -422,7 +433,10 @@ function openCellEditDialog(
               componentProps: { userData },
             };
           case "booked":
-            return { component: EditUserBookedDialog };
+            return {
+              component: EditUserBookedDialog,
+              componentProps: { userData },
+            };
           // Only other two remaining cases, could be in 'default:' instead
           case "sold":
           case "purchased":
