@@ -41,5 +41,5 @@ export default {
   conditions: "Condizioni",
   code: "Codice",
   originalCode: "Codice Originale",
-  returned: "Reso",
+  return: "Reso",
 };

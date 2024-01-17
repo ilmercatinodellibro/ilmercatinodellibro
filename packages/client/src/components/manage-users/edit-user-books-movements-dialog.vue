@@ -73,7 +73,7 @@
             <q-td class="text-center">
               <q-btn
                 class="min-height-none q-chip--dense q-chip--square"
-                :label="$t('book.returned')"
+                :label="$t('book.return')"
                 color="primary"
                 @click="
                   openActionsDialog(
@@ -159,6 +159,7 @@ const soldColumns = computed(
         field: "originalCode",
         name: "originalCode",
         align: "left",
+        format: (val: string) => (val === "" ? "/" : val),
       },
       {
         label: t("book.fields.author"),
