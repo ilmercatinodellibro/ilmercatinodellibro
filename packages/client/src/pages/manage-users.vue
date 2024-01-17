@@ -3,9 +3,7 @@
     <q-card
       class="absolute-full column no-wrap q-col-gutter-y-md q-ma-md q-pb-none q-px-none"
     >
-      <q-card-section
-        class="col-auto flex-center no-wrap q-col-gutter-md q-pr-none row"
-      >
+      <q-card-section class="flex-center no-wrap q-col-gutter-md q-pr-none row">
         <q-input
           v-model="searchQuery"
           class="col full-width search-bar"
@@ -92,10 +90,10 @@
               :info="columnTooltip.inStock"
             />
           </template>
-          <template #body-cell-inStock="{ col, row, rowIndex, value }">
+          <template #body-cell-inStock="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, rowIndex, value, col)"
+              @click="openCellEditDialog(row, value, col)"
             />
           </template>
 
@@ -105,10 +103,10 @@
               :info="columnTooltip.sold"
             />
           </template>
-          <template #body-cell-sold="{ col, row, rowIndex, value }">
+          <template #body-cell-sold="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, rowIndex, value, col)"
+              @click="openCellEditDialog(row, value, col)"
             />
           </template>
 
@@ -118,10 +116,10 @@
               :info="columnTooltip.booked"
             />
           </template>
-          <template #body-cell-booked="{ col, row, rowIndex, value }">
+          <template #body-cell-booked="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, rowIndex, value, col)"
+              @click="openCellEditDialog(row, value, col)"
             />
           </template>
 
@@ -131,10 +129,10 @@
               :info="columnTooltip.purchased"
             />
           </template>
-          <template #body-cell-purchased="{ col, row, rowIndex, value }">
+          <template #body-cell-purchased="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, rowIndex, value, col)"
+              @click="openCellEditDialog(row, value, col)"
             />
           </template>
 
@@ -406,20 +404,19 @@ function openEdit(
     newPassword: string;
     confirmPassword: string;
   },
-  userIndex: number,
+  rowIndex: number,
 ) {
   Dialog.create({
     component: EditUserDetailsDialog,
     componentProps: { userData },
   }).onOk((payload: { user: UserFragment; password?: string }) => {
     // TODO: add server call to update user data
-    rawRows.value[userIndex] = payload.user;
+    rawRows.value[rowIndex] = payload.user;
   });
 }
 
 function openCellEditDialog(
   userData: UserFragment,
-  rowIndex: number,
   value: number,
   column: QTableColumn,
 ) {
@@ -449,10 +446,7 @@ function openCellEditDialog(
             return {};
         }
       })(),
-    ).onOk((payload) => {
-      //TODO: add functionalities if there are any, or remove this
-      payload;
-    });
+    );
   }
 }
 

@@ -52,6 +52,8 @@ export default {
     purchasedAt: "Acquistato a",
     soldTo: "Venduto a",
     theVendor: "Il venditore",
+    reportProblem: "Segnala problema",
+    solveProblem: "Risolvi problema",
   },
   actions: "Azioni",
   bookedBooksDialog: {

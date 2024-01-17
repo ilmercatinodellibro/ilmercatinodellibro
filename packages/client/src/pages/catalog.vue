@@ -72,17 +72,15 @@
           :loading="bookLoading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           :rows="tableRows"
-          binary-state-sort
           row-key="isbn"
           square
-          table-header-class="table-header"
           class="col"
           @request="onRequest"
         >
           <!-- TODO: add the right value checks for colors and icon -->
           <template #body-cell-status="{ value }">
             <q-td>
-              <div class="cell-wrapper">
+              <div class="flex flex-center no-wrap q-col-gutter-md">
                 <q-icon
                   :name="value ? 'mdi-check-circle' : 'mdi-cancel'"
                   :color="value ? 'green' : 'red'"
@@ -102,7 +100,9 @@
           </template>
 
           <template #body-cell-utility="{ value }">
-            <utility-chip :value="value" />
+            <q-td class="flex flex-center text-center">
+              <utility-chip :value="value" />
+            </q-td>
           </template>
         </q-table>
       </q-card-section>
@@ -115,12 +115,12 @@ import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableProps } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { Book } from "src/@generated/graphql";
 import AddBookDialog from "src/components/add-book-dialog.vue";
 import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { useBookService } from "src/services/book";
+import { BookSummary } from "src/services/book.service";
 import { formatPrice } from "../composables/use-misc-formats";
 const { t } = useI18n();
 
@@ -129,19 +129,7 @@ const tableRef = ref<QTable>();
 const currentPage = ref(0);
 const numberOfRows = ref(100);
 
-const searchQuery = ref<string>("");
-
-type BookSummary = Pick<
-  Book,
-  | "__typename"
-  | "authorsFullName"
-  | "id"
-  | "isbnCode"
-  | "originalPrice"
-  | "publisherName"
-  | "subject"
-  | "title"
->;
+const searchQuery = ref("");
 
 enum BookFilters {
   Available,
@@ -160,10 +148,8 @@ const schoolFilterOptions = {
   addresses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
 };
 
-const subjects = ["Subject1", "Subject2"];
-
 const filters = ref([]);
-const schoolFilters = ref({} as typeof schoolFilterOptions);
+const schoolFilters = ref<typeof schoolFilterOptions>();
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -175,7 +161,7 @@ const { refetchBooks, booksPaginationDetails } = useBookService(
 
 const bookLoading = ref(false);
 
-const tableRows = ref([] as BookSummary[]);
+const tableRows = ref<BookSummary[]>([]);
 
 const columns = computed(
   () =>
@@ -238,7 +224,7 @@ const columns = computed(
         label: t("book.fields.utility"),
         //TODO: add the field name
         field: "",
-        align: "left",
+        align: "center",
         classes: "col",
       },
     ] satisfies QTableProps["columns"],
@@ -248,7 +234,6 @@ const pagination = ref({
   rowsPerPage: numberOfRows.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
   page: currentPage.value,
-  descending: false,
 });
 
 onMounted(() => {
@@ -291,9 +276,6 @@ function openSchoolFilterDialog() {
 function openBookDialog() {
   Dialog.create({
     component: AddBookDialog,
-    componentProps: {
-      subjects,
-    },
   }).onOk((payload: string[]) => {
     payload; // TODO: Load the new book in the database with the data passed from the dialog
   });
