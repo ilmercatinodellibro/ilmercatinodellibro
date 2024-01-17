@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
+  <q-dialog ref="dialogRef" @hide="onDialogHide">
     <q-card class="dialog-wrapper">
       <q-card-section>
         <div class="text-h6">
@@ -15,8 +15,8 @@
       <q-separator />
 
       <q-card-section class="q-pa-none">
-        <dialog-table :columns="columns"
-      /></q-card-section>
+        <dialog-table :columns="columns" />
+      </q-card-section>
       <q-card-actions align="right">
         <q-btn flat :label="$t('common.close')" @click="onDialogOK(userData)" />
       </q-card-actions>

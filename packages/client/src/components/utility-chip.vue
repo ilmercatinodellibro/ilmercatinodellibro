@@ -4,7 +4,8 @@
     :ripple="false"
     :color="colorFromValue(value ?? 0).color"
     :dark="colorFromValue(value ?? 0).color !== 'yellow'"
-    class="line-height-16 text-size-14 utility-chip"
+    class="line-height-16 text-size-14 text-weight-medium utility-chip"
+    dense
   >
     {{ $t(`book.utility.${colorFromValue(value ?? 0).label}`) }}
   </q-chip>
@@ -18,7 +19,12 @@ defineProps<{
   value?: number;
 }>();
 
-function colorFromValue(value: number) {
+interface ColorChipData {
+  color: "red" | "yellow" | "green";
+  label: "low" | "medium" | "high";
+}
+
+function colorFromValue(value: number): ColorChipData {
   return value < UTILITY_LOW_THRESHOLD
     ? { color: "red", label: "low" }
     : value < UTILITY_HIGH_THRESHOLD

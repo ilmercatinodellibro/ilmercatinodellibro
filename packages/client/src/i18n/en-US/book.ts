@@ -32,8 +32,14 @@ export default {
       },
     },
   },
+  deleteBookDialog: {
+    title: "Delete copy from the Database",
+    message:
+      "You're permanently deleting this copy from the database and you will be losing all the data tied to it. Do you wish to proceed?",
+  },
 
   conditions: "Conditions",
   code: "Code",
   originalCode: "Original Code",
+  returned: "Returned",
 };

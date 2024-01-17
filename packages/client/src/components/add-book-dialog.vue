@@ -81,9 +81,7 @@ defineEmits({
   ...useDialogPluginComponent.emitsObject,
 });
 
-defineProps<{
-  subjects: string[];
-}>();
+const subjects = ["Subject1", "Subject2"];
 
 const newBook = ref({} as Book);
 </script>

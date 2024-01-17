@@ -24,7 +24,7 @@ export default {
     purchased:
       "The number of paper copies of one or more titles that the user has already purchased",
     available:
-      "The number of titles currently available within those requested by the user",
+      "The number of titles currently available among those requested by the user",
   },
   payOff: "Pay off user",
   filters: ["With Available", "With Booked", "With Purchased", "With Sold"],
@@ -47,6 +47,8 @@ export default {
     purchasedAt: "Purchased at",
     soldTo: "Sold to",
     theVendor: "The vendor",
+    reportProblem: "Report problem",
+    solveProblem: "Solve problem",
   },
   actions: "Actions",
   bookedBooksDialog: {
