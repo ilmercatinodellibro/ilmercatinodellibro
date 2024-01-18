@@ -1,12 +1,10 @@
 <template>
   <q-page>
-    <q-card
-      class="absolute-full column no-wrap q-col-gutter-y-md q-ma-md q-pb-none q-px-none"
-    >
-      <q-card-section class="flex-center no-wrap q-col-gutter-md q-pr-none row">
+    <q-card class="absolute-full column gap-16 no-wrap q-ma-md">
+      <q-card-section class="flex-center gap-16 no-wrap row">
         <q-input
           v-model="searchQuery"
-          class="col full-width search-bar"
+          class="col search-bar"
           outlined
           :placeholder="$t('common.search')"
           type="text"
@@ -16,7 +14,7 @@
 
         <q-select
           v-model="filters"
-          class="col filters-menu full-width"
+          class="filters-menu"
           multiple
           outlined
           :options="options.map(({ key }) => key)"
@@ -44,7 +42,7 @@
 
         <q-space />
 
-        <q-item class="col col-shrink row">
+        <span class="col">
           <q-btn
             class="q-ma-sm"
             color="secondary"
@@ -52,10 +50,10 @@
             :label="$t('manageUsers.createUser')"
             @click="addNewUser"
           />
-        </q-item>
+        </span>
       </q-card-section>
 
-      <q-card-section class="col flex q-pb-none q-px-none">
+      <q-card-section class="col no-wrap q-pa-none row">
         <q-table
           ref="tableRef"
           v-model:pagination="pagination"
@@ -93,7 +91,7 @@
           <template #body-cell-inStock="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, value, col)"
+              @click="openCellEditDialog(row, col)"
             />
           </template>
 
@@ -106,7 +104,7 @@
           <template #body-cell-sold="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, value, col)"
+              @click="openCellEditDialog(row, col)"
             />
           </template>
 
@@ -119,7 +117,7 @@
           <template #body-cell-requested="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, value, col)"
+              @click="openCellEditDialog(row, col)"
             />
           </template>
 
@@ -132,7 +130,7 @@
           <template #body-cell-purchased="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, value, col)"
+              @click="openCellEditDialog(row, col)"
             />
           </template>
 
@@ -161,8 +159,9 @@
 
           <template #body-cell-payOff="{ value }">
             <q-td class="text-left">
+              <!-- This button has the same aspect of a q-chip -->
               <q-btn
-                color="primary q-ma-sm q-py-none q-px-sm"
+                color="primary min-height-none q-chip--dense q-chip--square"
                 dense
                 :label="$t('manageUsers.payOff')"
                 @click="openPayOff(value)"
@@ -415,38 +414,27 @@ function openEdit(
   });
 }
 
-function openCellEditDialog(
-  userData: UserFragment,
-  value: number,
-  column: QTableColumn,
-) {
-  if (value > 0) {
-    Dialog.create(
-      (() => {
-        switch (column.name) {
-          case "inStock":
-            return {
-              component: EditUserStockdataDialog,
-              componentProps: { userData },
-            };
-          case "requested":
-            return {
-              component: EditUserRequestedDialog,
-              componentProps: { userData },
-            };
-          // Only other two remaining cases, could be in 'default:' instead
-          case "sold":
-          case "purchased":
-            return {
-              component: EditUserBooksMovementsDialog,
-              componentProps: { userData, type: column.name },
-            };
-
-          default:
-            return {};
-        }
-      })(),
-    );
+function openCellEditDialog(userData: UserFragment, column: QTableColumn) {
+  switch (column.name) {
+    case "inStock":
+      Dialog.create({
+        component: EditUserStockdataDialog,
+        componentProps: { userData },
+      });
+      break;
+    case "requested":
+      Dialog.create({
+        component: EditUserRequestedDialog,
+        componentProps: { userData },
+      });
+      break;
+    // Only other two remaining cases, could be in 'default:' instead
+    case "sold":
+    case "purchased":
+      Dialog.create({
+        component: EditUserBooksMovementsDialog,
+        componentProps: { userData, type: column.name },
+      });
   }
 }
 
@@ -464,6 +452,9 @@ function updateTable() {
   max-width: 200px;
 }
 
+// This is the suggested way from Quasar docs; simply adding
+// the css to the element doesn't work and there is no table
+// property to make the thead sticky otherwise
 :deep(thead) {
   position: sticky;
   z-index: 1;

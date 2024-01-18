@@ -1,6 +1,7 @@
+<!-- FIXME: add complete structure once the new mockup has been approved -->
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <q-card class="dialog-wrapper">
+    <q-card>
       <q-card-section>
         <div class="text-h6">
           {{
@@ -33,6 +34,8 @@ import DialogTable from "./dialog-table.vue";
 
 const { t } = useI18n();
 
+// FIXME: add columns, rows and rest of the logic
+//  once the new mockup has been approved
 const columns = computed(() => [
   {
     label: t(""),

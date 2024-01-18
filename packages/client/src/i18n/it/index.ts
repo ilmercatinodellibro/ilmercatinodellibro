@@ -148,7 +148,7 @@ export default {
     [AvailableRouteNames.RolesAndPermissions]: "Ruoli e autorizzazioni",
     [AvailableRouteNames.RegisterWithToken]: "Invitare",
     [AvailableRouteNames.Login]: "Login",
-    [AvailableRouteNames.UserManagement]: "Utenti e Movimenti",
+    [AvailableRouteNames.UsersManagement]: "Utenti e Movimenti",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",

@@ -40,7 +40,7 @@
         <q-tab-panels v-model="tab" animated class="col column no-wrap">
           <q-tab-panel name="in-retrieval" class="col column no-wrap q-pa-none">
             <div class="items-center justify-between q-pa-md row">
-              <div class="items-center no-wrap q-gutter-md row">
+              <div class="gap-16 items-center no-wrap row">
                 <q-input
                   v-model="inRetrievalSearchQuery"
                   type="search"
@@ -74,7 +74,7 @@
             >
               <template #body-cell-status="{ value }">
                 <q-td>
-                  <div class="flex flex-center no-wrap q-col-gutter-md">
+                  <div class="flex-center gap-16 no-wrap row">
                     <q-icon
                       :name="value ? 'mdi-check-circle' : 'mdi-cancel'"
                       :color="value ? 'green' : 'red'"
@@ -83,9 +83,8 @@
                     <span>
                       {{
                         $t(
-                          `book.availability.${
-                            value ? "available" : "notAvailable"
-                          }`,
+                          "book.availability." +
+                            (value ? "available" : "notAvailable"),
                         )
                       }}
                     </span>
@@ -93,24 +92,31 @@
                 </q-td>
               </template>
               <template #body-cell-utility="{ value }">
-                <q-td class="flex flex-center text-center">
+                <q-td class="flex-center row text-center">
                   <utility-chip :value="value" />
                 </q-td>
               </template>
               <template #body-cell-actions="{ value }">
                 <q-td class="text-center">
+                  <!-- This button has the same aspect of a q-chip -->
                   <q-btn
                     color="secondary"
                     no-wrap
-                    class="min-height-none q-chip--dense q-chip--square"
+                    class="min-height-none q-chip--dense q-chip--square row"
                     @click="() => deleteBookDialog(value)"
                   >
                     <q-item-label> {{ $t("common.delete") }} </q-item-label>
                     <q-icon
+                      class="q-ml-sm"
                       name="mdi-information-outline"
                       size="18px"
-                      class="q-ml-xs"
-                    />
+                    >
+                      <q-tooltip>
+                        {{
+                          $t("manageUsers.inStockDialog.deleteBookBtnTooltip")
+                        }}
+                      </q-tooltip>
+                    </q-icon>
                   </q-btn>
                 </q-td>
               </template>
@@ -123,10 +129,10 @@
                 v-model="retrievedSearchQuery"
                 type="search"
                 outlined
-                class="col col-shrink search-bar"
+                class="col-shrink search-bar"
                 :placeholder="$t('manageUsers.inStockDialog.searchHint')"
               />
-              <q-item class="col col-shrink items-center row">
+              <q-item class="col-shrink items-center row">
                 <q-btn
                   color="secondary"
                   icon="mdi-plus"
@@ -146,7 +152,7 @@
             >
               <template #body-cell-status="{ value }">
                 <q-td>
-                  <div class="flex flex-center no-wrap q-col-gutter-md">
+                  <div class="flex-center gap-16 no-wrap row">
                     <q-icon
                       :name="value ? 'mdi-check-circle' : 'mdi-cancel'"
                       :color="value ? 'green' : 'red'"
@@ -155,9 +161,8 @@
                     <span>
                       {{
                         $t(
-                          `book.availability.${
-                            value ? "available" : "notAvailable"
-                          }`,
+                          "book.availability." +
+                            (value ? "available" : "notAvailable"),
                         )
                       }}
                     </span>
@@ -165,7 +170,7 @@
                 </q-td>
               </template>
               <template #body-cell-utility="{ value }">
-                <q-td class="flex flex-center text-center">
+                <q-td class="flex-center row text-center">
                   <utility-chip :value="value" />
                 </q-td>
               </template>
@@ -194,7 +199,7 @@ import { Dialog, QTable, QTableProps, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useBookService } from "src/services/book";
-import { BookSummary } from "src/services/book.service";
+import { BookSummaryFragment } from "src/services/book-copy.graphql";
 import { UserFragment } from "src/services/user.graphql";
 import AddBookDialog from "../add-book-dialog.vue";
 import UtilityChip from "../utility-chip.vue";
@@ -235,8 +240,8 @@ const tab = ref("in-retrieval");
 const inRetrievalLoading = ref(false);
 const retrievedLoading = ref(false);
 
-const inRetrievalRows = ref<BookSummary[]>([]);
-const retrievedRows = ref<BookSummary[]>([]);
+const inRetrievalRows = ref<BookSummaryFragment[]>([]);
+const retrievedRows = ref<BookSummaryFragment[]>([]);
 
 const inRetrievalPagination = ref({
   rowsPerPage: inRetrievalRowsPerPage.value,
@@ -249,7 +254,7 @@ const retrievedPagination = ref({
   page: retrievedCurrentPage.value,
 });
 
-// TODO: fill all the missing fields from the columns
+// FIXME: fill all the missing fields from the columns
 const inRetrievalColumns = computed(
   () =>
     [
@@ -468,7 +473,7 @@ function addBookDialog() {
   Dialog.create({
     component: AddBookDialog,
   }).onOk((payload: string[]) => {
-    payload; // TODO: Load the new book in the database with the data passed from the dialog
+    payload; // FIXME: Load the new book in the database with the data passed from the dialog
   });
 }
 
@@ -481,7 +486,7 @@ function retrieveAllBooks() {
   });
 }
 
-function deleteBookDialog(book: BookSummary) {
+function deleteBookDialog(book: BookSummaryFragment) {
   Dialog.create({
     title: t("book.deleteBookDialog.title"),
     message: t("book.deleteBookDialog.message"),
@@ -489,7 +494,7 @@ function deleteBookDialog(book: BookSummary) {
     ok: t("common.delete"),
     persistent: true,
   }).onOk(() => {
-    // TODO: Add the instructions for book deletion
+    // FIXME: Add the instructions for book deletion
     book;
   });
 }
@@ -502,12 +507,5 @@ defineEmits(useDialogPluginComponent.emitsObject);
 <style scoped lang="scss">
 .search-bar {
   width: 420px;
-}
-
-:deep(.cell-wrapper) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
 }
 </style>

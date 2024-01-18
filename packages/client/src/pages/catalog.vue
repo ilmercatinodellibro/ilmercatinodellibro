@@ -1,15 +1,11 @@
 <template>
-  <q-page class="catalog-page">
-    <q-card
-      class="absolute-full column no-wrap q-col-gutter-y-md q-ma-md q-pb-none q-px-none"
-    >
-      <q-card-section
-        class="col-auto flex-center no-wrap q-col-gutter-md q-pr-none row"
-      >
+  <q-page>
+    <q-card class="absolute-full column gap-16 no-wrap q-ma-md">
+      <q-card-section class="flex-center gap-16 no-wrap row">
         <q-input
           v-model="searchQuery"
           type="search"
-          class="col full-width search-bar"
+          class="col search-bar"
           outlined
           :placeholder="$t('common.search')"
         >
@@ -52,7 +48,7 @@
         </q-select>
 
         <q-space />
-        <q-item class="col col-shrink row">
+        <span class="col">
           <q-btn
             :label="$t('book.addBook')"
             class="q-ma-sm"
@@ -60,10 +56,10 @@
             icon="mdi-plus"
             @click="openBookDialog"
           />
-        </q-item>
+        </span>
       </q-card-section>
 
-      <q-card-section class="col flex q-pb-none q-px-none">
+      <q-card-section class="col no-wrap q-pa-none row">
         <q-table
           ref="tableRef"
           v-model:pagination="pagination"
@@ -77,10 +73,10 @@
           class="col"
           @request="onRequest"
         >
-          <!-- TODO: add the right value checks for colors and icon -->
+          <!-- FIXME: add the right value checks for colors and icon -->
           <template #body-cell-status="{ value }">
             <q-td>
-              <div class="flex flex-center no-wrap q-col-gutter-md">
+              <div class="flex-center gap-16 no-wrap row">
                 <q-icon
                   :name="value ? 'mdi-check-circle' : 'mdi-cancel'"
                   :color="value ? 'green' : 'red'"
@@ -89,9 +85,8 @@
                 <span>
                   {{
                     $t(
-                      `book.availability.${
-                        value ? "available" : "notAvailable"
-                      }`,
+                      "book.availability." +
+                        (value ? "available" : "notAvailable"),
                     )
                   }}
                 </span>
@@ -100,7 +95,7 @@
           </template>
 
           <template #body-cell-utility="{ value }">
-            <q-td class="flex flex-center text-center">
+            <q-td class="flex-center row text-center">
               <utility-chip :value="value" />
             </q-td>
           </template>
@@ -119,8 +114,9 @@ import AddBookDialog from "src/components/add-book-dialog.vue";
 import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { SchoolFilters } from "src/models/book";
 import { useBookService } from "src/services/book";
-import { BookSummary } from "src/services/book.service";
+import { BookSummaryFragment } from "src/services/book-copy.graphql";
 import { formatPrice } from "../composables/use-misc-formats";
 const { t } = useI18n();
 
@@ -142,14 +138,17 @@ enum BookFilters {
 
 const filterOptions = useTranslatedFilters<BookFilters>("book.filters.options");
 
-//TODO: Add actual logic with server fetch
-const schoolFilterOptions = {
+//FIXME: Add actual logic with server fetch
+const schoolFilterOptions: SchoolFilters = {
   schoolCodes: ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
   addresses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
 };
 
 const filters = ref([]);
-const schoolFilters = ref<typeof schoolFilterOptions>();
+const schoolFilters = ref<SchoolFilters>({
+  schoolCodes: [],
+  addresses: [],
+} satisfies SchoolFilters);
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -161,7 +160,7 @@ const { refetchBooks, booksPaginationDetails } = useBookService(
 
 const bookLoading = ref(false);
 
-const tableRows = ref<BookSummary[]>([]);
+const tableRows = ref<BookSummaryFragment[]>([]);
 
 const columns = computed(
   () =>
@@ -215,14 +214,14 @@ const columns = computed(
       {
         name: "status",
         label: t("book.fields.status"),
-        //TODO: add the field name
+        //FIXME: add the field name
         field: "",
         align: "left",
       },
       {
         name: "utility",
         label: t("book.fields.utility"),
-        //TODO: add the field name
+        //FIXME: add the field name
         field: "",
         align: "center",
         classes: "col",
@@ -268,7 +267,7 @@ function openSchoolFilterDialog() {
       filters: schoolFilterOptions,
       selectedFilters: schoolFilters.value,
     },
-  }).onOk((payload: typeof schoolFilterOptions) => {
+  }).onOk((payload: SchoolFilters) => {
     schoolFilters.value = payload;
   });
 }
@@ -277,7 +276,7 @@ function openBookDialog() {
   Dialog.create({
     component: AddBookDialog,
   }).onOk((payload: string[]) => {
-    payload; // TODO: Load the new book in the database with the data passed from the dialog
+    payload; // FIXME: Load the new book in the database with the data passed from the dialog
   });
 }
 </script>
@@ -291,6 +290,9 @@ function openBookDialog() {
   width: 200px;
 }
 
+// This is the suggested way from Quasar docs; simply adding
+// the css to the element doesn't work and there is no table
+// property to make the thead sticky otherwise
 :deep(thead) {
   position: sticky;
   z-index: 1;

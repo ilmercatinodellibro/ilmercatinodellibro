@@ -45,6 +45,7 @@ export default {
       "Include le copie ancora presenti in magazzino, non disperse, non prenotate",
     retrieveBtn: "Ritira tutti i libri nella lista",
     searchHint: "Inserisci un codice ISBN per aggiungere il libro alla lista",
+    deleteBookBtnTooltip: "Elimina definitivamente questa copia dal database",
   },
   booksMovementsDialog: {
     purchasedTitle: "Libri acquistati da {0} {1}",

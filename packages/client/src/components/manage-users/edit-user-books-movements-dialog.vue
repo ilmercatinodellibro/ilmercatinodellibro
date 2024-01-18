@@ -1,21 +1,15 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <q-card class="column dialog-wrapper no-wrap q-pa-none">
-      <q-card-section class="col">
+    <q-card class="col column no-wrap q-pa-none">
+      <q-card-section>
         <div class="text-h6">
-          {{
-            $t(
-              "manageUsers.booksMovementsDialog." +
-                (type === "sold" ? "soldTitle" : "purchasedTitle"),
-              [userData.firstname, userData.lastname],
-            )
-          }}
+          {{ $t(titlePath, [userData.firstname, userData.lastname]) }}
         </div>
       </q-card-section>
 
       <q-separator />
 
-      <q-card-section class="col column no-wrap q-pb-none q-px-none">
+      <q-card-section class="col column no-wrap q-pa-none">
         <dialog-table
           v-if="type === 'sold'"
           :columns="soldColumns"
@@ -26,6 +20,7 @@
         >
           <template #body-cell-problems="{ value }">
             <q-td class="text-center">
+              <!-- This button has the same aspect of a q-chip -->
               <q-btn
                 class="min-height-none q-chip--dense q-chip--square"
                 :label="
@@ -39,7 +34,7 @@
                 @click="
                   openProblemDialog(
                     value,
-                  ) /* TODO: Add actual logic for history button */
+                  ) /* FIXME: Add actual logic for history button */
                 "
               />
             </q-td>
@@ -54,7 +49,7 @@
                 @click="
                   openHistoryDialog(
                     value,
-                  ) /* TODO: Add actual logic for history button */
+                  ) /* FIXME: Add actual logic for history button */
                 "
               />
             </q-td>
@@ -71,6 +66,7 @@
         >
           <template #body-cell-actions="{ value }">
             <q-td class="text-center">
+              <!-- This button has the same aspect of a q-chip -->
               <q-btn
                 class="min-height-none q-chip--dense q-chip--square"
                 :label="$t('book.return')"
@@ -78,7 +74,7 @@
                 @click="
                   openActionsDialog(
                     value,
-                  ) /* TODO: Add actual logic for actions button*/
+                  ) /* FIXME: Add actual logic for actions button*/
                 "
               />
             </q-td>
@@ -99,8 +95,14 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
 import { useBookService } from "src/services/book";
-import { BookSummary } from "src/services/book.service";
+import { BookSummaryFragment } from "src/services/book-copy.graphql";
 import DialogTable from "./dialog-table.vue";
+
+const titlePath = computed(
+  () =>
+    "manageUsers.booksMovementsDialog." +
+    (props.type === "sold" ? "soldTitle" : "purchasedTitle"),
+);
 
 const currentSoldPage = ref(0);
 const currentPurchasedPage = ref(0);
@@ -133,12 +135,12 @@ const purchasedPagination = ref({
 
 const { t } = useI18n();
 
-defineProps<{
+const props = defineProps<{
   type: "sold" | "purchased";
   userData: User;
 }>();
 
-//TODO: Insert missing field names
+//FIXME: Insert missing field names
 const soldColumns = computed(
   () =>
     [
@@ -292,8 +294,8 @@ const purchasedColumns = computed(
     ] satisfies QTableProps["columns"],
 );
 
-const purchasedRows = ref<BookSummary[]>([]);
-const soldRows = ref<BookSummary[]>([]);
+const purchasedRows = ref<BookSummaryFragment[]>([]);
+const soldRows = ref<BookSummaryFragment[]>([]);
 
 const onSoldRequest: QTable["onRequest"] = async function (requestProps) {
   soldLoading.value = true;
@@ -338,17 +340,17 @@ const onPurchasedRequest: QTable["onRequest"] = async function (requestProps) {
 };
 
 function openProblemDialog(value: unknown) {
-  // TODO: add logic
+  // FIXME: add logic
   value;
 }
 
 function openHistoryDialog(value: unknown) {
-  // TODO: add logic
+  // FIXME: add logic
   value;
 }
 
 function openActionsDialog(value: unknown) {
-  // TODO: add logic
+  // FIXME: add logic
   value;
 }
 
@@ -356,9 +358,3 @@ const { dialogRef, onDialogOK, onDialogHide } = useDialogPluginComponent();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 </script>
-
-<style scoped lang="scss">
-.dialog-wrapper {
-  max-width: 100% !important;
-}
-</style>

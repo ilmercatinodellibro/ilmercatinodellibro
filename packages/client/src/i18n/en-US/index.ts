@@ -144,7 +144,7 @@ export default {
     [AvailableRouteNames.RegisterWithToken]: "Invite",
     [AvailableRouteNames.Login]: "Login",
 
-    [AvailableRouteNames.UserManagement]: "Users and Movements",
+    [AvailableRouteNames.UsersManagement]: "Users and Movements",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",

@@ -119,7 +119,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: "users-management",
-        name: AvailableRouteNames.UserManagement,
+        name: AvailableRouteNames.UsersManagement,
         beforeEnter: redirectIfNotAdmin,
         component: () => import("src/pages/manage-users.vue"),
       },

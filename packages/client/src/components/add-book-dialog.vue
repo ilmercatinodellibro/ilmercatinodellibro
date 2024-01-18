@@ -7,7 +7,7 @@
       @save="onDialogOK(newBook)"
       @cancel="onDialogCancel"
     >
-      <q-card-section class="q-gutter-md">
+      <q-card-section class="column gap-16">
         <q-input
           v-model="newBook.isbnCode"
           :label="$t('book.fields.isbn')"
@@ -56,7 +56,7 @@
         <q-input
           v-model="newBook.originalPrice"
           :label="$t('book.fields.price')"
-          :rules="[requiredRule]"
+          :rules="[requiredRule, greaterThanZeroRule]"
           type="text"
           lazy-rules
           outlined
@@ -69,9 +69,9 @@
 
 <script setup lang="ts">
 import { useDialogPluginComponent } from "quasar";
-import { ref } from "vue";
-import { Book } from "src/@generated/graphql";
-import { requiredRule } from "src/helpers/rules";
+import { reactive } from "vue";
+import { greaterThanZeroRule, requiredRule } from "src/helpers/rules";
+import { BookDetailsFragment } from "src/services/book.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
@@ -83,7 +83,14 @@ defineEmits({
 
 const subjects = ["Subject1", "Subject2"];
 
-const newBook = ref({} as Book);
+const newBook = reactive<Omit<BookDetailsFragment, "id">>({
+  authorsFullName: "",
+  isbnCode: "",
+  originalPrice: 0,
+  publisherName: "",
+  subject: "",
+  title: "",
+});
 </script>
 
 <style scoped lang="scss">

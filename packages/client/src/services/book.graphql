@@ -1,15 +1,19 @@
+fragment BookDetails on Book {
+  id
+  isbnCode
+  subject
+  authorsFullName
+  title
+  originalPrice
+  publisherName
+}
+
 query getBooks($page: Int!, $rows: Int!, $filter: String) {
   books(page: $page, rows: $rows, filter: $filter) {
     filter
     page
     rows {
-      id
-      isbnCode
-      subject
-      authorsFullName
-      title
-      originalPrice
-      publisherName
+      ...BookDetails
     }
     rowsCount
   }

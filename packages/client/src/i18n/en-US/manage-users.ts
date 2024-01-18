@@ -40,6 +40,7 @@ export default {
       "Includes the copies that are still present in stock, not lost, not requested",
     retrieveBtn: "Retrieve all the books in the list",
     searchHint: "Insert an ISBN code to add the book to the list",
+    deleteBookBtnTooltip: "Delete permanently this copy from the database",
   },
   booksMovementsDialog: {
     purchasedTitle: "Books purchased by {0} {1}",
