@@ -60,6 +60,7 @@
                 class="col col-shrink"
                 color="primary"
                 :label="$t('manageUsers.inStockDialog.retrieveBtn')"
+                @click="retrieveAllBooks"
               />
             </div>
 
@@ -198,6 +199,7 @@ import { UserFragment } from "src/services/user.graphql";
 import AddBookDialog from "../add-book-dialog.vue";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
+import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
 
 const inRetrievalCurrentPage = ref(0);
 const retrievedCurrentPage = ref(0);
@@ -467,6 +469,15 @@ function addBookDialog() {
     component: AddBookDialog,
   }).onOk((payload: string[]) => {
     payload; // TODO: Load the new book in the database with the data passed from the dialog
+  });
+}
+
+function retrieveAllBooks() {
+  Dialog.create({
+    component: RetrieveAllBooksDialog,
+  }).onOk((payload) => {
+    // FIXME: add the logic for the retrieval of all books
+    payload;
   });
 }
 
