@@ -32,18 +32,25 @@
 
 <script setup lang="ts">
 import { useDialogPluginComponent } from "quasar";
-import { ref } from "vue";
+import { reactive } from "vue";
+import { SchoolFilters } from "src/models/book";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 const props = defineProps<{
-  filters: { schoolCodes: string[]; addresses: string[] };
-  selectedFilters?: { schoolCodes: string[]; addresses: string[] };
+  filters: SchoolFilters;
+  selectedFilters?: SchoolFilters;
 }>();
 
-const newFilters = ref(props.selectedFilters ?? ({} as typeof props.filters));
+const newFilters = reactive<SchoolFilters>(
+  props.selectedFilters ??
+    ({
+      schoolCodes: [],
+      addresses: [],
+    } satisfies SchoolFilters),
+);
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
-  useDialogPluginComponent();
+  useDialogPluginComponent<SchoolFilters>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 </script>

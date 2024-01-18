@@ -5,7 +5,6 @@ fragment BookSummary on Book {
   authorsFullName
   title
   publisherName
-  retailLocationId
 }
 
 fragment BookCopiesSummary on BookCopy {
@@ -14,6 +13,7 @@ fragment BookCopiesSummary on BookCopy {
   updatedById
   book {
     ...BookSummary
+    retailLocationId
   }
   returnedAt
   returnedById

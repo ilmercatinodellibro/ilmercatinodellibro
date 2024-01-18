@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <q-card class="col-auto">
+    <q-card>
       <q-card-section class="text-h6 text-primary">
         {{ $t("book.retrieveBooksDialog.title") }}
       </q-card-section>

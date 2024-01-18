@@ -10,11 +10,7 @@
     :columns="columns"
     :filter="searchQuery"
     :loading="loading"
-    :hide-pagination="
-      pagination
-        ? (pagination.rowsNumber ?? 0) < (pagination.rowsPerPage ?? 1)
-        : true
-    "
+    :hide-pagination="hidePagination"
     @request="onRequest"
     @update:pagination="$emit('update:pagination', $event)"
   >
@@ -26,7 +22,7 @@
 
 <script setup lang="ts">
 import { QTable, QTableProps } from "quasar";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 type Slots = QTable["$slots"];
 
@@ -34,7 +30,13 @@ const tableRef = ref<QTable>();
 
 const slots = defineSlots<Slots>();
 
-defineProps<
+const hidePagination = computed(() =>
+  props.pagination
+    ? (props.pagination.rowsNumber ?? 0) < (props.pagination.rowsPerPage ?? 1)
+    : true,
+);
+
+const props = defineProps<
   {
     searchQuery?: string;
   } & Pick<
@@ -67,6 +69,9 @@ defineEmits({
 </script>
 
 <style scoped lang="scss">
+// This is the suggested way from Quasar docs; simply adding
+// the css to the element doesn't work and there is no table
+// property to make the thead sticky otherwise
 :deep(thead) {
   position: sticky;
   z-index: 1;

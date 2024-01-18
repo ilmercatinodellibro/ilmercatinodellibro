@@ -4,10 +4,6 @@
       :title="$t('manageUsers.editUser.title')"
       :submit-label="$t('common.save')"
       size="sm"
-      autocorrect="off"
-      autocapitalize="off"
-      autocomplete="off"
-      spellcheck="false"
       @submit="
         onDialogOK({
           user: newUserData.user,
@@ -16,7 +12,7 @@
       "
       @cancel="onDialogCancel"
     >
-      <q-card-section class="q-gutter-md">
+      <q-card-section class="gap-16">
         <q-input
           v-model="newUserData.user.firstname"
           :label="$t('manageUsers.fields.firstName')"
@@ -51,13 +47,11 @@
           :rules="[newUserData.newPassword ? validatePasswordRule : () => true]"
           :type="hidePassword ? 'password' : 'text'"
           outlined
-          autocomplete="off"
         >
           <template #append>
             <q-icon
               :name="hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
               class="cursor-pointer"
-              autocomplete="off"
               @click="hidePassword = !hidePassword"
             />
           </template>
@@ -73,7 +67,6 @@
           ]"
           :type="hideConfirm ? 'password' : 'text'"
           outlined
-          autocomplete="off"
         >
           <template #append>
             <q-icon
