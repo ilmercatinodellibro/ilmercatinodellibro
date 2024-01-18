@@ -4,7 +4,7 @@
       <q-card-section>
         <div class="text-h6">
           {{
-            $t("manageUsers.bookedBooksDialog.title", [
+            $t("manageUsers.requestedBooksDialog.title", [
               userData.firstname,
               userData.lastname,
             ])

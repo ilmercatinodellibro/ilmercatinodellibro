@@ -9,7 +9,7 @@ export default {
     phoneNumber: "Telefono",
     inStock: "In Magazzino",
     sold: "Venduti",
-    booked: "Prenotati",
+    requested: "Prenotati",
     purchased: "Acquistati",
     available: "Disponibili",
     creationDate: "Data di Creazione",
@@ -19,7 +19,7 @@ export default {
     inStock:
       "Il numero di copie cartacee di uno o più titoli che l'utente ha consegnato e che si trovano attualmente in magazzino",
     sold: "Il numero di copie cartacee di uno o più titoli che l'utente ha già venduto",
-    booked:
+    requested:
       "Il numero di copie cartacee di uno o più titoli che l'utente ha prenotato e che non ha ancora acquistato",
     purchased:
       "Il numero di copie cartacee di uno o più titoli che l'utente ha già acquistato",
@@ -56,7 +56,7 @@ export default {
     solveProblem: "Risolvi problema",
   },
   actions: "Azioni",
-  bookedBooksDialog: {
+  requestedBooksDialog: {
     title: "Libri prenotati da {0} {1}",
   },
 };

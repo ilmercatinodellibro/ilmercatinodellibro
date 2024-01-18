@@ -1,17 +1,6 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <q-card
-      class="col column no-wrap"
-      :class="
-        (
-          tab === 'retrieved'
-            ? retrievedRows.length > 10
-            : inRetrievalRows.length > 10
-        )
-          ? 'full-height'
-          : ''
-      "
-    >
+    <q-card class="col column full-height no-wrap">
       <q-card-section>
         <div class="text-h6 text-primary">
           {{

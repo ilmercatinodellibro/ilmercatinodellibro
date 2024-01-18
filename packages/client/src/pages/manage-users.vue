@@ -110,13 +110,13 @@
             />
           </template>
 
-          <template #header-cell-booked="{ col }">
+          <template #header-cell-requested="{ col }">
             <table-header-with-info
               :label="col.label"
-              :info="columnTooltip.booked"
+              :info="columnTooltip.requested"
             />
           </template>
-          <template #body-cell-booked="{ col, row, value }">
+          <template #body-cell-requested="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
               @click="openCellEditDialog(row, value, col)"
@@ -180,9 +180,9 @@ import { Dialog, QTable, QTableColumn } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
-import EditUserBookedDialog from "src/components/manage-users/edit-user-booked-dialog.vue";
 import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
 import EditUserDetailsDialog from "src/components/manage-users/edit-user-details-dialog.vue";
+import EditUserRequestedDialog from "src/components/manage-users/edit-user-requested-dialog.vue";
 import EditUserStockdataDialog from "src/components/manage-users/edit-user-stockdata-dialog.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
@@ -200,7 +200,7 @@ const filters = ref([]) as Ref<string[]>;
 
 enum UserFilters {
   withAvailable,
-  withBooked,
+  withRequested,
   withPurchased,
   withSold,
 }
@@ -210,7 +210,7 @@ const options = useTranslatedFilters<UserFilters>("manageUsers.filters");
 const columnTooltip = computed(() => ({
   inStock: t("manageUsers.toolTips.inStock"),
   sold: t("manageUsers.toolTips.sold"),
-  booked: t("manageUsers.toolTips.booked"),
+  requested: t("manageUsers.toolTips.requested"),
   purchased: t("manageUsers.toolTips.purchased"),
   available: t("manageUsers.toolTips.available"),
 }));
@@ -268,9 +268,9 @@ const columns = computed(
         classes: "ellipsis",
       },
       {
-        name: "booked",
-        field: "booked",
-        label: t("manageUsers.fields.booked"),
+        name: "requested",
+        field: "requested",
+        label: t("manageUsers.fields.requested"),
         headerClasses: "ellipsis",
         align: "left",
         classes: "ellipsis",
@@ -334,7 +334,7 @@ const rows = computed(() =>
     phoneNumber: Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
     inStock: index % 2,
     purchased: index % 3,
-    booked: index % 4,
+    requested: index % 4,
     sold: index % 5,
     available: (index + 1) % 2,
     creationDate: new Date()
@@ -429,9 +429,9 @@ function openCellEditDialog(
               component: EditUserStockdataDialog,
               componentProps: { userData },
             };
-          case "booked":
+          case "requested":
             return {
-              component: EditUserBookedDialog,
+              component: EditUserRequestedDialog,
               componentProps: { userData },
             };
           // Only other two remaining cases, could be in 'default:' instead
