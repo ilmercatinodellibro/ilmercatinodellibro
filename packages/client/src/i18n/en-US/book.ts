@@ -42,4 +42,13 @@ export default {
   code: "Code",
   originalCode: "Original Code",
   return: "Return",
+  retrieveBooksDialog: {
+    title: "Retrieve all the books in the list",
+    message:
+      "The books in the list will be added to the digital stock of Mercatino del Libro and the identifier code of the physical copy will be assigned to each of them. Do you wish to proceed?",
+    retrieveBooksBtn: "Retrieve the books",
+    tooltip:
+      "Insert the books into the digital stock and print the label stickers with the identifier codes to put onto the physical copies.",
+    retrieveAndPrint: "Retrieve the books and print the label stickers", // TODO: Ask what is the best wording
+  },
 };

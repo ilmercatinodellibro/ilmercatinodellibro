@@ -42,4 +42,13 @@ export default {
   code: "Codice",
   originalCode: "Codice Originale",
   return: "Reso",
+  retrieveBooksDialog: {
+    title: "Ritira tutti i libri nella lista",
+    message:
+      "I libri nella lista saranno aggiunti al magazzino digitale del Mercatino del Libro e verrà assegnato a ciascuno di loro il codice identificativo della copia cartacea. Vuoi procedere?",
+    retrieveBooksBtn: "Ritira i libri",
+    tooltip:
+      "Inserisci i libri nel magazzino digitale e stampa le etichette con i codici identificativi da apporre sulle copie cartacee.",
+    retrieveAndPrint: "Ritira i libri e stampa etichette",
+  },
 };
