@@ -134,7 +134,7 @@ const searchQuery = ref("");
 enum BookFilters {
   Available,
   Sold,
-  Booked,
+  Requested,
   HighUtility,
   MediumUtility,
   LowUtility,
