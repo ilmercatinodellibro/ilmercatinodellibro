@@ -191,12 +191,12 @@ import { UserFragment, useUsersQuery } from "src/services/user.graphql";
 
 const { loading, users, refetch } = useUsersQuery();
 
-const tableRef = ref() as Ref<QTable>;
+const tableRef = ref<QTable>();
 
 const { t, locale } = useI18n();
 
 const searchQuery = ref("");
-const filters = ref([]) as Ref<string[]>;
+const filters = ref<string[]>([]);
 
 enum UserFilters {
   withAvailable,
@@ -350,7 +350,7 @@ const rows = computed(() =>
 );
 
 onMounted(() => {
-  tableRef.value.requestServerInteraction();
+  updateTable();
 });
 
 function addNewUser() {
@@ -451,7 +451,7 @@ function openCellEditDialog(
 }
 
 function updateTable() {
-  tableRef.value.requestServerInteraction();
+  tableRef.value?.requestServerInteraction();
 }
 </script>
 
