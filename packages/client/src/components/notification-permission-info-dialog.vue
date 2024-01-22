@@ -1,6 +1,7 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
+      show-save-button
       size="sm"
       :title="t('pushNotifications.permissionDialog.title')"
       :save-label="t('pushNotifications.permissionDialog.allow')"

@@ -14,6 +14,7 @@
           @click="emit('cancel')"
         />
         <q-btn
+          v-if="showSaveButton"
           flat
           :label="saveLabel ?? t('common.confirm')"
           @click="emit('save')"
@@ -34,6 +35,7 @@ withDefaults(
   defineProps<
     CommonDialogProps & {
       saveLabel?: string;
+      showSaveButton?: boolean;
     }
   >(),
   {
@@ -41,6 +43,7 @@ withDefaults(
     size: "md",
     noActions: false,
     saveLabel: undefined,
+    showSaveButton: false,
   },
 );
 
