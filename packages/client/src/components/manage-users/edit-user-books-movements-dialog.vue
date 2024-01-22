@@ -3,7 +3,7 @@
     <k-dialog-card
       :title="$t(titlePath, [userData.firstname, userData.lastname])"
       :cancel-label="$t('common.close')"
-      @cancel="onDialogOK(userData)"
+      @cancel="onDialogCancel"
     >
       <q-card-section class="col column no-wrap q-pa-none">
         <dialog-table
@@ -86,11 +86,11 @@ import { QDialog, QTable, QTableProps, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
+import KDialogCard from "src/components/k-dialog-card.vue";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
-
 const titlePath = computed(
   () =>
     "manageUsers.booksMovementsDialog." +
@@ -347,7 +347,7 @@ function openActionsDialog(value: unknown) {
   value;
 }
 
-const { dialogRef, onDialogOK, onDialogHide } = useDialogPluginComponent();
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 </script>
