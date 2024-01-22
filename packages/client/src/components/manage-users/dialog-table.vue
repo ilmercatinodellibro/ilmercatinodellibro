@@ -3,7 +3,6 @@
     ref="tableRef"
     :pagination="pagination"
     :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
-    class="col"
     flat
     square
     :rows="rows"

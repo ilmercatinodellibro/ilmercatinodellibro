@@ -1,11 +1,12 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
-      :title="$t(titlePath, [userData.firstname, userData.lastname])"
+      size="lg"
       :cancel-label="$t('common.close')"
+      :title="$t(titlePath, [userData.firstname, userData.lastname])"
       @cancel="onDialogCancel"
     >
-      <q-card-section class="col column no-wrap q-pa-none">
+      <q-card-section class="q-pa-none">
         <dialog-table
           v-if="type === 'sold'"
           :columns="soldColumns"

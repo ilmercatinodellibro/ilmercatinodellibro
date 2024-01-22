@@ -1,20 +1,17 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <q-card class="col column full-height no-wrap">
-      <q-card-section>
-        <div class="text-h6 text-primary">
-          {{
-            $t("manageUsers.inStockDialog.title", [
-              userData.firstname,
-              userData.lastname,
-            ])
-          }}
-        </div>
-      </q-card-section>
-
-      <q-separator />
-
-      <q-card-section class="col column no-wrap q-pa-none">
+    <k-dialog-card
+      size="lg"
+      :cancel-label="$t('common.close')"
+      :title="
+        $t('manageUsers.inStockDialog.title', [
+          userData.firstname,
+          userData.lastname,
+        ])
+      "
+      @cancel="onDialogCancel"
+    >
+      <q-card-section class="q-pa-none">
         <q-tabs v-model="tab" inline-label active-color="secondary">
           <q-tab
             name="in-retrieval"
@@ -37,8 +34,8 @@
           </q-tab>
         </q-tabs>
 
-        <q-tab-panels v-model="tab" animated class="col column no-wrap">
-          <q-tab-panel name="in-retrieval" class="col column no-wrap q-pa-none">
+        <q-tab-panels v-model="tab" animated>
+          <q-tab-panel name="in-retrieval" class="column no-wrap q-pa-none">
             <div class="items-center justify-between q-pa-md row">
               <div class="gap-16 items-center no-wrap row">
                 <q-input
@@ -123,7 +120,7 @@
             </dialog-table>
           </q-tab-panel>
 
-          <q-tab-panel name="retrieved" class="col column no-wrap q-pa-none">
+          <q-tab-panel name="retrieved" class="column no-wrap q-pa-none">
             <div class="items-center q-pa-md row">
               <q-input
                 v-model="retrievedSearchQuery"
@@ -178,18 +175,7 @@
           </q-tab-panel>
         </q-tab-panels>
       </q-card-section>
-
-      <q-separator />
-
-      <q-card-actions align="right" class="bg-white">
-        <q-btn
-          color="white"
-          flat
-          :label="$t('common.close')"
-          @click="onDialogCancel"
-        />
-      </q-card-actions>
-    </q-card>
+    </k-dialog-card>
   </q-dialog>
 </template>
 
@@ -202,6 +188,7 @@ import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { UserFragment } from "src/services/user.graphql";
 import AddBookDialog from "../add-book-dialog.vue";
+import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
 import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
