@@ -1,14 +1,10 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <q-card class="col column no-wrap q-pa-none">
-      <q-card-section>
-        <div class="text-h6">
-          {{ $t(titlePath, [userData.firstname, userData.lastname]) }}
-        </div>
-      </q-card-section>
-
-      <q-separator />
-
+    <k-dialog-card
+      :title="$t(titlePath, [userData.firstname, userData.lastname])"
+      :cancel-label="$t('common.close')"
+      @cancel="onDialogOK(userData)"
+    >
       <q-card-section class="col column no-wrap q-pa-none">
         <dialog-table
           v-if="type === 'sold'"
@@ -81,11 +77,7 @@
           </template>
         </dialog-table>
       </q-card-section>
-
-      <q-card-actions align="right">
-        <q-btn flat :label="$t('common.close')" @click="onDialogOK(userData)" />
-      </q-card-actions>
-    </q-card>
+    </k-dialog-card>
   </q-dialog>
 </template>
 
@@ -96,6 +88,7 @@ import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book-copy.graphql";
+import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 
 const titlePath = computed(
