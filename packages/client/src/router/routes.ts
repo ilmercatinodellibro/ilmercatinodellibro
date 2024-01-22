@@ -5,6 +5,7 @@ import {
   redirectIfAuthenticated,
   redirectIfGuest,
   redirectIfNotAdmin,
+  redirectIfNotOperatorOrAdmin,
   useAuthService,
 } from "src/services/auth";
 
@@ -120,7 +121,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: "users-management",
         name: AvailableRouteNames.UsersManagement,
-        beforeEnter: redirectIfNotAdmin,
+        beforeEnter: redirectIfNotOperatorOrAdmin,
         component: () => import("src/pages/manage-users.vue"),
       },
     ],

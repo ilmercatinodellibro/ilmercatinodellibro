@@ -2,7 +2,7 @@
   <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="$t('manageUsers.editUser.title')"
-      :submit-label="$t('common.save')"
+      :submit-label="$t('common.confirm')"
       size="sm"
       @submit="
         onDialogOK({
@@ -76,6 +76,11 @@
             />
           </template>
         </q-input>
+        <q-checkbox
+          v-model="newUserData.discount"
+          :disable="useAuthService().user.value?.role !== 'ADMIN'"
+          :label="$t('manageUsers.editUser.discount')"
+        />
       </q-card-section>
     </k-dialog-form-card>
   </q-dialog>
@@ -91,6 +96,7 @@ import {
   requiredRule,
   validatePasswordRule,
 } from "src/helpers/rules";
+import { useAuthService } from "src/services/auth";
 import { UserFragment } from "src/services/user.graphql";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
@@ -102,6 +108,7 @@ const newUserData = ref({
   user: cloneDeep(props.userData),
   newPassword: "",
   confirmPassword: "",
+  discount: false,
 });
 const hidePassword = ref(true);
 const hideConfirm = ref(true);

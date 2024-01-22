@@ -272,3 +272,11 @@ export const redirectIfNotAdmin: NavigationGuard = () => {
     return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
   }
 };
+
+export const redirectIfNotOperatorOrAdmin: NavigationGuard = () => {
+  const { user } = useAuthService();
+
+  if (user.value?.role !== "OPERATOR" && user.value?.role !== "ADMIN") {
+    return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
+  }
+};
