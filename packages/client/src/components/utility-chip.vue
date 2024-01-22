@@ -7,7 +7,7 @@
     class="line-height-16 text-size-14 text-weight-medium utility-chip"
     dense
   >
-    {{ $t("book.utility." + colorFromValue(value ?? 0).label) }}
+    {{ $t(`book.utility.${colorFromValue(value ?? 0).label}`) }}
   </q-chip>
 </template>
 

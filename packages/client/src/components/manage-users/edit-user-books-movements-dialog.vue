@@ -87,7 +87,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
 import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book-copy.graphql";
+import { BookSummaryFragment } from "src/services/book.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 

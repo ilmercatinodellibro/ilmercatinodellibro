@@ -71,19 +71,17 @@
 import { useDialogPluginComponent } from "quasar";
 import { reactive } from "vue";
 import { greaterThanZeroRule, requiredRule } from "src/helpers/rules";
-import { BookDetailsFragment } from "src/services/book.graphql";
+import { BookSummaryFragment } from "src/services/book.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
   useDialogPluginComponent();
 
-defineEmits({
-  ...useDialogPluginComponent.emitsObject,
-});
+defineEmits(useDialogPluginComponent.emitsObject);
 
 const subjects = ["Subject1", "Subject2"];
 
-const newBook = reactive<Omit<BookDetailsFragment, "id">>({
+const newBook = reactive<Omit<BookSummaryFragment, "id">>({
   authorsFullName: "",
   isbnCode: "",
   originalPrice: 0,
