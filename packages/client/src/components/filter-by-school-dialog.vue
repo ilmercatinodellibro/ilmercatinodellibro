@@ -2,9 +2,9 @@
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
       :title="$t('book.filters.school')"
-      :save-label="$t('book.filter')"
+      :submit-label="$t('book.filter')"
       size="sm"
-      @save="onDialogOK(newFilters)"
+      @submit="onDialogOK(newFilters)"
       @cancel="onDialogCancel"
     >
       <q-card-section class="q-gutter-md">
