@@ -20,8 +20,8 @@ const defaultTheme: Theme = {
   // save it then in that case we cannot use getCssVar since it will
   // simply give back the newly set variables.
   colors: {
-    primary: "#263238",
-    secondary: "#76e1a7",
+    primary: "#798aa8",
+    secondary: "#c2664d",
     accent: "#ffdc27",
   },
   logo: "/ilmercatinodellibro-logo-dark-background.svg",
