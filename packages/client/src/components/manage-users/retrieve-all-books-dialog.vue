@@ -7,14 +7,14 @@
 
       <template #card-actions>
         <q-btn
-          outlined
+          outline
           no-wrap
           :label="$t('book.retrieveBooksDialog.retrieveBooksBtn')"
           @click="onDialogOK(false)"
         />
         <q-space />
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
-        <q-btn no-wrap color="accent" @click="onDialogOK(true)">
+        <q-btn no-wrap color="primary" @click="onDialogOK(true)">
           <q-item-label>
             <q-icon name="mdi-information-outline" class="q-mr-sm" size="18px">
               <q-tooltip>

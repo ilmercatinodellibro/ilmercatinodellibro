@@ -22,6 +22,14 @@
           outlined
           multiple
         >
+          <template v-if="filters.length === 0" #selected>
+            {{ $t("book.filter") }}
+          </template>
+
+          <template v-else #selected>
+            {{ selectedFiltersToString }}
+          </template>
+
           <template #option="{ itemProps, opt, selected, toggleOption }">
             <q-item v-bind="itemProps">
               <q-item-section side top>
@@ -35,15 +43,13 @@
               </q-item-section>
             </q-item>
           </template>
+
           <template #after-options>
             <q-item clickable @click="openSchoolFilterDialog">
               <q-item-section>
                 {{ $t("book.filters.school") }}
               </q-item-section>
             </q-item>
-          </template>
-          <template #selected>
-            {{ $t("book.filter") }}
           </template>
         </q-select>
 
@@ -144,11 +150,15 @@ const schoolFilterOptions: SchoolFilters = {
   addresses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
 };
 
-const filters = ref([]);
+const filters = ref<BookFilters[]>([]);
 const schoolFilters = ref<SchoolFilters>({
   schoolCodes: [],
   addresses: [],
 } satisfies SchoolFilters);
+
+const selectedFiltersToString = computed(() =>
+  filters.value.map((key) => filterOptions.value[key]?.label).join(", "),
+);
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
