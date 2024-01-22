@@ -116,7 +116,7 @@ import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { SchoolFilters } from "src/models/book";
 import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book-copy.graphql";
+import { BookSummaryFragment } from "src/services/book.graphql";
 import { formatPrice } from "../composables/use-misc-formats";
 const { t } = useI18n();
 

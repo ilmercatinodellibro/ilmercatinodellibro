@@ -109,7 +109,7 @@ const hideConfirm = ref(true);
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
 
-defineEmits({ ...useDialogPluginComponent.emitsObject });
+defineEmits(useDialogPluginComponent.emitsObject);
 </script>
 
 <style scoped lang="scss">

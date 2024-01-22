@@ -1,4 +1,4 @@
-fragment BookDetails on Book {
+fragment BookSummary on Book {
   id
   isbnCode
   subject
@@ -13,7 +13,7 @@ query getBooks($page: Int!, $rows: Int!, $filter: String) {
     filter
     page
     rows {
-      ...BookDetails
+      ...BookSummary
     }
     rowsCount
   }

@@ -49,6 +49,6 @@ export default {
     retrieveBooksBtn: "Retrieve the books",
     tooltip:
       "Insert the books into the digital stock and print the label stickers with the identifier codes to put onto the physical copies.",
-    retrieveAndPrint: "Retrieve books and print labels", // TODO: Ask what is the best wording
+    retrieveAndPrint: "Retrieve books and print labels",
   },
 };

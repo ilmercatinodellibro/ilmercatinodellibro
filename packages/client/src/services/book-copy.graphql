@@ -1,12 +1,3 @@
-fragment BookSummary on Book {
-  id
-  isbnCode
-  subject
-  authorsFullName
-  title
-  publisherName
-}
-
 fragment BookCopiesSummary on BookCopy {
   id
   updatedAt

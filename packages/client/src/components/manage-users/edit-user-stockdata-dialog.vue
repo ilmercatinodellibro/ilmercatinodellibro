@@ -199,7 +199,7 @@ import { Dialog, QTable, QTableProps, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book-copy.graphql";
+import { BookSummaryFragment } from "src/services/book.graphql";
 import { UserFragment } from "src/services/user.graphql";
 import AddBookDialog from "../add-book-dialog.vue";
 import UtilityChip from "../utility-chip.vue";
