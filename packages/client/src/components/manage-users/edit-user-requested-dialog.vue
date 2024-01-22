@@ -1,27 +1,21 @@
 <!-- FIXME: add complete structure once the new mockup has been approved -->
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <q-card>
-      <q-card-section>
-        <div class="text-h6">
-          {{
-            $t("manageUsers.requestedBooksDialog.title", [
-              userData.firstname,
-              userData.lastname,
-            ])
-          }}
-        </div>
-      </q-card-section>
-
-      <q-separator />
-
+    <k-dialog-card
+      size="lg"
+      :cancel-label="$t('common.close')"
+      :title="
+        $t('manageUsers.requestedBooksDialog.title', [
+          userData.firstname,
+          userData.lastname,
+        ])
+      "
+      @cancel="onDialogCancel"
+    >
       <q-card-section class="q-pa-none">
         <dialog-table :columns="columns" />
       </q-card-section>
-      <q-card-actions align="right">
-        <q-btn flat :label="$t('common.close')" @click="onDialogOK(userData)" />
-      </q-card-actions>
-    </q-card>
+    </k-dialog-card>
   </q-dialog>
 </template>
 
@@ -30,6 +24,7 @@ import { QDialog, useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
+import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 
 const { t } = useI18n();
@@ -48,7 +43,7 @@ defineProps<{
   userData: User;
 }>();
 
-const { dialogRef, onDialogOK, onDialogHide } = useDialogPluginComponent();
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 </script>
