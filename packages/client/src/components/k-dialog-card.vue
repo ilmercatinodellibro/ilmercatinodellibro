@@ -1,11 +1,16 @@
 <template>
   <q-card :class="`size--${size}`" class="mobile-responsive-dialog">
-    <q-card-section class="bg-primary text-h6 text-white">
+    <q-card-section class="bg-white text-h6 text-primary">
       <slot name="title">
         {{ title }}
       </slot>
     </q-card-section>
+
+    <q-separator />
     <slot />
+
+    <q-separator />
+
     <q-card-actions v-if="!noActions" align="right">
       <slot name="card-actions">
         <q-btn

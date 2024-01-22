@@ -18,10 +18,15 @@
           multiple
           outlined
           :options="options.map(({ key }) => key)"
-          :on-update:model-value="updateTable"
         >
-          <template #selected>
+          <!-- This is because the filters are translated and if one were to switch language they should update so the -->
+          <!-- key for each filter is an integer ID and the label is what's shown in the filter UI -->
+          <template v-if="filters.length === 0" #selected>
             {{ $t("book.filter") }}
+          </template>
+
+          <template v-else #selected>
+            {{ selectedFiltersToString }}
           </template>
 
           <template #option="{ itemProps, opt, selected, toggleOption }">
@@ -176,7 +181,7 @@
 
 <script setup lang="ts">
 import { Dialog, QTable, QTableColumn } from "quasar";
-import { Ref, computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
 import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
@@ -195,7 +200,7 @@ const tableRef = ref<QTable>();
 const { t, locale } = useI18n();
 
 const searchQuery = ref("");
-const filters = ref<string[]>([]);
+const filters = ref<UserFilters[]>([]);
 
 enum UserFilters {
   withAvailable,
@@ -324,10 +329,10 @@ const pagination = ref({
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
 
-const rawRows = ref([]) as Ref<UserFragment[]>;
+const rawRows = ref<UserFragment[]>([]);
 
 const rows = computed(() =>
-  // TODO: update fields with actual data instead of placeholders
+  // FIXME: update fields with actual data instead of placeholders
   rawRows.value.map((user, index) => ({
     ...user,
     phoneNumber: Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
@@ -352,11 +357,19 @@ onMounted(() => {
   updateTable();
 });
 
+const selectedFiltersToString = computed(() =>
+  filters.value.map((key) => options.value[key]?.label).join(", "),
+);
+
+watch(filters, () => {
+  updateTable();
+});
+
 function addNewUser() {
   Dialog.create({
     component: AddNewUserDialog,
   }).onOk((payload) => {
-    // TODO: add new user
+    // FIXME: add new user
     payload;
   });
 }
@@ -388,12 +401,12 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
 };
 
 function openReceipt(receipts: string[]) {
-  // TODO: add receipts dialog
+  // FIXME: add receipts dialog
   receipts;
 }
 
 function openPayOff(payOff: string) {
-  // TODO: add pay-off link
+  // FIXME: add pay-off link
   payOff;
 }
 
@@ -409,7 +422,7 @@ function openEdit(
     component: EditUserDetailsDialog,
     componentProps: { userData },
   }).onOk((payload: { user: UserFragment; password?: string }) => {
-    // TODO: add server call to update user data
+    // FIXME: add server call to update user data
     rawRows.value[rowIndex] = payload.user;
   });
 }
@@ -445,11 +458,11 @@ function updateTable() {
 
 <style scoped lang="scss">
 .search-bar {
-  max-width: 600px;
+  width: 600px;
 }
 
 .filters-menu {
-  max-width: 200px;
+  width: 200px;
 }
 
 // This is the suggested way from Quasar docs; simply adding
