@@ -2,7 +2,7 @@
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
       :title="$t('book.addBookDialog')"
-      :save-label="$t('book.filter')"
+      :save-label="$t('common.add')"
       size="sm"
       @save="onDialogOK(newBook)"
       @cancel="onDialogCancel"
