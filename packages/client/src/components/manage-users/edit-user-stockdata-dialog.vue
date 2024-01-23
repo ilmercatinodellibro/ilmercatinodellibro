@@ -40,6 +40,7 @@
               <div class="gap-16 items-center no-wrap row">
                 <q-input
                   v-model="inRetrievalSearchQuery"
+                  debounce="200"
                   type="search"
                   class="col col-shrink search-bar"
                   outlined
@@ -124,6 +125,7 @@
             <div class="items-center q-pa-md row">
               <q-input
                 v-model="retrievedSearchQuery"
+                debounce="200"
                 type="search"
                 outlined
                 class="col-shrink search-bar"

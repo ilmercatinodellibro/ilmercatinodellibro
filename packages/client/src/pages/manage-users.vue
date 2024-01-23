@@ -4,6 +4,7 @@
       <q-card-section class="flex-center gap-16 no-wrap row">
         <q-input
           v-model="searchQuery"
+          debounce="200"
           class="col search-bar"
           outlined
           :placeholder="$t('common.search')"
@@ -24,11 +25,7 @@
             language they should update so the key for each filter is an integer
             ID and the label is what's shown in the filter UI
           -->
-          <template v-if="filters.length === 0" #selected>
-            {{ $t("book.filter") }}
-          </template>
-
-          <template v-else #selected>
+          <template v-if="filters.length > 0" #selected>
             {{ selectedFiltersToString }}
           </template>
 
