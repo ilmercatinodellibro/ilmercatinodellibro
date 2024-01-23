@@ -88,13 +88,13 @@
           </template>
 
           <!-- Kind of redundant repetition of so much code, can this be reduced? -->
-          <template #header-cell-inStock="{ col }">
+          <template #header-cell-in-stock="{ col }">
             <table-header-with-info
               :label="col.label"
               :info="columnTooltip.inStock"
             />
           </template>
-          <template #body-cell-inStock="{ col, row, value }">
+          <template #body-cell-in-stock="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
               @click="openCellEditDialog(row, col)"
@@ -163,11 +163,12 @@
             </q-td>
           </template>
 
-          <template #body-cell-payOff="{ value }">
+          <template #body-cell-pay-off="{ value }">
             <q-td class="text-left">
               <!-- This button has the same aspect of a q-chip -->
               <q-btn
-                color="primary min-height-none q-chip--dense q-chip--square"
+                color="primary"
+                class="min-height-none q-chip--dense q-chip--square"
                 dense
                 :label="$t('manageUsers.payOff')"
                 @click="openPayOff(value)"
@@ -233,7 +234,7 @@ const columns = computed(
         classes: "ellipsis",
       },
       {
-        name: "firstName",
+        name: "first-name",
         field: "firstname",
         label: t("manageUsers.fields.firstName"),
         headerClasses: "ellipsis",
@@ -241,7 +242,7 @@ const columns = computed(
         classes: "ellipsis",
       },
       {
-        name: "lastName",
+        name: "last-name",
         field: "lastname",
         label: t("manageUsers.fields.lastName"),
         headerClasses: "ellipsis",
@@ -249,7 +250,7 @@ const columns = computed(
         classes: "ellipsis",
       },
       {
-        name: "phoneNumber",
+        name: "phone-number",
         field: "phoneNumber",
         label: t("manageUsers.fields.phoneNumber"),
         headerClasses: "ellipsis",
@@ -257,7 +258,7 @@ const columns = computed(
         classes: "ellipsis",
       },
       {
-        name: "inStock",
+        name: "in-stock",
         field: "inStock",
         label: t("manageUsers.fields.inStock"),
         headerClasses: "ellipsis",
@@ -297,7 +298,7 @@ const columns = computed(
         classes: "ellipsis",
       },
       {
-        name: "creationDate",
+        name: "creation-date",
         field: "creationDate",
         label: t("manageUsers.fields.creationDate"),
         headerClasses: "ellipsis",
@@ -313,7 +314,7 @@ const columns = computed(
         classes: "ellipsis",
       },
       {
-        name: "payOff",
+        name: "pay-off",
         field: "payOff",
         label: "",
       },
