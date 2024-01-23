@@ -1,11 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
+      :cancel-label="cancel"
+      :save-label="ok"
+      :title="title"
       show-save-button
       size="sm"
-      :title="title"
-      :save-label="ok"
-      :cancel-label="cancel"
       @save="onDialogOK"
       @cancel="onDialogCancel"
     >

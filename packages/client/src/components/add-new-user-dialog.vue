@@ -1,10 +1,9 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
-      size="sm"
       :title="t(`actions.addNewUser`)"
       :submit-label="t(`actions.sendInvitation`)"
-      :cancel-label="t('common.cancel')"
+      size="sm"
       @cancel="onDialogCancel"
       @submit="onSubmit"
     >
@@ -30,7 +29,7 @@ import { useI18n } from "vue-i18n";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
-const email = ref<string>("");
+const email = ref("");
 
 const { t } = useI18n();
 

@@ -34,8 +34,8 @@ import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { useDialogPluginComponent } from "quasar";
 import KDialogCard from "../k-dialog-card.vue";
 
+defineEmits(useDialogPluginComponent.emitsObject);
+
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
   useDialogPluginComponent();
-
-defineEmits(useDialogPluginComponent.emitsObject);
 </script>

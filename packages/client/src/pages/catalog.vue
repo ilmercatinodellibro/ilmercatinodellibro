@@ -6,7 +6,7 @@
           v-model="searchQuery"
           debounce="200"
           type="search"
-          class="col search-bar"
+          class="width-600"
           outlined
           :placeholder="$t('common.search')"
         >
@@ -18,8 +18,7 @@
           v-model="filters"
           fit
           :options="filterOptions.map(({ key }) => key)"
-          class="search-filter"
-          bg-color="white"
+          class="width-200"
           outlined
           multiple
           :label="$t('book.filter')"
@@ -57,15 +56,15 @@
         </q-select>
 
         <q-space />
-        <span class="col">
-          <q-btn
-            :label="$t('book.addBook')"
-            class="q-ma-sm"
-            color="secondary"
-            icon="mdi-plus"
-            @click="openBookDialog"
-          />
-        </span>
+
+        <q-btn
+          :label="$t('book.addBook')"
+          class="q-ma-sm"
+          color="accent"
+          no-wrap
+          :icon="mdiPlus"
+          @click="openBookDialog"
+        />
       </q-card-section>
 
       <q-card-section class="col no-wrap q-pa-none row">
@@ -115,7 +114,7 @@
 </template>
 
 <script lang="ts" setup>
-import { mdiMagnify } from "@quasar/extras/mdi-v7";
+import { mdiMagnify, mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableProps } from "quasar";
 import { computed, onMounted, ref } from "vue";

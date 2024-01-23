@@ -2,7 +2,6 @@
   <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="$t('manageUsers.editUser.title')"
-      :submit-label="$t('common.confirm')"
       size="sm"
       @submit="
         onDialogOK({
@@ -104,6 +103,11 @@ const props = defineProps<{
   userData: UserFragment;
 }>();
 
+defineEmits(useDialogPluginComponent.emitsObject);
+
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
+  useDialogPluginComponent();
+
 const newUserData = ref({
   user: cloneDeep(props.userData),
   newPassword: "",
@@ -112,11 +116,6 @@ const newUserData = ref({
 });
 const hidePassword = ref(true);
 const hideConfirm = ref(true);
-
-const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
-  useDialogPluginComponent();
-
-defineEmits(useDialogPluginComponent.emitsObject);
 </script>
 
 <style scoped lang="scss">

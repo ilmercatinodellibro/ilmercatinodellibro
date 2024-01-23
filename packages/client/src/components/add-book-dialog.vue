@@ -2,9 +2,9 @@
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
       :title="$t('book.addBookDialog')"
-      :save-label="$t('common.add')"
+      :submit-label="$t('common.add')"
       size="sm"
-      @save="onDialogOK(newBook)"
+      @submit="onDialogOK(newBook)"
       @cancel="onDialogCancel"
     >
       <q-card-section class="column gap-16">
@@ -90,9 +90,3 @@ const newBook = reactive<Omit<BookSummaryFragment, "id">>({
   title: "",
 });
 </script>
-
-<style scoped lang="scss">
-.dialog-card {
-  width: 360px;
-}
-</style>
