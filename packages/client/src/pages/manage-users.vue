@@ -5,7 +5,7 @@
         <q-input
           v-model="searchQuery"
           debounce="200"
-          class="col search-bar"
+          class="width-600"
           outlined
           :placeholder="$t('common.search')"
           type="text"
@@ -17,7 +17,7 @@
 
         <q-select
           v-model="filters"
-          class="filters-menu"
+          class="width-200"
           multiple
           outlined
           :options="options.map(({ key }) => key)"
@@ -50,15 +50,14 @@
 
         <q-space />
 
-        <span class="col">
-          <q-btn
-            class="q-ma-sm"
-            color="secondary"
-            icon="mdi-plus"
-            :label="$t('manageUsers.createUser')"
-            @click="addNewUser"
-          />
-        </span>
+        <q-btn
+          class="q-ma-sm"
+          color="accent"
+          no-wrap
+          :icon="mdiPlus"
+          :label="$t('manageUsers.createUser')"
+          @click="addNewUser"
+        />
       </q-card-section>
 
       <q-card-section class="col no-wrap q-pa-none row">
@@ -184,7 +183,12 @@
 </template>
 
 <script setup lang="ts">
-import { mdiMagnify, mdiPencil, mdiReceiptText } from "@quasar/extras/mdi-v7";
+import {
+  mdiMagnify,
+  mdiPencil,
+  mdiPlus,
+  mdiReceiptText,
+} from "@quasar/extras/mdi-v7";
 import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -434,7 +438,7 @@ function openEdit(
 
 function openCellEditDialog(userData: UserFragment, column: QTableColumn) {
   switch (column.name) {
-    case "inStock":
+    case "in-stock":
       Dialog.create({
         component: EditUserStockdataDialog,
         componentProps: { userData },
@@ -462,14 +466,6 @@ function updateTable() {
 </script>
 
 <style scoped lang="scss">
-.search-bar {
-  width: 600px;
-}
-
-.filters-menu {
-  width: 200px;
-}
-
 // This is the suggested way from Quasar docs; simply adding
 // the css to the element doesn't work and there is no table
 // property to make the thead sticky otherwise

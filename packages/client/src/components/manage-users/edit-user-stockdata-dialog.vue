@@ -12,18 +12,14 @@
       @cancel="onDialogCancel"
     >
       <q-card-section class="q-pa-none">
-        <q-tabs v-model="tab" inline-label active-color="secondary">
-          <q-tab
-            name="in-retrieval"
-            :label="$t('manageUsers.inRetrieval')"
-            class="col"
-          />
-          <q-tab
-            name="retrieved"
-            :label="$t('manageUsers.retrieved')"
-            class="col"
-            inline
-          >
+        <q-tabs
+          v-model="tab"
+          align="justify"
+          active-color="accent"
+          inline-label
+        >
+          <q-tab name="in-retrieval" :label="$t('manageUsers.inRetrieval')" />
+          <q-tab name="retrieved" :label="$t('manageUsers.retrieved')">
             <template #default>
               <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
                 <q-tooltip>
@@ -36,28 +32,27 @@
 
         <q-tab-panels v-model="tab" animated>
           <q-tab-panel name="in-retrieval" class="column no-wrap q-pa-none">
-            <div class="items-center justify-between q-pa-md row">
-              <div class="gap-16 items-center no-wrap row">
-                <q-input
-                  v-model="inRetrievalSearchQuery"
-                  debounce="200"
-                  type="search"
-                  class="col col-shrink search-bar"
-                  outlined
-                  :placeholder="$t('manageUsers.inStockDialog.searchHint')"
-                />
-                <q-btn
-                  class="col col-shrink"
-                  color="secondary"
-                  icon="mdi-plus"
-                  :label="$t('book.addBookDialog')"
-                  @click="addBookDialog"
-                />
-              </div>
+            <div class="gap-16 items-center no-wrap q-pa-md row">
+              <q-input
+                v-model="inRetrievalSearchQuery"
+                :placeholder="$t('manageUsers.inStockDialog.searchHint')"
+                class="width-420"
+                debounce="200"
+                outlined
+                type="search"
+              />
               <q-btn
-                class="col col-shrink"
-                color="primary"
+                :label="$t('book.addBookDialog')"
+                color="accent"
+                :icon="mdiPlus"
+                no-wrap
+                @click="addBookDialog"
+              />
+              <q-space />
+              <q-btn
                 :label="$t('manageUsers.inStockDialog.retrieveBtn')"
+                color="primary"
+                no-wrap
                 @click="retrieveAllBooks"
               />
             </div>
@@ -98,7 +93,7 @@
                 <q-td class="text-center">
                   <!-- This button has the same aspect of a q-chip -->
                   <q-btn
-                    color="secondary"
+                    color="primary"
                     no-wrap
                     class="min-height-none q-chip--dense q-chip--square row"
                     @click="() => deleteBookDialog(value)"
@@ -122,23 +117,21 @@
           </q-tab-panel>
 
           <q-tab-panel name="retrieved" class="column no-wrap q-pa-none">
-            <div class="items-center q-pa-md row">
+            <div class="gap-16 items-center no-wrap q-pa-md row">
               <q-input
                 v-model="retrievedSearchQuery"
-                debounce="200"
-                type="search"
-                outlined
-                class="col-shrink search-bar"
                 :placeholder="$t('manageUsers.inStockDialog.searchHint')"
+                debounce="200"
+                class="width-420"
+                outlined
+                type="search"
               />
-              <q-item class="col-shrink items-center row">
-                <q-btn
-                  color="secondary"
-                  icon="mdi-plus"
-                  :label="$t('book.addBookDialog')"
-                  @click="addBookDialog"
-                />
-              </q-item>
+              <q-btn
+                :label="$t('book.addBookDialog')"
+                color="accent"
+                :icon="mdiPlus"
+                @click="addBookDialog"
+              />
             </div>
 
             <dialog-table
@@ -182,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
+import { mdiInformationOutline, mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableProps, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
@@ -343,7 +336,7 @@ const retrievedColumns = computed(
       {
         label: t("book.originalCode"),
         field: "originalCode",
-        name: "originalCode",
+        name: "original-code",
         align: "left",
       },
       {
@@ -493,9 +486,3 @@ const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 </script>
-
-<style scoped lang="scss">
-.search-bar {
-  width: 420px;
-}
-</style>

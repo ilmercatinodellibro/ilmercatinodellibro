@@ -7,6 +7,7 @@
     </q-card-section>
 
     <q-separator />
+
     <slot />
 
     <q-separator />

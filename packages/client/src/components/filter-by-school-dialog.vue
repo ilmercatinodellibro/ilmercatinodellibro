@@ -7,7 +7,7 @@
       @submit="onDialogOK(newFilters)"
       @cancel="onDialogCancel"
     >
-      <q-card-section class="q-gutter-md">
+      <q-card-section class="gap-16">
         <q-select
           v-model="newFilters.addresses"
           :label="$t('book.filters.schoolFilter.fields.address')"
