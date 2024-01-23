@@ -61,7 +61,7 @@
             </q-item-section>
           </q-item>
 
-          <template v-if="user?.role === 'ADMIN'">
+          <template v-if="hasAdminRole">
             <q-separator class="q-mb-sm" />
 
             <q-item-label class="text-size-12" header>
@@ -252,7 +252,7 @@ const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 
 const { logout } = useLogoutMutation();
-const { user } = useAuthService();
+const { user, hasAdminRole } = useAuthService();
 
 const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
   useLateralDrawer();
