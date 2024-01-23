@@ -2,7 +2,7 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { until } from "@vueuse/core";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { LocalStorage } from "quasar";
-import { readonly, ref, watch } from "vue";
+import { computed, readonly, ref, watch } from "vue";
 import { NavigationGuard, Router, useRouter } from "vue-router";
 import {
   UserSummaryFragment,
@@ -233,6 +233,10 @@ function getJwtHeader(authToken = token.value) {
   };
 }
 
+const hasAdminRole = computed(() => user.value?.role === "ADMIN");
+const hasOperatorRole = computed(() => user.value?.role === "OPERATOR");
+const hasUserRole = computed(() => user.value?.role === "USER");
+
 // This composable is meant to work even outside a Vue component context
 // DO NOT directly use stuff that requires a Vue context (e.g. using `useRouter`) nor return methods that use them
 export function useAuthService() {
@@ -240,6 +244,9 @@ export function useAuthService() {
     onLogin,
     onLogout,
     getJwtHeader,
+    hasAdminRole,
+    hasOperatorRole,
+    hasUserRole,
     isAuthenticated: readonly(isAuthenticated),
     user: readonly(user),
   };
@@ -266,17 +273,17 @@ export const redirectIfGuest: NavigationGuard = (to, from, next) => {
 };
 
 export const redirectIfNotAdmin: NavigationGuard = () => {
-  const { user } = useAuthService();
+  const { hasAdminRole } = useAuthService();
 
-  if (user.value?.role !== "ADMIN") {
+  if (hasAdminRole.value) {
     return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
   }
 };
 
 export const redirectIfNotOperatorOrAdmin: NavigationGuard = () => {
-  const { user } = useAuthService();
+  const { hasAdminRole, hasOperatorRole } = useAuthService();
 
-  if (user.value?.role !== "OPERATOR" && user.value?.role !== "ADMIN") {
+  if (hasAdminRole.value && hasOperatorRole.value) {
     return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
   }
 };

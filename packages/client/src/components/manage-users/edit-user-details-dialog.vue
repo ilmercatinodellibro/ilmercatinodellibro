@@ -77,7 +77,7 @@
         </q-input>
         <q-checkbox
           v-model="newUserData.discount"
-          :disable="useAuthService().user.value?.role !== 'ADMIN'"
+          :disable="!hasAdminRole"
           :label="$t('manageUsers.editUser.discount')"
         />
       </q-card-section>
@@ -107,6 +107,8 @@ defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+
+const { hasAdminRole } = useAuthService();
 
 const newUserData = ref({
   user: cloneDeep(props.userData),
