@@ -4,6 +4,7 @@
       <q-card-section class="flex-center gap-16 no-wrap row">
         <q-input
           v-model="searchQuery"
+          debounce="200"
           type="search"
           class="col search-bar"
           outlined
