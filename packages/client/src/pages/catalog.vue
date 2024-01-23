@@ -11,7 +11,7 @@
           :placeholder="$t('common.search')"
         >
           <template #append>
-            <q-icon name="mdi-magnify" />
+            <q-icon :name="mdiMagnify" />
           </template>
         </q-input>
         <q-select
@@ -115,6 +115,7 @@
 </template>
 
 <script lang="ts" setup>
+import { mdiMagnify } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableProps } from "quasar";
 import { computed, onMounted, ref } from "vue";

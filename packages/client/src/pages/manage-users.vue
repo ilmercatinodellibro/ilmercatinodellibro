@@ -10,7 +10,9 @@
           :placeholder="$t('common.search')"
           type="text"
         >
-          <template #append> <q-icon name="mdi-magnify" /> </template>
+          <template #append>
+            <q-icon :name="mdiMagnify" />
+          </template>
         </q-input>
 
         <q-select
@@ -79,7 +81,7 @@
               <q-btn
                 color="primary"
                 flat
-                icon="mdi-pencil"
+                :icon="mdiPencil"
                 round
                 size="md"
                 @click="openEdit(row, rowIndex)"
@@ -155,7 +157,7 @@
               <q-btn
                 color="primary"
                 flat
-                icon="mdi-receipt-text"
+                :icon="mdiReceiptText"
                 round
                 size="md"
                 @click="openReceipt(value)"
@@ -182,6 +184,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiMagnify, mdiPencil, mdiReceiptText } from "@quasar/extras/mdi-v7";
 import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";

@@ -29,6 +29,7 @@
 </template>
 
 <script lang="ts">
+import { mdiShield } from "@quasar/extras/mdi-v7";
 import { computed, defineComponent, PropType, ref, toRefs, watch } from "vue";
 import { notifyError } from "src/helpers/error-messages";
 import { ServerError } from "src/models/server";
@@ -142,7 +143,7 @@ export default defineComponent({
           start: 0,
           end: 100,
           color: "blue",
-          icon: "mdi-shield",
+          icon: mdiShield,
           message: "",
         },
       ],

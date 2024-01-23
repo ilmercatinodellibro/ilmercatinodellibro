@@ -14,13 +14,15 @@
         <span class="button-text">
           {{ name }}
         </span>
-        <q-icon color="black-54" name="mdi-arrow-right" />
+        <q-icon color="black-54" :name="mdiArrowRight" />
       </span>
     </span>
   </q-btn>
 </template>
 
 <script setup lang="ts">
+import { mdiArrowRight } from "@quasar/extras/mdi-v7";
+
 defineProps({
   link: { type: String, default: "" },
   name: { type: String, default: "" },

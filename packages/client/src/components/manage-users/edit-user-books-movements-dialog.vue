@@ -42,7 +42,7 @@
                 round
                 flat
                 color="primary"
-                icon="mdi-history"
+                :icon="mdiHistory"
                 @click="
                   openHistoryDialog(
                     value,
@@ -83,6 +83,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiHistory } from "@quasar/extras/mdi-v7";
 import { QDialog, QTable, QTableProps, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
