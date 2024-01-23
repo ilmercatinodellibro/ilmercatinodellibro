@@ -1,23 +1,22 @@
 <template>
   <q-th class="text-left">
     {{ label }}
-    <q-btn
-      class="q-pa-none"
+    <q-icon
+      class="q-ml-sm"
       color="black-54"
-      dense
-      flat
-      icon="mdi-information-outline"
-      round
-      size="sm"
+      :name="mdiInformationOutline"
+      size="xs"
     >
       <q-tooltip>
         {{ info }}
       </q-tooltip>
-    </q-btn>
+    </q-icon>
   </q-th>
 </template>
 
 <script setup lang="ts">
+import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
+
 defineProps<{
   label: string;
   info: string;

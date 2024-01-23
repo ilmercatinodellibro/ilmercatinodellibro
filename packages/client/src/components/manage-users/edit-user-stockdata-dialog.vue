@@ -25,7 +25,7 @@
             inline
           >
             <template #default>
-              <q-icon name="mdi-information-outline" class="q-ml-sm" size="sm">
+              <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
                 <q-tooltip>
                   {{ $t("manageUsers.inStockDialog.retrievableTooltip") }}
                 </q-tooltip>
@@ -106,7 +106,7 @@
                     <q-item-label> {{ $t("common.delete") }} </q-item-label>
                     <q-icon
                       class="q-ml-sm"
-                      name="mdi-information-outline"
+                      :name="mdiInformationOutline"
                       size="18px"
                     >
                       <q-tooltip>
@@ -182,6 +182,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableProps, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";

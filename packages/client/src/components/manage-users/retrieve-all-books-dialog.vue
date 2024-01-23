@@ -16,7 +16,7 @@
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
         <q-btn no-wrap color="primary" @click="onDialogOK(true)">
           <q-item-label>
-            <q-icon name="mdi-information-outline" class="q-mr-sm" size="18px">
+            <q-icon :name="mdiInformationOutline" class="q-mr-sm" size="18px">
               <q-tooltip>
                 {{ $t("book.retrieveBooksDialog.tooltip") }}
               </q-tooltip>
@@ -30,6 +30,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { useDialogPluginComponent } from "quasar";
 import KDialogCard from "../k-dialog-card.vue";
 
