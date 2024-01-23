@@ -21,8 +21,8 @@ const defaultTheme: Theme = {
   // simply give back the newly set variables.
   colors: {
     primary: "#798aa8",
-    secondary: "#c2664d",
-    accent: "#ffdc27",
+    secondary: "#76e1a7",
+    accent: "#c2664d",
   },
   logo: "/ilmercatinodellibro-logo-dark-background.svg",
 };

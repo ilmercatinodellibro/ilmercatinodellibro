@@ -41,13 +41,13 @@
 
           <q-item
             :to="{ name: AvailableRouteNames.Events }"
-            active-class="bg-primary-activated-light"
+            active-class="bg-black-54-activated-light"
           >
             <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
               {{ $t(`routesNames.${AvailableRouteNames.Events}`) }}
             </q-tooltip>
             <q-item-section side>
-              <q-icon :name="mdiAlarmLight" color="secondary" />
+              <q-icon :name="mdiAlarmLight" color="black-54" />
             </q-item-section>
             <q-item-section>
               <q-item-label class="ellipsis text-size-16">
@@ -70,13 +70,13 @@
 
             <q-item
               :to="{ name: AvailableRouteNames.Theme }"
-              active-class="bg-primary-activated-light"
+              active-class="bg-black-54-activated-light"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t(`routesNames.${AvailableRouteNames.Theme}`) }}
               </q-tooltip>
               <q-item-section side>
-                <q-icon :name="mdiPaletteSwatch" color="secondary" />
+                <q-icon :name="mdiPaletteSwatch" color="black-54" />
               </q-item-section>
               <q-item-section>
                 <q-item-label class="ellipsis text-size-16">
@@ -95,7 +95,7 @@
                 }}
               </q-tooltip>
               <q-item-section side>
-                <q-icon :name="mdiAccountMultiple" color="secondary" />
+                <q-icon :name="mdiAccountMultiple" color="black-54" />
               </q-item-section>
               <q-item-section>
                 <q-item-label class="ellipsis text-size-16">
@@ -118,7 +118,7 @@
                 {{ t("general.language") }}
               </q-tooltip>
               <q-item-section side>
-                <q-icon :name="mdiWeb" color="secondary" />
+                <q-icon :name="mdiWeb" color="black-54" />
               </q-item-section>
               <q-item-section>
                 <q-item-label class="ellipsis text-size-16">
@@ -132,7 +132,9 @@
                 v-for="language in languages"
                 :key="language.code"
                 clickable
-                :class="locale === language.code ? 'selected' : ''"
+                :class="
+                  locale === language.code ? 'bg-primary-activated-light' : ''
+                "
                 :inset-level="EXPANSION_ITEMS_INSET_LEVEL"
                 @click="setLanguage(language.code)"
               >
@@ -150,7 +152,7 @@
               {{ t("auth.logOut") }}
             </q-tooltip>
             <q-item-section side>
-              <q-icon :name="mdiExitToApp" color="secondary" />
+              <q-icon :name="mdiExitToApp" color="black-54" />
             </q-item-section>
             <q-item-section>
               <q-item-label class="ellipsis text-size-16">
@@ -162,7 +164,7 @@
       </q-scroll-area>
     </q-drawer>
 
-    <q-page-container class="bg-grey-1">
+    <q-page-container class="bg-layout">
       <router-view />
     </q-page-container>
   </q-layout>
@@ -268,10 +270,6 @@ $header-height: 64px;
   max-width: calc(v-bind(DRAWER_WIDTH) * 1px);
 }
 
-.selected {
-  background-color: rgba(#000, 0.1);
-}
-
 .header-logo {
   height: 36px;
 }
@@ -295,5 +293,10 @@ $header-height: 64px;
     top: 24px;
     bottom: 8px;
   }
+}
+
+.bg-layout {
+  // This is a custom color not used anywhere else
+  background-color: #edf2fa;
 }
 </style>

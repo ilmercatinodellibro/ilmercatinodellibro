@@ -295,14 +295,6 @@ function openBookDialog() {
 </script>
 
 <style scoped lang="scss">
-.search-bar {
-  max-width: 600px;
-}
-
-.search-filter {
-  width: 200px;
-}
-
 // This is the suggested way from Quasar docs; simply adding
 // the css to the element doesn't work and there is no table
 // property to make the thead sticky otherwise
