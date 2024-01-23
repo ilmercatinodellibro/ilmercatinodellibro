@@ -19,11 +19,12 @@
           multiple
           outlined
           :options="options.map(({ key }) => key)"
+          :label="$t('book.filter')"
         >
           <!--
-            This is because the filters are translated and if one were to switch
-            language they should update so the key for each filter is an integer
-            ID and the label is what's shown in the filter UI
+            This is because the filters are translated and if a user were to switch
+            language they should update so the key for each filter is an integer ID
+            and the label is what's shown in the filter UI
           -->
           <template v-if="filters.length > 0" #selected>
             {{ selectedFiltersToString }}

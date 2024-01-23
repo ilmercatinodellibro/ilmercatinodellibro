@@ -22,12 +22,14 @@
           bg-color="white"
           outlined
           multiple
+          :label="$t('book.filter')"
         >
-          <template v-if="filters.length === 0" #selected>
-            {{ $t("book.filter") }}
-          </template>
-
-          <template v-else #selected>
+          <!--
+            This is because the filters are translated and if a user were to switch
+            language they should update so the key for each filter is an integer ID
+            and the label is what's shown in the filter UI
+          -->
+          <template v-if="filters.length > 0" #selected>
             {{ selectedFiltersToString }}
           </template>
 
