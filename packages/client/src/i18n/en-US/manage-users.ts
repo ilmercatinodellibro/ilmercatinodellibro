@@ -30,7 +30,7 @@ export default {
   filters: ["With Available", "With Requested", "With Purchased", "With Sold"],
   editUser: {
     title: "Edit User Data",
-    discount: "Apply ISEE/voluntary discount",
+    discount: "Apply ISEE/volunteer discount",
   },
   inRetrieval: "In retrieval",
   retrieved: "Retrieved and returnable",

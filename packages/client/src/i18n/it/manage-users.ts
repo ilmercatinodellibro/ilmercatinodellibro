@@ -35,7 +35,7 @@ export default {
   ],
   editUser: {
     title: "Modifica Dati Utente",
-    discount: "Apply ISEE/voluntary discount",
+    discount: "Applica sconto ISEE/volontario",
   },
   inRetrieval: "In ritiro",
   retrieved: "Ritirati e restituibili",
