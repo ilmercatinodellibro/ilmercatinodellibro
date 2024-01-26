@@ -155,12 +155,12 @@ const newBookISBN = ref("");
 const {
   refetchBooks: refetchInRetrievalBooks,
   booksPaginationDetails: inRetrievalBooksPaginationDetails,
-} = useBookService(inRetrievalCurrentPage, inRetrievalRowsPerPage, ref(""));
+} = useBookService(inRetrievalCurrentPage, inRetrievalRowsPerPage);
 
 const {
   refetchBooks: refetchRetrievedBooks,
   booksPaginationDetails: retrievedBooksPaginationDetails,
-} = useBookService(retrievedCurrentPage, retrievedRowsPerPage, newBookISBN);
+} = useBookService(retrievedCurrentPage, retrievedRowsPerPage);
 
 const { t } = useI18n();
 
@@ -351,7 +351,6 @@ const onInRetrievalRequest: QTable["onRequest"] = async function (
   const newBooks = await refetchInRetrievalBooks({
     page: requestProps.pagination.page - 1,
     rows: requestProps.pagination.rowsPerPage,
-    filter: "",
   });
   inRetrievalPagination.value.rowsNumber = newBooks?.data.books.rowsCount ?? 0;
 
@@ -373,7 +372,6 @@ const onRetrievedRequest: QTable["onRequest"] = async function (requestProps) {
   const newBooks = await refetchRetrievedBooks({
     page: requestProps.pagination.page - 1,
     rows: requestProps.pagination.rowsPerPage,
-    filter: "",
   });
 
   retrievedPagination.value.rowsNumber =

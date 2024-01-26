@@ -7,7 +7,7 @@ import {
 export function useBookService(
   page: Ref<number>,
   rows: Ref<number>,
-  filter: Ref<string | undefined>,
+  filter?: Ref<string | undefined>,
 ) {
   const {
     books: booksData,
@@ -16,7 +16,7 @@ export function useBookService(
   } = useGetBooksQuery(() => ({
     page: page.value,
     rows: rows.value,
-    filter: filter.value,
+    filter: filter?.value,
   }));
 
   const loadBooksMutation = useLoadBooksIntoDatabaseMutation();

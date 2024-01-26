@@ -111,11 +111,11 @@ const purchasedLoading = ref(false);
 const {
   refetchBooks: refetchSoldBooks,
   booksPaginationDetails: soldBooksPaginationDetails,
-} = useBookService(currentSoldPage, soldRowsPerPage, ref(""));
+} = useBookService(currentSoldPage, soldRowsPerPage);
 const {
   refetchBooks: refetchPurchasedBooks,
   booksPaginationDetails: purchasedBooksPaginationDetails,
-} = useBookService(currentPurchasedPage, purchasedRowsPerPage, ref(""));
+} = useBookService(currentPurchasedPage, purchasedRowsPerPage);
 
 const soldPagination = ref({
   rowsPerPage: soldRowsPerPage.value,
