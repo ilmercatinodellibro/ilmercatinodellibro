@@ -34,22 +34,24 @@
           <q-tab-panel name="in-retrieval" class="column no-wrap q-pa-none">
             <div class="gap-16 items-center no-wrap q-pa-md row">
               <q-input
-                v-model="inRetrievalSearchQuery"
+                v-model="newBookISBN"
                 :placeholder="$t('manageUsers.inStockDialog.searchHint')"
                 class="width-420"
                 debounce="200"
                 outlined
-                type="search"
+                type="text"
+                @keyup.enter="addBookToInRetrieval()"
               />
               <q-btn
                 :label="$t('book.addBookDialog')"
                 color="accent"
                 :icon="mdiPlus"
                 no-wrap
-                @click="addBookDialog"
+                @click="addBookToInRetrieval"
               />
               <q-space />
               <q-btn
+                :disable="inRetrievalRows.length === 0"
                 :label="$t('manageUsers.inStockDialog.retrieveBtn')"
                 color="primary"
                 no-wrap
@@ -61,31 +63,16 @@
               :pagination="inRetrievalPagination"
               :columns="inRetrievalColumns"
               :rows="inRetrievalRows"
-              :search-query="inRetrievalSearchQuery"
               :loading="inRetrievalLoading"
               :on-request="onInRetrievalRequest"
             >
               <template #body-cell-status="{ value }">
                 <q-td>
-                  <div class="flex-center gap-16 no-wrap row">
-                    <q-icon
-                      :name="value ? 'mdi-check-circle' : 'mdi-cancel'"
-                      :color="value ? 'green' : 'red'"
-                      size="24px"
-                    />
-                    <span>
-                      {{
-                        $t(
-                          "book.availability." +
-                            (value ? "available" : "notAvailable"),
-                        )
-                      }}
-                    </span>
-                  </div>
+                  <status-chip :value="value" />
                 </q-td>
               </template>
               <template #body-cell-utility="{ value }">
-                <q-td class="flex-center row text-center">
+                <q-td class="text-center">
                   <utility-chip :value="value" />
                 </q-td>
               </template>
@@ -117,52 +104,20 @@
           </q-tab-panel>
 
           <q-tab-panel name="retrieved" class="column no-wrap q-pa-none">
-            <div class="gap-16 items-center no-wrap q-pa-md row">
-              <q-input
-                v-model="retrievedSearchQuery"
-                :placeholder="$t('manageUsers.inStockDialog.searchHint')"
-                debounce="200"
-                class="width-420"
-                outlined
-                type="search"
-              />
-              <q-btn
-                :label="$t('book.addBookDialog')"
-                color="accent"
-                :icon="mdiPlus"
-                @click="addBookDialog"
-              />
-            </div>
-
             <dialog-table
               :pagination="retrievedPagination"
               :columns="retrievedColumns"
               :rows="retrievedRows"
-              :search-query="retrievedSearchQuery"
               :loading="retrievedLoading"
               @request="onRetrievedRequest"
             >
               <template #body-cell-status="{ value }">
                 <q-td>
-                  <div class="flex-center gap-16 no-wrap row">
-                    <q-icon
-                      :name="value ? 'mdi-check-circle' : 'mdi-cancel'"
-                      :color="value ? 'green' : 'red'"
-                      size="24px"
-                    />
-                    <span>
-                      {{
-                        $t(
-                          "book.availability." +
-                            (value ? "available" : "notAvailable"),
-                        )
-                      }}
-                    </span>
-                  </div>
+                  <status-chip :value="value" />
                 </q-td>
               </template>
               <template #body-cell-utility="{ value }">
-                <q-td class="flex-center row text-center">
+                <q-td>
                   <utility-chip :value="value" />
                 </q-td>
               </template>
@@ -183,11 +138,11 @@ import { useI18n } from "vue-i18n";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { UserFragment } from "src/services/user.graphql";
-import AddBookDialog from "../add-book-dialog.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
 import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
+import StatusChip from "./status-chip.vue";
 
 const inRetrievalCurrentPage = ref(0);
 const retrievedCurrentPage = ref(0);
@@ -195,26 +150,17 @@ const retrievedCurrentPage = ref(0);
 const inRetrievalRowsPerPage = ref(5);
 const retrievedRowsPerPage = ref(5);
 
-const retrievedSearchQuery = ref("");
-const inRetrievalSearchQuery = ref("");
+const newBookISBN = ref("");
 
 const {
   refetchBooks: refetchInRetrievalBooks,
   booksPaginationDetails: inRetrievalBooksPaginationDetails,
-} = useBookService(
-  inRetrievalCurrentPage,
-  inRetrievalRowsPerPage,
-  retrievedSearchQuery,
-);
+} = useBookService(inRetrievalCurrentPage, inRetrievalRowsPerPage, ref(""));
 
 const {
   refetchBooks: refetchRetrievedBooks,
   booksPaginationDetails: retrievedBooksPaginationDetails,
-} = useBookService(
-  retrievedCurrentPage,
-  retrievedRowsPerPage,
-  inRetrievalSearchQuery,
-);
+} = useBookService(retrievedCurrentPage, retrievedRowsPerPage, newBookISBN);
 
 const { t } = useI18n();
 
@@ -252,8 +198,7 @@ const inRetrievalColumns = computed(
         label: t("book.fields.author"),
         field: "authorsFullName",
         name: "author",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
         format: (val: string) => startCase(toLower(val)),
       },
@@ -261,8 +206,7 @@ const inRetrievalColumns = computed(
         label: t("book.fields.subject"),
         field: "subject",
         name: "subject",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
         format: (val: string) => startCase(toLower(val)),
       },
@@ -282,8 +226,7 @@ const inRetrievalColumns = computed(
         label: t("book.fields.title"),
         field: "title",
         name: "title",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
         format: (val: string) => startCase(toLower(val)),
       },
@@ -291,8 +234,7 @@ const inRetrievalColumns = computed(
         label: t("book.fields.publisher"),
         field: "publisherName",
         name: "publisher",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
         format: (val: string) => startCase(toLower(val)),
       },
@@ -343,16 +285,14 @@ const retrievedColumns = computed(
         label: t("book.fields.author"),
         field: "authorsFullName",
         name: "author",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
         label: t("book.fields.subject"),
         field: "subject",
         name: "subject",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
@@ -371,16 +311,14 @@ const retrievedColumns = computed(
         label: t("book.fields.title"),
         field: "title",
         name: "title",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
         label: t("book.fields.publisher"),
         field: "publisherName",
         name: "publisher",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
@@ -404,6 +342,7 @@ defineProps<{
   userData: UserFragment;
 }>();
 
+// FIXME: add actual retrieval logic on both onRequest functions
 const onInRetrievalRequest: QTable["onRequest"] = async function (
   requestProps,
 ) {
@@ -412,7 +351,7 @@ const onInRetrievalRequest: QTable["onRequest"] = async function (
   const newBooks = await refetchInRetrievalBooks({
     page: requestProps.pagination.page - 1,
     rows: requestProps.pagination.rowsPerPage,
-    filter: inRetrievalSearchQuery.value,
+    filter: "",
   });
   inRetrievalPagination.value.rowsNumber = newBooks?.data.books.rowsCount ?? 0;
 
@@ -434,7 +373,7 @@ const onRetrievedRequest: QTable["onRequest"] = async function (requestProps) {
   const newBooks = await refetchRetrievedBooks({
     page: requestProps.pagination.page - 1,
     rows: requestProps.pagination.rowsPerPage,
-    filter: retrievedSearchQuery.value,
+    filter: "",
   });
 
   retrievedPagination.value.rowsNumber =
@@ -452,12 +391,8 @@ const onRetrievedRequest: QTable["onRequest"] = async function (requestProps) {
   retrievedLoading.value = false;
 };
 
-function addBookDialog() {
-  Dialog.create({
-    component: AddBookDialog,
-  }).onOk((payload: string[]) => {
-    payload; // FIXME: Load the new book in the database with the data passed from the dialog
-  });
+function addBookToInRetrieval() {
+  // FIXME: add logic to add a book into "in retrieval" section
 }
 
 function retrieveAllBooks() {

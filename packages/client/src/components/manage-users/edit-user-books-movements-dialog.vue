@@ -162,16 +162,14 @@ const soldColumns = computed(
         label: t("book.fields.author"),
         field: "authorsFullName",
         name: "author",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
         label: t("book.fields.subject"),
         field: "subject",
         name: "subject",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
@@ -184,16 +182,14 @@ const soldColumns = computed(
         label: t("book.fields.title"),
         field: "title",
         name: "title",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
         label: t("book.fields.publisher"),
         field: "publisherName",
         name: "publisher",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
@@ -234,16 +230,14 @@ const purchasedColumns = computed(
         label: t("book.fields.author"),
         field: "authorsFullName",
         name: "author",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
         label: t("book.fields.subject"),
         field: "subject",
         name: "subject",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
@@ -256,16 +250,14 @@ const purchasedColumns = computed(
         label: t("book.fields.title"),
         field: "title",
         name: "title",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
         label: t("book.fields.publisher"),
         field: "publisherName",
         name: "publisher",
-        headerClasses: "ellipsis",
-        classes: "ellipsis",
+
         align: "left",
       },
       {
