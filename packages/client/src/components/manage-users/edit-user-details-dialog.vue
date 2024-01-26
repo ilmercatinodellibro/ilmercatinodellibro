@@ -49,7 +49,7 @@
         >
           <template #append>
             <q-icon
-              :name="hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
+              :name="hidePassword ? mdiEyeOff : mdiEye"
               class="cursor-pointer"
               @click="hidePassword = !hidePassword"
             />
@@ -69,7 +69,7 @@
         >
           <template #append>
             <q-icon
-              :name="hideConfirm ? 'mdi-eye-off' : 'mdi-eye'"
+              :name="hideConfirm ? mdiEyeOff : mdiEye"
               class="cursor-pointer"
               @click="hideConfirm = !hideConfirm"
             />
@@ -86,6 +86,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiEye, mdiEyeOff } from "@quasar/extras/mdi-v7";
 import { cloneDeep } from "lodash-es";
 import { useDialogPluginComponent } from "quasar";
 import { ref } from "vue";

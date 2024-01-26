@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column gap-16 no-wrap q-ma-md">
+    <q-card class="absolute-full column no-wrap q-ma-md">
       <q-card-section class="flex-center gap-16 no-wrap row">
         <q-input
           v-model="searchQuery"
@@ -165,7 +165,7 @@
           </template>
 
           <template #body-cell-pay-off="{ value }">
-            <q-td class="text-left">
+            <q-td>
               <!-- This button has the same aspect of a q-chip -->
               <q-btn
                 color="primary"
@@ -236,89 +236,78 @@ const columns = computed(
         name: "email",
         field: "email",
         label: t("manageUsers.fields.email"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "first-name",
         field: "firstname",
         label: t("manageUsers.fields.firstName"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "last-name",
         field: "lastname",
         label: t("manageUsers.fields.lastName"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "phone-number",
         field: "phoneNumber",
         label: t("manageUsers.fields.phoneNumber"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "in-stock",
         field: "inStock",
         label: t("manageUsers.fields.inStock"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "sold",
         field: "sold",
         label: t("manageUsers.fields.sold"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "requested",
         field: "requested",
         label: t("manageUsers.fields.requested"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "purchased",
         field: "purchased",
         label: t("manageUsers.fields.purchased"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "available",
         field: "available",
         label: t("manageUsers.fields.available"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "creation-date",
         field: "creationDate",
         label: t("manageUsers.fields.creationDate"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "receipts",
         field: "receipts",
         label: t("manageUsers.fields.receipts"),
-        headerClasses: "ellipsis",
+
         align: "left",
-        classes: "ellipsis",
       },
       {
         name: "pay-off",

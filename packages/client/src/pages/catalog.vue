@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column gap-16 no-wrap q-ma-md">
+    <q-card class="absolute-full column no-wrap q-ma-md">
       <q-card-section class="flex-center gap-16 no-wrap row">
         <q-input
           v-model="searchQuery"
@@ -84,26 +84,12 @@
           <!-- FIXME: add the right value checks for colors and icon -->
           <template #body-cell-status="{ value }">
             <q-td>
-              <div class="flex-center gap-16 no-wrap row">
-                <q-icon
-                  :name="value ? 'mdi-check-circle' : 'mdi-cancel'"
-                  :color="value ? 'green' : 'red'"
-                  size="24px"
-                />
-                <span>
-                  {{
-                    $t(
-                      "book.availability." +
-                        (value ? "available" : "notAvailable"),
-                    )
-                  }}
-                </span>
-              </div>
+              <status-chip :value="value" />
             </q-td>
           </template>
 
           <template #body-cell-utility="{ value }">
-            <q-td class="flex-center row text-center">
+            <q-td>
               <utility-chip :value="value" />
             </q-td>
           </template>
@@ -121,6 +107,7 @@ import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AddBookDialog from "src/components/add-book-dialog.vue";
 import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
+import StatusChip from "src/components/manage-users/status-chip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { SchoolFilters } from "src/models/book";
@@ -183,7 +170,6 @@ const columns = computed(
         label: t("book.fields.isbn"),
         field: "isbnCode",
         align: "left",
-        classes: "col col-shrink ellipsis",
       },
       {
         name: "author",
@@ -191,7 +177,6 @@ const columns = computed(
         field: "authorsFullName",
         align: "left",
         format: (val: string) => startCase(toLower(val)),
-        classes: "col col-shrink ellipsis",
       },
       {
         name: "publisher",
@@ -199,7 +184,6 @@ const columns = computed(
         field: "publisherName",
         align: "left",
         format: (val: string) => startCase(toLower(val)),
-        classes: "col col-shrink ellipsis",
       },
       {
         name: "subject",
@@ -207,7 +191,6 @@ const columns = computed(
         field: "subject",
         align: "left",
         format: (val: string) => startCase(toLower(val)),
-        classes: "col col-shrink ellipsis",
       },
       {
         name: "title",
@@ -215,7 +198,6 @@ const columns = computed(
         field: "title",
         align: "left",
         format: (val: string) => startCase(toLower(val)),
-        classes: "col col-grow ellipsis",
       },
       {
         name: "price",
@@ -237,7 +219,6 @@ const columns = computed(
         //FIXME: add the field name
         field: "",
         align: "center",
-        classes: "col",
       },
     ] satisfies QTableProps["columns"],
 );
