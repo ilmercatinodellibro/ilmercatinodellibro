@@ -22,16 +22,15 @@
                 class="min-height-none q-chip--dense q-chip--square"
                 :label="
                   $t(
-                    'manageUsers.bookMovementsDialog' + value
-                      ? 'report'
-                      : 'solve',
+                    'manageUsers.booksMovementsDialog.' +
+                      (value ? 'reportProblem' : 'solveProblem'),
                   )
                 "
                 :color="value ? 'red' : 'green'"
                 @click="
                   openProblemDialog(
                     value,
-                  ) /* FIXME: Add actual logic for history button */
+                  ) /* FIXME: Add actual logic for problems button */
                 "
               />
             </q-td>
@@ -326,7 +325,7 @@ const onPurchasedRequest: QTable["onRequest"] = async function (requestProps) {
 };
 
 function openProblemDialog(value: unknown) {
-  // FIXME: add logic
+  // FIXME: add problem report dialog
   value;
 }
 
