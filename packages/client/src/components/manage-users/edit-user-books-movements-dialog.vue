@@ -91,7 +91,6 @@ import { User } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
-import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 const titlePath = computed(
   () =>
