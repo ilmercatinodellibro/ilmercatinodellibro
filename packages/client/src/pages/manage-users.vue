@@ -164,7 +164,7 @@
             </q-td>
           </template>
 
-          <template #body-cell-pay-off="{ value }">
+          <template #body-cell-pay-off="{ row }">
             <q-td>
               <!-- This button has the same aspect of a q-chip -->
               <q-btn
@@ -172,7 +172,7 @@
                 class="min-height-none q-chip--dense q-chip--square"
                 dense
                 :label="$t('manageUsers.payOff')"
-                @click="openPayOff(value)"
+                @click="openPayOff(row)"
               />
             </q-td>
           </template>
@@ -193,6 +193,7 @@ import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
+import CheckOutUserDialog from "src/components/manage-users/check-out-user-dialog.vue";
 import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
 import EditUserDetailsDialog from "src/components/manage-users/edit-user-details-dialog.vue";
 import EditUserRequestedDialog from "src/components/manage-users/edit-user-requested-dialog.vue";
@@ -200,6 +201,7 @@ import EditUserStockdataDialog from "src/components/manage-users/edit-user-stock
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { UserSummaryFragment } from "src/services/auth.graphql";
 import { UserFragment, useUsersQuery } from "src/services/user.graphql";
 
 const { loading, users, refetch } = useUsersQuery();
@@ -403,9 +405,15 @@ function openReceipt(receipts: string[]) {
   receipts;
 }
 
-function openPayOff(payOff: string) {
-  // FIXME: add pay-off link
-  payOff;
+function openPayOff(user: UserSummaryFragment) {
+  Dialog.create({
+    component: CheckOutUserDialog,
+    componentProps: {
+      user,
+    },
+  }).onOk((payload) => {
+    payload;
+  });
 }
 
 function openEdit(

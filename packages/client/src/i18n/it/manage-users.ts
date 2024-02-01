@@ -35,6 +35,7 @@ export default {
   ],
   editUser: {
     title: "Modifica Dati Utente",
+    notes: "Note",
     discount: "Applica sconto ISEE/volontario",
   },
   inRetrieval: "In ritiro",
@@ -59,5 +60,28 @@ export default {
   actions: "Azioni",
   requestedBooksDialog: {
     title: "Libri prenotati da {0} {1}",
+  },
+  checkOutUserDialog: {
+    title: "Liquida Utente {0} {1}",
+    soldBooksCountLabel: "Totale Libri dell'Utente Venduti ad Altri",
+    totalCheckOutLabel: "Totale Liquidabile all'Utente",
+    totalCheckedOutLabel: "Totale Liquidato all'Utente",
+    info: "Utilizza le checkbox delle righe per attivare le azioni di gruppo",
+    buyPrice: "Prezzo d'acquisizione",
+    buyPriceTooltip:
+      "È il prezzo concordato con il proprietario originale del libro e corrisponde alla somma che gli viene garantita in caso di vendita",
+    publicPrice: "Prezzo al Pubblico",
+    publicPriceTooltip:
+      "È il prezzo al quale il libro viene venduto dal Mercatino e corrisponde al Prezzo d'acquisizione maggiorato della percentuale trattenuta dal Mercatino",
+    booksInStock: "Libri in Magazzino",
+    soldBooks: "Libri venduti",
+    returnedBooks: "Libri restituiti",
+    returnOptions: {
+      donate: "Dona al Mercatino",
+      return: "Restituisci",
+      repay: "Rimborsa",
+    },
+    returnAndDonate: "Restituisci contanti e dona libri",
+    returnEverything: "Restituisci contanti e libri",
   },
 };

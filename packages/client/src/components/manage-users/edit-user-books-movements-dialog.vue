@@ -1,18 +1,19 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" full-height @hide="onDialogHide">
     <k-dialog-card
-      size="lg"
+      size="fullscreen"
       :cancel-label="$t('common.close')"
       :title="$t(titlePath, [userData.firstname, userData.lastname])"
       @cancel="onDialogCancel"
     >
-      <q-card-section class="q-pa-none">
+      <q-card-section class="col-grow column height-none no-wrap q-pa-none">
         <dialog-table
           v-if="type === 'sold'"
           :columns="soldColumns"
           :rows="soldRows"
           :loading="soldLoading"
           :pagination="soldPagination"
+          class="full-height"
           @request="onSoldRequest"
         >
           <template #body-cell-problems="{ value }">

@@ -1,15 +1,17 @@
 <template>
   <q-table
     ref="tableRef"
-    :pagination="pagination"
-    :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
-    flat
-    square
-    :rows="rows"
     :columns="columns"
     :filter="searchQuery"
-    :loading="loading"
     :hide-pagination="hidePagination"
+    :hide-bottom="hideBottom"
+    :loading="loading"
+    :pagination="pagination"
+    :rows="rows"
+    :rows-per-page-options="rowsPerPageOptions ?? ROWS_PER_PAGE_OPTIONS"
+    class="full-height"
+    flat
+    square
     @request="onRequest"
     @update:pagination="$emit('update:pagination', $event)"
   >
@@ -20,14 +22,12 @@
 </template>
 
 <script setup lang="ts">
-import { QTable, QTableProps } from "quasar";
+import { QTable, QTableProps, QTableSlots } from "quasar";
 import { computed, onMounted, ref } from "vue";
-
-type Slots = QTable["$slots"];
 
 const tableRef = ref<QTable>();
 
-const slots = defineSlots<Slots>();
+const slots = defineSlots<QTableSlots>();
 
 const hidePagination = computed(() =>
   props.pagination
@@ -40,7 +40,13 @@ const props = defineProps<
     searchQuery?: string;
   } & Pick<
     QTableProps,
-    "rows" | "columns" | "pagination" | "loading" | "onRequest"
+    | "columns"
+    | "hideBottom"
+    | "loading"
+    | "onRequest"
+    | "pagination"
+    | "rows"
+    | "rowsPerPageOptions"
   >
 >();
 
