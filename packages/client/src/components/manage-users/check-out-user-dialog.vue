@@ -438,6 +438,8 @@ function reportProblems(books: string[]) {
 </script>
 
 <style scoped lang="scss">
+// This class is used so that the bulk action buttons
+// can be seen without scrolling the table to the right
 .sticky-button-group {
   position: sticky;
   right: 16px;
