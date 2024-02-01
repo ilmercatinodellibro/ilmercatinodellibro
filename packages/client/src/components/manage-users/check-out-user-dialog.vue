@@ -55,9 +55,77 @@
               :label="$t('manageUsers.checkOutUserDialog.publicPrice')"
             />
           </template>
+
+          <!--
+            Body slot is used because we need to split the table
+            into 3 parts, as seen in https://zpl.io/dR4zM4R
+          -->
           <template #body="{ row, cols }">
-            <q-tr v-if="!(row.id in Titles)">
+            <q-tr v-if="row.id in Titles" class="bg-grey-1">
+              <q-td>
+                <q-checkbox
+                  v-if="row.id === 'in-stock'"
+                  :model-value="rowsSelectionStatus()"
+                  @click="swapAllRows"
+                />
+              </q-td>
+              <!--
+                This <td> takes all the remaining columns of the table's worth of width
+                so the colspan is set to take up the space of all the other columns
+              -->
+              <q-td class="non-selectable text-weight-medium" colspan="11">
+                <span class="items-center row">
+                  {{ localizedSectionTitle(row.id) }}
+                  <q-space />
+                  <span
+                    v-if="
+                      rowsSelectionStatus() !== false && row.id === 'in-stock'
+                    "
+                    class="gap-16 items-center row sticky-button-group"
+                  >
+                    <q-btn
+                      :label="
+                        $t(
+                          'manageUsers.checkOutUserDialog.returnOptions.donate',
+                        )
+                      "
+                      outline
+                      @click="donateBooks(selectedRowsIDs)"
+                    />
+                    <q-btn
+                      :label="
+                        $t('manageUsers.checkOutUserDialog.returnOptions.repay')
+                      "
+                      outline
+                      @click="repayBooks(selectedRowsIDs)"
+                    />
+                    <q-btn
+                      :label="
+                        $t(
+                          'manageUsers.checkOutUserDialog.returnOptions.return',
+                        )
+                      "
+                      color="green"
+                      @click="returnBooks(selectedRowsIDs)"
+                    />
+                    <q-btn
+                      :label="
+                        $t('manageUsers.booksMovementsDialog.reportProblem')
+                      "
+                      color="red"
+                      @click="reportProblems(selectedRowsIDs)"
+                    />
+                  </span>
+                </span>
+              </q-td>
+            </q-tr>
+
+            <q-tr v-else>
               <q-td v-for="col in cols" :key="col.name">
+                <!--
+                  Since we can't use #body-cell-[column-name] because we're using
+                  the #body slot, we have to use v-if on the col.name instead
+                -->
                 <q-checkbox
                   v-if="
                     col.name === 'select' && selectableRowsIDs.includes(row.id)
@@ -115,60 +183,6 @@
                 </q-btn>
                 <span v-else>
                   {{ row[col.field] }}
-                </span>
-              </q-td>
-            </q-tr>
-            <q-tr v-else class="bg-grey-1">
-              <q-td auto-width>
-                <q-checkbox
-                  v-if="row.id === 'in-stock'"
-                  :model-value="rowsSelectionStatus()"
-                  @click="swapAllRows"
-                />
-              </q-td>
-              <q-td class="non-selectable text-weight-medium" colspan="11">
-                <span class="items-center row">
-                  {{ localizedSectionTitle(row.id) }}
-                  <q-space />
-                  <span
-                    v-if="
-                      rowsSelectionStatus() !== false && row.id === 'in-stock'
-                    "
-                    class="gap-16 items-center row sticky-button-group"
-                  >
-                    <q-btn
-                      :label="
-                        $t(
-                          'manageUsers.checkOutUserDialog.returnOptions.donate',
-                        )
-                      "
-                      outline
-                      @click="donateBooks(selectedRowsIDs)"
-                    />
-                    <q-btn
-                      :label="
-                        $t('manageUsers.checkOutUserDialog.returnOptions.repay')
-                      "
-                      outline
-                      @click="repayBooks(selectedRowsIDs)"
-                    />
-                    <q-btn
-                      :label="
-                        $t(
-                          'manageUsers.checkOutUserDialog.returnOptions.return',
-                        )
-                      "
-                      color="green"
-                      @click="returnBooks(selectedRowsIDs)"
-                    />
-                    <q-btn
-                      :label="
-                        $t('manageUsers.booksMovementsDialog.reportProblem')
-                      "
-                      color="red"
-                      @click="reportProblems(selectedRowsIDs)"
-                    />
-                  </span>
                 </span>
               </q-td>
             </q-tr>
@@ -308,21 +322,17 @@ const stockRows = ref<BookSummaryFragment[]>([]);
 const returnedRows = ref<BookSummaryFragment[]>([]);
 const soldRows = ref<BookSummaryFragment[]>([]);
 
-enum Titles {
-  "in-stock" = "in-stock",
-  returned = "returned",
-  sold = "sold",
-}
+const selectedRowsIDs = ref<string[]>([]);
 
 const bookLoading = ref(false);
 
-// FIXME: change query and logic to the actual one once the infrastructure is set up
+// FIXME: change query and logic to the actual separate queries once the infrastructure is set up
 const { refetchBooks } = useBookService(ref(0), ref(100));
 
 onMounted(async () => {
   bookLoading.value = true;
 
-  // FIXME: also change logic here to match the query above
+  // FIXME: also change logic here to match the queries above
   // Remember to add the sorting of stockRows by book copy ID
   const newBooks = await refetchBooks();
   stockRows.value =
@@ -338,9 +348,15 @@ onMounted(async () => {
   bookLoading.value = false;
 });
 
+enum Titles {
+  "in-stock" = "in-stock",
+  returned = "returned",
+  sold = "sold",
+}
+
 const tableRows = computed(() =>
   [
-    // Adding one empty row for each of the secondary headers, then merging all the
+    // Adding one empty row for each of the sub-headers, then merging all the
     // separate rows into the same array to display them all in a single table
     {
       id: "in-stock",
@@ -374,12 +390,12 @@ const tableRows = computed(() =>
     })
     .concat(soldRows.value),
 );
+
 const selectableRowsIDs = computed(() =>
   stockRows.value
     .filter((row) => row.id.endsWith("0") /* FIXME: add real filter logic */)
     .map((row) => row.id),
 );
-const selectedRowsIDs = ref<string[]>([]);
 
 const localizedSectionTitle = (sectionTitle: Titles) => {
   return sectionTitle === Titles["in-stock"]
