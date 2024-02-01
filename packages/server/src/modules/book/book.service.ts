@@ -58,7 +58,7 @@ export class BookService {
       "./tmp-files/books-source.csv",
     );
 
-    rmSync(dataDestination);
+    rmSync(dataDestination, { force: true });
 
     const sourceStream = createReadStream(dataSource);
     const destinationStream = createWriteStream(dataDestination);

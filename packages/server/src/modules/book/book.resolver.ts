@@ -169,7 +169,8 @@ export class BookResolver {
       }
 
       return result;
-    } catch {
+    } catch (e) {
+      console.error("Cannot load books, error: ", e);
       throw new UnprocessableEntityException(
         "Cannot import or process files on server.",
       );
