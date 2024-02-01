@@ -412,6 +412,7 @@ function openPayOff(user: UserSummaryFragment) {
       user,
     },
   }).onOk((payload) => {
+    // FIXME: add checkout logic
     payload;
   });
 }
