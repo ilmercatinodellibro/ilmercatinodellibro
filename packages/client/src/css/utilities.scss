@@ -122,6 +122,23 @@ $widths-list: 32, 180, 200, 250, 315, 420, 600, 1024;
   }
 }
 
+// heights
+$heights-list: 0, 52;
+
+@each $height in $heights-list {
+  .height-#{$height} {
+    height: $height + px !important;
+  }
+
+  .min-height-#{$height} {
+    min-height: $height + px !important;
+  }
+
+  .max-height-#{$height} {
+    max-height: $height + px !important;
+  }
+}
+
 .round {
   border-radius: 50% !important;
 }
@@ -147,7 +164,7 @@ $widths-list: 32, 180, 200, 250, 315, 420, 600, 1024;
   In order to provide an height value to the container you can set the height of that element to 0 and than let it expand using "flex-grow".
 
 */
-.height-0 {
+.flex-delegate-height-management {
   flex-grow: 1;
   height: 0;
   overflow: auto;
@@ -165,13 +182,6 @@ $widths-list: 32, 180, 200, 250, 315, 420, 600, 1024;
     position: sticky;
     bottom: 0;
   }
-}
-
-// min-height
-$min-height-row: 52px;
-
-.min-height-52.min-height-52 {
-  min-height: $min-height-row;
 }
 
 .vertical-align-middle {

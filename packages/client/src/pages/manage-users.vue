@@ -169,7 +169,7 @@
               <!-- This button has the same aspect of a q-chip -->
               <q-btn
                 color="primary"
-                class="min-height-none q-chip--dense q-chip--square"
+                class="min-height-0 q-chip--dense q-chip--square"
                 dense
                 :label="$t('manageUsers.payOff')"
                 @click="openPayOff(row)"
