@@ -217,12 +217,6 @@ const inRetrievalColumns = computed(
         align: "left",
       },
       {
-        label: t("book.conditions"),
-        field: "conditions",
-        name: "conditions",
-        align: "left",
-      },
-      {
         label: t("book.fields.title"),
         field: "title",
         name: "title",
@@ -299,12 +293,6 @@ const retrievedColumns = computed(
         label: t("book.fields.status"),
         field: "status",
         name: "status",
-        align: "left",
-      },
-      {
-        label: t("book.conditions"),
-        field: "conditions",
-        name: "conditions",
         align: "left",
       },
       {

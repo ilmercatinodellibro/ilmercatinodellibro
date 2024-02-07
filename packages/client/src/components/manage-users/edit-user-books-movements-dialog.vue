@@ -172,12 +172,6 @@ const soldColumns = computed(
         align: "left",
       },
       {
-        label: t("book.conditions"),
-        field: "conditions",
-        name: "conditions",
-        align: "left",
-      },
-      {
         label: t("book.fields.title"),
         field: "title",
         name: "title",
@@ -237,12 +231,6 @@ const purchasedColumns = computed(
         field: "subject",
         name: "subject",
 
-        align: "left",
-      },
-      {
-        label: t("book.conditions"),
-        field: "conditions",
-        name: "conditions",
         align: "left",
       },
       {
