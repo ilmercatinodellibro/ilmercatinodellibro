@@ -1,7 +1,7 @@
 <template>
-  <q-dialog ref="dialogRef" full-height @hide="onDialogHide">
+  <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
-      size="fullscreen"
+      size="lg"
       :cancel-label="$t('common.close')"
       :title="$t(titlePath, [userData.firstname, userData.lastname])"
       @cancel="onDialogCancel"
@@ -13,7 +13,6 @@
           :rows="soldRows"
           :loading="soldLoading"
           :pagination="soldPagination"
-          class="full-height"
           @request="onSoldRequest"
         >
           <template #body-cell-problems="{ value }">
