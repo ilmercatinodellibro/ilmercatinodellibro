@@ -56,17 +56,17 @@
             />
           </template>
 
-          <!--
-            Body slot is used because we need to split the table
-            into 3 parts, as seen in https://zpl.io/dR4zM4R
-          -->
+          <!-- Body slot is used because we need to split the table into 3 parts -->
           <template #body="{ row, cols }">
-            <q-tr v-if="row.id in Titles" class="bg-grey-1">
+            <q-tr
+              v-if="Object.values(Titles).includes(row.id)"
+              class="bg-grey-1"
+            >
               <q-td>
                 <q-checkbox
                   v-if="row.id === 'in-stock'"
                   :model-value="rowsSelectionStatus()"
-                  @click="swapAllRows"
+                  @update:model-value="swapAllRows()"
                 />
               </q-td>
               <!--
@@ -105,14 +105,14 @@
                           'manageUsers.checkOutUserDialog.returnOptions.return',
                         )
                       "
-                      color="green"
+                      color="positive"
                       @click="returnBooks(selectedRowsIDs)"
                     />
                     <q-btn
                       :label="
                         $t('manageUsers.booksMovementsDialog.reportProblem')
                       "
-                      color="red"
+                      color="negative"
                       @click="reportProblems(selectedRowsIDs)"
                     />
                   </span>
@@ -131,7 +131,7 @@
                     col.name === 'select' && selectableRowsIDs.includes(row.id)
                   "
                   :model-value="selectedRowsIDs.includes(row.id)"
-                  @click="swapRow(row.id)"
+                  @update:model-value="swapRow(row.id)"
                 />
                 <q-btn
                   v-else-if="col.name === 'actions' && stockRows.includes(row)"
@@ -182,7 +182,7 @@
                   </q-menu>
                 </q-btn>
                 <span v-else>
-                  {{ row[col.field] }}
+                  {{ col.value }}
                 </span>
               </q-td>
             </q-tr>
@@ -290,21 +290,23 @@ const columns = computed(
         field: "originalPrice",
         label: t("book.fields.price"),
         align: "left",
-        format: (val: number) => val.toFixed(2) + " €",
+        format: (val: number) => `${val.toFixed(2)} €`,
       },
       {
         name: "buy-price",
-        // FIXME: add field
+        // FIXME: add field and enable format
         field: "",
         label: t("manageUsers.checkOutUserDialog.buyPrice"),
         align: "left",
+        // format: (val: number) => `${val.toFixed(2)} €`,
       },
       {
         name: "public-price",
-        // FIXME: add field
+        // FIXME: add field and enable format
         field: "",
         label: t("manageUsers.checkOutUserDialog.publicPrice"),
         align: "left",
+        // format: (val: number) => `${val.toFixed(2)} €`,
       },
       {
         name: "actions",
@@ -348,48 +350,22 @@ onMounted(async () => {
   bookLoading.value = false;
 });
 
-enum Titles {
-  "in-stock" = "in-stock",
-  returned = "returned",
-  sold = "sold",
-}
-
-const tableRows = computed(() =>
-  [
-    // Adding one empty row for each of the sub-headers, then merging all the
-    // separate rows into the same array to display them all in a single table
-    {
-      id: "in-stock",
-      authorsFullName: "",
-      isbnCode: "",
-      originalPrice: 0,
-      publisherName: "",
-      subject: "",
-      title: "",
-    },
-  ]
-    .concat(stockRows.value)
-    .concat({
-      id: "returned",
-      authorsFullName: "",
-      isbnCode: "",
-      originalPrice: 0,
-      publisherName: "",
-      subject: "",
-      title: "",
-    })
-    .concat(returnedRows.value)
-    .concat({
-      id: "sold",
-      authorsFullName: "",
-      isbnCode: "",
-      originalPrice: 0,
-      publisherName: "",
-      subject: "",
-      title: "",
-    })
-    .concat(soldRows.value),
-);
+const tableRows = computed(() => [
+  // Adding one empty row for each of the sub-headers, then merging all the
+  // separate rows into the same array to display them all in a single table
+  {
+    id: "in-stock",
+  },
+  ...stockRows.value,
+  {
+    id: "returned",
+  },
+  ...returnedRows.value,
+  {
+    id: "sold",
+  },
+  ...soldRows.value,
+]);
 
 const selectableRowsIDs = computed(() =>
   stockRows.value
@@ -397,10 +373,16 @@ const selectableRowsIDs = computed(() =>
     .map((row) => row.id),
 );
 
+enum Titles {
+  InStock = "in-stock",
+  Returned = "returned",
+  Sold = "sold",
+}
+
 const localizedSectionTitle = (sectionTitle: Titles) => {
-  return sectionTitle === Titles["in-stock"]
+  return sectionTitle === Titles.InStock
     ? t("manageUsers.checkOutUserDialog.booksInStock")
-    : sectionTitle === Titles.returned
+    : sectionTitle === Titles.Returned
     ? t("manageUsers.checkOutUserDialog.returnedBooks")
     : t("manageUsers.checkOutUserDialog.soldBooks");
 };
