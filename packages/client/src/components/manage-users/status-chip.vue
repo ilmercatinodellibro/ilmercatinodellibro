@@ -6,7 +6,7 @@
     size="24px"
   />
   <span>
-    {{ $t("book.availability." + (value ? "available" : "notAvailable")) }}
+    {{ $t(`book.availability.${value ? "available" : "notAvailable"}`) }}
   </span>
 </template>
 

@@ -4,7 +4,7 @@
       size="lg"
       :cancel-label="$t('common.close')"
       :title="$t(titlePath, [userData.firstname, userData.lastname])"
-      @cancel="onDialogCancel"
+      @cancel="onDialogCancel()"
     >
       <q-card-section class="col-grow column height-0 no-wrap q-pa-none">
         <dialog-table
@@ -93,8 +93,9 @@ import { BookSummaryFragment } from "src/services/book.graphql";
 import DialogTable from "./dialog-table.vue";
 const titlePath = computed(
   () =>
-    "manageUsers.booksMovementsDialog." +
-    (props.type === "sold" ? "soldTitle" : "purchasedTitle"),
+    `manageUsers.booksMovementsDialog.${
+      props.type === "sold" ? "soldTitle" : "purchasedTitle"
+    }`,
 );
 
 const currentSoldPage = ref(0);

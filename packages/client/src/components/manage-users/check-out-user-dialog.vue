@@ -41,6 +41,7 @@
           :pagination="pagination"
           :rows="tableRows"
           :rows-per-page-options="[0]"
+          class="external-padding-0"
           hide-bottom
         >
           <template #header-cell-buy-price>
@@ -61,11 +62,13 @@
             <q-tr
               v-if="Object.values(Titles).includes(row.id)"
               class="bg-grey-1"
+              no-hover
             >
               <q-td>
                 <q-checkbox
                   v-if="row.id === 'in-stock'"
-                  :model-value="rowsSelectionStatus()"
+                  :model-value="rowsSelectionStatus"
+                  dense
                   @update:model-value="swapAllRows()"
                 />
               </q-td>
@@ -79,7 +82,7 @@
                   <q-space />
                   <span
                     v-if="
-                      rowsSelectionStatus() !== false && row.id === 'in-stock'
+                      rowsSelectionStatus !== false && row.id === 'in-stock'
                     "
                     class="gap-16 items-center row sticky-button-group"
                   >
@@ -131,11 +134,13 @@
                     col.name === 'select' && selectableRowsIDs.includes(row.id)
                   "
                   :model-value="selectedRowsIDs.includes(row.id)"
+                  dense
                   @update:model-value="swapRow(row.id)"
                 />
                 <q-btn
                   v-else-if="col.name === 'actions' && stockRows.includes(row)"
                   :icon="mdiDotsVertical"
+                  dense
                   flat
                   round
                   size="sm"
@@ -194,12 +199,12 @@
         <q-btn
           outline
           :label="$t('manageUsers.checkOutUserDialog.returnAndDonate')"
-          @click="onDialogOK(false)"
+          @click="onDialogOK('return-and-donate')"
         />
         <q-btn
           color="green"
           :label="$t('manageUsers.checkOutUserDialog.returnEverything')"
-          @click="onDialogOK(true)"
+          @click="onDialogOK('return-everything')"
         />
       </template>
     </k-dialog-card>
@@ -228,7 +233,7 @@ defineProps<{
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
-  useDialogPluginComponent();
+  useDialogPluginComponent<"return-and-donate" | "return-everything">();
 
 const totalSoldBooks = ref(0);
 const totalCheckoutMoney = ref(0);
@@ -387,19 +392,13 @@ const localizedSectionTitle = (sectionTitle: Titles) => {
     : t("manageUsers.checkOutUserDialog.soldBooks");
 };
 
-/**
- * Value of the status of the selection for a section of the table
- * @param sectionTitle the title of the section
- * @returns `false` if none of the rows of the section are selected,
- * `true` if all the rows are selected, `undefined` otherwise
- */
-const rowsSelectionStatus = () => {
-  return selectedRowsIDs.value.length === 0
+const rowsSelectionStatus = computed(() =>
+  selectedRowsIDs.value.length === 0
     ? false
     : selectedRowsIDs.value.length === selectableRowsIDs.value.length
     ? true
-    : undefined;
-};
+    : undefined,
+);
 
 function swapAllRows() {
   selectedRowsIDs.value =
