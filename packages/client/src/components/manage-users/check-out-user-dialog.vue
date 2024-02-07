@@ -41,7 +41,6 @@
           :pagination="pagination"
           :rows="tableRows"
           :rows-per-page-options="[0]"
-          class="external-padding-0"
           hide-bottom
         >
           <template #header-cell-buy-price>
