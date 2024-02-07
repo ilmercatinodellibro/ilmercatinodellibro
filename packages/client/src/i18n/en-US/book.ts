@@ -38,7 +38,6 @@ export default {
       "You're permanently deleting this copy from the database and you will be losing all the data tied to it. Do you wish to proceed?",
   },
 
-  conditions: "Conditions",
   code: "Code",
   originalCode: "Original Code",
   return: "Return",

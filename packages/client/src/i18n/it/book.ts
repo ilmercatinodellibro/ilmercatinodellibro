@@ -38,7 +38,6 @@ export default {
       "Stai eliminando definitivamente questa copia dal database e perderai tutti i dati ad essa connessi. Vuoi procedere?",
   },
 
-  conditions: "Condizioni",
   code: "Codice",
   originalCode: "Codice Originale",
   return: "Reso",
