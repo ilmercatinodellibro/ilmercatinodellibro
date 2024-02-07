@@ -1,14 +1,10 @@
 <template>
   <q-table
     ref="tableRef"
-    :columns="columns"
     :filter="searchQuery"
     :hide-pagination="hidePagination"
-    :hide-bottom="hideBottom"
-    :loading="loading"
     :pagination="pagination"
-    :rows="rows"
-    :rows-per-page-options="rowsPerPageOptions ?? ROWS_PER_PAGE_OPTIONS"
+    :rows-per-page-options="rowsPerPageOptions"
     class="full-height"
     flat
     square
@@ -35,22 +31,17 @@ const hidePagination = computed(() =>
     : true,
 );
 
-const props = defineProps<
+const props = withDefaults(
+  defineProps<
+    {
+      searchQuery?: string;
+    } & Pick<QTableProps, "pagination" | "onRequest" | "rowsPerPageOptions">
+  >(),
   {
-    searchQuery?: string;
-  } & Pick<
-    QTableProps,
-    | "columns"
-    | "hideBottom"
-    | "loading"
-    | "onRequest"
-    | "pagination"
-    | "rows"
-    | "rowsPerPageOptions"
-  >
->();
-
-const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
+    searchQuery: undefined,
+    rowsPerPageOptions: () => [5, 10, 20, 50, 100, 200],
+  },
+);
 
 onMounted(() => {
   tableRef.value?.requestServerInteraction();
