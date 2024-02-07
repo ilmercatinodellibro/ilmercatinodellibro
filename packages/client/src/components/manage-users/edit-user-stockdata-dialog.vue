@@ -82,7 +82,7 @@
                   <q-btn
                     color="primary"
                     no-wrap
-                    class="min-height-none q-chip--dense q-chip--square row"
+                    class="min-height-0 q-chip--dense q-chip--square row"
                     @click="() => deleteBookDialog(value)"
                   >
                     <q-item-label> {{ $t("common.delete") }} </q-item-label>

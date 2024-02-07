@@ -34,7 +34,7 @@
         {{ $t("manageUsers.checkOutUserDialog.info") }}
       </q-card-section>
 
-      <q-card-section class="col-grow column height-none no-wrap q-pa-none">
+      <q-card-section class="col-grow column height-0 no-wrap q-pa-none">
         <dialog-table
           :columns="columns"
           :loading="bookLoading"

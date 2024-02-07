@@ -6,7 +6,7 @@
       :title="$t(titlePath, [userData.firstname, userData.lastname])"
       @cancel="onDialogCancel"
     >
-      <q-card-section class="col-grow column height-none no-wrap q-pa-none">
+      <q-card-section class="col-grow column height-0 no-wrap q-pa-none">
         <dialog-table
           v-if="type === 'sold'"
           :columns="soldColumns"
@@ -19,7 +19,7 @@
             <q-td class="text-center">
               <!-- This button has the same aspect of a q-chip -->
               <q-btn
-                class="min-height-none q-chip--dense q-chip--square"
+                class="min-height-0 q-chip--dense q-chip--square"
                 :label="
                   $t(
                     'manageUsers.booksMovementsDialog.' +
@@ -64,7 +64,7 @@
             <q-td class="text-center">
               <!-- This button has the same aspect of a q-chip -->
               <q-btn
-                class="min-height-none q-chip--dense q-chip--square"
+                class="min-height-0 q-chip--dense q-chip--square"
                 :label="$t('book.return')"
                 color="primary"
                 @click="

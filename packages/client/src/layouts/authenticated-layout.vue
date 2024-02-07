@@ -9,7 +9,7 @@
       :breakpoint="DRAWER_BREAKPOINT"
       :mini="isDrawerMini"
       :width="DRAWER_WIDTH"
-      class="column height-0"
+      class="column flex-delegate-height-management"
       content-class="bg-grey-1"
       show-if-above
       role="navigation"
