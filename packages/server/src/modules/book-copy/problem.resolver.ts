@@ -41,11 +41,11 @@ export class ProblemResolver {
     });
   }
 
-  //============ Problems ============
+  //============ Mutations ============
   @Mutation(() => Problem)
   async reportProblem(
     @Input()
-    { bookCopyId, details, type }: ProblemCreateInput,
+    input: ProblemCreateInput,
     @CurrentUser() { id: userId, role: userRole }: User,
   ) {
     if (userRole === Role.USER) {
@@ -56,7 +56,7 @@ export class ProblemResolver {
 
     const unresolvedProblem = await this.prisma.problem.findFirst({
       where: {
-        bookCopyId,
+        bookCopyId: input.bookCopyId,
         resolvedById: null,
       },
     });
@@ -69,10 +69,8 @@ export class ProblemResolver {
 
     return this.prisma.problem.create({
       data: {
-        bookCopyId,
         createdById: userId,
-        details,
-        type,
+        ...input,
       },
     });
   }
@@ -80,7 +78,7 @@ export class ProblemResolver {
   @Mutation(() => Problem)
   async resolveProblem(
     @Input()
-    { id, solution }: ProblemResolveInput,
+    { id, ...toUpdate }: ProblemResolveInput,
     @CurrentUser() { id: userId, role: userRole }: User,
   ) {
     if (userRole === Role.USER) {
@@ -91,8 +89,10 @@ export class ProblemResolver {
 
     await this.prisma.problem.findFirstOrThrow({
       where: {
-        id, // If the problem does not exists, throw an error
-        resolvedById: null, // If the problem was already solved, throw an exception because we must not override the old solution.
+        // If the problem does not exist, throw an error
+        id,
+        // If the problem was already solved, throw an exception because we must not override the old solution.
+        resolvedById: null,
       },
     });
 
@@ -101,7 +101,7 @@ export class ProblemResolver {
         id,
       },
       data: {
-        solution,
+        ...toUpdate,
         resolvedById: userId,
         resolvedAt: new Date(),
       },

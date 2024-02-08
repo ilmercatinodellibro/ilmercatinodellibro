@@ -61,6 +61,7 @@ model User {
   deletedReservations Reservation[] @relation("ReservationDeletedBy")
   reservations        Reservation[] @relation("ReservationUser") // Keeps track of the user for who the reservation was made
   requestedBooks      BookRequest[] @relation("BookRequestUser")
+  deletedBookRequests BookRequest[] @relation("BookRequestDeletedBy")
 
   // Operator/admin relations
   returnedBookCopies BookCopy[] @relation("CopyReturnedBy")
@@ -223,7 +224,7 @@ model Reservation {
   id String @id @default(uuid())
 
   userId String @map("user_id")
-  user   User?  @relation("ReservationUser", fields: [userId], references: [id])
+  user   User   @relation("ReservationUser", fields: [userId], references: [id])
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation("BookReservations", fields: [bookId], references: [id])
 
@@ -235,7 +236,7 @@ model Reservation {
   deletedById String?   @map("deleted_by_id")
   deletedBy   User?     @relation("ReservationDeletedBy", fields: [deletedById], references: [id])
 
-  expiresAt DateTime? @map("expires_at")
+  expiresAt DateTime @map("expires_at")
 
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("ReservationSale", fields: [saleId], references: [id])
@@ -245,12 +246,14 @@ model BookRequest {
   id String @id @default(uuid())
 
   userId String @map("user_id")
-  user   User?  @relation("BookRequestUser", fields: [userId], references: [id])
+  user   User   @relation("BookRequestUser", fields: [userId], references: [id])
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation("BookRequested", fields: [bookId], references: [id])
 
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  deletedAt DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by_id")
+  deletedBy   User?     @relation("BookRequestDeletedBy", fields: [deletedById], references: [id])
 
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("BookRequestSale", fields: [saleId], references: [id])

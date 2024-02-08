@@ -8,15 +8,17 @@ fragment BookCopiesSummary on BookCopy {
     retailLocationId
   }
   problems {
+    id
     createdAt
     createdBy {
+      id
       firstname
       lastname
     }
     details
-    id
     resolvedAt
     resolvedBy {
+      id
       firstname
       lastname
     }

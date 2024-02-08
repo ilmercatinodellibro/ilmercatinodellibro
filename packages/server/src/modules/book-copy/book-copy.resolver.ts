@@ -87,11 +87,11 @@ export class BookCopyResolver {
   @Query(() => [BookCopy])
   async bookCopies(
     @Args()
-    { bookId }: BookCopyQueryArgs,
+    queryArgs: BookCopyQueryArgs,
   ) {
     return this.prisma.bookCopy.findMany({
       where: {
-        bookId,
+        ...queryArgs,
       },
     });
   }

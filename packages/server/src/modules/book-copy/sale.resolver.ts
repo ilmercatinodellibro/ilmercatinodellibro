@@ -42,7 +42,7 @@ export class SaleResolver {
     });
   }
 
-  //============ Problems ============
+  //============ Mutations ============
   @Mutation(() => GraphQLVoid, { nullable: true })
   async refundSale(
     @Input()
