@@ -71,7 +71,7 @@ export class ReservationResolver {
       .deletedBy();
   }
 
-  @ResolveField(() => Sale)
+  @ResolveField(() => Sale, { nullable: true })
   async sale(@Root() reservation: Reservation) {
     if (!reservation.saleId) {
       return null;
