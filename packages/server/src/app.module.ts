@@ -29,7 +29,9 @@ import { MailModule } from "./modules/mail/mail.module";
 import { NotificationModule } from "./modules/notification/notification.module";
 import { PrismaModule } from "./modules/prisma/prisma.module";
 import { PushNotificationModule } from "./modules/push-notification/push-notification.module";
+import { ReservationModule } from "./modules/reservation/reservation.module";
 import { RetailLocationModule } from "./modules/retail-location/retail-location.module";
+import { SaleModule } from "./modules/sale/sale.module";
 import { UserModule } from "./modules/user/user.module";
 
 @Module({
@@ -135,6 +137,8 @@ import { UserModule } from "./modules/user/user.module";
     PushNotificationModule,
     RetailLocationModule,
     FeedbackModule,
+    ReservationModule,
+    SaleModule,
     UserModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }, DateScalar],
