@@ -183,14 +183,7 @@ const retrievedPagination = ref({
   page: retrievedCurrentPage.value,
 });
 
-const inRetrievalColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
-  {
-    label: t("book.fields.isbn"),
-    field: "isbnCode",
-    name: "isbn",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-  },
+const commonColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     label: t("book.fields.author"),
     field: "authorsFullName",
@@ -241,6 +234,19 @@ const inRetrievalColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     name: "utility",
     align: "center",
   },
+]);
+
+const inRetrievalColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+  {
+    label: t("book.fields.isbn"),
+    field: "isbnCode",
+    name: "isbn",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+
+  ...commonColumns.value,
+
   {
     label: t("manageUsers.actions"),
     field: () => undefined,
@@ -248,7 +254,7 @@ const inRetrievalColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "center",
   },
 ]);
-// TODO: apply start case to related fields, re-use common columns
+
 const retrievedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     label: t("book.fields.isbn"),
@@ -270,52 +276,8 @@ const retrievedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     name: "original-code",
     align: "left",
   },
-  {
-    label: t("book.fields.author"),
-    field: "authorsFullName",
-    name: "author",
-    align: "left",
-  },
-  {
-    label: t("book.fields.subject"),
-    field: "subject",
-    name: "subject",
-    align: "left",
-  },
-  {
-    label: t("book.fields.status"),
-    // TODO: add the field name
-    field: () => undefined,
-    name: "status",
-    align: "left",
-  },
-  {
-    label: t("book.fields.title"),
-    field: "title",
-    name: "title",
-    align: "left",
-  },
-  {
-    label: t("book.fields.publisher"),
-    field: "publisherName",
-    name: "publisher",
-    align: "left",
-  },
-  {
-    label: t("book.fields.price"),
-    field: "originalPrice",
-    name: "price",
-    headerClasses: "text-center",
-    align: "left",
-    format: (val) => val + " €",
-  },
-  {
-    label: t("book.fields.utility"),
-    // TODO: add the field name
-    field: () => undefined,
-    name: "utility",
-    align: "center",
-  },
+
+  ...commonColumns.value,
 ]);
 
 defineProps<{
