@@ -6,7 +6,7 @@ import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { ProblemCreateInput, ProblemResolveInput } from "./problem.args";
 
-@Resolver(Problem)
+@Resolver(() => Problem)
 export class ProblemResolver {
   constructor(private readonly prisma: PrismaService) {}
 

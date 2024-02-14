@@ -19,7 +19,7 @@ import {
 } from "./book-copy.args";
 import { BookCopyService } from "./book-copy.service";
 
-@Resolver(BookCopy)
+@Resolver(() => BookCopy)
 export class BookCopyResolver {
   constructor(
     private readonly prisma: PrismaService,
