@@ -213,7 +213,12 @@
 <script setup lang="ts">
 import { mdiDotsVertical, mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { cloneDeep } from "lodash-es";
-import { QDialog, QTableProps, useDialogPluginComponent } from "quasar";
+import {
+  QDialog,
+  QTableColumn,
+  QTableProps,
+  useDialogPluginComponent,
+} from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
@@ -238,87 +243,84 @@ const totalSoldBooks = ref(0);
 const totalCheckoutMoney = ref(0);
 const totalCheckedOutMoney = ref(0);
 
-const columns = computed(
-  () =>
-    [
-      {
-        name: "select",
-        field: "",
-        label: "",
-      },
-      {
-        name: "isbn-code",
-        field: "isbnCode",
-        label: t("book.fields.isbn"),
-        align: "left",
-      },
-      {
-        name: "book-code",
-        // FIXME: add field
-        field: "",
-        label: t("book.code"),
-        align: "left",
-      },
-      {
-        name: "status",
-        // FIXME: add field
-        field: "",
-        label: t("book.fields.status"),
-      },
-      {
-        name: "author",
-        field: "authorsFullName",
-        label: t("book.fields.author"),
-        align: "left",
-      },
-      {
-        name: "publisher",
-        field: "publisherName",
-        label: t("book.fields.publisher"),
-        align: "left",
-      },
-      {
-        name: "subject",
-        field: "subject",
-        label: t("book.fields.subject"),
-        align: "left",
-      },
-      {
-        name: "title",
-        field: "title",
-        label: t("book.fields.title"),
-        align: "left",
-      },
-      {
-        name: "cover-price",
-        field: "originalPrice",
-        label: t("book.fields.price"),
-        align: "left",
-        format: (val: number) => `${val.toFixed(2)} €`,
-      },
-      {
-        name: "buy-price",
-        // FIXME: add field and enable format
-        field: "",
-        label: t("manageUsers.checkOutUserDialog.buyPrice"),
-        align: "left",
-        // format: (val: number) => `${val.toFixed(2)} €`,
-      },
-      {
-        name: "public-price",
-        // FIXME: add field and enable format
-        field: "",
-        label: t("manageUsers.checkOutUserDialog.publicPrice"),
-        align: "left",
-        // format: (val: number) => `${val.toFixed(2)} €`,
-      },
-      {
-        name: "actions",
-        field: "",
-        label: "",
-      },
-    ] satisfies QTableProps["columns"],
-);
+const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+  {
+    name: "select",
+    field: () => undefined,
+    label: "",
+  },
+  {
+    name: "isbn-code",
+    field: "isbnCode",
+    label: t("book.fields.isbn"),
+    align: "left",
+  },
+  {
+    name: "book-code",
+    // FIXME: add field
+    field: () => undefined,
+    label: t("book.code"),
+    align: "left",
+  },
+  {
+    name: "status",
+    // FIXME: add field
+    field: () => undefined,
+    label: t("book.fields.status"),
+  },
+  {
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
+    align: "left",
+  },
+  {
+    name: "publisher",
+    field: "publisherName",
+    label: t("book.fields.publisher"),
+    align: "left",
+  },
+  {
+    name: "subject",
+    field: "subject",
+    label: t("book.fields.subject"),
+    align: "left",
+  },
+  {
+    name: "title",
+    field: "title",
+    label: t("book.fields.title"),
+    align: "left",
+  },
+  {
+    name: "cover-price",
+    field: "originalPrice",
+    label: t("book.fields.price"),
+    align: "left",
+    format: (val: number) => `${val.toFixed(2)} €`,
+  },
+  {
+    name: "buy-price",
+    // FIXME: add field and enable format
+    field: () => undefined,
+    label: t("manageUsers.checkOutUserDialog.buyPrice"),
+    align: "left",
+    // format: (val: number) => `${val.toFixed(2)} €`,
+  },
+  {
+    name: "public-price",
+    // FIXME: add field and enable format
+    field: () => undefined,
+    label: t("manageUsers.checkOutUserDialog.publicPrice"),
+    align: "left",
+    // format: (val: number) => `${val.toFixed(2)} €`,
+  },
+  {
+    name: "actions",
+    field: () => undefined,
+    label: "",
+  },
+]);
 
 const pagination: QTableProps["pagination"] = {
   rowsPerPage: 0,

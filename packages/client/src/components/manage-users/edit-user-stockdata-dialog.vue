@@ -132,7 +132,7 @@
 <script setup lang="ts">
 import { mdiInformationOutline, mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
-import { Dialog, QTable, QTableProps, useDialogPluginComponent } from "quasar";
+import { Dialog, QTable, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useBookService } from "src/services/book";
@@ -183,148 +183,140 @@ const retrievedPagination = ref({
   page: retrievedCurrentPage.value,
 });
 
-// FIXME: fill all the missing fields from the columns
-const inRetrievalColumns = computed(
-  () =>
-    [
-      {
-        label: t("book.fields.isbn"),
-        field: "isbnCode",
-        name: "isbn",
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        label: t("book.fields.author"),
-        field: "authorsFullName",
-        name: "author",
-
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        label: t("book.fields.subject"),
-        field: "subject",
-        name: "subject",
-
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        label: t("book.fields.status"),
-        field: "status",
-        name: "status",
-        align: "left",
-      },
-      {
-        label: t("book.fields.title"),
-        field: "title",
-        name: "title",
-
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        label: t("book.fields.publisher"),
-        field: "publisherName",
-        name: "publisher",
-
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        label: t("book.fields.price"),
-        field: "originalPrice",
-        name: "price",
-        headerClasses: "text-center",
-        align: "left",
-        format: (val) => val + " €",
-      },
-      {
-        label: t("book.fields.utility"),
-        field: "utility",
-        name: "utility",
-        align: "center",
-      },
-      {
-        label: t("manageUsers.actions"),
-        field: "",
-        name: "actions",
-        align: "center",
-      },
-    ] satisfies QTableProps["columns"],
-);
-const retrievedColumns = computed(
-  () =>
-    [
-      {
-        label: t("book.fields.isbn"),
-        field: "isbnCode",
-        name: "isbn",
-        align: "left",
-      },
-      {
-        label: t("book.code"),
-        field: "code",
-        name: "code",
-        align: "left",
-      },
-      {
-        label: t("book.originalCode"),
-        field: "originalCode",
-        name: "original-code",
-        align: "left",
-      },
-      {
-        label: t("book.fields.author"),
-        field: "authorsFullName",
-        name: "author",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.subject"),
-        field: "subject",
-        name: "subject",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.status"),
-        field: "status",
-        name: "status",
-        align: "left",
-      },
-      {
-        label: t("book.fields.title"),
-        field: "title",
-        name: "title",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.publisher"),
-        field: "publisherName",
-        name: "publisher",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.price"),
-        field: "originalPrice",
-        name: "price",
-        headerClasses: "text-center",
-        align: "left",
-        format: (val) => val + " €",
-      },
-      {
-        label: t("book.fields.utility"),
-        field: "utility",
-        name: "utility",
-        align: "center",
-      },
-    ] satisfies QTableProps["columns"],
-);
+const inRetrievalColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+  {
+    label: t("book.fields.isbn"),
+    field: "isbnCode",
+    name: "isbn",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    label: t("book.fields.author"),
+    field: "authorsFullName",
+    name: "author",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    label: t("book.fields.subject"),
+    field: "subject",
+    name: "subject",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    label: t("book.fields.status"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "status",
+    align: "left",
+  },
+  {
+    label: t("book.fields.title"),
+    field: "title",
+    name: "title",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    label: t("book.fields.publisher"),
+    field: "publisherName",
+    name: "publisher",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    label: t("book.fields.price"),
+    field: "originalPrice",
+    name: "price",
+    headerClasses: "text-center",
+    align: "left",
+    format: (val) => val + " €",
+  },
+  {
+    label: t("book.fields.utility"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "utility",
+    align: "center",
+  },
+  {
+    label: t("manageUsers.actions"),
+    field: () => undefined,
+    name: "actions",
+    align: "center",
+  },
+]);
+// TODO: apply start case to related fields, re-use common columns
+const retrievedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+  {
+    label: t("book.fields.isbn"),
+    field: "isbnCode",
+    name: "isbn",
+    align: "left",
+  },
+  {
+    label: t("book.code"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "code",
+    align: "left",
+  },
+  {
+    label: t("book.originalCode"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "original-code",
+    align: "left",
+  },
+  {
+    label: t("book.fields.author"),
+    field: "authorsFullName",
+    name: "author",
+    align: "left",
+  },
+  {
+    label: t("book.fields.subject"),
+    field: "subject",
+    name: "subject",
+    align: "left",
+  },
+  {
+    label: t("book.fields.status"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "status",
+    align: "left",
+  },
+  {
+    label: t("book.fields.title"),
+    field: "title",
+    name: "title",
+    align: "left",
+  },
+  {
+    label: t("book.fields.publisher"),
+    field: "publisherName",
+    name: "publisher",
+    align: "left",
+  },
+  {
+    label: t("book.fields.price"),
+    field: "originalPrice",
+    name: "price",
+    headerClasses: "text-center",
+    align: "left",
+    format: (val) => val + " €",
+  },
+  {
+    label: t("book.fields.utility"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "utility",
+    align: "center",
+  },
+]);
 
 defineProps<{
   userData: UserFragment;
