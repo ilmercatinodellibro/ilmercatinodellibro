@@ -28,29 +28,35 @@ export class BookCopyResolver {
 
   @ResolveField(() => Book)
   async book(@Root() bookCopy: BookCopy) {
-    return this.prisma.book.findUnique({
-      where: {
-        id: bookCopy.bookId,
-      },
-    });
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .book();
   }
 
   @ResolveField(() => [Problem])
   async problems(@Root() bookCopy: BookCopy) {
-    return this.prisma.problem.findMany({
-      where: {
-        bookCopyId: bookCopy.id,
-      },
-    });
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .problems();
   }
 
   @ResolveField(() => User)
   async createdBy(@Root() bookCopy: BookCopy) {
-    return this.prisma.user.findUnique({
-      where: {
-        id: bookCopy.createdById,
-      },
-    });
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .createdBy();
   }
 
   @ResolveField(() => User, { nullable: true })
@@ -59,29 +65,35 @@ export class BookCopyResolver {
       return null;
     }
 
-    return this.prisma.user.findUnique({
-      where: {
-        id: bookCopy.returnedById,
-      },
-    });
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .returnedBy();
   }
 
   @ResolveField(() => User)
   async updatedBy(@Root() bookCopy: BookCopy) {
-    return this.prisma.user.findUnique({
-      where: {
-        id: bookCopy.updatedById,
-      },
-    });
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .updatedBy();
   }
 
   @ResolveField(() => [Sale])
   async sales(@Root() bookCopy: BookCopy) {
-    return this.prisma.sale.findMany({
-      where: {
-        bookCopyId: bookCopy.bookId,
-      },
-    });
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .sales();
   }
 
   @Query(() => [BookCopy])

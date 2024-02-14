@@ -16,32 +16,37 @@ export class ProblemResolver {
       return null;
     }
 
-    return this.prisma.user.findUnique({
-      where: {
-        id: problem.resolvedById,
-      },
-    });
+    return this.prisma.problem
+      .findUnique({
+        where: {
+          id: problem.id,
+        },
+      })
+      .resolvedBy();
   }
 
   @ResolveField(() => User)
   async createdBy(@Root() problem: Problem) {
-    return this.prisma.user.findUnique({
-      where: {
-        id: problem.createdById,
-      },
-    });
+    return this.prisma.problem
+      .findUnique({
+        where: {
+          id: problem.id,
+        },
+      })
+      .createdBy();
   }
 
   @ResolveField(() => BookCopy)
   async bookCopy(@Root() problem: Problem) {
-    return this.prisma.bookCopy.findUnique({
-      where: {
-        id: problem.bookCopyId,
-      },
-    });
+    return this.prisma.problem
+      .findUnique({
+        where: {
+          id: problem.id,
+        },
+      })
+      .bookCopy();
   }
 
-  //============ Mutations ============
   @Mutation(() => Problem)
   async reportProblem(
     @Input()
