@@ -28,7 +28,9 @@ export class BookResolver {
       filter: dirtyFilter = "",
     }: BookQueryArgs,
   ) {
-    const filter = dirtyFilter.trim();
+    // TODO: Use Prisma full-text search
+    // handle spaces by replacing them with % for the search
+    const filter = dirtyFilter.trim().replaceAll(" ", "%");
 
     const where: Prisma.BookWhereInput = {
       retailLocationId: "re", // TODO: update this when retailLocations are properly handled
