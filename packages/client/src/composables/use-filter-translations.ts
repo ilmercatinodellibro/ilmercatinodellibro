@@ -1,13 +1,21 @@
+import { ResourcePath, ResourceValue } from "@intlify/core-base";
 import { computed } from "vue";
-import { MessageFunction, VueMessageType, useI18n } from "vue-i18n";
+import { useI18n } from "vue-i18n";
+import { MessageSchema } from "src/boot/i18n";
 
-export function useTranslatedFilters<T>(key: string) {
+type AllKeys = ResourcePath<MessageSchema>;
+type ArrayValueKeys = {
+  [K in AllKeys]: string[] extends ResourceValue<MessageSchema, K> ? K : never;
+}[AllKeys];
+
+export function useTranslatedFilters<TResultKey>(key: ArrayValueKeys) {
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const { tm, rt } = useI18n();
+
   return computed(() =>
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    (tm(key) as VueMessageType[] | MessageFunction<VueMessageType>[]).map(
-      (filter, key) => ({ key: key as T, label: rt(filter) }),
-    ),
+    tm(key).map((filter, key) => ({
+      key: key as TResultKey,
+      label: rt(filter),
+    })),
   );
 }
