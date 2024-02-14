@@ -3,6 +3,7 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Prisma } from "@prisma/client";
 import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -21,100 +22,69 @@ export class BookResolver {
   @Query(() => BookQueryResult)
   async books(
     @Args()
-    { page = 0, rows = 100, filter: dirtyFilter = "" }: BookQueryArgs,
+    {
+      page = 0,
+      rows: rowsPerPage = 100,
+      filter: dirtyFilter = "",
+    }: BookQueryArgs,
   ) {
-    const filter = dirtyFilter.trim();
+    // TODO: Use Prisma full-text search
+    // handle spaces by replacing them with % for the search
+    const filter = dirtyFilter.trim().replaceAll(" ", "%");
 
-    const rowsCount = await this.prisma.book.aggregate({
-      _count: true,
-      where: {
-        retailLocationId: "re", // TODO: update this when retailLocations are properly handled
-        ...(filter
-          ? {
-              OR: [
-                {
-                  authorsFullName: {
-                    contains: filter,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  isbnCode: {
-                    contains: filter,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  publisherName: {
-                    contains: filter,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  title: {
-                    contains: filter,
-                    mode: "insensitive",
-                  },
-                },
-                {
-                  subject: {
-                    contains: filter,
-                    mode: "insensitive",
-                  },
-                },
-              ],
-            }
-          : {}),
-      },
-    });
+    const where: Prisma.BookWhereInput = {
+      retailLocationId: "re", // TODO: update this when retailLocations are properly handled
+
+      OR: filter
+        ? [
+            {
+              authorsFullName: {
+                contains: filter,
+                mode: "insensitive",
+              },
+            },
+            {
+              isbnCode: {
+                contains: filter,
+                mode: "insensitive",
+              },
+            },
+            {
+              publisherName: {
+                contains: filter,
+                mode: "insensitive",
+              },
+            },
+            {
+              title: {
+                contains: filter,
+                mode: "insensitive",
+              },
+            },
+            {
+              subject: {
+                contains: filter,
+                mode: "insensitive",
+              },
+            },
+          ]
+        : undefined,
+    };
+
+    const [rowsCount, rows] = await this.prisma.$transaction([
+      this.prisma.book.count({ where }),
+      this.prisma.book.findMany({
+        skip: page * rowsPerPage,
+        take: rowsPerPage,
+        where,
+      }),
+    ]);
 
     return {
       page,
       filter,
-      rowsCount: rowsCount._count,
-      rows: await this.prisma.book.findMany({
-        skip: page * rows,
-        take: rows,
-        where: {
-          retailLocationId: "re", // TODO: update this when retailLocations are properly handled
-          ...(filter
-            ? {
-                OR: [
-                  {
-                    authorsFullName: {
-                      contains: filter,
-                      mode: "insensitive",
-                    },
-                  },
-                  {
-                    isbnCode: {
-                      contains: filter,
-                      mode: "insensitive",
-                    },
-                  },
-                  {
-                    publisherName: {
-                      contains: filter,
-                      mode: "insensitive",
-                    },
-                  },
-                  {
-                    title: {
-                      contains: filter,
-                      mode: "insensitive",
-                    },
-                  },
-                  {
-                    subject: {
-                      contains: filter,
-                      mode: "insensitive",
-                    },
-                  },
-                ],
-              }
-            : {}),
-        },
-      }),
+      rowsCount,
+      rows,
     };
   }
 
@@ -136,6 +106,7 @@ export class BookResolver {
         retailLocationId,
         isbnCode,
       },
+      select: { id: true }, // only need to know if it exists
     });
     if (bookExistsForRetailLocation) {
       throw new ConflictException(
@@ -169,8 +140,8 @@ export class BookResolver {
       }
 
       return result;
-    } catch (e) {
-      console.error("Cannot load books, error: ", e);
+    } catch (error) {
+      console.error("Cannot load books, error: ", error);
       throw new UnprocessableEntityException(
         "Cannot import or process files on server.",
       );

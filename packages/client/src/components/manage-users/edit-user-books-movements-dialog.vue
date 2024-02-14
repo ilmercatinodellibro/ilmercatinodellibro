@@ -83,7 +83,12 @@
 
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
-import { QDialog, QTable, QTableProps, useDialogPluginComponent } from "quasar";
+import {
+  QDialog,
+  QTable,
+  QTableColumn,
+  useDialogPluginComponent,
+} from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
@@ -134,139 +139,114 @@ const props = defineProps<{
   userData: User;
 }>();
 
-//FIXME: Insert missing field names
-const soldColumns = computed(
-  () =>
-    [
-      {
-        label: t("book.fields.isbn"),
-        field: "isbnCode",
-        name: "isbn",
-        align: "left",
-      },
-      {
-        label: t("book.code"),
-        field: "code",
-        name: "code",
-        align: "left",
-      },
-      {
-        label: t("book.originalCode"),
-        field: "originalCode",
-        name: "originalCode",
-        align: "left",
-        format: (val: string) => (val === "" ? "/" : val),
-      },
-      {
-        label: t("book.fields.author"),
-        field: "authorsFullName",
-        name: "author",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.subject"),
-        field: "subject",
-        name: "subject",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.title"),
-        field: "title",
-        name: "title",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.publisher"),
-        field: "publisherName",
-        name: "publisher",
-
-        align: "left",
-      },
-      {
-        label: t("manageUsers.booksMovementsDialog.soldTo"),
-        field: "soldTo",
-        name: "soldTo",
-        align: "left",
-      },
-      {
-        label: "",
-        field: "problems",
-        name: "problems",
-      },
-      {
-        label: "",
-        field: "",
-        name: "history",
-      },
-    ] satisfies QTableProps["columns"],
+const bookMiddleInfoColumns = computed<QTableColumn<BookSummaryFragment>[]>(
+  () => [
+    {
+      label: t("book.fields.author"),
+      field: "authorsFullName",
+      name: "author",
+      align: "left",
+    },
+    {
+      label: t("book.fields.subject"),
+      field: "subject",
+      name: "subject",
+      align: "left",
+    },
+    {
+      label: t("book.fields.title"),
+      field: "title",
+      name: "title",
+      align: "left",
+    },
+    {
+      label: t("book.fields.publisher"),
+      field: "publisherName",
+      name: "publisher",
+      align: "left",
+    },
+  ],
 );
 
-const purchasedColumns = computed(
-  () =>
-    [
-      {
-        label: t("book.fields.isbn"),
-        field: "isbnCode",
-        name: "isbn",
-        align: "left",
-      },
-      {
-        label: t("book.code"),
-        field: "code",
-        name: "code",
-        align: "left",
-      },
-      {
-        label: t("book.fields.author"),
-        field: "authorsFullName",
-        name: "author",
+const soldColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+  {
+    label: t("book.fields.isbn"),
+    field: "isbnCode",
+    name: "isbn",
+    align: "left",
+  },
+  {
+    label: t("book.code"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "code",
+    align: "left",
+  },
+  {
+    label: t("book.originalCode"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "original-code",
+    align: "left",
+    format: (val: string) => (val === "" ? "/" : val),
+  },
+  ...bookMiddleInfoColumns.value,
+  {
+    label: t("manageUsers.booksMovementsDialog.soldTo"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "sold-to",
+    align: "left",
+  },
+  {
+    label: "",
+    // TODO: add the field name
+    field: () => undefined,
+    name: "problems",
+  },
+  {
+    label: "",
+    field: () => undefined,
+    name: "history",
+  },
+]);
 
-        align: "left",
-      },
-      {
-        label: t("book.fields.subject"),
-        field: "subject",
-        name: "subject",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.title"),
-        field: "title",
-        name: "title",
-
-        align: "left",
-      },
-      {
-        label: t("book.fields.publisher"),
-        field: "publisherName",
-        name: "publisher",
-
-        align: "left",
-      },
-      {
-        label: t("manageUsers.booksMovementsDialog.purchasedAt"),
-        field: "",
-        name: "purchasedAt",
-        align: "left",
-      },
-      {
-        label: t("manageUsers.booksMovementsDialog.theVendor"),
-        field: "vendor",
-        name: "vendor",
-        align: "left",
-      },
-      {
-        label: t("manageUsers.actions"),
-        field: "",
-        name: "actions",
-        align: "center",
-      },
-    ] satisfies QTableProps["columns"],
-);
+const purchasedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+  {
+    label: t("book.fields.isbn"),
+    field: "isbnCode",
+    name: "isbn",
+    align: "left",
+  },
+  {
+    label: t("book.code"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "code",
+    align: "left",
+  },
+  ...bookMiddleInfoColumns.value,
+  {
+    label: t("manageUsers.booksMovementsDialog.purchasedAt"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "purchased-at",
+    align: "left",
+  },
+  {
+    label: t("manageUsers.booksMovementsDialog.theVendor"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "vendor",
+    align: "left",
+  },
+  {
+    label: t("manageUsers.actions"),
+    field: () => undefined,
+    name: "actions",
+    align: "center",
+  },
+]);
 
 const purchasedRows = ref<BookSummaryFragment[]>([]);
 const soldRows = ref<BookSummaryFragment[]>([]);

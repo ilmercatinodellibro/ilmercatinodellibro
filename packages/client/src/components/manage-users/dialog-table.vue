@@ -8,8 +8,8 @@
     class="full-height"
     flat
     square
-    @request="onRequest"
-    @update:pagination="$emit('update:pagination', $event)"
+    @request="props.onRequest"
+    @update:pagination="props['onUpdate:pagination']"
   >
     <template v-for="(_, slotName) in slots" #[slotName]="slotData">
       <slot :name="slotName" v-bind="slotData" />
@@ -35,7 +35,11 @@ const props = withDefaults(
   defineProps<
     {
       searchQuery?: string;
-    } & Pick<QTableProps, "pagination" | "onRequest" | "rowsPerPageOptions">
+      // eslint-disable-next-line vue/prop-name-casing, vue/no-unused-properties
+    } & Pick<
+      QTableProps,
+      "pagination" | "rowsPerPageOptions" | "onRequest" | "onUpdate:pagination"
+    >
   >(),
   {
     searchQuery: undefined,
@@ -45,22 +49,6 @@ const props = withDefaults(
 
 onMounted(() => {
   tableRef.value?.requestServerInteraction();
-});
-
-defineEmits({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  "update:pagination": (newPagination: QTableProps["pagination"]) => true,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  request: (requestProp: {
-    pagination: {
-      sortBy: string;
-      descending: boolean;
-      page: number;
-      rowsPerPage: number;
-    };
-    filter?: unknown;
-    getCellValue: (col: unknown, row: unknown) => unknown;
-  }) => true,
 });
 </script>
 

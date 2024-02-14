@@ -18,20 +18,17 @@ export class RetailLocationResolver {
 
   @Public()
   @Query(() => RetailLocation)
-  retailLocation(
-    @Input()
-    { id }: RetailLocationQueryPayload,
-  ) {
-    if (id) {
-      return this.prisma.retailLocation.findUniqueOrThrow({
-        where: {
-          id,
-        },
-      });
+  retailLocation(@Input() { id }: RetailLocationQueryPayload) {
+    if (!id) {
+      throw new UnprocessableEntityException(
+        "Provide a valid id or humanReadableId.",
+      );
     }
 
-    throw new UnprocessableEntityException(
-      "Provide a valid id or humanReadableId.",
-    );
+    return this.prisma.retailLocation.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    });
   }
 }

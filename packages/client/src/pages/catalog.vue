@@ -102,7 +102,7 @@
 <script lang="ts" setup>
 import { mdiMagnify, mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
-import { Dialog, QTable, QTableProps } from "quasar";
+import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AddBookDialog from "src/components/add-book-dialog.vue";
@@ -134,7 +134,7 @@ enum BookFilters {
 
 const filterOptions = useTranslatedFilters<BookFilters>("book.filters.options");
 
-//FIXME: Add actual logic with server fetch
+// FIXME: Add actual logic with server fetch
 const schoolFilterOptions: SchoolFilters = {
   schoolCodes: ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
   addresses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
@@ -144,7 +144,7 @@ const filters = ref<BookFilters[]>([]);
 const schoolFilters = ref<SchoolFilters>({
   schoolCodes: [],
   addresses: [],
-} satisfies SchoolFilters);
+});
 
 const selectedFiltersToString = computed(() =>
   filters.value.map((key) => filterOptions.value[key]?.label).join(", "),
@@ -162,66 +162,63 @@ const bookLoading = ref(false);
 
 const tableRows = ref<BookSummaryFragment[]>([]);
 
-const columns = computed(
-  () =>
-    [
-      {
-        name: "isbn",
-        label: t("book.fields.isbn"),
-        field: "isbnCode",
-        align: "left",
-      },
-      {
-        name: "author",
-        label: t("book.fields.author"),
-        field: "authorsFullName",
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        name: "publisher",
-        label: t("book.fields.publisher"),
-        field: "publisherName",
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        name: "subject",
-        label: t("book.fields.subject"),
-        field: "subject",
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        name: "title",
-        label: t("book.fields.title"),
-        field: "title",
-        align: "left",
-        format: (val: string) => startCase(toLower(val)),
-      },
-      {
-        name: "price",
-        label: t("book.fields.price"),
-        field: "originalPrice",
-        align: "left",
-        format: (val: string) => formatPrice(val),
-      },
-      {
-        name: "status",
-        label: t("book.fields.status"),
-        //FIXME: add the field name
-        field: "",
-        align: "left",
-      },
-      {
-        name: "utility",
-        label: t("book.fields.utility"),
-        //FIXME: add the field name
-        field: "",
-        align: "center",
-      },
-    ] satisfies QTableProps["columns"],
-);
+const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+  {
+    name: "isbn",
+    label: t("book.fields.isbn"),
+    field: "isbnCode",
+    align: "left",
+  },
+  {
+    name: "author",
+    label: t("book.fields.author"),
+    field: "authorsFullName",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    name: "publisher",
+    label: t("book.fields.publisher"),
+    field: "publisherName",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    name: "subject",
+    label: t("book.fields.subject"),
+    field: "subject",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    name: "title",
+    label: t("book.fields.title"),
+    field: "title",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+  },
+  {
+    name: "price",
+    label: t("book.fields.price"),
+    field: "originalPrice",
+    align: "left",
+    format: (val: string) => formatPrice(val),
+  },
+  {
+    name: "status",
+    label: t("book.fields.status"),
+    // FIXME: add the field name
+    field: () => false,
+    align: "left",
+  },
+  {
+    name: "utility",
+    label: t("book.fields.utility"),
+    // FIXME: add the field name
+    field: () => undefined,
+    align: "center",
+  },
+]);
 
 const pagination = ref({
   rowsPerPage: numberOfRows.value,
