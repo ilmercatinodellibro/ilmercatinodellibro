@@ -8,7 +8,7 @@
     <!-- Carry over all the slots -->
     <template v-for="(_, name) in slots" #[name]="slotData">
       <!-- Due to an unknown reason, Volar complains here, so we cast slotData to any below -->
-      <slot :name="name" v-bind="slotData as any" />
+      <slot :name="name" v-bind="/* prettier-ignore */(slotData as any)" />
     </template>
 
     <template #no-option>
@@ -26,6 +26,7 @@ import { QSelectSlots } from "quasar";
 import { useI18n } from "vue-i18n";
 
 interface Props {
+  // TODO: Use component generics (<script ... generic="T">)
   modelValue: string | string[] | number | Record<string, unknown>;
   options?: readonly unknown[];
 }
