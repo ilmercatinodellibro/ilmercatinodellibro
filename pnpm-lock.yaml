@@ -60,8 +60,8 @@ importers:
         specifier: ^3.9.4
         version: 3.9.4(graphql-ws@5.15.0)(graphql@16.8.1)
       '@quasar/extras':
-        specifier: ^1.16.7
-        version: 1.16.7
+        specifier: ^1.16.9
+        version: 1.16.9
       '@vue/apollo-composable':
         specifier: ^4.0.1
         version: 4.0.1(@apollo/client@3.9.4)(graphql@16.8.1)(typescript@5.2.2)(vue@3.4.19)
@@ -102,8 +102,8 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       quasar:
-        specifier: ^2.13.0
-        version: 2.13.0
+        specifier: ^2.14.3
+        version: 2.14.3
       vue:
         specifier: ^3.4.19
         version: 3.4.19(typescript@5.2.2)
@@ -133,17 +133,17 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0(graphql@16.8.1)
       '@quasar/app-vite':
-        specifier: ^1.6.2
-        version: 1.6.2(@types/node@18.15.11)(eslint@8.52.0)(quasar@2.13.0)(rollup@2.79.1)(vue-router@4.2.5)(vue@3.4.19)(workbox-build@7.0.0)
+        specifier: ^1.7.3
+        version: 1.7.3(@types/node@18.15.11)(eslint@8.52.0)(quasar@2.14.3)(rollup@2.79.1)(vue-router@4.2.5)(vue@3.4.19)(workbox-build@7.0.0)
       '@quasar/cli':
         specifier: ^2.3.0
         version: 2.3.0
       '@quasar/quasar-app-extension-apollo':
-        specifier: ^2.2.0-beta.2
-        version: 2.2.0-beta.2(@apollo/client@3.9.4)(@vue/apollo-composable@4.0.1)(graphql-ws@5.15.0)(graphql@16.8.1)(quasar@2.13.0)(vue@3.4.19)
+        specifier: ^2.2.0
+        version: 2.2.0(@apollo/client@3.9.4)(@vue/apollo-composable@4.0.1)(graphql-ws@5.15.0)(graphql@16.8.1)(quasar@2.14.3)(vue@3.4.19)
       '@quasar/quasar-app-extension-testing-e2e-cypress':
-        specifier: ^5.2.0-alpha.3
-        version: 5.2.0-alpha.3(@babel/core@7.23.2)(@babel/preset-env@7.21.4)(babel-loader@8.3.0)(cypress@13.3.3)(eslint-plugin-cypress@2.15.1)(vite@4.3.8)(webpack@5.89.0)
+        specifier: ^5.2.0
+        version: 5.2.0(@babel/core@7.23.2)(@babel/preset-env@7.21.4)(babel-loader@8.3.0)(cypress@13.3.3)(eslint-plugin-cypress@2.15.1)(vite@4.3.8)(webpack@5.89.0)
       '@types/guacamole-common-js':
         specifier: ^1.3.4
         version: 1.3.4
@@ -152,7 +152,7 @@ importers:
         version: 4.17.10
       autoprefixer:
         specifier: ^10.4.16
-        version: 10.4.16(postcss@8.4.31)
+        version: 10.4.16(postcss@8.4.35)
       concurrently:
         specifier: ^8.2.2
         version: 8.2.2
@@ -2221,8 +2221,8 @@ packages:
       postcss-selector-parser: 6.0.13
     dev: true
 
-  /@cypress/code-coverage@3.12.4(@babel/core@7.23.2)(@babel/preset-env@7.21.4)(babel-loader@8.3.0)(cypress@13.3.3)(webpack@5.89.0):
-    resolution: {integrity: sha512-5uwsZpUd4iMCHESZLHZmnWhLFws3LKhto1VsdfXTiI8NPlDxpXF93k2ixehG9uQr7SSYEUJmdKipHSQmn4CidQ==}
+  /@cypress/code-coverage@3.12.22(@babel/core@7.23.2)(@babel/preset-env@7.21.4)(babel-loader@8.3.0)(cypress@13.3.3)(webpack@5.89.0):
+    resolution: {integrity: sha512-YH/OqJghwcHF8hLgkcPcZXwsmUI9LqC0NDuYnSdO5tg5NLL3jDftRgq4cTk8ccYX9k9xjAZi7NRlsS/gRceAag==}
     peerDependencies:
       '@babel/core': ^7.0.1
       '@babel/preset-env': ^7.0.0
@@ -2239,8 +2239,8 @@ packages:
       dayjs: 1.11.10
       debug: 4.3.4(supports-color@8.1.1)
       execa: 4.1.0
-      globby: 11.0.4
-      istanbul-lib-coverage: 3.0.0
+      globby: 11.1.0
+      istanbul-lib-coverage: 3.2.0
       js-yaml: 4.1.0
       nyc: 15.1.0
       webpack: 5.89.0
@@ -2305,7 +2305,7 @@ packages:
     peerDependencies:
       vite: ^4.0.0
     dependencies:
-      vite: 4.3.8(@types/node@18.15.11)(sass@1.32.12)
+      vite: 4.3.8(@types/node@18.15.11)(sass@1.70.0)
     dev: true
 
   /@dreamonkey/graphql-codegen-vue-apollo-plugin@0.1.2(@apollo/client@3.9.4)(@graphql-codegen/near-operation-file-preset@3.0.0)(@graphql-codegen/typed-document-node@4.0.1)(@graphql-codegen/typescript-operations@3.0.4)(@graphql-codegen/typescript@3.0.4)(@vue/apollo-composable@4.0.1)(graphql@16.8.1)(vue@3.4.19):
@@ -4842,8 +4842,8 @@ packages:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
     dev: false
 
-  /@quasar/app-vite@1.6.2(@types/node@18.15.11)(eslint@8.52.0)(quasar@2.13.0)(rollup@2.79.1)(vue-router@4.2.5)(vue@3.4.19)(workbox-build@7.0.0):
-    resolution: {integrity: sha512-keyJ28cqVtzNLDibQESo1c/DD++6+wqf8nQO6oMRqH6WgYcPs+YO1buRsRMXF9w3ghMCV0/9/Lj8Kyb7S55j6A==}
+  /@quasar/app-vite@1.7.3(@types/node@18.15.11)(eslint@8.52.0)(quasar@2.14.3)(rollup@2.79.1)(vue-router@4.2.5)(vue@3.4.19)(workbox-build@7.0.0):
+    resolution: {integrity: sha512-pnDInCFP9M1d7lJzS8UkiFq8bGWdekLz8Gu+NLI9UAxruIM9QVlSD4hUmWptTQXaVEvYlDnqfW3LOr57B8eVtw==}
     engines: {node: ^24 || ^22 || ^20 || ^18 || ^16 || ^14.19, npm: '>= 6.14.12', yarn: '>= 1.17.3'}
     hasBin: true
     peerDependencies:
@@ -4851,7 +4851,7 @@ packages:
       electron-packager: '>= 15'
       eslint: ^8.11.0
       pinia: ^2.0.0
-      quasar: ^2.8.0
+      quasar: ^2.14.0
       vue: ^3.2.29
       vue-router: ^4.0.12
       vuex: ^4.0.0
@@ -4870,13 +4870,13 @@ packages:
       workbox-build:
         optional: true
     dependencies:
-      '@quasar/render-ssr-error': 1.0.1
-      '@quasar/vite-plugin': 1.3.3(@vitejs/plugin-vue@4.2.3)(quasar@2.13.0)(vite@4.3.8)(vue@3.4.19)
+      '@quasar/render-ssr-error': 1.0.3
+      '@quasar/vite-plugin': 1.3.3(@vitejs/plugin-vue@4.2.3)(quasar@2.14.3)(vite@4.3.8)(vue@3.4.19)
       '@rollup/pluginutils': 4.2.1
       '@types/chrome': 0.0.208
       '@types/compression': 1.7.2
       '@types/cordova': 0.0.34
-      '@types/express': 4.17.17
+      '@types/express': 4.17.20
       '@vitejs/plugin-vue': 4.2.3(vite@4.3.8)(vue@3.4.19)
       archiver: 5.3.1
       chokidar: 3.5.3
@@ -4891,20 +4891,20 @@ packages:
       fast-glob: 3.2.12
       fs-extra: 11.1.1
       html-minifier: 4.0.0
-      inquirer: 8.2.5
+      inquirer: 8.2.6
       isbinaryfile: 5.0.0
       kolorist: 1.8.0
       lodash: 4.17.21
       minimist: 1.2.8
       open: 8.4.0
-      quasar: 2.13.0
+      quasar: 2.14.3
       register-service-worker: 1.7.2
       rollup-plugin-visualizer: 5.8.3(rollup@2.79.1)
-      sass: 1.32.12
+      sass: 1.70.0
       semver: 7.5.4
       serialize-javascript: 6.0.1
       table: 6.8.1
-      vite: 4.3.8(@types/node@18.15.11)(sass@1.32.12)
+      vite: 4.3.8(@types/node@18.15.11)(sass@1.70.0)
       vue: 3.4.19(typescript@5.2.2)
       vue-router: 4.2.5(vue@3.4.19)
       webpack-merge: 5.8.0
@@ -4945,15 +4945,15 @@ packages:
       - supports-color
     dev: true
 
-  /@quasar/extras@1.16.7:
-    resolution: {integrity: sha512-nYF3gVE/si1YJ/D4qmAiHGwxoJIDCvTT8NI6ZmbTMPrur4J8xBKhfhfhyLoQ4k2jJZP6Rx0rUcB71FBNC2C8vQ==}
+  /@quasar/extras@1.16.9:
+    resolution: {integrity: sha512-SlOhwzXyPQHWgQIS2ncyDdYdksCJvUYNtgsDQqzAKEG3r3d/ejOxvThle79HTK3Q6HB+gQWFG21Ux00Osr5XSw==}
     dev: false
 
-  /@quasar/quasar-app-extension-apollo@2.2.0-beta.2(@apollo/client@3.9.4)(@vue/apollo-composable@4.0.1)(graphql-ws@5.15.0)(graphql@16.8.1)(quasar@2.13.0)(vue@3.4.19):
-    resolution: {integrity: sha512-UowYzCcPHLp7GqiZMK2e4+4uqt/OE4/oq2WhJ53Nr2lMD61l0y2aY2Wtzy565jNx8mq5/HyHjJK8y4TA6rgisQ==}
+  /@quasar/quasar-app-extension-apollo@2.2.0(@apollo/client@3.9.4)(@vue/apollo-composable@4.0.1)(graphql-ws@5.15.0)(graphql@16.8.1)(quasar@2.14.3)(vue@3.4.19):
+    resolution: {integrity: sha512-D9tR1+65x5IoYR9h2bGcnJynVaj8jMwCuJy7dMCCBOD5sQ0r9TgbPqB/ViXJPor8/1nfGG5dG2SGeNevhAZNXw==}
     peerDependencies:
       '@apollo/client': ^3.0.0
-      '@vue/apollo-composable': ^4.0.0-alpha.12
+      '@vue/apollo-composable': ^4.0.0
       graphql: ^15.0.0 || ^16.0.0
       graphql-sse: ^2.3.0
       graphql-ws: ^5.14.0
@@ -4969,12 +4969,12 @@ packages:
       '@vue/apollo-composable': 4.0.1(@apollo/client@3.9.4)(graphql@16.8.1)(typescript@5.2.2)(vue@3.4.19)
       graphql: 16.8.1
       graphql-ws: 5.15.0(graphql@16.8.1)
-      quasar: 2.13.0
+      quasar: 2.14.3
       vue: 3.4.19(typescript@5.2.2)
     dev: true
 
-  /@quasar/quasar-app-extension-testing-e2e-cypress@5.2.0-alpha.3(@babel/core@7.23.2)(@babel/preset-env@7.21.4)(babel-loader@8.3.0)(cypress@13.3.3)(eslint-plugin-cypress@2.15.1)(vite@4.3.8)(webpack@5.89.0):
-    resolution: {integrity: sha512-KSho183jinFHccj/FmYzzcmuocFa1YGaXNShXjnN7p3OHUiWzhHrB7/Zq7bCUaEg6dQ7RccIEmNJlWM6696+OA==}
+  /@quasar/quasar-app-extension-testing-e2e-cypress@5.2.0(@babel/core@7.23.2)(@babel/preset-env@7.21.4)(babel-loader@8.3.0)(cypress@13.3.3)(eslint-plugin-cypress@2.15.1)(vite@4.3.8)(webpack@5.89.0):
+    resolution: {integrity: sha512-Fb8TXPo3uG2tRoSjxNb+3VnKXKZDU+lf8hkKWpzlbDUiMAqZYvHCgXKIaC+Kwm2L1+y9ky4+Pg1nPpfNIBpfcg==}
     engines: {node: ^14.13.0 || ^16.0.0 || >= 18.0.0, npm: '>= 6.14.12', yarn: '>= 1.17.3'}
     peerDependencies:
       cypress: ^12.2.0 || ^13.2.0
@@ -4983,13 +4983,13 @@ packages:
       eslint-plugin-cypress:
         optional: true
     dependencies:
-      '@cypress/code-coverage': 3.12.4(@babel/core@7.23.2)(@babel/preset-env@7.21.4)(babel-loader@8.3.0)(cypress@13.3.3)(webpack@5.89.0)
+      '@cypress/code-coverage': 3.12.22(@babel/core@7.23.2)(@babel/preset-env@7.21.4)(babel-loader@8.3.0)(cypress@13.3.3)(webpack@5.89.0)
       cross-env: 7.0.3
       cypress: 13.3.3
       eslint-plugin-cypress: 2.15.1(eslint@8.52.0)
       lodash: 4.17.21
       nyc: 15.1.0
-      start-server-and-test: 2.0.1
+      start-server-and-test: 2.0.0
       vite-plugin-istanbul: 5.0.0(vite@4.3.8)
     transitivePeerDependencies:
       - '@babel/core'
@@ -5000,9 +5000,9 @@ packages:
       - webpack
     dev: true
 
-  /@quasar/render-ssr-error@1.0.1:
-    resolution: {integrity: sha512-4Shxl079hew/yZnIsDtWpRD8enOmqMjMu/s2bkGN0QBvlsRkpWv9pwOz5geJXZxBa17q1S4txvByBxkhPfhWaQ==}
-    engines: {node: '>= 14.17.0'}
+  /@quasar/render-ssr-error@1.0.3:
+    resolution: {integrity: sha512-A8RF99q6/sOSe1Ighnh5syEIbliD3qUYEJd2HyfFyBPSMF+WYGXon5dmzg4nUoK662NgOggInevkDyBDJcZugg==}
+    engines: {node: '>= 16'}
     dependencies:
       stack-trace: 1.0.0-pre2
     dev: true
@@ -5015,7 +5015,7 @@ packages:
       selfsigned: 2.1.1
     dev: true
 
-  /@quasar/vite-plugin@1.3.3(@vitejs/plugin-vue@4.2.3)(quasar@2.13.0)(vite@4.3.8)(vue@3.4.19):
+  /@quasar/vite-plugin@1.3.3(@vitejs/plugin-vue@4.2.3)(quasar@2.14.3)(vite@4.3.8)(vue@3.4.19):
     resolution: {integrity: sha512-HSX/Vgec5/Y8fiJRfpf1MR7+um+rdpbilktBGQkYOKw4A9d0smGq4jtSS/K4O2GTXRYqDmZ/5sgCeBcmhB3OCw==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -5025,8 +5025,8 @@ packages:
       vue: ^3.0.0
     dependencies:
       '@vitejs/plugin-vue': 4.2.3(vite@4.3.8)(vue@3.4.19)
-      quasar: 2.13.0
-      vite: 4.3.8(@types/node@18.15.11)(sass@1.32.12)
+      quasar: 2.14.3
+      vite: 4.3.8(@types/node@18.15.11)(sass@1.70.0)
       vue: 3.4.19(typescript@5.2.2)
     dev: true
 
@@ -5301,15 +5301,6 @@ packages:
       '@types/qs': 6.9.7
       '@types/range-parser': 1.2.4
       '@types/send': 0.17.1
-
-  /@types/express@4.17.17:
-    resolution: {integrity: sha512-Q4FmmuLGBG58btUnfS1c1r/NQdlp3DMfGDGig8WhfpA2YRUtEkxAjkZb0yvplJGYdF1fsQ81iMDcH24sSCNC/Q==}
-    dependencies:
-      '@types/body-parser': 1.19.2
-      '@types/express-serve-static-core': 4.17.35
-      '@types/qs': 6.9.7
-      '@types/serve-static': 1.15.0
-    dev: true
 
   /@types/express@4.17.20:
     resolution: {integrity: sha512-rOaqlkgEvOW495xErXMsmyX3WKBInbhG5eqojXYi3cGUaLoRDlXa5d52fkfWZT963AZ3v2eZ4MbKE6WpDAGVsw==}
@@ -5786,7 +5777,7 @@ packages:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.3.8(@types/node@18.15.11)(sass@1.32.12)
+      vite: 4.3.8(@types/node@18.15.11)(sass@1.70.0)
       vue: 3.4.19(typescript@5.2.2)
     dev: true
 
@@ -6612,7 +6603,7 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /autoprefixer@10.4.16(postcss@8.4.31):
+  /autoprefixer@10.4.16(postcss@8.4.35):
     resolution: {integrity: sha512-7vd3UC6xKp0HLfua5IjZlcXvGAGy7cBAXTg2lyQ/8WpNhd6SiZ8Be+xm3FyBSYJx5GKcpRCzBh7RH4/0dnY+uQ==}
     engines: {node: ^10 || ^12 || >=14}
     hasBin: true
@@ -6624,7 +6615,7 @@ packages:
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.0.0
-      postcss: 8.4.31
+      postcss: 8.4.35
       postcss-value-parser: 4.2.0
     dev: true
 
@@ -10100,18 +10091,6 @@ packages:
       define-properties: 1.2.1
     dev: true
 
-  /globby@11.0.4:
-    resolution: {integrity: sha512-9O4MVG9ioZJ08ffbcyVYyLOJLk5JQ688pJ4eMGLpdWLHq/Wr1D9BlriLQyL0E+jbkuePVZXYFj47QM/v093wHg==}
-    engines: {node: '>=10'}
-    dependencies:
-      array-union: 2.1.0
-      dir-glob: 3.0.1
-      fast-glob: 3.3.1
-      ignore: 5.2.4
-      merge2: 1.4.1
-      slash: 3.0.0
-    dev: true
-
   /globby@11.1.0:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
     engines: {node: '>=10'}
@@ -10683,6 +10662,10 @@ packages:
     engines: {node: '>=0.8.0'}
     dev: true
 
+  /immutable@4.3.5:
+    resolution: {integrity: sha512-8eabxkth9gZatlwl5TBuJnCsoTADlL6ftEr7A4qgdaTsPyreilDSnUk57SO+jfKcNtxPa22U5KK6DSeAYhpBJw==}
+    dev: true
+
   /import-fresh@3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
     engines: {node: '>=6'}
@@ -11215,11 +11198,6 @@ packages:
 
   /isstream@0.1.2:
     resolution: {integrity: sha512-Yljz7ffyPbrLpLngrMtZ7NduUgVvi6wG9RJ9IUcyCd59YQ911PBJphODUcbOVbqYfxe1wuYf/LJ8PauMRwsM/g==}
-    dev: true
-
-  /istanbul-lib-coverage@3.0.0:
-    resolution: {integrity: sha512-UiUIqxMgRDET6eR+o5HbfRYP1l0hqkWOs7vNxC/mggutCMUIhWMm8gAHb8tHlyfD3/l6rlgNA5cKdDzEAf6hEg==}
-    engines: {node: '>=8'}
     dev: true
 
   /istanbul-lib-coverage@3.2.0:
@@ -14552,8 +14530,8 @@ packages:
     dependencies:
       side-channel: 1.0.4
 
-  /quasar@2.13.0:
-    resolution: {integrity: sha512-VPxbDy4vsobROUqGfet415SAvthj03fbm06pHSOYH5TeixWKHiLBIbwV9/LmWsDqwEsmMpADkHNZhmBZ40ha2w==}
+  /quasar@2.14.3:
+    resolution: {integrity: sha512-7WzbtZxykLn2ic5oNpepZ2ZjDVpmxyVD4KC9rWe+Ia+4Er61svGr4jOuttN+Ok7IerLSCmKIRyjQMgasF60rFA==}
     engines: {node: '>= 10.18.1', npm: '>= 6.13.4', yarn: '>= 1.21.1'}
 
   /querystringify@2.2.0:
@@ -15078,12 +15056,14 @@ packages:
   /safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  /sass@1.32.12:
-    resolution: {integrity: sha512-zmXn03k3hN0KaiVTjohgkg98C3UowhL1/VSGdj4/VAAiMKGQOE80PFPxFP2Kyq0OUskPKcY5lImkhBKEHlypJA==}
-    engines: {node: '>=8.9.0'}
+  /sass@1.70.0:
+    resolution: {integrity: sha512-uUxNQ3zAHeAx5nRFskBnrWzDUJrrvpCPD5FNAoRvTi0WwremlheES3tg+56PaVtCs5QDRX5CBLxxKMDJMEa1WQ==}
+    engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
       chokidar: 3.5.3
+      immutable: 4.3.5
+      source-map-js: 1.0.2
     dev: true
 
   /sax@1.1.4:
@@ -15531,9 +15511,9 @@ packages:
     resolution: {integrity: sha512-qoRRSyROncaz1z0mvYqIE4lCd9p2R90i6GxW3uZv5ucSu8tU7B5HXUP1gG8pVZsYNVaXjk8ClXHPttLyxAL48A==}
     dev: false
 
-  /start-server-and-test@2.0.1:
-    resolution: {integrity: sha512-8PFo4DLLLCDMuS51/BEEtE1m9CAXw1LNVtZSS1PzkYQh6Qf9JUwM4huYeSoUumaaoAyuwYBwCa9OsrcpMqcOdQ==}
-    engines: {node: '>=16'}
+  /start-server-and-test@2.0.0:
+    resolution: {integrity: sha512-UqKLw0mJbfrsG1jcRLTUlvuRi9sjNuUiDOLI42r7R5fA9dsFoywAy9DoLXNYys9B886E4RCKb+qM1Gzu96h7DQ==}
+    engines: {node: '>=6'}
     hasBin: true
     dependencies:
       arg: 5.0.2
@@ -16949,7 +16929,7 @@ packages:
       stylelint: 15.10.0(typescript@5.2.2)
       tiny-invariant: 1.3.1
       typescript: 5.2.2
-      vite: 4.3.8(@types/node@18.15.11)(sass@1.32.12)
+      vite: 4.3.8(@types/node@18.15.11)(sass@1.70.0)
       vscode-languageclient: 7.0.0
       vscode-languageserver: 7.0.0
       vscode-languageserver-textdocument: 1.0.8
@@ -16967,12 +16947,12 @@ packages:
       istanbul-lib-instrument: 5.2.1
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vite: 4.3.8(@types/node@18.15.11)(sass@1.32.12)
+      vite: 4.3.8(@types/node@18.15.11)(sass@1.70.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /vite@4.3.8(@types/node@18.15.11)(sass@1.32.12):
+  /vite@4.3.8(@types/node@18.15.11)(sass@1.70.0):
     resolution: {integrity: sha512-uYB8PwN7hbMrf4j1xzGDk/lqjsZvCDbt/JC5dyfxc19Pg8kRm14LinK/uq+HSLNswZEoKmweGdtpbnxRtrAXiQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -16999,9 +16979,9 @@ packages:
     dependencies:
       '@types/node': 18.15.11
       esbuild: 0.17.19
-      postcss: 8.4.31
+      postcss: 8.4.35
       rollup: 3.22.0
-      sass: 1.32.12
+      sass: 1.70.0
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
