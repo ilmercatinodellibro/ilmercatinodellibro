@@ -207,14 +207,14 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "status",
     label: t("book.fields.status"),
-    //FIXME: add the field name
-    field: () => undefined,
+    // FIXME: add the field name
+    field: () => false,
     align: "left",
   },
   {
     name: "utility",
     label: t("book.fields.utility"),
-    //FIXME: add the field name
+    // FIXME: add the field name
     field: () => undefined,
     align: "center",
   },

@@ -201,7 +201,7 @@ const commonColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     label: t("book.fields.status"),
     // TODO: add the field name
-    field: () => undefined,
+    field: () => false,
     name: "status",
     align: "left",
   },
