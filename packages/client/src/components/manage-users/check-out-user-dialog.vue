@@ -65,7 +65,7 @@
             >
               <q-td>
                 <q-checkbox
-                  v-if="row.id === 'in-stock'"
+                  v-if="row.id === Titles.InStock"
                   :model-value="rowsSelectionStatus"
                   dense
                   @update:model-value="swapAllRows()"
@@ -81,7 +81,7 @@
                   <q-space />
                   <span
                     v-if="
-                      rowsSelectionStatus !== false && row.id === 'in-stock'
+                      rowsSelectionStatus !== false && row.id === Titles.InStock
                     "
                     class="gap-16 items-center row sticky-button-group"
                   >
@@ -356,19 +356,27 @@ onMounted(async () => {
   bookLoading.value = false;
 });
 
-const tableRows = computed(() => [
+enum Titles {
+  InStock = "in-stock",
+  Returned = "returned",
+  Sold = "sold",
+}
+interface GroupHeaderRow {
+  id: Titles;
+}
+const tableRows = computed<(BookSummaryFragment | GroupHeaderRow)[]>(() => [
   // Adding one empty row for each of the sub-headers, then merging all the
   // separate rows into the same array to display them all in a single table
   {
-    id: "in-stock",
+    id: Titles.InStock,
   },
   ...stockRows.value,
   {
-    id: "returned",
+    id: Titles.Returned,
   },
   ...returnedRows.value,
   {
-    id: "sold",
+    id: Titles.Sold,
   },
   ...soldRows.value,
 ]);
@@ -378,12 +386,6 @@ const selectableRowsIDs = computed(() =>
     .filter((row) => row.id.endsWith("0") /* FIXME: add real filter logic */)
     .map((row) => row.id),
 );
-
-enum Titles {
-  InStock = "in-stock",
-  Returned = "returned",
-  Sold = "sold",
-}
 
 const localizedSectionTitle = (sectionTitle: Titles) => {
   return sectionTitle === Titles.InStock
