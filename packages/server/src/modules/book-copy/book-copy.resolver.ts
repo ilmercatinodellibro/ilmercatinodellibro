@@ -1,7 +1,14 @@
 import { ForbiddenException } from "@nestjs/common";
-import { Args, Int, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { Role, User } from "src/@generated";
-import { BookCopy } from "src/@generated/book-copy";
+import {
+  Args,
+  Int,
+  Mutation,
+  Query,
+  ResolveField,
+  Resolver,
+  Root,
+} from "@nestjs/graphql";
+import { Book, BookCopy, Problem, Role, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -12,21 +19,91 @@ import {
 } from "./book-copy.args";
 import { BookCopyService } from "./book-copy.service";
 
-@Resolver()
+@Resolver(() => BookCopy)
 export class BookCopyResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly bookService: BookCopyService,
   ) {}
 
+  @ResolveField(() => Book)
+  async book(@Root() bookCopy: BookCopy) {
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .book();
+  }
+
+  @ResolveField(() => [Problem])
+  async problems(@Root() bookCopy: BookCopy) {
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .problems();
+  }
+
+  @ResolveField(() => User)
+  async createdBy(@Root() bookCopy: BookCopy) {
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .createdBy();
+  }
+
+  @ResolveField(() => User, { nullable: true })
+  async returnedBy(@Root() bookCopy: BookCopy) {
+    if (!bookCopy.returnedById) {
+      return null;
+    }
+
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .returnedBy();
+  }
+
+  @ResolveField(() => User)
+  async updatedBy(@Root() bookCopy: BookCopy) {
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .updatedBy();
+  }
+
+  @ResolveField(() => [Sale])
+  async sales(@Root() bookCopy: BookCopy) {
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .sales();
+  }
+
   @Query(() => [BookCopy])
   async bookCopies(
     @Args()
-    { bookId }: BookCopyQueryArgs,
+    queryArgs: BookCopyQueryArgs,
   ) {
     return this.prisma.bookCopy.findMany({
       where: {
-        bookId,
+        ...queryArgs,
       },
     });
   }

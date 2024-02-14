@@ -23,13 +23,16 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth-guard";
 import { BookModule } from "./modules/book/book.module";
 import { BookCopyModule } from "./modules/book-copy/book-copy.module";
+import { BookRequestModule } from "./modules/book-request/book-request.module";
 import { EventModule } from "./modules/event/event.module";
 import { FeedbackModule } from "./modules/feedback/feedback.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { NotificationModule } from "./modules/notification/notification.module";
 import { PrismaModule } from "./modules/prisma/prisma.module";
 import { PushNotificationModule } from "./modules/push-notification/push-notification.module";
+import { ReservationModule } from "./modules/reservation/reservation.module";
 import { RetailLocationModule } from "./modules/retail-location/retail-location.module";
+import { SaleModule } from "./modules/sale/sale.module";
 import { UserModule } from "./modules/user/user.module";
 
 @Module({
@@ -129,12 +132,15 @@ import { UserModule } from "./modules/user/user.module";
     AuthModule,
     BookModule,
     BookCopyModule,
+    BookRequestModule,
     MailModule,
     EventModule,
     NotificationModule,
     PushNotificationModule,
     RetailLocationModule,
     FeedbackModule,
+    ReservationModule,
+    SaleModule,
     UserModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }, DateScalar],

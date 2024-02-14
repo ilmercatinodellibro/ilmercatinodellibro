@@ -1,8 +1,9 @@
 import { Injectable, UnprocessableEntityException } from "@nestjs/common";
 import * as argon2 from "argon2";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
-import { UserCreateInput, UserUpdateInput } from "src/@generated/user";
-import { PrismaService } from "../prisma/prisma.service";
+import { UserCreateInput } from "src/@generated";
+import { UserUpdateInput } from "src/modules/auth/user-update.input";
+import { PrismaService } from "src/modules/prisma/prisma.service";
 
 @Injectable()
 export class UserService {
@@ -39,7 +40,7 @@ export class UserService {
     });
   }
 
-  async updateUserRole({ id, role }: UserUpdateInput) {
+  async updateUserRole({ id, role }: Pick<UserUpdateInput, "id" | "role">) {
     return this.prisma.user.update({
       where: {
         id,
