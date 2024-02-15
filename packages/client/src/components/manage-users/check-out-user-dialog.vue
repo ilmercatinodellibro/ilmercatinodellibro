@@ -222,9 +222,9 @@ import {
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { UserSummaryFragment } from "src/services/auth.graphql";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { UserSummaryFragment } from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
 import TableHeaderWithInfo from "./table-header-with-info.vue";
 
@@ -335,6 +335,7 @@ const selectedRowsIDs = ref<string[]>([]);
 const bookLoading = ref(false);
 
 // FIXME: change query and logic to the actual separate queries once the infrastructure is set up
+// getBookCopiesByOwner and getSoldBookCopies queries are available, but not returned TODO: wire up the queries
 const { refetchBooks } = useBookService(ref(0), ref(100));
 
 onMounted(async () => {
