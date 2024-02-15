@@ -29,7 +29,9 @@
           readonly
           suffix="€"
         />
+
         <q-space />
+
         <q-icon :name="mdiInformationOutline" color="black-54" size="24px" />
         {{ $t("manageUsers.checkOutUserDialog.info") }}
       </q-card-section>
@@ -38,7 +40,6 @@
         <dialog-table
           :columns="columns"
           :loading="bookLoading"
-          :pagination="pagination"
           :rows="tableRows"
           :rows-per-page-options="[0]"
           hide-bottom
@@ -49,6 +50,7 @@
               :label="$t('manageUsers.checkOutUserDialog.buyPrice')"
             />
           </template>
+
           <template #header-cell-public-price>
             <table-header-with-info
               :info="$t('manageUsers.checkOutUserDialog.publicPriceTooltip')"
@@ -121,7 +123,6 @@
                 </span>
               </q-td>
             </q-tr>
-
             <q-tr v-else>
               <q-td v-for="col in cols" :key="col.name">
                 <!--
@@ -137,7 +138,9 @@
                   @update:model-value="swapRow(row.id)"
                 />
                 <q-btn
-                  v-else-if="col.name === 'actions' && stockRows.includes(row)"
+                  v-else-if="
+                    col.name === 'actions' && ownedCopies.includes(row)
+                  "
                   :icon="mdiDotsVertical"
                   dense
                   flat
@@ -193,6 +196,7 @@
           </template>
         </dialog-table>
       </q-card-section>
+
       <template #card-actions>
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
         <q-btn
@@ -213,24 +217,23 @@
 <script setup lang="ts">
 import { mdiDotsVertical, mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { cloneDeep } from "lodash-es";
-import {
-  QDialog,
-  QTableColumn,
-  QTableProps,
-  useDialogPluginComponent,
-} from "quasar";
-import { computed, onMounted, ref } from "vue";
+import { QDialog, QTableColumn, useDialogPluginComponent } from "quasar";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import {
+  BookCopyDetailsFragment,
+  useGetBookCopiesByOwnerQuery,
+  useGetReturnedBookCopiesQuery,
+  useGetSoldBookCopiesQuery,
+} from "src/services/book-copy.graphql";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
 import TableHeaderWithInfo from "./table-header-with-info.vue";
 
 const { t } = useI18n();
 
-defineProps<{
+const props = defineProps<{
   user: UserSummaryFragment;
 }>();
 
@@ -243,7 +246,7 @@ const totalSoldBooks = ref(0);
 const totalCheckoutMoney = ref(0);
 const totalCheckedOutMoney = ref(0);
 
-const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
     name: "select",
     field: () => undefined,
@@ -251,7 +254,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "isbn-code",
-    field: "isbnCode",
+    field: ({ book }) => book.isbnCode,
     label: t("book.fields.isbn"),
     align: "left",
   },
@@ -270,31 +273,31 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "author",
-    field: "authorsFullName",
+    field: ({ book }) => book.authorsFullName,
     label: t("book.fields.author"),
     align: "left",
   },
   {
     name: "publisher",
-    field: "publisherName",
+    field: ({ book }) => book.publisherName,
     label: t("book.fields.publisher"),
     align: "left",
   },
   {
     name: "subject",
-    field: "subject",
+    field: ({ book }) => book.subject,
     label: t("book.fields.subject"),
     align: "left",
   },
   {
     name: "title",
-    field: "title",
+    field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
   },
   {
     name: "cover-price",
-    field: "originalPrice",
+    field: ({ book }) => book.originalPrice,
     label: t("book.fields.price"),
     align: "left",
     format: (val: number) => `${val.toFixed(2)} €`,
@@ -322,40 +325,23 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const pagination: QTableProps["pagination"] = {
-  rowsPerPage: 0,
-};
+const { bookCopiesByOwner: ownedCopies } = useGetBookCopiesByOwnerQuery(() => ({
+  userId: props.user.id,
+}));
 
-const stockRows = ref<BookSummaryFragment[]>([]);
-const returnedRows = ref<BookSummaryFragment[]>([]);
-const soldRows = ref<BookSummaryFragment[]>([]);
+const { returnedBookCopies: returnedCopies } = useGetReturnedBookCopiesQuery(
+  () => ({
+    userId: props.user.id,
+  }),
+);
+
+const { soldBookCopies: soldCopies } = useGetSoldBookCopiesQuery(() => ({
+  userId: props.user.id,
+}));
 
 const selectedRowsIDs = ref<string[]>([]);
 
 const bookLoading = ref(false);
-
-// FIXME: change query and logic to the actual separate queries once the infrastructure is set up
-// getBookCopiesByOwner and getSoldBookCopies queries are available, but not returned TODO: wire up the queries
-const { refetchBooks } = useBookService(ref(0), ref(100));
-
-onMounted(async () => {
-  bookLoading.value = true;
-
-  // FIXME: also change logic here to match the queries above
-  // Remember to add the sorting of stockRows by book copy ID
-  const newBooks = await refetchBooks();
-  stockRows.value =
-    newBooks?.data.books.rows
-      .slice(0, 6)
-      .sort((bookA, bookB) =>
-        bookA.originalPrice > bookB.originalPrice ? 1 : -1,
-      ) ?? stockRows.value;
-  returnedRows.value =
-    newBooks?.data.books.rows.slice(6, 12) ?? returnedRows.value;
-  soldRows.value = newBooks?.data.books.rows.slice(12, 18) ?? soldRows.value;
-
-  bookLoading.value = false;
-});
 
 enum Titles {
   InStock = "in-stock",
@@ -365,25 +351,26 @@ enum Titles {
 interface GroupHeaderRow {
   id: Titles;
 }
-const tableRows = computed<(BookSummaryFragment | GroupHeaderRow)[]>(() => [
+// TODO: Handle the case when a group is empty (?)
+const tableRows = computed<(BookCopyDetailsFragment | GroupHeaderRow)[]>(() => [
   // Adding one empty row for each of the sub-headers, then merging all the
   // separate rows into the same array to display them all in a single table
   {
     id: Titles.InStock,
   },
-  ...stockRows.value,
+  ...ownedCopies.value,
   {
     id: Titles.Returned,
   },
-  ...returnedRows.value,
+  ...returnedCopies.value,
   {
     id: Titles.Sold,
   },
-  ...soldRows.value,
+  ...soldCopies.value,
 ]);
 
 const selectableRowsIDs = computed(() =>
-  stockRows.value
+  ownedCopies.value
     .filter((row) => row.id.endsWith("0") /* FIXME: add real filter logic */)
     .map((row) => row.id),
 );
