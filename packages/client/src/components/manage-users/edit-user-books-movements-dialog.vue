@@ -10,10 +10,8 @@
         <dialog-table
           v-if="type === 'sold'"
           :columns="soldColumns"
-          :rows="soldRows"
+          :rows="soldBookCopies"
           :loading="soldLoading"
-          :pagination="soldPagination"
-          @request="onSoldRequest"
         >
           <template #body-cell-problems="{ value }">
             <q-td class="text-center">
@@ -80,18 +78,15 @@
 
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
-import {
-  QDialog,
-  QTable,
-  QTableColumn,
-  useDialogPluginComponent,
-} from "quasar";
-import { computed, ref } from "vue";
+import { QDialog, QTableColumn, useDialogPluginComponent } from "quasar";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { useBookService } from "src/services/book";
-import { useGetPurchasedBookCopiesQuery } from "src/services/book-copy.graphql";
+import {
+  useGetPurchasedBookCopiesQuery,
+  useGetSoldBookCopiesQuery,
+} from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import DialogTable from "./dialog-table.vue";
 
@@ -100,6 +95,10 @@ const props = defineProps<{
   userData: User;
 }>();
 
+defineEmits(useDialogPluginComponent.emitsObject);
+
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+
 const { t } = useI18n();
 
 const titlePath = computed(
@@ -107,6 +106,15 @@ const titlePath = computed(
     `manageUsers.booksMovementsDialog.${
       props.type === "sold" ? "soldTitle" : "purchasedTitle"
     }`,
+);
+
+const { soldBookCopies, loading: soldLoading } = useGetSoldBookCopiesQuery(
+  () => ({
+    userId: props.userData.id,
+  }),
+  () => ({
+    enabled: props.type === "sold",
+  }),
 );
 
 const { purchasedBookCopies, loading: purchasedLoading } =
@@ -118,21 +126,6 @@ const { purchasedBookCopies, loading: purchasedLoading } =
       enabled: props.type === "purchased",
     }),
   );
-
-const currentSoldPage = ref(0);
-const soldRowsPerPage = ref(5);
-const soldLoading = ref(false);
-
-const {
-  refetchBooks: refetchSoldBooks,
-  booksPaginationDetails: soldBooksPaginationDetails,
-} = useBookService(currentSoldPage, soldRowsPerPage);
-
-const soldPagination = ref({
-  rowsPerPage: soldRowsPerPage.value,
-  rowsNumber: soldBooksPaginationDetails.value.rowCount,
-  page: currentSoldPage.value,
-});
 
 const bookMiddleInfoColumns = computed<QTableColumn<BookSummaryFragment>[]>(
   () => [
@@ -243,29 +236,6 @@ const purchasedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const soldRows = ref<BookSummaryFragment[]>([]);
-
-const onSoldRequest: QTable["onRequest"] = async function (requestProps) {
-  soldLoading.value = true;
-
-  const newBooks = await refetchSoldBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-  soldPagination.value.rowsNumber = newBooks?.data.books.rowsCount ?? 0;
-
-  soldRows.value.splice(
-    0,
-    soldRows.value.length,
-    ...(newBooks?.data.books.rows ?? soldRows.value),
-  );
-
-  soldPagination.value.page = requestProps.pagination.page;
-  soldPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  soldLoading.value = false;
-};
-
 function openProblemDialog(value: unknown) {
   // FIXME: add problem report dialog
   value;
@@ -280,8 +250,4 @@ function openActionsDialog(value: unknown) {
   // FIXME: add logic
   value;
 }
-
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
-
-defineEmits(useDialogPluginComponent.emitsObject);
 </script>

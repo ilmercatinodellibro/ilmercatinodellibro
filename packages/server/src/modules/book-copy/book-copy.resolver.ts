@@ -65,6 +65,29 @@ export class BookCopyResolver {
     });
   }
 
+  @Query(() => [BookCopy])
+  async soldBookCopies(
+    @Args() { userId: soldById }: BookCopyByUserQueryArgs,
+    @CurrentUser() { id: userId, role }: User,
+  ) {
+    if (soldById !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You don't have the necessary permissions to view the sold books of another user.",
+      );
+    }
+
+    return this.prisma.bookCopy.findMany({
+      where: {
+        ownerId: soldById,
+        sales: {
+          some: {
+            refundedAt: null,
+          },
+        },
+      },
+    });
+  }
+
   @ResolveField(() => Book)
   async book(@Root() bookCopy: BookCopy) {
     return this.prisma.bookCopy

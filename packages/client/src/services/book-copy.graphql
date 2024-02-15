@@ -50,6 +50,12 @@ query getPurchasedBookCopies($userId: String!) {
   }
 }
 
+query getSoldBookCopies($userId: String!) {
+  soldBookCopies(userId: $userId) {
+    ...BookCopySummary
+  }
+}
+
 mutation createBookCopies($input: BookCopyCreateInput!) {
   createBookCopies(input: $input)
 }

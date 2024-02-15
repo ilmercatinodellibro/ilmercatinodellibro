@@ -3,6 +3,7 @@ import {
   useGetBookCopiesByOwnerQuery,
   useGetBookCopiesQuery,
   useGetPurchasedBookCopiesQuery,
+  useGetSoldBookCopiesQuery,
   useReportProblemMutation,
   useResolveProblemMutation,
 } from "src/services/book-copy.graphql";
@@ -16,6 +17,7 @@ export function useBookCopyService() {
     useGetBookCopiesByOwnerQuery,
     useGetBookCopiesQuery,
     useGetPurchasedBookCopiesQuery,
+    useGetSoldBookCopiesQuery,
     createBookCopiesComposable,
     createReportProblemComposable,
     createResolveProblemComposable,
