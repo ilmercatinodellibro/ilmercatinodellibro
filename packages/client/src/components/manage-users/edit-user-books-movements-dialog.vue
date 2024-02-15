@@ -3,7 +3,7 @@
     <k-dialog-card
       size="lg"
       :cancel-label="$t('common.close')"
-      :title="$t(titlePath, [userData.firstname, userData.lastname])"
+      :title="title"
       @cancel="onDialogCancel()"
     >
       <q-card-section class="col-grow column height-0 no-wrap q-pa-none">
@@ -107,11 +107,13 @@ const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 const { t } = useI18n();
 
-const titlePath = computed(
-  () =>
-    `manageUsers.booksMovementsDialog.${
-      props.type === "sold" ? "soldTitle" : "purchasedTitle"
-    }`,
+const title = computed(() =>
+  t(
+    props.type === "sold"
+      ? "manageUsers.booksMovementsDialog.soldTitle"
+      : "manageUsers.booksMovementsDialog.purchasedTitle",
+    [props.userData.firstname, props.userData.lastname],
+  ),
 );
 
 const { soldBookCopies, loading: soldLoading } = useGetSoldBookCopiesQuery(
