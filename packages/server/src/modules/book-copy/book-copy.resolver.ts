@@ -45,7 +45,9 @@ export class BookCopyResolver {
     });
   }
 
-  @Query(() => [BookCopy])
+  @Query(() => [BookCopy], {
+    description: "Book copies that were purchased by the user",
+  })
   async purchasedBookCopies(
     @Args() { userId: purchasedById }: BookCopyByUserQueryArgs,
     @CurrentUser() { id: userId, role }: User,
@@ -68,7 +70,9 @@ export class BookCopyResolver {
     });
   }
 
-  @Query(() => [BookCopy])
+  @Query(() => [BookCopy], {
+    description: "Book copies that belonged to the user and are currently sold",
+  })
   async soldBookCopies(
     @Args() { userId: soldById }: BookCopyByUserQueryArgs,
     @CurrentUser() { id: userId, role }: User,
@@ -86,6 +90,30 @@ export class BookCopyResolver {
           some: {
             refundedAt: null,
           },
+        },
+      },
+    });
+  }
+
+  @Query(() => [BookCopy], {
+    description:
+      "Book copies that were returned to the user, which is the owner of the book copies",
+  })
+  async returnedBookCopies(
+    @Args() { userId: ownerId }: BookCopyByUserQueryArgs,
+    @CurrentUser() { id: userId, role }: User,
+  ) {
+    if (ownerId !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You don't have the necessary permissions to view the returned books of another user.",
+      );
+    }
+
+    return this.prisma.bookCopy.findMany({
+      where: {
+        ownerId,
+        returnedById: {
+          not: null,
         },
       },
     });
