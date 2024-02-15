@@ -2,12 +2,12 @@ fragment UserSummary on User {
   id
   firstname
   lastname
+  email
 }
 
 fragment User on User {
   ...UserSummary
   role
-  email
   phoneNumber
   discount
 }

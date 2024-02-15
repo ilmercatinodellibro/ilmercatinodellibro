@@ -1,4 +1,7 @@
-import { ForbiddenException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import {
   Args,
   Int,
@@ -156,6 +159,50 @@ export class BookCopyResolver {
         },
       })
       .sales();
+  }
+
+  @ResolveField(() => Date, { nullable: true })
+  async purchasedAt(@Root() bookCopy: BookCopy) {
+    const sale = await this.#getBookCopySale(bookCopy.id);
+    return sale?.purchasedAt;
+  }
+
+  @ResolveField(() => User, { nullable: true })
+  async purchasedBy(@Root() bookCopy: BookCopy) {
+    const sale = await this.#getBookCopySale(bookCopy.id);
+    return sale?.purchasedBy;
+  }
+
+  async #getBookCopySale(bookCopyId: string) {
+    const sales = await this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopyId,
+        },
+      })
+      .sales({
+        where: {
+          refundedAt: null,
+        },
+        include: {
+          // Theoretically multiple calls to this function should end up re-using the same query
+          // So, always include this to not end up having different queries
+          purchasedBy: true,
+        },
+      });
+
+    if (!sales || sales.length === 0) {
+      return null;
+    }
+
+    // TODO: maybe silently use the first sale and log an error which must be tracked carefully (?)
+    if (sales.length > 1) {
+      throw new InternalServerErrorException(
+        "There are multiple sales for the same book copy that are not refunded. This should have not happened.",
+      );
+    }
+
+    return sales[0];
   }
 
   @Query(() => [BookCopy])

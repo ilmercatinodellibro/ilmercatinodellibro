@@ -90,6 +90,12 @@ import {
 } from "src/services/book-copy.graphql";
 import DialogTable from "./dialog-table.vue";
 
+// sold and purchased means the same thing, it's just a different perspective depending on which side the user is
+type SoldBookCopy = BookCopyDetailsFragment & {
+  purchasedAt: NonNullable<BookCopyDetailsFragment["purchasedAt"]>;
+  purchasedBy: NonNullable<BookCopyDetailsFragment["purchasedBy"]>;
+};
+
 const props = defineProps<{
   type: "sold" | "purchased";
   userData: User;
@@ -127,36 +133,34 @@ const { purchasedBookCopies, loading: purchasedLoading } =
     }),
   );
 
-const bookMiddleInfoColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
-  () => [
-    {
-      label: t("book.fields.author"),
-      field: ({ book }) => book.authorsFullName,
-      name: "author",
-      align: "left",
-    },
-    {
-      label: t("book.fields.subject"),
-      field: ({ book }) => book.subject,
-      name: "subject",
-      align: "left",
-    },
-    {
-      label: t("book.fields.title"),
-      field: ({ book }) => book.title,
-      name: "title",
-      align: "left",
-    },
-    {
-      label: t("book.fields.publisher"),
-      field: ({ book }) => book.publisherName,
-      name: "publisher",
-      align: "left",
-    },
-  ],
-);
+const bookMiddleInfoColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
+  {
+    label: t("book.fields.author"),
+    field: ({ book }) => book.authorsFullName,
+    name: "author",
+    align: "left",
+  },
+  {
+    label: t("book.fields.subject"),
+    field: ({ book }) => book.subject,
+    name: "subject",
+    align: "left",
+  },
+  {
+    label: t("book.fields.title"),
+    field: ({ book }) => book.title,
+    name: "title",
+    align: "left",
+  },
+  {
+    label: t("book.fields.publisher"),
+    field: ({ book }) => book.publisherName,
+    name: "publisher",
+    align: "left",
+  },
+]);
 
-const soldColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
+const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   {
     label: t("book.fields.isbn"),
     field: ({ book }) => book.isbnCode,
@@ -179,10 +183,10 @@ const soldColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     format: (val: string) => (val === "" ? "/" : val),
   },
   ...bookMiddleInfoColumns.value,
+  // TODO: not in the mockups, but should we add the date? (as an alternative to opening the history)
   {
     label: t("manageUsers.booksMovementsDialog.soldTo"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: ({ purchasedBy }) => purchasedBy.email,
     name: "sold-to",
     align: "left",
   },
@@ -199,44 +203,41 @@ const soldColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
 ]);
 
-const purchasedColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
-  () => [
-    {
-      label: t("book.fields.isbn"),
-      field: ({ book }) => book.isbnCode,
-      name: "isbn",
-      align: "left",
-    },
-    {
-      label: t("book.code"),
-      // TODO: add the field name
-      field: () => undefined,
-      name: "code",
-      align: "left",
-    },
-    ...bookMiddleInfoColumns.value,
-    {
-      label: t("manageUsers.booksMovementsDialog.purchasedAt"),
-      // TODO: add the field name
-      field: () => undefined,
-      name: "purchased-at",
-      align: "left",
-    },
-    {
-      label: t("manageUsers.booksMovementsDialog.theVendor"),
-      // TODO: add the field name
-      field: () => undefined,
-      name: "vendor",
-      align: "left",
-    },
-    {
-      label: t("manageUsers.actions"),
-      field: () => undefined,
-      name: "actions",
-      align: "center",
-    },
-  ],
-);
+const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
+  {
+    label: t("book.fields.isbn"),
+    field: ({ book }) => book.isbnCode,
+    name: "isbn",
+    align: "left",
+  },
+  {
+    label: t("book.code"),
+    // TODO: add the field name
+    field: () => undefined,
+    name: "code",
+    align: "left",
+  },
+  ...bookMiddleInfoColumns.value,
+  // TODO: decide to keep/remove this. This column doesn't exist in the mockups, but might be nice to have the date
+  {
+    label: t("manageUsers.booksMovementsDialog.purchasedAt"),
+    field: ({ purchasedAt }) => purchasedAt, // TODO: Format the date
+    name: "purchased-at",
+    align: "left",
+  },
+  {
+    label: t("manageUsers.booksMovementsDialog.theVendor"),
+    field: ({ owner }) => owner.email,
+    name: "vendor",
+    align: "left",
+  },
+  {
+    label: t("manageUsers.actions"),
+    field: () => undefined,
+    name: "actions",
+    align: "center",
+  },
+]);
 
 function openProblemDialog(value: unknown) {
   // FIXME: add problem report dialog

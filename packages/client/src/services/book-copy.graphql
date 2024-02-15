@@ -26,6 +26,13 @@ fragment BookCopyDetails on BookCopy {
   problems {
     ...ProblemDetails
   }
+  purchasedAt
+  purchasedBy {
+    ...UserSummary
+  }
+  owner {
+    ...UserSummary
+  }
   returnedAt
   returnedById
   updatedAt

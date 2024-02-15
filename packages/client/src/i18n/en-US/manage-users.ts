@@ -48,6 +48,7 @@ export default {
     soldTitle: "Books sold by {0} {1}",
     purchasedAt: "Purchased at",
     soldTo: "Sold to",
+    // TODO: use purchasedBy, it's more suitable in English
     theVendor: "The vendor",
     reportProblem: "Report problem",
     solveProblem: "Solve problem",
