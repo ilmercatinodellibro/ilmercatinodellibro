@@ -13,7 +13,7 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
-  BookCopyByOwnerQueryArgs,
+  BookCopyByUserQueryArgs,
   BookCopyCreateInput,
   BookCopyQueryArgs,
 } from "./book-copy.args";
@@ -25,6 +25,45 @@ export class BookCopyResolver {
     private readonly prisma: PrismaService,
     private readonly bookService: BookCopyService,
   ) {}
+
+  @Query(() => [BookCopy])
+  async bookCopiesByOwner(
+    @Args()
+    { userId: ownerId }: BookCopyByUserQueryArgs,
+  ) {
+    const currentRetailLocationId = "re"; // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
+    return this.prisma.bookCopy.findMany({
+      where: {
+        ownerId,
+        book: {
+          retailLocationId: currentRetailLocationId,
+        },
+      },
+    });
+  }
+
+  @Query(() => [BookCopy])
+  async purchasedBookCopies(
+    @Args() { userId: purchasedById }: BookCopyByUserQueryArgs,
+    @CurrentUser() { id: userId, role }: User,
+  ) {
+    if (purchasedById !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You don't have the necessary permissions to view the purchased books of another user.",
+      );
+    }
+
+    return this.prisma.bookCopy.findMany({
+      where: {
+        sales: {
+          some: {
+            purchasedById,
+            refundedAt: null,
+          },
+        },
+      },
+    });
+  }
 
   @ResolveField(() => Book)
   async book(@Root() bookCopy: BookCopy) {
@@ -104,22 +143,6 @@ export class BookCopyResolver {
     return this.prisma.bookCopy.findMany({
       where: {
         ...queryArgs,
-      },
-    });
-  }
-
-  @Query(() => [BookCopy])
-  async bookCopiesByOwner(
-    @Args()
-    { ownerId }: BookCopyByOwnerQueryArgs,
-  ) {
-    const currentRetailLocationId = "re"; // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    return this.prisma.bookCopy.findMany({
-      where: {
-        ownerId,
-        book: {
-          retailLocationId: currentRetailLocationId,
-        },
       },
     });
   }

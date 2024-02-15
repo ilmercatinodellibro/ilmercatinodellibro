@@ -1,4 +1,4 @@
-fragment BookCopiesSummary on BookCopy {
+fragment BookCopySummary on BookCopy {
   id
   createdAt
   createdById
@@ -34,13 +34,19 @@ fragment BookCopiesSummary on BookCopy {
 
 query getBookCopies($bookId: String!) {
   bookCopies(bookId: $bookId) {
-    ...BookCopiesSummary
+    ...BookCopySummary
   }
 }
 
-query getBookCopiesByOwner($ownerId: String!) {
-  bookCopiesByOwner(ownerId: $ownerId) {
-    ...BookCopiesSummary
+query getBookCopiesByOwner($userId: String!) {
+  bookCopiesByOwner(userId: $userId) {
+    ...BookCopySummary
+  }
+}
+
+query getPurchasedBookCopies($userId: String!) {
+  purchasedBookCopies(userId: $userId) {
+    ...BookCopySummary
   }
 }
 

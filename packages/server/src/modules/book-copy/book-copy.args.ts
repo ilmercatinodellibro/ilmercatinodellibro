@@ -7,9 +7,9 @@ export class BookCopyQueryArgs {
 }
 
 @ArgsType()
-export class BookCopyByOwnerQueryArgs {
+export class BookCopyByUserQueryArgs {
   @Field(() => String)
-  ownerId?: string;
+  userId!: string;
 }
 
 @InputType()

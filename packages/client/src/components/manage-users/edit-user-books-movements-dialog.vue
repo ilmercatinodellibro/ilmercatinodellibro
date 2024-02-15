@@ -51,14 +51,11 @@
             </q-td>
           </template>
         </dialog-table>
-
         <dialog-table
           v-else
           :columns="purchasedColumns"
-          :rows="purchasedRows"
+          :rows="purchasedBookCopies"
           :loading="purchasedLoading"
-          :pagination="purchasedPagination"
-          @request="onPurchasedRequest"
         >
           <template #body-cell-actions="{ value }">
             <q-td class="text-center">
@@ -94,8 +91,17 @@ import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { useBookService } from "src/services/book";
+import { useGetPurchasedBookCopiesQuery } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import DialogTable from "./dialog-table.vue";
+
+const props = defineProps<{
+  type: "sold" | "purchased";
+  userData: User;
+}>();
+
+const { t } = useI18n();
+
 const titlePath = computed(
   () =>
     `manageUsers.booksMovementsDialog.${
@@ -103,41 +109,30 @@ const titlePath = computed(
     }`,
 );
 
+const { purchasedBookCopies, loading: purchasedLoading } =
+  useGetPurchasedBookCopiesQuery(
+    () => ({
+      userId: props.userData.id,
+    }),
+    () => ({
+      enabled: props.type === "purchased",
+    }),
+  );
+
 const currentSoldPage = ref(0);
-const currentPurchasedPage = ref(0);
-
 const soldRowsPerPage = ref(5);
-const purchasedRowsPerPage = ref(5);
-
 const soldLoading = ref(false);
-const purchasedLoading = ref(false);
 
 const {
   refetchBooks: refetchSoldBooks,
   booksPaginationDetails: soldBooksPaginationDetails,
 } = useBookService(currentSoldPage, soldRowsPerPage);
-const {
-  refetchBooks: refetchPurchasedBooks,
-  booksPaginationDetails: purchasedBooksPaginationDetails,
-} = useBookService(currentPurchasedPage, purchasedRowsPerPage);
 
 const soldPagination = ref({
   rowsPerPage: soldRowsPerPage.value,
   rowsNumber: soldBooksPaginationDetails.value.rowCount,
   page: currentSoldPage.value,
 });
-const purchasedPagination = ref({
-  rowsPerPage: purchasedRowsPerPage.value,
-  rowsNumber: purchasedBooksPaginationDetails.value.rowCount,
-  page: currentPurchasedPage.value,
-});
-
-const { t } = useI18n();
-
-const props = defineProps<{
-  type: "sold" | "purchased";
-  userData: User;
-}>();
 
 const bookMiddleInfoColumns = computed<QTableColumn<BookSummaryFragment>[]>(
   () => [
@@ -248,7 +243,6 @@ const purchasedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const purchasedRows = ref<BookSummaryFragment[]>([]);
 const soldRows = ref<BookSummaryFragment[]>([]);
 
 const onSoldRequest: QTable["onRequest"] = async function (requestProps) {
@@ -270,27 +264,6 @@ const onSoldRequest: QTable["onRequest"] = async function (requestProps) {
   soldPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
 
   soldLoading.value = false;
-};
-
-const onPurchasedRequest: QTable["onRequest"] = async function (requestProps) {
-  purchasedLoading.value = true;
-
-  const newBooks = await refetchPurchasedBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-  purchasedPagination.value.rowsNumber = newBooks?.data.books.rowsCount ?? 0;
-
-  purchasedRows.value.splice(
-    0,
-    purchasedRows.value.length,
-    ...(newBooks?.data.books.rows ?? purchasedRows.value),
-  );
-
-  purchasedPagination.value.page = requestProps.pagination.page;
-  purchasedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  purchasedLoading.value = false;
 };
 
 function openProblemDialog(value: unknown) {
