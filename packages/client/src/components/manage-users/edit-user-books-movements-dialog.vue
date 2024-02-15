@@ -84,10 +84,10 @@ import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import {
+  BookCopyDetailsFragment,
   useGetPurchasedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
 } from "src/services/book-copy.graphql";
-import { BookSummaryFragment } from "src/services/book.graphql";
 import DialogTable from "./dialog-table.vue";
 
 const props = defineProps<{
@@ -127,39 +127,39 @@ const { purchasedBookCopies, loading: purchasedLoading } =
     }),
   );
 
-const bookMiddleInfoColumns = computed<QTableColumn<BookSummaryFragment>[]>(
+const bookMiddleInfoColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   () => [
     {
       label: t("book.fields.author"),
-      field: "authorsFullName",
+      field: ({ book }) => book.authorsFullName,
       name: "author",
       align: "left",
     },
     {
       label: t("book.fields.subject"),
-      field: "subject",
+      field: ({ book }) => book.subject,
       name: "subject",
       align: "left",
     },
     {
       label: t("book.fields.title"),
-      field: "title",
+      field: ({ book }) => book.title,
       name: "title",
       align: "left",
     },
     {
       label: t("book.fields.publisher"),
-      field: "publisherName",
+      field: ({ book }) => book.publisherName,
       name: "publisher",
       align: "left",
     },
   ],
 );
 
-const soldColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+const soldColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
     label: t("book.fields.isbn"),
-    field: "isbnCode",
+    field: ({ book }) => book.isbnCode,
     name: "isbn",
     align: "left",
   },
@@ -199,42 +199,44 @@ const soldColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const purchasedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
-  {
-    label: t("book.fields.isbn"),
-    field: "isbnCode",
-    name: "isbn",
-    align: "left",
-  },
-  {
-    label: t("book.code"),
-    // TODO: add the field name
-    field: () => undefined,
-    name: "code",
-    align: "left",
-  },
-  ...bookMiddleInfoColumns.value,
-  {
-    label: t("manageUsers.booksMovementsDialog.purchasedAt"),
-    // TODO: add the field name
-    field: () => undefined,
-    name: "purchased-at",
-    align: "left",
-  },
-  {
-    label: t("manageUsers.booksMovementsDialog.theVendor"),
-    // TODO: add the field name
-    field: () => undefined,
-    name: "vendor",
-    align: "left",
-  },
-  {
-    label: t("manageUsers.actions"),
-    field: () => undefined,
-    name: "actions",
-    align: "center",
-  },
-]);
+const purchasedColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
+  () => [
+    {
+      label: t("book.fields.isbn"),
+      field: ({ book }) => book.isbnCode,
+      name: "isbn",
+      align: "left",
+    },
+    {
+      label: t("book.code"),
+      // TODO: add the field name
+      field: () => undefined,
+      name: "code",
+      align: "left",
+    },
+    ...bookMiddleInfoColumns.value,
+    {
+      label: t("manageUsers.booksMovementsDialog.purchasedAt"),
+      // TODO: add the field name
+      field: () => undefined,
+      name: "purchased-at",
+      align: "left",
+    },
+    {
+      label: t("manageUsers.booksMovementsDialog.theVendor"),
+      // TODO: add the field name
+      field: () => undefined,
+      name: "vendor",
+      align: "left",
+    },
+    {
+      label: t("manageUsers.actions"),
+      field: () => undefined,
+      name: "actions",
+      align: "center",
+    },
+  ],
+);
 
 function openProblemDialog(value: unknown) {
   // FIXME: add problem report dialog

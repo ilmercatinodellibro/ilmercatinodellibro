@@ -1,4 +1,20 @@
-fragment BookCopySummary on BookCopy {
+fragment ProblemDetails on Problem {
+  id
+  createdAt
+  createdBy {
+    ...UserSummary
+  }
+  details
+  resolvedAt
+  resolvedBy {
+    ...UserSummary
+  }
+  solution
+  type
+  updatedAt
+}
+
+fragment BookCopyDetails on BookCopy {
   id
   createdAt
   createdById
@@ -8,23 +24,7 @@ fragment BookCopySummary on BookCopy {
     retailLocationId
   }
   problems {
-    id
-    createdAt
-    createdBy {
-      id
-      firstname
-      lastname
-    }
-    details
-    resolvedAt
-    resolvedBy {
-      id
-      firstname
-      lastname
-    }
-    solution
-    type
-    updatedAt
+    ...ProblemDetails
   }
   returnedAt
   returnedById
@@ -34,25 +34,25 @@ fragment BookCopySummary on BookCopy {
 
 query getBookCopies($bookId: String!) {
   bookCopies(bookId: $bookId) {
-    ...BookCopySummary
+    ...BookCopyDetails
   }
 }
 
 query getBookCopiesByOwner($userId: String!) {
   bookCopiesByOwner(userId: $userId) {
-    ...BookCopySummary
+    ...BookCopyDetails
   }
 }
 
 query getPurchasedBookCopies($userId: String!) {
   purchasedBookCopies(userId: $userId) {
-    ...BookCopySummary
+    ...BookCopyDetails
   }
 }
 
 query getSoldBookCopies($userId: String!) {
   soldBookCopies(userId: $userId) {
-    ...BookCopySummary
+    ...BookCopyDetails
   }
 }
 
