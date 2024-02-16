@@ -1,9 +1,13 @@
-fragment User on User {
+fragment UserSummary on User {
   id
   firstname
   lastname
-  role
   email
+}
+
+fragment User on User {
+  ...UserSummary
+  role
   phoneNumber
   discount
 }

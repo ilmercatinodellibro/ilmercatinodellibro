@@ -5,7 +5,7 @@ import { LocalStorage } from "quasar";
 import { computed, readonly, ref, watch } from "vue";
 import { NavigationGuard, Router, useRouter } from "vue-router";
 import {
-  UserSummaryFragment,
+  CurrentUserFragment,
   useLoginMutation as useBaseLoginMutation,
   useRegisterMutation as useBaseRegisterMutation,
   useRegisterWithTokenMutation as useBaseRegisterWithTokenMutation,
@@ -31,7 +31,7 @@ watch(token, (newToken) => {
 
 // "?? undefined" bit is to remove null values and replace them with undefined
 const user = ref(
-  LocalStorage.getItem<UserSummaryFragment>(AUTH_USER_KEY) ?? undefined,
+  LocalStorage.getItem<CurrentUserFragment>(AUTH_USER_KEY) ?? undefined,
 );
 watch(user, (newUser) => {
   if (newUser !== undefined) {
@@ -185,7 +185,7 @@ export function useLogoutMutation(router = useRouter()) {
   return { logout };
 }
 
-type LoginHook = (user: UserSummaryFragment) => void | Promise<void>;
+type LoginHook = (user: CurrentUserFragment) => void | Promise<void>;
 type LogoutHook = () => void | Promise<void>;
 
 const onLoginHooks: LoginHook[] = [];

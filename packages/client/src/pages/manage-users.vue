@@ -201,7 +201,6 @@ import EditUserStockdataDialog from "src/components/manage-users/edit-user-stock
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { UserSummaryFragment } from "src/services/auth.graphql";
 import { UserFragment, useUsersQuery } from "src/services/user.graphql";
 
 const { loading, users, refetch } = useUsersQuery();
@@ -230,94 +229,81 @@ const columnTooltip = computed(() => ({
   available: t("manageUsers.toolTips.available"),
 }));
 
-const columns = computed(
-  () =>
-    [
-      { name: "edit", field: "edit", label: "" },
-      {
-        name: "email",
-        field: "email",
-        label: t("manageUsers.fields.email"),
-
-        align: "left",
-      },
-      {
-        name: "first-name",
-        field: "firstname",
-        label: t("manageUsers.fields.firstName"),
-
-        align: "left",
-      },
-      {
-        name: "last-name",
-        field: "lastname",
-        label: t("manageUsers.fields.lastName"),
-
-        align: "left",
-      },
-      {
-        name: "phone-number",
-        field: "phoneNumber",
-        label: t("manageUsers.fields.phoneNumber"),
-
-        align: "left",
-      },
-      {
-        name: "in-stock",
-        field: "inStock",
-        label: t("manageUsers.fields.inStock"),
-
-        align: "left",
-      },
-      {
-        name: "sold",
-        field: "sold",
-        label: t("manageUsers.fields.sold"),
-
-        align: "left",
-      },
-      {
-        name: "requested",
-        field: "requested",
-        label: t("manageUsers.fields.requested"),
-
-        align: "left",
-      },
-      {
-        name: "purchased",
-        field: "purchased",
-        label: t("manageUsers.fields.purchased"),
-
-        align: "left",
-      },
-      {
-        name: "available",
-        field: "available",
-        label: t("manageUsers.fields.available"),
-
-        align: "left",
-      },
-      {
-        name: "creation-date",
-        field: "creationDate",
-        label: t("manageUsers.fields.creationDate"),
-
-        align: "left",
-      },
-      {
-        name: "receipts",
-        field: "receipts",
-        label: t("manageUsers.fields.receipts"),
-
-        align: "left",
-      },
-      {
-        name: "pay-off",
-        field: "payOff",
-        label: "",
-      },
-    ] satisfies QTableColumn[],
-);
+// TODO: pass the actual row type to QTable column's generic parameter when the data is available
+const columns = computed<QTableColumn[]>(() => [
+  { name: "edit", field: () => undefined, label: "" },
+  {
+    name: "email",
+    field: "email",
+    label: t("manageUsers.fields.email"),
+    align: "left",
+  },
+  {
+    name: "first-name",
+    field: "firstname",
+    label: t("manageUsers.fields.firstName"),
+    align: "left",
+  },
+  {
+    name: "last-name",
+    field: "lastname",
+    label: t("manageUsers.fields.lastName"),
+    align: "left",
+  },
+  {
+    name: "phone-number",
+    field: "phoneNumber",
+    label: t("manageUsers.fields.phoneNumber"),
+    align: "left",
+  },
+  {
+    name: "in-stock",
+    field: "inStock",
+    label: t("manageUsers.fields.inStock"),
+    align: "left",
+  },
+  {
+    name: "sold",
+    field: "sold",
+    label: t("manageUsers.fields.sold"),
+    align: "left",
+  },
+  {
+    name: "requested",
+    field: "requested",
+    label: t("manageUsers.fields.requested"),
+    align: "left",
+  },
+  {
+    name: "purchased",
+    field: "purchased",
+    label: t("manageUsers.fields.purchased"),
+    align: "left",
+  },
+  {
+    name: "available",
+    field: "available",
+    label: t("manageUsers.fields.available"),
+    align: "left",
+  },
+  {
+    name: "creation-date",
+    field: "creationDate",
+    label: t("manageUsers.fields.creationDate"),
+    align: "left",
+  },
+  {
+    name: "receipts",
+    field: "receipts",
+    label: t("manageUsers.fields.receipts"),
+    align: "left",
+  },
+  {
+    name: "pay-off",
+    field: () => undefined,
+    label: "",
+  },
+]);
 
 const currentPage = ref(0);
 
@@ -331,6 +317,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
 
 const rawRows = ref<UserFragment[]>([]);
 
+// TODO: Instead of transforming the data here, use field/format fields of column definitions when the data is available
 const rows = computed(() =>
   // FIXME: update fields with actual data instead of placeholders
   rawRows.value.map((user, index) => ({
@@ -405,7 +392,7 @@ function openReceipt(receipts: string[]) {
   receipts;
 }
 
-function openPayOff(user: UserSummaryFragment) {
+function openPayOff(user: UserFragment) {
   Dialog.create({
     component: CheckOutUserDialog,
     componentProps: {

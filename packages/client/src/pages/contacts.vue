@@ -92,11 +92,11 @@ const userParam = ref({
   message: "",
 });
 
-const userData = useAuthService();
-if (userData.isAuthenticated.value && userData.user.value) {
-  userParam.value.firstname = userData.user.value.firstname;
-  userParam.value.lastname = userData.user.value.lastname;
-  userParam.value.email = userData.user.value.email;
+const { isAuthenticated, user } = useAuthService();
+if (isAuthenticated.value && user.value) {
+  userParam.value.firstname = user.value.firstname;
+  userParam.value.lastname = user.value.lastname;
+  userParam.value.email = user.value.email;
 }
 
 const userHints = ref({

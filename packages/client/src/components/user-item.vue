@@ -35,10 +35,10 @@
 import { mdiMenuDown } from "@quasar/extras/mdi-v7";
 import { useI18n } from "vue-i18n";
 import { AvailableRouteNames } from "src/models/routes";
-import { UserSummaryFragment } from "src/services/auth.graphql";
+import { CurrentUserFragment } from "src/services/auth.graphql";
 
 defineProps<{
-  user: UserSummaryFragment;
+  user: CurrentUserFragment;
 }>();
 
 const { t } = useI18n();

@@ -1,4 +1,7 @@
-import { ForbiddenException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import {
   Args,
   Int,
@@ -13,7 +16,7 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
-  BookCopyByOwnerQueryArgs,
+  BookCopyByUserQueryArgs,
   BookCopyCreateInput,
   BookCopyQueryArgs,
 } from "./book-copy.args";
@@ -25,6 +28,96 @@ export class BookCopyResolver {
     private readonly prisma: PrismaService,
     private readonly bookService: BookCopyService,
   ) {}
+
+  @Query(() => [BookCopy])
+  async bookCopiesByOwner(
+    @Args()
+    { userId: ownerId }: BookCopyByUserQueryArgs,
+  ) {
+    const currentRetailLocationId = "re"; // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
+    return this.prisma.bookCopy.findMany({
+      where: {
+        ownerId,
+        book: {
+          retailLocationId: currentRetailLocationId,
+        },
+      },
+    });
+  }
+
+  @Query(() => [BookCopy], {
+    description: "Book copies that were purchased by the user",
+  })
+  async purchasedBookCopies(
+    @Args() { userId: purchasedById }: BookCopyByUserQueryArgs,
+    @CurrentUser() { id: userId, role }: User,
+  ) {
+    if (purchasedById !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You don't have the necessary permissions to view the purchased books of another user.",
+      );
+    }
+
+    return this.prisma.bookCopy.findMany({
+      where: {
+        sales: {
+          some: {
+            purchasedById,
+            refundedAt: null,
+          },
+        },
+      },
+    });
+  }
+
+  @Query(() => [BookCopy], {
+    description: "Book copies that belonged to the user and are currently sold",
+  })
+  async soldBookCopies(
+    @Args() { userId: soldById }: BookCopyByUserQueryArgs,
+    @CurrentUser() { id: userId, role }: User,
+  ) {
+    if (soldById !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You don't have the necessary permissions to view the sold books of another user.",
+      );
+    }
+
+    return this.prisma.bookCopy.findMany({
+      where: {
+        ownerId: soldById,
+        sales: {
+          some: {
+            refundedAt: null,
+          },
+        },
+      },
+    });
+  }
+
+  @Query(() => [BookCopy], {
+    description:
+      "Book copies that were returned to the user, which is the owner of the book copies",
+  })
+  async returnedBookCopies(
+    @Args() { userId: ownerId }: BookCopyByUserQueryArgs,
+    @CurrentUser() { id: userId, role }: User,
+  ) {
+    if (ownerId !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You don't have the necessary permissions to view the returned books of another user.",
+      );
+    }
+
+    return this.prisma.bookCopy.findMany({
+      where: {
+        ownerId,
+        returnedById: {
+          not: null,
+        },
+      },
+    });
+  }
 
   @ResolveField(() => Book)
   async book(@Root() bookCopy: BookCopy) {
@@ -96,6 +189,50 @@ export class BookCopyResolver {
       .sales();
   }
 
+  @ResolveField(() => Date, { nullable: true })
+  async purchasedAt(@Root() bookCopy: BookCopy) {
+    const sale = await this.#getBookCopySale(bookCopy.id);
+    return sale?.purchasedAt;
+  }
+
+  @ResolveField(() => User, { nullable: true })
+  async purchasedBy(@Root() bookCopy: BookCopy) {
+    const sale = await this.#getBookCopySale(bookCopy.id);
+    return sale?.purchasedBy;
+  }
+
+  async #getBookCopySale(bookCopyId: string) {
+    const sales = await this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopyId,
+        },
+      })
+      .sales({
+        where: {
+          refundedAt: null,
+        },
+        include: {
+          // Theoretically multiple calls to this function should end up re-using the same query
+          // So, always include this to not end up having different queries
+          purchasedBy: true,
+        },
+      });
+
+    if (!sales || sales.length === 0) {
+      return null;
+    }
+
+    // TODO: maybe silently use the first sale and log an error which must be tracked carefully (?)
+    if (sales.length > 1) {
+      throw new InternalServerErrorException(
+        "There are multiple sales for the same book copy that are not refunded. This should have not happened.",
+      );
+    }
+
+    return sales[0];
+  }
+
   @Query(() => [BookCopy])
   async bookCopies(
     @Args()
@@ -104,22 +241,6 @@ export class BookCopyResolver {
     return this.prisma.bookCopy.findMany({
       where: {
         ...queryArgs,
-      },
-    });
-  }
-
-  @Query(() => [BookCopy])
-  async bookCopiesByOwner(
-    @Args()
-    { ownerId }: BookCopyByOwnerQueryArgs,
-  ) {
-    const currentRetailLocationId = "re"; // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    return this.prisma.bookCopy.findMany({
-      where: {
-        ownerId,
-        book: {
-          retailLocationId: currentRetailLocationId,
-        },
       },
     });
   }

@@ -76,7 +76,6 @@
           :loading="bookLoading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           :rows="tableRows"
-          row-key="isbn"
           square
           class="col"
           @request="onRequest"

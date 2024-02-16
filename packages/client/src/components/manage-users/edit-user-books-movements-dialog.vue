@@ -3,17 +3,15 @@
     <k-dialog-card
       size="lg"
       :cancel-label="$t('common.close')"
-      :title="$t(titlePath, [userData.firstname, userData.lastname])"
+      :title="title"
       @cancel="onDialogCancel()"
     >
       <q-card-section class="col-grow column height-0 no-wrap q-pa-none">
         <dialog-table
           v-if="type === 'sold'"
           :columns="soldColumns"
-          :rows="soldRows"
+          :rows="soldBookCopies"
           :loading="soldLoading"
-          :pagination="soldPagination"
-          @request="onSoldRequest"
         >
           <template #body-cell-problems="{ value }">
             <q-td class="text-center">
@@ -51,14 +49,11 @@
             </q-td>
           </template>
         </dialog-table>
-
         <dialog-table
           v-else
           :columns="purchasedColumns"
-          :rows="purchasedRows"
+          :rows="purchasedBookCopies"
           :loading="purchasedLoading"
-          :pagination="purchasedPagination"
-          @request="onPurchasedRequest"
         >
           <template #body-cell-actions="{ value }">
             <q-td class="text-center">
@@ -83,95 +78,94 @@
 
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
-import {
-  QDialog,
-  QTable,
-  QTableColumn,
-  useDialogPluginComponent,
-} from "quasar";
-import { computed, ref } from "vue";
+import { QDialog, QTableColumn, useDialogPluginComponent } from "quasar";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { User } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import {
+  BookCopyDetailsFragment,
+  useGetPurchasedBookCopiesQuery,
+  useGetSoldBookCopiesQuery,
+} from "src/services/book-copy.graphql";
 import DialogTable from "./dialog-table.vue";
-const titlePath = computed(
-  () =>
-    `manageUsers.booksMovementsDialog.${
-      props.type === "sold" ? "soldTitle" : "purchasedTitle"
-    }`,
-);
 
-const currentSoldPage = ref(0);
-const currentPurchasedPage = ref(0);
-
-const soldRowsPerPage = ref(5);
-const purchasedRowsPerPage = ref(5);
-
-const soldLoading = ref(false);
-const purchasedLoading = ref(false);
-
-const {
-  refetchBooks: refetchSoldBooks,
-  booksPaginationDetails: soldBooksPaginationDetails,
-} = useBookService(currentSoldPage, soldRowsPerPage);
-const {
-  refetchBooks: refetchPurchasedBooks,
-  booksPaginationDetails: purchasedBooksPaginationDetails,
-} = useBookService(currentPurchasedPage, purchasedRowsPerPage);
-
-const soldPagination = ref({
-  rowsPerPage: soldRowsPerPage.value,
-  rowsNumber: soldBooksPaginationDetails.value.rowCount,
-  page: currentSoldPage.value,
-});
-const purchasedPagination = ref({
-  rowsPerPage: purchasedRowsPerPage.value,
-  rowsNumber: purchasedBooksPaginationDetails.value.rowCount,
-  page: currentPurchasedPage.value,
-});
-
-const { t } = useI18n();
+// sold and purchased means the same thing, it's just a different perspective depending on which side the user is
+type SoldBookCopy = BookCopyDetailsFragment & {
+  purchasedAt: NonNullable<BookCopyDetailsFragment["purchasedAt"]>;
+  purchasedBy: NonNullable<BookCopyDetailsFragment["purchasedBy"]>;
+};
 
 const props = defineProps<{
   type: "sold" | "purchased";
   userData: User;
 }>();
 
-const bookMiddleInfoColumns = computed<QTableColumn<BookSummaryFragment>[]>(
-  () => [
-    {
-      label: t("book.fields.author"),
-      field: "authorsFullName",
-      name: "author",
-      align: "left",
-    },
-    {
-      label: t("book.fields.subject"),
-      field: "subject",
-      name: "subject",
-      align: "left",
-    },
-    {
-      label: t("book.fields.title"),
-      field: "title",
-      name: "title",
-      align: "left",
-    },
-    {
-      label: t("book.fields.publisher"),
-      field: "publisherName",
-      name: "publisher",
-      align: "left",
-    },
-  ],
+defineEmits(useDialogPluginComponent.emitsObject);
+
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+
+const { t } = useI18n();
+
+const title = computed(() =>
+  t(
+    props.type === "sold"
+      ? "manageUsers.booksMovementsDialog.soldTitle"
+      : "manageUsers.booksMovementsDialog.purchasedTitle",
+    [props.userData.firstname, props.userData.lastname],
+  ),
 );
 
-const soldColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+const { soldBookCopies, loading: soldLoading } = useGetSoldBookCopiesQuery(
+  () => ({
+    userId: props.userData.id,
+  }),
+  () => ({
+    enabled: props.type === "sold",
+  }),
+);
+
+const { purchasedBookCopies, loading: purchasedLoading } =
+  useGetPurchasedBookCopiesQuery(
+    () => ({
+      userId: props.userData.id,
+    }),
+    () => ({
+      enabled: props.type === "purchased",
+    }),
+  );
+
+const bookMiddleInfoColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
+  {
+    label: t("book.fields.author"),
+    field: ({ book }) => book.authorsFullName,
+    name: "author",
+    align: "left",
+  },
+  {
+    label: t("book.fields.subject"),
+    field: ({ book }) => book.subject,
+    name: "subject",
+    align: "left",
+  },
+  {
+    label: t("book.fields.title"),
+    field: ({ book }) => book.title,
+    name: "title",
+    align: "left",
+  },
+  {
+    label: t("book.fields.publisher"),
+    field: ({ book }) => book.publisherName,
+    name: "publisher",
+    align: "left",
+  },
+]);
+
+const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   {
     label: t("book.fields.isbn"),
-    field: "isbnCode",
+    field: ({ book }) => book.isbnCode,
     name: "isbn",
     align: "left",
   },
@@ -191,10 +185,10 @@ const soldColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     format: (val: string) => (val === "" ? "/" : val),
   },
   ...bookMiddleInfoColumns.value,
+  // TODO: not in the mockups, but should we add the date? (as an alternative to opening the history)
   {
     label: t("manageUsers.booksMovementsDialog.soldTo"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: ({ purchasedBy }) => purchasedBy.email,
     name: "sold-to",
     align: "left",
   },
@@ -211,10 +205,10 @@ const soldColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const purchasedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   {
     label: t("book.fields.isbn"),
-    field: "isbnCode",
+    field: ({ book }) => book.isbnCode,
     name: "isbn",
     align: "left",
   },
@@ -226,17 +220,16 @@ const purchasedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
   },
   ...bookMiddleInfoColumns.value,
+  // TODO: decide to keep/remove this. This column doesn't exist in the mockups, but might be nice to have the date
   {
     label: t("manageUsers.booksMovementsDialog.purchasedAt"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: ({ purchasedAt }) => purchasedAt, // TODO: Format the date
     name: "purchased-at",
     align: "left",
   },
   {
     label: t("manageUsers.booksMovementsDialog.theVendor"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: ({ owner }) => owner.email,
     name: "vendor",
     align: "left",
   },
@@ -247,51 +240,6 @@ const purchasedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "center",
   },
 ]);
-
-const purchasedRows = ref<BookSummaryFragment[]>([]);
-const soldRows = ref<BookSummaryFragment[]>([]);
-
-const onSoldRequest: QTable["onRequest"] = async function (requestProps) {
-  soldLoading.value = true;
-
-  const newBooks = await refetchSoldBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-  soldPagination.value.rowsNumber = newBooks?.data.books.rowsCount ?? 0;
-
-  soldRows.value.splice(
-    0,
-    soldRows.value.length,
-    ...(newBooks?.data.books.rows ?? soldRows.value),
-  );
-
-  soldPagination.value.page = requestProps.pagination.page;
-  soldPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  soldLoading.value = false;
-};
-
-const onPurchasedRequest: QTable["onRequest"] = async function (requestProps) {
-  purchasedLoading.value = true;
-
-  const newBooks = await refetchPurchasedBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-  purchasedPagination.value.rowsNumber = newBooks?.data.books.rowsCount ?? 0;
-
-  purchasedRows.value.splice(
-    0,
-    purchasedRows.value.length,
-    ...(newBooks?.data.books.rows ?? purchasedRows.value),
-  );
-
-  purchasedPagination.value.page = requestProps.pagination.page;
-  purchasedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  purchasedLoading.value = false;
-};
 
 function openProblemDialog(value: unknown) {
   // FIXME: add problem report dialog
@@ -307,8 +255,4 @@ function openActionsDialog(value: unknown) {
   // FIXME: add logic
   value;
 }
-
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
-
-defineEmits(useDialogPluginComponent.emitsObject);
 </script>
