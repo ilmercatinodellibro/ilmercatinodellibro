@@ -137,6 +137,10 @@
                   dense
                   @update:model-value="swapRow(row.id)"
                 />
+                <status-chip
+                  v-else-if="col.name === 'status'"
+                  :value="col.value"
+                />
                 <q-btn
                   v-else-if="
                     col.name === 'actions' && ownedCopies.includes(row)
@@ -229,6 +233,7 @@ import {
 } from "src/services/book-copy.graphql";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
+import StatusChip from "./status-chip.vue";
 import TableHeaderWithInfo from "./table-header-with-info.vue";
 
 const { t } = useI18n();
@@ -267,8 +272,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    // FIXME: add field
-    field: () => undefined,
+    field: ({ book }) => book.isAvailable,
     label: t("book.fields.status"),
   },
   {

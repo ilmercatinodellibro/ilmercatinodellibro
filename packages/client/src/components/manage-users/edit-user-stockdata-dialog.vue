@@ -116,6 +116,7 @@
                   <status-chip :value="value" />
                 </q-td>
               </template>
+
               <template #body-cell-utility="{ value }">
                 <q-td>
                   <utility-chip :value="value" />
@@ -200,8 +201,7 @@ const commonColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     label: t("book.fields.status"),
-    // TODO: add the field name
-    field: () => false,
+    field: "isAvailable",
     name: "status",
     align: "left",
   },

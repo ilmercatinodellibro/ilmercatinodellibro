@@ -80,7 +80,6 @@
           class="col"
           @request="onRequest"
         >
-          <!-- FIXME: add the right value checks for colors and icon -->
           <template #body-cell-status="{ value }">
             <q-td>
               <status-chip :value="value" />
@@ -206,8 +205,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "status",
     label: t("book.fields.status"),
-    // FIXME: add the field name
-    field: () => false,
+    field: "isAvailable",
     align: "left",
   },
   {
@@ -266,7 +264,8 @@ function openBookDialog() {
   Dialog.create({
     component: AddBookDialog,
   }).onOk((payload: string[]) => {
-    payload; // FIXME: Load the new book in the database with the data passed from the dialog
+    // eslint-disable-next-line no-console
+    console.log(payload); // FIXME: Load the new book in the database with the data passed from the dialog
   });
 }
 </script>

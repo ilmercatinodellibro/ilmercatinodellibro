@@ -2,7 +2,14 @@ import {
   ConflictException,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import {
+  Args,
+  Mutation,
+  Query,
+  ResolveField,
+  Resolver,
+  Root,
+} from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
 import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
@@ -12,7 +19,7 @@ import { BookService } from "./book.service";
 // import { CurrentUser } from "../auth/decorators/current-user.decorator";
 // @CurrentUser() { id: userId, firstname, lastname }: User,
 
-@Resolver()
+@Resolver(() => Book)
 export class BookResolver {
   constructor(
     private readonly prisma: PrismaService,
@@ -86,6 +93,38 @@ export class BookResolver {
       rowsCount,
       rows,
     };
+  }
+
+  @ResolveField(() => Boolean, {
+    description: "Indicates if the book has any available copies for sale.",
+  })
+  async isAvailable(@Root() book: Book) {
+    const availableCopies = await this.prisma.book
+      .findUnique({
+        where: { id: book.id },
+      })
+      .copies({
+        where: {
+          returnedAt: null,
+          OR: [
+            {
+              sales: {
+                none: {},
+              },
+            },
+            {
+              sales: {
+                some: {
+                  refundedAt: null,
+                },
+              },
+            },
+          ],
+        },
+        select: { id: true },
+      });
+
+    return availableCopies && availableCopies.length > 0;
   }
 
   @Mutation(() => Book, { nullable: true })
