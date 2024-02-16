@@ -325,23 +325,26 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
 ]);
 
-const { bookCopiesByOwner: ownedCopies } = useGetBookCopiesByOwnerQuery(() => ({
-  userId: props.user.id,
-}));
-
-const { returnedBookCopies: returnedCopies } = useGetReturnedBookCopiesQuery(
-  () => ({
+const { bookCopiesByOwner: ownedCopies, loading: ownedLoading } =
+  useGetBookCopiesByOwnerQuery(() => ({
     userId: props.user.id,
-  }),
-);
+  }));
 
-const { soldBookCopies: soldCopies } = useGetSoldBookCopiesQuery(() => ({
-  userId: props.user.id,
-}));
+const { returnedBookCopies: returnedCopies, loading: returnedLoading } =
+  useGetReturnedBookCopiesQuery(() => ({
+    userId: props.user.id,
+  }));
+
+const { soldBookCopies: soldCopies, loading: soldLoading } =
+  useGetSoldBookCopiesQuery(() => ({
+    userId: props.user.id,
+  }));
 
 const selectedRowsIDs = ref<string[]>([]);
 
-const bookLoading = ref(false);
+const bookLoading = computed(
+  () => ownedLoading.value || returnedLoading.value || soldLoading.value,
+);
 
 enum Titles {
   InStock = "in-stock",
