@@ -362,10 +362,16 @@ const tableRows = computed<(BookCopyDetailsFragment | GroupHeaderRow)[]>(() => [
     id: Titles.InStock,
   },
   ...ownedCopies.value,
-  {
-    id: Titles.Returned,
-  },
-  ...returnedCopies.value,
+
+  ...(returnedCopies.value.length > 0
+    ? [
+        {
+          id: Titles.Returned,
+        },
+        ...returnedCopies.value,
+      ]
+    : []),
+
   {
     id: Titles.Sold,
   },
