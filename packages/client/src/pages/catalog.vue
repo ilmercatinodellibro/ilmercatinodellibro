@@ -72,7 +72,7 @@
           ref="tableRef"
           v-model:pagination="pagination"
           :columns="columns"
-          :filter="searchQuery"
+          :filter="tableFilter"
           :loading="bookLoading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           :rows="tableRows"
@@ -144,6 +144,11 @@ const schoolFilters = ref<SchoolFilters>({
   addresses: [],
 });
 
+const tableFilter = computed(() => ({
+  search: searchQuery.value,
+  isAvailable: filters.value.includes(BookFilters.Available) || undefined,
+}));
+
 const selectedFiltersToString = computed(() =>
   filters.value.map((key) => filterOptions.value[key]?.label).join(", "),
 );
@@ -153,7 +158,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 const { refetchBooks, booksPaginationDetails } = useBookService(
   currentPage,
   numberOfRows,
-  searchQuery,
+  tableFilter,
 );
 
 const bookLoading = ref(false);
@@ -233,7 +238,7 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
   const newBooks = await refetchBooks({
     page: requestProps.pagination.page - 1,
     rows: requestProps.pagination.rowsPerPage,
-    filter: searchQuery.value,
+    filter: tableFilter.value,
   });
   pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 

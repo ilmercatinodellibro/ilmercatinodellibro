@@ -1,4 +1,5 @@
-import { Ref, computed } from "vue";
+import { ComputedRef, Ref, computed } from "vue";
+import { BookQueryFilter } from "src/@generated/graphql";
 import {
   useGetBooksQuery,
   useLoadBooksIntoDatabaseMutation,
@@ -7,7 +8,7 @@ import {
 export function useBookService(
   page: Ref<number>,
   rows: Ref<number>,
-  filter?: Ref<string | undefined>,
+  filter?: ComputedRef<BookQueryFilter>,
 ) {
   const {
     books: booksData,
@@ -26,7 +27,6 @@ export function useBookService(
 
     return {
       page: currentData?.page ?? 0,
-      filter: currentData?.filter ?? "",
       rowCount: currentData?.rowsCount ?? 0,
     };
   });

@@ -26,51 +26,76 @@ export class BookResolver {
     private readonly bookService: BookService,
   ) {}
 
+  #availableCopyFilter: Prisma.BookCopyWhereInput = {
+    returnedAt: null,
+    OR: [
+      {
+        sales: {
+          none: {},
+        },
+      },
+      {
+        sales: {
+          some: {
+            refundedAt: null,
+          },
+        },
+      },
+    ],
+  };
+
   @Query(() => BookQueryResult)
   async books(
     @Args()
-    {
-      page = 0,
-      rows: rowsPerPage = 100,
-      filter: dirtyFilter = "",
-    }: BookQueryArgs,
+    { page = 0, rows: rowsPerPage = 100, filter = {} }: BookQueryArgs,
   ) {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
-    const filter = dirtyFilter.trim().replaceAll(" ", "%");
+    const searchText = filter.search?.trim().replaceAll(" ", "%");
 
     const where: Prisma.BookWhereInput = {
       retailLocationId: "re", // TODO: update this when retailLocations are properly handled
 
-      OR: filter
+      copies:
+        typeof filter.isAvailable !== "boolean"
+          ? undefined
+          : filter.isAvailable
+          ? {
+              some: this.#availableCopyFilter,
+            }
+          : {
+              none: this.#availableCopyFilter,
+            },
+
+      OR: searchText
         ? [
             {
               authorsFullName: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
             {
               isbnCode: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
             {
               publisherName: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
             {
               title: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
             {
               subject: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
@@ -89,7 +114,6 @@ export class BookResolver {
 
     return {
       page,
-      filter,
       rowsCount,
       rows,
     };
@@ -104,23 +128,7 @@ export class BookResolver {
         where: { id: book.id },
       })
       .copies({
-        where: {
-          returnedAt: null,
-          OR: [
-            {
-              sales: {
-                none: {},
-              },
-            },
-            {
-              sales: {
-                some: {
-                  refundedAt: null,
-                },
-              },
-            },
-          ],
-        },
+        where: this.#availableCopyFilter,
         select: { id: true },
       });
 
