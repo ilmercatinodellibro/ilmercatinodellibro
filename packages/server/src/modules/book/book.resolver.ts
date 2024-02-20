@@ -78,6 +78,8 @@ export class BookResolver {
     // handle spaces by replacing them with % for the search
     const searchText = filter.search?.trim().replaceAll(" ", "%");
 
+    // TODO: involve reservations and cart items in availability check:
+    // To do that, we either have to use a raw query, a view, or similar, or fetch all books matching `where` then filter the rest in memory.
     const where: Prisma.BookWhereInput = {
       retailLocationId: "re", // TODO: update this when retailLocations are properly handled
 
@@ -148,16 +150,27 @@ export class BookResolver {
     description: "Indicates if the book has any available copies for sale.",
   })
   async isAvailable(@Root() book: Book) {
-    const availableCopies = await this.prisma.book
-      .findUnique({
-        where: { id: book.id },
-      })
-      .copies({
+    const bookChain = this.prisma.book.findUniqueOrThrow({
+      where: { id: book.id },
+    });
+
+    const [availableCopies, reservedCopies] = await Promise.all([
+      bookChain.copies({
         where: this.#availableCopyFilter,
         select: { id: true },
-      });
+      }),
 
-    return availableCopies && availableCopies.length > 0;
+      bookChain.reservations({
+        where: {
+          deletedAt: null,
+        },
+        select: { id: true },
+      }),
+
+      // TODO: get the carts which have this book, and reduce the available amount
+    ]);
+
+    return availableCopies.length - reservedCopies.length > 0;
   }
 
   @Mutation(() => Book, { nullable: true })
