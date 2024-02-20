@@ -28,18 +28,43 @@ export class BookResolver {
 
   #availableCopyFilter: Prisma.BookCopyWhereInput = {
     returnedAt: null,
-    OR: [
+    AND: [
       {
-        sales: {
-          none: {},
-        },
-      },
-      {
-        sales: {
-          some: {
-            refundedAt: null,
+        OR: [
+          {
+            sales: {
+              none: {},
+            },
           },
-        },
+          {
+            sales: {
+              every: {
+                refundedAt: {
+                  not: null,
+                },
+              },
+            },
+          },
+        ],
+      },
+
+      {
+        OR: [
+          {
+            problems: {
+              none: {},
+            },
+          },
+          {
+            problems: {
+              every: {
+                resolvedAt: {
+                  not: null,
+                },
+              },
+            },
+          },
+        ],
       },
     ],
   };
