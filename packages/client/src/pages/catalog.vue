@@ -210,7 +210,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "status",
     label: t("book.fields.status"),
-    field: "isAvailable",
+    field: ({ meta }) => meta.isAvailable,
     align: "left",
   },
   {

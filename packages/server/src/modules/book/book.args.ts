@@ -1,11 +1,4 @@
-import {
-  ArgsType,
-  Field,
-  InputType,
-  Int,
-  ObjectType,
-  OmitType,
-} from "@nestjs/graphql";
+import { ArgsType, Field, InputType, Int, ObjectType } from "@nestjs/graphql";
 import { Book, BookCreateWithoutRetailLocationInput } from "src/@generated";
 
 @InputType()
@@ -30,11 +23,7 @@ export class BookQueryArgs {
 }
 
 @InputType()
-export class BookCreateInput extends OmitType(
-  BookCreateWithoutRetailLocationInput,
-  ["id"],
-  InputType,
-) {
+export class BookCreateInput extends BookCreateWithoutRetailLocationInput {
   @Field(() => String, { nullable: false })
   retailLocationId!: string;
 }

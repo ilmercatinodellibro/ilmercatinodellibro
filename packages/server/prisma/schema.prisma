@@ -5,7 +5,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  previewFeatures = ["postgresqlExtensions", "views"]
   binaryTargets   = ["native"]
 }
 
@@ -141,9 +141,19 @@ model Book {
   retailLocationId String         @map("retail_location_id")
   retailLocation   RetailLocation @relation("RetailLocationBooks", fields: [retailLocationId], references: [id])
 
+  // Defining the relation from this side to be able to define it as non-nullable
+  meta BookMeta @relation(fields: [id], references: [id])
+
   copies       BookCopy[]
   reservations Reservation[] @relation("BookReservations")
   requests     BookRequest[] @relation("BookRequested")
+}
+
+view BookMeta {
+  id   String @id @map("book_id") @db.Uuid
+  book Book?
+
+  isAvailable Boolean @map("is_available")
 }
 
 model BookCopy {

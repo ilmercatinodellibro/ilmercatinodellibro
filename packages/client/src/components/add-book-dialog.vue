@@ -82,7 +82,7 @@ defineEmits(useDialogPluginComponent.emitsObject);
 const subjects = ["Subject1", "Subject2"];
 
 // TODO: Use the input type after implementing the GraphQL mutation
-const newBook = reactive<Omit<BookSummaryFragment, "id" | "isAvailable">>({
+const newBook = reactive<Omit<BookSummaryFragment, "id" | "meta">>({
   authorsFullName: "",
   isbnCode: "",
   originalPrice: 0,

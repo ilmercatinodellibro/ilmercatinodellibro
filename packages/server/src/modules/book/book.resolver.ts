@@ -11,13 +11,12 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
+import { BookMeta } from "src/@generated";
 import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookCreateInput, BookQueryArgs, BookQueryResult } from "./book.args";
 import { BookService } from "./book.service";
-// import { CurrentUser } from "../auth/decorators/current-user.decorator";
-// @CurrentUser() { id: userId, firstname, lastname }: User,
 
 @Resolver(() => Book)
 export class BookResolver {
@@ -25,49 +24,6 @@ export class BookResolver {
     private readonly prisma: PrismaService,
     private readonly bookService: BookService,
   ) {}
-
-  #availableCopyFilter: Prisma.BookCopyWhereInput = {
-    returnedAt: null,
-    AND: [
-      {
-        OR: [
-          {
-            sales: {
-              none: {},
-            },
-          },
-          {
-            sales: {
-              every: {
-                refundedAt: {
-                  not: null,
-                },
-              },
-            },
-          },
-        ],
-      },
-
-      {
-        OR: [
-          {
-            problems: {
-              none: {},
-            },
-          },
-          {
-            problems: {
-              every: {
-                resolvedAt: {
-                  not: null,
-                },
-              },
-            },
-          },
-        ],
-      },
-    ],
-  };
 
   @Query(() => BookQueryResult)
   async books(
@@ -78,21 +34,12 @@ export class BookResolver {
     // handle spaces by replacing them with % for the search
     const searchText = filter.search?.trim().replaceAll(" ", "%");
 
-    // TODO: involve reservations and cart items in availability check:
-    // To do that, we either have to use a raw query, a view, or similar, or fetch all books matching `where` then filter the rest in memory.
     const where: Prisma.BookWhereInput = {
       retailLocationId: "re", // TODO: update this when retailLocations are properly handled
 
-      copies:
-        typeof filter.isAvailable !== "boolean"
-          ? undefined
-          : filter.isAvailable
-          ? {
-              some: this.#availableCopyFilter,
-            }
-          : {
-              none: this.#availableCopyFilter,
-            },
+      meta: {
+        isAvailable: filter.isAvailable,
+      },
 
       OR: searchText
         ? [
@@ -146,31 +93,15 @@ export class BookResolver {
     };
   }
 
-  @ResolveField(() => Boolean, {
-    description: "Indicates if the book has any available copies for sale.",
-  })
-  async isAvailable(@Root() book: Book) {
-    const bookChain = this.prisma.book.findUniqueOrThrow({
-      where: { id: book.id },
-    });
-
-    const [availableCopies, reservedCopies] = await Promise.all([
-      bookChain.copies({
-        where: this.#availableCopyFilter,
-        select: { id: true },
-      }),
-
-      bookChain.reservations({
+  @ResolveField(() => BookMeta)
+  async meta(@Root() book: Book) {
+    return this.prisma.book
+      .findUniqueOrThrow({
         where: {
-          deletedAt: null,
+          id: book.id,
         },
-        select: { id: true },
-      }),
-
-      // TODO: get the carts which have this book, and reduce the available amount
-    ]);
-
-    return availableCopies.length - reservedCopies.length > 0;
+      })
+      .meta();
   }
 
   @Mutation(() => Book, { nullable: true })

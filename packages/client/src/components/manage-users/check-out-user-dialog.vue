@@ -272,7 +272,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    field: ({ book }) => book.isAvailable,
+    field: ({ book }) => book.meta.isAvailable,
     label: t("book.fields.status"),
   },
   {
