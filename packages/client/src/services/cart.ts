@@ -1,7 +1,8 @@
-import { useOpenCartMutation } from "./cart.graphql";
+import { useAddToCartMutation, useOpenCartMutation } from "./cart.graphql";
 
 export function useCartService() {
   return {
     useOpenCartMutation,
+    useAddToCartMutation,
   };
 }

@@ -5,7 +5,7 @@ import { Book, Cart } from "src/@generated";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { Input } from "../auth/decorators/input.decorator";
-import { OpenCartInput } from "./cart.input";
+import { AddToCartInput, OpenCartInput } from "./cart.input";
 
 // TODO: Delete the cart 30 minutes after it was created
 
@@ -53,7 +53,32 @@ export class CartResolver {
     });
   }
 
-  // TODO: Add to cart
+  @Mutation(() => Book)
+  async addToCart(
+    @Input() { cartId, bookIsbn }: AddToCartInput,
+    @CurrentUser() operator: User,
+  ) {
+    if (operator.role === Role.USER) {
+      throw new ForbiddenException("Regular users cannot modify carts");
+    }
+
+    const cart = await this.prisma.cart.findUniqueOrThrow({
+      where: { id: cartId },
+    });
+
+    const book = await this.prisma.book.findFirstOrThrow({
+      where: { isbnCode: bookIsbn },
+    });
+
+    await this.prisma.cartItem.create({
+      data: {
+        cartId: cart.id,
+        bookId: book.id,
+      },
+    });
+
+    return book;
+  }
 
   // TODO: Remove from cart (and restore to previous state, e.g. reserved or requested)
 

@@ -21,3 +21,9 @@ mutation openCart($input: OpenCartInput!) {
     ...Cart
   }
 }
+
+mutation addToCart($input: AddToCartInput!) {
+  addToCart(input: $input) {
+    ...BookWithCopies
+  }
+}
