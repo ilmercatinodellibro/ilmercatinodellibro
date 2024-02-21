@@ -1,0 +1,23 @@
+fragment CartSummary on Cart {
+  id
+}
+
+fragment BookWithCopies on Book {
+  ...BookSummary
+  copies {
+    ...BookCopySummary
+  }
+}
+
+fragment Cart on Cart {
+  ...CartSummary
+  books {
+    ...BookWithCopies
+  }
+}
+
+mutation openCart($input: OpenCartInput!) {
+  openCart(input: $input) {
+    ...Cart
+  }
+}

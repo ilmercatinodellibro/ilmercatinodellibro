@@ -11,7 +11,7 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
-import { BookMeta } from "src/@generated";
+import { BookCopy, BookMeta } from "src/@generated";
 import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -108,6 +108,16 @@ export class BookResolver {
         },
       })
       .meta();
+  }
+
+  // TODO: Add a filter to only return the available copies
+  @Query(() => [BookCopy])
+  async copies(@Root() book: Book) {
+    return this.prisma.book
+      .findUniqueOrThrow({
+        where: { id: book.id },
+      })
+      .copies();
   }
 
   @Mutation(() => Book, { nullable: true })

@@ -151,6 +151,13 @@
             <table-cell-with-dialog :value="value" show-alert />
           </template>
 
+          <template #body-cell-shopping-cart="props">
+            <q-td :props="props">
+              <!-- TODO: Create the cart dialog and make the button open it -->
+              <q-btn color="primary" flat :icon="mdiCart" round size="md" />
+            </q-td>
+          </template>
+
           <template #body-cell-receipts="{ value }">
             <q-td class="text-center">
               <q-btn
@@ -184,6 +191,7 @@
 
 <script setup lang="ts">
 import {
+  mdiCart,
   mdiMagnify,
   mdiPencil,
   mdiPlus,
@@ -285,6 +293,12 @@ const columns = computed<QTableColumn[]>(() => [
     field: "available",
     label: t("manageUsers.fields.available"),
     align: "left",
+  },
+  {
+    name: "shopping-cart",
+    // TODO: Get the cart items amount from the server and display it in a badge if it's non-zero
+    field: () => undefined,
+    label: "",
   },
   {
     name: "creation-date",

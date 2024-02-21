@@ -70,6 +70,8 @@ model User {
   reportedProblems   Problem[]  @relation("ProblemReportedBy")
   resolvedProblems   Problem[]  @relation("ProblemResolvedBy")
   refundedCopySale   Sale[]     @relation("CopySaleRefundedBy")
+  ownedCart          Cart?      @relation("CartOwner")
+  createdCarts       Cart[]     @relation("CartOperator")
 }
 
 model Event {
@@ -147,6 +149,7 @@ model Book {
   copies       BookCopy[]
   reservations Reservation[] @relation("BookReservations")
   requests     BookRequest[] @relation("BookRequested")
+  cartItems    CartItem[]
 }
 
 view BookMeta {
@@ -267,4 +270,30 @@ model BookRequest {
 
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("BookRequestSale", fields: [saleId], references: [id])
+}
+
+model Cart {
+  id String @id @default(uuid())
+
+  userId String @unique @map("user_id")
+  user   User   @relation("CartOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  // TODO: implement max 30 minutes of lifespan for the cart
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("CartOperator", fields: [createdById], references: [id])
+
+  items CartItem[]
+}
+
+model CartItem {
+  id String @id @default(uuid())
+
+  cartId String @map("cart_id")
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  bookId String @map("book_id") @db.Uuid
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, bookId])
 }

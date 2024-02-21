@@ -24,6 +24,7 @@ import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth-guard";
 import { BookModule } from "./modules/book/book.module";
 import { BookCopyModule } from "./modules/book-copy/book-copy.module";
 import { BookRequestModule } from "./modules/book-request/book-request.module";
+import { CartModule } from "./modules/cart/cart.module";
 import { EventModule } from "./modules/event/event.module";
 import { FeedbackModule } from "./modules/feedback/feedback.module";
 import { MailModule } from "./modules/mail/mail.module";
@@ -133,6 +134,7 @@ import { UserModule } from "./modules/user/user.module";
     BookModule,
     BookCopyModule,
     BookRequestModule,
+    CartModule,
     MailModule,
     EventModule,
     NotificationModule,
