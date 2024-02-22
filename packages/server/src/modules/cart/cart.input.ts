@@ -20,3 +20,12 @@ export class AddToCartInput {
   @Field({ nullable: true })
   fromBookRequestId?: string;
 }
+
+@InputType()
+export class RemoveFromCartInput {
+  @Field()
+  cartId!: string;
+
+  @Field()
+  bookId!: string;
+}

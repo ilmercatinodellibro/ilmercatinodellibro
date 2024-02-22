@@ -27,3 +27,7 @@ mutation addToCart($input: AddToCartInput!) {
     ...BookWithCopies
   }
 }
+
+mutation removeFromCart($input: RemoveFromCartInput!) {
+  removeFromCart(input: $input)
+}

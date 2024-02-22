@@ -1,11 +1,16 @@
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { Role, User } from "@prisma/client";
+import { GraphQLVoid } from "graphql-scalars";
 import { Book, Cart } from "src/@generated";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { Input } from "../auth/decorators/input.decorator";
-import { AddToCartInput, OpenCartInput } from "./cart.input";
+import {
+  AddToCartInput,
+  OpenCartInput,
+  RemoveFromCartInput,
+} from "./cart.input";
 
 // TODO: Delete the cart 30 minutes after it was created
 
@@ -116,7 +121,24 @@ export class CartResolver {
     return book;
   }
 
-  // TODO: Remove from cart
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async removeFromCart(
+    @Input() { cartId, bookId }: RemoveFromCartInput,
+    @CurrentUser() operator: User,
+  ) {
+    if (operator.role === Role.USER) {
+      throw new ForbiddenException("Regular users cannot modify carts");
+    }
+
+    await this.prisma.cartItem.delete({
+      where: {
+        cartId_bookId: {
+          cartId,
+          bookId,
+        },
+      },
+    });
+  }
 
   // TODO: Checkout: accept selected copies for each book in the cart, then create the Sale entries and delete the cart
 }
