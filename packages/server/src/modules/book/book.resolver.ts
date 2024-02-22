@@ -28,11 +28,17 @@ export class BookResolver {
   @Query(() => BookQueryResult)
   async books(
     @Args()
-    { page = 0, rows: rowsPerPage = 100, filter = {} }: BookQueryArgs,
+    { page, rows: rowsPerPage = 100, filter = {} }: BookQueryArgs,
   ) {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
     const searchText = filter.search?.trim().replaceAll(" ", "%");
+
+    if (rowsPerPage > 200) {
+      throw new UnprocessableEntityException(
+        "The maximum number of rows per page is 200.",
+      );
+    }
 
     const where: Prisma.BookWhereInput = {
       retailLocationId: "re", // TODO: update this when retailLocations are properly handled

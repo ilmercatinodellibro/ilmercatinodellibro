@@ -12,8 +12,8 @@ export class BookQueryFilter {
 
 @ArgsType()
 export class BookQueryArgs {
-  @Field(() => Int, { nullable: true })
-  page?: number;
+  @Field(() => Int)
+  page!: number;
 
   @Field(() => Int, { nullable: true })
   rows?: number;
