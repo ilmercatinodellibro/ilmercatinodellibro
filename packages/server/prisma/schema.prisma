@@ -253,6 +253,8 @@ model Reservation {
 
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("ReservationSale", fields: [saleId], references: [id])
+
+  cartItem CartItem?
 }
 
 model BookRequest {
@@ -270,6 +272,8 @@ model BookRequest {
 
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("BookRequestSale", fields: [saleId], references: [id])
+
+  cartItem CartItem?
 }
 
 model Cart {
@@ -294,6 +298,12 @@ model CartItem {
 
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  fromReservationId String?      @unique @map("from_reservation_id") @db.Uuid
+  fromReservation   Reservation? @relation(fields: [fromReservationId], references: [id])
+
+  fromBookRequestId String?      @unique @map("from_book_request_id") @db.Uuid
+  fromBookRequest   BookRequest? @relation(fields: [fromBookRequestId], references: [id])
 
   @@unique([cartId, bookId])
 }

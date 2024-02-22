@@ -1,4 +1,4 @@
-import { ForbiddenException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { Role, User } from "@prisma/client";
 import { Book, Cart } from "src/@generated";
@@ -55,32 +55,68 @@ export class CartResolver {
 
   @Mutation(() => Book)
   async addToCart(
-    @Input() { cartId, bookIsbn }: AddToCartInput,
+    @Input()
+    {
+      cartId,
+      fromBookIsbn,
+      fromBookRequestId,
+      fromReservationId,
+    }: AddToCartInput,
     @CurrentUser() operator: User,
   ) {
     if (operator.role === Role.USER) {
       throw new ForbiddenException("Regular users cannot modify carts");
     }
 
-    const cart = await this.prisma.cart.findUniqueOrThrow({
-      where: { id: cartId },
-    });
+    const inputs = [fromBookIsbn, fromBookRequestId, fromReservationId].filter(
+      (input) => input !== undefined,
+    );
+    if (inputs.length !== 1) {
+      throw new BadRequestException(
+        "Exactly one of bookIsbn, fromBookRequestId, or fromReservationId must be provided",
+      );
+    }
+
+    // TODO: validate if the request or reservation is still valid (not expired, not already fulfilled, etc.)
 
     const book = await this.prisma.book.findFirstOrThrow({
-      where: { isbnCode: bookIsbn },
+      where: {
+        OR: [
+          {
+            isbnCode: fromBookIsbn,
+          },
+          {
+            requests: {
+              some: {
+                id: fromBookRequestId,
+              },
+            },
+          },
+          {
+            reservations: {
+              some: {
+                id: fromReservationId,
+              },
+            },
+          },
+        ],
+      },
     });
 
     await this.prisma.cartItem.create({
       data: {
-        cartId: cart.id,
+        cartId,
         bookId: book.id,
+
+        fromBookRequestId,
+        fromReservationId,
       },
     });
 
     return book;
   }
 
-  // TODO: Remove from cart (and restore to previous state, e.g. reserved or requested)
+  // TODO: Remove from cart
 
   // TODO: Checkout: accept selected copies for each book in the cart, then create the Sale entries and delete the cart
 }

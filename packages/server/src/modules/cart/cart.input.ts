@@ -11,6 +11,12 @@ export class AddToCartInput {
   @Field()
   cartId!: string;
 
-  @Field()
-  bookIsbn!: string;
+  @Field({ nullable: true })
+  fromBookIsbn?: string;
+
+  @Field({ nullable: true })
+  fromReservationId?: string;
+
+  @Field({ nullable: true })
+  fromBookRequestId?: string;
 }
