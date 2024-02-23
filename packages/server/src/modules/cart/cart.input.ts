@@ -1,4 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
+import { GraphQLISBN } from "graphql-scalars";
 
 @InputType()
 export class OpenCartInput {
@@ -11,7 +12,7 @@ export class AddToCartInput {
   @Field()
   cartId!: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => GraphQLISBN, { nullable: true })
   fromBookIsbn?: string;
 
   @Field({ nullable: true })
