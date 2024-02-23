@@ -6,11 +6,14 @@ fragment BookSummary on Book {
   title
   originalPrice
   publisherName
+
+  meta {
+    isAvailable
+  }
 }
 
-query getBooks($page: Int!, $rows: Int!, $filter: String) {
+query getBooks($page: Int!, $rows: Int!, $filter: BookQueryFilter) {
   books(page: $page, rows: $rows, filter: $filter) {
-    filter
     page
     rows {
       ...BookSummary

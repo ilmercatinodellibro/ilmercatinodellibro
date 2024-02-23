@@ -2,17 +2,23 @@ import {
   ConflictException,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import {
+  Args,
+  Mutation,
+  Query,
+  ResolveField,
+  Resolver,
+  Root,
+} from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
+import { BookMeta } from "src/@generated";
 import { Book } from "src/@generated/book";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookCreateInput, BookQueryArgs, BookQueryResult } from "./book.args";
 import { BookService } from "./book.service";
-// import { CurrentUser } from "../auth/decorators/current-user.decorator";
-// @CurrentUser() { id: userId, firstname, lastname }: User,
 
-@Resolver()
+@Resolver(() => Book)
 export class BookResolver {
   constructor(
     private readonly prisma: PrismaService,
@@ -22,48 +28,54 @@ export class BookResolver {
   @Query(() => BookQueryResult)
   async books(
     @Args()
-    {
-      page = 0,
-      rows: rowsPerPage = 100,
-      filter: dirtyFilter = "",
-    }: BookQueryArgs,
+    { page, rows: rowsPerPage = 100, filter = {} }: BookQueryArgs,
   ) {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
-    const filter = dirtyFilter.trim().replaceAll(" ", "%");
+    const searchText = filter.search?.trim().replaceAll(" ", "%");
+
+    if (rowsPerPage > 200) {
+      throw new UnprocessableEntityException(
+        "The maximum number of rows per page is 200.",
+      );
+    }
 
     const where: Prisma.BookWhereInput = {
       retailLocationId: "re", // TODO: update this when retailLocations are properly handled
 
-      OR: filter
+      meta: {
+        isAvailable: filter.isAvailable,
+      },
+
+      OR: searchText
         ? [
             {
               authorsFullName: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
             {
               isbnCode: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
             {
               publisherName: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
             {
               title: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
             {
               subject: {
-                contains: filter,
+                contains: searchText,
                 mode: "insensitive",
               },
             },
@@ -82,10 +94,20 @@ export class BookResolver {
 
     return {
       page,
-      filter,
       rowsCount,
       rows,
     };
+  }
+
+  @ResolveField(() => BookMeta)
+  async meta(@Root() book: Book) {
+    return this.prisma.book
+      .findUniqueOrThrow({
+        where: {
+          id: book.id,
+        },
+      })
+      .meta();
   }
 
   @Mutation(() => Book, { nullable: true })
