@@ -12,12 +12,14 @@ import {
   OpenCartInput,
   RemoveFromCartInput,
 } from "./cart.input";
-
-// TODO: Delete the cart 30 minutes after it was created
+import { CartService } from "./cart.service";
 
 @Resolver(() => Cart)
 export class CartResolver {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cartService: CartService,
+  ) {}
 
   @ResolveField(() => [Book])
   async books(@Root() cart: Cart) {
@@ -48,7 +50,13 @@ export class CartResolver {
       where: { userId },
     });
     if (cart) {
-      return cart;
+      if (!this.cartService.isCartExpired(cart)) {
+        return cart;
+      }
+
+      await this.prisma.cart.delete({
+        where: { id: cart.id },
+      });
     }
 
     return await this.prisma.cart.create({
@@ -82,6 +90,8 @@ export class CartResolver {
         "Exactly one of bookIsbn, fromBookRequestId, or fromReservationId must be provided",
       );
     }
+
+    await this.cartService.ensureCartNotExpired(cartId);
 
     let book: PrismaBook;
 
@@ -170,6 +180,8 @@ export class CartResolver {
       throw new ForbiddenException("Regular users cannot modify carts");
     }
 
+    await this.cartService.ensureCartNotExpired(cartId);
+
     await this.prisma.cartItem.delete({
       where: {
         cartId_bookId: {
@@ -188,6 +200,8 @@ export class CartResolver {
     if (operator.role === Role.USER) {
       throw new ForbiddenException("Regular users cannot modify carts");
     }
+
+    await this.cartService.ensureCartNotExpired(input.cartId);
 
     await this.prisma.$transaction(async (prisma) => {
       await this.#finalizeCart(prisma, input);

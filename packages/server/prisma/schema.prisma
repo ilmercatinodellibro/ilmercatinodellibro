@@ -284,7 +284,6 @@ model Cart {
   userId String @unique @map("user_id")
   user   User   @relation("CartOwner", fields: [userId], references: [id], onDelete: Cascade)
 
-  // TODO: implement max 30 minutes of lifespan for the cart
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
   createdById String   @map("created_by_id")
   createdBy   User     @relation("CartOperator", fields: [createdById], references: [id])
