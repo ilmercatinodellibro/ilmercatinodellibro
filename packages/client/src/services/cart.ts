@@ -1,5 +1,6 @@
 import {
   useAddToCartMutation,
+  useFinalizeCartMutation,
   useOpenCartMutation,
   useRemoveFromCartMutation,
 } from "./cart.graphql";
@@ -9,5 +10,6 @@ export function useCartService() {
     useOpenCartMutation,
     useAddToCartMutation,
     useRemoveFromCartMutation,
+    useFinalizeCartMutation,
   };
 }

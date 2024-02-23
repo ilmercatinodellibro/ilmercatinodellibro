@@ -213,6 +213,7 @@ model Problem {
   resolvedBy   User?     @relation("ProblemResolvedBy", fields: [resolvedById], references: [id])
 }
 
+// TODO: Add a field for keeping track of the operator who made the sale (?)
 model Sale {
   id                  String   @id @default(uuid())
   bookCopyId          String   @map("book_copy_id")
@@ -299,10 +300,10 @@ model CartItem {
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
-  fromReservationId String?      @unique @map("from_reservation_id") @db.Uuid
+  fromReservationId String?      @unique @map("from_reservation_id")
   fromReservation   Reservation? @relation(fields: [fromReservationId], references: [id])
 
-  fromBookRequestId String?      @unique @map("from_book_request_id") @db.Uuid
+  fromBookRequestId String?      @unique @map("from_book_request_id")
   fromBookRequest   BookRequest? @relation(fields: [fromBookRequestId], references: [id])
 
   @@unique([cartId, bookId])

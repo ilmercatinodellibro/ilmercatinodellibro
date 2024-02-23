@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { Role, User } from "@prisma/client";
+import { Prisma, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { Book, Cart } from "src/@generated";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
@@ -8,6 +8,7 @@ import { PrismaService } from "src/modules/prisma/prisma.service";
 import { Input } from "../auth/decorators/input.decorator";
 import {
   AddToCartInput,
+  FinalizeCartInput,
   OpenCartInput,
   RemoveFromCartInput,
 } from "./cart.input";
@@ -140,5 +141,125 @@ export class CartResolver {
     });
   }
 
-  // TODO: Checkout: accept selected copies for each book in the cart, then create the Sale entries and delete the cart
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async finalizeCart(
+    @Input() input: FinalizeCartInput,
+    @CurrentUser() operator: User,
+  ) {
+    if (operator.role === Role.USER) {
+      throw new ForbiddenException("Regular users cannot modify carts");
+    }
+
+    await this.prisma.$transaction(async (prisma) => {
+      await this.#finalizeCart(prisma, input);
+    });
+  }
+
+  async #finalizeCart(
+    prisma: Prisma.TransactionClient,
+    { cartId, bookCopyIds }: FinalizeCartInput,
+  ) {
+    const cart = await prisma.cart.findUniqueOrThrow({
+      where: { id: cartId },
+      include: {
+        user: true,
+      },
+    });
+
+    const books = await prisma.book.findMany({
+      where: {
+        cartItems: {
+          some: {
+            cartId,
+          },
+        },
+      },
+      include: {
+        requests: {
+          where: {
+            userId: cart.userId,
+            deletedAt: null,
+            saleId: null,
+          },
+        },
+        reservations: {
+          where: {
+            userId: cart.userId,
+            deletedAt: null,
+            saleId: null,
+          },
+        },
+      },
+    });
+
+    const bookCopies = await prisma.bookCopy.findMany({
+      where: {
+        id: {
+          in: bookCopyIds,
+        },
+      },
+    });
+
+    const cartBookIds = books.map(({ id }) => id);
+    const selectedBookIds = bookCopies.map(({ bookId }) => bookId);
+    if (!selectedBookIds.every((id) => cartBookIds.includes(id))) {
+      throw new BadRequestException(
+        "Given book copies do not match the list of books in the cart",
+      );
+    }
+
+    const purchasedAt = new Date();
+    await prisma.sale.createMany({
+      data: bookCopies.map((bookCopy) => ({
+        bookCopyId: bookCopy.id,
+        purchasedById: cart.user.id,
+        iseeDiscountApplied: cart.user.discount,
+        purchasedAt,
+      })),
+    });
+    // createMany doesn't return the created entries, so we have to query them again
+    const sales = await prisma.sale.findMany({
+      where: {
+        bookCopyId: {
+          in: bookCopies.map(({ id }) => id),
+        },
+        purchasedAt,
+      },
+    });
+    // Connect requests and reservations to the sales
+    await Promise.all(
+      sales.map(async (sale) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const bookCopy = bookCopies.find(({ id }) => id === sale.bookCopyId)!;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const book = books.find(({ id }) => id === bookCopy.bookId)!;
+
+        if (book.requests.length > 0) {
+          // There can only be one request per book per user (already filtered to ensure it's not fulfilled or deleted)
+          const request = book.requests[0];
+          await prisma.bookRequest.update({
+            where: { id: request.id },
+            data: {
+              saleId: sale.id,
+            },
+          });
+        }
+
+        if (book.reservations.length > 0) {
+          // There can only be one reservation per book per user (already filtered to ensure it's not fulfilled or deleted)
+          const reservation = book.reservations[0];
+          await prisma.reservation.update({
+            where: { id: reservation.id },
+            data: {
+              saleId: sale.id,
+            },
+          });
+        }
+      }),
+    );
+
+    await prisma.cart.delete({
+      where: { id: cartId },
+    });
+  }
 }

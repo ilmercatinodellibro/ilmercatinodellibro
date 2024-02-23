@@ -11,7 +11,7 @@ export class AddToCartInput {
   @Field()
   cartId!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   fromBookIsbn?: string;
 
   @Field({ nullable: true })
@@ -28,4 +28,13 @@ export class RemoveFromCartInput {
 
   @Field()
   bookId!: string;
+}
+
+@InputType()
+export class FinalizeCartInput {
+  @Field()
+  cartId!: string;
+
+  @Field(() => [String])
+  bookCopyIds!: string[];
 }
