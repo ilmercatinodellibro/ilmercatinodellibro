@@ -110,14 +110,61 @@ export class BookResolver {
       .meta();
   }
 
-  // TODO: Add a filter to only return the available copies
   @Query(() => [BookCopy])
-  async copies(@Root() book: Book) {
+  async copies(
+    @Root() book: Book,
+    @Args("isAvailable", { defaultValue: false }) isAvailable: boolean,
+  ) {
+    const availableFilter: Prisma.BookCopyWhereInput = {
+      returnedAt: null,
+      AND: [
+        {
+          OR: [
+            {
+              sales: {
+                none: {},
+              },
+            },
+            {
+              sales: {
+                every: {
+                  refundedAt: {
+                    not: null,
+                  },
+                },
+              },
+            },
+          ],
+        },
+
+        {
+          OR: [
+            {
+              problems: {
+                none: {},
+              },
+            },
+            {
+              problems: {
+                every: {
+                  resolvedAt: {
+                    not: null,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ],
+    };
+
     return this.prisma.book
       .findUniqueOrThrow({
         where: { id: book.id },
       })
-      .copies();
+      .copies({
+        where: isAvailable ? availableFilter : undefined,
+      });
   }
 
   @Mutation(() => Book, { nullable: true })

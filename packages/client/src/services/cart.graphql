@@ -2,9 +2,9 @@ fragment CartSummary on Cart {
   id
 }
 
-fragment BookWithCopies on Book {
+fragment BookWithAvailableCopies on Book {
   ...BookSummary
-  copies {
+  copies(isAvailable: true) {
     ...BookCopySummary
   }
 }
@@ -12,7 +12,7 @@ fragment BookWithCopies on Book {
 fragment Cart on Cart {
   ...CartSummary
   books {
-    ...BookWithCopies
+    ...BookWithAvailableCopies
   }
 }
 
@@ -24,7 +24,7 @@ mutation openCart($input: OpenCartInput!) {
 
 mutation addToCart($input: AddToCartInput!) {
   addToCart(input: $input) {
-    ...BookWithCopies
+    ...BookWithAvailableCopies
   }
 }
 
