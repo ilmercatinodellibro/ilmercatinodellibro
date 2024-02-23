@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { Prisma, Role, User } from "@prisma/client";
+import { Prisma, Book as PrismaBook, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { Book, Cart } from "src/@generated";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
@@ -83,31 +83,70 @@ export class CartResolver {
       );
     }
 
-    // TODO: validate if the request or reservation is still valid (not expired, not already fulfilled, etc.)
+    let book: PrismaBook;
 
-    const book = await this.prisma.book.findFirstOrThrow({
-      where: {
-        OR: [
-          {
-            isbnCode: fromBookIsbn,
-          },
-          {
-            requests: {
-              some: {
-                id: fromBookRequestId,
+    if (fromBookIsbn) {
+      const bookDetails = await this.prisma.book.findFirstOrThrow({
+        where: { isbnCode: fromBookIsbn },
+        include: {
+          meta: true,
+          requests: {
+            where: {
+              user: {
+                ownedCart: {
+                  id: cartId,
+                },
               },
             },
           },
-          {
-            reservations: {
-              some: {
-                id: fromReservationId,
+          reservations: {
+            where: {
+              user: {
+                ownedCart: {
+                  id: cartId,
+                },
               },
             },
           },
-        ],
-      },
-    });
+        },
+      });
+      book = bookDetails;
+
+      // The book availability is global, so we first check if the user already has a request or reservation for the book
+      if (
+        bookDetails.requests.length === 0 &&
+        bookDetails.reservations.length === 0 &&
+        !bookDetails.meta.isAvailable
+      ) {
+        throw new BadRequestException("The book is not available");
+      }
+    } else if (fromBookRequestId) {
+      const request = await this.prisma.bookRequest.findUniqueOrThrow({
+        where: { id: fromBookRequestId },
+        include: {
+          book: true,
+        },
+      });
+      if (request.deletedAt !== null || request.saleId !== null) {
+        throw new BadRequestException("The request is no longer valid");
+      }
+
+      book = request.book;
+    } else if (fromReservationId) {
+      const reservation = await this.prisma.reservation.findUniqueOrThrow({
+        where: { id: fromReservationId },
+        include: {
+          book: true,
+        },
+      });
+      if (reservation.deletedAt !== null || reservation.saleId !== null) {
+        throw new BadRequestException("The reservation is no longer valid");
+      }
+
+      book = reservation.book;
+    } else {
+      throw new Error("Unreachable code"); // to satisfy TypeScript
+    }
 
     await this.prisma.cartItem.create({
       data: {
