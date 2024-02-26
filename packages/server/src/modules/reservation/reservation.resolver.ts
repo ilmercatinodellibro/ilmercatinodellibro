@@ -86,6 +86,22 @@ export class ReservationResolver {
       .sale();
   }
 
+  // TODO: use this to hide the reservation from the list when the related book is in a cart
+  @ResolveField(() => Boolean)
+  async isInCart(@Root() reservation: Reservation) {
+    const cartItem = await this.prisma.reservation
+      .findUniqueOrThrow({
+        where: {
+          id: reservation.id,
+        },
+      })
+      .cartItem({
+        select: { id: true },
+      });
+
+    return cartItem !== null;
+  }
+
   @Query(() => [Reservation])
   async userReservations(
     @Args()

@@ -1,4 +1,4 @@
-import { Role } from "src/@generated/graphql";
+import { Role } from "@prisma/client";
 import {
   UsersDocument,
   useRemoveUserMutation,

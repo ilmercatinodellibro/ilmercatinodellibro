@@ -1,17 +1,13 @@
 import { Injectable, UnprocessableEntityException } from "@nestjs/common";
+import { Role } from "@prisma/client";
 import * as argon2 from "argon2";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
-import { UserCreateInput } from "src/@generated";
-import { UserUpdateInput } from "src/modules/auth/user-update.input";
+import { RegisterPayload } from "src/modules/auth/auth.args";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-
-  getUsers() {
-    return this.prisma.user.findMany();
-  }
 
   async getUser(id: string) {
     return this.prisma.user.findUnique({
@@ -29,7 +25,10 @@ export class UserService {
     });
   }
 
-  async createUser(userData: UserCreateInput, emailVerified?: boolean) {
+  async createUser(
+    userData: Omit<RegisterPayload, "passwordConfirmation">,
+    emailVerified?: boolean,
+  ) {
     userData.email = userData.email.toLowerCase();
     userData.password = await argon2.hash(userData.password);
     return this.prisma.user.create({
@@ -40,7 +39,7 @@ export class UserService {
     });
   }
 
-  async updateUserRole({ id, role }: Pick<UserUpdateInput, "id" | "role">) {
+  async updateUserRole({ id, role }: { id: string; role: Role }) {
     return this.prisma.user.update({
       where: {
         id,
@@ -51,15 +50,14 @@ export class UserService {
     });
   }
 
-  async updateUser(userData: UserUpdateInput) {
-    userData.password = userData.password
-      ? await argon2.hash(userData.password)
-      : undefined;
+  async updatePassword({ id, password }: { id: string; password: string }) {
     return this.prisma.user.update({
       where: {
-        id: userData.id,
+        id,
       },
-      data: userData,
+      data: {
+        password: await argon2.hash(password),
+      },
     });
   }
 
@@ -90,10 +88,9 @@ export class UserService {
   }
 
   async findUserByEmail(email: string) {
-    email = email.toLowerCase();
     return this.prisma.user.findUnique({
       where: {
-        email,
+        email: email.toLowerCase(),
       },
     });
   }

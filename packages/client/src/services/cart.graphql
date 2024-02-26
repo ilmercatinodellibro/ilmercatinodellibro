@@ -1,0 +1,37 @@
+fragment CartSummary on Cart {
+  id
+}
+
+fragment BookWithAvailableCopies on Book {
+  ...BookSummary
+  copies(isAvailable: true) {
+    ...BookCopySummary
+  }
+}
+
+fragment Cart on Cart {
+  ...CartSummary
+  books {
+    ...BookWithAvailableCopies
+  }
+}
+
+mutation openCart($input: OpenCartInput!) {
+  openCart(input: $input) {
+    ...Cart
+  }
+}
+
+mutation addToCart($input: AddToCartInput!) {
+  addToCart(input: $input) {
+    ...BookWithAvailableCopies
+  }
+}
+
+mutation removeFromCart($input: RemoveFromCartInput!) {
+  removeFromCart(input: $input)
+}
+
+mutation finalizeCart($input: FinalizeCartInput!) {
+  finalizeCart(input: $input)
+}

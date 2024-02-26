@@ -1,8 +1,8 @@
 import { UnprocessableEntityException, UseGuards } from "@nestjs/common";
 import { Mutation, Resolver } from "@nestjs/graphql";
+import { User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
-import { User } from "src/@generated";
 import { UserService } from "../user/user.service";
 import {
   LoginPayload,
@@ -130,7 +130,7 @@ export class AuthResolver {
         "Invalid password, Try something else!",
       );
     }
-    await this.userService.updateUser({
+    await this.userService.updatePassword({
       id: user.id,
       password: newPassword,
     });
@@ -164,7 +164,7 @@ export class AuthResolver {
         "Confirmation password doesn't match with provided password!",
       );
     }
-    await this.userService.updateUser({
+    await this.userService.updatePassword({
       id: user.id,
       password: newPassword,
     });

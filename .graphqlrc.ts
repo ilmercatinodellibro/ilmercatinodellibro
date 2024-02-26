@@ -1,13 +1,17 @@
 import type { IGraphQLConfig } from "graphql-config";
-import { resolve } from "path";
 
-const config: IGraphQLConfig = {
-  schema: resolve(__dirname, "./packages/server/src/@generated/schema.graphql"),
+import client from "./packages/client/.graphqlrc";
+import server from "./packages/server/.graphqlrc";
+
+export default {
+  // Common
+  schema: server.schema,
   extensions: {
-    endpoints: {
-      default: `http://localhost:3000/graphql`,
-    },
+    ...server.extensions,
   },
-};
 
-export default config;
+  projects: {
+    client,
+    server,
+  },
+} satisfies IGraphQLConfig;

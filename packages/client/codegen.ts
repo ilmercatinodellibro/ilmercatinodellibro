@@ -15,6 +15,8 @@ const config: CodegenConfig = {
     scalars: {
       Timestamp: "number",
       DateTime: "string",
+      Void: "undefined",
+      ISBN: "string",
     },
   },
   generates: {
