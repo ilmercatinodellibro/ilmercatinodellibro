@@ -9,10 +9,6 @@ import { PrismaService } from "src/modules/prisma/prisma.service";
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  getUsers() {
-    return this.prisma.user.findMany();
-  }
-
   async getUser(id: string) {
     return this.prisma.user.findUnique({
       where: {
