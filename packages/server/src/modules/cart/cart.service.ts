@@ -27,7 +27,7 @@ export class CartService {
       where: { id: cartId },
     });
     if (!this.isCartExpired(cart)) {
-      return;
+      return cart;
     }
 
     await this.prisma.cart.delete({

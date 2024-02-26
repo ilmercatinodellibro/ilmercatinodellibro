@@ -39,7 +39,7 @@ export class CartResolver {
       "Create a new cart for the user, or return the existing one if it exists.",
   })
   async openCart(
-    @Input() { userId }: OpenCartInput,
+    @Input() { userId, retailLocationId }: OpenCartInput,
     @CurrentUser() operator: User,
   ) {
     if (operator.role === Role.USER) {
@@ -47,7 +47,12 @@ export class CartResolver {
     }
 
     const cart = await this.prisma.cart.findUnique({
-      where: { userId },
+      where: {
+        userId_retailLocationId: {
+          userId,
+          retailLocationId,
+        },
+      },
     });
     if (cart) {
       if (!this.cartService.isCartExpired(cart)) {
@@ -62,6 +67,7 @@ export class CartResolver {
     return await this.prisma.cart.create({
       data: {
         userId,
+        retailLocationId,
         createdById: operator.id,
       },
     });
@@ -91,38 +97,33 @@ export class CartResolver {
       );
     }
 
-    await this.cartService.ensureCartNotExpired(cartId);
+    const cart = await this.cartService.ensureCartNotExpired(cartId);
 
     let book: PrismaBook;
 
     if (fromBookIsbn) {
       const bookDetails = await this.prisma.book.findFirstOrThrow({
-        where: { isbnCode: fromBookIsbn },
+        where: {
+          isbnCode: fromBookIsbn,
+          retailLocationId: cart.retailLocationId,
+        },
         include: {
           meta: true,
           requests: {
             where: {
-              user: {
-                ownedCart: {
-                  id: cartId,
-                },
-              },
+              userId: cart.userId,
             },
           },
           reservations: {
             where: {
-              user: {
-                ownedCart: {
-                  id: cartId,
-                },
-              },
+              userId: cart.userId,
             },
           },
         },
       });
       book = bookDetails;
 
-      // The book availability is global, so we first check if the user already has a request or reservation for the book
+      // The book availability applies to all users, so we first check if this specific user already has a request or reservation for the book
       if (
         bookDetails.requests.length === 0 &&
         bookDetails.reservations.length === 0 &&
@@ -140,6 +141,11 @@ export class CartResolver {
       if (request.deletedAt !== null || request.saleId !== null) {
         throw new BadRequestException("The request is no longer valid");
       }
+      if (request.book.retailLocationId !== cart.retailLocationId) {
+        throw new BadRequestException(
+          "The book request is not for the same retail location as the cart",
+        );
+      }
 
       book = request.book;
     } else if (fromReservationId) {
@@ -151,6 +157,11 @@ export class CartResolver {
       });
       if (reservation.deletedAt !== null || reservation.saleId !== null) {
         throw new BadRequestException("The reservation is no longer valid");
+      }
+      if (reservation.book.retailLocationId !== cart.retailLocationId) {
+        throw new BadRequestException(
+          "The reservation is not for the same retail location as the cart",
+        );
       }
 
       book = reservation.book;

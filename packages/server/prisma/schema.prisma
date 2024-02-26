@@ -62,7 +62,7 @@ model User {
   reservations        Reservation[] @relation("ReservationUser") // Keeps track of the user for who the reservation was made
   requestedBooks      BookRequest[] @relation("BookRequestUser")
   deletedBookRequests BookRequest[] @relation("BookRequestDeletedBy")
-  ownedCart           Cart?         @relation("CartOwner")
+  ownedCarts          Cart[]        @relation("CartOwner")
 
   // Operator/admin relations
   returnedBookCopies  BookCopy[] @relation("CopyReturnedBy")
@@ -127,6 +127,7 @@ model RetailLocation {
   warehouseMaxBlockSize Int     @default(10) @map("warehouse_max_block_size")
 
   books Book[] @relation("RetailLocationBooks")
+  carts Cart[]
 }
 
 model Book {
@@ -289,14 +290,19 @@ model BookRequest {
 model Cart {
   id String @id @default(uuid())
 
-  userId String @unique @map("user_id")
+  userId String @map("user_id")
   user   User   @relation("CartOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation(fields: [retailLocationId], references: [id])
 
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
   createdById String   @map("created_by_id")
   createdBy   User     @relation("CartOperator", fields: [createdById], references: [id])
 
   items CartItem[]
+
+  @@unique([userId, retailLocationId])
 }
 
 model CartItem {

@@ -5,6 +5,9 @@ import { GraphQLISBN } from "graphql-scalars";
 export class OpenCartInput {
   @Field()
   userId!: string;
+
+  @Field()
+  retailLocationId!: string;
 }
 
 @InputType()
