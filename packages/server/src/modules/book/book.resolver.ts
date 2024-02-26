@@ -110,7 +110,7 @@ export class BookResolver {
       .meta();
   }
 
-  @Query(() => [BookCopy])
+  @ResolveField(() => [BookCopy])
   async copies(
     @Root() book: Book,
     @Args("isAvailable", { defaultValue: false }) isAvailable: boolean,
