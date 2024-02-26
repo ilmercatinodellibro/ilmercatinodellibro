@@ -62,16 +62,18 @@ model User {
   reservations        Reservation[] @relation("ReservationUser") // Keeps track of the user for who the reservation was made
   requestedBooks      BookRequest[] @relation("BookRequestUser")
   deletedBookRequests BookRequest[] @relation("BookRequestDeletedBy")
+  ownedCart           Cart?         @relation("CartOwner")
 
   // Operator/admin relations
-  returnedBookCopies BookCopy[] @relation("CopyReturnedBy")
-  createdBookCopies  BookCopy[] @relation("CopyCreatedBy")
-  updatedBookCopies  BookCopy[] @relation("CopyUpdatedBy")
-  reportedProblems   Problem[]  @relation("ProblemReportedBy")
-  resolvedProblems   Problem[]  @relation("ProblemResolvedBy")
-  refundedCopySale   Sale[]     @relation("CopySaleRefundedBy")
-  ownedCart          Cart?      @relation("CartOwner")
-  createdCarts       Cart[]     @relation("CartOperator")
+  returnedBookCopies  BookCopy[] @relation("CopyReturnedBy")
+  createdBookCopies   BookCopy[] @relation("CopyCreatedBy")
+  updatedBookCopies   BookCopy[] @relation("CopyUpdatedBy")
+  reportedProblems    Problem[]  @relation("ProblemReportedBy")
+  resolvedProblems    Problem[]  @relation("ProblemResolvedBy")
+  refundedSales       Sale[]     @relation("CopySaleRefundedBy")
+  processedSales      Sale[]     @relation("CopySoldBy")
+  salesInCreatedCarts Sale[]     @relation("SaleInCartOpenedBy")
+  createdCarts        Cart[]     @relation("CartOperator")
 }
 
 model Event {
@@ -225,6 +227,12 @@ model Sale {
   purchasedAt   DateTime @default(now()) @map("purchased_at") @db.Timestamptz()
   purchasedById String   @map("purchased_by_id")
   purchasedBy   User     @relation("CopyPurchasedBy", fields: [purchasedById], references: [id])
+
+  // Operator/admin relation
+  createdById     String @map("created_by_id")
+  createdBy       User   @relation("CopySoldBy", fields: [createdById], references: [id])
+  cartCreatedById String @map("cart_created_by_id")
+  cartCreatedBy   User   @relation("SaleInCartOpenedBy", fields: [cartCreatedById], references: [id])
 
   // Operator/admin relation
   refundedAt   DateTime? @map("refunded_at")

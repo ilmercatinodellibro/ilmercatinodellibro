@@ -204,13 +204,14 @@ export class CartResolver {
     await this.cartService.ensureCartNotExpired(input.cartId);
 
     await this.prisma.$transaction(async (prisma) => {
-      await this.#finalizeCart(prisma, input);
+      await this.#finalizeCart(prisma, input, operator);
     });
   }
 
   async #finalizeCart(
     prisma: Prisma.TransactionClient,
     { cartId, bookCopyIds }: FinalizeCartInput,
+    operator: User,
   ) {
     const cart = await prisma.cart.findUniqueOrThrow({
       where: { id: cartId },
@@ -265,9 +266,11 @@ export class CartResolver {
     await prisma.sale.createMany({
       data: bookCopies.map((bookCopy) => ({
         bookCopyId: bookCopy.id,
+        purchasedAt,
         purchasedById: cart.user.id,
         iseeDiscountApplied: cart.user.discount,
-        purchasedAt,
+        createdById: operator.id,
+        cartCreatedById: cart.createdById,
       })),
     });
     // createMany doesn't return the created entries, so we have to query them again
