@@ -377,11 +377,11 @@ const rows = computed(() =>
   rawRows.value.map((user, index) => ({
     ...user,
     phoneNumber: Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
-    inStock: index % 2,
-    purchased: index % 3,
-    requested: index % 4,
-    sold: index % 5,
-    reserved: (index % 2) + 1,
+    inStock: user.booksInStock,
+    purchased: user.booksBought,
+    requested: user.booksRequested,
+    sold: user.booksSold,
+    reserved: user.booksReserved,
     available: (index + 1) % 2,
     creationDate: new Date()
       .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
