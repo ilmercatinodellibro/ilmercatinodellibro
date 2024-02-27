@@ -247,9 +247,9 @@ import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { UserFragment, useUsersQuery } from "src/services/user.graphql";
+import { UserFragment, useGetUsersQuery } from "src/services/user.graphql";
 
-const { loading, users, refetch } = useUsersQuery();
+const { loading, users, refetch } = useGetUsersQuery();
 
 const tableRef = ref<QTable>();
 

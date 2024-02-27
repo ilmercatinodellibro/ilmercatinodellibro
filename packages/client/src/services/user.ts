@@ -1,19 +1,19 @@
 import { Role } from "@prisma/client";
 import {
-  UsersDocument,
+  GetUsersDocument,
+  useGetUsersQuery,
   useRemoveUserMutation,
   useUpdateRoleMutation,
-  useUsersQuery,
 } from "src/services/user.graphql";
 
 export const useUserService = () => {
-  const { users, loading } = useUsersQuery();
+  const { users, loading } = useGetUsersQuery();
 
   const { updateRole: _updateRole } = useUpdateRoleMutation();
   async function updateRole(id: string, role: Role) {
     const { cache } = await _updateRole({ input: { id, role } });
 
-    cache.updateQuery({ query: UsersDocument }, (data) => {
+    cache.updateQuery({ query: GetUsersDocument }, (data) => {
       const users = data?.users;
       if (!users) {
         return;
@@ -31,7 +31,7 @@ export const useUserService = () => {
   async function removeUser(id: string) {
     const { cache } = await deleteUser({ input: { id } });
 
-    cache.updateQuery({ query: UsersDocument }, (data) => {
+    cache.updateQuery({ query: GetUsersDocument }, (data) => {
       const users = data?.users;
       if (!users) {
         return;

@@ -13,7 +13,7 @@ fragment User on User {
   notes
 }
 
-query users {
+query getUsers {
   users {
     ...User
   }
