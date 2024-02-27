@@ -1,4 +1,11 @@
-import { Mutation, Query, ResolveField, Resolver, Root } from "@nestjs/graphql";
+import {
+  Args,
+  Mutation,
+  Query,
+  ResolveField,
+  Resolver,
+  Root,
+} from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
 import { User } from "src/@generated/user";
 import { Input } from "../auth/decorators/input.decorator";
@@ -113,7 +120,10 @@ export class UserResolver {
   }
 
   @ResolveField(() => Number)
-  async booksRequested(@Root() user: User) {
+  async booksRequested(
+    @Root() user: User,
+    @Args("onlyAvailable", { defaultValue: false }) onlyAvailable: boolean,
+  ) {
     const { _count } = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: user.id,
@@ -126,6 +136,15 @@ export class UserResolver {
                 deletedAt: {
                   not: null,
                 },
+                ...(onlyAvailable
+                  ? {
+                      book: {
+                        meta: {
+                          isAvailable: true,
+                        },
+                      },
+                    }
+                  : {}),
               },
             },
           },

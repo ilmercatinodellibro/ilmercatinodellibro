@@ -16,6 +16,7 @@ fragment User on User {
   booksSold
   booksReserved
   booksRequested
+  booksRequestedAndAvailable: booksRequested(onlyAvailable: true)
   booksBought
 }
 

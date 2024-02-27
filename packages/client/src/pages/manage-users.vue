@@ -374,7 +374,7 @@ const rawRows = ref<UserFragment[]>([]);
 // TODO: Instead of transforming the data here, use field/format fields of column definitions when the data is available
 const rows = computed(() =>
   // FIXME: update fields with actual data instead of placeholders
-  rawRows.value.map((user, index) => ({
+  rawRows.value.map((user) => ({
     ...user,
     phoneNumber: Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
     inStock: user.booksInStock,
@@ -382,7 +382,7 @@ const rows = computed(() =>
     requested: user.booksRequested,
     sold: user.booksSold,
     reserved: user.booksReserved,
-    available: (index + 1) % 2,
+    available: user.booksRequestedAndAvailable,
     creationDate: new Date()
       .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
         hour12: false,
