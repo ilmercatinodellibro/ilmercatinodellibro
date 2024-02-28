@@ -247,9 +247,12 @@ import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { UserFragment, useGetUsersQuery } from "src/services/user.graphql";
+import {
+  CustomerFragment,
+  useGetCustomersQuery,
+} from "src/services/user.graphql";
 
-const { loading, users, refetch } = useGetUsersQuery();
+const { loading, users, refetch } = useGetCustomersQuery();
 
 const tableRef = ref<QTable>();
 
@@ -277,7 +280,7 @@ const columnTooltip = computed(() => ({
 }));
 
 // TODO: pass the actual row type to QTable column's generic parameter when the data is available
-const columns = computed<QTableColumn<(typeof rows.value)[number]>[]>(() => [
+const columns = computed<QTableColumn[]>(() => [
   { name: "edit", field: () => undefined, label: "" },
   {
     name: "email",
@@ -369,7 +372,7 @@ const pagination = ref({
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
 
-const rawRows = ref<UserFragment[]>([]);
+const rawRows = ref<CustomerFragment[]>([]);
 
 // TODO: Instead of transforming the data here, use field/format fields of column definitions when the data is available
 const rows = computed(() =>
@@ -419,21 +422,19 @@ function addNewUser() {
 const onRequest: QTable["onRequest"] = async function (requestProps) {
   loading.value = true;
 
-  const payload = await refetch();
+  await refetch();
 
   // FIXME: reserve this filtering to the actual query
   rawRows.value.splice(
     0,
     rawRows.value.length,
-    ...(payload?.data.users.filter(
-      (row) =>
-        row.role === "USER" &&
-        Object.values(row).some((value) =>
-          searchQuery.value
-            ? typeof value === "string" && value.includes(searchQuery.value)
-            : true,
-        ),
-    ) ?? []),
+    ...users.value.filter((row) =>
+      Object.values(row).some((value) =>
+        searchQuery.value
+          ? typeof value === "string" && value.includes(searchQuery.value)
+          : true,
+      ),
+    ),
   );
 
   pagination.value.rowsNumber = rawRows.value.length; // FIXME: update to correct rowsNumber
@@ -443,7 +444,7 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
   loading.value = false;
 };
 
-function openReceipt(user: UserFragment) {
+function openReceipt(user: CustomerFragment) {
   Dialog.create({
     component: ReceiptsDialog,
     componentProps: {
@@ -452,7 +453,7 @@ function openReceipt(user: UserFragment) {
   });
 }
 
-function openPayOff(user: UserFragment) {
+function openPayOff(user: CustomerFragment) {
   Dialog.create({
     component: PayOffUserDialog,
     componentProps: {
@@ -464,24 +465,25 @@ function openPayOff(user: UserFragment) {
   });
 }
 
-function openEdit(user: UserFragment, rowIndex: number) {
+function openEdit(user: CustomerFragment, rowIndex: number) {
   Dialog.create({
     component: EditUserDetailsDialog,
     componentProps: { userData: user },
-  }).onOk((payload: { user: UserFragment; password?: string }) => {
+  }).onOk((payload: { user: CustomerFragment; password?: string }) => {
     // FIXME: add server call to update user data
     rawRows.value[rowIndex] = payload.user;
   });
 }
 
 function openCellEditDialog(
-  userData: UserFragment,
+  userData: CustomerFragment,
   column: QTableColumn,
   value: number,
 ) {
   if (value === 0) {
     return;
   }
+
   switch (column.name) {
     case "in-stock":
       Dialog.create({
@@ -515,13 +517,13 @@ function updateTable() {
   tableRef.value?.requestServerInteraction();
 }
 
-function getAvailableCount(user: UserFragment) {
+function getAvailableCount(user: CustomerFragment) {
   // FIXME: add logic for available books count
   user;
   return 1;
 }
 
-function openCart(user: UserFragment) {
+function openCart(user: CustomerFragment) {
   Dialog.create({
     component: CartDialog,
     componentProps: { user },

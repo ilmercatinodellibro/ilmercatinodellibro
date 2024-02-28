@@ -218,7 +218,6 @@ model Problem {
   resolvedBy   User?     @relation("ProblemResolvedBy", fields: [resolvedById], references: [id])
 }
 
-// TODO: Add a field for keeping track of the operator who made the sale (?)
 model Sale {
   id                  String   @id @default(uuid())
   bookCopyId          String   @map("book_copy_id")

@@ -1,3 +1,4 @@
+import { ForbiddenException } from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -7,7 +8,9 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
+import { Role } from "src/@generated";
 import { User } from "src/@generated/user";
+import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { RemoveUserPayload, UpdateRolePayload } from "./user.args";
@@ -21,10 +24,27 @@ export class UserResolver {
   ) {}
 
   @Query(() => [User])
-  async users() {
+  async users(
+    @Args("roles", { type: () => [Role], defaultValue: [] })
+    roles: Role[],
+    @CurrentUser() user: User,
+  ) {
+    if (user.role === "USER") {
+      throw new ForbiddenException(
+        "You are not allowed to view the list of users.",
+      );
+    }
+
     return await this.prisma.user.findMany({
       where: {
         emailVerified: true,
+        ...(roles.length > 0
+          ? {
+              role: {
+                in: roles,
+              },
+            }
+          : {}),
       },
     });
   }
