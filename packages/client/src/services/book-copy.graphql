@@ -1,6 +1,7 @@
 fragment BookCopySummary on BookCopy {
   id
   code
+  originalCode
 }
 
 fragment ProblemDetails on Problem {

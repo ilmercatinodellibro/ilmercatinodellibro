@@ -15,6 +15,7 @@ fragment User on User {
 
 fragment Customer on User {
   ...User
+  createdAt
   booksInStock
   booksSold
   booksReserved

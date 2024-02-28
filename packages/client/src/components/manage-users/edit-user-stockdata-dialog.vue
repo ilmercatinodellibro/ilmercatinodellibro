@@ -32,10 +32,10 @@
           name="in-retrieval"
           class="col column flex-delegate-height-management no-wrap q-pa-none"
         >
-          <card-table-header @add-book="addBookToInRetrieval">
+          <card-table-header @add-book="addBookToBeRegistered">
             <template #side-actions>
               <q-btn
-                :disable="inRetrievalRows.length === 0"
+                :disable="booksToRegister.length === 0"
                 :label="$t('manageUsers.inStockDialog.retrieveBtn')"
                 color="primary"
                 no-wrap
@@ -45,29 +45,29 @@
           </card-table-header>
 
           <dialog-table
-            v-model:pagination="inRetrievalPagination"
-            :columns="inRetrievalColumns"
-            :loading="inRetrievalLoading"
-            :rows="inRetrievalRows"
+            :rows="booksToRegister"
+            :columns="booksToRegisterColumns"
+            :rows-per-page-options="[0]"
             class="col"
-            @request="onInRetrievalRequest"
           >
             <template #body-cell-status="{ value }">
               <q-td>
                 <status-chip :value="value" />
               </q-td>
             </template>
+
             <template #body-cell-utility="{ value }">
               <q-td class="text-center">
                 <utility-chip :value="value" />
               </q-td>
             </template>
-            <template #body-cell-actions="{ value }">
+
+            <template #body-cell-actions="{ rowIndex }">
               <q-td class="text-center">
                 <chip-button
                   color="primary"
                   no-wrap
-                  @click="() => deleteBookDialog(value)"
+                  @click="openDeleteBookDialog(rowIndex)"
                 >
                   <q-item-label> {{ $t("common.delete") }} </q-item-label>
                   <q-icon
@@ -90,24 +90,26 @@
           class="column flex-delegate-height-management no-wrap q-pa-none"
         >
           <dialog-table
-            v-model:pagination="retrievedPagination"
-            :columns="retrievedColumns"
-            :loading="retrievedLoading"
-            :rows="retrievedRows"
+            :rows="copiesInStock"
+            :columns="copiesInStockColumns"
+            :loading="inStockLoading"
+            :rows-per-page-options="[0]"
             class="col"
-            @request="onRetrievedRequest"
           >
             <template #body-cell-status="{ value }">
               <q-td>
                 <status-chip :value="value" />
               </q-td>
             </template>
+
             <template #body-cell-utility="{ value }">
               <q-td>
                 <utility-chip :value="value" />
               </q-td>
             </template>
+
             <template #body-cell-actions="{ row }">
+              <!-- TODO: hide it when the book has been lost -->
               <q-td>
                 <chip-button
                   :label="
@@ -128,16 +130,13 @@
 <script setup lang="ts">
 import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
-import {
-  Dialog,
-  QTable,
-  QTableColumn,
-  QTableProps,
-  useDialogPluginComponent,
-} from "quasar";
+import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useBookService } from "src/services/book";
+import {
+  BookCopyDetailsFragment,
+  useGetBookCopiesByOwnerQuery,
+} from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { UserFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
@@ -148,196 +147,139 @@ import DialogTable from "./dialog-table.vue";
 import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
 import StatusChip from "./status-chip.vue";
 
-const inRetrievalCurrentPage = ref(0);
-const retrievedCurrentPage = ref(0);
-
-const inRetrievalRowsPerPage = ref(5);
-const retrievedRowsPerPage = ref(5);
-
-const {
-  refetchBooks: refetchInRetrievalBooks,
-  booksPaginationDetails: inRetrievalBooksPaginationDetails,
-  loading: inRetrievalLoading,
-} = useBookService(inRetrievalCurrentPage, inRetrievalRowsPerPage);
-
-const {
-  refetchBooks: refetchRetrievedBooks,
-  booksPaginationDetails: retrievedBooksPaginationDetails,
-  loading: retrievedLoading,
-} = useBookService(retrievedCurrentPage, retrievedRowsPerPage);
+const props = defineProps<{
+  userData: UserFragment;
+}>();
 
 const { t } = useI18n();
 
 const tab = ref("in-retrieval");
 
-const inRetrievalRows = ref<BookSummaryFragment[]>([]);
-const retrievedRows = ref<BookSummaryFragment[]>([]);
+const booksToRegister = ref<BookSummaryFragment[]>([]);
 
-const inRetrievalPagination = ref({
-  rowsPerPage: inRetrievalRowsPerPage.value,
-  rowsNumber: inRetrievalBooksPaginationDetails.value.rowCount,
-  page: inRetrievalCurrentPage.value,
-});
-const retrievedPagination = ref({
-  rowsPerPage: retrievedRowsPerPage.value,
-  rowsNumber: retrievedBooksPaginationDetails.value.rowCount,
-  page: retrievedCurrentPage.value,
-});
+const { bookCopiesByOwner: copiesInStock, loading: inStockLoading } =
+  useGetBookCopiesByOwnerQuery(() => ({
+    userId: props.userData.id,
+  }));
 
-const commonColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
-  {
-    label: t("book.fields.author"),
-    field: "authorsFullName",
-    name: "author",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-  },
-  {
-    label: t("book.fields.subject"),
-    field: "subject",
-    name: "subject",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-  },
-  {
-    label: t("book.fields.status"),
-    field: ({ meta }) => meta.isAvailable,
-    name: "status",
-    align: "left",
-  },
-  {
-    label: t("book.fields.title"),
-    field: "title",
-    name: "title",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-  },
-  {
-    label: t("book.fields.publisher"),
-    field: "publisherName",
-    name: "publisher",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-  },
-  {
-    label: t("book.fields.price"),
-    field: "originalPrice",
-    name: "price",
-    headerClasses: "text-center",
-    align: "left",
-    format: (val) => val + " €",
-  },
-  {
-    label: t("book.fields.utility"),
-    // TODO: add the field name
-    field: () => undefined,
-    name: "utility",
-    align: "center",
-  },
-]);
+// probably unnecessarily complex, but 🤷
+function getCommonColumns<
+  const TEntity extends "book" | "copy",
+  TFragment extends TEntity extends "book"
+    ? BookSummaryFragment
+    : BookCopyDetailsFragment,
+>(entity: TEntity): QTableColumn<TFragment>[] {
+  const getField = (
+    field: QTableColumn<BookSummaryFragment>["field"],
+  ): QTableColumn<TFragment>["field"] =>
+    entity === "book"
+      ? (field as QTableColumn<TFragment>["field"])
+      : (row) => {
+          const book = (row as BookCopyDetailsFragment).book;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return typeof field === "function" ? field(book) : field;
+        };
 
-const inRetrievalColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
-  {
-    label: t("book.fields.isbn"),
-    field: "isbnCode",
-    name: "isbn",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-  },
+  return [
+    {
+      label: t("book.fields.author"),
+      field: getField("authorsFullName"),
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.subject"),
+      field: getField("subject"),
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.status"),
+      field: getField(({ meta }) => meta.isAvailable),
+      name: "status",
+      align: "left",
+    },
+    {
+      label: t("book.fields.title"),
+      field: getField("title"),
+      name: "title",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.publisher"),
+      field: getField("publisherName"),
+      name: "publisher",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.price"),
+      field: getField("originalPrice"),
+      name: "price",
+      headerClasses: "text-center",
+      align: "left",
+      format: (val) => val + " €",
+    },
+    {
+      label: t("book.fields.utility"),
+      // TODO: add the field name
+      field: () => undefined,
+      name: "utility",
+      align: "center",
+    },
+  ];
+}
 
-  ...commonColumns.value,
+const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
+  () => [
+    {
+      label: t("book.fields.isbn"),
+      field: "isbnCode",
+      name: "isbn",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
 
-  {
-    label: t("manageUsers.actions"),
-    field: () => undefined,
-    name: "actions",
-    align: "center",
-  },
-]);
+    ...getCommonColumns("book"),
 
-const retrievedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
-  {
-    label: t("book.fields.isbn"),
-    field: "isbnCode",
-    name: "isbn",
-    align: "left",
-  },
-  {
-    label: t("book.code"),
-    // TODO: add the field name
-    field: () => undefined,
-    name: "code",
-    align: "left",
-  },
-  {
-    label: t("book.originalCode"),
-    // TODO: add the field name
-    field: () => undefined,
-    name: "original-code",
-    align: "left",
-  },
+    {
+      label: t("manageUsers.actions"),
+      field: () => undefined,
+      name: "actions",
+      align: "center",
+    },
+  ],
+);
 
-  ...commonColumns.value,
-  {
-    label: t("manageUsers.actions"),
-    field: () => undefined,
-    name: "actions",
-    align: "center",
-  },
-]);
+const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
+  () => [
+    {
+      label: t("book.fields.isbn"),
+      field: ({ book }) => book.isbnCode,
+      name: "isbn",
+      align: "left",
+    },
+    {
+      label: t("book.code"),
+      field: "code",
+      name: "code",
+      align: "left",
+    },
+    {
+      label: t("book.originalCode"),
+      field: "originalCode",
+      name: "original-code",
+      align: "left",
+    },
 
-defineProps<{
-  userData: UserFragment;
-}>();
+    ...getCommonColumns("copy"),
+  ],
+);
 
-// FIXME: add actual retrieval logic on both onRequest functions
-const onInRetrievalRequest: QTableProps["onRequest"] = async function (
-  requestProps,
-) {
-  inRetrievalLoading.value = true;
-
-  const newBooks = await refetchInRetrievalBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-  inRetrievalPagination.value.rowsNumber = newBooks?.data.books.rowsCount ?? 0;
-
-  inRetrievalRows.value.splice(
-    0,
-    inRetrievalRows.value.length,
-    ...(newBooks?.data.books.rows ?? inRetrievalRows.value),
-  );
-
-  inRetrievalPagination.value.page = requestProps.pagination.page;
-  inRetrievalPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  inRetrievalLoading.value = false;
-};
-
-const onRetrievedRequest: QTable["onRequest"] = async function (requestProps) {
-  retrievedLoading.value = true;
-
-  const newBooks = await refetchRetrievedBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-
-  retrievedPagination.value.rowsNumber =
-    retrievedBooksPaginationDetails.value.rowCount;
-
-  retrievedRows.value.splice(
-    0,
-    retrievedRows.value.length,
-    ...(newBooks?.data.books.rows ?? retrievedRows.value),
-  );
-
-  retrievedPagination.value.page = requestProps.pagination.page;
-  retrievedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  retrievedLoading.value = false;
-};
-
-function addBookToInRetrieval(bookISBN: string) {
+function addBookToBeRegistered(bookISBN: string) {
   // FIXME: add logic to add a book into "in retrieval" section
   bookISBN;
 }
@@ -351,7 +293,7 @@ function retrieveAllBooks() {
   });
 }
 
-function deleteBookDialog(book: BookSummaryFragment) {
+function openDeleteBookDialog(bookIndex: number) {
   Dialog.create({
     title: t("book.deleteBookDialog.title"),
     message: t("book.deleteBookDialog.message"),
@@ -359,8 +301,7 @@ function deleteBookDialog(book: BookSummaryFragment) {
     ok: t("common.delete"),
     persistent: true,
   }).onOk(() => {
-    // FIXME: Add the instructions for book deletion
-    book;
+    booksToRegister.value.splice(bookIndex, 1);
   });
 }
 

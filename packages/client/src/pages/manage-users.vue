@@ -68,12 +68,11 @@
           flat
           square
           row-key="name"
-          :rows="rows"
+          :rows="customers"
           :columns="columns"
           :filter="searchQuery"
           :loading="loading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
-          @request="onRequest"
         >
           <template #body-cell-edit="{ row, rowIndex }">
             <q-td class="text-left">
@@ -252,7 +251,7 @@ import {
   useGetCustomersQuery,
 } from "src/services/user.graphql";
 
-const { loading, users, refetch } = useGetCustomersQuery();
+const { loading, users: customers } = useGetCustomersQuery();
 
 const tableRef = ref<QTable>();
 
@@ -279,8 +278,7 @@ const columnTooltip = computed(() => ({
   available: t("manageUsers.tooltips.available"),
 }));
 
-// TODO: pass the actual row type to QTable column's generic parameter when the data is available
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   { name: "edit", field: () => undefined, label: "" },
   {
     name: "email",
@@ -302,37 +300,38 @@ const columns = computed<QTableColumn[]>(() => [
   },
   {
     name: "phone-number",
-    field: "phoneNumber",
+    // field: "phoneNumber",
+    field: () => Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
     label: t("manageUsers.fields.phoneNumber"),
     align: "left",
   },
   {
     name: "in-stock",
-    field: "inStock",
+    field: "booksInStock",
     label: t("manageUsers.fields.inStock"),
     align: "left",
   },
   {
     name: "sold",
-    field: "sold",
+    field: "booksSold",
     label: t("manageUsers.fields.sold"),
     align: "left",
   },
   {
     name: "reserved",
-    field: "reserved",
+    field: "booksReserved",
     label: t("manageUsers.fields.reserved"),
     align: "left",
   },
   {
     name: "requested",
-    field: "requested",
+    field: "booksRequested",
     label: t("manageUsers.fields.requested"),
     align: "left",
   },
   {
     name: "purchased",
-    field: "purchased",
+    field: "booksBought",
     label: t("manageUsers.fields.purchased"),
     align: "left",
   },
@@ -345,7 +344,17 @@ const columns = computed<QTableColumn[]>(() => [
   },
   {
     name: "creation-date",
-    field: "creationDate",
+    field: "createdAt",
+    format: (val: string) =>
+      new Date(val)
+        .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+        .split(", ")
+        .join(" - "),
     label: t("manageUsers.fields.creationDate"),
     align: "left",
   },
@@ -367,36 +376,10 @@ const currentPage = ref(0);
 const pagination = ref({
   page: currentPage.value,
   rowsPerPage: 100,
-  rowsNumber: users.value.length,
+  rowsNumber: customers.value.length,
 });
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
-
-const rawRows = ref<CustomerFragment[]>([]);
-
-// TODO: Instead of transforming the data here, use field/format fields of column definitions when the data is available
-const rows = computed(() =>
-  // FIXME: update fields with actual data instead of placeholders
-  rawRows.value.map((user) => ({
-    ...user,
-    phoneNumber: Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
-    inStock: user.booksInStock,
-    purchased: user.booksBought,
-    requested: user.booksRequested,
-    sold: user.booksSold,
-    reserved: user.booksReserved,
-    available: user.booksRequestedAndAvailable,
-    creationDate: new Date()
-      .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-      .split(", ")
-      .join(" - "),
-  })),
-);
 
 onMounted(() => {
   updateTable();
@@ -418,31 +401,6 @@ function addNewUser() {
     payload;
   });
 }
-
-const onRequest: QTable["onRequest"] = async function (requestProps) {
-  loading.value = true;
-
-  await refetch();
-
-  // FIXME: reserve this filtering to the actual query
-  rawRows.value.splice(
-    0,
-    rawRows.value.length,
-    ...users.value.filter((row) =>
-      Object.values(row).some((value) =>
-        searchQuery.value
-          ? typeof value === "string" && value.includes(searchQuery.value)
-          : true,
-      ),
-    ),
-  );
-
-  pagination.value.rowsNumber = rawRows.value.length; // FIXME: update to correct rowsNumber
-  pagination.value.page = requestProps.pagination.page;
-  pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  loading.value = false;
-};
 
 function openReceipt(user: CustomerFragment) {
   Dialog.create({
@@ -471,7 +429,7 @@ function openEdit(user: CustomerFragment, rowIndex: number) {
     componentProps: { userData: user },
   }).onOk((payload: { user: CustomerFragment; password?: string }) => {
     // FIXME: add server call to update user data
-    rawRows.value[rowIndex] = payload.user;
+    customers.value[rowIndex] = payload.user;
   });
 }
 
