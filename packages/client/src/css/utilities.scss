@@ -108,7 +108,7 @@ $line-heights-list: 16, 20, 28, 50, 75;
 }
 
 // widths
-$widths-list: 0, 24, 32, 180, 200, 250, 315, 420, 600, 1024;
+$widths-list: 0, 24, 32, 160, 180, 200, 250, 315, 420, 600, 1024;
 
 @each $width in $widths-list {
   .width-#{$width} {

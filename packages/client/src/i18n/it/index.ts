@@ -11,6 +11,7 @@ import contacts from "./contacts";
 import events from "./events";
 import general from "./general";
 import manageUsers from "./manage-users";
+import myBooks from "./my-books";
 import network from "./network";
 import salableBooks from "./salable-books";
 import validators from "./validators";
@@ -46,6 +47,7 @@ export default {
   events,
   general,
   manageUsers,
+  myBooks,
   network,
   salableBooks,
   validators,
@@ -152,6 +154,7 @@ export default {
     [AvailableRouteNames.Login]: "Login",
     [AvailableRouteNames.SalableBooks]: "Libri vendibili",
     [AvailableRouteNames.UsersManagement]: "Utenti e Movimenti",
+    [AvailableRouteNames.MyBooks]: "I Miei Libri",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",
