@@ -58,8 +58,6 @@ import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 
-const { t } = useI18n();
-
 defineProps<{
   booksToReturn: BookCopyDetailsFragment[];
   disclaimer: string;
@@ -72,6 +70,8 @@ defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+
+const { t } = useI18n();
 
 const totalSoldBooks = ref(0);
 const totalCheckoutMoney = ref(0);
