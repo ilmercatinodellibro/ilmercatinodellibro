@@ -133,6 +133,7 @@ import {
   mdiDelete,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
+import { sumBy } from "lodash-es";
 import { QDialog, QTableColumn, date, useDialogPluginComponent } from "quasar";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";

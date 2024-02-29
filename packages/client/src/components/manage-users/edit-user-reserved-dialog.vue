@@ -133,11 +133,7 @@
             >
               <!-- FIXME: add actual field check to show this action -->
               <template v-if="book.status === 'available'">
-                <q-item
-                  v-close-popup
-                  clickable
-                  @click="reserveBook(book)"
-                >
+                <q-item v-close-popup clickable @click="reserveBook(book)">
                   <q-item-section>
                     {{ $t("book.reservedBooksDialog.options.reserved") }}
                   </q-item-section>
@@ -145,7 +141,7 @@
                 <q-item
                   v-close-popup
                   clickable
-                  @click="putBookIntoCart(book)"
+                  @click="putBooksIntoCart([book])"
                 >
                   <q-item-section>
                     {{ $t("book.reservedBooksDialog.options.cart") }}
@@ -319,9 +315,9 @@ function removeFromReserved(book: BookSummaryFragment) {
   book;
 }
 
-function reserveBooks(books: BookSummaryFragment[]) {
-  // FIXME: add reserve books logic
-  books;
+function reserveBook(book: BookSummaryFragment) {
+  // FIXME: add reserve book logic
+  book;
 }
 
 function deleteReservation(book: BookSummaryFragment) {
