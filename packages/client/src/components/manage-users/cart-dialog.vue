@@ -257,15 +257,10 @@ const timeUntilEmpty = computed(() => {
 });
 
 const totalBooksPrice = computed(() =>
-  Object.keys(selectedBookCopies.value)
-    .reduce(
-      (accumulator, currentValue) =>
-        accumulator +
-        (stubRows.value.find((value) => value.id === currentValue)
-          ?.originalPrice ?? 0),
-      0,
-    )
-    .toFixed(2),
+  sumBy(Object.keys(selectedBookCopies.value), (bookId) => {
+    const book = stubRows.value.find(({ id }) => id === bookId);
+    return book?.originalPrice ?? 0;
+  }).toFixed(2),
 );
 
 let interval: number | undefined;
