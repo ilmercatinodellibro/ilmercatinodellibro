@@ -132,26 +132,27 @@
               show-dropdown
             >
               <!-- FIXME: add actual field check to show this action -->
-              <q-item
-                v-if="book.status === 'available'"
-                v-close-popup
-                clickable
-                @click="reserveBooks([book])"
-              >
-                <q-item-section>
-                  {{ $t("book.reservedBooksDialog.options.reserved") }}
-                </q-item-section>
-              </q-item>
-              <q-item
-                v-if="book.status === 'available'"
-                v-close-popup
-                clickable
-                @click="putBooksIntoCart([book])"
-              >
-                <q-item-section>
-                  {{ $t("book.reservedBooksDialog.options.cart") }}
-                </q-item-section>
-              </q-item>
+              <template v-if="book.status === 'available'">
+                <q-item
+                  v-close-popup
+                  clickable
+                  @click="reserveBook(book)"
+                >
+                  <q-item-section>
+                    {{ $t("book.reservedBooksDialog.options.reserved") }}
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  v-close-popup
+                  clickable
+                  @click="putBookIntoCart(book)"
+                >
+                  <q-item-section>
+                    {{ $t("book.reservedBooksDialog.options.cart") }}
+                  </q-item-section>
+                </q-item>
+              </template>
+
               <q-item v-close-popup clickable @click="deleteReservation(book)">
                 <q-item-section>
                   {{ $t("common.delete") }}
