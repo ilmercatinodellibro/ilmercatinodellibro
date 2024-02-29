@@ -11,4 +11,5 @@ export enum AvailableRouteNames {
   Login = "login",
   UsersManagement = "users-management",
   SalableBooks = "salable-books",
+  MyBooks = "my-books",
 }

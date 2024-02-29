@@ -129,6 +129,11 @@ const routes: RouteRecordRaw[] = [
         name: AvailableRouteNames.SalableBooks,
         component: () => import("src/pages/salable-books.vue"),
       },
+      {
+        path: "my-books",
+        name: AvailableRouteNames.MyBooks,
+        component: () => import("src/pages/my-books.vue"),
+      },
     ],
   },
 
