@@ -12,15 +12,12 @@ import { computed } from "vue";
 
 const props = defineProps<{ floatLeft?: boolean; floatLeftSquare?: boolean }>();
 
-const positionClass = computed(
-  () =>
-    `${
-      props.floatLeft
-        ? "top-left"
-        : props.floatLeftSquare
-        ? "top-left--square"
-        : ""
-    }`,
+const positionClass = computed(() =>
+  props.floatLeft
+    ? "top-left"
+    : props.floatLeftSquare
+    ? "top-left--square"
+    : undefined,
 );
 </script>
 
