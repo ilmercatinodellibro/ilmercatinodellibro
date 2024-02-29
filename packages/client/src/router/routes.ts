@@ -124,6 +124,11 @@ const routes: RouteRecordRaw[] = [
         beforeEnter: redirectIfNotOperatorOrAdmin,
         component: () => import("src/pages/manage-users.vue"),
       },
+      {
+        path: "salable-books",
+        name: AvailableRouteNames.SalableBooks,
+        component: () => import("src/pages/salable-books.vue"),
+      },
     ],
   },
 

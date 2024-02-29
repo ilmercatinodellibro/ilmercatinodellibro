@@ -12,6 +12,7 @@ import events from "./events";
 import general from "./general";
 import manageUsers from "./manage-users";
 import network from "./network";
+import salableBooks from "./salable-books";
 import validators from "./validators";
 
 const durationNames = {
@@ -46,6 +47,7 @@ export default {
   general,
   manageUsers,
   network,
+  salableBooks,
   validators,
   feedbackType,
 
@@ -148,6 +150,7 @@ export default {
     [AvailableRouteNames.RolesAndPermissions]: "Ruoli e autorizzazioni",
     [AvailableRouteNames.RegisterWithToken]: "Invitare",
     [AvailableRouteNames.Login]: "Login",
+    [AvailableRouteNames.SalableBooks]: "Libri vendibili",
     [AvailableRouteNames.UsersManagement]: "Utenti e Movimenti",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
