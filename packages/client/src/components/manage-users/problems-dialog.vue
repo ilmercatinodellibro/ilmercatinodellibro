@@ -63,10 +63,6 @@ import {
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
-const options: ProblemType[] = ["LOST", "INCOMPLETE", "CUSTOM"];
-
-const { t } = useI18n();
-
 const props = defineProps<{
   bookCopy: BookCopyDetailsFragment;
   user: UserSummaryFragment;
@@ -76,6 +72,10 @@ defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
   useDialogPluginComponent<ProblemDetailsFragment | undefined>();
+
+const options: ProblemType[] = ["LOST", "INCOMPLETE", "CUSTOM"];
+
+const { t } = useI18n();
 
 const title = computed(() =>
   t(
