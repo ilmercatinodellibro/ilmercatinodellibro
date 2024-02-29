@@ -10,6 +10,7 @@ fragment User on User {
   role
   phoneNumber
   discount
+  notes
 }
 
 query users {

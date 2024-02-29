@@ -72,8 +72,8 @@
           ref="tableRef"
           v-model:pagination="pagination"
           :columns="columns"
-          :filter="tableFilter"
-          :loading="bookLoading"
+          :filter="searchQuery"
+          :loading="loading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           :rows="tableRows"
           square
@@ -155,13 +155,11 @@ const selectedFiltersToString = computed(() =>
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
-const { refetchBooks, booksPaginationDetails } = useBookService(
+const { refetchBooks, booksPaginationDetails, loading } = useBookService(
   currentPage,
   numberOfRows,
   tableFilter,
 );
-
-const bookLoading = ref(false);
 
 const tableRows = ref<BookSummaryFragment[]>([]);
 
@@ -233,7 +231,7 @@ onMounted(() => {
 });
 
 const onRequest: QTable["onRequest"] = async function (requestProps) {
-  bookLoading.value = true;
+  loading.value = true;
 
   const newBooks = await refetchBooks({
     page: requestProps.pagination.page - 1,
@@ -250,7 +248,7 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
 
   pagination.value.page = requestProps.pagination.page;
   pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-  bookLoading.value = false;
+  loading.value = false;
 };
 
 function openSchoolFilterDialog() {

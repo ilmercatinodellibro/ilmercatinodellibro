@@ -275,7 +275,7 @@ export const redirectIfGuest: NavigationGuard = (to, from, next) => {
 export const redirectIfNotAdmin: NavigationGuard = () => {
   const { hasAdminRole } = useAuthService();
 
-  if (hasAdminRole.value) {
+  if (!hasAdminRole.value) {
     return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
   }
 };
@@ -283,7 +283,7 @@ export const redirectIfNotAdmin: NavigationGuard = () => {
 export const redirectIfNotOperatorOrAdmin: NavigationGuard = () => {
   const { hasAdminRole, hasOperatorRole } = useAuthService();
 
-  if (hasAdminRole.value && hasOperatorRole.value) {
+  if (!hasAdminRole.value && !hasOperatorRole.value) {
     return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
   }
 };

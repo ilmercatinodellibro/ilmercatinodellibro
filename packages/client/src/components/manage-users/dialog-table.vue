@@ -27,7 +27,7 @@ const slots = defineSlots<QTableSlots>();
 
 const hidePagination = computed(() =>
   props.pagination
-    ? (props.pagination.rowsNumber ?? 0) < (props.pagination.rowsPerPage ?? 1)
+    ? (props.pagination.rowsNumber ?? 0) <= (props.pagination.rowsPerPage ?? 1)
     : true,
 );
 

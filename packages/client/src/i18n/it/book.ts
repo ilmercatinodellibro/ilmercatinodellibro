@@ -50,4 +50,10 @@ export default {
       "Inserisci i libri nel magazzino digitale e stampa le etichette con i codici identificativi da apporre sulle copie cartacee.",
     retrieveAndPrint: "Ritira i libri e stampa etichette",
   },
+  reservedBooksDialog: {
+    options: {
+      cart: "Metti nel Carrello",
+      reserved: "Segna come Prenotato",
+    },
+  },
 };

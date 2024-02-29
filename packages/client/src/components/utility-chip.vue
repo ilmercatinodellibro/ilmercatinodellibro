@@ -3,7 +3,7 @@
     square
     :ripple="false"
     :color="colorFromValue(value ?? 0).color"
-    :dark="colorFromValue(value ?? 0).color !== 'yellow'"
+    :dark="colorFromValue(value ?? 0).color !== 'warning'"
     class="line-height-16 text-size-14 text-weight-medium utility-chip"
     dense
   >
@@ -20,16 +20,16 @@ defineProps<{
 }>();
 
 interface ColorChipData {
-  color: "red" | "yellow" | "green";
+  color: "negative" | "warning" | "positive";
   label: "low" | "medium" | "high";
 }
 
 function colorFromValue(value: number): ColorChipData {
   return value < UTILITY_LOW_THRESHOLD
-    ? { color: "red", label: "low" }
+    ? { color: "negative", label: "low" }
     : value < UTILITY_HIGH_THRESHOLD
-    ? { color: "yellow", label: "medium" }
-    : { color: "green", label: "high" };
+    ? { color: "warning", label: "medium" }
+    : { color: "positive", label: "high" };
 }
 </script>
 

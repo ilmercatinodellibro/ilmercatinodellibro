@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
+  <q-dialog ref="dialogRef" full-height persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="$t('manageUsers.editUser.title')"
       size="sm"
@@ -11,7 +11,7 @@
       "
       @cancel="onDialogCancel"
     >
-      <q-card-section class="gap-16">
+      <q-card-section class="col-grow column gap-16 height-0 no-wrap">
         <q-input
           v-model="newUserData.user.firstname"
           :label="$t('manageUsers.fields.firstName')"
@@ -37,6 +37,7 @@
           v-model="newUserData.user.phoneNumber"
           :label="$t('manageUsers.fields.phoneNumber')"
           bottom-slots
+          clearable
           mask="phone"
           outlined
         />
@@ -75,8 +76,14 @@
             />
           </template>
         </q-input>
+        <q-input
+          v-model="newUserData.user.notes"
+          :label="$t('manageUsers.editUser.notes')"
+          clearable
+          outlined
+        />
         <q-checkbox
-          v-model="newUserData.discount"
+          v-model="newUserData.user.discount"
           :disable="!hasAdminRole"
           :label="$t('manageUsers.editUser.discount')"
         />
@@ -115,14 +122,7 @@ const newUserData = ref({
   user: cloneDeep(props.userData),
   newPassword: "",
   confirmPassword: "",
-  discount: false,
 });
 const hidePassword = ref(true);
 const hideConfirm = ref(true);
 </script>
-
-<style scoped lang="scss">
-.form-card {
-  width: 360px;
-}
-</style>

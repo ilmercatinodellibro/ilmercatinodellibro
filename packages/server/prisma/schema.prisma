@@ -44,6 +44,7 @@ model User {
   firstname     String
   lastname      String
   phoneNumber   String   @default("")
+  notes         String   @default("")
   discount      Boolean  @default(false)
   emailVerified Boolean  @default(false)
   role          Role     @default(USER)

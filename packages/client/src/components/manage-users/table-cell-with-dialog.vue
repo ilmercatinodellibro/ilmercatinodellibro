@@ -5,7 +5,12 @@
         {{ value }}
       </span>
       <q-space />
-      <q-icon v-if="showAlert" color="green" :name="mdiAlertCircle" />
+      <round-badge v-if="secondaryValue" color="positive">
+        {{ secondaryValue }}
+        <q-tooltip>
+          {{ $t("manageUsers.availableTooltip") }}
+        </q-tooltip>
+      </round-badge>
     </q-btn>
     <span v-else class="text-body2">
       {{ value }}
@@ -14,10 +19,10 @@
 </template>
 
 <script setup lang="ts">
-import { mdiAlertCircle } from "@quasar/extras/mdi-v7";
+import RoundBadge from "./round-badge.vue";
 
 defineProps<{
   value: number;
-  showAlert?: boolean;
+  secondaryValue?: number;
 }>();
 </script>
