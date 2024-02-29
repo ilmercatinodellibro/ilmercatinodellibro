@@ -36,6 +36,15 @@ import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 
+defineProps<{
+  // eslint-disable-next-line vue/no-unused-properties
+  bookCopy: BookCopy;
+}>();
+
+defineEmits(useDialogPluginComponent.emitsObject);
+
+const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
+
 const { formatDate } = date;
 
 const { t } = useI18n();
@@ -105,15 +114,6 @@ const pagination = ref({
   rowsNumber: rowsNumber.value,
   rowsPerPage: 0,
 });
-
-defineProps<{
-  // eslint-disable-next-line vue/no-unused-properties
-  bookCopy: BookCopy;
-}>();
-
-defineEmits(useDialogPluginComponent.emitsObject);
-
-const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
 
 const onRequest: QTableProps["onRequest"] = ({
   pagination: requestPagination,
