@@ -88,6 +88,24 @@
             </q-td>
           </template>
 
+          <template #body-cell-first-name="{ value, row }">
+            <q-td class="text-left">
+              <span class="gap-16 items-center justify-between no-wrap row">
+                {{ value }}
+                <q-icon
+                  v-if="row.notes.length > 0"
+                  :name="mdiInformationOutline"
+                  size="24px"
+                  color="primary"
+                >
+                  <q-tooltip>
+                    {{ row.notes }}
+                  </q-tooltip>
+                </q-icon>
+              </span>
+            </q-td>
+          </template>
+
           <!-- Kind of redundant repetition of so much code, can this be reduced? -->
           <template #header-cell-in-stock="{ col }">
             <table-header-with-info
@@ -98,7 +116,7 @@
           <template #body-cell-in-stock="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, col)"
+              @click="openCellEditDialog(row, col, value)"
             />
           </template>
 
@@ -111,7 +129,20 @@
           <template #body-cell-sold="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, col)"
+              @click="openCellEditDialog(row, col, value)"
+            />
+          </template>
+
+          <template #header-cell-reserved="{ col }">
+            <table-header-with-info
+              :label="col.label"
+              :info="columnTooltip.reserved"
+            />
+          </template>
+          <template #body-cell-reserved="{ col, row, value }">
+            <table-cell-with-dialog
+              :value="value"
+              @click="openCellEditDialog(row, col, value)"
             />
           </template>
 
@@ -122,9 +153,11 @@
             />
           </template>
           <template #body-cell-requested="{ col, row, value }">
+            <!-- FIXME: add actual value logic -->
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, col)"
+              :secondary-value="getAvailableCount(row)"
+              @click="openCellEditDialog(row, col, value)"
             />
           </template>
 
@@ -137,28 +170,30 @@
           <template #body-cell-purchased="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              @click="openCellEditDialog(row, col)"
+              @click="openCellEditDialog(row, col, value)"
             />
           </template>
 
-          <template #header-cell-available="{ col }">
-            <table-header-with-info
-              :label="col.label"
-              :info="columnTooltip.available"
-            />
-          </template>
-          <template #body-cell-available="{ value }">
-            <table-cell-with-dialog :value="value" show-alert />
-          </template>
-
-          <template #body-cell-shopping-cart="props">
-            <q-td :props="props">
-              <!-- TODO: Create the cart dialog and make the button open it -->
-              <q-btn color="primary" flat :icon="mdiCart" round size="md" />
+          <template #body-cell-shopping-cart="{ row }">
+            <q-td class="text-center">
+              <q-btn
+                :icon="mdiCart"
+                color="primary"
+                flat
+                round
+                @click="openCart(row)"
+              >
+                <round-badge
+                  :label="getAvailableCount(row)"
+                  class="badge-top-left"
+                  color="accent"
+                  float-left
+                />
+              </q-btn>
             </q-td>
           </template>
 
-          <template #body-cell-receipts="{ value }">
+          <template #body-cell-receipts="{ row }">
             <q-td class="text-center">
               <q-btn
                 color="primary"
@@ -166,18 +201,15 @@
                 :icon="mdiReceiptText"
                 round
                 size="md"
-                @click="openReceipt(value)"
+                @click="openReceipt(row)"
               />
             </q-td>
           </template>
 
           <template #body-cell-pay-off="{ row }">
             <q-td>
-              <!-- This button has the same aspect of a q-chip -->
-              <q-btn
+              <chip-button
                 color="primary"
-                class="min-height-0 q-chip--dense q-chip--square"
-                dense
                 :label="$t('manageUsers.payOff')"
                 @click="openPayOff(row)"
               />
@@ -192,6 +224,7 @@
 <script setup lang="ts">
 import {
   mdiCart,
+  mdiInformationOutline,
   mdiMagnify,
   mdiPencil,
   mdiPlus,
@@ -201,11 +234,16 @@ import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
-import CheckOutUserDialog from "src/components/manage-users/check-out-user-dialog.vue";
+import CartDialog from "src/components/manage-users/cart-dialog.vue";
+import ChipButton from "src/components/manage-users/chip-button.vue";
 import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
 import EditUserDetailsDialog from "src/components/manage-users/edit-user-details-dialog.vue";
 import EditUserRequestedDialog from "src/components/manage-users/edit-user-requested-dialog.vue";
+import EditUserReservedDialog from "src/components/manage-users/edit-user-reserved-dialog.vue";
 import EditUserStockdataDialog from "src/components/manage-users/edit-user-stockdata-dialog.vue";
+import PayOffUserDialog from "src/components/manage-users/pay-off-user-dialog.vue";
+import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
+import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
@@ -230,15 +268,16 @@ enum UserFilters {
 const options = useTranslatedFilters<UserFilters>("manageUsers.filters");
 
 const columnTooltip = computed(() => ({
-  inStock: t("manageUsers.toolTips.inStock"),
-  sold: t("manageUsers.toolTips.sold"),
-  requested: t("manageUsers.toolTips.requested"),
-  purchased: t("manageUsers.toolTips.purchased"),
-  available: t("manageUsers.toolTips.available"),
+  inStock: t("manageUsers.tooltips.inStock"),
+  sold: t("manageUsers.tooltips.sold"),
+  reserved: t("manageUsers.tooltips.reserved"),
+  requested: t("manageUsers.tooltips.requested"),
+  purchased: t("manageUsers.tooltips.purchased"),
+  available: t("manageUsers.tooltips.available"),
 }));
 
 // TODO: pass the actual row type to QTable column's generic parameter when the data is available
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn<(typeof rows.value)[number]>[]>(() => [
   { name: "edit", field: () => undefined, label: "" },
   {
     name: "email",
@@ -277,6 +316,12 @@ const columns = computed<QTableColumn[]>(() => [
     align: "left",
   },
   {
+    name: "reserved",
+    field: "reserved",
+    label: t("manageUsers.fields.reserved"),
+    align: "left",
+  },
+  {
     name: "requested",
     field: "requested",
     label: t("manageUsers.fields.requested"),
@@ -289,16 +334,11 @@ const columns = computed<QTableColumn[]>(() => [
     align: "left",
   },
   {
-    name: "available",
-    field: "available",
-    label: t("manageUsers.fields.available"),
-    align: "left",
-  },
-  {
     name: "shopping-cart",
-    // TODO: Get the cart items amount from the server and display it in a badge if it's non-zero
+    // FIXME: add field
     field: () => undefined,
-    label: "",
+    label: t("manageUsers.fields.cart"),
+    align: "center",
   },
   {
     name: "creation-date",
@@ -308,7 +348,7 @@ const columns = computed<QTableColumn[]>(() => [
   },
   {
     name: "receipts",
-    field: "receipts",
+    field: () => undefined,
     label: t("manageUsers.fields.receipts"),
     align: "left",
   },
@@ -341,6 +381,7 @@ const rows = computed(() =>
     purchased: index % 3,
     requested: index % 4,
     sold: index % 5,
+    reserved: (index % 2) + 1,
     available: (index + 1) % 2,
     creationDate: new Date()
       .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
@@ -380,6 +421,7 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
 
   const payload = await refetch();
 
+  // FIXME: reserve this filtering to the actual query
   rawRows.value.splice(
     0,
     rawRows.value.length,
@@ -394,21 +436,25 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
     ) ?? []),
   );
 
-  pagination.value.rowsNumber = rawRows.value.length;
+  pagination.value.rowsNumber = rawRows.value.length; // FIXME: update to correct rowsNumber
   pagination.value.page = requestProps.pagination.page;
   pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
 
   loading.value = false;
 };
 
-function openReceipt(receipts: string[]) {
-  // FIXME: add receipts dialog
-  receipts;
+function openReceipt(user: UserFragment) {
+  Dialog.create({
+    component: ReceiptsDialog,
+    componentProps: {
+      user,
+    },
+  });
 }
 
 function openPayOff(user: UserFragment) {
   Dialog.create({
-    component: CheckOutUserDialog,
+    component: PayOffUserDialog,
     componentProps: {
       user,
     },
@@ -418,28 +464,34 @@ function openPayOff(user: UserFragment) {
   });
 }
 
-function openEdit(
-  userData: {
-    user: UserFragment;
-    newPassword: string;
-    confirmPassword: string;
-  },
-  rowIndex: number,
-) {
+function openEdit(user: UserFragment, rowIndex: number) {
   Dialog.create({
     component: EditUserDetailsDialog,
-    componentProps: { userData },
+    componentProps: { userData: user },
   }).onOk((payload: { user: UserFragment; password?: string }) => {
     // FIXME: add server call to update user data
     rawRows.value[rowIndex] = payload.user;
   });
 }
 
-function openCellEditDialog(userData: UserFragment, column: QTableColumn) {
+function openCellEditDialog(
+  userData: UserFragment,
+  column: QTableColumn,
+  value: number,
+) {
+  if (value === 0) {
+    return;
+  }
   switch (column.name) {
     case "in-stock":
       Dialog.create({
         component: EditUserStockdataDialog,
+        componentProps: { userData },
+      });
+      break;
+    case "reserved":
+      Dialog.create({
+        component: EditUserReservedDialog,
         componentProps: { userData },
       });
       break;
@@ -461,6 +513,19 @@ function openCellEditDialog(userData: UserFragment, column: QTableColumn) {
 
 function updateTable() {
   tableRef.value?.requestServerInteraction();
+}
+
+function getAvailableCount(user: UserFragment) {
+  // FIXME: add logic for available books count
+  user;
+  return 1;
+}
+
+function openCart(user: UserFragment) {
+  Dialog.create({
+    component: CartDialog,
+    componentProps: { user },
+  });
 }
 </script>
 

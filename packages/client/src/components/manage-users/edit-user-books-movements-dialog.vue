@@ -1,94 +1,90 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
-      size="lg"
+      size="fullscreen"
       :cancel-label="$t('common.close')"
       :title="title"
       @cancel="onDialogCancel()"
     >
-      <q-card-section class="col-grow column height-0 no-wrap q-pa-none">
-        <dialog-table
-          v-if="type === 'sold'"
-          :columns="soldColumns"
-          :rows="soldBookCopies"
-          :loading="soldLoading"
-        >
-          <template #body-cell-problems="{ value }">
-            <q-td class="text-center">
-              <!-- This button has the same aspect of a q-chip -->
-              <q-btn
-                class="min-height-0 q-chip--dense q-chip--square"
-                :label="
-                  $t(
-                    'manageUsers.booksMovementsDialog.' +
-                      (value ? 'reportProblem' : 'solveProblem'),
-                  )
-                "
-                :color="value ? 'red' : 'green'"
-                @click="
-                  openProblemDialog(
-                    value,
-                  ) /* FIXME: Add actual logic for problems button */
-                "
-              />
-            </q-td>
-          </template>
-          <template #body-cell-history="{ value }">
-            <q-td class="text-center">
-              <q-btn
-                round
-                flat
-                color="primary"
-                :icon="mdiHistory"
-                @click="
-                  openHistoryDialog(
-                    value,
-                  ) /* FIXME: Add actual logic for history button */
-                "
-              />
-            </q-td>
-          </template>
-        </dialog-table>
-        <dialog-table
-          v-else
-          :columns="purchasedColumns"
-          :rows="purchasedBookCopies"
-          :loading="purchasedLoading"
-        >
-          <template #body-cell-actions="{ value }">
-            <q-td class="text-center">
-              <!-- This button has the same aspect of a q-chip -->
-              <q-btn
-                class="min-height-0 q-chip--dense q-chip--square"
-                :label="$t('book.return')"
-                color="primary"
-                @click="
-                  openActionsDialog(
-                    value,
-                  ) /* FIXME: Add actual logic for actions button*/
-                "
-              />
-            </q-td>
-          </template>
-        </dialog-table>
-      </q-card-section>
+      <dialog-table
+        v-if="type === 'sold'"
+        :columns="soldColumns"
+        :loading="soldLoading"
+        :rows="soldBookCopies"
+        class="flex-delegate-height-management"
+      >
+        <template #body-cell-problems="{ value }">
+          <q-td class="text-center">
+            <chip-button
+              :label="
+                $t(
+                  `manageUsers.booksMovementsDialog.${
+                    !value ? 'reportProblem' : 'solveProblem'
+                  }`,
+                )
+              "
+              :color="!value ? 'red' : 'green'"
+              @click="openProblemDialog(value)"
+            />
+          </q-td>
+        </template>
+        <template #body-cell-history="{ row }">
+          <q-td class="text-center">
+            <q-btn
+              round
+              flat
+              color="primary"
+              :icon="mdiHistory"
+              @click="openHistoryDialog(row)"
+            />
+          </q-td>
+        </template>
+      </dialog-table>
+
+      <dialog-table
+        v-else
+        :columns="purchasedColumns"
+        :loading="purchasedLoading"
+        :rows="purchasedBookCopies"
+        class="flex-delegate-height-management"
+      >
+        <template #body-cell-return="{ row }">
+          <q-td class="text-center">
+            <chip-button
+              :label="$t('book.return')"
+              color="primary"
+              @click="openReturnDialog(row)"
+            />
+          </q-td>
+        </template>
+      </dialog-table>
     </k-dialog-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
-import { QDialog, QTableColumn, useDialogPluginComponent } from "quasar";
+import {
+  Dialog,
+  QDialog,
+  QTableColumn,
+  useDialogPluginComponent,
+} from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { User } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import {
   BookCopyDetailsFragment,
+  ProblemDetailsFragment,
   useGetPurchasedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
 } from "src/services/book-copy.graphql";
+import { UserSummaryFragment } from "src/services/user.graphql";
+import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
+import ProblemsDialog from "./problems-dialog.vue";
+import ProblemsHistoryDialog from "./problems-history-dialog.vue";
+import ReturnBookDialog from "./return-book-dialog.vue";
 
 // sold and purchased means the same thing, it's just a different perspective depending on which side the user is
 type SoldBookCopy = BookCopyDetailsFragment & {
@@ -98,7 +94,7 @@ type SoldBookCopy = BookCopyDetailsFragment & {
 
 const props = defineProps<{
   type: "sold" | "purchased";
-  userData: User;
+  userData: UserSummaryFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -112,7 +108,7 @@ const title = computed(() =>
     props.type === "sold"
       ? "manageUsers.booksMovementsDialog.soldTitle"
       : "manageUsers.booksMovementsDialog.purchasedTitle",
-    [props.userData.firstname, props.userData.lastname],
+    [`${props.userData.firstname} ${props.userData.lastname}`],
   ),
 );
 
@@ -228,7 +224,7 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     align: "left",
   },
   {
-    label: t("manageUsers.booksMovementsDialog.theVendor"),
+    label: t("manageUsers.booksMovementsDialog.purchasedBy"),
     field: ({ owner }) => owner.email,
     name: "vendor",
     align: "left",
@@ -236,23 +232,43 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   {
     label: t("manageUsers.actions"),
     field: () => undefined,
-    name: "actions",
+    name: "return",
     align: "center",
   },
 ]);
 
-function openProblemDialog(value: unknown) {
-  // FIXME: add problem report dialog
-  value;
+function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
+  Dialog.create({
+    component: ProblemsDialog,
+    componentProps: {
+      bookCopy,
+      user: props.userData,
+    },
+  }).onOk((newProblem: ProblemDetailsFragment) => {
+    // FIXME: add problem to history
+    newProblem;
+  });
 }
 
-function openHistoryDialog(value: unknown) {
-  // FIXME: add logic
-  value;
+function openHistoryDialog(bookCopy: BookCopyDetailsFragment) {
+  Dialog.create({
+    component: ProblemsHistoryDialog,
+    componentProps: {
+      bookCopy,
+    },
+  });
 }
 
-function openActionsDialog(value: unknown) {
-  // FIXME: add logic
-  value;
+function openReturnDialog(bookCopy: BookCopyDetailsFragment) {
+  Dialog.create({
+    component: ReturnBookDialog,
+    componentProps: {
+      bookCopy,
+      user: props.userData,
+    },
+  }).onOk((payload) => {
+    // FIXME: return book
+    payload;
+  });
 }
 </script>

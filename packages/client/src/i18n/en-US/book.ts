@@ -50,4 +50,10 @@ export default {
       "Insert the books into the digital stock and print the label stickers with the identifier codes to put onto the physical copies.",
     retrieveAndPrint: "Retrieve books and print labels",
   },
+  reservedBooksDialog: {
+    options: {
+      cart: "Put into Cart",
+      reserved: "Mark as Reserved",
+    },
+  },
 };

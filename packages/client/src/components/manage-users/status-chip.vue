@@ -14,6 +14,6 @@
 import { mdiCancel, mdiCheckCircle } from "@quasar/extras/mdi-v7";
 
 defineProps<{
-  value: boolean;
+  value?: boolean;
 }>();
 </script>

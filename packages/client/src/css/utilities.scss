@@ -71,7 +71,7 @@ $gap-size-list: 4, 6, 8, 10, 12, 16, 18, 24, 32, 48;
 }
 
 // text sizes
-$text-size-list: 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48;
+$text-size-list: 10, 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48;
 
 @each $text-size in $text-size-list {
   .text-size-#{$text-size} {
@@ -108,7 +108,7 @@ $line-heights-list: 16, 20, 28, 50, 75;
 }
 
 // widths
-$widths-list: 32, 180, 200, 250, 315, 420, 600, 1024;
+$widths-list: 0, 24, 32, 180, 200, 250, 315, 420, 600, 1024;
 
 @each $width in $widths-list {
   .width-#{$width} {
@@ -125,7 +125,7 @@ $widths-list: 32, 180, 200, 250, 315, 420, 600, 1024;
 }
 
 // heights
-$heights-list: 0, 52;
+$heights-list: 0, 24, 48, 52, 600;
 
 @each $height in $heights-list {
   .height-#{$height} {

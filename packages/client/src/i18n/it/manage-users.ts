@@ -9,16 +9,20 @@ export default {
     phoneNumber: "Telefono",
     inStock: "In Magazzino",
     sold: "Venduti",
-    requested: "Prenotati",
+    requested: "Richiesti",
     purchased: "Acquistati",
     available: "Disponibili",
     creationDate: "Data di Creazione",
     receipts: "Ricevute",
+    reserved: "Prenotati",
+    cart: "Carrello",
   },
-  toolTips: {
+  tooltips: {
     inStock:
       "Il numero di copie cartacee di uno o più titoli che l'utente ha consegnato e che si trovano attualmente in magazzino",
     sold: "Il numero di copie cartacee di uno o più titoli che l'utente ha già venduto",
+    reserved:
+      "Il numero di titoli che l'utente ha prenotato e che non ha ancora acquistato. La lista include anche i libri Richiesti e quelli Disponibili",
     requested:
       "Il numero di copie cartacee di uno o più titoli che l'utente ha prenotato e che non ha ancora acquistato",
     purchased:
@@ -35,36 +39,67 @@ export default {
   ],
   editUser: {
     title: "Modifica Dati Utente",
-    notes: "Note",
     discount: "Applica sconto ISEE/volontario",
+    notes: "Note",
   },
+  availableTooltip: "Libri Disponibili",
   inRetrieval: "In ritiro",
   retrieved: "Ritirati e restituibili",
+  searchHint: "Inserisci un codice ISBN per aggiungere il libro alla lista",
   inStockDialog: {
-    title: "Libri di {0} {1} in Magazzino",
+    title: "Libri di {0} in Magazzino",
     retrievableTooltip:
       "Include le copie ancora presenti in magazzino, non disperse, non prenotate",
     retrieveBtn: "Ritira tutti i libri nella lista",
-    searchHint: "Inserisci un codice ISBN per aggiungere il libro alla lista",
     deleteBookBtnTooltip: "Elimina definitivamente questa copia dal database",
   },
   booksMovementsDialog: {
-    purchasedTitle: "Libri acquistati da {0} {1}",
-    soldTitle: "Libri venduti da {0} {1}",
+    purchasedTitle: "Libri acquistati da {0}",
+    soldTitle: "Libri venduti da {0}",
     purchasedAt: "Acquistato a",
     soldTo: "Venduto a",
-    theVendor: "Il venditore",
+    purchasedBy: "Il venditore",
     reportProblem: "Segnala problema",
     solveProblem: "Risolvi problema",
+    problemType: "Tipo di problema",
+    details: "Dettagli",
+    problemTypes: {
+      LOST: "Perso",
+      INCOMPLETE: "Incompleto",
+      CUSTOM: "Personalizzato",
+    },
+    howResolved: "Come è stato risolto il problema?",
+    problemsHistory: "History dei Problemi",
+    reportedBy: "Segnalato Da",
+    resolutionDate: "Data Risoluzione",
+    solution: "Soluzione",
+    resolvedBy: "Risolto Da",
   },
   actions: "Azioni",
   requestedBooksDialog: {
-    title: "Libri prenotati da {0} {1}",
+    title: "Libri richiesti da {0}",
+    titleNoName: "Libri Richiesti",
+    deleteAll: "Elimina Tutti",
+    moveIntoReserved: "Sposta i Disponibili nei Prenotati",
+    moveIntoCart: "Metti i Disponibili nel Carrello",
   },
-  checkOutUserDialog: {
-    title: "Liquida Utente {0} {1}",
+  reservedBooksDialog: {
+    title: "Libri prenotati da {0}",
+    deleteAllReserved: "Elimina tutti i Prenotati",
+    moveAllIntoCart: "Metti Prenotati e Disponibili nel Carrello",
+    reservedIntoCart: "Metti i Prenotati nel Carrello",
+    requestStatus: "Stato Richiesta",
+    confirmDialog: {
+      title: "Elimina tutti i Libri Prenotati",
+      message:
+        'Stai eliminando tutti i libri prenotati da questo cliente. I libri verranno segnalati come "Disponibili". Vuoi procedere?',
+      confirmButton: "Elimina Tutti",
+    },
+  },
+  payOffUserDialog: {
+    title: "Liquida Utente {0}",
     soldBooksCountLabel: "Totale Libri dell'Utente Venduti ad Altri",
-    totalCheckOutLabel: "Totale Liquidabile all'Utente",
+    totalPayOffLabel: "Totale Liquidabile all'Utente",
     totalCheckedOutLabel: "Totale Liquidato all'Utente",
     info: "Utilizza le checkbox delle righe per attivare le azioni di gruppo",
     buyPrice: "Prezzo d'acquisizione",
@@ -79,9 +114,62 @@ export default {
     returnOptions: {
       donate: "Dona al Mercatino",
       return: "Restituisci",
-      repay: "Rimborsa",
+      reimburse: "Rimborsa",
     },
     returnAndDonate: "Restituisci contanti e dona libri",
-    returnEverything: "Restituisci contanti e libri",
+    returnEverything: "Restituisci contanti e libri ({0} €)",
+    confirms: {
+      disclaimer:
+        "Non potrai annullare questa azione dal dialog di liquidazione. Vuoi procedere?",
+      donate: {
+        title:
+          "Dona libro al Mercatino del Libro | Dona libri al Mercatino del Libro",
+        label:
+          "Stai donando questa copia del libro al Mercatino del Libro. | Stai donando queste copie del/i libro/i al Mercatino del Libro.",
+        confirmLabel: "Dona libro | Dona libro",
+      },
+      reimburse: {
+        title: "Rimborsa libro al cliente | Rimborsa libri al cliente",
+        label:
+          "Stai rimborsando questa copia del libro al cliente proprietario. | Stai rimborsando queste copie del/i libro/i al cliente proprietario.",
+        confirmLabel: "Rimborsa libro | Rimborsa libri",
+      },
+      returnAndDonate: {
+        disclaimer:
+          "I libri nella lista sottostante saranno donati dal cliente al Mercatino del Libro. Non potrai annullare questa azione. Vuoi procedere?",
+        tableTitle: "Libri Donati al Mercatino",
+        buttonText: "Restituisci contanti e dona libri ({0} €)",
+      },
+      returnEverything: {
+        title: "Restituisci contanti e libri",
+        disclaimer:
+          "I libri nella lista sottostante saranno restituiti al cliente in quanto legittimo proprietario. Non potrai annullare questa azione. Vuoi procedere?",
+        tableTitle: "Libri in restituzione",
+      },
+    },
+  },
+  goToCart: "Vai al carrello",
+  returnBookTitle: "Effettua il Reso del Libro",
+  returnBook: "Effettua Reso",
+  moneyToGive: "Soldi da rendere al Cliente",
+  iseeInfoTooltip:
+    "Questo utente ha diritto allo sconto e il totale da rendere ne tiene conto?",
+  cartDialog: {
+    title: "Carrello di {0}",
+    emptyCart: "Svuota carrello",
+    autoEmptyDisclaimer:
+      "Ricorda: non puoi tenere i libri disponibili bloccati nel carrello per troppo tempo, perciò si svuoterà automaticamente tra: {0}",
+    sellBooks: "Vendi libri ({0} €)",
+    totalBooks: "Totale Libri da vendere",
+    discount: "Sconto ISEE/volontario",
+    total: "Totale",
+  },
+  receiptsDialog: {
+    title: "Ricevute",
+    requests: "Richieste",
+    retrievals: "Ritiri",
+    createdBy: "Creata da",
+    purchases: "Acquisti",
+    resend: "Invia di nuovo",
   },
 };

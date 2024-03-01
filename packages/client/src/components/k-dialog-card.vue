@@ -62,11 +62,13 @@ const emit = defineEmits<{
 <style lang="scss" scoped>
 $dialog-margin: 24px;
 $complex-dialog-max-height: 800px;
-$complex-dialog-breakpoint: $complex-dialog-max-height - $dialog-margin * 2;
+$complex-dialog-breakpoint: $complex-dialog-max-height + $dialog-margin * 2;
 $dialog-fullscreen-max-height: calc(100vh - #{$dialog-margin} * 2);
 
 %fullscreen {
-  max-height: 100vh;
+  // This max-height is set so that the dialog doesn't extend below
+  // the bottom edge of the screen on certain resolutions
+  max-height: calc(100vh - 2 * #{$dialog-margin});
   max-width: 100vw;
 }
 

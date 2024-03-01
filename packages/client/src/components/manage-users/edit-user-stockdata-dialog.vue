@@ -1,55 +1,39 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
-      size="lg"
+      size="fullscreen"
       :cancel-label="$t('common.close')"
       :title="
         $t('manageUsers.inStockDialog.title', [
-          userData.firstname,
-          userData.lastname,
+          `${userData.firstname} ${userData.lastname}`,
         ])
       "
       @cancel="onDialogCancel"
     >
-      <q-card-section class="q-pa-none">
-        <q-tabs
-          v-model="tab"
-          align="justify"
-          active-color="accent"
-          inline-label
-        >
-          <q-tab name="in-retrieval" :label="$t('manageUsers.inRetrieval')" />
-          <q-tab name="retrieved" :label="$t('manageUsers.retrieved')">
-            <template #default>
-              <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
-                <q-tooltip>
-                  {{ $t("manageUsers.inStockDialog.retrievableTooltip") }}
-                </q-tooltip>
-              </q-icon>
-            </template>
-          </q-tab>
-        </q-tabs>
+      <q-tabs v-model="tab" align="justify" active-color="accent" inline-label>
+        <q-tab name="in-retrieval" :label="$t('manageUsers.inRetrieval')" />
+        <q-tab name="retrieved" :label="$t('manageUsers.retrieved')">
+          <template #default>
+            <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
+              <q-tooltip>
+                {{ $t("manageUsers.inStockDialog.retrievableTooltip") }}
+              </q-tooltip>
+            </q-icon>
+          </template>
+        </q-tab>
+      </q-tabs>
 
-        <q-tab-panels v-model="tab" animated>
-          <q-tab-panel name="in-retrieval" class="column no-wrap q-pa-none">
-            <div class="gap-16 items-center no-wrap q-pa-md row">
-              <q-input
-                v-model="newBookISBN"
-                :placeholder="$t('manageUsers.inStockDialog.searchHint')"
-                class="width-420"
-                debounce="200"
-                outlined
-                type="text"
-                @keyup.enter="addBookToInRetrieval()"
-              />
-              <q-btn
-                :label="$t('book.addBookDialog')"
-                color="accent"
-                :icon="mdiPlus"
-                no-wrap
-                @click="addBookToInRetrieval"
-              />
-              <q-space />
+      <q-tab-panels
+        v-model="tab"
+        animated
+        class="col column dialog-panels flex-delegate-height-management no-wrap"
+      >
+        <q-tab-panel
+          name="in-retrieval"
+          class="col column flex-delegate-height-management no-wrap q-pa-none"
+        >
+          <card-table-header @add-book="addBookToInRetrieval">
+            <template #side-actions>
               <q-btn
                 :disable="inRetrievalRows.length === 0"
                 :label="$t('manageUsers.inStockDialog.retrieveBtn')"
@@ -57,83 +41,100 @@
                 no-wrap
                 @click="retrieveAllBooks"
               />
-            </div>
+            </template>
+          </card-table-header>
 
-            <dialog-table
-              :pagination="inRetrievalPagination"
-              :columns="inRetrievalColumns"
-              :rows="inRetrievalRows"
-              :loading="inRetrievalLoading"
-              :on-request="onInRetrievalRequest"
-            >
-              <template #body-cell-status="{ value }">
-                <q-td>
-                  <status-chip :value="value" />
-                </q-td>
-              </template>
-              <template #body-cell-utility="{ value }">
-                <q-td class="text-center">
-                  <utility-chip :value="value" />
-                </q-td>
-              </template>
-              <template #body-cell-actions="{ value }">
-                <q-td class="text-center">
-                  <!-- This button has the same aspect of a q-chip -->
-                  <q-btn
-                    color="primary"
-                    no-wrap
-                    class="min-height-0 q-chip--dense q-chip--square row"
-                    @click="() => deleteBookDialog(value)"
+          <dialog-table
+            v-model:pagination="inRetrievalPagination"
+            :columns="inRetrievalColumns"
+            :loading="inRetrievalLoading"
+            :rows="inRetrievalRows"
+            class="col"
+            @request="onInRetrievalRequest"
+          >
+            <template #body-cell-status="{ value }">
+              <q-td>
+                <status-chip :value="value" />
+              </q-td>
+            </template>
+            <template #body-cell-utility="{ value }">
+              <q-td class="text-center">
+                <utility-chip :value="value" />
+              </q-td>
+            </template>
+            <template #body-cell-actions="{ value }">
+              <q-td class="text-center">
+                <chip-button
+                  color="primary"
+                  no-wrap
+                  @click="() => deleteBookDialog(value)"
+                >
+                  <q-item-label> {{ $t("common.delete") }} </q-item-label>
+                  <q-icon
+                    class="q-ml-sm"
+                    :name="mdiInformationOutline"
+                    size="18px"
                   >
-                    <q-item-label> {{ $t("common.delete") }} </q-item-label>
-                    <q-icon
-                      class="q-ml-sm"
-                      :name="mdiInformationOutline"
-                      size="18px"
-                    >
-                      <q-tooltip>
-                        {{
-                          $t("manageUsers.inStockDialog.deleteBookBtnTooltip")
-                        }}
-                      </q-tooltip>
-                    </q-icon>
-                  </q-btn>
-                </q-td>
-              </template>
-            </dialog-table>
-          </q-tab-panel>
+                    <q-tooltip>
+                      {{ $t("manageUsers.inStockDialog.deleteBookBtnTooltip") }}
+                    </q-tooltip>
+                  </q-icon>
+                </chip-button>
+              </q-td>
+            </template>
+          </dialog-table>
+        </q-tab-panel>
 
-          <q-tab-panel name="retrieved" class="column no-wrap q-pa-none">
-            <dialog-table
-              :pagination="retrievedPagination"
-              :columns="retrievedColumns"
-              :rows="retrievedRows"
-              :loading="retrievedLoading"
-              @request="onRetrievedRequest"
-            >
-              <template #body-cell-status="{ value }">
-                <q-td>
-                  <status-chip :value="value" />
-                </q-td>
-              </template>
-
-              <template #body-cell-utility="{ value }">
-                <q-td>
-                  <utility-chip :value="value" />
-                </q-td>
-              </template>
-            </dialog-table>
-          </q-tab-panel>
-        </q-tab-panels>
-      </q-card-section>
+        <q-tab-panel
+          name="retrieved"
+          class="column flex-delegate-height-management no-wrap q-pa-none"
+        >
+          <dialog-table
+            v-model:pagination="retrievedPagination"
+            :columns="retrievedColumns"
+            :loading="retrievedLoading"
+            :rows="retrievedRows"
+            class="col"
+            @request="onRetrievedRequest"
+          >
+            <template #body-cell-status="{ value }">
+              <q-td>
+                <status-chip :value="value" />
+              </q-td>
+            </template>
+            <template #body-cell-utility="{ value }">
+              <q-td>
+                <utility-chip :value="value" />
+              </q-td>
+            </template>
+            <template #body-cell-actions="{ row }">
+              <q-td>
+                <chip-button
+                  :label="
+                    $t('manageUsers.payOffUserDialog.returnOptions.return')
+                  "
+                  color="primary"
+                  @click="returnBook(row)"
+                />
+              </q-td>
+            </template>
+          </dialog-table>
+        </q-tab-panel>
+      </q-tab-panels>
     </k-dialog-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { mdiInformationOutline, mdiPlus } from "@quasar/extras/mdi-v7";
+import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
-import { Dialog, QTable, QTableColumn, useDialogPluginComponent } from "quasar";
+import {
+  Dialog,
+  QTable,
+  QTableColumn,
+  QTableProps,
+  useDialogPluginComponent,
+} from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useBookService } from "src/services/book";
@@ -141,6 +142,8 @@ import { BookSummaryFragment } from "src/services/book.graphql";
 import { UserFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
+import CardTableHeader from "./card-table-header.vue";
+import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
 import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
 import StatusChip from "./status-chip.vue";
@@ -151,24 +154,21 @@ const retrievedCurrentPage = ref(0);
 const inRetrievalRowsPerPage = ref(5);
 const retrievedRowsPerPage = ref(5);
 
-const newBookISBN = ref("");
-
 const {
   refetchBooks: refetchInRetrievalBooks,
   booksPaginationDetails: inRetrievalBooksPaginationDetails,
+  loading: inRetrievalLoading,
 } = useBookService(inRetrievalCurrentPage, inRetrievalRowsPerPage);
 
 const {
   refetchBooks: refetchRetrievedBooks,
   booksPaginationDetails: retrievedBooksPaginationDetails,
+  loading: retrievedLoading,
 } = useBookService(retrievedCurrentPage, retrievedRowsPerPage);
 
 const { t } = useI18n();
 
 const tab = ref("in-retrieval");
-
-const inRetrievalLoading = ref(false);
-const retrievedLoading = ref(false);
 
 const inRetrievalRows = ref<BookSummaryFragment[]>([]);
 const retrievedRows = ref<BookSummaryFragment[]>([]);
@@ -278,6 +278,12 @@ const retrievedColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 
   ...commonColumns.value,
+  {
+    label: t("manageUsers.actions"),
+    field: () => undefined,
+    name: "actions",
+    align: "center",
+  },
 ]);
 
 defineProps<{
@@ -285,7 +291,7 @@ defineProps<{
 }>();
 
 // FIXME: add actual retrieval logic on both onRequest functions
-const onInRetrievalRequest: QTable["onRequest"] = async function (
+const onInRetrievalRequest: QTableProps["onRequest"] = async function (
   requestProps,
 ) {
   inRetrievalLoading.value = true;
@@ -331,8 +337,9 @@ const onRetrievedRequest: QTable["onRequest"] = async function (requestProps) {
   retrievedLoading.value = false;
 };
 
-function addBookToInRetrieval() {
+function addBookToInRetrieval(bookISBN: string) {
   // FIXME: add logic to add a book into "in retrieval" section
+  bookISBN;
 }
 
 function retrieveAllBooks() {
@@ -357,7 +364,25 @@ function deleteBookDialog(book: BookSummaryFragment) {
   });
 }
 
+function returnBook(book: BookSummaryFragment) {
+  // FIXME: return the book to the Mercatino
+  book;
+}
+
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 </script>
+
+<style lang="scss">
+/*
+  Adding this to make up for the child element of q-panels
+  which is an otherwise inaccessible div
+*/
+.dialog-panels > .q-panel[role="tabpanel"],
+.dialog-panels > * > .q-tab-panel[role="tabpanel"] {
+  display: flex;
+  overflow: auto;
+  height: auto;
+}
+</style>
