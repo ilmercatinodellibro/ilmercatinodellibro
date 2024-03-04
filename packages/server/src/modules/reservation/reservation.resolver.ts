@@ -23,6 +23,27 @@ export class ReservationResolver {
     private readonly reservationService: ReservationService,
   ) {}
 
+  @Query(() => [Reservation])
+  async userReservations(
+    @Args() { userId }: UserReservationsQueryArgs,
+    @CurrentUser() { id: currentUserId, role }: User,
+  ) {
+    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
+    const currentRetailLocationId = "re";
+
+    // Normal users can only view their own Reservations
+    if (currentUserId !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You do not have permission to view these reservations.",
+      );
+    }
+
+    return this.reservationService.getUserReservations(
+      userId,
+      currentRetailLocationId,
+    );
+  }
+
   @ResolveField(() => Book)
   async book(@Root() reservation: Reservation) {
     return this.prisma.reservation
@@ -102,40 +123,13 @@ export class ReservationResolver {
     return cartItem !== null;
   }
 
-  @Query(() => [Reservation])
-  async userReservations(
-    @Args()
-    queryArgs: UserReservationsQueryArgs,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
-  ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
-
-    // Normal users can only view their own Reservations
-    if (currentUserId !== queryArgs.userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to view these reservations.",
-      );
-    }
-
-    return this.reservationService.getUserReservations(
-      queryArgs.userId,
-      currentRetailLocationId,
-    );
-  }
-
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteReservation(
-    @Input()
-    input: DeleteReservationInput,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
+    @Input() { id }: DeleteReservationInput,
+    @CurrentUser() { id: currentUserId, role }: User,
   ) {
     const reservation = await this.prisma.reservation.findUniqueOrThrow({
-      where: {
-        id: input.id,
-      },
+      where: { id },
     });
 
     if (currentUserId !== reservation.userId && role === Role.USER) {
@@ -144,6 +138,6 @@ export class ReservationResolver {
       );
     }
 
-    return this.reservationService.deleteReservation(input.id, currentUserId);
+    return this.reservationService.deleteReservation(id, currentUserId);
   }
 }
