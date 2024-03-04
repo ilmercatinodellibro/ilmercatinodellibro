@@ -473,13 +473,13 @@ function openCellEditDialog(
         componentProps: { userData },
       });
       break;
-    // Only other two remaining cases, could be in 'default:' instead
     case "sold":
     case "purchased":
       Dialog.create({
         component: EditUserBooksMovementsDialog,
         componentProps: { userData, type: column.name },
       });
+      break;
   }
 }
 
