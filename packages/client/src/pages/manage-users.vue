@@ -152,12 +152,21 @@
             />
           </template>
           <template #body-cell-requested="{ col, row, value }">
-            <!-- FIXME: add actual value logic -->
             <table-cell-with-dialog
               :value="value"
-              :secondary-value="getAvailableCount(row)"
+              :secondary-value="row.booksRequestedAndAvailable"
               @click="openCellEditDialog(row, col, value)"
-            />
+            >
+              <template #secondary-value="{ value: availableCount }">
+                <round-badge color="positive">
+                  {{ availableCount }}
+
+                  <q-tooltip>
+                    {{ $t("manageUsers.tooltips.available") }}
+                  </q-tooltip>
+                </round-badge>
+              </template>
+            </table-cell-with-dialog>
           </template>
 
           <template #header-cell-purchased="{ col }">
@@ -182,8 +191,10 @@
                 round
                 @click="openCart(row)"
               >
+                <!-- TODO: Display the actual cart items count, hide it when 0 -->
                 <round-badge
-                  :label="getAvailableCount(row)"
+                  v-if="false"
+                  :label="1"
                   class="badge-top-left"
                   color="accent"
                   float-left
@@ -473,12 +484,6 @@ function openCellEditDialog(
 
 function updateTable() {
   tableRef.value?.requestServerInteraction();
-}
-
-function getAvailableCount(user: CustomerFragment) {
-  // FIXME: add logic for available books count
-  user;
-  return 1;
 }
 
 function openCart(user: CustomerFragment) {

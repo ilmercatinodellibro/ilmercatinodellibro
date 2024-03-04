@@ -1,20 +1,23 @@
 <template>
   <q-td>
-    <q-btn v-if="value > 0" square flat class="absolute-full">
+    <span v-if="value <= 0" class="text-body2">
+      {{ value }}
+    </span>
+    <q-btn v-else square flat class="absolute-full">
       <span class="text-underline text-weight-regular">
         {{ value }}
       </span>
-      <q-space />
-      <round-badge v-if="secondaryValue" color="positive">
-        {{ secondaryValue }}
-        <q-tooltip>
-          {{ $t("manageUsers.availableTooltip") }}
-        </q-tooltip>
-      </round-badge>
+
+      <template v-if="!!secondaryValue">
+        <q-space />
+
+        <slot name="secondary-value" v-bind="{ value: secondaryValue }">
+          <round-badge color="positive">
+            {{ secondaryValue }}
+          </round-badge>
+        </slot>
+      </template>
     </q-btn>
-    <span v-else class="text-body2">
-      {{ value }}
-    </span>
   </q-td>
 </template>
 
