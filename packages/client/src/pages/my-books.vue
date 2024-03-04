@@ -24,20 +24,22 @@
           {{ $t(`myBooks.tabsTitles.${tab}`) }}
         </q-tab>
       </q-tabs>
+
       <q-tab-panels
         v-model="selectedTab"
         animated
         class="col column dialog-panels flex-delegate-height-management no-wrap"
       >
         <q-tab-panel
-          :name="PageTab.DELIVERED"
+          v-for="tab in Object.values(PageTab)"
+          :key="tab"
+          :name="tab"
           class="col column flex-delegate-height-management no-padding no-wrap"
         >
-          <!-- TODO: add loading and fix rows -->
           <dialog-table
             :columns="columns"
             :loading="loading"
-            :rows="bookCopiesByOwner"
+            :rows="tableRowsByTab[tab]"
             :rows-per-page-options="[0]"
             class="col q-pt-sm"
           >
@@ -82,9 +84,23 @@ const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   userId: user.value?.id ?? "",
 });
 
-const { t } = useI18n();
+enum PageTab {
+  DELIVERED = "delivered",
+  RESERVED = "reserved",
+  PURCHASED = "purchased",
+}
 
-const searchQuery = ref("");
+const tableRowsByTab = computed<Record<PageTab, BookCopyDetailsFragment[]>>(
+  () => ({
+    delivered: bookCopiesByOwner.value.filter(
+      ({ owner }) => owner.id, // TODO: add correct filter to all rows
+    ),
+    purchased: bookCopiesByOwner.value,
+    reserved: bookCopiesByOwner.value,
+  }),
+);
+
+const { t } = useI18n();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
@@ -131,13 +147,9 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
 ]);
 
-enum PageTab {
-  DELIVERED = "delivered",
-  RESERVED = "reserved",
-  PURCHASED = "purchased",
-}
-
 const selectedTab = ref(PageTab.DELIVERED);
+
+const searchQuery = ref("");
 
 const totalSale = ref(0);
 </script>
