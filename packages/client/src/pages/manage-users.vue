@@ -182,7 +182,7 @@
             />
           </template>
 
-          <template #body-cell-shopping-cart="{ row }">
+          <template #body-cell-shopping-cart="{ row, value }">
             <q-td class="text-center">
               <q-btn
                 :icon="mdiCart"
@@ -191,10 +191,9 @@
                 round
                 @click="openCart(row)"
               >
-                <!-- TODO: Display the actual cart items count, hide it when 0 -->
                 <round-badge
-                  v-if="false"
-                  :label="1"
+                  v-if="value > 0"
+                  :label="value"
                   class="badge-top-left"
                   color="accent"
                   float-left
@@ -262,7 +261,10 @@ import {
   useGetCustomersQuery,
 } from "src/services/user.graphql";
 
-const { loading, users: customers } = useGetCustomersQuery();
+const { loading, users: customers } = useGetCustomersQuery(() => ({
+  // TODO: Make this dynamic
+  retailLocationId: "re",
+}));
 
 const tableRef = ref<QTable>();
 
@@ -348,8 +350,7 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   },
   {
     name: "shopping-cart",
-    // FIXME: add field
-    field: () => undefined,
+    field: "booksInCart",
     label: t("manageUsers.fields.cart"),
     align: "center",
   },

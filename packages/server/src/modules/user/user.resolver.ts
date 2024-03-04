@@ -199,6 +199,35 @@ export class UserResolver {
     return _count.purchases;
   }
 
+  @ResolveField(() => Number)
+  async booksInCart(
+    @Root() user: User,
+    @Args("retailLocationId") retailLocationId: string,
+  ) {
+    const { ownedCarts } = await this.prisma.user.findUniqueOrThrow({
+      where: {
+        id: user.id,
+      },
+      select: {
+        ownedCarts: {
+          where: {
+            retailLocationId,
+          },
+          select: {
+            _count: {
+              select: {
+                items: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Can only have one cart per retail location, so we can safely check only the first one.
+    return ownedCarts[0]?._count.items ?? 0;
+  }
+
   @Mutation(() => GraphQLVoid, { nullable: true })
   removeUser(
     @Input()

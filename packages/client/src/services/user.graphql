@@ -22,6 +22,7 @@ fragment Customer on User {
   booksRequested
   booksRequestedAndAvailable: booksRequested(onlyAvailable: true)
   booksBought
+  booksInCart(retailLocationId: $retailLocationId)
 }
 
 query getUsers {
@@ -30,7 +31,7 @@ query getUsers {
   }
 }
 
-query getCustomers {
+query getCustomers($retailLocationId: String!) {
   users(roles: [USER]) {
     ...Customer
   }
