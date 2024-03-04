@@ -14,7 +14,10 @@ import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { ReservationService } from "./rerservation.service";
 import { UserReservationsQueryArgs } from "./reservation.args";
-import { DeleteReservationInput } from "./reservation.input";
+import {
+  CreateReservationInput,
+  DeleteReservationInput,
+} from "./reservation.input";
 
 @Resolver(() => Reservation)
 export class ReservationResolver {
@@ -121,6 +124,114 @@ export class ReservationResolver {
       });
 
     return cartItem !== null;
+  }
+
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async createReservations(
+    @Input() { userId, bookIds }: CreateReservationInput,
+    @CurrentUser() { id: currentUserId, role }: User,
+  ) {
+    if (currentUserId !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You do not have permission to create reservations for this user.",
+      );
+    }
+
+    const retailLocationId = "re"; // TODO: make this dynamic
+
+    const books = await this.prisma.book.findMany({
+      where: { id: { in: bookIds } },
+      include: {
+        reservations: {
+          where: { userId },
+        },
+        requests: {
+          where: { userId },
+        },
+        meta: true,
+      },
+    });
+
+    if (books.length !== bookIds.length) {
+      throw new ForbiddenException("One or more books given are not found.");
+    }
+
+    if (books.some(({ reservations }) => reservations.length > 0)) {
+      throw new ForbiddenException(
+        "One or more books given are already reserved by the user.",
+      );
+    }
+
+    if (
+      books.some((book) => book.requests.length > 0 && !book.meta.isAvailable)
+    ) {
+      throw new ForbiddenException(
+        "One or more books given are already requested by the user and not available.",
+      );
+    }
+
+    const retailLocation = await this.prisma.retailLocation.findUniqueOrThrow({
+      where: { id: retailLocationId },
+    });
+    if (books.some((book) => book.retailLocationId !== retailLocation.id)) {
+      throw new ForbiddenException(
+        "One or more books given belong to a different retail location.",
+      );
+    }
+
+    const booksToReserve = books.filter(({ meta }) => meta.isAvailable);
+    const booksToPromoteRequests = books.filter(
+      ({ requests, meta }) => requests.length > 0 && !meta.isAvailable,
+    );
+    const booksToRequest = books.filter(
+      ({ requests, meta }) => requests.length === 0 && !meta.isAvailable,
+    );
+
+    await this.prisma.$transaction(async (prisma) => {
+      // TODO: delete expired reservations on a schedule, similar to how expired carts are handled
+      const expiresAt = new Date(
+        Date.now() + retailLocation.maxBookingDays * 24 * 60 * 60 * 1000,
+      );
+
+      await prisma.reservation.createMany({
+        data: booksToReserve.map(({ id }) => ({
+          bookId: id,
+          userId,
+          createdById: currentUserId,
+          expiresAt,
+        })),
+      });
+
+      // TODO: instead of deleting the request, connect the request to the reservation, so that:
+      // - when the reservation expires, the request is still there
+      // - the connection/history between the request and the reservation is kept
+      await prisma.bookRequest.updateMany({
+        where: {
+          bookId: { in: booksToPromoteRequests.map(({ id }) => id) },
+          userId,
+        },
+        data: {
+          deletedAt: new Date(),
+          deletedById: currentUserId,
+        },
+      });
+      await prisma.reservation.createMany({
+        data: booksToPromoteRequests.map(({ id }) => ({
+          bookId: id,
+          userId,
+          createdById: currentUserId,
+          expiresAt,
+        })),
+      });
+
+      await prisma.bookRequest.createMany({
+        data: booksToRequest.map(({ id }) => ({
+          bookId: id,
+          userId,
+          createdById: currentUserId,
+        })),
+      });
+    });
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
