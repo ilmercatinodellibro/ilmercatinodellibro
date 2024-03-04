@@ -36,7 +36,8 @@
           <!-- TODO: add loading and fix rows -->
           <dialog-table
             :columns="columns"
-            :rows="books"
+            :loading="loading"
+            :rows="bookCopiesByOwner"
             :rows-per-page-options="[0]"
             class="col q-pt-sm"
           >
@@ -69,57 +70,52 @@ import { QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
-// TODO: remove and uncomment right imports
-import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
-// import { useAuthService } from "src/services/auth";
-// import { useGetBookCopiesByOwnerQuery } from "src/services/book-copy.graphql";
+import { useAuthService } from "src/services/auth";
+import {
+  BookCopyDetailsFragment,
+  useGetBookCopiesByOwnerQuery,
+} from "src/services/book-copy.graphql";
 
-// TODO: remove and uncomment right query
-const page = ref(0);
-const rowsPerPage = ref(100);
-const { books } = useBookService(page, rowsPerPage);
-// const { user } = useAuthService();
+const { user } = useAuthService();
 
-// const { bookCopiesByOwner, loading, refetch } = useGetBookCopiesByOwnerQuery({
-//   userId: user.value?.id ?? "",
-// });
+const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
+  userId: user.value?.id ?? "",
+});
 
 const { t } = useI18n();
 
 const searchQuery = ref("");
 
-// TODO: change with BookCopyDetailsFragment once the PR where it is defined is merged
-const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
     name: "isbn",
-    field: "isbnCode",
+    field: ({ book }) => book.isbnCode,
     label: t("book.fields.isbn"),
     align: "left",
   },
   {
     name: "author",
-    field: "authorsFullName",
+    field: ({ book }) => book.authorsFullName,
     label: t("book.fields.author"),
     align: "left",
     classes: "max-width-160 ellipsis",
   },
   {
     name: "subject",
-    field: "subject",
+    field: ({ book }) => book.subject,
     label: t("book.fields.subject"),
     align: "left",
     classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
-    field: "title",
+    field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
   },
   {
     name: "cover-price",
-    field: "originalPrice",
+    field: ({ book }) => book.originalPrice,
     label: t("book.fields.price"),
     align: "left",
     format: (price: number) => `${price.toFixed(2)} €`,
@@ -127,7 +123,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "sale-price",
-    field: "originalPrice",
+    field: ({ book }) => book.originalPrice,
     label: t("myBooks.receivedAmount"),
     align: "left",
     // TODO: change price to the right calculation

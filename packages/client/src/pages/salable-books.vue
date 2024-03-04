@@ -215,7 +215,9 @@ async function searchBook() {
     await refetchBooks({
       page: page.value,
       rows: rowsPerPage.value,
-      filter: searchQuery.value,
+      filter: {
+        search: searchQuery.value,
+      },
     })
   )?.data.books.rows ?? [])[0];
   loading.value = false;
