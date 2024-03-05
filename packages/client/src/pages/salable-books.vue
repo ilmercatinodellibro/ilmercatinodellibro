@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { mdiMagnify } from "@quasar/extras/mdi-v7";
-import { Notify, QTableColumn } from "quasar";
+import { QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
@@ -91,7 +91,7 @@ const rowsPerPage = ref(1);
 
 const { loading, refetchBooks } = useBookService(page, rowsPerPage);
 
-const searchQuery = ref<string>();
+const searchQuery = ref<string>("");
 
 const columns = computed<QTableColumn<BookWithStatus>[]>(() => [
   {
@@ -180,20 +180,7 @@ const rows = computed<
       ]),
 ]);
 
-const ISBNLength = 13;
-
 async function searchBook() {
-  if (
-    searchQuery.value?.length !== ISBNLength ||
-    isNaN(Number(searchQuery.value)) ||
-    searchQuery.value.includes(".")
-  ) {
-    Notify.create({
-      type: "negative",
-      caption: t("salableBooks.alert"),
-    });
-    return;
-  }
   if (
     acceptedBooks.value.find(
       ({ isbnCode }) => searchQuery.value === isbnCode,
@@ -205,7 +192,7 @@ async function searchBook() {
     return;
   }
   loading.value = true;
-  const foundBook = ((
+  const foundBook = (
     await refetchBooks({
       page: page.value,
       rows: rowsPerPage.value,
@@ -213,7 +200,7 @@ async function searchBook() {
         search: searchQuery.value,
       },
     })
-  )?.data.books.rows ?? [])[0];
+  )?.data.books.rows[0];
   loading.value = false;
   if (foundBook) {
     acceptedBooks.value.push(foundBook);
