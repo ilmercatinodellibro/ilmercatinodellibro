@@ -145,9 +145,9 @@ interface EmptyBodyRow {
   id: "EMPTY";
 }
 
-interface BookWithStatus extends BookSummaryFragment {
+type BookWithStatus = {
   status: AcceptanceStatus;
-}
+} & BookSummaryFragment;
 
 const acceptedBooks = ref<BookSummaryFragment[]>([]);
 const rejectedBooks = ref<Pick<BookWithStatus, "isbnCode" | "status">[]>([]);

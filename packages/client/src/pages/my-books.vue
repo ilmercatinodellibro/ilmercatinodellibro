@@ -80,8 +80,7 @@
               #body-cell-actions="{ row }"
             >
               <q-td auto-width>
-                <!-- eslint-disable vue/no-bare-strings-in-template -->
-                <q-btn
+                <chip-button
                   :label="$t('myBooks.cancelReservation')"
                   color="primary"
                   @click="cancelReservation(row)"
@@ -106,7 +105,9 @@ import {
 import { NamedColor, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import chipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { formatPrice } from "src/composables/use-misc-formats";
 import { useAuthService } from "src/services/auth";
 import {
   BookCopyDetailsFragment,
@@ -168,7 +169,7 @@ const tableRowsByTab = computed<Record<PageTab, BookCopyDetailsFragment[]>>(
 
 const { t } = useI18n();
 
-const commonColumns: QTableColumn<BookCopyDetailsFragment>[] = [
+const commonColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
     name: "isbn",
     field: ({ book }) => book.isbnCode,
@@ -200,10 +201,10 @@ const commonColumns: QTableColumn<BookCopyDetailsFragment>[] = [
     field: ({ book }) => book.originalPrice,
     label: t("book.fields.price"),
     align: "left",
-    format: (price: number) => `${price.toFixed(2)} €`,
+    format: formatPrice,
     classes: "text-strike text-black-54",
   },
-];
+]);
 
 const columns = computed<
   Record<PageTab, QTableColumn<BookCopyDetailsFragment>[]>
@@ -216,27 +217,36 @@ const columns = computed<
       label: t("book.fields.status"),
       align: "left",
     },
-    ...commonColumns,
+    ...commonColumns.value,
     {
       name: "sale-price",
       field: ({ book }) => book.originalPrice,
       label: t("myBooks.receivedAmount"),
       align: "left",
       // TODO: change price to the right calculation
-      format: (price: number) => `${price.toFixed(2)} €`,
+      format: formatPrice,
     },
   ],
   purchased: [
-    ...commonColumns,
+    ...commonColumns.value,
     {
-      name: "actions",
-      field: () => undefined,
-      label: "",
+      name: "paid-price",
+      // TODO: add correct field
+      field: ({ book }) => book.originalPrice,
+      label: t("myBooks.priceYouPaid"),
       align: "left",
+      format: formatPrice,
     },
   ],
   reserved: [
-    ...commonColumns,
+    ...commonColumns.value,
+    {
+      name: "price",
+      field: ({ book }) => book.originalPrice,
+      label: t("myBooks.price"),
+      align: "left",
+      format: formatPrice,
+    },
     {
       name: "actions",
       field: () => undefined,

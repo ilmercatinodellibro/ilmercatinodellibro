@@ -13,4 +13,6 @@ export default {
     donated: "Donato al mercatino",
   },
   cancelReservation: "Annulla prenotazione",
+  price: "Prezzo",
+  priceYouPaid: "Prezzo che hai pagato",
 };
