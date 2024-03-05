@@ -12,12 +12,12 @@ import { Book, Reservation, Role, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
-import { ReservationService } from "./rerservation.service";
 import { UserReservationsQueryArgs } from "./reservation.args";
 import {
   CreateReservationInput,
   DeleteReservationInput,
 } from "./reservation.input";
+import { ReservationService } from "./reservation.service";
 
 @Resolver(() => Reservation)
 export class ReservationResolver {
