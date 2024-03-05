@@ -102,6 +102,7 @@ import {
   mdiGift,
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
+import { sumBy } from "lodash-es";
 import { NamedColor, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -259,7 +260,10 @@ const selectedTab = ref(PageTab.DELIVERED);
 
 const searchQuery = ref("");
 
-const totalSale = ref(0);
+// TODO: update to correct field
+const totalSale = ref(
+  sumBy(tableRowsByTab.value.delivered, ({ book }) => book.originalPrice),
+);
 
 // TODO: replace book status once it is implemented on the server
 enum BookStatus {
