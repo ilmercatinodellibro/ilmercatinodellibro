@@ -79,7 +79,7 @@
               v-if="tab === PageTab.RESERVED"
               #body-cell-actions="{ row }"
             >
-              <q-td auto-width>
+              <q-td>
                 <chip-button
                   :label="$t('myBooks.cancelReservation')"
                   color="primary"
