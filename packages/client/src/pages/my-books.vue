@@ -37,15 +37,15 @@
           class="col column flex-delegate-height-management no-padding no-wrap"
         >
           <dialog-table
-            :columns="columns"
+            :columns="columns[tab]"
             :loading="loading"
             :rows="tableRowsByTab[tab]"
             :rows-per-page-options="[0]"
             class="col q-pt-sm"
           >
-            <template #header="props">
+            <template v-if="tab === PageTab.DELIVERED" #header="props">
               <q-tr class="bg-grey-1">
-                <q-th colspan="4" />
+                <q-th colspan="5" />
                 <q-th class="text-left">
                   {{ $t("myBooks.total") }}
                 </q-th>
@@ -59,6 +59,35 @@
                 </q-th>
               </q-tr>
             </template>
+
+            <template
+              v-if="tab === PageTab.DELIVERED"
+              #body-cell-status="{ value }"
+            >
+              <q-td class="text-center">
+                <!-- TODO: change to correct book status type -->
+                <q-chip
+                  v-bind="
+                    statusChipData[(value as BookStatus) ?? BookStatus.NOT_SOLD]
+                  "
+                  class="non-selectable"
+                />
+              </q-td>
+            </template>
+
+            <template
+              v-if="tab === PageTab.RESERVED"
+              #body-cell-actions="{ row }"
+            >
+              <q-td auto-width>
+                <!-- eslint-disable vue/no-bare-strings-in-template -->
+                <q-btn
+                  :label="$t('myBooks.cancelReservation')"
+                  color="primary"
+                  @click="cancelReservation(row)"
+                />
+              </q-td>
+            </template>
           </dialog-table>
         </q-tab-panel>
       </q-tab-panels>
@@ -67,8 +96,14 @@
 </template>
 
 <script setup lang="ts">
-import { mdiMagnify } from "@quasar/extras/mdi-v7";
-import { QTableColumn } from "quasar";
+import {
+  mdiBookArrowLeft,
+  mdiCurrencyEur,
+  mdiCurrencyEurOff,
+  mdiGift,
+  mdiMagnify,
+} from "@quasar/extras/mdi-v7";
+import { NamedColor, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
@@ -80,9 +115,40 @@ import {
 
 const { user } = useAuthService();
 
-const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
+const { /* bookCopiesByOwner,*/ loading } = useGetBookCopiesByOwnerQuery({
   userId: user.value?.id ?? "",
 });
+
+// FIXME: remove stub
+const bookCopiesByOwner = ref([
+  {
+    book: {
+      authorsFullName: "Autore sample",
+      id: "",
+      isbnCode: "ISBN sample",
+      meta: {
+        isAvailable: true,
+      },
+      originalPrice: 100,
+      publisherName: "",
+      retailLocationId: "",
+      subject: "Materia sample",
+      title: "Titolo molto molto molto molto molto molto lungo sample",
+    },
+    code: "",
+    createdAt: 0,
+    createdById: "",
+    id: "",
+    owner: {
+      email: "",
+      firstname: "",
+      lastname: "",
+      id: "0",
+    },
+    updatedAt: 0,
+    updatedById: "",
+  },
+]);
 
 enum PageTab {
   DELIVERED = "delivered",
@@ -95,14 +161,14 @@ const tableRowsByTab = computed<Record<PageTab, BookCopyDetailsFragment[]>>(
     delivered: bookCopiesByOwner.value.filter(
       ({ owner }) => owner.id, // TODO: add correct filter to all rows
     ),
-    purchased: bookCopiesByOwner.value,
-    reserved: bookCopiesByOwner.value,
+    purchased: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
+    reserved: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
   }),
 );
 
 const { t } = useI18n();
 
-const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
+const commonColumns: QTableColumn<BookCopyDetailsFragment>[] = [
   {
     name: "isbn",
     field: ({ book }) => book.isbnCode,
@@ -137,21 +203,96 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     format: (price: number) => `${price.toFixed(2)} €`,
     classes: "text-strike text-black-54",
   },
-  {
-    name: "sale-price",
-    field: ({ book }) => book.originalPrice,
-    label: t("myBooks.receivedAmount"),
-    align: "left",
-    // TODO: change price to the right calculation
-    format: (price: number) => `${price.toFixed(2)} €`,
-  },
-]);
+];
+
+const columns = computed<
+  Record<PageTab, QTableColumn<BookCopyDetailsFragment>[]>
+>(() => ({
+  delivered: [
+    {
+      name: "status",
+      // TODO: add the field
+      field: () => undefined,
+      label: t("book.fields.status"),
+      align: "left",
+    },
+    ...commonColumns,
+    {
+      name: "sale-price",
+      field: ({ book }) => book.originalPrice,
+      label: t("myBooks.receivedAmount"),
+      align: "left",
+      // TODO: change price to the right calculation
+      format: (price: number) => `${price.toFixed(2)} €`,
+    },
+  ],
+  purchased: [
+    ...commonColumns,
+    {
+      name: "actions",
+      field: () => undefined,
+      label: "",
+      align: "left",
+    },
+  ],
+  reserved: [
+    ...commonColumns,
+    {
+      name: "actions",
+      field: () => undefined,
+      label: "",
+    },
+  ],
+}));
 
 const selectedTab = ref(PageTab.DELIVERED);
 
 const searchQuery = ref("");
 
 const totalSale = ref(0);
+
+// TODO: replace book status once it is implemented on the server
+enum BookStatus {
+  SOLD = "sold",
+  NOT_SOLD = "not-sold",
+  RETURNED = "returned",
+  DONATED = "donated",
+}
+
+const statusChipData = computed<
+  Record<
+    BookStatus,
+    { color: NamedColor; icon: string; label: string; dark?: boolean }
+  >
+>(() => ({
+  sold: {
+    color: "positive",
+    icon: mdiCurrencyEur,
+    label: t("myBooks.statusLabels.donated"),
+    dark: true,
+  },
+  "not-sold": {
+    color: "red-5",
+    icon: mdiCurrencyEurOff,
+    label: t("myBooks.statusLabels.notSold"),
+    dark: true,
+  },
+  returned: {
+    color: "grey-5",
+    icon: mdiBookArrowLeft,
+    label: t("myBooks.statusLabels.returned"),
+  },
+  donated: {
+    color: "amber",
+    icon: mdiGift,
+    label: t("myBooks.statusLabels.donated"),
+  },
+}));
+
+function cancelReservation(bookCopy: BookCopyDetailsFragment) {
+  // FIXME: cancel reservation
+  bookCopy;
+}
 </script>
 
 <style lang="scss">

@@ -6,4 +6,11 @@ export default {
   },
   total: "Totale che riceverai:",
   receivedAmount: "Quanto riceverai",
+  statusLabels: {
+    sold: "Venduto",
+    notSold: "Non ancora venduto",
+    returned: "Riconsegnato",
+    donated: "Donato al mercatino",
+  },
+  cancelReservation: "Annulla prenotazione",
 };
