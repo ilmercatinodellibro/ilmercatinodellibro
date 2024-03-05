@@ -4,7 +4,7 @@
       <q-card-section
         class="column gap-8 items-center text-center title-section"
       >
-        <span class="text-h6 text-primary">
+        <span class="text-h6 text-primary text-weight-regular">
           {{ $t("salableBooks.title") }}
         </span>
         <span>

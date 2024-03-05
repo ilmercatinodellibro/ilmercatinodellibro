@@ -65,7 +65,7 @@
               #body-cell-status="{ value }"
             >
               <q-td class="text-center">
-                <!-- TODO: change to correct book status type -->
+                <!-- TODO: update to correct book status type -->
                 <q-chip
                   v-bind="
                     statusChipData[(value as BookStatus) ?? BookStatus.NOT_SOLD]
@@ -232,7 +232,7 @@ const columns = computed<
     ...commonColumns.value,
     {
       name: "paid-price",
-      // TODO: add correct field
+      // TODO: update to correct field
       field: ({ book }) => book.originalPrice,
       label: t("myBooks.priceYouPaid"),
       align: "left",
@@ -265,7 +265,7 @@ const totalSale = ref(
   sumBy(tableRowsByTab.value.delivered, ({ book }) => book.originalPrice),
 );
 
-// TODO: replace book status once it is implemented on the server
+// TODO: remove book status once it is implemented on the server
 enum BookStatus {
   SOLD = "sold",
   NOT_SOLD = "not-sold",
