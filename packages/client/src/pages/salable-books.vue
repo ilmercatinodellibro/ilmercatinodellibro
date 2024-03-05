@@ -12,25 +12,22 @@
         </span>
       </q-card-section>
       <q-card-section class="col column gap-24 no-padding no-wrap">
-        <span class="flex-center gap-16 q-px-sm row">
+        <q-form class="flex-center gap-16 q-px-sm row" @submit="searchBook()">
           <q-input
             v-model="searchQuery"
             :placeholder="$t('salableBooks.searchHint')"
+            :rules="[requiredRule, validISBN]"
             class="col max-width-600"
+            lazy-rules="ondemand"
             outlined
             type="search"
-            @keyup.enter="searchBook"
           >
             <template #append>
               <q-icon :name="mdiMagnify" />
             </template>
           </q-input>
-          <q-btn
-            :label="$t('common.search')"
-            color="accent"
-            @click="searchBook"
-          />
-        </span>
+          <q-btn :label="$t('common.search')" color="accent" type="submit" />
+        </q-form>
         <dialog-table
           :columns="columns"
           :loading="loading"
@@ -44,10 +41,6 @@
               class="bg-grey-1"
               no-hover
             >
-              <!--
-                This <td> takes all the columns of the table's worth of width
-                so the colspan is set to take up the space of all the columns
-              -->
               <q-td class="non-selectable text-weight-medium" colspan="100%">
                 {{ $t(`salableBooks.tableSectionTitles.${row.id}`) }}
               </q-td>
@@ -87,6 +80,7 @@ import { Notify, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { requiredRule, validISBN } from "src/helpers/rules";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 
