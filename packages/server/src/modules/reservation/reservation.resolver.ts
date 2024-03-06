@@ -143,10 +143,16 @@ export class ReservationResolver {
       where: { id: { in: bookIds } },
       include: {
         reservations: {
-          where: { userId },
+          where: {
+            userId,
+            deletedAt: null,
+          },
         },
         requests: {
-          where: { userId },
+          where: {
+            userId,
+            deletedAt: null,
+          },
         },
         meta: true,
       },
@@ -188,7 +194,6 @@ export class ReservationResolver {
     );
 
     await this.prisma.$transaction(async (prisma) => {
-      // TODO: delete expired reservations on a schedule, similar to how expired carts are handled
       const expiresAt = new Date(
         Date.now() + retailLocation.maxBookingDays * 24 * 60 * 60 * 1000,
       );
