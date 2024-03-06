@@ -1,16 +1,15 @@
 <template>
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
-      <q-card-section
-        class="column gap-8 items-center text-center title-section"
-      >
-        <span class="text-h6 text-primary text-weight-regular">
+      <q-card-section class="text-center title-section">
+        <h6 class="q-ma-none text-primary text-weight-regular">
           {{ $t("salableBooks.title") }}
-        </span>
-        <span>
+        </h6>
+        <p class="q-mb-none q-mt-sm">
           {{ $t("salableBooks.subtitle") }}
-        </span>
+        </p>
       </q-card-section>
+
       <q-card-section class="col column gap-24 no-padding no-wrap">
         <q-form class="flex-center gap-16 q-px-sm row" @submit="searchBook()">
           <q-input
@@ -26,8 +25,10 @@
               <q-icon :name="mdiMagnify" />
             </template>
           </q-input>
+
           <q-btn :label="$t('common.search')" color="accent" type="submit" />
         </q-form>
+
         <dialog-table
           :columns="columns"
           :loading="loading"
@@ -41,12 +42,12 @@
               class="bg-grey-1"
               no-hover
             >
-              <q-td class="non-selectable text-weight-medium" colspan="100%">
+              <q-td class="non-selectable text-weight-medium" colspan="5">
                 {{ $t(`salableBooks.tableSectionTitles.${row.id}`) }}
               </q-td>
             </q-tr>
             <q-tr v-else-if="row.id === 'EMPTY'">
-              <q-td colspan="100%">
+              <q-td colspan="5">
                 {{ $t("salableBooks.emptyRowMessage") }}
               </q-td>
             </q-tr>
@@ -76,7 +77,7 @@
 
 <script setup lang="ts">
 import { mdiMagnify } from "@quasar/extras/mdi-v7";
-import { QTableColumn } from "quasar";
+import { Notify, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
@@ -91,7 +92,7 @@ const rowsPerPage = ref(1);
 
 const { loading, refetchBooks } = useBookService(page, rowsPerPage);
 
-const searchQuery = ref<string>("");
+const searchQuery = ref("");
 
 const columns = computed<QTableColumn<BookWithStatus>[]>(() => [
   {
@@ -187,8 +188,7 @@ async function searchBook() {
     ) ??
     rejectedBooks.value.find(({ isbnCode }) => searchQuery.value === isbnCode)
   ) {
-    // Potentially show a notification to the user to
-    // tell them that the book was already searched for
+    Notify.create(t("salableBooks.alreadySearched"));
     return;
   }
   loading.value = true;

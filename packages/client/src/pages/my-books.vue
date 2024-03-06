@@ -5,7 +5,7 @@
         <q-input
           v-model="searchQuery"
           :placeholder="$t('common.search')"
-          class="col max-width-600"
+          class="max-width-600"
           outlined
           type="text"
         >

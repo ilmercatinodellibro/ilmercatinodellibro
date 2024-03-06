@@ -13,4 +13,5 @@ export default {
     accepted: "Accepted for sale",
     rejected: "Not accepted",
   },
+  alreadySearched: "This book was already searched for",
 };
