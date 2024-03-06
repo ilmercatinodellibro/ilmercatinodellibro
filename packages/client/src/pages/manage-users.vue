@@ -4,7 +4,7 @@
       <q-card-section class="flex-center gap-16 no-wrap row">
         <q-input
           v-model="searchQuery"
-          debounce="200"
+          :debounce="500"
           class="width-600"
           outlined
           :placeholder="$t('common.search')"
@@ -278,9 +278,13 @@ const pagination = ref({
   rowsNumber: rowsCount.value,
 });
 const onRequest: QTableProps["onRequest"] = async (requested) => {
+  const filter = requested.filter as typeof tableFilter.value;
+
   await fetchCustomers({
     page: requested.pagination.page,
     rowsPerPage: requested.pagination.rowsPerPage,
+    searchTerm: filter?.searchTerm,
+    // TODO: pass the filters to the server
   });
 
   pagination.value.rowsNumber = rowsCount.value;
@@ -305,7 +309,7 @@ enum UserFilters {
 const tableFilter = computed(() =>
   !searchQuery.value && filters.value.length === 0
     ? undefined
-    : { search: searchQuery.value, filters: filters.value },
+    : { searchTerm: searchQuery.value, filters: filters.value },
 );
 
 const options = useTranslatedFilters<UserFilters>("manageUsers.filters");

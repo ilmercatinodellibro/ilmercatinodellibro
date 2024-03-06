@@ -12,6 +12,11 @@ export class UsersQueryArgs {
 
   @Field(() => [Role], { defaultValue: [] })
   roles!: Role[];
+
+  @Field(() => String, { nullable: true })
+  searchTerm?: string;
+
+  // TODO: Add filters (with available, with requested, with purchased, with sold)
 }
 
 @ObjectType()

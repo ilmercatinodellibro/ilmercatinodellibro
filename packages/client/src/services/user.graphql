@@ -39,8 +39,14 @@ query getCustomers(
   $page: Int!
   $rowsPerPage: Int!
   $retailLocationId: String!
+  $searchTerm: String
 ) {
-  users(page: $page, rowsPerPage: $rowsPerPage, roles: [USER]) {
+  users(
+    page: $page
+    rowsPerPage: $rowsPerPage
+    roles: [USER]
+    searchTerm: $searchTerm
+  ) {
     page
     rowsCount
     rows {

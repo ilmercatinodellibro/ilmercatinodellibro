@@ -33,7 +33,7 @@ export class UserResolver {
 
   @Query(() => UsersQueryResult)
   async users(
-    @Args() { page, rowsPerPage, roles }: UsersQueryArgs,
+    @Args() { page, rowsPerPage, roles, searchTerm }: UsersQueryArgs,
     @CurrentUser() user: User,
   ) {
     if (rowsPerPage > 200) {
@@ -48,6 +48,14 @@ export class UserResolver {
       );
     }
 
+    // TODO: Use Prisma full-text search
+    // handle spaces by replacing them with % for the search
+    const searchText = searchTerm?.trim().replaceAll(" ", "%");
+    const searchFilter: Prisma.StringFilter<"User"> = {
+      contains: searchText,
+      mode: "insensitive",
+    };
+
     const where: Prisma.UserWhereInput = {
       emailVerified: true,
       ...(roles.length > 0
@@ -55,6 +63,25 @@ export class UserResolver {
             role: {
               in: roles,
             },
+          }
+        : {}),
+
+      ...(searchText
+        ? {
+            OR: [
+              {
+                firstname: searchFilter,
+              },
+              {
+                lastname: searchFilter,
+              },
+              {
+                email: searchFilter,
+              },
+              {
+                phoneNumber: searchFilter,
+              },
+            ],
           }
         : {}),
     };
