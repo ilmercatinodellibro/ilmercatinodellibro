@@ -70,9 +70,10 @@
           row-key="name"
           :rows="customers"
           :columns="columns"
-          :filter="searchQuery"
+          :filter="tableFilter"
           :loading="loading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
+          @request="onRequest"
         >
           <template #body-cell-edit="{ row, rowIndex }">
             <q-td class="text-left">
@@ -239,8 +240,8 @@ import {
   mdiPlus,
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QTable, QTableColumn } from "quasar";
-import { computed, onMounted, ref, watch } from "vue";
+import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
+import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
@@ -256,19 +257,39 @@ import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import {
-  CustomerFragment,
-  useGetCustomersQuery,
-} from "src/services/user.graphql";
+import { useCustomerService } from "src/services/customer";
+import { CustomerFragment } from "src/services/user.graphql";
 
-const { loading, users: customers } = useGetCustomersQuery(() => ({
-  // TODO: Make this dynamic
-  retailLocationId: "re",
-}));
-
-const tableRef = ref<QTable>();
+const tableRef = ref() as Ref<QTable>;
 
 const { t, locale } = useI18n();
+
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
+
+const {
+  customers,
+  rowsCount,
+  loading,
+  fetch: fetchCustomers,
+} = useCustomerService();
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 100,
+  rowsNumber: rowsCount.value,
+});
+const onRequest: QTableProps["onRequest"] = async (requested) => {
+  await fetchCustomers({
+    page: requested.pagination.page,
+    rowsPerPage: requested.pagination.rowsPerPage,
+  });
+
+  pagination.value.rowsNumber = rowsCount.value;
+  pagination.value.page = requested.pagination.page;
+  pagination.value.rowsPerPage = requested.pagination.rowsPerPage;
+};
+onMounted(() => {
+  tableRef.value.requestServerInteraction();
+});
 
 const searchQuery = ref("");
 const filters = ref<UserFilters[]>([]);
@@ -279,6 +300,13 @@ enum UserFilters {
   withPurchased,
   withSold,
 }
+
+// TODO: send the filters to the server
+const tableFilter = computed(() =>
+  !searchQuery.value && filters.value.length === 0
+    ? undefined
+    : { search: searchQuery.value, filters: filters.value },
+);
 
 const options = useTranslatedFilters<UserFilters>("manageUsers.filters");
 
@@ -383,27 +411,9 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   },
 ]);
 
-const currentPage = ref(0);
-
-const pagination = ref({
-  page: currentPage.value,
-  rowsPerPage: 100,
-  rowsNumber: customers.value.length,
-});
-
-const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
-
-onMounted(() => {
-  updateTable();
-});
-
 const selectedFiltersToString = computed(() =>
   filters.value.map((key) => options.value[key]?.label).join(", "),
 );
-
-watch(filters, () => {
-  updateTable();
-});
 
 function addNewUser() {
   Dialog.create({
@@ -481,10 +491,6 @@ function openCellEditDialog(
       });
       break;
   }
-}
-
-function updateTable() {
-  tableRef.value?.requestServerInteraction();
 }
 
 function openCart(user: CustomerFragment) {

@@ -1,4 +1,7 @@
-import { ForbiddenException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -7,13 +10,18 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
+import { Prisma } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
-import { Role } from "src/@generated";
 import { User } from "src/@generated/user";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
-import { RemoveUserPayload, UpdateRolePayload } from "./user.args";
+import {
+  RemoveUserPayload,
+  UpdateRolePayload,
+  UsersQueryArgs,
+  UsersQueryResult,
+} from "./user.args";
 import { UserService } from "./user.service";
 
 @Resolver(() => User)
@@ -23,30 +31,48 @@ export class UserResolver {
     private readonly prisma: PrismaService,
   ) {}
 
-  @Query(() => [User])
+  @Query(() => UsersQueryResult)
   async users(
-    @Args("roles", { type: () => [Role], defaultValue: [] })
-    roles: Role[],
+    @Args() { page, rowsPerPage, roles }: UsersQueryArgs,
     @CurrentUser() user: User,
   ) {
+    if (rowsPerPage > 200) {
+      throw new UnprocessableEntityException(
+        "The maximum number of rows per page is 200.",
+      );
+    }
+
     if (user.role === "USER") {
       throw new ForbiddenException(
         "You are not allowed to view the list of users.",
       );
     }
 
-    return await this.prisma.user.findMany({
-      where: {
-        emailVerified: true,
-        ...(roles.length > 0
-          ? {
-              role: {
-                in: roles,
-              },
-            }
-          : {}),
-      },
-    });
+    const where: Prisma.UserWhereInput = {
+      emailVerified: true,
+      ...(roles.length > 0
+        ? {
+            role: {
+              in: roles,
+            },
+          }
+        : {}),
+    };
+
+    const [rowsCount, rows] = await this.prisma.$transaction([
+      this.prisma.user.count({ where }),
+      this.prisma.user.findMany({
+        skip: page * rowsPerPage,
+        take: rowsPerPage,
+        where,
+      }),
+    ]);
+
+    return {
+      page,
+      rowsCount,
+      rows,
+    };
   }
 
   @ResolveField(() => Number)

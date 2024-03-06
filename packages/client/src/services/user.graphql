@@ -25,15 +25,27 @@ fragment Customer on User {
   booksInCart(retailLocationId: $retailLocationId)
 }
 
-query getUsers {
-  users(roles: [ADMIN, OPERATOR]) {
-    ...User
+query getUsers($page: Int!, $rowsPerPage: Int!) {
+  users(page: $page, rowsPerPage: $rowsPerPage, roles: [ADMIN, OPERATOR]) {
+    page
+    rowsCount
+    rows {
+      ...User
+    }
   }
 }
 
-query getCustomers($retailLocationId: String!) {
-  users(roles: [USER]) {
-    ...Customer
+query getCustomers(
+  $page: Int!
+  $rowsPerPage: Int!
+  $retailLocationId: String!
+) {
+  users(page: $page, rowsPerPage: $rowsPerPage, roles: [USER]) {
+    page
+    rowsCount
+    rows {
+      ...Customer
+    }
   }
 }
 
