@@ -10,7 +10,11 @@ import { join as joinPath } from "node:path";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { parse, transform } from "csv";
 import { PrismaService } from "../prisma/prisma.service";
-import { IngestedCsvRow } from "./book-csv.types";
+import {
+  IngestedCsvRow,
+  IngestedStateSchoolRow,
+  SchoolCsvConfiguration,
+} from "./book-csv.types";
 
 @Injectable()
 export class BookService {
@@ -155,6 +159,112 @@ export class BookService {
 
         resolve();
       });
+    });
+  }
+
+  //======== Parse Schools CSV ========
+  async loadSchoolsIntoDb(locationsPrefixes: string[] = ["MO", "RE"]) {
+    const schoolCodes: Record<string, string[]> = {};
+    const schoolCodesList: string[] = [];
+
+    for (const regionCode of locationsPrefixes) {
+      schoolCodes[regionCode] = [];
+    }
+
+    return this.#parseCsvSchoolsContent({
+      sourceFileName: "SCUOLE_STATALI",
+      removeDestination: true,
+
+      csvParser: parse({
+        skip_empty_lines: true,
+        skipRecordsWithError: true,
+        on_record: (record: IngestedStateSchoolRow, { lines }) => {
+          // Skips header parsing
+          if (lines === 1) {
+            return null;
+          }
+
+          const schoolCode = record[6];
+          const provinceCode = schoolCode.substring(0, 2);
+          if (provinceCode && locationsPrefixes.includes(provinceCode)) {
+            if (!schoolCodesList.includes(schoolCode)) {
+              schoolCodesList.push(schoolCode);
+            } else {
+              // The school already exists, skip record
+              return null;
+            }
+
+            schoolCodes[provinceCode].push();
+
+            return record;
+          }
+          return null;
+        },
+      }),
+
+      csvTransformer: transform((row: IngestedStateSchoolRow) => {
+        return (
+          // See [1]
+          [
+            `"${row[6]}"`,
+            `"${row[7]}"`,
+            `"${row[8]}"`,
+            `"${row[6].substring(0, 2)}"`,
+          ].join(",") + "\n"
+        );
+      }),
+    });
+  }
+
+  async #parseCsvSchoolsContent({
+    csvParser,
+    sourceFileName,
+    csvTransformer,
+    removeDestination = false,
+  }: SchoolCsvConfiguration) {
+    const dataSource = joinPath(
+      process.cwd(),
+      `./tmp-files/${sourceFileName}.csv`,
+    );
+    if (!existsSync(dataSource)) {
+      throw new NotFoundException(
+        `The CSV file with name ${sourceFileName} was not found.`,
+      );
+    }
+
+    const dataDestination = joinPath(
+      process.cwd(),
+      "./tmp-files/schools-meta.csv",
+    );
+
+    if (removeDestination) {
+      rmSync(dataDestination, { force: true });
+    }
+
+    const sourceStream = createReadStream(dataSource);
+    const destinationStream = createWriteStream(dataDestination);
+
+    // This line must be written prior to add a finish listener to the stream, otherwise the finish handler will be called twice
+    await this.#writeStreamPromise(
+      destinationStream,
+      // [1] - School data CSV format
+      "code,name,address,province_code\n",
+    );
+
+    return new Promise<void>((resolve, reject) => {
+      destinationStream.addListener("finish", () => {
+        sourceStream.close();
+        destinationStream.close();
+
+        resolve();
+      });
+
+      destinationStream.addListener("error", (error) => {
+        reject(error.message);
+      });
+
+      // Starts streaming process
+      sourceStream.pipe(csvParser).pipe(csvTransformer).pipe(destinationStream);
     });
   }
 }
