@@ -109,23 +109,18 @@ export class CartResolver {
         },
         include: {
           meta: true,
-          requests: {
-            where: {
-              userId: cart.userId,
-            },
-          },
           reservations: {
             where: {
               userId: cart.userId,
+              deletedAt: null,
             },
           },
         },
       });
       book = bookDetails;
 
-      // The book availability applies to all users, so we first check if this specific user already has a request or reservation for the book
+      // The book availability applies to all users, so we first check if this specific user already has a reservation for the book
       if (
-        bookDetails.requests.length === 0 &&
         bookDetails.reservations.length === 0 &&
         !bookDetails.meta.isAvailable
       ) {
