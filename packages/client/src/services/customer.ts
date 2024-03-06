@@ -1,6 +1,5 @@
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import {
-  GetCustomersDocument,
   GetCustomersQueryVariables,
   useGetCustomersLazyQuery,
 } from "src/services/user.graphql";
@@ -14,13 +13,17 @@ export function useCustomerService() {
     result,
     loading,
     load: loadUsers,
-    refetch: refetchUsers,
-  } = useGetCustomersLazyQuery(() => ({
+    refetch,
+  } = useGetCustomersLazyQuery(
+    // When using the function form, `load` does not respect the variables passed to it, so we use a `ref` instead
+    // see: https://github.com/vuejs/apollo/issues/1540
     // used to satisfy the type, actual parameters are set in fetch()
-    page: 0,
-    rowsPerPage: 0,
-    retailLocationId,
-  }));
+    ref({
+      page: 1,
+      rowsPerPage: 0,
+      retailLocationId,
+    }),
+  );
 
   const customers = computed(() => result.value?.users.rows ?? []);
   const rowsCount = computed(() => result.value?.users.rowsCount ?? 0);
@@ -28,19 +31,19 @@ export function useCustomerService() {
   async function fetch(
     variables: Omit<GetCustomersQueryVariables, "retailLocationId">,
   ) {
-    const wrappedVariables: GetCustomersQueryVariables = {
+    const queryVariables: GetCustomersQueryVariables = {
       ...variables,
       page: variables.page - 1,
       retailLocationId,
     };
 
-    const shouldLoad = loadUsers(GetCustomersDocument, wrappedVariables);
+    const shouldLoad = loadUsers(undefined, queryVariables);
     if (shouldLoad !== false) {
       await shouldLoad;
       return;
     }
 
-    await refetchUsers(wrappedVariables);
+    await refetch(queryVariables);
   }
 
   return {
