@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { Prisma, Book as PrismaBook, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
@@ -115,16 +119,32 @@ export class CartResolver {
               deletedAt: null,
             },
           },
+          copies: {
+            where: {
+              sales: {
+                some: {
+                  purchasedById: cart.userId,
+                  refundedAt: null,
+                },
+              },
+            },
+          },
         },
       });
       book = bookDetails;
+
+      if (bookDetails.copies.length > 0) {
+        throw new UnprocessableEntityException(
+          "The book has already been bought by the user",
+        );
+      }
 
       // The book availability applies to all users, so we first check if this specific user already has a reservation for the book
       if (
         bookDetails.reservations.length === 0 &&
         !bookDetails.meta.isAvailable
       ) {
-        throw new BadRequestException("The book is not available");
+        throw new UnprocessableEntityException("The book is not available");
       }
     } else if (fromBookRequestId) {
       const request = await this.prisma.bookRequest.findUniqueOrThrow({
@@ -134,10 +154,12 @@ export class CartResolver {
         },
       });
       if (request.deletedAt !== null || request.saleId !== null) {
-        throw new BadRequestException("The request is no longer valid");
+        throw new UnprocessableEntityException(
+          "The request is no longer valid",
+        );
       }
       if (request.book.retailLocationId !== cart.retailLocationId) {
-        throw new BadRequestException(
+        throw new UnprocessableEntityException(
           "The book request is not for the same retail location as the cart",
         );
       }
@@ -151,10 +173,12 @@ export class CartResolver {
         },
       });
       if (reservation.deletedAt !== null || reservation.saleId !== null) {
-        throw new BadRequestException("The reservation is no longer valid");
+        throw new UnprocessableEntityException(
+          "The reservation is no longer valid",
+        );
       }
       if (reservation.book.retailLocationId !== cart.retailLocationId) {
-        throw new BadRequestException(
+        throw new UnprocessableEntityException(
           "The reservation is not for the same retail location as the cart",
         );
       }
