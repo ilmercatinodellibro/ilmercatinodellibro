@@ -182,6 +182,7 @@ export class UserResolver {
                 deletedAt: {
                   not: null,
                 },
+                cartItem: null,
               },
             },
           },
@@ -209,6 +210,7 @@ export class UserResolver {
                 deletedAt: {
                   not: null,
                 },
+                cartItem: null,
                 OR: [
                   {
                     reservations: {
