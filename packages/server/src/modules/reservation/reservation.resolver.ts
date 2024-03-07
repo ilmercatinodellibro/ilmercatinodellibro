@@ -45,6 +45,16 @@ export class ReservationResolver {
         userId,
         deletedAt: null,
         cartItem: null,
+        OR: [
+          {
+            saleId: null,
+          },
+          {
+            sale: {
+              refundedAt: null,
+            },
+          },
+        ],
         book: {
           retailLocationId,
         },

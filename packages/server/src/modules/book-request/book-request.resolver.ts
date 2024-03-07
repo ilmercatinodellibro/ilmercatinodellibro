@@ -41,18 +41,35 @@ export class BookRequestResolver {
         },
         deletedAt: null,
         cartItem: null,
-        OR: [
+        AND: [
           {
-            reservations: {
-              none: {},
-            },
-          },
-          {
-            reservations: {
-              every: {
-                deletedAt: null,
+            OR: [
+              {
+                saleId: null,
               },
-            },
+              {
+                sale: {
+                  refundedAt: null,
+                },
+              },
+            ],
+          },
+
+          {
+            OR: [
+              {
+                reservations: {
+                  none: {},
+                },
+              },
+              {
+                reservations: {
+                  every: {
+                    deletedAt: null,
+                  },
+                },
+              },
+            ],
           },
         ],
       },

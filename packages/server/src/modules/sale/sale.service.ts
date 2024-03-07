@@ -44,7 +44,7 @@ export class SaleService {
         id: saleId,
       },
       data: {
-        refundedAt: new Date().toISOString(),
+        refundedAt: new Date(),
         refundedById: refundingOperatorId,
       },
     });

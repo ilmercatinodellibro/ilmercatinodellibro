@@ -151,9 +151,13 @@ export class CartResolver {
         where: { id: fromBookRequestId },
         include: {
           book: true,
+          sale: true,
         },
       });
-      if (request.deletedAt !== null || request.saleId !== null) {
+      if (
+        request.deletedAt !== null ||
+        (request.saleId !== null && request.sale?.refundedAt !== null)
+      ) {
         throw new UnprocessableEntityException(
           "The request is no longer valid",
         );
@@ -170,9 +174,13 @@ export class CartResolver {
         where: { id: fromReservationId },
         include: {
           book: true,
+          sale: true,
         },
       });
-      if (reservation.deletedAt !== null || reservation.saleId !== null) {
+      if (
+        reservation.deletedAt !== null ||
+        (reservation.saleId !== null && reservation.sale?.refundedAt !== null)
+      ) {
         throw new UnprocessableEntityException(
           "The reservation is no longer valid",
         );
@@ -263,14 +271,32 @@ export class CartResolver {
           where: {
             userId: cart.userId,
             deletedAt: null,
-            saleId: null,
+            OR: [
+              {
+                saleId: null,
+              },
+              {
+                sale: {
+                  refundedAt: null,
+                },
+              },
+            ],
           },
         },
         reservations: {
           where: {
             userId: cart.userId,
             deletedAt: null,
-            saleId: null,
+            OR: [
+              {
+                saleId: null,
+              },
+              {
+                sale: {
+                  refundedAt: null,
+                },
+              },
+            ],
           },
         },
       },
