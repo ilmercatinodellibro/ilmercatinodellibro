@@ -12,4 +12,5 @@ export enum AvailableRouteNames {
   UsersManagement = "users-management",
   SalableBooks = "salable-books",
   MyBooks = "my-books",
+  ReserveBooks = "reserve-books",
 }

@@ -13,6 +13,7 @@ import general from "./general";
 import manageUsers from "./manage-users";
 import myBooks from "./my-books";
 import network from "./network";
+import reserveBooks from "./reserve-books";
 import salableBooks from "./salable-books";
 import validators from "./validators";
 
@@ -48,6 +49,7 @@ export default {
   general,
   manageUsers,
   myBooks,
+  reserveBooks,
   network,
   salableBooks,
   validators,
@@ -150,6 +152,7 @@ export default {
     [AvailableRouteNames.SalableBooks]: "Salable books",
     [AvailableRouteNames.UsersManagement]: "Users and Movements",
     [AvailableRouteNames.MyBooks]: "My Books",
+    [AvailableRouteNames.ReserveBooks]: "Reserve Books",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",
