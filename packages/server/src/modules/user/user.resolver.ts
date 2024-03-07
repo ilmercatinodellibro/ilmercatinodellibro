@@ -209,6 +209,20 @@ export class UserResolver {
                 deletedAt: {
                   not: null,
                 },
+                OR: [
+                  {
+                    reservations: {
+                      none: {},
+                    },
+                  },
+                  {
+                    reservations: {
+                      every: {
+                        deletedAt: null,
+                      },
+                    },
+                  },
+                ],
                 ...(onlyAvailable
                   ? {
                       book: {
