@@ -1,4 +1,7 @@
-import { ForbiddenException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -159,20 +162,40 @@ export class ReservationResolver {
     });
 
     if (books.length !== bookIds.length) {
-      throw new ForbiddenException("One or more books given are not found.");
+      throw new UnprocessableEntityException(
+        "One or more books given are not found.",
+      );
+    }
+
+    if (books.some(({ requests }) => requests.length > 1)) {
+      throw new UnprocessableEntityException(
+        "Logic Error: One or more books somehow have more than one active request by the user.",
+      );
     }
 
     if (books.some(({ reservations }) => reservations.length > 0)) {
-      throw new ForbiddenException(
+      throw new UnprocessableEntityException(
         "One or more books given are already reserved by the user.",
       );
     }
 
     if (
-      books.some((book) => book.requests.length > 0 && !book.meta.isAvailable)
+      books.some(
+        ({ meta, requests }) => !meta.isAvailable && requests.length > 0,
+      )
     ) {
-      throw new ForbiddenException(
+      throw new UnprocessableEntityException(
         "One or more books given are already requested by the user and not available.",
+      );
+    }
+
+    if (
+      books.some(
+        ({ requests }) => requests.length > 0 && requests[0].saleId !== null,
+      )
+    ) {
+      throw new UnprocessableEntityException(
+        "One or more books given are already have been bought by the user.",
       );
     }
 
@@ -180,17 +203,19 @@ export class ReservationResolver {
       where: { id: retailLocationId },
     });
     if (books.some((book) => book.retailLocationId !== retailLocation.id)) {
-      throw new ForbiddenException(
-        "One or more books given belong to a different retail location.",
+      throw new UnprocessableEntityException(
+        "One or more books given belong to a different retail location than the one specified.",
       );
     }
 
-    const booksToReserve = books.filter(({ meta }) => meta.isAvailable);
     const booksToPromoteRequests = books.filter(
-      ({ requests, meta }) => requests.length > 0 && !meta.isAvailable,
+      ({ meta, requests }) => meta.isAvailable && requests.length > 0,
+    );
+    const booksToReserveAndRequest = books.filter(
+      ({ meta, requests }) => meta.isAvailable && requests.length === 0,
     );
     const booksToRequest = books.filter(
-      ({ requests, meta }) => requests.length === 0 && !meta.isAvailable,
+      ({ meta, requests }) => !meta.isAvailable && requests.length === 0,
     );
 
     await this.prisma.$transaction(async (prisma) => {
@@ -198,44 +223,54 @@ export class ReservationResolver {
         Date.now() + retailLocation.maxBookingDays * 24 * 60 * 60 * 1000,
       );
 
-      await prisma.reservation.createMany({
-        data: booksToReserve.map(({ id }) => ({
-          bookId: id,
-          userId,
-          createdById: currentUserId,
-          expiresAt,
-        })),
-      });
+      if (booksToPromoteRequests.length > 0) {
+        await prisma.reservation.createMany({
+          data: booksToPromoteRequests.map(({ id, requests }) => ({
+            bookId: id,
+            userId,
+            createdById: currentUserId,
+            expiresAt,
+            requestId: requests[0].id,
+          })),
+        });
+      }
 
-      // TODO: instead of deleting the request, connect the request to the reservation, so that:
-      // - when the reservation expires, the request is still there
-      // - the connection/history between the request and the reservation is kept
-      await prisma.bookRequest.updateMany({
-        where: {
-          bookId: { in: booksToPromoteRequests.map(({ id }) => id) },
-          userId,
-        },
-        data: {
-          deletedAt: new Date(),
-          deletedById: currentUserId,
-        },
-      });
-      await prisma.reservation.createMany({
-        data: booksToPromoteRequests.map(({ id }) => ({
-          bookId: id,
-          userId,
-          createdById: currentUserId,
-          expiresAt,
-        })),
-      });
+      if (booksToReserveAndRequest.length > 0) {
+        await prisma.bookRequest.createMany({
+          data: booksToReserveAndRequest.map(({ id }) => ({
+            bookId: id,
+            userId,
+            createdById: currentUserId,
+          })),
+        });
 
-      await prisma.bookRequest.createMany({
-        data: booksToRequest.map(({ id }) => ({
-          bookId: id,
-          userId,
-          createdById: currentUserId,
-        })),
-      });
+        const requests = await prisma.bookRequest.findMany({
+          where: {
+            bookId: { in: booksToReserveAndRequest.map(({ id }) => id) },
+            userId,
+          },
+        });
+
+        await prisma.reservation.createMany({
+          data: requests.map(({ id, bookId }) => ({
+            bookId,
+            userId,
+            createdById: currentUserId,
+            expiresAt,
+            requestId: id,
+          })),
+        });
+      }
+
+      if (booksToRequest.length > 0) {
+        await prisma.bookRequest.createMany({
+          data: booksToRequest.map(({ id }) => ({
+            bookId: id,
+            userId,
+            createdById: currentUserId,
+          })),
+        });
+      }
     });
   }
 

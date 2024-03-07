@@ -249,6 +249,7 @@ model Reservation {
 
   userId String @map("user_id")
   user   User   @relation("ReservationUser", fields: [userId], references: [id])
+  // TODO: bookId may be eliminated in favor of the request relation (reservation.request.bookId)
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation("BookReservations", fields: [bookId], references: [id])
 
@@ -261,6 +262,9 @@ model Reservation {
   deletedBy   User?     @relation("ReservationDeletedBy", fields: [deletedById], references: [id])
 
   expiresAt DateTime @map("expires_at")
+
+  requestId String      @map("request_id")
+  request   BookRequest @relation("BookRequestReservation", fields: [requestId], references: [id])
 
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("ReservationSale", fields: [saleId], references: [id])
@@ -284,7 +288,8 @@ model BookRequest {
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("BookRequestSale", fields: [saleId], references: [id])
 
-  cartItem CartItem?
+  cartItem     CartItem?
+  reservations Reservation[] @relation("BookRequestReservation")
 }
 
 model Cart {
