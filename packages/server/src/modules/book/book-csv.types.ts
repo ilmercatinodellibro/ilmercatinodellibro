@@ -70,6 +70,7 @@ export type IngestedEquivalentSchoolRow = [
 ];
 
 export interface SchoolCsvConfiguration {
+  destinationFileName: string;
   sourceFileName: string;
   csvParser: ReturnType<typeof parse>;
   csvTransformer: ReturnType<typeof transform>;

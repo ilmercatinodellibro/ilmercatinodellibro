@@ -3,6 +3,7 @@ import {
   createReadStream,
   createWriteStream,
   existsSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -12,6 +13,7 @@ import { parse, transform } from "csv";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   IngestedCsvRow,
+  IngestedEquivalentSchoolRow,
   IngestedStateSchoolRow,
   SchoolCsvConfiguration,
 } from "./book-csv.types";
@@ -166,13 +168,19 @@ export class BookService {
   async loadSchoolsIntoDb(locationsPrefixes: string[] = ["MO", "RE"]) {
     const schoolCodes: Record<string, string[]> = {};
     const schoolCodesList: string[] = [];
+    const schoolCodesFromBooksCsv = readFileSync(
+      joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
+    )
+      .toString("utf-8")
+      .split("\n");
 
     for (const regionCode of locationsPrefixes) {
       schoolCodes[regionCode] = [];
     }
 
-    return this.#parseCsvSchoolsContent({
+    await this.#parseCsvSchoolsContent({
       sourceFileName: "SCUOLE_STATALI",
+      destinationFileName: "filtered_state_schools",
       removeDestination: true,
 
       csvParser: parse({
@@ -186,16 +194,14 @@ export class BookService {
 
           const schoolCode = record[6];
           const provinceCode = schoolCode.substring(0, 2);
-          if (provinceCode && locationsPrefixes.includes(provinceCode)) {
-            if (!schoolCodesList.includes(schoolCode)) {
-              schoolCodesList.push(schoolCode);
-            } else {
-              // The school already exists, skip record
-              return null;
-            }
-
+          if (
+            provinceCode &&
+            locationsPrefixes.includes(provinceCode) &&
+            schoolCodesFromBooksCsv.includes(schoolCode) &&
+            !schoolCodesList.includes(schoolCode)
+          ) {
+            schoolCodesList.push(schoolCode);
             schoolCodes[provinceCode].push();
-
             return record;
           }
           return null;
@@ -214,12 +220,57 @@ export class BookService {
         );
       }),
     });
+
+    await this.#parseCsvSchoolsContent({
+      sourceFileName: "SCUOLE_PARITARIE",
+      destinationFileName: "filtered_peer_schools",
+
+      csvParser: parse({
+        skip_empty_lines: true,
+        skipRecordsWithError: true,
+        on_record: (record: IngestedEquivalentSchoolRow, { lines }) => {
+          // Skips header parsing
+          if (lines === 1) {
+            return null;
+          }
+
+          const schoolCode = record[4];
+          const provinceCode = schoolCode.substring(0, 2);
+          if (
+            provinceCode &&
+            locationsPrefixes.includes(provinceCode) &&
+            schoolCodesFromBooksCsv.includes(schoolCode) &&
+            !schoolCodesList.includes(schoolCode)
+          ) {
+            schoolCodesList.push(schoolCode);
+            schoolCodes[provinceCode].push();
+            return record;
+          }
+          return null;
+        },
+      }),
+
+      csvTransformer: transform((row: IngestedEquivalentSchoolRow) => {
+        return (
+          // See [1]
+          [
+            `"${row[4]}"`,
+            `"${row[5]}"`,
+            `"${row[6]}"`,
+            `"${row[4].substring(0, 2)}"`,
+          ].join(",") + "\n"
+        );
+      }),
+    });
+
+    return true;
   }
 
   async #parseCsvSchoolsContent({
     csvParser,
     sourceFileName,
     csvTransformer,
+    destinationFileName,
     removeDestination = false,
   }: SchoolCsvConfiguration) {
     const dataSource = joinPath(
@@ -234,7 +285,7 @@ export class BookService {
 
     const dataDestination = joinPath(
       process.cwd(),
-      "./tmp-files/schools-meta.csv",
+      `./tmp-files/${destinationFileName}.csv`,
     );
 
     if (removeDestination) {
