@@ -103,7 +103,7 @@ import {
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
 import { sumBy } from "lodash-es";
-import { NamedColor, QTab, QTableColumn } from "quasar";
+import { QChipProps, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import chipButton from "src/components/manage-users/chip-button.vue";
@@ -273,12 +273,7 @@ enum BookStatus {
   DONATED = "donated",
 }
 
-const statusChipData = computed<
-  Record<
-    BookStatus,
-    { color: NamedColor; icon: string; label: string; dark?: boolean }
-  >
->(() => ({
+const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({
   sold: {
     color: "positive",
     icon: mdiCurrencyEur,
