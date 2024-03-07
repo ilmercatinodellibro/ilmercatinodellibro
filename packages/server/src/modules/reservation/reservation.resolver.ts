@@ -20,22 +20,18 @@ import {
   CreateReservationInput,
   DeleteReservationInput,
 } from "./reservation.input";
-import { ReservationService } from "./reservation.service";
 
 @Resolver(() => Reservation)
 export class ReservationResolver {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly reservationService: ReservationService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Query(() => [Reservation])
   async userReservations(
     @Args() { userId }: UserReservationsQueryArgs,
     @CurrentUser() { id: currentUserId, role }: User,
   ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
+    // TODO: Make this dynamic
+    const retailLocationId = "re";
 
     // Normal users can only view their own Reservations
     if (currentUserId !== userId && role === Role.USER) {
@@ -44,10 +40,14 @@ export class ReservationResolver {
       );
     }
 
-    return this.reservationService.getUserReservations(
-      userId,
-      currentRetailLocationId,
-    );
+    return this.prisma.reservation.findMany({
+      where: {
+        userId,
+        book: {
+          retailLocationId,
+        },
+      },
+    });
   }
 
   @ResolveField(() => Book)
@@ -140,7 +140,8 @@ export class ReservationResolver {
       );
     }
 
-    const retailLocationId = "re"; // TODO: make this dynamic
+    // TODO: Make this dynamic
+    const retailLocationId = "re";
 
     const books = await this.prisma.book.findMany({
       where: { id: { in: bookIds } },
@@ -289,6 +290,14 @@ export class ReservationResolver {
       );
     }
 
-    return this.reservationService.deleteReservation(id, currentUserId);
+    return this.prisma.reservation.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: new Date(),
+        deletedById: currentUserId,
+      },
+    });
   }
 }
