@@ -43,6 +43,8 @@ export class ReservationResolver {
     return this.prisma.reservation.findMany({
       where: {
         userId,
+        deletedAt: null,
+        cartItem: null,
         book: {
           retailLocationId,
         },
@@ -113,7 +115,6 @@ export class ReservationResolver {
       .sale();
   }
 
-  // TODO: use this to hide the reservation from the list when the related book is in a cart
   @ResolveField(() => Boolean)
   async isInCart(@Root() reservation: Reservation) {
     const cartItem = await this.prisma.reservation
