@@ -151,7 +151,7 @@
             </q-item>
           </template>
 
-          <template v-if="user && hasAdminRole">
+          <template v-if="user && (hasAdminRole || hasOperatorRole)">
             <q-item class="q-pr-sm q-py-md">
               <q-item-section side>
                 <q-icon :name="mdiAccountCircle" color="primary" />
@@ -436,7 +436,7 @@ const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 
 const { logout } = useLogoutMutation();
-const { user, hasAdminRole } = useAuthService();
+const { user, hasAdminRole, hasOperatorRole } = useAuthService();
 
 const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
   useLateralDrawer();
