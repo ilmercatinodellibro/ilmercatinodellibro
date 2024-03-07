@@ -1,0 +1,22 @@
+fragment RequestSummary on BookRequest {
+  id
+  book {
+    ...BookSummary
+  }
+}
+
+query getRequests($userId: String!) {
+  bookRequests(userId: $userId) {
+    ...RequestSummary
+  }
+}
+
+mutation createRequest($input: CreateBookRequestInput!) {
+  createBookRequest(input: $input) {
+    ...RequestSummary
+  }
+}
+
+mutation deleteRequest($input: DeleteBookRequestInput!) {
+  deleteBookRequest(input: $input)
+}
