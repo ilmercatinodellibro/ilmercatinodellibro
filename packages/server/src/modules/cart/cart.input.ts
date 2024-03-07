@@ -42,3 +42,9 @@ export class FinalizeCartInput {
   @Field(() => [String])
   bookCopyIds!: string[];
 }
+
+@InputType()
+export class DeleteCartInput {
+  @Field()
+  cartId!: string;
+}

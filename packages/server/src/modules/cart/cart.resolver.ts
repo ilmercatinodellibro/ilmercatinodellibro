@@ -12,6 +12,7 @@ import { PrismaService } from "src/modules/prisma/prisma.service";
 import { Input } from "../auth/decorators/input.decorator";
 import {
   AddToCartInput,
+  DeleteCartInput,
   FinalizeCartInput,
   OpenCartInput,
   RemoveFromCartInput,
@@ -371,6 +372,20 @@ export class CartResolver {
     );
 
     await prisma.cart.delete({
+      where: { id: cartId },
+    });
+  }
+
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async deleteCart(
+    @Input() { cartId }: DeleteCartInput,
+    @CurrentUser() operator: User,
+  ) {
+    if (operator.role === Role.USER) {
+      throw new ForbiddenException("Regular users cannot delete carts");
+    }
+
+    await this.prisma.cart.delete({
       where: { id: cartId },
     });
   }
