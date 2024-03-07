@@ -1,4 +1,4 @@
-import { ForbiddenException } from "@nestjs/common";
+import { ConflictException, ForbiddenException } from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -7,12 +7,16 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
+import { GraphQLVoid } from "graphql-scalars";
 import { Book, BookRequest, Role, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookRequestQueryArgs } from "./book-request.args";
-import { CreateBookRequestInput } from "./book-request.input";
+import {
+  CreateBookRequestInput,
+  DeleteBookRequestInput,
+} from "./book-request.input";
 
 @Resolver(() => BookRequest)
 export class BookRequestResolver {
@@ -158,6 +162,40 @@ export class BookRequestResolver {
       data: {
         bookId,
         userId,
+      },
+    });
+  }
+
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async deleteBookRequest(
+    @Input() { id }: DeleteBookRequestInput,
+    @CurrentUser() { id: currentUserId, role }: User,
+  ) {
+    const bookRequest = await this.prisma.bookRequest.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    });
+
+    if (currentUserId !== bookRequest.userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You do not have permission to delete this book request.",
+      );
+    }
+
+    if (bookRequest.deletedAt !== null) {
+      throw new ConflictException(
+        "This book request has already been deleted.",
+      );
+    }
+
+    return this.prisma.bookRequest.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: new Date(),
+        deletedById: currentUserId,
       },
     });
   }

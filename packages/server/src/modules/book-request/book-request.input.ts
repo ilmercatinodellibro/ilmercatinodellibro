@@ -7,3 +7,10 @@ export class CreateBookRequestInput extends PickType(
   ["userId", "bookId"],
   InputType,
 ) {}
+
+@InputType()
+export class DeleteBookRequestInput extends PickType(
+  BookRequest,
+  ["id"],
+  InputType,
+) {}

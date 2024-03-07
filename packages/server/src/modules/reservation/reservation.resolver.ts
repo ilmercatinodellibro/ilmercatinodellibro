@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   UnprocessableEntityException,
 } from "@nestjs/common";
@@ -299,6 +300,10 @@ export class ReservationResolver {
       throw new ForbiddenException(
         "You do not have permission to delete this reservation.",
       );
+    }
+
+    if (reservation.deletedAt !== null) {
+      throw new ConflictException("This reservation has already been deleted.");
     }
 
     return this.prisma.reservation.update({
