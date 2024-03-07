@@ -270,6 +270,8 @@ model Reservation {
   sale   Sale?   @relation("ReservationSale", fields: [saleId], references: [id])
 
   cartItem CartItem?
+
+  @@unique([userId, bookId, deletedAt])
 }
 
 model BookRequest {
@@ -290,6 +292,8 @@ model BookRequest {
 
   cartItem     CartItem?
   reservations Reservation[] @relation("BookRequestReservation")
+
+  @@unique([userId, bookId, deletedAt])
 }
 
 model Cart {

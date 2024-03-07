@@ -137,7 +137,6 @@ export class BookRequestResolver {
       );
     }
 
-    // TODO: probably needs to add a check that prevents creating multiple book requests for the same book for a given user on the current retail location
     return this.prisma.bookRequest.create({
       data: {
         bookId,
