@@ -13,9 +13,45 @@ fragment User on User {
   notes
 }
 
-query users {
-  users {
-    ...User
+fragment Customer on User {
+  ...User
+  createdAt
+  booksInStock
+  booksSold
+  booksReserved
+  booksRequested
+  booksRequestedAndAvailable: booksRequested(onlyAvailable: true)
+  booksBought
+  booksInCart(retailLocationId: $retailLocationId)
+}
+
+query getUsers($page: Int!, $rowsPerPage: Int!) {
+  users(page: $page, rowsPerPage: $rowsPerPage, roles: [ADMIN, OPERATOR]) {
+    page
+    rowsCount
+    rows {
+      ...User
+    }
+  }
+}
+
+query getCustomers(
+  $page: Int!
+  $rowsPerPage: Int!
+  $retailLocationId: String!
+  $searchTerm: String
+) {
+  users(
+    page: $page
+    rowsPerPage: $rowsPerPage
+    roles: [USER]
+    searchTerm: $searchTerm
+  ) {
+    page
+    rowsCount
+    rows {
+      ...Customer
+    }
   }
 }
 

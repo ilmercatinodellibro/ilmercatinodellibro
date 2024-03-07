@@ -1,4 +1,4 @@
-import { ForbiddenException } from "@nestjs/common";
+import { ConflictException, ForbiddenException } from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -29,6 +29,42 @@ export class SaleResolver {
     private readonly prisma: PrismaService,
     private readonly saleService: SaleService,
   ) {}
+
+  @Query(() => [Sale])
+  async userSales(
+    @Args() { userId }: UserSalesQueryArgs,
+    @CurrentUser() { id: currentUserId, role }: User,
+  ) {
+    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
+    const currentRetailLocationId = "re";
+
+    // Normal users can only view their own Sales
+    if (currentUserId !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You do not have permission to view these sales.",
+      );
+    }
+
+    return this.saleService.getUserSales(userId, currentRetailLocationId);
+  }
+
+  @Query(() => [Sale])
+  async userPurchases(
+    @Args() { userId }: UserPurchasesQueryArgs,
+    @CurrentUser() { id: currentUserId, role }: User,
+  ) {
+    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
+    const currentRetailLocationId = "re";
+
+    // Normal users can only view their own purchases
+    if (currentUserId !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You do not have permission to view these purchases.",
+      );
+    }
+
+    return this.saleService.getUserPurchases(userId, currentRetailLocationId);
+  }
 
   @ResolveField(() => BookCopy)
   async bookCopy(@Root() sale: Sale) {
@@ -89,58 +125,10 @@ export class SaleResolver {
       .bookRequest();
   }
 
-  @Query(() => [Sale])
-  async userSales(
-    @Args()
-    queryArgs: UserSalesQueryArgs,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
-  ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
-
-    // Normal users can only view their own Sales
-    if (currentUserId !== queryArgs.userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to view these sales.",
-      );
-    }
-
-    return this.saleService.getUserSales(
-      queryArgs.userId,
-      currentRetailLocationId,
-    );
-  }
-
-  @Query(() => [Sale])
-  async userPurchases(
-    @Args()
-    queryArgs: UserPurchasesQueryArgs,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
-  ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
-
-    // Normal users can only view their own purchases
-    if (currentUserId !== queryArgs.userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to view these purchases.",
-      );
-    }
-
-    return this.saleService.getUserPurchases(
-      queryArgs.userId,
-      currentRetailLocationId,
-    );
-  }
-
   @Mutation(() => GraphQLVoid, { nullable: true })
   async refundSale(
-    @Input()
-    input: RefundSaleInput,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
+    @Input() { id }: RefundSaleInput,
+    @CurrentUser() { id: currentUserId, role }: User,
   ) {
     // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
     const currentRetailLocationId = "re";
@@ -148,7 +136,7 @@ export class SaleResolver {
     return this.prisma.$transaction(async (prisma) => {
       const toRefund = await prisma.sale.findUniqueOrThrow({
         where: {
-          id: input.id,
+          id,
           bookCopy: {
             book: {
               retailLocationId: currentRetailLocationId,
@@ -165,12 +153,12 @@ export class SaleResolver {
       }
 
       if (toRefund.refundedAt) {
-        throw new ForbiddenException("This sale has already been refunded.");
+        throw new ConflictException("This sale has already been refunded.");
       }
 
-      return this.saleService.refundSale(prisma, input.id, currentUserId);
+      return this.saleService.refundSale(prisma, id, currentUserId);
     });
   }
-  // TODO: at the moment I have not implemented here a way to create sale records,
-  // because that will be part of the much larger checkout feature which makes use of the shopping cart.
+
+  // see the Cart module for Sale creation logic
 }

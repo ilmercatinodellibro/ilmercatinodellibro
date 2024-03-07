@@ -96,6 +96,7 @@ const { t } = useI18n();
 const search = ref("");
 
 const { users, loading, removeUser, updateRole } = useUserService();
+
 const { sendRegistrationInvite } = useSendRegistrationInviteMutation();
 
 const ROLE_TYPE_OPTIONS = (["ADMIN", "OPERATOR", "USER"] as Role[]).map(

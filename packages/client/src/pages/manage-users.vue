@@ -4,7 +4,7 @@
       <q-card-section class="flex-center gap-16 no-wrap row">
         <q-input
           v-model="searchQuery"
-          debounce="200"
+          :debounce="500"
           class="width-600"
           outlined
           :placeholder="$t('common.search')"
@@ -68,9 +68,9 @@
           flat
           square
           row-key="name"
-          :rows="rows"
+          :rows="customers"
           :columns="columns"
-          :filter="searchQuery"
+          :filter="tableFilter"
           :loading="loading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           @request="onRequest"
@@ -153,12 +153,21 @@
             />
           </template>
           <template #body-cell-requested="{ col, row, value }">
-            <!-- FIXME: add actual value logic -->
             <table-cell-with-dialog
               :value="value"
-              :secondary-value="getAvailableCount(row)"
+              :secondary-value="row.booksRequestedAndAvailable"
               @click="openCellEditDialog(row, col, value)"
-            />
+            >
+              <template #secondary-value="{ value: availableCount }">
+                <round-badge color="positive">
+                  {{ availableCount }}
+
+                  <q-tooltip>
+                    {{ $t("manageUsers.tooltips.available") }}
+                  </q-tooltip>
+                </round-badge>
+              </template>
+            </table-cell-with-dialog>
           </template>
 
           <template #header-cell-purchased="{ col }">
@@ -174,7 +183,7 @@
             />
           </template>
 
-          <template #body-cell-shopping-cart="{ row }">
+          <template #body-cell-shopping-cart="{ row, value }">
             <q-td class="text-center">
               <q-btn
                 :icon="mdiCart"
@@ -184,7 +193,8 @@
                 @click="openCart(row)"
               >
                 <round-badge
-                  :label="getAvailableCount(row)"
+                  v-if="value > 0"
+                  :label="value"
                   class="badge-top-left"
                   color="accent"
                   float-left
@@ -230,8 +240,8 @@ import {
   mdiPlus,
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QTable, QTableColumn } from "quasar";
-import { computed, onMounted, ref, watch } from "vue";
+import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
+import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
@@ -247,13 +257,43 @@ import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { UserFragment, useUsersQuery } from "src/services/user.graphql";
+import { useCustomerService } from "src/services/customer";
+import { CustomerFragment } from "src/services/user.graphql";
 
-const { loading, users, refetch } = useUsersQuery();
-
-const tableRef = ref<QTable>();
+const tableRef = ref() as Ref<QTable>;
 
 const { t, locale } = useI18n();
+
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
+
+const {
+  customers,
+  rowsCount,
+  loading,
+  fetch: fetchCustomers,
+} = useCustomerService();
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 100,
+  rowsNumber: rowsCount.value,
+});
+const onRequest: QTableProps["onRequest"] = async (requested) => {
+  const filter = requested.filter as typeof tableFilter.value;
+
+  await fetchCustomers({
+    page: requested.pagination.page,
+    rowsPerPage: requested.pagination.rowsPerPage,
+    searchTerm: filter?.searchTerm,
+    // TODO: pass the filters to the server
+  });
+
+  pagination.value.rowsNumber = rowsCount.value;
+  pagination.value.page = requested.pagination.page;
+  pagination.value.rowsPerPage = requested.pagination.rowsPerPage;
+};
+onMounted(() => {
+  tableRef.value.requestServerInteraction();
+});
 
 const searchQuery = ref("");
 const filters = ref<UserFilters[]>([]);
@@ -264,6 +304,13 @@ enum UserFilters {
   withPurchased,
   withSold,
 }
+
+// TODO: send the filters to the server
+const tableFilter = computed(() =>
+  !searchQuery.value && filters.value.length === 0
+    ? undefined
+    : { searchTerm: searchQuery.value, filters: filters.value },
+);
 
 const options = useTranslatedFilters<UserFilters>("manageUsers.filters");
 
@@ -276,8 +323,7 @@ const columnTooltip = computed(() => ({
   available: t("manageUsers.tooltips.available"),
 }));
 
-// TODO: pass the actual row type to QTable column's generic parameter when the data is available
-const columns = computed<QTableColumn<(typeof rows.value)[number]>[]>(() => [
+const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   { name: "edit", field: () => undefined, label: "" },
   {
     name: "email",
@@ -299,50 +345,60 @@ const columns = computed<QTableColumn<(typeof rows.value)[number]>[]>(() => [
   },
   {
     name: "phone-number",
-    field: "phoneNumber",
+    // field: "phoneNumber",
+    field: () => Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
     label: t("manageUsers.fields.phoneNumber"),
     align: "left",
   },
   {
     name: "in-stock",
-    field: "inStock",
+    field: "booksInStock",
     label: t("manageUsers.fields.inStock"),
     align: "left",
   },
   {
     name: "sold",
-    field: "sold",
+    field: "booksSold",
     label: t("manageUsers.fields.sold"),
     align: "left",
   },
   {
     name: "reserved",
-    field: "reserved",
+    field: "booksReserved",
     label: t("manageUsers.fields.reserved"),
     align: "left",
   },
   {
     name: "requested",
-    field: "requested",
+    field: "booksRequested",
     label: t("manageUsers.fields.requested"),
     align: "left",
   },
   {
     name: "purchased",
-    field: "purchased",
+    field: "booksBought",
     label: t("manageUsers.fields.purchased"),
     align: "left",
   },
   {
     name: "shopping-cart",
-    // FIXME: add field
-    field: () => undefined,
+    field: "booksInCart",
     label: t("manageUsers.fields.cart"),
     align: "center",
   },
   {
     name: "creation-date",
-    field: "creationDate",
+    field: "createdAt",
+    format: (val: string) =>
+      new Date(val)
+        .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+        .split(", ")
+        .join(" - "),
     label: t("manageUsers.fields.creationDate"),
     align: "left",
   },
@@ -359,53 +415,9 @@ const columns = computed<QTableColumn<(typeof rows.value)[number]>[]>(() => [
   },
 ]);
 
-const currentPage = ref(0);
-
-const pagination = ref({
-  page: currentPage.value,
-  rowsPerPage: 100,
-  rowsNumber: users.value.length,
-});
-
-const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
-
-const rawRows = ref<UserFragment[]>([]);
-
-// TODO: Instead of transforming the data here, use field/format fields of column definitions when the data is available
-const rows = computed(() =>
-  // FIXME: update fields with actual data instead of placeholders
-  rawRows.value.map((user, index) => ({
-    ...user,
-    phoneNumber: Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
-    inStock: index % 2,
-    purchased: index % 3,
-    requested: index % 4,
-    sold: index % 5,
-    reserved: (index % 2) + 1,
-    available: (index + 1) % 2,
-    creationDate: new Date()
-      .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-      .split(", ")
-      .join(" - "),
-  })),
-);
-
-onMounted(() => {
-  updateTable();
-});
-
 const selectedFiltersToString = computed(() =>
   filters.value.map((key) => options.value[key]?.label).join(", "),
 );
-
-watch(filters, () => {
-  updateTable();
-});
 
 function addNewUser() {
   Dialog.create({
@@ -416,34 +428,7 @@ function addNewUser() {
   });
 }
 
-const onRequest: QTable["onRequest"] = async function (requestProps) {
-  loading.value = true;
-
-  const payload = await refetch();
-
-  // FIXME: reserve this filtering to the actual query
-  rawRows.value.splice(
-    0,
-    rawRows.value.length,
-    ...(payload?.data.users.filter(
-      (row) =>
-        row.role === "USER" &&
-        Object.values(row).some((value) =>
-          searchQuery.value
-            ? typeof value === "string" && value.includes(searchQuery.value)
-            : true,
-        ),
-    ) ?? []),
-  );
-
-  pagination.value.rowsNumber = rawRows.value.length; // FIXME: update to correct rowsNumber
-  pagination.value.page = requestProps.pagination.page;
-  pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  loading.value = false;
-};
-
-function openReceipt(user: UserFragment) {
+function openReceipt(user: CustomerFragment) {
   Dialog.create({
     component: ReceiptsDialog,
     componentProps: {
@@ -452,7 +437,7 @@ function openReceipt(user: UserFragment) {
   });
 }
 
-function openPayOff(user: UserFragment) {
+function openPayOff(user: CustomerFragment) {
   Dialog.create({
     component: PayOffUserDialog,
     componentProps: {
@@ -464,24 +449,25 @@ function openPayOff(user: UserFragment) {
   });
 }
 
-function openEdit(user: UserFragment, rowIndex: number) {
+function openEdit(user: CustomerFragment, rowIndex: number) {
   Dialog.create({
     component: EditUserDetailsDialog,
     componentProps: { userData: user },
-  }).onOk((payload: { user: UserFragment; password?: string }) => {
+  }).onOk((payload: { user: CustomerFragment; password?: string }) => {
     // FIXME: add server call to update user data
-    rawRows.value[rowIndex] = payload.user;
+    customers.value[rowIndex] = payload.user;
   });
 }
 
 function openCellEditDialog(
-  userData: UserFragment,
+  userData: CustomerFragment,
   column: QTableColumn,
   value: number,
 ) {
   if (value === 0) {
     return;
   }
+
   switch (column.name) {
     case "in-stock":
       Dialog.create({
@@ -501,27 +487,17 @@ function openCellEditDialog(
         componentProps: { userData },
       });
       break;
-    // Only other two remaining cases, could be in 'default:' instead
     case "sold":
     case "purchased":
       Dialog.create({
         component: EditUserBooksMovementsDialog,
         componentProps: { userData, type: column.name },
       });
+      break;
   }
 }
 
-function updateTable() {
-  tableRef.value?.requestServerInteraction();
-}
-
-function getAvailableCount(user: UserFragment) {
-  // FIXME: add logic for available books count
-  user;
-  return 1;
-}
-
-function openCart(user: UserFragment) {
+function openCart(user: CustomerFragment) {
   Dialog.create({
     component: CartDialog,
     componentProps: { user },

@@ -29,7 +29,9 @@ export class BookCopyResolver {
     private readonly bookService: BookCopyService,
   ) {}
 
-  @Query(() => [BookCopy])
+  @Query(() => [BookCopy], {
+    description: "Book copies that are owned by the user and is in stock",
+  })
   async bookCopiesByOwner(
     @Args()
     { userId: ownerId }: BookCopyByUserQueryArgs,
@@ -41,6 +43,23 @@ export class BookCopyResolver {
         book: {
           retailLocationId: currentRetailLocationId,
         },
+        returnedAt: null,
+        OR: [
+          {
+            sales: {
+              none: {},
+            },
+          },
+          {
+            sales: {
+              every: {
+                refundedAt: {
+                  not: null,
+                },
+              },
+            },
+          },
+        ],
       },
     });
   }
