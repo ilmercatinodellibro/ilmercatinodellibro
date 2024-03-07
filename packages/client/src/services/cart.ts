@@ -1,5 +1,6 @@
 import {
   useAddToCartMutation,
+  useDeleteCartMutation,
   useFinalizeCartMutation,
   useOpenCartMutation,
   useRemoveFromCartMutation,
@@ -8,6 +9,7 @@ import {
 export function useCartService() {
   return {
     useOpenCartMutation,
+    useDeleteCartMutation,
     useAddToCartMutation,
     useRemoveFromCartMutation,
     useFinalizeCartMutation,
