@@ -39,6 +39,22 @@ export class BookRequestResolver {
         book: {
           retailLocationId,
         },
+        deletedAt: null,
+        cartItem: null,
+        OR: [
+          {
+            reservations: {
+              none: {},
+            },
+          },
+          {
+            reservations: {
+              every: {
+                deletedAt: null,
+              },
+            },
+          },
+        ],
       },
     });
   }
@@ -95,7 +111,6 @@ export class BookRequestResolver {
       .sale();
   }
 
-  // TODO: use this to hide the book request from the list when the related book is in a cart
   @ResolveField(() => Boolean)
   async isInCart(@Root() bookRequest: BookRequest) {
     const cartItem = await this.prisma.bookRequest
