@@ -14,6 +14,7 @@ interface Theme {
 
 const STORAGE_THEME_KEY = "application-theme";
 const hasPendingChanges = ref(false);
+// TODO: change to actual logic
 const currentOffice = "re";
 const defaultTheme: Theme = {
   // Note: we're hardcoding the colors here instead of getCssVar
