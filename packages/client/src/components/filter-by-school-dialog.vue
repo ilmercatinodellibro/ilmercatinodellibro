@@ -9,9 +9,9 @@
     >
       <q-card-section class="gap-16">
         <q-select
-          v-model="newFilters.addresses"
-          :label="$t('book.filters.schoolFilter.fields.address')"
-          :options="filters.addresses"
+          v-model="newFilters.courses"
+          :label="$t('book.filters.schoolFilter.fields.course')"
+          :options="filters.courses"
           fill-input
           multiple
           outlined
@@ -45,7 +45,7 @@ const newFilters = reactive<SchoolFilters>(
   props.selectedFilters ??
     ({
       schoolCodes: [],
-      addresses: [],
+      courses: [],
     } satisfies SchoolFilters),
 );
 

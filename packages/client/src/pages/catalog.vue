@@ -135,13 +135,13 @@ const filterOptions = useTranslatedFilters<BookFilters>("book.filters.options");
 // FIXME: Add actual logic with server fetch
 const schoolFilterOptions: SchoolFilters = {
   schoolCodes: ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
-  addresses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
+  courses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
 };
 
 const filters = ref<BookFilters[]>([]);
 const schoolFilters = ref<SchoolFilters>({
   schoolCodes: [],
-  addresses: [],
+  courses: [],
 });
 
 const tableFilter = computed(() => ({
@@ -200,7 +200,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "price",
-    label: t("book.fields.price"),
+    label: t("book.fields.coverPrice"),
     field: "originalPrice",
     align: "left",
     format: (val: string) => formatPrice(val),
