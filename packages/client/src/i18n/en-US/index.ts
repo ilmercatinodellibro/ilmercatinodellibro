@@ -133,7 +133,7 @@ export default {
     },
   },
   routesNames: {
-    [AvailableRouteNames.Catalog]: "Books catalog",
+    [AvailableRouteNames.Catalog]: "Catalog",
     [AvailableRouteNames.Contacts]: "Contacts",
     [AvailableRouteNames.Events]: "Events",
     [AvailableRouteNames.Theme]: "Theme",

@@ -7,6 +7,7 @@ export default {
   saves: "Preferiti",
   oopsNothingHere: "Oops. Niente qui",
   goHome: "Torna alla home",
+  home: "Home",
   default: "default",
   filters: "Filtri",
   confirmRequest: "Richiesta conferma",
@@ -29,9 +30,20 @@ export default {
   removeUserMessage:
     "Stai rimuovendo questo contatto dalla piattaforma e non sarà più in grado di accedervi. Vuoi procedere?",
   language: "Lingua",
+  myData: "I Miei Dati",
+  reserveBooks: "Prenota Libri",
+  myBooks: "I Miei Libri",
+  salableBooks: "Libri Vendibili",
   saveChanges: "Salva modifiche",
   themeChanged: "Tema aggiornato!",
   leaveWithoutSaving: "Vuoi uscire dalla pagina senza salvare?",
   logoSizeMessage:
     "Il logo deve essere un png o svg e deve avere una larghezza minima di 400px",
+  tooltips: {
+    warehouse: "Contiene la lista di tutte le copie cartacee registrate",
+    catalog:
+      "Contiene la lista di tutti i titoli rilasciati dal Ministero per le classi di tutte le scuole della provincia",
+    usersAndMovements:
+      "Contiene le funzionalità per gestire i dati degli Utenti registrati e la compravendita dei libri",
+  },
 };

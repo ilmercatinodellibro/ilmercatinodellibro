@@ -14,6 +14,7 @@ interface Theme {
 
 const STORAGE_THEME_KEY = "application-theme";
 const hasPendingChanges = ref(false);
+const currentOffice = "re";
 const defaultTheme: Theme = {
   // Note: we're hardcoding the colors here instead of getCssVar
   // This is because if user changes theme for the first time and does not
@@ -24,7 +25,7 @@ const defaultTheme: Theme = {
     secondary: "#76e1a7",
     accent: "#c2664d",
   },
-  logo: "/ilmercatinodellibro-logo-dark-background.svg",
+  logo: `favicon-${currentOffice}.png`,
 };
 
 const theme = ref<Theme>(
