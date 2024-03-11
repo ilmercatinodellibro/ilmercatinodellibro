@@ -208,7 +208,7 @@ export class ReservationResolver {
       )
     ) {
       throw new UnprocessableEntityException(
-        "One or more books given are already have been bought by the user.",
+        "One or more books given have already been bought by the user.",
       );
     }
 
