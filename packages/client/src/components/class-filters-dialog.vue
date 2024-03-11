@@ -1,3 +1,4 @@
+<!-- TODO: refactor once server side is implemented -->
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
@@ -36,6 +37,7 @@ defineEmits(useDialogPluginComponent.emitsObject);
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
   useDialogPluginComponent();
 
+// TODO: add logic once the server side is implemented
 const school: string[] = [];
 const course: string[] = [];
 const year: string[] = [];
