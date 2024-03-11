@@ -174,7 +174,7 @@ const tablePagination = ref({
   page: currentPage.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
   rowsPerPage: rowsPerPage.value,
-} satisfies QTableProps["pagination"]);
+});
 
 const searchQuery = ref("");
 
