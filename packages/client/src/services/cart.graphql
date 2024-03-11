@@ -35,3 +35,7 @@ mutation removeFromCart($input: RemoveFromCartInput!) {
 mutation finalizeCart($input: FinalizeCartInput!) {
   finalizeCart(input: $input)
 }
+
+mutation deleteCart($input: DeleteCartInput!) {
+  deleteCart(input: $input)
+}

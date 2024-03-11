@@ -1,4 +1,8 @@
-import { ForbiddenException } from "@nestjs/common";
+import {
+  ConflictException,
+  ForbiddenException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -12,16 +16,52 @@ import { Book, Reservation, Role, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
-import { ReservationService } from "./rerservation.service";
 import { UserReservationsQueryArgs } from "./reservation.args";
-import { DeleteReservationInput } from "./reservation.input";
+import {
+  CreateReservationInput,
+  DeleteReservationInput,
+} from "./reservation.input";
 
 @Resolver(() => Reservation)
 export class ReservationResolver {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly reservationService: ReservationService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
+
+  @Query(() => [Reservation])
+  async userReservations(
+    @Args() { userId }: UserReservationsQueryArgs,
+    @CurrentUser() { id: currentUserId, role }: User,
+  ) {
+    // TODO: Make this dynamic
+    const retailLocationId = "re";
+
+    // Normal users can only view their own Reservations
+    if (currentUserId !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You do not have permission to view these reservations.",
+      );
+    }
+
+    return this.prisma.reservation.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        cartItem: null,
+        OR: [
+          {
+            saleId: null,
+          },
+          {
+            sale: {
+              refundedAt: null,
+            },
+          },
+        ],
+        book: {
+          retailLocationId,
+        },
+      },
+    });
+  }
 
   @ResolveField(() => Book)
   async book(@Root() reservation: Reservation) {
@@ -86,7 +126,6 @@ export class ReservationResolver {
       .sale();
   }
 
-  // TODO: use this to hide the reservation from the list when the related book is in a cart
   @ResolveField(() => Boolean)
   async isInCart(@Root() reservation: Reservation) {
     const cartItem = await this.prisma.reservation
@@ -102,40 +141,159 @@ export class ReservationResolver {
     return cartItem !== null;
   }
 
-  @Query(() => [Reservation])
-  async userReservations(
-    @Args()
-    queryArgs: UserReservationsQueryArgs,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async createReservations(
+    @Input() { userId, bookIds }: CreateReservationInput,
+    @CurrentUser() { id: currentUserId, role }: User,
   ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
-
-    // Normal users can only view their own Reservations
-    if (currentUserId !== queryArgs.userId && role === Role.USER) {
+    if (currentUserId !== userId && role === Role.USER) {
       throw new ForbiddenException(
-        "You do not have permission to view these reservations.",
+        "You do not have permission to create reservations for this user.",
       );
     }
 
-    return this.reservationService.getUserReservations(
-      queryArgs.userId,
-      currentRetailLocationId,
+    // TODO: Make this dynamic
+    const retailLocationId = "re";
+
+    const books = await this.prisma.book.findMany({
+      where: { id: { in: bookIds } },
+      include: {
+        reservations: {
+          where: {
+            userId,
+            deletedAt: null,
+          },
+        },
+        requests: {
+          where: {
+            userId,
+            deletedAt: null,
+          },
+        },
+        meta: true,
+      },
+    });
+
+    if (books.length !== bookIds.length) {
+      throw new UnprocessableEntityException(
+        "One or more books given are not found.",
+      );
+    }
+
+    if (books.some(({ requests }) => requests.length > 1)) {
+      throw new UnprocessableEntityException(
+        "Logic Error: One or more books somehow have more than one active request by the user.",
+      );
+    }
+
+    if (books.some(({ reservations }) => reservations.length > 0)) {
+      throw new UnprocessableEntityException(
+        "One or more books given are already reserved by the user.",
+      );
+    }
+
+    if (
+      books.some(
+        ({ meta, requests }) => !meta.isAvailable && requests.length > 0,
+      )
+    ) {
+      throw new UnprocessableEntityException(
+        "One or more books given are already requested by the user and not available.",
+      );
+    }
+
+    if (
+      books.some(
+        ({ requests }) => requests.length > 0 && requests[0].saleId !== null,
+      )
+    ) {
+      throw new UnprocessableEntityException(
+        "One or more books given have already been bought by the user.",
+      );
+    }
+
+    const retailLocation = await this.prisma.retailLocation.findUniqueOrThrow({
+      where: { id: retailLocationId },
+    });
+    if (books.some((book) => book.retailLocationId !== retailLocation.id)) {
+      throw new UnprocessableEntityException(
+        "One or more books given belong to a different retail location than the one specified.",
+      );
+    }
+
+    const booksToPromoteRequests = books.filter(
+      ({ meta, requests }) => meta.isAvailable && requests.length > 0,
     );
+    const booksToRequestAndReserve = books.filter(
+      ({ meta, requests }) => meta.isAvailable && requests.length === 0,
+    );
+    const booksToRequest = books.filter(
+      ({ meta, requests }) => !meta.isAvailable && requests.length === 0,
+    );
+
+    await this.prisma.$transaction(async (prisma) => {
+      const expiresAt = new Date(
+        Date.now() + retailLocation.maxBookingDays * 24 * 60 * 60 * 1000,
+      );
+
+      if (booksToPromoteRequests.length > 0) {
+        await prisma.reservation.createMany({
+          data: booksToPromoteRequests.map(({ id, requests }) => ({
+            bookId: id,
+            userId,
+            createdById: currentUserId,
+            expiresAt,
+            requestId: requests[0].id,
+          })),
+        });
+      }
+
+      if (booksToRequestAndReserve.length > 0) {
+        await prisma.bookRequest.createMany({
+          data: booksToRequestAndReserve.map(({ id }) => ({
+            bookId: id,
+            userId,
+            createdById: currentUserId,
+          })),
+        });
+
+        const requests = await prisma.bookRequest.findMany({
+          where: {
+            bookId: { in: booksToRequestAndReserve.map(({ id }) => id) },
+            userId,
+          },
+        });
+
+        await prisma.reservation.createMany({
+          data: requests.map(({ id, bookId }) => ({
+            bookId,
+            userId,
+            createdById: currentUserId,
+            expiresAt,
+            requestId: id,
+          })),
+        });
+      }
+
+      if (booksToRequest.length > 0) {
+        await prisma.bookRequest.createMany({
+          data: booksToRequest.map(({ id }) => ({
+            bookId: id,
+            userId,
+            createdById: currentUserId,
+          })),
+        });
+      }
+    });
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteReservation(
-    @Input()
-    input: DeleteReservationInput,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
+    @Input() { id }: DeleteReservationInput,
+    @CurrentUser() { id: currentUserId, role }: User,
   ) {
     const reservation = await this.prisma.reservation.findUniqueOrThrow({
-      where: {
-        id: input.id,
-      },
+      where: { id },
     });
 
     if (currentUserId !== reservation.userId && role === Role.USER) {
@@ -144,6 +302,18 @@ export class ReservationResolver {
       );
     }
 
-    return this.reservationService.deleteReservation(input.id, currentUserId);
+    if (reservation.deletedAt !== null) {
+      throw new ConflictException("This reservation has already been deleted.");
+    }
+
+    return this.prisma.reservation.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: new Date(),
+        deletedById: currentUserId,
+      },
+    });
   }
 }

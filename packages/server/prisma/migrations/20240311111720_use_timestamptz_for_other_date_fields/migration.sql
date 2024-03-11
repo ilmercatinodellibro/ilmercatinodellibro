@@ -1,0 +1,16 @@
+-- AlterTable
+ALTER TABLE "BookCopy" ALTER COLUMN "returned_at" SET DATA TYPE TIMESTAMPTZ;
+
+-- AlterTable
+ALTER TABLE "BookRequest" ALTER COLUMN "deleted_at" SET DATA TYPE TIMESTAMPTZ;
+
+-- AlterTable
+ALTER TABLE "Problem" ALTER COLUMN "resolved_at" SET DATA TYPE TIMESTAMPTZ;
+
+-- AlterTable
+ALTER TABLE "Reservation"
+  ALTER COLUMN "deleted_at" SET DATA TYPE TIMESTAMPTZ,
+  ALTER COLUMN "expires_at" SET DATA TYPE TIMESTAMPTZ;
+
+-- AlterTable
+ALTER TABLE "Sale" ALTER COLUMN "refunded_at" SET DATA TYPE TIMESTAMPTZ;

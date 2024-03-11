@@ -1,4 +1,4 @@
-import { ForbiddenException } from "@nestjs/common";
+import { ConflictException, ForbiddenException } from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -7,20 +7,78 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
+import { GraphQLVoid } from "graphql-scalars";
 import { Book, BookRequest, Role, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookRequestQueryArgs } from "./book-request.args";
-import { CreateBookRequestInput } from "./book-request.input";
-import { BookRequestService } from "./book-request.service";
+import {
+  CreateBookRequestInput,
+  DeleteBookRequestInput,
+} from "./book-request.input";
 
 @Resolver(() => BookRequest)
 export class BookRequestResolver {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly bookRequestService: BookRequestService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
+
+  @Query(() => [BookRequest])
+  async bookRequests(
+    @Args() { userId }: BookRequestQueryArgs,
+    @CurrentUser() { id: currentUserId, role }: User,
+  ) {
+    // TODO: Make this dynamic
+    const retailLocationId = "re";
+
+    // Normal users can only view their own book requests
+    if (currentUserId !== userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You do not have permission to view these book requests.",
+      );
+    }
+
+    return this.prisma.bookRequest.findMany({
+      where: {
+        userId,
+        book: {
+          retailLocationId,
+        },
+        deletedAt: null,
+        cartItem: null,
+        AND: [
+          {
+            OR: [
+              {
+                saleId: null,
+              },
+              {
+                sale: {
+                  refundedAt: null,
+                },
+              },
+            ],
+          },
+
+          {
+            OR: [
+              {
+                reservations: {
+                  none: {},
+                },
+              },
+              {
+                reservations: {
+                  every: {
+                    deletedAt: null,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+  }
 
   @ResolveField(() => Book)
   async book(@Root() bookRequest: BookRequest) {
@@ -74,7 +132,6 @@ export class BookRequestResolver {
       .sale();
   }
 
-  // TODO: use this to hide the book request from the list when the related book is in a cart
   @ResolveField(() => Boolean)
   async isInCart(@Root() bookRequest: BookRequest) {
     const cartItem = await this.prisma.bookRequest
@@ -90,49 +147,56 @@ export class BookRequestResolver {
     return cartItem !== null;
   }
 
-  @Query(() => [BookRequest])
-  async bookRequests(
-    @Args()
-    queryArgs: BookRequestQueryArgs,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
-  ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
-
-    // Normal users can only view their own book requests
-    if (currentUserId !== queryArgs.userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to view these book requests.",
-      );
-    }
-
-    return this.bookRequestService.getUserBookRequests(
-      queryArgs.userId,
-      currentRetailLocationId,
-    );
-  }
-
   @Mutation(() => BookRequest)
   async createBookRequest(
-    @Input()
-    input: CreateBookRequestInput,
-    @CurrentUser()
-    { id: currentUserId, role }: User,
+    @Input() { userId, bookId }: CreateBookRequestInput,
+    @CurrentUser() { id: currentUserId, role }: User,
   ) {
-    if (currentUserId !== input.userId && role === Role.USER) {
+    if (currentUserId !== userId && role === Role.USER) {
       throw new ForbiddenException(
         "You do not have permission to create book requests for the given user.",
       );
     }
 
-    return this.prisma.$transaction(async (prisma) => {
-      // TODO: probably needs to add a check that prevents creating multiple book requests for the same book for a given user on the current retail location
-      return this.bookRequestService.createBookRequest(
-        prisma,
-        input.userId,
-        input.bookId,
+    return this.prisma.bookRequest.create({
+      data: {
+        bookId,
+        userId,
+      },
+    });
+  }
+
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async deleteBookRequest(
+    @Input() { id }: DeleteBookRequestInput,
+    @CurrentUser() { id: currentUserId, role }: User,
+  ) {
+    const bookRequest = await this.prisma.bookRequest.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    });
+
+    if (currentUserId !== bookRequest.userId && role === Role.USER) {
+      throw new ForbiddenException(
+        "You do not have permission to delete this book request.",
       );
+    }
+
+    if (bookRequest.deletedAt !== null) {
+      throw new ConflictException(
+        "This book request has already been deleted.",
+      );
+    }
+
+    return this.prisma.bookRequest.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: new Date(),
+        deletedById: currentUserId,
+      },
     });
   }
 }

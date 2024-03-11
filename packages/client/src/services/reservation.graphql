@@ -1,0 +1,22 @@
+fragment ReservationSummary on Reservation {
+  id
+  book {
+    ...BookSummary
+  }
+  isInCart
+  expiresAt
+}
+
+query getReservations($userId: String!) {
+  userReservations(userId: $userId) {
+    ...ReservationSummary
+  }
+}
+
+mutation createReservations($input: CreateReservationInput!) {
+  createReservations(input: $input)
+}
+
+mutation deleteReservation($input: DeleteReservationInput!) {
+  deleteReservation(input: $input)
+}

@@ -5,8 +5,8 @@ export class CreateReservationInput {
   @Field()
   userId!: string;
 
-  @Field()
-  bookId!: string;
+  @Field(() => [String])
+  bookIds!: string[];
 }
 
 // We are overriding the id field to be required as it's mandatory for the update mutation

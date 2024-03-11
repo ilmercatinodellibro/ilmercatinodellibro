@@ -180,7 +180,7 @@ model BookCopy {
   owner   User   @relation("BookCopyOwner", fields: [ownerId], references: [id])
 
   // Operator/admin relations
-  returnedAt   DateTime? @map("returned_at")
+  returnedAt   DateTime? @map("returned_at") @db.Timestamptz()
   returnedById String?   @map("returned_by_id")
   returnedBy   User?     @relation("CopyReturnedBy", fields: [returnedById], references: [id])
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
@@ -213,7 +213,7 @@ model Problem {
   createdById String   @map("created_by_id")
   createdBy   User     @relation("ProblemReportedBy", fields: [createdById], references: [id])
 
-  resolvedAt   DateTime? @map("resolved_at")
+  resolvedAt   DateTime? @map("resolved_at") @db.Timestamptz()
   resolvedById String?   @map("resolved_by_id")
   resolvedBy   User?     @relation("ProblemResolvedBy", fields: [resolvedById], references: [id])
 }
@@ -236,7 +236,7 @@ model Sale {
   cartCreatedBy   User   @relation("SaleInCartOpenedBy", fields: [cartCreatedById], references: [id])
 
   // Operator/admin relation
-  refundedAt   DateTime? @map("refunded_at")
+  refundedAt   DateTime? @map("refunded_at") @db.Timestamptz()
   refundedById String?   @map("refunded_by_id")
   refundedBy   User?     @relation("CopySaleRefundedBy", fields: [refundedById], references: [id])
 
@@ -249,6 +249,7 @@ model Reservation {
 
   userId String @map("user_id")
   user   User   @relation("ReservationUser", fields: [userId], references: [id])
+  // TODO: bookId may be eliminated in favor of the request relation (reservation.request.bookId)
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation("BookReservations", fields: [bookId], references: [id])
 
@@ -256,16 +257,21 @@ model Reservation {
   createdById String   @map("created_by_id")
   createdBy   User     @relation("ReservationMadeBy", fields: [createdById], references: [id])
 
-  deletedAt   DateTime? @map("deleted_at")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
   deletedById String?   @map("deleted_by_id")
   deletedBy   User?     @relation("ReservationDeletedBy", fields: [deletedById], references: [id])
 
-  expiresAt DateTime @map("expires_at")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz()
+
+  requestId String      @map("request_id")
+  request   BookRequest @relation("BookRequestReservation", fields: [requestId], references: [id])
 
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("ReservationSale", fields: [saleId], references: [id])
 
   cartItem CartItem?
+
+  @@unique([userId, bookId, deletedAt])
 }
 
 model BookRequest {
@@ -277,14 +283,17 @@ model BookRequest {
   book   Book   @relation("BookRequested", fields: [bookId], references: [id])
 
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  deletedAt   DateTime? @map("deleted_at")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
   deletedById String?   @map("deleted_by_id")
   deletedBy   User?     @relation("BookRequestDeletedBy", fields: [deletedById], references: [id])
 
   saleId String? @unique() @map("sale_id")
   sale   Sale?   @relation("BookRequestSale", fields: [saleId], references: [id])
 
-  cartItem CartItem?
+  cartItem     CartItem?
+  reservations Reservation[] @relation("BookRequestReservation")
+
+  @@unique([userId, bookId, deletedAt])
 }
 
 model Cart {

@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { Prisma, Book as PrismaBook, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
@@ -8,6 +12,7 @@ import { PrismaService } from "src/modules/prisma/prisma.service";
 import { Input } from "../auth/decorators/input.decorator";
 import {
   AddToCartInput,
+  DeleteCartInput,
   FinalizeCartInput,
   OpenCartInput,
   RemoveFromCartInput,
@@ -109,40 +114,57 @@ export class CartResolver {
         },
         include: {
           meta: true,
-          requests: {
-            where: {
-              userId: cart.userId,
-            },
-          },
           reservations: {
             where: {
               userId: cart.userId,
+              deletedAt: null,
+            },
+          },
+          copies: {
+            where: {
+              sales: {
+                some: {
+                  purchasedById: cart.userId,
+                  refundedAt: null,
+                },
+              },
             },
           },
         },
       });
       book = bookDetails;
 
-      // The book availability applies to all users, so we first check if this specific user already has a request or reservation for the book
+      if (bookDetails.copies.length > 0) {
+        throw new UnprocessableEntityException(
+          "The book has already been bought by the user",
+        );
+      }
+
+      // The book availability applies to all users, so we first check if this specific user already has a reservation for the book
       if (
-        bookDetails.requests.length === 0 &&
         bookDetails.reservations.length === 0 &&
         !bookDetails.meta.isAvailable
       ) {
-        throw new BadRequestException("The book is not available");
+        throw new UnprocessableEntityException("The book is not available");
       }
     } else if (fromBookRequestId) {
       const request = await this.prisma.bookRequest.findUniqueOrThrow({
         where: { id: fromBookRequestId },
         include: {
           book: true,
+          sale: true,
         },
       });
-      if (request.deletedAt !== null || request.saleId !== null) {
-        throw new BadRequestException("The request is no longer valid");
+      if (
+        request.deletedAt !== null ||
+        (request.saleId !== null && request.sale?.refundedAt !== null)
+      ) {
+        throw new UnprocessableEntityException(
+          "The request is no longer valid",
+        );
       }
       if (request.book.retailLocationId !== cart.retailLocationId) {
-        throw new BadRequestException(
+        throw new UnprocessableEntityException(
           "The book request is not for the same retail location as the cart",
         );
       }
@@ -153,13 +175,19 @@ export class CartResolver {
         where: { id: fromReservationId },
         include: {
           book: true,
+          sale: true,
         },
       });
-      if (reservation.deletedAt !== null || reservation.saleId !== null) {
-        throw new BadRequestException("The reservation is no longer valid");
+      if (
+        reservation.deletedAt !== null ||
+        (reservation.saleId !== null && reservation.sale?.refundedAt !== null)
+      ) {
+        throw new UnprocessableEntityException(
+          "The reservation is no longer valid",
+        );
       }
       if (reservation.book.retailLocationId !== cart.retailLocationId) {
-        throw new BadRequestException(
+        throw new UnprocessableEntityException(
           "The reservation is not for the same retail location as the cart",
         );
       }
@@ -244,14 +272,32 @@ export class CartResolver {
           where: {
             userId: cart.userId,
             deletedAt: null,
-            saleId: null,
+            OR: [
+              {
+                saleId: null,
+              },
+              {
+                sale: {
+                  refundedAt: null,
+                },
+              },
+            ],
           },
         },
         reservations: {
           where: {
             userId: cart.userId,
             deletedAt: null,
-            saleId: null,
+            OR: [
+              {
+                saleId: null,
+              },
+              {
+                sale: {
+                  refundedAt: null,
+                },
+              },
+            ],
           },
         },
       },
@@ -326,6 +372,20 @@ export class CartResolver {
     );
 
     await prisma.cart.delete({
+      where: { id: cartId },
+    });
+  }
+
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async deleteCart(
+    @Input() { cartId }: DeleteCartInput,
+    @CurrentUser() operator: User,
+  ) {
+    if (operator.role === Role.USER) {
+      throw new ForbiddenException("Regular users cannot delete carts");
+    }
+
+    await this.prisma.cart.delete({
       where: { id: cartId },
     });
   }
