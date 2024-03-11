@@ -7,6 +7,7 @@ export default {
   saves: "Saves",
   oopsNothingHere: "Oops. Nothing here",
   goHome: "Go home",
+  home: "Home",
   default: "default",
   filters: "Filters",
   confirmRequest: "Confirm request",
@@ -29,9 +30,21 @@ export default {
   removeUserMessage:
     "You are removing this contact from the platform and it won’t be able to access it anymore. Do you want to proceed?",
   language: "Language",
+  myData: "My Data",
+  warehouse: "Warehouse",
+  reserveBooks: "Reserve Books",
+  myBooks: "My Books",
+  salableBooks: "Salable Books",
   saveChanges: "Save Changes",
   themeChanged: "Theme changed!",
   leaveWithoutSaving: "Do you want to leave this page without saving?",
   logoSizeMessage:
     "The logo must be a png or svg and it must have a minimum width of 400px",
+  tooltips: {
+    warehouse: "Contains the list of all registered physical book copies",
+    catalog:
+      "Contains the list of all the titles that were released by the Ministry for the classes of all the schools of the province",
+    usersAndMovements:
+      "Contains the features to manage the data of the registered Users and the marketing exchange of books",
+  },
 };
