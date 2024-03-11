@@ -173,7 +173,14 @@
               </q-item-section>
             </q-item>
 
-            <q-item active-class="bg-black-activated-light" class="drawer-item">
+            <!-- TODO: add router link -->
+            <q-item
+              v-ripple
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="warehouse"
+            >
               <!-- TODO: add tooltip -->
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
               </q-tooltip>
