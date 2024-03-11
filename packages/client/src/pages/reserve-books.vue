@@ -96,8 +96,17 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { useRequestService } from "src/services/request";
+import { useReservationService } from "src/services/reservation";
+
+const { useCreateReservationsMutation } = useReservationService();
+const { createReservations } = useCreateReservationsMutation();
+const { useCreateRequestMutation } = useRequestService();
+const { createBookRequest } = useCreateRequestMutation();
+const { user } = useAuthService();
 
 const { t } = useI18n();
 
@@ -178,6 +187,10 @@ const tablePagination = ref({
 
 const searchQuery = ref("");
 
+const showByClass = ref(false);
+
+const classBooks = ref([]);
+
 const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   loading.value = true;
 
@@ -199,10 +212,6 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   loading.value = false;
 };
 
-const showByClass = ref(false);
-
-const classBooks = ref([]);
-
 function searchClassBooks() {
   Dialog.create({
     component: ClassFiltersDialog,
@@ -213,19 +222,29 @@ function searchClassBooks() {
   });
 }
 
-function reserveOrRequest(book: BookSummaryFragment) {
-  if (book.meta.isAvailable) {
-    // FIXME: reserve book
-    return;
+async function reserveOrRequest(book: BookSummaryFragment) {
+  if (user.value) {
+    if (book.meta.isAvailable) {
+      await createReservations({
+        input: { bookIds: [book.id], userId: user.value.id },
+      });
+      return;
+    }
+    Dialog.create({
+      title: t("reserveBooks.requestBookDisclaimer.title"),
+      message: t("reserveBooks.requestBookDisclaimer.message"),
+      cancel: t("common.cancel"),
+      ok: t("reserveBooks.requestCopy"),
+    }).onOk(async () => {
+      if (user.value) {
+        await createBookRequest({
+          input: { bookId: book.id, userId: user.value.id },
+        });
+      }
+      // Should never be reachable, is there a need for an error display here?
+    });
   }
-  Dialog.create({
-    title: t("reserveBooks.requestBookDisclaimer.title"),
-    message: t("reserveBooks.requestBookDisclaimer.message"),
-    cancel: t("common.cancel"),
-    ok: t("reserveBooks.requestCopy"),
-  }).onOk(() => {
-    // FIXME: request copy
-  });
+  // Same here as the previous comment
 }
 
 function openReserveAllDialog() {
