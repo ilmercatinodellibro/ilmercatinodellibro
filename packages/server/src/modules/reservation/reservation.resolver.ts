@@ -224,7 +224,7 @@ export class ReservationResolver {
     const booksToPromoteRequests = books.filter(
       ({ meta, requests }) => meta.isAvailable && requests.length > 0,
     );
-    const booksToReserveAndRequest = books.filter(
+    const booksToRequestAndReserve = books.filter(
       ({ meta, requests }) => meta.isAvailable && requests.length === 0,
     );
     const booksToRequest = books.filter(
@@ -248,9 +248,9 @@ export class ReservationResolver {
         });
       }
 
-      if (booksToReserveAndRequest.length > 0) {
+      if (booksToRequestAndReserve.length > 0) {
         await prisma.bookRequest.createMany({
-          data: booksToReserveAndRequest.map(({ id }) => ({
+          data: booksToRequestAndReserve.map(({ id }) => ({
             bookId: id,
             userId,
             createdById: currentUserId,
@@ -259,7 +259,7 @@ export class ReservationResolver {
 
         const requests = await prisma.bookRequest.findMany({
           where: {
-            bookId: { in: booksToReserveAndRequest.map(({ id }) => id) },
+            bookId: { in: booksToRequestAndReserve.map(({ id }) => id) },
             userId,
           },
         });
