@@ -46,5 +46,11 @@ export default {
       "Contains the list of all the titles that were released by the Ministry for the classes of all the schools of the province",
     usersAndMovements:
       "Contains the features to manage the data of the registered Users and the marketing exchange of books",
+    reserveBooks:
+      "Access this page to reserve the books that you wish to purchase. You can also request the books which aren't available at the moment.",
+    myBooks:
+      "Access this page to know the status of the books that you have given us for us to sell, of your reservations, and of the purchases that you have made.",
+    salableBooks:
+      "Access this page to verify which books we accept among those that you wish to sell.",
   },
 };

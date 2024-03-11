@@ -46,5 +46,11 @@ export default {
       "Contiene la lista di tutti i titoli rilasciati dal Ministero per le classi di tutte le scuole della provincia",
     usersAndMovements:
       "Contiene le funzionalità per gestire i dati degli Utenti registrati e la compravendita dei libri",
+    reserveBooks:
+      "Accedi a questa pagina per prenotare i libri che vuoi acquistare. Puoi anche richiedere i libri al momento non disponibili.",
+    myBooks:
+      "Accedi a questa pagina per conoscere lo stato dei libri che ci hai consegnato da vendere, delle tue prenotazioni, e degli acquisti che hai fatto.",
+    salableBooks:
+      "Accedi a questa pagina per verificare quali libri accettiamo tra quelli che vuoi vendere.",
   },
 };

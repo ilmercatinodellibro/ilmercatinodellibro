@@ -85,8 +85,7 @@
               <q-item-section side>
                 <q-icon :name="mdiInformationOutline" color="black-54">
                   <q-tooltip>
-                    <!-- TODO: fix tooltip -->
-                    {{ t("general.reserveBooks") }}
+                    {{ t("general.tooltips.reserveBooks") }}
                   </q-tooltip>
                 </q-icon>
               </q-item-section>
@@ -114,8 +113,7 @@
               <q-item-section side>
                 <q-icon :name="mdiInformationOutline" color="black-54">
                   <q-tooltip>
-                    <!-- TODO: fix tooltip -->
-                    {{ t("general.myBooks") }}
+                    {{ t("general.tooltips.myBooks") }}
                   </q-tooltip>
                 </q-icon>
               </q-item-section>
@@ -143,8 +141,7 @@
               <q-item-section side>
                 <q-icon :name="mdiInformationOutline" color="black-54">
                   <q-tooltip>
-                    <!-- TODO: fix tooltip -->
-                    {{ t("general.salableBooks") }}
+                    {{ t("general.tooltips.salableBooks") }}
                   </q-tooltip>
                 </q-icon>
               </q-item-section>
