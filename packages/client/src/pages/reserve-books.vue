@@ -18,12 +18,30 @@
         <q-space />
 
         <q-btn
+          v-if="!showByClass"
           :icon="mdiFilter"
           :label="$t('reserveBooks.filterButton')"
           class="text-transform-none"
           color="accent"
           @click="searchClassBooks()"
         />
+
+        <template v-else>
+          <q-btn
+            :icon="mdiArrowLeft"
+            :label="t('reserveBooks.backToMainList')"
+            class="text-transform-none"
+            outline
+            @click="showByClass = false"
+          />
+          <q-btn
+            :icon="mdiPlus"
+            :label="t('reserveBooks.reserveAll')"
+            color="positive"
+            class="text-transform-none"
+            @click="openReserveAllDialog()"
+          />
+        </template>
       </q-card-section>
 
       <q-card-section class="col no-padding">
@@ -63,7 +81,12 @@
 </template>
 
 <script setup lang="ts">
-import { mdiFilter, mdiMagnify } from "@quasar/extras/mdi-v7";
+import {
+  mdiArrowLeft,
+  mdiFilter,
+  mdiMagnify,
+  mdiPlus,
+} from "@quasar/extras/mdi-v7";
 import { Dialog, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -71,6 +94,7 @@ import ClassFiltersDialog from "src/components/class-filters-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -175,10 +199,18 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   loading.value = false;
 };
 
+const showByClass = ref(false);
+
+const classBooks = ref([]);
+
 function searchClassBooks() {
   Dialog.create({
     component: ClassFiltersDialog,
-  }).onOk(() => void 0);
+  }).onOk((payload) => {
+    showByClass.value = true;
+    // TODO: query the books by class
+    payload;
+  });
 }
 
 function reserveOrRequest(book: BookSummaryFragment) {
@@ -186,7 +218,23 @@ function reserveOrRequest(book: BookSummaryFragment) {
     // FIXME: reserve book
     return;
   }
-  // FIXME: request book
+  Dialog.create({
+    title: t("reserveBooks.requestBookDisclaimer.title"),
+    message: t("reserveBooks.requestBookDisclaimer.message"),
+    cancel: t("common.cancel"),
+    ok: t("reserveBooks.requestCopy"),
+  }).onOk(() => {
+    // FIXME: request copy
+  });
+}
+
+function openReserveAllDialog() {
+  Dialog.create({
+    component: ReserveBooksByClassDialog,
+    componentProps: {
+      classBooks: classBooks.value,
+    },
+  }).onOk(() => (showByClass.value = false));
 }
 </script>
 
