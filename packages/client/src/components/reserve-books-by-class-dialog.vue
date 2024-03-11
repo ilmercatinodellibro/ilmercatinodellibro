@@ -24,7 +24,7 @@
                 $t('reserveBooks.confirmReserveByClassDialog.removeFromList')
               "
               color="negative"
-              @click="removeBook(row)"
+              @click="remove(booksToReserve, row)"
             />
           </q-td>
         </template>
@@ -117,8 +117,4 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
 ]);
 
 const booksToReserve = ref(cloneDeep(props.classBooks));
-
-function removeBook(bookToRemove: BookSummaryFragment) {
-  remove(booksToReserve.value, (book) => book.id === bookToRemove.id);
-}
 </script>
