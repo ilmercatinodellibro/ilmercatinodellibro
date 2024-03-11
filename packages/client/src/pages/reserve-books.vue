@@ -253,7 +253,15 @@ function openReserveAllDialog() {
     componentProps: {
       classBooks: classBooks.value,
     },
-  }).onOk(() => (showByClass.value = false));
+  }).onOk(async (books: BookSummaryFragment[]) => {
+    if (user.value) {
+      await createReservations({
+        input: { bookIds: books.map(({ id }) => id), userId: user.value.id },
+      });
+      showByClass.value = false;
+      // Should never be reachable, is there a need for an error display here?
+    }
+  });
 }
 </script>
 
