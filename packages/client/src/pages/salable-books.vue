@@ -16,7 +16,7 @@
             v-model="searchQuery"
             :placeholder="$t('salableBooks.searchHint')"
             :rules="[requiredRule, validISBN]"
-            class="col max-width-600"
+            class="flex-grow max-width-600"
             lazy-rules="ondemand"
             outlined
             type="search"
