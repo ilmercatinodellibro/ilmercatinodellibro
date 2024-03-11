@@ -31,6 +31,7 @@ export default {
     "Stai rimuovendo questo contatto dalla piattaforma e non sarà più in grado di accedervi. Vuoi procedere?",
   language: "Lingua",
   myData: "I Miei Dati",
+  warehouse: "Magazzino",
   reserveBooks: "Prenota Libri",
   myBooks: "I Miei Libri",
   salableBooks: "Libri Vendibili",

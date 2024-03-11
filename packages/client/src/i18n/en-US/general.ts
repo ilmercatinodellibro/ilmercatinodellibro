@@ -31,6 +31,7 @@ export default {
     "You are removing this contact from the platform and it won’t be able to access it anymore. Do you want to proceed?",
   language: "Language",
   myData: "My Data",
+  warehouse: "Warehouse",
   reserveBooks: "Reserve Books",
   myBooks: "My Books",
   salableBooks: "Salable Books",

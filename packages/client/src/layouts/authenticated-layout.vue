@@ -182,7 +182,9 @@
               </q-item-section>
               <q-item-section>
                 <!-- TODO: add label -->
-                <q-item-label class="ellipsis text-size-16"> </q-item-label>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("general.warehouse") }}
+                </q-item-label>
               </q-item-section>
               <q-item-section side>
                 <q-icon :name="mdiInformationOutline" color="black-54">
@@ -202,7 +204,7 @@
                 {{ t(`routesNames.${AvailableRouteNames.Catalog}`) }}
               </q-tooltip>
               <q-item-section side>
-                <q-icon :name="mdiAccountMultiple" color="black-54" />
+                <q-icon :name="mdiBookOpenBlankVariant" color="black-54" />
               </q-item-section>
               <q-item-section>
                 <q-item-label class="ellipsis text-size-16">
@@ -245,6 +247,7 @@
 
             <!-- TODO: fix route -->
             <q-item
+              v-if="hasAdminRole"
               :to="{ name: AvailableRouteNames.Theme }"
               active-class="bg-black-activated-light"
               class="drawer-item"
