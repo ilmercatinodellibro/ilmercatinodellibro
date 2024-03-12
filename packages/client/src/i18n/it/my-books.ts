@@ -2,6 +2,7 @@ export default {
   tabsTitles: {
     delivered: "Consegnati",
     reserved: "Prenotati e da ritirare",
+    requested: "Richiesti",
     purchased: "Acquistati",
   },
   total: "Totale che riceverai:",
@@ -13,6 +14,9 @@ export default {
     donated: "Donato al mercatino",
   },
   cancelReservation: "Annulla prenotazione",
+  cancelRequest: "Annulla richiesta",
   price: "Prezzo",
   priceYouPaid: "Prezzo che hai pagato",
+  availability: "Disponibilità",
+  reserve: "Prenota",
 };

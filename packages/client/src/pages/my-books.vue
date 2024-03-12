@@ -64,7 +64,7 @@
               v-if="tab === PageTab.DELIVERED"
               #body-cell-status="{ value }"
             >
-              <q-td class="text-center">
+              <q-td>
                 <!-- TODO: update to correct book status type -->
                 <q-chip
                   v-bind="
@@ -87,6 +87,42 @@
                 />
               </q-td>
             </template>
+
+            <template
+              v-if="tab === PageTab.REQUESTED"
+              #body-cell-availability="{ value }"
+            >
+              <q-td>
+                <status-chip :value="value" />
+              </q-td>
+            </template>
+
+            <template
+              v-if="tab === PageTab.REQUESTED"
+              #body-cell-reserve="{ value, row }"
+            >
+              <q-td>
+                <chip-button
+                  v-if="value"
+                  :label="t('myBooks.reserve')"
+                  color="primary"
+                  @click="reserveBook(row)"
+                />
+              </q-td>
+            </template>
+
+            <template
+              v-if="tab === PageTab.REQUESTED"
+              #body-cell-cancel-request="{ row }"
+            >
+              <q-td>
+                <chip-button
+                  :label="t('myBooks.cancelRequest')"
+                  color="accent"
+                  @click="cancelRequest(row)"
+                />
+              </q-td>
+            </template>
           </dialog-table>
         </q-tab-panel>
       </q-tab-panels>
@@ -106,65 +142,45 @@ import { sumBy } from "lodash-es";
 import { QChipProps, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import chipButton from "src/components/manage-users/chip-button.vue";
+import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import StatusChip from "src/components/manage-users/status-chip.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { useAuthService } from "src/services/auth";
 import {
   BookCopyDetailsFragment,
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
+import { useReservationService } from "src/services/reservation";
 
 const { user } = useAuthService();
 
-const { /* bookCopiesByOwner,*/ loading } = useGetBookCopiesByOwnerQuery({
+const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   userId: user.value?.id ?? "",
 });
 
-// FIXME: remove stub
-const bookCopiesByOwner = ref([
-  {
-    book: {
-      authorsFullName: "Autore sample",
-      id: "",
-      isbnCode: "ISBN sample",
-      meta: {
-        isAvailable: true,
-      },
-      originalPrice: 100,
-      publisherName: "",
-      retailLocationId: "",
-      subject: "Materia sample",
-      title: "Titolo molto molto molto molto molto molto lungo sample",
-    },
-    code: "",
-    createdAt: 0,
-    createdById: "",
-    id: "",
-    owner: {
-      email: "",
-      firstname: "",
-      lastname: "",
-      id: "0",
-    },
-    updatedAt: 0,
-    updatedById: "",
-  },
-]);
+const { useCreateReservationsMutation } = useReservationService();
+const { createReservations } = useCreateReservationsMutation();
 
 enum PageTab {
   DELIVERED = "delivered",
   RESERVED = "reserved",
+  REQUESTED = "requested",
   PURCHASED = "purchased",
 }
 
 const tableRowsByTab = computed<Record<PageTab, BookCopyDetailsFragment[]>>(
   () => ({
-    delivered: bookCopiesByOwner.value.filter(
+    [PageTab.DELIVERED]: bookCopiesByOwner.value.filter(
       ({ owner }) => owner.id, // TODO: add correct filter to all rows
     ),
-    purchased: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
-    reserved: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
+    [PageTab.PURCHASED]: bookCopiesByOwner.value.filter(
+      ({ owner }) => owner.id,
+    ),
+    [PageTab.REQUESTED]: bookCopiesByOwner.value.filter(
+      ({ owner }) => owner.id,
+    ),
+    [PageTab.RESERVED]: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
   }),
 );
 
@@ -197,20 +213,23 @@ const commonColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     label: t("book.fields.title"),
     align: "left",
   },
-  {
+]);
+
+const coverPriceColumn = computed<QTableColumn<BookCopyDetailsFragment>>(
+  () => ({
     name: "cover-price",
     field: ({ book }) => book.originalPrice,
     label: t("book.fields.price"),
     align: "left",
     format: formatPrice,
     classes: "text-strike text-black-54",
-  },
-]);
+  }),
+);
 
 const columns = computed<
   Record<PageTab, QTableColumn<BookCopyDetailsFragment>[]>
 >(() => ({
-  delivered: [
+  [PageTab.DELIVERED]: [
     {
       name: "status",
       // TODO: add the field
@@ -219,6 +238,7 @@ const columns = computed<
       align: "left",
     },
     ...commonColumns.value,
+    coverPriceColumn.value,
     {
       name: "sale-price",
       field: ({ book }) => book.originalPrice,
@@ -228,8 +248,9 @@ const columns = computed<
       format: formatPrice,
     },
   ],
-  purchased: [
+  [PageTab.PURCHASED]: [
     ...commonColumns.value,
+    coverPriceColumn.value,
     {
       name: "paid-price",
       // TODO: update to correct field
@@ -239,8 +260,28 @@ const columns = computed<
       format: formatPrice,
     },
   ],
-  reserved: [
+  [PageTab.REQUESTED]: [
     ...commonColumns.value,
+    {
+      name: "availability",
+      field: ({ book: { meta } }) => meta.isAvailable,
+      label: t("myBooks.availability"),
+    },
+    coverPriceColumn.value,
+    {
+      name: "reserve",
+      field: ({ book: { meta } }) => meta.isAvailable,
+      label: "",
+    },
+    {
+      name: "cancel-request",
+      field: () => undefined,
+      label: "",
+    },
+  ],
+  [PageTab.RESERVED]: [
+    ...commonColumns.value,
+    coverPriceColumn.value,
     {
       name: "price",
       field: ({ book }) => book.originalPrice,
@@ -274,24 +315,24 @@ enum BookStatus {
 }
 
 const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({
-  sold: {
+  [BookStatus.SOLD]: {
     color: "positive",
     icon: mdiCurrencyEur,
     label: t("myBooks.statusLabels.donated"),
     dark: true,
   },
-  "not-sold": {
+  [BookStatus.NOT_SOLD]: {
     color: "red-5",
     icon: mdiCurrencyEurOff,
     label: t("myBooks.statusLabels.notSold"),
     dark: true,
   },
-  returned: {
+  [BookStatus.RETURNED]: {
     color: "grey-5",
     icon: mdiBookArrowLeft,
     label: t("myBooks.statusLabels.returned"),
   },
-  donated: {
+  [BookStatus.DONATED]: {
     color: "amber",
     icon: mdiGift,
     label: t("myBooks.statusLabels.donated"),
@@ -300,6 +341,19 @@ const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({
 
 function cancelReservation(bookCopy: BookCopyDetailsFragment) {
   // FIXME: cancel reservation
+  bookCopy;
+}
+
+async function reserveBook({ book: { id } }: BookCopyDetailsFragment) {
+  if (user.value) {
+    await createReservations({
+      input: { bookIds: [id], userId: user.value.id },
+    });
+  }
+}
+
+function cancelRequest(bookCopy: BookCopyDetailsFragment) {
+  // FIXME: cancel request of the book
   bookCopy;
 }
 </script>
