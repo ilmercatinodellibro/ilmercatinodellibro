@@ -17,7 +17,7 @@
         </p>
       </q-card-section>
       <dialog-table :columns="columns" :rows="booksToReserve">
-        <template #actions="{ row }">
+        <template #body-cell-actions="{ row }">
           <q-td>
             <chip-button
               :label="

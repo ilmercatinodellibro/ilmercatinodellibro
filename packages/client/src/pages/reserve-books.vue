@@ -50,7 +50,7 @@
           :columns="columns"
           :filter="searchQuery"
           :loading="loading"
-          :rows="rows"
+          :rows="showByClass ? classBooks : rows"
           class="flex-delegate-height-management"
           @request="onRequest"
         >
@@ -96,6 +96,7 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { CourseDetails } from "src/models/book";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -215,9 +216,9 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
 function searchClassBooks() {
   Dialog.create({
     component: ClassFiltersDialog,
-  }).onOk((payload) => {
+  }).onOk((payload: CourseDetails) => {
     showByClass.value = true;
-    // TODO: query the books by class
+    // TODO: put specified class books into classBooks
     payload;
   });
 }
