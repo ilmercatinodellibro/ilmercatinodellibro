@@ -64,11 +64,9 @@
               <chip-button
                 :color="row.meta.isAvailable ? 'primary' : 'accent'"
                 :label="
-                  $t(
-                    `reserveBooks.${
-                      row.meta.isAvailable ? 'reserveCopy' : 'requestCopy'
-                    }`,
-                  )
+                  row.meta.isAvailable
+                    ? $t('reserveBooks.reserveCopy')
+                    : $t('reserveBooks.requestCopy')
                 "
                 @click="reserveOrRequest(row)"
               />
