@@ -10,6 +10,7 @@ import {
 import { join as joinPath } from "node:path";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { parse, transform } from "csv";
+import { School } from "src/@generated";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   IngestedCsvRow,
@@ -178,6 +179,8 @@ export class BookService {
       schoolCodes[regionCode] = [];
     }
 
+    const schoolsToInsert: School[] = [];
+
     await this.#parseCsvSchoolsContent({
       sourceFileName: "SCUOLE_STATALI",
       destinationFileName: "filtered_state_schools",
@@ -209,13 +212,20 @@ export class BookService {
       }),
 
       csvTransformer: transform((row: IngestedStateSchoolRow) => {
+        // [2]
+        schoolsToInsert.push({
+          code: row[6],
+          name: row[7],
+          address: row[8],
+          provinceCode: row[6].substring(0, 2),
+        });
         return (
           // See [1]
           [
-            `"${row[6]}"`,
-            `"${row[7]}"`,
-            `"${row[8]}"`,
-            `"${row[6].substring(0, 2)}"`,
+            `${row[6]}`,
+            `${row[7]}`,
+            `${row[8]}`,
+            `${row[6].substring(0, 2)}`,
           ].join(",") + "\n"
         );
       }),
@@ -251,19 +261,52 @@ export class BookService {
       }),
 
       csvTransformer: transform((row: IngestedEquivalentSchoolRow) => {
+        // [2]
+        schoolsToInsert.push({
+          code: row[4],
+          name: row[5],
+          address: row[6],
+          provinceCode: row[4].substring(0, 2),
+        });
         return (
           // See [1]
           [
-            `"${row[4]}"`,
-            `"${row[5]}"`,
-            `"${row[6]}"`,
-            `"${row[4].substring(0, 2)}"`,
+            `${row[4]}`,
+            `${row[5]}`,
+            `${row[6]}`,
+            `${row[4].substring(0, 2)}`,
           ].join(",") + "\n"
         );
       }),
     });
 
-    return true;
+    try {
+      // [2]
+      // This should have been the correct way to import the rows into the DB inside the schools table.
+      // However when following this approach there are a bunch of schools (and always the same ones) that are not imported by the DB copy instruction
+      // The db throws no error, and even the analysis of the records does not give any meaningful result on why those records are ignored.
+      // Furthermore, if said records are left on their own inside the generated CSV file and there are just a few records, then the copy instruction can import it
+      // Additionally, it should not be a problem of how many records are there inside the CSV, because the books CSV has many more records and they are imported correctly.
+      // In the end and to save time, school insert into DB has been made using Prisma method.
+      // await this.prisma.$executeRaw`
+      // COPY "School" (code, name, address, province_code)
+      // FROM '/tmp/tmp-files/filtered_state_schools.csv'
+      // WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
+      // `;
+      // await this.prisma.$executeRaw`
+      // COPY "School" (code, name, address,  province_code)
+      // FROM '/tmp/tmp-files/filtered_peer_schools.csv'
+      // WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
+      // `;
+
+      await this.prisma.school.createMany({
+        data: schoolsToInsert,
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async #parseCsvSchoolsContent({
@@ -302,12 +345,12 @@ export class BookService {
       "code,name,address,province_code\n",
     );
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       destinationStream.addListener("finish", () => {
         sourceStream.close();
-        destinationStream.close();
-
-        resolve();
+        destinationStream.close(() => {
+          resolve(`tmp-files/${destinationFileName}.csv`);
+        });
       });
 
       destinationStream.addListener("error", (error) => {
