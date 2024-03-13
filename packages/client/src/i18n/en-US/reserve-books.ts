@@ -16,7 +16,7 @@ export default {
   confirmReserveByClassDialog: {
     title: "Reserve all the books",
     message:
-      'You\'re almost there. Use the table to delete the unnecessary books. Remember that you can add other books with the text field below here. When your list is perfect, click on "Reserve all" to finalize the reservation.',
+      'You are almost there. Use the table to delete the unnecessary books. Remember that you can add other books with the text field below here. When your list is perfect, click on "Reserve all" to finalize the reservation.',
     disclaimer:
       'Proceeding with the reservation, if your list includes some "Not Available" books, you will also activate a request to ask Mercatino del Libro to try to retrieve the copies that you need.',
     removeFromList: "Remove from the list",
