@@ -138,7 +138,7 @@ model Book {
   // The second method showcased there is actually the one needed here to instruct the DB to actually create a UUID field which is automatically populated by the DB and not by Prisma itself
   // This is needed at import time when the code is using the Postgre COPY command to import books into the DB.
   id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  /// @FieldType({ name: 'Scalars.GraphQLISBN', from: 'graphql-scalars', input: true, output: true })
+  /// @FieldType({ name: 'Scalars.GraphQLISBN', from: 'graphql-scalars', input: true })
   isbnCode         String         @map("isbn_code")
   subject          String
   authorsFullName  String         @map("authors_full_name")
