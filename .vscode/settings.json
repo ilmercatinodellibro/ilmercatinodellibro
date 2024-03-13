@@ -18,5 +18,6 @@
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
   "stylelint.validate": ["css", "scss", "vue"],
 
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.importModuleSpecifier": "non-relative"
 }
