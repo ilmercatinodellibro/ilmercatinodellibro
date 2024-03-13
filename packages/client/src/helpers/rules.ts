@@ -132,7 +132,7 @@ export const greaterThanZeroRule: ValidationRule<number | string | null> = (
 };
 
 export const validISBN: ValidationRule<string> = (value) =>
-  /^(\d{13})?$/.test(value) || t("validators.nonValidISBN");
+  value.length <= 13 || t("validators.nonValidISBN");
 
 // ---------- ---------- ----------
 // Next fields are not imported in other files but we need to leave these so in the future we can abstract these in a package

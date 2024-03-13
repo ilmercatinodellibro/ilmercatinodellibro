@@ -6,9 +6,11 @@ export default {
     title: "Titolo",
     publisher: "Editore",
     subject: "Materia",
-    price: "Prezzo di Copertina",
+    coverPrice: "Prezzo di Copertina",
     status: "Stato",
     utility: "Utilità",
+    availability: "Disponibilità",
+    price: "Prezzo",
   },
   addBook: "Aggiungi un libro",
   addBookDialog: "Aggiungi Libro",
@@ -28,7 +30,8 @@ export default {
     schoolFilter: {
       fields: {
         school: "Scuola",
-        address: "Indirizzo",
+        course: "Indirizzo",
+        year: "Anno",
       },
     },
   },

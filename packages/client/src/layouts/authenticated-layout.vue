@@ -63,9 +63,9 @@
               </q-item-section>
             </q-item>
 
-            <!-- TODO: add router link -->
             <q-item
               v-ripple
+              :to="{ name: AvailableRouteNames.ReserveBooks }"
               active-class="bg-black-activated-light"
               class="drawer-item"
               clickable
@@ -91,9 +91,9 @@
               </q-item-section>
             </q-item>
 
-            <!-- TODO: add router link -->
             <q-item
               v-ripple
+              :to="{ name: AvailableRouteNames.MyBooks }"
               active-class="bg-black-activated-light"
               class="drawer-item"
               clickable
@@ -119,9 +119,9 @@
               </q-item-section>
             </q-item>
 
-            <!-- TODO: add router link -->
             <q-item
               v-ripple
+              :to="{ name: AvailableRouteNames.SalableBooks }"
               active-class="bg-black-activated-light"
               class="drawer-item"
               clickable
