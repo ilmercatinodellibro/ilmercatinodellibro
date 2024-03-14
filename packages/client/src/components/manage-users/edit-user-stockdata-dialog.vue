@@ -151,6 +151,10 @@ const props = defineProps<{
   userData: UserFragment;
 }>();
 
+defineEmits(useDialogPluginComponent.emitsObject);
+
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+
 const { t } = useI18n();
 
 const tab = ref("in-retrieval");
@@ -309,10 +313,6 @@ function returnBook(book: BookSummaryFragment) {
   // FIXME: return the book to the Mercatino
   book;
 }
-
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
-
-defineEmits(useDialogPluginComponent.emitsObject);
 </script>
 
 <style lang="scss">
