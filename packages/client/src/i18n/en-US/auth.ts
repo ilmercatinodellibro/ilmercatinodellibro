@@ -30,4 +30,12 @@ export default {
     "Your email has been correctly verified, you can now login using your credentials",
   backToLogin: "Back to login",
   registeredSuccessfully: "Registration successful 🎉 ",
+  birthDate: "Date of Birth",
+  nameOfDelegate: "First Name and Last Name of the delegate",
+  emailAddress: "Email Address",
+  phoneNumber: "Phone Number",
+  delegateLabel:
+    "The first name and last name of an adult person with delegation to deliver and retrieve books at Mercatino del Libro's retail location",
+  editMyData: "Edit my data",
+  deleteAccount: "Delete your account",
 };

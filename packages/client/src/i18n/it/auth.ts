@@ -31,4 +31,12 @@ export default {
     "La tua email è stata verificata correttamente, ora puoi accedere utilizzando le tue credenziali",
   backToLogin: "Torna al login",
   registeredSuccessfully: "Registrazione riuscita 🎉 ",
+  birthDate: "Data di Nascita",
+  nameOfDelegate: "Nome e Cognome del delegato",
+  emailAddress: "Indirizzo Email",
+  phoneNumber: "Numero di Telefono",
+  delegateLabel:
+    "Il nome e il cognome di una persona maggiorenne con delega di consegnare e ritirare libri presso la sede del Mercatino del Libro",
+  editMyData: "Modifica i miei dati",
+  deleteAccount: "Elimina il tuo account",
 };

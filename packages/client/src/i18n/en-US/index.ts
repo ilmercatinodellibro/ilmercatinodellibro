@@ -154,6 +154,7 @@ export default {
     [AvailableRouteNames.MyBooks]: "My Books",
     [AvailableRouteNames.ReserveBooks]: "Reserve Books",
     [AvailableRouteNames.SelectLocation]: "Select Location",
+    [AvailableRouteNames.MyData]: "My Data",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",
