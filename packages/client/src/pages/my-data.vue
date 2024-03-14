@@ -66,6 +66,7 @@ import {
 import { Dialog } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import DeleteAccountDialog from "src/components/delete-account-dialog.vue";
 import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
 import { UserInfo } from "src/models/auth";
 import { useAuthService } from "src/services/auth";
@@ -139,6 +140,10 @@ function modifyUserData() {
 }
 
 function deleteAccount() {
-  // FIXME: open dialog
+  Dialog.create({
+    component: DeleteAccountDialog,
+  }).onOk(() => {
+    // FIXME: add deletion of the user's account and log out
+  });
 }
 </script>
