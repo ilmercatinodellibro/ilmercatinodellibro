@@ -38,4 +38,6 @@ export default {
     "The first name and last name of an adult person with delegation to deliver and retrieve books at Mercatino del Libro's retail location",
   editMyData: "Edit my data",
   deleteAccount: "Delete your account",
+  confirmEmail: "Confirm Email",
+  emailsDoNotMatch: "The emails do not match",
 };

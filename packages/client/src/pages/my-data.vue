@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card class="absolute-full flex-center q-ma-md row">
-      <q-card-section class="column no-padding width-360">
+      <q-card-section class="column no-padding width-min-360">
         <q-list>
           <q-item
             v-for="{ icon, label, value, showInfo, format } in userData"
@@ -63,8 +63,11 @@ import {
   mdiMail,
   mdiPhone,
 } from "@quasar/extras/mdi-v7";
+import { Dialog } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
+import { UserInfo } from "src/models/auth";
 import { useAuthService } from "src/services/auth";
 import { UserFragment } from "src/services/user.graphql";
 
@@ -115,8 +118,7 @@ const userData = computed<ItemData[]>(() => [
   {
     icon: mdiPhone,
     label: t("auth.phoneNumber"),
-    // TODO: add the field
-    value: undefined,
+    value: user.value?.phoneNumber,
   },
   {
     icon: mdiLock,
@@ -128,7 +130,12 @@ const userData = computed<ItemData[]>(() => [
 ]);
 
 function modifyUserData() {
-  // FIXME: open dialog
+  Dialog.create({
+    component: EditUserDataDialog,
+  }).onOk((payload: UserInfo) => {
+    // FIXME: add mutation of user info
+    payload;
+  });
 }
 
 function deleteAccount() {
