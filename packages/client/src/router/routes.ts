@@ -139,6 +139,11 @@ const routes: RouteRecordRaw[] = [
         name: AvailableRouteNames.ReserveBooks,
         component: () => import("src/pages/reserve-books.vue"),
       },
+      {
+        path: "my-data",
+        name: AvailableRouteNames.MyData,
+        component: () => import("src/pages/my-data.vue"),
+      },
     ],
   },
 
