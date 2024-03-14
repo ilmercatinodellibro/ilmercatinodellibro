@@ -40,4 +40,11 @@ export default {
   deleteAccount: "Delete your account",
   confirmEmail: "Confirm Email",
   emailsDoNotMatch: "The emails do not match",
+  deleteAccountDialog: {
+    disclaimer:
+      "Attention, you are about to delete your user account permanently. In 7 days your personal information will be removed from our database and your account will become permanently inaccessible. Are you sure you want to proceed?",
+    message:
+      "The data relative to your requests, reservations, purchases, sales and other activities done on Mercatino del Libro will be utilized to conduct statistical analyses that will improve the service that we offer to the families. Don't worry: to respect your privacy, all this information will be anonymized in accordance with the law.",
+    deleteAccount: "Delete account",
+  },
 };
