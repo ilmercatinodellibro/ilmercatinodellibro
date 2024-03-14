@@ -18,22 +18,20 @@
           lazy-rules
           outlined
         >
-          <!-- TODO: add check for password field -->
           <template #append>
             <q-icon
-              v-if="key === 'confirmPassword'"
+              v-if="key === 'password' || key === 'confirmPassword'"
               :name="hidePassword ? mdiEyeOff : mdiEye"
               class="cursor-pointer"
               @click="hidePassword = !hidePassword"
             />
-            <!-- TODO: Update the v-else-if to check for the delegate info field -->
             <q-icon
-              v-else-if="field.label === ''"
+              v-else-if="field.infoLabel"
               :name="mdiInformationOutline"
               color="black-54"
             >
               <q-tooltip>
-                {{ t("auth.delegateLabel") }}
+                {{ field.infoLabel }}
               </q-tooltip>
             </q-icon>
           </template>
@@ -52,7 +50,12 @@ import {
 import { QInputProps, ValidationRule, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { emailRule, makeValueMatchRule, requiredRule } from "src/helpers/rules";
+import {
+  emailRule,
+  makeValueMatchRule,
+  requiredRule,
+  validatePasswordRule,
+} from "src/helpers/rules";
 import { UserInfo } from "src/models/auth";
 import { useAuthService } from "src/services/auth";
 import KDialogFormCard from "./k-dialog-form-card.vue";
@@ -67,6 +70,10 @@ const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
   useDialogPluginComponent<UserInfo>();
 
 type UserData = UserInfo & {
+  // TODO: remove stubbed fields
+  password: string;
+  date: number;
+  delegate: string;
   confirmEmail: string;
   confirmPassword: string;
 };
@@ -76,6 +83,9 @@ const newUserData = ref<UserData>({
   firstname: user.value?.firstname ?? "",
   lastname: user.value?.lastname ?? "",
   phoneNumber: user.value?.phoneNumber ?? "",
+  password: "",
+  date: Date.now(),
+  delegate: "",
   confirmEmail: "",
   confirmPassword: "",
 });
@@ -98,8 +108,14 @@ const formData = computed<{
     label: t("auth.lastName"),
     rules: [requiredRule],
   },
-  // TODO: add birth date
-  // TODO: add delegate name
+  date: {
+    label: t("auth.birthDate"),
+    type: "date",
+  },
+  delegate: {
+    label: t("auth.nameOfDelegate"),
+    infoLabel: t("auth.delegateLabel"),
+  },
   phoneNumber: {
     label: t("auth.phoneNumber"),
   },
@@ -113,12 +129,21 @@ const formData = computed<{
       makeValueMatchRule(newUserData.value.email, t("auth.emailsDoNotMatch")),
     ],
   },
-  // TODO: add password
+  password: {
+    label: t("auth.password"),
+    type: hidePassword.value ? "password" : "text",
+    rules: [requiredRule, validatePasswordRule],
+  },
   confirmPassword: {
     label: t("auth.confirmPassword"),
     type: hidePassword.value ? "password" : "text",
-    // TODO: add makeValueMatchRule(password) rule
-    rules: [requiredRule],
+    rules: [
+      requiredRule,
+      makeValueMatchRule(
+        newUserData.value.password,
+        t("auth.passwordDoNotMatch"),
+      ),
+    ],
   },
 }));
 </script>

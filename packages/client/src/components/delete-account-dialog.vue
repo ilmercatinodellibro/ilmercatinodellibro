@@ -1,14 +1,18 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide()">
+    <!--
+      We have to set the size to be "fullscreen" otherwise the width
+      of the card is set statically and doesn't match the value of 560px
+    -->
     <k-dialog-card
       :title="t('auth.deleteAccount')"
       :save-label="t('auth.deleteAccountDialog.deleteAccount')"
-      size="sm"
+      size="fullscreen"
       show-save-button
       @cancel="onDialogCancel()"
       @save="onDialogOK()"
     >
-      <q-card-section class="column gap-24 q-pa-md">
+      <q-card-section class="column gap-24 q-pa-md width-560">
         <span class="text-h6 text-primary">
           {{ t("auth.deleteAccountDialog.disclaimer") }}
         </span>
