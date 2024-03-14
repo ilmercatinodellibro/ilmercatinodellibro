@@ -39,4 +39,6 @@ export default {
     "Il nome e il cognome di una persona maggiorenne con delega di consegnare e ritirare libri presso la sede del Mercatino del Libro",
   editMyData: "Modifica i miei dati",
   deleteAccount: "Elimina il tuo account",
+  confirmEmail: "Conferma Email",
+  emailsDoNotMatch: "Le email non coincidono",
 };
