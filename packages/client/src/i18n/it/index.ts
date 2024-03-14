@@ -158,6 +158,8 @@ export default {
     [AvailableRouteNames.UsersManagement]: "Utenti e Movimenti",
     [AvailableRouteNames.MyBooks]: "I Miei Libri",
     [AvailableRouteNames.ReserveBooks]: "Prenota Libri",
+    [AvailableRouteNames.JoinUs]: "Unisciti a Noi",
+    [AvailableRouteNames.WhoWeAre]: "Chi siamo",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",
