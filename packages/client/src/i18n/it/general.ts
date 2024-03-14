@@ -53,4 +53,6 @@ export default {
     salableBooks:
       "Accedi a questa pagina per verificare quali libri accettiamo tra quelli che vuoi vendere.",
   },
+  joinUs: "Unisciti a noi",
+  whoWeAre: "Chi siamo",
 };
