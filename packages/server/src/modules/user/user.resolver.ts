@@ -298,18 +298,12 @@ export class UserResolver {
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
-  removeUser(
-    @Input()
-    { id }: RemoveUserPayload,
-  ) {
+  async removeUser(@Input() { id }: RemoveUserPayload) {
     return this.userService.removeUser(id);
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async updateRole(
-    @Input()
-    userData: UpdateRolePayload,
-  ) {
+  async updateRole(@Input() userData: UpdateRolePayload) {
     await this.userService.updateUserRole(userData);
   }
 }

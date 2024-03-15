@@ -1,5 +1,16 @@
-import { ArgsType, Field, InputType, Int, ObjectType } from "@nestjs/graphql";
+import {
+  ArgsType,
+  Field,
+  InputType,
+  Int,
+  IntersectionType,
+  ObjectType,
+} from "@nestjs/graphql";
 import { Book, BookCreateWithoutRetailLocationInput } from "src/@generated";
+import {
+  LocationBoundInput,
+  LocationBoundQueryArgs,
+} from "src/modules/retail-location";
 
 @InputType()
 export class BookQueryFilter {
@@ -11,7 +22,7 @@ export class BookQueryFilter {
 }
 
 @ArgsType()
-export class BookQueryArgs {
+export class BookQueryArgs extends LocationBoundQueryArgs {
   @Field(() => Int)
   page!: number;
 
@@ -20,12 +31,6 @@ export class BookQueryArgs {
 
   @Field(() => BookQueryFilter, { nullable: true })
   filter?: BookQueryFilter;
-}
-
-@InputType()
-export class BookCreateInput extends BookCreateWithoutRetailLocationInput {
-  @Field(() => String, { nullable: false })
-  retailLocationId!: string;
 }
 
 @ObjectType()
@@ -39,3 +44,9 @@ export class BookQueryResult {
   @Field(() => [Book])
   rows!: Book[];
 }
+
+@InputType()
+export class BookCreateInput extends IntersectionType(
+  BookCreateWithoutRetailLocationInput,
+  LocationBoundInput,
+) {}

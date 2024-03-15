@@ -28,7 +28,12 @@ export class BookResolver {
   @Query(() => BookQueryResult)
   async books(
     @Args()
-    { page, rows: rowsPerPage = 100, filter = {} }: BookQueryArgs,
+    {
+      page,
+      rows: rowsPerPage = 100,
+      filter = {},
+      retailLocationId,
+    }: BookQueryArgs,
   ) {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
@@ -41,7 +46,7 @@ export class BookResolver {
     }
 
     const where: Prisma.BookWhereInput = {
-      retailLocationId: "re", // TODO: update this when retailLocations are properly handled
+      retailLocationId,
 
       meta: {
         isAvailable: filter.isAvailable,

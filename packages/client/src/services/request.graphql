@@ -5,8 +5,8 @@ fragment RequestSummary on BookRequest {
   }
 }
 
-query getRequests($userId: String!) {
-  bookRequests(userId: $userId) {
+query getRequests($retailLocationId: String!, $userId: String!) {
+  bookRequests(retailLocationId: $retailLocationId, userId: $userId) {
     ...RequestSummary
   }
 }

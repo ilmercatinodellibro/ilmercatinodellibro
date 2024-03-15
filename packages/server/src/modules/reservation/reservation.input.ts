@@ -1,7 +1,8 @@
 import { Field, InputType } from "@nestjs/graphql";
+import { LocationBoundInput } from "src/modules/retail-location";
 
 @InputType()
-export class CreateReservationInput {
+export class CreateReservationInput extends LocationBoundInput {
   @Field()
   userId!: string;
 

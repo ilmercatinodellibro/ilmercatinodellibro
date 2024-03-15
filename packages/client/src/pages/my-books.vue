@@ -152,11 +152,14 @@ import {
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
 import { useReservationService } from "src/services/reservation";
+import { useRetailLocationService } from "src/services/retail-location";
 
+const { selectedLocation } = useRetailLocationService();
 const { user } = useAuthService();
 
 const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   userId: user.value?.id ?? "",
+  retailLocationId: selectedLocation.value.id,
 });
 
 const { useCreateReservationsMutation } = useReservationService();
@@ -345,11 +348,17 @@ function cancelReservation(bookCopy: BookCopyDetailsFragment) {
 }
 
 async function reserveBook({ book: { id } }: BookCopyDetailsFragment) {
-  if (user.value) {
-    await createReservations({
-      input: { bookIds: [id], userId: user.value.id },
-    });
+  if (!user.value) {
+    return;
   }
+
+  await createReservations({
+    input: {
+      bookIds: [id],
+      userId: user.value.id,
+      retailLocationId: selectedLocation.value.id,
+    },
+  });
 }
 
 function cancelRequest(bookCopy: BookCopyDetailsFragment) {

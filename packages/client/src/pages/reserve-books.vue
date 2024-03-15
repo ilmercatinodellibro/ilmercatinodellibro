@@ -100,12 +100,14 @@ import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRequestService } from "src/services/request";
 import { useReservationService } from "src/services/reservation";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const { useCreateReservationsMutation } = useReservationService();
 const { createReservations } = useCreateReservationsMutation();
 const { useCreateRequestMutation } = useRequestService();
 const { createBookRequest } = useCreateRequestMutation();
 const { user } = useAuthService();
+const { selectedLocation } = useRetailLocationService();
 
 const { t } = useI18n();
 
@@ -225,7 +227,11 @@ async function reserveOrRequest(book: BookSummaryFragment) {
   if (user.value) {
     if (book.meta.isAvailable) {
       await createReservations({
-        input: { bookIds: [book.id], userId: user.value.id },
+        input: {
+          bookIds: [book.id],
+          userId: user.value.id,
+          retailLocationId: selectedLocation.value.id,
+        },
       });
       return;
     }
@@ -255,7 +261,11 @@ function openReserveAllDialog() {
   }).onOk(async (books: BookSummaryFragment[]) => {
     if (user.value) {
       await createReservations({
-        input: { bookIds: books.map(({ id }) => id), userId: user.value.id },
+        input: {
+          bookIds: books.map(({ id }) => id),
+          userId: user.value.id,
+          retailLocationId: selectedLocation.value.id,
+        },
       });
       showByClass.value = false;
       // Should never be reachable, is there a need for an error display here?

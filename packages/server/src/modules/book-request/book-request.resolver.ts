@@ -24,12 +24,9 @@ export class BookRequestResolver {
 
   @Query(() => [BookRequest])
   async bookRequests(
-    @Args() { userId }: BookRequestQueryArgs,
+    @Args() { userId, retailLocationId }: BookRequestQueryArgs,
     @CurrentUser() { id: currentUserId, role }: User,
   ) {
-    // TODO: Make this dynamic
-    const retailLocationId = "re";
-
     // Normal users can only view their own book requests
     if (currentUserId !== userId && role === Role.USER) {
       throw new ForbiddenException(

@@ -138,6 +138,7 @@ import {
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
 import { UserFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
@@ -161,9 +162,11 @@ const tab = ref("in-retrieval");
 
 const booksToRegister = ref<BookSummaryFragment[]>([]);
 
+const { selectedLocation } = useRetailLocationService();
 const { bookCopiesByOwner: copiesInStock, loading: inStockLoading } =
   useGetBookCopiesByOwnerQuery(() => ({
     userId: props.userData.id,
+    retailLocationId: selectedLocation.value.id,
   }));
 
 // probably unnecessarily complex, but 🤷

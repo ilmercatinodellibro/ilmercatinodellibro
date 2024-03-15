@@ -12,8 +12,18 @@ fragment BookSummary on Book {
   }
 }
 
-query getBooks($page: Int!, $rows: Int!, $filter: BookQueryFilter) {
-  books(page: $page, rows: $rows, filter: $filter) {
+query getBooks(
+  $retailLocationId: String!
+  $page: Int!
+  $rows: Int!
+  $filter: BookQueryFilter
+) {
+  books(
+    retailLocationId: $retailLocationId
+    page: $page
+    rows: $rows
+    filter: $filter
+  ) {
     page
     rows {
       ...BookSummary
