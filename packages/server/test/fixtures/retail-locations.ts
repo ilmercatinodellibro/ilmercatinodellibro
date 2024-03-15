@@ -11,24 +11,24 @@ Durante tutto l'anno ci impegniamo ad ampliare e migliorare il servizio con prog
 Qualora tu sia interessato a svolgere una attività costruttiva, formativa e divertente per il riconoscimento di crediti formativi, come alternanza scuola lavoro o semplicemente per dare il tuo contributo ti invitiamo a scriverci a mercatino@thespots-re.it.`;
 
 export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
-  name: "Il Mercatino del Libro",
+  id: "re",
+  name: "Reggio Emilia",
   email: "info@ilmercatinodellibro.com",
   facebookLink: "https://www.facebook.com/IlMercatinoDelLibroRE/",
   instagramLink: "https://www.instagram.com/ilmercatinodellibrore/",
   fullAddress: "Via Francesco Cassoli, 1, 42123 Reggio Emilia RE",
-  id: "re",
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
   phoneNumber: "3516215189",
 };
 
 export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
-  name: "Il Mercatino del Libro - MO",
+  id: "mo",
+  name: "Modena",
   email: " info-mo@ilmercatinodellibro.com",
   facebookLink: "https://www.facebook.com/IlMercatinoDelLibroMO/",
   instagramLink: "https://www.instagram.com/ilmercatinodellibromo/",
   fullAddress: "Strada Nazionale Canaletto Sud, 43L, 41121 - Modena MO",
-  id: "mo",
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
   phoneNumber: "3515472756",

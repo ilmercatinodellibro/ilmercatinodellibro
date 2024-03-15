@@ -23,10 +23,10 @@
         </span>
         <span class="contacts-text text-secondary">
           <a
-            :href="'tel:+39' + locationData.phoneNumber"
+            :href="'tel:+39' + selectedLocation.phoneNumber"
             class="contacts-details text-secondary"
           >
-            {{ formatPhone(locationData.phoneNumber) }}
+            {{ formatPhone(selectedLocation.phoneNumber) }}
           </a>
         </span>
         <span class="contacts-subtext text-black-54">
@@ -36,12 +36,12 @@
         <span class="contacts-text"> {{ $t("contacts.findUs") }} </span>
         <div>
           <social-button
-            :link="locationData.socials.facebook"
+            :link="selectedLocation.facebookLink"
             name="facebook"
             class="q-mb-sm"
           />
           <social-button
-            :link="locationData.socials.instagram"
+            :link="selectedLocation.instagramLink"
             name="instagram"
           />
         </div>
@@ -80,10 +80,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from "vue";
+import { ref } from "vue";
 import SocialButton from "src/components/social-button.vue";
-import { useRetailLocations } from "src/composables/use-retail-location";
 import { useAuthService } from "src/services/auth";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const userParam = ref({
   firstname: "",
@@ -106,36 +106,18 @@ const userHints = ref({
   message: "",
 });
 
-const locationDataQuery = useRetailLocations();
+const { selectedLocation } = useRetailLocationService();
 
-const locationData = reactive({
-  phoneNumber: "",
-  socials: reactive({
-    facebook: "",
-    instagram: "",
-  }),
-});
-
-watch(locationDataQuery.loading, () => {
-  if (!locationDataQuery.loading.value) {
-    // Since the selectedRetailLocation object is empty, the information relative to the Reggio Emilia site is loaded for now
-    useRetailLocations().retailLocations.value.forEach((location) => {
-      if (location.id === "re") {
-        locationData.phoneNumber = location.phoneNumber;
-        locationData.socials.facebook = location.facebookLink;
-        locationData.socials.instagram = location.instagramLink;
-      }
-    });
+function formatPhone(unformattedNumber: string | undefined) {
+  if (!unformattedNumber) {
+    return "";
   }
-});
 
-function formatPhone(unformattedNumber: string | undefined): string {
-  return !unformattedNumber
-    ? ""
-    : `${unformattedNumber.slice(0, 3)} ${unformattedNumber.slice(
-        3,
-        6,
-      )} ${unformattedNumber.slice(6, 10)}`;
+  const firtPart = unformattedNumber.slice(0, 3);
+  const secondPart = unformattedNumber.slice(3, 6);
+  const thirdPart = unformattedNumber.slice(6, 10);
+
+  return `${firtPart} ${secondPart} ${thirdPart}`;
 }
 </script>
 

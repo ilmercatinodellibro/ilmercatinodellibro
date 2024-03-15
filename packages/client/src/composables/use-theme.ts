@@ -26,7 +26,7 @@ const defaultTheme: Theme = {
     secondary: "#76e1a7",
     accent: "#c2664d",
   },
-  logo: `favicon-${retailLocationId}.png`,
+  logo: `/favicon-${retailLocationId}.png`,
 };
 
 const theme = ref<Theme>(

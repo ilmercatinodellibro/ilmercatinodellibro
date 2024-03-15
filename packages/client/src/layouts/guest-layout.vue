@@ -1,5 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
+    <!-- TODO: Implement "go back to login" button -->
+    <!-- TODO: Implement location info tabs -->
     <header-bar />
 
     <q-page-container class="bg-grey-1">
@@ -8,14 +10,6 @@
   </q-layout>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import headerBar from "src/components/header-bar.vue";
-
-export default defineComponent({
-  name: "GuestLayout",
-  components: {
-    headerBar,
-  },
-});
+<script setup lang="ts">
+import HeaderBar from "src/components/header-bar.vue";
 </script>

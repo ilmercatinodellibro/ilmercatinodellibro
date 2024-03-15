@@ -62,6 +62,7 @@ module.exports = configure(function (ctx) {
       "refresh-token",
       "in-app-notifications",
       "firebase-messaging",
+      "retail-location",
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
