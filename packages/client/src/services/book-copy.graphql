@@ -50,26 +50,26 @@ query getBookCopies($bookId: String!) {
   }
 }
 
-query getBookCopiesByOwner($userId: String!) {
-  bookCopiesByOwner(userId: $userId) {
+query getBookCopiesByOwner($retailLocationId: String!, $userId: String!) {
+  bookCopiesByOwner(retailLocationId: $retailLocationId, userId: $userId) {
     ...BookCopyDetails
   }
 }
 
-query getPurchasedBookCopies($userId: String!) {
-  purchasedBookCopies(userId: $userId) {
+query getPurchasedBookCopies($retailLocationId: String!, $userId: String!) {
+  purchasedBookCopies(retailLocationId: $retailLocationId, userId: $userId) {
     ...BookCopyDetails
   }
 }
 
-query getSoldBookCopies($userId: String!) {
-  soldBookCopies(userId: $userId) {
+query getSoldBookCopies($retailLocationId: String!, $userId: String!) {
+  soldBookCopies(retailLocationId: $retailLocationId, userId: $userId) {
     ...BookCopyDetails
   }
 }
 
-query getReturnedBookCopies($userId: String!) {
-  returnedBookCopies(userId: $userId) {
+query getReturnedBookCopies($retailLocationId: String!, $userId: String!) {
+  returnedBookCopies(retailLocationId: $retailLocationId, userId: $userId) {
     ...BookCopyDetails
   }
 }

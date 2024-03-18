@@ -13,4 +13,5 @@ export enum AvailableRouteNames {
   SalableBooks = "salable-books",
   MyBooks = "my-books",
   ReserveBooks = "reserve-books",
+  SelectLocation = "select-location",
 }

@@ -230,6 +230,7 @@ import {
   useGetReturnedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
 } from "src/services/book-copy.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
@@ -332,19 +333,24 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
 ]);
 
+const { selectedLocation } = useRetailLocationService();
+
 const { bookCopiesByOwner: ownedCopies, loading: ownedLoading } =
   useGetBookCopiesByOwnerQuery(() => ({
     userId: props.user.id,
+    retailLocationId: selectedLocation.value.id,
   }));
 
 const { returnedBookCopies: returnedCopies, loading: returnedLoading } =
   useGetReturnedBookCopiesQuery(() => ({
     userId: props.user.id,
+    retailLocationId: selectedLocation.value.id,
   }));
 
 const { soldBookCopies: soldCopies, loading: soldLoading } =
   useGetSoldBookCopiesQuery(() => ({
     userId: props.user.id,
+    retailLocationId: selectedLocation.value.id,
   }));
 
 const selectedRows = ref<BookCopyDetailsFragment[]>([]);

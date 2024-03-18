@@ -7,8 +7,8 @@ fragment ReservationSummary on Reservation {
   expiresAt
 }
 
-query getReservations($userId: String!) {
-  userReservations(userId: $userId) {
+query getReservations($retailLocationId: String!, $userId: String!) {
+  userReservations(retailLocationId: $retailLocationId, userId: $userId) {
     ...ReservationSummary
   }
 }

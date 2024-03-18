@@ -32,38 +32,30 @@ export class SaleResolver {
 
   @Query(() => [Sale])
   async userSales(
-    @Args() { userId }: UserSalesQueryArgs,
+    @Args() { userId, retailLocationId }: UserSalesQueryArgs,
     @CurrentUser() { id: currentUserId, role }: User,
   ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
-
-    // Normal users can only view their own Sales
     if (currentUserId !== userId && role === Role.USER) {
       throw new ForbiddenException(
         "You do not have permission to view these sales.",
       );
     }
 
-    return this.saleService.getUserSales(userId, currentRetailLocationId);
+    return this.saleService.getUserSales(userId, retailLocationId);
   }
 
   @Query(() => [Sale])
   async userPurchases(
-    @Args() { userId }: UserPurchasesQueryArgs,
+    @Args() { userId, retailLocationId }: UserPurchasesQueryArgs,
     @CurrentUser() { id: currentUserId, role }: User,
   ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
-
-    // Normal users can only view their own purchases
     if (currentUserId !== userId && role === Role.USER) {
       throw new ForbiddenException(
         "You do not have permission to view these purchases.",
       );
     }
 
-    return this.saleService.getUserPurchases(userId, currentRetailLocationId);
+    return this.saleService.getUserPurchases(userId, retailLocationId);
   }
 
   @ResolveField(() => BookCopy)
@@ -130,22 +122,23 @@ export class SaleResolver {
     @Input() { id }: RefundSaleInput,
     @CurrentUser() { id: currentUserId, role }: User,
   ) {
-    // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
-    const currentRetailLocationId = "re";
-
     return this.prisma.$transaction(async (prisma) => {
       const toRefund = await prisma.sale.findUniqueOrThrow({
         where: {
           id,
+        },
+        include: {
           bookCopy: {
-            book: {
-              retailLocationId: currentRetailLocationId,
+            include: {
+              book: true,
             },
           },
         },
       });
 
-      // TODO: this will need to get the role based on the retail location
+      // TODO: ensure the operator have permission over this location (toRefund.bookCopy.book.retailLocationId)
+
+      // TODO: get the location-specific role for the current user
       if (role === Role.USER) {
         throw new ForbiddenException(
           "You do not have permission to refund this sale.",

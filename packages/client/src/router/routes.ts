@@ -9,39 +9,55 @@ import {
   useAuthService,
 } from "src/services/auth";
 
+// TODO: Instead of redirecting to Events, redirect to home page (when implemented)
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
+    redirect: () => ({
+      name: useAuthService().isAuthenticated.value
+        ? AvailableRouteNames.Events
+        : AvailableRouteNames.SelectLocation,
+    }),
+  },
+
+  {
+    path: "/select-location",
+    name: AvailableRouteNames.SelectLocation,
+    component: () => import("src/pages/select-location.vue"),
+    // beforeEnter: redirectIfAuthenticated,
+  },
+
+  {
+    path: "/:locationId",
     component: () =>
       import(
-        `layouts/${
-          useAuthService().isAuthenticated.value
-            ? "authenticated-layout"
-            : "guest-layout"
-        }.vue`
+        useAuthService().isAuthenticated.value
+          ? "layouts/authenticated-layout.vue"
+          : "layouts/guest-layout.vue"
       ),
     children: [
       {
-        path: "/",
-        redirect: {
+        path: "",
+        redirect: () => ({
           name: useAuthService().isAuthenticated.value
             ? AvailableRouteNames.Events
-            : "login",
-        },
+            : AvailableRouteNames.SelectLocation,
+        }),
       },
       {
         path: "contacts",
-        name: "contacts",
+        name: AvailableRouteNames.Contacts,
         component: () => import("pages/contacts.vue"),
       },
     ],
   },
+
   {
-    path: "/",
+    path: "/:locationId",
     component: () => import("layouts/guest-layout.vue"),
     beforeEnter: redirectIfAuthenticated,
     children: [
-      { path: "/", redirect: { name: "login" } },
+      { path: "", redirect: { name: AvailableRouteNames.SelectLocation } },
       {
         path: "login",
         name: "login",
@@ -85,12 +101,13 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+
   {
-    path: "/",
+    path: "/:locationId",
     component: () => import("layouts/authenticated-layout.vue"),
     beforeEnter: redirectIfGuest,
     children: [
-      { path: "/", redirect: { name: AvailableRouteNames.Events } },
+      { path: "", redirect: { name: AvailableRouteNames.Events } },
       {
         path: "events",
         name: AvailableRouteNames.Events,

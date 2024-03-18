@@ -28,13 +28,9 @@ export class ReservationResolver {
 
   @Query(() => [Reservation])
   async userReservations(
-    @Args() { userId }: UserReservationsQueryArgs,
+    @Args() { userId, retailLocationId }: UserReservationsQueryArgs,
     @CurrentUser() { id: currentUserId, role }: User,
   ) {
-    // TODO: Make this dynamic
-    const retailLocationId = "re";
-
-    // Normal users can only view their own Reservations
     if (currentUserId !== userId && role === Role.USER) {
       throw new ForbiddenException(
         "You do not have permission to view these reservations.",
@@ -143,7 +139,7 @@ export class ReservationResolver {
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async createReservations(
-    @Input() { userId, bookIds }: CreateReservationInput,
+    @Input() { userId, bookIds, retailLocationId }: CreateReservationInput,
     @CurrentUser() { id: currentUserId, role }: User,
   ) {
     if (currentUserId !== userId && role === Role.USER) {
@@ -151,9 +147,6 @@ export class ReservationResolver {
         "You do not have permission to create reservations for this user.",
       );
     }
-
-    // TODO: Make this dynamic
-    const retailLocationId = "re";
 
     const books = await this.prisma.book.findMany({
       where: { id: { in: bookIds } },
@@ -212,10 +205,7 @@ export class ReservationResolver {
       );
     }
 
-    const retailLocation = await this.prisma.retailLocation.findUniqueOrThrow({
-      where: { id: retailLocationId },
-    });
-    if (books.some((book) => book.retailLocationId !== retailLocation.id)) {
+    if (books.some((book) => book.retailLocationId !== retailLocationId)) {
       throw new UnprocessableEntityException(
         "One or more books given belong to a different retail location than the one specified.",
       );
@@ -231,6 +221,9 @@ export class ReservationResolver {
       ({ meta, requests }) => !meta.isAvailable && requests.length === 0,
     );
 
+    const retailLocation = await this.prisma.retailLocation.findUniqueOrThrow({
+      where: { id: retailLocationId },
+    });
     await this.prisma.$transaction(async (prisma) => {
       const expiresAt = new Date(
         Date.now() + retailLocation.maxBookingDays * 24 * 60 * 60 * 1000,

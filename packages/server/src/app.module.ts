@@ -13,6 +13,7 @@ import { databaseConfiguration } from "src/config/database";
 import { emailConfiguration } from "src/config/email";
 import { QueueConfiguration, queueConfiguration } from "src/config/queue";
 import { rootConfiguration } from "src/config/root";
+import { ProblemModule } from "src/modules/problem/problem.module";
 import { DateScalar } from "./date.scalar";
 import {
   GraphQLConnectionParams,
@@ -144,6 +145,7 @@ import { UserModule } from "./modules/user/user.module";
     ReservationModule,
     SaleModule,
     UserModule,
+    ProblemModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }, DateScalar],
 })

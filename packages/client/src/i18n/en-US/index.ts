@@ -153,6 +153,7 @@ export default {
     [AvailableRouteNames.UsersManagement]: "Users and Movements",
     [AvailableRouteNames.MyBooks]: "My Books",
     [AvailableRouteNames.ReserveBooks]: "Reserve Books",
+    [AvailableRouteNames.SelectLocation]: "Select Location",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",

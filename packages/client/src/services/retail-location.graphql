@@ -1,17 +1,22 @@
+fragment RetailLocation on RetailLocation {
+  id
+  name
+  fullAddress
+  phoneNumber
+  joinUsContent
+  instagramLink
+  facebookLink
+  whoAreWeContent
+
+  buyRate
+  sellRate
+  payOffEnabled
+  maxBookingDays
+  warehouseMaxBlockSize
+}
+
 query getRetailLocations {
   retailLocations {
-    id
-    maxBookingDays
-    joinUsContent
-    instagramLink
-    fullAddress
-    facebookLink
-    buyRate
-    whoAreWeContent
-    payOffEnabled
-    name
-    warehouseMaxBlockSize
-    phoneNumber
-    sellRate
+    ...RetailLocation
   }
 }

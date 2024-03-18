@@ -29,19 +29,27 @@ export class BookCopyResolver {
     private readonly bookService: BookCopyService,
   ) {}
 
+  @Query(() => [BookCopy])
+  async bookCopies(@Args() { bookId }: BookCopyQueryArgs) {
+    return this.prisma.bookCopy.findMany({
+      where: {
+        bookId,
+      },
+    });
+  }
+
   @Query(() => [BookCopy], {
     description: "Book copies that are owned by the user and is in stock",
   })
   async bookCopiesByOwner(
-    @Args()
-    { userId: ownerId }: BookCopyByUserQueryArgs,
+    @Args() { userId: ownerId, retailLocationId }: BookCopyByUserQueryArgs,
+    // TODO: ensure the current user is either the owner itself or an operator/admin
   ) {
-    const currentRetailLocationId = "re"; // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
     return this.prisma.bookCopy.findMany({
       where: {
         ownerId,
         book: {
-          retailLocationId: currentRetailLocationId,
+          retailLocationId,
         },
         returnedAt: null,
         OR: [
@@ -68,7 +76,8 @@ export class BookCopyResolver {
     description: "Book copies that were purchased by the user",
   })
   async purchasedBookCopies(
-    @Args() { userId: purchasedById }: BookCopyByUserQueryArgs,
+    @Args()
+    { userId: purchasedById, retailLocationId }: BookCopyByUserQueryArgs,
     @CurrentUser() { id: userId, role }: User,
   ) {
     if (purchasedById !== userId && role === Role.USER) {
@@ -85,6 +94,9 @@ export class BookCopyResolver {
             refundedAt: null,
           },
         },
+        book: {
+          retailLocationId,
+        },
       },
     });
   }
@@ -93,7 +105,7 @@ export class BookCopyResolver {
     description: "Book copies that belonged to the user and are currently sold",
   })
   async soldBookCopies(
-    @Args() { userId: soldById }: BookCopyByUserQueryArgs,
+    @Args() { userId: soldById, retailLocationId }: BookCopyByUserQueryArgs,
     @CurrentUser() { id: userId, role }: User,
   ) {
     if (soldById !== userId && role === Role.USER) {
@@ -110,6 +122,9 @@ export class BookCopyResolver {
             refundedAt: null,
           },
         },
+        book: {
+          retailLocationId,
+        },
       },
     });
   }
@@ -119,7 +134,7 @@ export class BookCopyResolver {
       "Book copies that were returned to the user, which is the owner of the book copies",
   })
   async returnedBookCopies(
-    @Args() { userId: ownerId }: BookCopyByUserQueryArgs,
+    @Args() { userId: ownerId, retailLocationId }: BookCopyByUserQueryArgs,
     @CurrentUser() { id: userId, role }: User,
   ) {
     if (ownerId !== userId && role === Role.USER) {
@@ -133,6 +148,9 @@ export class BookCopyResolver {
         ownerId,
         returnedById: {
           not: null,
+        },
+        book: {
+          retailLocationId,
         },
       },
     });
@@ -252,22 +270,9 @@ export class BookCopyResolver {
     return sales[0];
   }
 
-  @Query(() => [BookCopy])
-  async bookCopies(
-    @Args()
-    queryArgs: BookCopyQueryArgs,
-  ) {
-    return this.prisma.bookCopy.findMany({
-      where: {
-        ...queryArgs,
-      },
-    });
-  }
-
   @Mutation(() => Int, { nullable: true })
   async createBookCopies(
-    @Input()
-    { bookIds, ownerId }: BookCopyCreateInput,
+    @Input() { bookIds, ownerId, retailLocationId }: BookCopyCreateInput,
     @CurrentUser() { id: userId, role: userRole }: User,
   ) {
     if (userRole === Role.USER) {
@@ -276,11 +281,10 @@ export class BookCopyResolver {
       );
     }
 
-    const currentRetailLocationId = "re"; // TODO: this must come from the retailLocationId for which the current logged in user is an operator. Refactor later
     const books = await this.prisma.book.findMany({
       select: {
         id: true,
-        retailLocationId: true, // TODO: must add a control for the locationId
+        retailLocationId: true,
       },
       where: {
         id: {
@@ -289,9 +293,7 @@ export class BookCopyResolver {
       },
     });
 
-    if (
-      !books.every((book) => book.retailLocationId === currentRetailLocationId)
-    ) {
+    if (!books.every((book) => book.retailLocationId === retailLocationId)) {
       throw new ForbiddenException(
         "You are trying to create books for a retail location for which you don't have operator permissions.",
       );
@@ -301,7 +303,7 @@ export class BookCopyResolver {
       const booksCodes = await this.bookService.calculateBookCodes(
         prisma,
         bookIds,
-        currentRetailLocationId,
+        retailLocationId,
       );
 
       return prisma.bookCopy.createMany({

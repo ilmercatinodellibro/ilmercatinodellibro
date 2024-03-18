@@ -79,6 +79,7 @@ import {
   useGetPurchasedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
 } from "src/services/book-copy.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
@@ -112,9 +113,12 @@ const title = computed(() =>
   ),
 );
 
+const { selectedLocation } = useRetailLocationService();
+
 const { soldBookCopies, loading: soldLoading } = useGetSoldBookCopiesQuery(
   () => ({
     userId: props.userData.id,
+    retailLocationId: selectedLocation.value.id,
   }),
   () => ({
     enabled: props.type === "sold",
@@ -125,6 +129,7 @@ const { purchasedBookCopies, loading: purchasedLoading } =
   useGetPurchasedBookCopiesQuery(
     () => ({
       userId: props.userData.id,
+      retailLocationId: selectedLocation.value.id,
     }),
     () => ({
       enabled: props.type === "purchased",

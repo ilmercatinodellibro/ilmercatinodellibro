@@ -29,12 +29,14 @@ import { useI18n } from "vue-i18n";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
-const email = ref("");
-
-const { t } = useI18n();
+defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+
+const { t } = useI18n();
+
+const email = ref("");
 
 function onSubmit() {
   onDialogOK(email.value);

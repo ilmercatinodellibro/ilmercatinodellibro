@@ -1,13 +1,11 @@
 import { Field, InputType } from "@nestjs/graphql";
 import { GraphQLISBN } from "graphql-scalars";
+import { LocationBoundInput } from "src/modules/retail-location";
 
 @InputType()
-export class OpenCartInput {
+export class OpenCartInput extends LocationBoundInput {
   @Field()
   userId!: string;
-
-  @Field()
-  retailLocationId!: string;
 }
 
 @InputType()
