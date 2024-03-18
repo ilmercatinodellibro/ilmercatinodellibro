@@ -4,7 +4,14 @@
       <q-card-section class="column no-padding width-min-360">
         <q-list>
           <q-item
-            v-for="{ icon, label, value, showInfo, format } in userData"
+            v-for="{
+              icon,
+              label,
+              value,
+              showInfo,
+              format,
+              infoLabel,
+            } in userData"
             :key="label"
           >
             <q-item-section side>
@@ -17,14 +24,16 @@
               </span>
 
               <span class="text-black-54">
-                {{ format ? format(value) : value }}
+                {{
+                  format && typeof value === "string" ? format(value) : value
+                }}
               </span>
             </q-item-section>
 
             <q-item-section v-if="showInfo" side>
               <q-icon :name="mdiInformationOutline" color="black-54">
                 <q-tooltip>
-                  {{ t("auth.delegateLabel") }}
+                  {{ infoLabel }}
                 </q-tooltip>
               </q-icon>
             </q-item-section>
@@ -76,15 +85,14 @@ const { t } = useI18n();
 
 const { user } = useAuthService();
 
-type ItemData = {
+interface ItemData {
   icon: string;
   label: string;
-} & ({ showInfo?: false } | { showInfo: true; infoLabel: string }) & {
-    value: UserFragment[keyof UserFragment];
-  } & {
-    value?: string;
-    format?: (value?: string) => string | undefined;
-  };
+  value: UserFragment[keyof UserFragment];
+  showInfo?: boolean;
+  infoLabel?: string;
+  format?: (value?: string) => string | undefined;
+}
 
 const userData = computed<ItemData[]>(() => [
   {
