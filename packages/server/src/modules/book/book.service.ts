@@ -69,8 +69,15 @@ export class BookService {
 
     const sourceStream = createReadStream(dataSource);
     const destinationStream = createWriteStream(dataDestination);
-    const schoolsList: string[] = [];
     const locationBooks: Record<string, string[]> = {};
+    const schoolCoursesMap = new Map<
+      string,
+      {
+        year: string;
+        section: string;
+        booksIsbn: string[];
+      }[]
+    >();
 
     for (const regionCode of locationsPrefixes) {
       locationBooks[regionCode] = [];
@@ -88,12 +95,32 @@ export class BookService {
         const schoolCode = record[0];
         const provinceCode = schoolCode.substring(0, 2);
         if (locationsPrefixes.includes(provinceCode)) {
-          if (!schoolsList.includes(schoolCode)) {
-            schoolsList.push(schoolCode);
+          if (!schoolCoursesMap.has(schoolCode)) {
+            schoolCoursesMap.set(schoolCode, []);
           }
 
-          // Skip book if already present for a specific retail point
           const bookIsbn = record[6];
+
+          // Maps courses and books to their respective schools
+          const schoolCourses = schoolCoursesMap.get(schoolCode) ?? [];
+          const courseYear = record[1];
+          const courseSection = record[2];
+          const course = schoolCourses.find(
+            ({ year, section }) =>
+              year === courseYear && section === courseSection,
+          );
+          if (!course) {
+            schoolCourses.push({
+              section: courseSection,
+              year: courseYear,
+              booksIsbn: [bookIsbn],
+            });
+          } else if (!course.booksIsbn.includes(bookIsbn)) {
+            course.booksIsbn.push(bookIsbn);
+          }
+          schoolCoursesMap.set(schoolCode, schoolCourses);
+
+          // Skip book if already present for a specific retail point
           if (locationBooks[provinceCode].includes(bookIsbn)) {
             return null;
           }
@@ -138,7 +165,12 @@ export class BookService {
 
         writeFileSync(
           joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
-          schoolsList.join("\n"),
+          Array.from(schoolCoursesMap.keys()).join("\n"),
+        );
+
+        writeFileSync(
+          joinPath(process.cwd(), "./tmp-files/school_courses.json"),
+          JSON.stringify(Object.fromEntries(schoolCoursesMap)),
         );
 
         resolve();
