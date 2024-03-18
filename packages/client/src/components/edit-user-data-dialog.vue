@@ -4,10 +4,10 @@
       :title="t('auth.editMyData')"
       :submit-label="t('common.save')"
       size="sm"
-      @submit="onDialogOK(user)"
       @cancel="onDialogCancel()"
+      @submit="onDialogOK(user)"
     >
-      <q-card-section class="column gap-24 q-pa-lg">
+      <q-card-section class="column gap-4 q-pb-xs q-pt-lg q-px-lg">
         <q-input
           v-for="(field, key) in formData"
           :key="key"
@@ -15,6 +15,7 @@
           :label="field.label"
           :rules="field.rules"
           :type="field.type"
+          bottom-slots
           lazy-rules
           outlined
         >

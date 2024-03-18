@@ -24,6 +24,7 @@
             <!-- TODO: add router link -->
             <q-item
               v-ripple
+              :to="{ name: AvailableRouteNames.MyData }"
               active-class="bg-black-activated-light"
               class="drawer-item"
               clickable
