@@ -164,9 +164,10 @@ model Book {
   meta BookMeta @relation(fields: [id], references: [id])
 
   copies       BookCopy[]
-  reservations Reservation[] @relation("BookReservations")
-  requests     BookRequest[] @relation("BookRequested")
+  reservations Reservation[]    @relation("BookReservations")
+  requests     BookRequest[]    @relation("BookRequested")
   cartItems    CartItem[]
+  courses      BooksOnCourses[] @relation("CourseBook")
 }
 
 view BookMeta {
@@ -344,9 +345,32 @@ model CartItem {
   @@unique([cartId, bookId])
 }
 
+//======== School and Courses ========
 model School {
   code         String @id
   name         String
   address      String
   provinceCode String @map("province_code")
+
+  courses SchoolCourse[] @relation("OrganizingSchool")
+}
+
+model SchoolCourse {
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  year       String
+  section    String
+  schoolCode String           @map("school_code")
+  school     School           @relation("OrganizingSchool", fields: [schoolCode], references: [code], onDelete: Cascade)
+  books      BooksOnCourses[] @relation("BookSchoolCourse")
+
+  @@unique([year, section, schoolCode])
+}
+
+model BooksOnCourses {
+  schoolCourseId String       @map("school_course_id") @db.Uuid
+  bookId         String       @map("book_id") @db.Uuid
+  schoolCourse   SchoolCourse @relation("BookSchoolCourse", fields: [schoolCourseId], references: [id], onDelete: Cascade)
+  book           Book         @relation("CourseBook", fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolCourseId, bookId])
 }
