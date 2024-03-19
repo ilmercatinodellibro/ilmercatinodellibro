@@ -14,6 +14,7 @@ export enum AvailableRouteNames {
   MyBooks = "my-books",
   ReserveBooks = "reserve-books",
   SelectLocation = "select-location",
+  MyData = "my-data",
   WhoWeAre = "who-we-are",
   JoinUs = "join-us",
 }
