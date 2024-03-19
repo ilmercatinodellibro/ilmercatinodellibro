@@ -49,6 +49,16 @@ const routes: RouteRecordRaw[] = [
         name: AvailableRouteNames.Contacts,
         component: () => import("pages/contacts.vue"),
       },
+      {
+        path: "join-us",
+        name: AvailableRouteNames.JoinUs,
+        component: () => import("pages/join-us.vue"),
+      },
+      {
+        path: "who-we-are",
+        name: AvailableRouteNames.WhoWeAre,
+        component: () => import("pages/who-we-are.vue"),
+      },
     ],
   },
 
