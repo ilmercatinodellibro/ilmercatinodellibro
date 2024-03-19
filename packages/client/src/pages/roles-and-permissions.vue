@@ -14,7 +14,7 @@
         <q-btn class="q-ml-sm" color="black-12" outline @click="addUser">
           <span class="text-black-87">
             <q-icon :name="mdiAccountPlus" />
-            {{ t(`actions.addNewUser`) }}
+            {{ t("actions.addNewUser") }}
           </span>
         </q-btn>
       </q-card-section>
@@ -57,7 +57,7 @@
             no-caps
             @click="deleteUser(user.id)"
           >
-            <span class="text-black-87">{{ t(`actions.remove`) }}</span>
+            <span class="text-black-87">{{ t("actions.remove") }}</span>
           </q-btn>
         </span>
       </q-card-section>

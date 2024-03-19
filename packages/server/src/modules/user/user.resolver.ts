@@ -105,12 +105,15 @@ export class UserResolver {
     @CurrentUser() user: User,
   ) {
     try {
-      await this.prisma.locationMember.findFirstOrThrow({
+      const { role } = await this.prisma.locationMember.findFirstOrThrow({
         where: {
           userId: user.id,
           retailLocationId,
         },
       });
+      if (role !== "ADMIN") {
+        throw new Error();
+      }
     } catch {
       throw new ForbiddenException(
         "You are not allowed to view the list of members for this location.",
