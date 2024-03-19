@@ -50,7 +50,7 @@ query getCustomers(
   }
 }
 
-mutation removeMember($input: RemoveUserPayload!) {
+mutation removeMember($input: RemoveMemberPayload!) {
   removeMember(input: $input)
 }
 
