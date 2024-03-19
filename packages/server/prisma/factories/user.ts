@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Prisma } from "@prisma/client";
 import * as argon2 from "argon2";
-import { RE_RETAIL_POINT } from "test/fixtures/retail-locations";
+import RETAIL_LOCATIONS from "test/fixtures/retail-locations";
 import { SeedUserCreateInput } from "test/fixtures/users";
 
 // Correspond to "longSecret123!" encoded with argon2id defaults
@@ -33,10 +33,10 @@ export async function createUser({
     ...(role
       ? {
           memberships: {
-            create: {
-              retailLocationId: RE_RETAIL_POINT.id,
+            create: RETAIL_LOCATIONS.map((location) => ({
+              retailLocationId: location.id,
               role,
-            },
+            })),
           },
         }
       : {}),
