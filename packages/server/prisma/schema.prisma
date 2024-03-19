@@ -30,7 +30,6 @@ datasource db {
 }
 
 enum Role {
-  USER
   OPERATOR
   ADMIN
 }
@@ -47,7 +46,6 @@ model User {
   notes         String   @default("")
   discount      Boolean  @default(false)
   emailVerified Boolean  @default(false)
-  role          Role     @default(USER)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
@@ -66,15 +64,16 @@ model User {
   ownedCarts          Cart[]        @relation("CartOwner")
 
   // Operator/admin relations
-  returnedBookCopies  BookCopy[] @relation("CopyReturnedBy")
-  createdBookCopies   BookCopy[] @relation("CopyCreatedBy")
-  updatedBookCopies   BookCopy[] @relation("CopyUpdatedBy")
-  reportedProblems    Problem[]  @relation("ProblemReportedBy")
-  resolvedProblems    Problem[]  @relation("ProblemResolvedBy")
-  refundedSales       Sale[]     @relation("CopySaleRefundedBy")
-  processedSales      Sale[]     @relation("CopySoldBy")
-  salesInCreatedCarts Sale[]     @relation("SaleInCartOpenedBy")
-  createdCarts        Cart[]     @relation("CartOperator")
+  returnedBookCopies  BookCopy[]       @relation("CopyReturnedBy")
+  createdBookCopies   BookCopy[]       @relation("CopyCreatedBy")
+  updatedBookCopies   BookCopy[]       @relation("CopyUpdatedBy")
+  reportedProblems    Problem[]        @relation("ProblemReportedBy")
+  resolvedProblems    Problem[]        @relation("ProblemResolvedBy")
+  refundedSales       Sale[]           @relation("CopySaleRefundedBy")
+  processedSales      Sale[]           @relation("CopySoldBy")
+  salesInCreatedCarts Sale[]           @relation("SaleInCartOpenedBy")
+  createdCarts        Cart[]           @relation("CartOperator")
+  memberships         LocationMember[]
 }
 
 model Event {
@@ -127,8 +126,22 @@ model RetailLocation {
   maxBookingDays        Int     @default(7) @map("max_booking_days")
   warehouseMaxBlockSize Int     @default(10) @map("warehouse_max_block_size")
 
-  books Book[] @relation("RetailLocationBooks")
-  carts Cart[]
+  books   Book[]           @relation("RetailLocationBooks")
+  carts   Cart[]
+  members LocationMember[]
+}
+
+model LocationMember {
+  id String @id @default(uuid())
+
+  userId           String         @map("user_id")
+  user             User           @relation(fields: [userId], references: [id])
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation(fields: [retailLocationId], references: [id])
+
+  role Role
+
+  @@unique([userId, retailLocationId])
 }
 
 model Book {

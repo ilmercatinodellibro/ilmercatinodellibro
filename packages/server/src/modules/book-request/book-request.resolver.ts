@@ -8,7 +8,7 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Book, BookRequest, Role, Sale, User } from "src/@generated";
+import { Book, BookRequest, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -25,13 +25,21 @@ export class BookRequestResolver {
   @Query(() => [BookRequest])
   async bookRequests(
     @Args() { userId, retailLocationId }: BookRequestQueryArgs,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
-    // Normal users can only view their own book requests
-    if (currentUserId !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to view these book requests.",
-      );
+    if (currentUserId !== userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId: currentUserId,
+            retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You do not have permission to view these book requests.",
+        );
+      }
     }
 
     return this.prisma.bookRequest.findMany({
@@ -147,12 +155,27 @@ export class BookRequestResolver {
   @Mutation(() => BookRequest)
   async createBookRequest(
     @Input() { userId, bookId }: CreateBookRequestInput,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
-    if (currentUserId !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to create book requests for the given user.",
-      );
+    const book = await this.prisma.book.findUniqueOrThrow({
+      where: {
+        id: bookId,
+      },
+    });
+
+    if (currentUserId !== userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId: currentUserId,
+            retailLocationId: book.retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You do not have permission to create book requests for the given user.",
+        );
+      }
     }
 
     return this.prisma.bookRequest.create({
@@ -166,18 +189,30 @@ export class BookRequestResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteBookRequest(
     @Input() { id }: DeleteBookRequestInput,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
     const bookRequest = await this.prisma.bookRequest.findUniqueOrThrow({
       where: {
         id,
       },
+      include: {
+        book: true,
+      },
     });
 
-    if (currentUserId !== bookRequest.userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to delete this book request.",
-      );
+    if (currentUserId !== bookRequest.userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId: currentUserId,
+            retailLocationId: bookRequest.book.retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You do not have permission to delete this book request.",
+        );
+      }
     }
 
     if (bookRequest.deletedAt !== null) {

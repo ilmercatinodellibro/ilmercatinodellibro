@@ -1,5 +1,4 @@
 import { Injectable, UnprocessableEntityException } from "@nestjs/common";
-import { Role } from "@prisma/client";
 import * as argon2 from "argon2";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
 import { RegisterPayload } from "src/modules/auth/auth.args";
@@ -35,17 +34,6 @@ export class UserService {
       data: {
         ...userData,
         emailVerified,
-      },
-    });
-  }
-
-  async updateUserRole({ id, role }: { id: string; role: Role }) {
-    return this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        role,
       },
     });
   }

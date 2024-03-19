@@ -4,7 +4,7 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { Prisma, Book as PrismaBook, Role, User } from "@prisma/client";
+import { Prisma, Book as PrismaBook, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { Book, Cart } from "src/@generated";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
@@ -47,8 +47,17 @@ export class CartResolver {
     @Input() { userId, retailLocationId }: OpenCartInput,
     @CurrentUser() operator: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot create carts");
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: operator.id,
+          retailLocationId,
+        },
+      });
+    } catch {
+      throw new ForbiddenException(
+        "Only the staff of the related retail location can create carts",
+      );
     }
 
     const cart = await this.prisma.cart.findUnique({
@@ -89,8 +98,19 @@ export class CartResolver {
     }: AddToCartInput,
     @CurrentUser() operator: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot modify carts");
+    const cart = await this.cartService.ensureCartNotExpired(cartId);
+
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: operator.id,
+          retailLocationId: cart.retailLocationId,
+        },
+      });
+    } catch {
+      throw new ForbiddenException(
+        "Only the staff of the related retail location can modify the cart",
+      );
     }
 
     const inputs = [fromBookIsbn, fromBookRequestId, fromReservationId].filter(
@@ -101,8 +121,6 @@ export class CartResolver {
         "Exactly one of bookIsbn, fromBookRequestId, or fromReservationId must be provided",
       );
     }
-
-    const cart = await this.cartService.ensureCartNotExpired(cartId);
 
     let book: PrismaBook;
 
@@ -215,11 +233,20 @@ export class CartResolver {
     @Input() { cartId, bookId }: RemoveFromCartInput,
     @CurrentUser() operator: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot modify carts");
-    }
+    const cart = await this.cartService.ensureCartNotExpired(cartId);
 
-    await this.cartService.ensureCartNotExpired(cartId);
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: operator.id,
+          retailLocationId: cart.retailLocationId,
+        },
+      });
+    } catch {
+      throw new ForbiddenException(
+        "Only the staff of the related retail location can modify the cart",
+      );
+    }
 
     await this.prisma.cartItem.delete({
       where: {
@@ -236,11 +263,20 @@ export class CartResolver {
     @Input() input: FinalizeCartInput,
     @CurrentUser() operator: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot modify carts");
-    }
+    const cart = await this.cartService.ensureCartNotExpired(input.cartId);
 
-    await this.cartService.ensureCartNotExpired(input.cartId);
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: operator.id,
+          retailLocationId: cart.retailLocationId,
+        },
+      });
+    } catch {
+      throw new ForbiddenException(
+        "Only the staff of the related retail location can modify the cart",
+      );
+    }
 
     await this.prisma.$transaction(async (prisma) => {
       await this.#finalizeCart(prisma, input, operator);
@@ -379,10 +415,23 @@ export class CartResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteCart(
     @Input() { cartId }: DeleteCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() { id: userId }: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot delete carts");
+    const cart = await this.prisma.cart.findUniqueOrThrow({
+      where: { id: cartId },
+    });
+
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId,
+          retailLocationId: cart.retailLocationId,
+        },
+      });
+    } catch {
+      throw new ForbiddenException(
+        "Only the staff of the related retail location can delete the cart",
+      );
     }
 
     await this.prisma.cart.delete({

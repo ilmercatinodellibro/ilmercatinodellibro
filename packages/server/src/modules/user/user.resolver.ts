@@ -12,7 +12,9 @@ import {
 } from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
+import { Role } from "src/@generated";
 import { User } from "src/@generated/user";
+import { LocationBoundQueryArgs } from "src/modules/retail-location";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -33,7 +35,7 @@ export class UserResolver {
 
   @Query(() => UsersQueryResult)
   async users(
-    @Args() { page, rowsPerPage, roles, searchTerm }: UsersQueryArgs,
+    @Args() { page, rowsPerPage, searchTerm }: UsersQueryArgs,
     @CurrentUser() user: User,
   ) {
     if (rowsPerPage > 200) {
@@ -42,7 +44,13 @@ export class UserResolver {
       );
     }
 
-    if (user.role === "USER") {
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: user.id,
+        },
+      });
+    } catch {
       throw new ForbiddenException(
         "You are not allowed to view the list of users.",
       );
@@ -58,13 +66,6 @@ export class UserResolver {
 
     const where: Prisma.UserWhereInput = {
       emailVerified: true,
-      ...(roles.length > 0
-        ? {
-            role: {
-              in: roles,
-            },
-          }
-        : {}),
 
       ...(searchText
         ? {
@@ -100,6 +101,55 @@ export class UserResolver {
       rowsCount,
       rows,
     };
+  }
+
+  @Query(() => [User])
+  async members(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() user: User,
+  ) {
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: user.id,
+          retailLocationId,
+        },
+      });
+    } catch {
+      throw new ForbiddenException(
+        "You are not allowed to view the list of members for this location.",
+      );
+    }
+
+    return this.prisma.user.findMany({
+      where: {
+        memberships: {
+          some: {
+            retailLocationId,
+          },
+        },
+      },
+    });
+  }
+
+  @ResolveField(() => Role, { nullable: true })
+  async role(
+    @Root() user: User,
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+  ) {
+    const memberships = await this.prisma.user
+      .findUniqueOrThrow({
+        where: {
+          id: user.id,
+        },
+      })
+      .memberships({
+        where: {
+          retailLocationId,
+        },
+      });
+
+    return memberships[0]?.role;
   }
 
   @ResolveField(() => Number)
@@ -303,7 +353,19 @@ export class UserResolver {
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async updateRole(@Input() userData: UpdateRolePayload) {
-    await this.userService.updateUserRole(userData);
+  async updateRole(
+    @Input() { userId, retailLocationId, role }: UpdateRolePayload,
+  ) {
+    await this.prisma.locationMember.update({
+      where: {
+        userId_retailLocationId: {
+          userId,
+          retailLocationId,
+        },
+      },
+      data: {
+        role,
+      },
+    });
   }
 }

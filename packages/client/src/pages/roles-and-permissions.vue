@@ -89,17 +89,17 @@ import ConfirmDialog from "src/components/confirm-dialog.vue";
 import { notifyError } from "src/helpers/error-messages";
 import { ServerError } from "src/models/server";
 import { useSendRegistrationInviteMutation } from "src/services/auth.graphql";
-import { useUserService } from "src/services/user";
+import { useMembersService } from "src/services/member";
 
 const { t } = useI18n();
 
 const search = ref("");
 
-const { users, loading, removeUser, updateRole } = useUserService();
+const { members, loading, removeUser, updateRole } = useMembersService();
 
 const { sendRegistrationInvite } = useSendRegistrationInviteMutation();
 
-const ROLE_TYPE_OPTIONS = (["ADMIN", "OPERATOR", "USER"] as Role[]).map(
+const ROLE_TYPE_OPTIONS = (["ADMIN", "OPERATOR"] satisfies Role[]).map(
   (type) => ({
     label: type,
     value: type,
@@ -107,7 +107,7 @@ const ROLE_TYPE_OPTIONS = (["ADMIN", "OPERATOR", "USER"] as Role[]).map(
 );
 
 const filteredUserList = computed(() =>
-  users.value.filter((user) =>
+  members.value.filter((user) =>
     `${user.firstname} ${user.lastname} ${user.email}`
       .toLowerCase()
       .includes(search.value.toLowerCase()),

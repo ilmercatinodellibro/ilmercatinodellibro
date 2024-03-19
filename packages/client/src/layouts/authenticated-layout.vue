@@ -20,7 +20,7 @@
 
       <q-scroll-area class="col-grow">
         <q-list class="drawer-list" separator>
-          <template v-if="user && user.role === 'USER'">
+          <template v-if="user && hasUserRole">
             <!-- TODO: add router link -->
             <q-item
               v-ripple
@@ -444,7 +444,7 @@ const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 
 const { logout } = useLogoutMutation();
-const { user, hasAdminRole, hasOperatorRole } = useAuthService();
+const { user, hasAdminRole, hasOperatorRole, hasUserRole } = useAuthService();
 
 const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
   useLateralDrawer();

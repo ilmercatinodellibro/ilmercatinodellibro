@@ -8,14 +8,7 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import {
-  BookCopy,
-  BookRequest,
-  Reservation,
-  Role,
-  Sale,
-  User,
-} from "src/@generated";
+import { BookCopy, BookRequest, Reservation, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -33,12 +26,21 @@ export class SaleResolver {
   @Query(() => [Sale])
   async userSales(
     @Args() { userId, retailLocationId }: UserSalesQueryArgs,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
-    if (currentUserId !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to view these sales.",
-      );
+    if (currentUserId !== userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId: currentUserId,
+            retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You do not have permission to view these sales.",
+        );
+      }
     }
 
     return this.saleService.getUserSales(userId, retailLocationId);
@@ -47,12 +49,21 @@ export class SaleResolver {
   @Query(() => [Sale])
   async userPurchases(
     @Args() { userId, retailLocationId }: UserPurchasesQueryArgs,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
-    if (currentUserId !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to view these purchases.",
-      );
+    if (currentUserId !== userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId: currentUserId,
+            retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You do not have permission to view these purchases.",
+        );
+      }
     }
 
     return this.saleService.getUserPurchases(userId, retailLocationId);
@@ -120,7 +131,7 @@ export class SaleResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async refundSale(
     @Input() { id }: RefundSaleInput,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
     return this.prisma.$transaction(async (prisma) => {
       const toRefund = await prisma.sale.findUniqueOrThrow({
@@ -136,10 +147,14 @@ export class SaleResolver {
         },
       });
 
-      // TODO: ensure the operator have permission over this location (toRefund.bookCopy.book.retailLocationId)
-
-      // TODO: get the location-specific role for the current user
-      if (role === Role.USER) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId: currentUserId,
+            retailLocationId: toRefund.bookCopy.book.retailLocationId,
+          },
+        });
+      } catch {
         throw new ForbiddenException(
           "You do not have permission to refund this sale.",
         );

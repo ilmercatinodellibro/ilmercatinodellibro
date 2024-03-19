@@ -1,8 +1,8 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
-      :title="t(`actions.addNewUser`)"
-      :submit-label="t(`actions.sendInvitation`)"
+      :title="t('actions.addNewUser')"
+      :submit-label="t('actions.sendInvitation')"
       size="sm"
       @cancel="onDialogCancel"
       @submit="onSubmit"
@@ -12,7 +12,7 @@
           v-model="email"
           :rules="[requiredRule, emailRule]"
           lazy-rules
-          :label="t(`auth.email`)"
+          :label="t('auth.email')"
           outlined
           type="email"
           data-cy="email-field"

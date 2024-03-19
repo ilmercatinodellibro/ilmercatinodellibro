@@ -235,7 +235,7 @@ function getJwtHeader(authToken = token.value) {
 
 const hasAdminRole = computed(() => user.value?.role === "ADMIN");
 const hasOperatorRole = computed(() => user.value?.role === "OPERATOR");
-const hasUserRole = computed(() => user.value?.role === "USER");
+const hasUserRole = computed(() => user.value?.role === null);
 
 // This composable is meant to work even outside a Vue component context
 // DO NOT directly use stuff that requires a Vue context (e.g. using `useRouter`) nor return methods that use them

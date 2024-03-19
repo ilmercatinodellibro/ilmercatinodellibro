@@ -11,7 +11,7 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Book, BookCopy, Problem, Role, Sale, User } from "src/@generated";
+import { Book, BookCopy, Problem, Sale, User } from "src/@generated";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -78,12 +78,21 @@ export class BookCopyResolver {
   async purchasedBookCopies(
     @Args()
     { userId: purchasedById, retailLocationId }: BookCopyByUserQueryArgs,
-    @CurrentUser() { id: userId, role }: User,
+    @CurrentUser() { id: userId }: User,
   ) {
-    if (purchasedById !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You don't have the necessary permissions to view the purchased books of another user.",
-      );
+    if (purchasedById !== userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId,
+            retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You don't have the necessary permissions to view the purchased books of another user.",
+        );
+      }
     }
 
     return this.prisma.bookCopy.findMany({
@@ -106,12 +115,21 @@ export class BookCopyResolver {
   })
   async soldBookCopies(
     @Args() { userId: soldById, retailLocationId }: BookCopyByUserQueryArgs,
-    @CurrentUser() { id: userId, role }: User,
+    @CurrentUser() { id: userId }: User,
   ) {
-    if (soldById !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You don't have the necessary permissions to view the sold books of another user.",
-      );
+    if (soldById !== userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId,
+            retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You don't have the necessary permissions to view the sold books of another user.",
+        );
+      }
     }
 
     return this.prisma.bookCopy.findMany({
@@ -135,12 +153,21 @@ export class BookCopyResolver {
   })
   async returnedBookCopies(
     @Args() { userId: ownerId, retailLocationId }: BookCopyByUserQueryArgs,
-    @CurrentUser() { id: userId, role }: User,
+    @CurrentUser() { id: userId }: User,
   ) {
-    if (ownerId !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You don't have the necessary permissions to view the returned books of another user.",
-      );
+    if (ownerId !== userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId,
+            retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You don't have the necessary permissions to view the returned books of another user.",
+        );
+      }
     }
 
     return this.prisma.bookCopy.findMany({
@@ -273,9 +300,16 @@ export class BookCopyResolver {
   @Mutation(() => Int, { nullable: true })
   async createBookCopies(
     @Input() { bookIds, ownerId, retailLocationId }: BookCopyCreateInput,
-    @CurrentUser() { id: userId, role: userRole }: User,
+    @CurrentUser() { id: userId }: User,
   ) {
-    if (userRole === Role.USER) {
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId,
+          retailLocationId,
+        },
+      });
+    } catch {
       throw new ForbiddenException(
         "You don't have the necessary permissions to create a new book for this retail location.",
       );

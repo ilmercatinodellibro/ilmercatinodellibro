@@ -1,26 +1,32 @@
 import { Role } from "@prisma/client";
-import { computed } from "vue";
+import { useRetailLocationService } from "src/services/retail-location";
 import {
   UserFragmentDoc,
-  useGetUsersQuery,
+  useGetMembersQuery,
   useRemoveUserMutation,
   useUpdateRoleMutation,
 } from "src/services/user.graphql";
 
-export function useUserService() {
-  const { users: usersData, loading } = useGetUsersQuery(() => ({
-    // pagination for operators/admins should not be needed, so we can hardcode the values and don't need refetch
-    page: 1,
-    rowsPerPage: 200,
+export function useMembersService() {
+  const { selectedLocation } = useRetailLocationService();
+
+  const { members, loading } = useGetMembersQuery(() => ({
+    retailLocationId: selectedLocation.value.id,
   }));
 
   const { updateRole: _updateRole } = useUpdateRoleMutation();
-  async function updateRole(id: string, role: Role) {
-    const { cache } = await _updateRole({ input: { id, role } });
+  async function updateRole(userId: string, role: Role) {
+    const { cache } = await _updateRole({
+      input: {
+        userId,
+        retailLocationId: selectedLocation.value.id,
+        role,
+      },
+    });
 
     cache.updateFragment(
       {
-        id: cache.identify({ id, __typename: "User" }),
+        id: cache.identify({ id: userId, __typename: "User" }),
         fragment: UserFragmentDoc,
         fragmentName: "User",
       },
@@ -46,12 +52,8 @@ export function useUserService() {
     cache.gc();
   }
 
-  const users = computed(() => usersData.value?.rows ?? []);
-  const rowsCount = computed(() => usersData.value?.rowsCount ?? 0);
-
   return {
-    users,
-    rowsCount,
+    members,
     loading,
     removeUser,
     updateRole,
