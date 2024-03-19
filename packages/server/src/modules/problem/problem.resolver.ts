@@ -1,6 +1,7 @@
 import { ForbiddenException } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { BookCopy, Problem, User } from "src/@generated";
+import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -8,7 +9,10 @@ import { ProblemCreateInput, ProblemResolveInput } from "./problem.args";
 
 @Resolver(() => Problem)
 export class ProblemResolver {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   @ResolveField(() => User, { nullable: true })
   async resolvedBy(@Root() problem: Problem) {
@@ -60,18 +64,13 @@ export class ProblemResolver {
         book: true,
       },
     });
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId,
-          retailLocationId: bookCopy.book.retailLocationId,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: bookCopy.book.retailLocationId,
+      message:
         "You don't have the necessary permissions to create a new problem for this book copy.",
-      );
-    }
+    });
 
     const unresolvedProblem = await this.prisma.problem.findFirst({
       where: {
@@ -112,18 +111,12 @@ export class ProblemResolver {
       },
     });
 
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId,
-          retailLocationId: problem.bookCopy.book.retailLocationId,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: problem.bookCopy.book.retailLocationId,
+      message:
         "You don't have the necessary permissions to resolve a problem for this book copy.",
-      );
-    }
+    });
 
     return this.prisma.problem.update({
       where: {

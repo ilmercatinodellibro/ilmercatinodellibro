@@ -1,12 +1,12 @@
 import {
   BadRequestException,
-  ForbiddenException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { Prisma, Book as PrismaBook, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { Book, Cart } from "src/@generated";
+import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { Input } from "../auth/decorators/input.decorator";
@@ -24,6 +24,7 @@ export class CartResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cartService: CartService,
+    private readonly authService: AuthService,
   ) {}
 
   @ResolveField(() => [Book])
@@ -47,18 +48,11 @@ export class CartResolver {
     @Input() { userId, retailLocationId }: OpenCartInput,
     @CurrentUser() operator: User,
   ) {
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId: operator.id,
-          retailLocationId,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
-        "Only the staff of the related retail location can create carts",
-      );
-    }
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId,
+      message: "Only the staff of the related retail location can create carts",
+    });
 
     const cart = await this.prisma.cart.findUnique({
       where: {
@@ -100,18 +94,12 @@ export class CartResolver {
   ) {
     const cart = await this.cartService.ensureCartNotExpired(cartId);
 
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId: operator.id,
-          retailLocationId: cart.retailLocationId,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId: cart.retailLocationId,
+      message:
         "Only the staff of the related retail location can modify the cart",
-      );
-    }
+    });
 
     const inputs = [fromBookIsbn, fromBookRequestId, fromReservationId].filter(
       (input) => input !== undefined,
@@ -235,18 +223,12 @@ export class CartResolver {
   ) {
     const cart = await this.cartService.ensureCartNotExpired(cartId);
 
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId: operator.id,
-          retailLocationId: cart.retailLocationId,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId: cart.retailLocationId,
+      message:
         "Only the staff of the related retail location can modify the cart",
-      );
-    }
+    });
 
     await this.prisma.cartItem.delete({
       where: {
@@ -265,18 +247,12 @@ export class CartResolver {
   ) {
     const cart = await this.cartService.ensureCartNotExpired(input.cartId);
 
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId: operator.id,
-          retailLocationId: cart.retailLocationId,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId: cart.retailLocationId,
+      message:
         "Only the staff of the related retail location can modify the cart",
-      );
-    }
+    });
 
     await this.prisma.$transaction(async (prisma) => {
       await this.#finalizeCart(prisma, input, operator);
@@ -421,18 +397,12 @@ export class CartResolver {
       where: { id: cartId },
     });
 
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId,
-          retailLocationId: cart.retailLocationId,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: cart.retailLocationId,
+      message:
         "Only the staff of the related retail location can delete the cart",
-      );
-    }
+    });
 
     await this.prisma.cart.delete({
       where: { id: cartId },

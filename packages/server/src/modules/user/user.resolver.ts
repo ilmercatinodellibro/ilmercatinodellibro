@@ -1,7 +1,4 @@
-import {
-  ForbiddenException,
-  UnprocessableEntityException,
-} from "@nestjs/common";
+import { UnprocessableEntityException } from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -14,6 +11,7 @@ import { Prisma } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { Role } from "src/@generated";
 import { User } from "src/@generated/user";
+import { AuthService } from "src/modules/auth/auth.service";
 import { LocationBoundQueryArgs } from "src/modules/retail-location";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
@@ -27,7 +25,10 @@ import {
 
 @Resolver(() => User)
 export class UserResolver {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Query(() => UsersQueryResult)
   async users(
@@ -40,17 +41,10 @@ export class UserResolver {
       );
     }
 
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId: user.id,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
-        "You are not allowed to view the list of users.",
-      );
-    }
+    await this.authService.assertMembership({
+      userId: user.id,
+      message: "You are not allowed to view the list of users.",
+    });
 
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
@@ -104,21 +98,13 @@ export class UserResolver {
     @Args() { retailLocationId }: LocationBoundQueryArgs,
     @CurrentUser() user: User,
   ) {
-    try {
-      const { role } = await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId: user.id,
-          retailLocationId,
-        },
-      });
-      if (role !== "ADMIN") {
-        throw new Error();
-      }
-    } catch {
-      throw new ForbiddenException(
+    await this.authService.assertMembership({
+      userId: user.id,
+      retailLocationId,
+      role: Role.ADMIN,
+      message:
         "You are not allowed to view the list of members for this location.",
-      );
-    }
+    });
 
     return this.prisma.user.findMany({
       where: {
@@ -351,21 +337,12 @@ export class UserResolver {
     @Input() { id: userId, retailLocationId }: RemoveMemberPayload,
     @CurrentUser() currentUser: User,
   ) {
-    try {
-      const { role } = await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId: currentUser.id,
-          retailLocationId,
-        },
-      });
-      if (role !== "ADMIN") {
-        throw new Error();
-      }
-    } catch {
-      throw new ForbiddenException(
-        "You are not allowed to remove members from this location.",
-      );
-    }
+    await this.authService.assertMembership({
+      userId: currentUser.id,
+      retailLocationId,
+      role: Role.ADMIN,
+      message: "You are not allowed to remove members from this location.",
+    });
 
     const anyOtherAdmin = await this.prisma.locationMember.findFirst({
       where: {
@@ -397,21 +374,13 @@ export class UserResolver {
     @Input() { userId, retailLocationId, role }: UpdateRolePayload,
     @CurrentUser() currentUser: User,
   ) {
-    try {
-      const { role } = await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId: currentUser.id,
-          retailLocationId,
-        },
-      });
-      if (role !== "ADMIN") {
-        throw new Error();
-      }
-    } catch {
-      throw new ForbiddenException(
+    await this.authService.assertMembership({
+      userId: currentUser.id,
+      retailLocationId,
+      role: Role.ADMIN,
+      message:
         "You are not allowed to update roles of members in this location.",
-      );
-    }
+    });
 
     if (role !== Role.ADMIN) {
       const anyOtherAdmin = await this.prisma.locationMember.findFirst({

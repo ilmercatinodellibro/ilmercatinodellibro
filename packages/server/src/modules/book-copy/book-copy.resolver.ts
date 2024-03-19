@@ -12,6 +12,7 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { Book, BookCopy, Problem, Sale, User } from "src/@generated";
+import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -27,6 +28,7 @@ export class BookCopyResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly bookService: BookCopyService,
+    private readonly authService: AuthService,
   ) {}
 
   @Query(() => [BookCopy])
@@ -46,18 +48,12 @@ export class BookCopyResolver {
     @CurrentUser() { id: userId }: User,
   ) {
     if (ownerId !== userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId,
-            retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
+      await this.authService.assertMembership({
+        userId,
+        retailLocationId,
+        message:
           "You don't have the necessary permissions to view the book copies of another user.",
-        );
-      }
+      });
     }
 
     return this.prisma.bookCopy.findMany({
@@ -96,18 +92,12 @@ export class BookCopyResolver {
     @CurrentUser() { id: userId }: User,
   ) {
     if (purchasedById !== userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId,
-            retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
+      await this.authService.assertMembership({
+        userId,
+        retailLocationId,
+        message:
           "You don't have the necessary permissions to view the purchased books of another user.",
-        );
-      }
+      });
     }
 
     return this.prisma.bookCopy.findMany({
@@ -133,18 +123,12 @@ export class BookCopyResolver {
     @CurrentUser() { id: userId }: User,
   ) {
     if (soldById !== userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId,
-            retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
+      await this.authService.assertMembership({
+        userId,
+        retailLocationId,
+        message:
           "You don't have the necessary permissions to view the sold books of another user.",
-        );
-      }
+      });
     }
 
     return this.prisma.bookCopy.findMany({
@@ -171,18 +155,12 @@ export class BookCopyResolver {
     @CurrentUser() { id: userId }: User,
   ) {
     if (ownerId !== userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId,
-            retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
+      await this.authService.assertMembership({
+        userId,
+        retailLocationId,
+        message:
           "You don't have the necessary permissions to view the returned books of another user.",
-        );
-      }
+      });
     }
 
     return this.prisma.bookCopy.findMany({
@@ -317,18 +295,12 @@ export class BookCopyResolver {
     @Input() { bookIds, ownerId, retailLocationId }: BookCopyCreateInput,
     @CurrentUser() { id: userId }: User,
   ) {
-    try {
-      await this.prisma.locationMember.findFirstOrThrow({
-        where: {
-          userId,
-          retailLocationId,
-        },
-      });
-    } catch {
-      throw new ForbiddenException(
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId,
+      message:
         "You don't have the necessary permissions to create a new book for this retail location.",
-      );
-    }
+    });
 
     const books = await this.prisma.book.findMany({
       select: {

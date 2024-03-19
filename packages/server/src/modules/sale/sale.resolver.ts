@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException } from "@nestjs/common";
+import { ConflictException } from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -9,6 +9,7 @@ import {
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
 import { BookCopy, BookRequest, Reservation, Sale, User } from "src/@generated";
+import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -21,6 +22,7 @@ export class SaleResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly saleService: SaleService,
+    private readonly authService: AuthService,
   ) {}
 
   @Query(() => [Sale])
@@ -29,18 +31,11 @@ export class SaleResolver {
     @CurrentUser() { id: currentUserId }: User,
   ) {
     if (currentUserId !== userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId: currentUserId,
-            retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
-          "You do not have permission to view these sales.",
-        );
-      }
+      await this.authService.assertMembership({
+        userId: currentUserId,
+        retailLocationId,
+        message: "You do not have permission to view these sales.",
+      });
     }
 
     return this.saleService.getUserSales(userId, retailLocationId);
@@ -52,18 +47,11 @@ export class SaleResolver {
     @CurrentUser() { id: currentUserId }: User,
   ) {
     if (currentUserId !== userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId: currentUserId,
-            retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
-          "You do not have permission to view these purchases.",
-        );
-      }
+      await this.authService.assertMembership({
+        userId: currentUserId,
+        retailLocationId,
+        message: "You do not have permission to view these purchases.",
+      });
     }
 
     return this.saleService.getUserPurchases(userId, retailLocationId);
@@ -147,18 +135,11 @@ export class SaleResolver {
         },
       });
 
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId: currentUserId,
-            retailLocationId: toRefund.bookCopy.book.retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
-          "You do not have permission to refund this sale.",
-        );
-      }
+      await this.authService.assertMembership({
+        userId: currentUserId,
+        retailLocationId: toRefund.bookCopy.book.retailLocationId,
+        message: "You do not have permission to refund this sale.",
+      });
 
       if (toRefund.refundedAt) {
         throw new ConflictException("This sale has already been refunded.");

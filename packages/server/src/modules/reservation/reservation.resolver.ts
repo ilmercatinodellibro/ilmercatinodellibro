@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  ForbiddenException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
 import { Book, Reservation, Sale, User } from "src/@generated";
+import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -24,7 +24,10 @@ import {
 
 @Resolver(() => Reservation)
 export class ReservationResolver {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Query(() => [Reservation])
   async userReservations(
@@ -32,18 +35,11 @@ export class ReservationResolver {
     @CurrentUser() { id: currentUserId }: User,
   ) {
     if (currentUserId !== userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId: currentUserId,
-            retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
-          "You do not have permission to view these reservations.",
-        );
-      }
+      await this.authService.assertMembership({
+        userId: currentUserId,
+        retailLocationId,
+        message: "You do not have permission to view these reservations.",
+      });
     }
 
     return this.prisma.reservation.findMany({
@@ -152,18 +148,12 @@ export class ReservationResolver {
     @CurrentUser() { id: currentUserId }: User,
   ) {
     if (currentUserId !== userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId,
-            retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
+      await this.authService.assertMembership({
+        userId,
+        retailLocationId,
+        message:
           "You do not have permission to create reservations for this user.",
-        );
-      }
+      });
     }
 
     const books = await this.prisma.book.findMany({
@@ -311,18 +301,11 @@ export class ReservationResolver {
     });
 
     if (currentUserId !== reservation.userId) {
-      try {
-        await this.prisma.locationMember.findFirstOrThrow({
-          where: {
-            userId: currentUserId,
-            retailLocationId: reservation.book.retailLocationId,
-          },
-        });
-      } catch {
-        throw new ForbiddenException(
-          "You do not have permission to delete this reservation.",
-        );
-      }
+      await this.authService.assertMembership({
+        userId: currentUserId,
+        retailLocationId: reservation.book.retailLocationId,
+        message: "You do not have permission to delete this reservation.",
+      });
     }
 
     if (reservation.deletedAt !== null) {
