@@ -43,8 +43,23 @@ export class BookCopyResolver {
   })
   async bookCopiesByOwner(
     @Args() { userId: ownerId, retailLocationId }: BookCopyByUserQueryArgs,
-    // TODO: ensure the current user is either the owner itself or an operator/admin
+    @CurrentUser() { id: userId }: User,
   ) {
+    if (ownerId !== userId) {
+      try {
+        await this.prisma.locationMember.findFirstOrThrow({
+          where: {
+            userId,
+            retailLocationId,
+          },
+        });
+      } catch {
+        throw new ForbiddenException(
+          "You don't have the necessary permissions to view the book copies of another user.",
+        );
+      }
+    }
+
     return this.prisma.bookCopy.findMany({
       where: {
         ownerId,

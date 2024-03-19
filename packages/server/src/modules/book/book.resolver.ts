@@ -10,9 +10,10 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { BookCopy, BookMeta } from "src/@generated";
 import { Book } from "src/@generated/book";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookCreateInput, BookQueryArgs, BookQueryResult } from "./book.args";
@@ -184,7 +185,21 @@ export class BookResolver {
       subject,
       title,
     }: BookCreateInput,
+    @CurrentUser() { id: userId }: User,
   ) {
+    try {
+      await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId,
+          retailLocationId,
+        },
+      });
+    } catch {
+      throw new ConflictException(
+        "You do not have permission to create books for this retail location.",
+      );
+    }
+
     const bookExistsForRetailLocation = await this.prisma.book.findFirst({
       where: {
         retailLocationId,
@@ -198,7 +213,6 @@ export class BookResolver {
       );
     }
 
-    // TODO: add guard for user. Must ensure that role is operator or higher and that it is inserting the user for a retail point for which they have permission to do that.
     return this.prisma.book.create({
       data: {
         authorsFullName,
