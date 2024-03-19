@@ -245,4 +245,17 @@ export class BookResolver {
       );
     }
   }
+
+  async loadSchoolsIntoDb() {
+    try {
+      const result = await this.bookService.loadSchoolsIntoDb();
+
+      return result;
+    } catch (error) {
+      console.error("Cannot load books, error: ", error);
+      throw new UnprocessableEntityException(
+        "Cannot import or process files on server, or create entities for School or School Courses or  their join table.",
+      );
+    }
+  }
 }
