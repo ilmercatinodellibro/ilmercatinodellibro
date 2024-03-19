@@ -16,6 +16,7 @@ import {
   IngestedCsvRow,
   IngestedEquivalentSchoolRow,
   IngestedStateSchoolRow,
+  SchoolCourseDto,
   SchoolCsvConfiguration,
 } from "./book-csv.types";
 
@@ -70,14 +71,7 @@ export class BookService {
     const sourceStream = createReadStream(dataSource);
     const destinationStream = createWriteStream(dataDestination);
     const locationBooks: Record<string, string[]> = {};
-    const schoolCoursesMap = new Map<
-      string,
-      {
-        year: string;
-        section: string;
-        booksIsbn: string[];
-      }[]
-    >();
+    const schoolCoursesMap = new Map<string, SchoolCourseDto[]>();
 
     for (const regionCode of locationsPrefixes) {
       locationBooks[regionCode] = [];
@@ -335,6 +329,8 @@ export class BookService {
         data: schoolsToInsert,
       });
 
+      await this.#loadCoursesIntoDb(locationsPrefixes);
+
       return true;
     } catch (e) {
       return false;
@@ -392,5 +388,80 @@ export class BookService {
       // Starts streaming process
       sourceStream.pipe(csvParser).pipe(csvTransformer).pipe(destinationStream);
     });
+  }
+
+  async #loadCoursesIntoDb(locationsPrefixes: string[]) {
+    if (locationsPrefixes.length === 0) {
+      return false;
+    }
+
+    const coursesData = JSON.parse(
+      readFileSync(
+        joinPath(process.cwd(), "./tmp-files/school_courses.json"),
+      ).toString(),
+    ) as Record<string, SchoolCourseDto[] | undefined>;
+
+    for (const prefix of locationsPrefixes) {
+      const [locationSchools, locationBooks] = await Promise.all([
+        this.prisma.school.findMany({
+          select: {
+            code: true,
+          },
+          where: {
+            provinceCode: {
+              equals: prefix,
+              mode: "insensitive",
+            },
+          },
+        }),
+        this.prisma.book.findMany({
+          select: {
+            id: true,
+            isbnCode: true,
+            retailLocationId: true,
+          },
+          where: {
+            retailLocationId: {
+              equals: prefix,
+              mode: "insensitive",
+            },
+          },
+        }),
+      ]);
+
+      for (const { code: schoolCode } of locationSchools) {
+        const schoolCourses = coursesData[schoolCode];
+        if (!schoolCourses) {
+          continue;
+        }
+
+        for (const course of schoolCourses) {
+          const savedCourse = await this.prisma.schoolCourse.create({
+            data: {
+              section: course.section,
+              year: course.year,
+              schoolCode,
+            },
+          });
+
+          const validBooks = course.booksIsbn
+            .map((isbnCode) => ({
+              schoolCourseId: savedCourse.id,
+              bookId: locationBooks.find((book) => book.isbnCode === isbnCode)
+                ?.id,
+            }))
+            .filter(({ bookId }) => !!bookId) as {
+            schoolCourseId: string;
+            bookId: string;
+          }[];
+
+          await this.prisma.booksOnCourses.createMany({
+            data: validBooks,
+          });
+        }
+      }
+    }
+
+    return true;
   }
 }

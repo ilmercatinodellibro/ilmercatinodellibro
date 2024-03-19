@@ -76,3 +76,9 @@ export interface SchoolCsvConfiguration {
   csvTransformer: ReturnType<typeof transform>;
   removeDestination?: boolean;
 }
+
+export interface SchoolCourseDto {
+  year: string;
+  section: string;
+  booksIsbn: string[];
+}
