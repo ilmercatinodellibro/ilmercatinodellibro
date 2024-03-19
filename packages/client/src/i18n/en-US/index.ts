@@ -152,6 +152,8 @@ export default {
     [AvailableRouteNames.SalableBooks]: "Salable books",
     [AvailableRouteNames.UsersManagement]: "Users and Movements",
     [AvailableRouteNames.MyBooks]: "My Books",
+    [AvailableRouteNames.JoinUs]: "Join Us",
+    [AvailableRouteNames.WhoWeAre]: "Who we are",
     [AvailableRouteNames.ReserveBooks]: "Reserve Books",
     [AvailableRouteNames.SelectLocation]: "Select Location",
   } satisfies Record<AvailableRouteNames, string>,

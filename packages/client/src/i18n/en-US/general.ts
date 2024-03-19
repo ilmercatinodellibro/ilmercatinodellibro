@@ -53,4 +53,6 @@ export default {
     salableBooks:
       "Access this page to verify which books we accept among those that you wish to sell.",
   },
+  joinUs: "Join us",
+  whoWeAre: "Who we are",
 };

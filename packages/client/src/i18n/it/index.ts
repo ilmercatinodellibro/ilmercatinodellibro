@@ -159,6 +159,8 @@ export default {
     [AvailableRouteNames.MyBooks]: "I Miei Libri",
     [AvailableRouteNames.ReserveBooks]: "Prenota Libri",
     [AvailableRouteNames.SelectLocation]: "Seleziona la tua sede",
+    [AvailableRouteNames.JoinUs]: "Unisciti a Noi",
+    [AvailableRouteNames.WhoWeAre]: "Chi siamo",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",
