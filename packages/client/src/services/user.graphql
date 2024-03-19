@@ -50,8 +50,8 @@ query getCustomers(
   }
 }
 
-mutation removeUser($input: RemoveUserPayload!) {
-  removeUser(input: $input)
+mutation removeMember($input: RemoveUserPayload!) {
+  removeMember(input: $input)
 }
 
 mutation updateRole($input: UpdateRolePayload!) {

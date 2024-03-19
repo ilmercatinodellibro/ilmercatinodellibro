@@ -99,11 +99,11 @@ const { members, loading, removeUser, updateRole } = useMembersService();
 
 const { sendRegistrationInvite } = useSendRegistrationInviteMutation();
 
-const ROLE_TYPE_OPTIONS = (["ADMIN", "OPERATOR"] satisfies Role[]).map(
-  (type) => ({
-    label: type,
+const ROLE_TYPE_OPTIONS = computed(() =>
+  (["ADMIN", "OPERATOR"] satisfies Role[]).map((type) => ({
+    label: t(`roleMap.${type}`),
     value: type,
-  }),
+  })),
 );
 
 const filteredUserList = computed(() =>

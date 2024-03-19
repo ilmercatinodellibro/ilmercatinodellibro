@@ -30,7 +30,7 @@ export class UsersQueryResult {
 }
 
 @InputType()
-export class RemoveUserPayload {
+export class RemoveMemberPayload extends LocationBoundInput {
   @Field()
   id!: string;
 }

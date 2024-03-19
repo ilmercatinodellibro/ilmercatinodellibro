@@ -1,7 +1,7 @@
 import { Role } from "@prisma/client";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
-  UserFragmentDoc,
+  MemberFragmentDoc,
   useGetMembersQuery,
   useRemoveUserMutation,
   useUpdateRoleMutation,
@@ -27,8 +27,11 @@ export function useMembersService() {
     cache.updateFragment(
       {
         id: cache.identify({ id: userId, __typename: "User" }),
-        fragment: UserFragmentDoc,
-        fragmentName: "User",
+        fragment: MemberFragmentDoc,
+        fragmentName: "Member",
+        variables: {
+          retailLocationId: selectedLocation.value.id,
+        },
       },
       (data) => {
         if (!data) {

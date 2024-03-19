@@ -19,19 +19,15 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
-  RemoveUserPayload,
+  RemoveMemberPayload,
   UpdateRolePayload,
   UsersQueryArgs,
   UsersQueryResult,
 } from "./user.args";
-import { UserService } from "./user.service";
 
 @Resolver(() => User)
 export class UserResolver {
-  constructor(
-    private readonly userService: UserService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Query(() => UsersQueryResult)
   async users(
@@ -348,14 +344,89 @@ export class UserResolver {
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async removeUser(@Input() { id }: RemoveUserPayload) {
-    return this.userService.removeUser(id);
+  async removeMember(
+    @Input() { id: userId, retailLocationId }: RemoveMemberPayload,
+    @CurrentUser() currentUser: User,
+  ) {
+    try {
+      const { role } = await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: currentUser.id,
+          retailLocationId,
+        },
+      });
+      if (role !== "ADMIN") {
+        throw new Error();
+      }
+    } catch {
+      throw new ForbiddenException(
+        "You are not allowed to remove members from this location.",
+      );
+    }
+
+    const anyOtherAdmin = await this.prisma.locationMember.findFirst({
+      where: {
+        retailLocationId,
+        role: Role.ADMIN,
+        userId: {
+          not: userId,
+        },
+      },
+    });
+    if (!anyOtherAdmin) {
+      throw new UnprocessableEntityException(
+        "You cannot remove the last admin of a location.",
+      );
+    }
+
+    return this.prisma.locationMember.delete({
+      where: {
+        userId_retailLocationId: {
+          userId,
+          retailLocationId,
+        },
+      },
+    });
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async updateRole(
     @Input() { userId, retailLocationId, role }: UpdateRolePayload,
+    @CurrentUser() currentUser: User,
   ) {
+    try {
+      const { role } = await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: currentUser.id,
+          retailLocationId,
+        },
+      });
+      if (role !== "ADMIN") {
+        throw new Error();
+      }
+    } catch {
+      throw new ForbiddenException(
+        "You are not allowed to update roles of members in this location.",
+      );
+    }
+
+    if (role !== Role.ADMIN) {
+      const anyOtherAdmin = await this.prisma.locationMember.findFirst({
+        where: {
+          retailLocationId,
+          role: Role.ADMIN,
+          userId: {
+            not: userId,
+          },
+        },
+      });
+      if (!anyOtherAdmin) {
+        throw new UnprocessableEntityException(
+          "You cannot demote the last admin of a location.",
+        );
+      }
+    }
+
     await this.prisma.locationMember.update({
       where: {
         userId_retailLocationId: {
