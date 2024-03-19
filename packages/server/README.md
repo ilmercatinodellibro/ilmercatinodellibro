@@ -174,3 +174,49 @@ We have different drivers for sending push notifications:
 - Copy the generated private key file into `./.firebase-service-account.json`(_default path in env config_) or set the `FIREBASE_SERVICE_ACCOUNT` env variable to the path of the file
 
 Also see [Client README | Push notifications](../client/README.md#push-notifications) for setting up and configuring the client.
+
+## Importing data from files
+
+These sections explain how to load the Books and Schools plus Courses data correctly into the server at startup time for each new year.
+
+First, make sure that the Books, Schools, Courses and BooksOnCourses records have been removed, then proceed with these steps.
+
+### 1. Import Books
+
+The first step needed is to import the books dataset from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Adozioni%20libri%20di%20testo) and place it into the folder called `tmp-files`. The file name should be `ALTEMILIAROMAGNA.csv`, so the location of the file with respect to where the CLI command to run the server is executed should be `./tmp-files/ALTEMILIAROMAGNA.csv`.
+
+This operation **must** be executed before importing the schools, because this CSV directs how the content of the other CSVs needs to be managed and parsed.
+In particular, it prints out a list of School codes that were found during the analysis of the books, and only the schools with at least a book in the `ALTEMILIAROMAGNA.csv` can be later added to the DB.
+
+Note: Additionally, from this CSV it is possible to derive which books belongs to which study course and which course belongs to which school.
+The output of this operation is stored to a file called `school_courses.json`.
+
+With everything in place, at the moment the easiest way to load the Books data into DB is to go to `book.resolver.ts` and inside its constructor add the line `void this.loadBooksIntoDatabase();`, save the file and run `pnpm dev` inside the server CLI. Once the server is up and running and the operation is concluded, usually it does not take much time, you can then stop the `dev server` and remove that line of code.
+
+Once this steps is concluded, we can move on to step 2.
+
+### 2. Import School CSV and connect School Courses to their Schools
+
+Before being able to actually import School and School Courses, it is necessary to:
+
+1. Have run the import of books in step 1.
+2. Download peer schools's CSV for the current year from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Scuole) It is in the section _Informazioni anagrafiche scuole paritarie_.
+3. Rename CSV downloaded in point 2 of this list to `SCUOLE_PARITARIE.csv` and place it into the folder `./tmp-files/`.
+4. From the same link in point 2 of this list, download the CSV for the state's schools from the area called _Informazioni anagrafiche scuole statali_ and pay attention it its year.
+5. Rename CSV downloaded in point 4 of this list to `SCUOLE_STATALI.csv` and place it into the folder `./tmp-files/`.
+
+After the setup operations are concluded, you can then use the same trick of the Import Books section: go to `book.resolver.ts` and inside its constructor add the line `void this.loadSchoolsIntoDb();`, save the file and run `pnpm dev` inside the server CLI. Once the server is up and running and the operation is concluded you can then stop the `dev server` and remove that line of code. This operation takes much more time when compared to the first operation because it needs to loop through courses, create them first and then generate their books related records. From current tests it takes up to a full minute for the system to be able to create all the records it needs.
+
+After this step is done, all the pieces of the puzzle are in their place and the data has been loaded.
+
+### Improvements for import
+
+There are some possible improvements that we'll need to make in order to make the execution of the import of data more seamless.
+
+1. Use [Nest.js command files](https://docs.nestjs.com/recipes/nest-commander#a-command-file) to add a couple of commands to the available ones: one for dropping old DB content and the other one to import the Books, then Schools and courses.
+2. We can think about adding a capability of the client app that only admins can leverage to load the data of both Schools and Books into the DB.
+
+At the moment, we do not have that much time to take care of this, but the first approach sounds more like the most secure one.
+
+Another note: for the moment I decided not to connect Schools to a retailLocation, even if the school code already includes the province, thus the retailLocationId.
+This is because at the moment there are no requirements involving such a thing and in this way schools can be still viewed from other retailLocations.

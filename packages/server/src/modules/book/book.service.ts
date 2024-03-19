@@ -444,6 +444,7 @@ export class BookService {
             },
           });
 
+          // When inserting a Book, if one ISBN code is not found, we skip inserting that book
           const validBooks = course.booksIsbn
             .map((isbnCode) => ({
               schoolCourseId: savedCourse.id,
