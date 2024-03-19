@@ -8,7 +8,7 @@
 
       <q-card-section
         class="default-color no-padding"
-        v-html="selectedRetailLocation?.whoAreWeContent"
+        v-html="selectedLocation?.whoAreWeContent"
       />
     </span>
   </q-page>
@@ -16,9 +16,9 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { useRetailLocations } from "src/composables/use-retail-location";
+import { useRetailLocationService } from "src/services/retail-location";
 
-const { selectedRetailLocation } = useRetailLocations();
+const { selectedLocation } = useRetailLocationService();
 
 const { t } = useI18n();
 </script>
