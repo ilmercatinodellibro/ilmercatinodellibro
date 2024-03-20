@@ -192,9 +192,8 @@ export class BookService {
     const schoolCodesList: string[] = [];
     const schoolCodesFromBooksCsv = readFileSync(
       joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
-    )
-      .toString("utf-8")
-      .split("\n");
+      "utf-8",
+    ).split("\n");
 
     for (const regionCode of locationsPrefixes) {
       schoolCodes[regionCode] = [];
