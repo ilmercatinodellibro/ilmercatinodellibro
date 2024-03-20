@@ -3,7 +3,7 @@ import { useRetailLocationService } from "src/services/retail-location";
 import {
   MemberFragmentDoc,
   useGetMembersQuery,
-  useRemoveUserMutation,
+  useRemoveMemberMutation,
   useUpdateRoleMutation,
 } from "src/services/user.graphql";
 
@@ -46,9 +46,14 @@ export function useMembersService() {
     );
   }
 
-  const { removeUser: deleteUser } = useRemoveUserMutation();
+  const { removeMember: deleteUser } = useRemoveMemberMutation();
   async function removeUser(id: string) {
-    const { cache } = await deleteUser({ input: { id } });
+    const { cache } = await deleteUser({
+      input: {
+        id,
+        retailLocationId: selectedLocation.value.id,
+      },
+    });
 
     const cacheId = cache.identify({ id, __typename: "User" });
     cache.evict({ id: cacheId });
