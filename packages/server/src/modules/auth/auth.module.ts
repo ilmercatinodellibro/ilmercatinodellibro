@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
@@ -30,7 +30,7 @@ import { LocalStrategy } from "./strategies/local.strategy";
     }),
     PrismaModule,
     MailModule,
-    UserModule,
+    forwardRef(() => UserModule),
   ],
   providers: [AuthResolver, AuthService, LocalStrategy, JwtStrategy],
   exports: [AuthService],
