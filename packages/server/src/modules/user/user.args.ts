@@ -1,6 +1,7 @@
 import { ArgsType, Field, InputType, Int, ObjectType } from "@nestjs/graphql";
 import { User } from "src/@generated";
 import { Role } from "src/@generated/prisma";
+import { LocationBoundInput } from "src/modules/retail-location";
 
 @ArgsType()
 export class UsersQueryArgs {
@@ -9,9 +10,6 @@ export class UsersQueryArgs {
 
   @Field(() => Int, { defaultValue: 100 })
   rowsPerPage!: number;
-
-  @Field(() => [Role], { defaultValue: [] })
-  roles!: Role[];
 
   @Field(() => String, { nullable: true })
   searchTerm?: string;
@@ -32,15 +30,16 @@ export class UsersQueryResult {
 }
 
 @InputType()
-export class RemoveUserPayload {
+export class RemoveMemberPayload extends LocationBoundInput {
   @Field()
   id!: string;
 }
 
 @InputType()
-export class UpdateRolePayload {
+export class UpdateRolePayload extends LocationBoundInput {
   @Field()
-  id!: string;
+  userId!: string;
+
   @Field(() => Role)
   role!: Role;
 }

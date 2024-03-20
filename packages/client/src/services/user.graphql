@@ -7,10 +7,14 @@ fragment UserSummary on User {
 
 fragment User on User {
   ...UserSummary
-  role
   phoneNumber
   discount
   notes
+}
+
+fragment Member on User {
+  ...User
+  role(retailLocationId: $retailLocationId)
 }
 
 fragment Customer on User {
@@ -25,13 +29,9 @@ fragment Customer on User {
   booksInCart(retailLocationId: $retailLocationId)
 }
 
-query getUsers($page: Int!, $rowsPerPage: Int!) {
-  users(page: $page, rowsPerPage: $rowsPerPage, roles: [ADMIN, OPERATOR]) {
-    page
-    rowsCount
-    rows {
-      ...User
-    }
+query getMembers($retailLocationId: String!) {
+  members(retailLocationId: $retailLocationId) {
+    ...Member
   }
 }
 
@@ -41,12 +41,7 @@ query getCustomers(
   $retailLocationId: String!
   $searchTerm: String
 ) {
-  users(
-    page: $page
-    rowsPerPage: $rowsPerPage
-    roles: [USER]
-    searchTerm: $searchTerm
-  ) {
+  users(page: $page, rowsPerPage: $rowsPerPage, searchTerm: $searchTerm) {
     page
     rowsCount
     rows {
@@ -55,8 +50,8 @@ query getCustomers(
   }
 }
 
-mutation removeUser($input: RemoveUserPayload!) {
-  removeUser(input: $input)
+mutation removeMember($input: RemoveMemberPayload!) {
+  removeMember(input: $input)
 }
 
 mutation updateRole($input: UpdateRolePayload!) {

@@ -1,6 +1,7 @@
 import { ForbiddenException } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { BookCopy, Problem, Role, User } from "src/@generated";
+import { BookCopy, Problem, User } from "src/@generated";
+import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -8,7 +9,10 @@ import { ProblemCreateInput, ProblemResolveInput } from "./problem.args";
 
 @Resolver(() => Problem)
 export class ProblemResolver {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   @ResolveField(() => User, { nullable: true })
   async resolvedBy(@Root() problem: Problem) {
@@ -49,15 +53,24 @@ export class ProblemResolver {
 
   @Mutation(() => Problem)
   async reportProblem(
-    @Input()
-    input: ProblemCreateInput,
-    @CurrentUser() { id: userId, role: userRole }: User,
+    @Input() input: ProblemCreateInput,
+    @CurrentUser() { id: userId }: User,
   ) {
-    if (userRole === Role.USER) {
-      throw new ForbiddenException(
+    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
+      where: {
+        id: input.bookCopyId,
+      },
+      include: {
+        book: true,
+      },
+    });
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: bookCopy.book.retailLocationId,
+      message:
         "You don't have the necessary permissions to create a new problem for this book copy.",
-      );
-    }
+    });
 
     const unresolvedProblem = await this.prisma.problem.findFirst({
       where: {
@@ -65,7 +78,6 @@ export class ProblemResolver {
         resolvedById: null,
       },
     });
-
     if (unresolvedProblem) {
       throw new ForbiddenException(
         "A problem is already active for the current book. Please, solve that problem first.",
@@ -82,23 +94,28 @@ export class ProblemResolver {
 
   @Mutation(() => Problem)
   async resolveProblem(
-    @Input()
-    { id, ...toUpdate }: ProblemResolveInput,
-    @CurrentUser() { id: userId, role: userRole }: User,
+    @Input() { id, ...toUpdate }: ProblemResolveInput,
+    @CurrentUser() { id: userId }: User,
   ) {
-    if (userRole === Role.USER) {
-      throw new ForbiddenException(
-        "You don't have the necessary permissions to resolve a problem for this book copy.",
-      );
-    }
-
-    await this.prisma.problem.findFirstOrThrow({
+    const problem = await this.prisma.problem.findFirstOrThrow({
       where: {
-        // If the problem does not exist, throw an error
         id,
-        // If the problem was already solved, throw an exception because we must not override the old solution.
         resolvedById: null,
       },
+      include: {
+        bookCopy: {
+          include: {
+            book: true,
+          },
+        },
+      },
+    });
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: problem.bookCopy.book.retailLocationId,
+      message:
+        "You don't have the necessary permissions to resolve a problem for this book copy.",
     });
 
     return this.prisma.problem.update({

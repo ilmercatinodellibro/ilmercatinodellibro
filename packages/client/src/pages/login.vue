@@ -69,6 +69,7 @@ import KPasswordInput from "src/components/k-password-input.vue";
 import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import { useLoginMutation } from "src/services/auth";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const props = defineProps<{
   emailVerified?: boolean;
@@ -93,11 +94,15 @@ const user = ref<LoginPayload>({
 
 const showPassword = ref(false);
 
+const { selectedLocation } = useRetailLocationService();
 const { login, loading: isLoggingIn } = useLoginMutation();
 
 async function onSubmit() {
   try {
-    await login({ input: user.value });
+    await login({
+      input: user.value,
+      retailLocationId: selectedLocation.value.id,
+    });
   } catch (error) {
     const { message, graphQLErrors } = error as ApolloError;
     const status = graphQLErrors[0]?.extensions?.status as number | undefined;

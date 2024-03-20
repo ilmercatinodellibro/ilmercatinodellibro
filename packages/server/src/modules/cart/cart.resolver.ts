@@ -1,12 +1,12 @@
 import {
   BadRequestException,
-  ForbiddenException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { Prisma, Book as PrismaBook, Role, User } from "@prisma/client";
+import { Prisma, Book as PrismaBook, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { Book, Cart } from "src/@generated";
+import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { Input } from "../auth/decorators/input.decorator";
@@ -24,6 +24,7 @@ export class CartResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cartService: CartService,
+    private readonly authService: AuthService,
   ) {}
 
   @ResolveField(() => [Book])
@@ -47,9 +48,11 @@ export class CartResolver {
     @Input() { userId, retailLocationId }: OpenCartInput,
     @CurrentUser() operator: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot create carts");
-    }
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId,
+      message: "Only the staff of the related retail location can create carts",
+    });
 
     const cart = await this.prisma.cart.findUnique({
       where: {
@@ -89,9 +92,14 @@ export class CartResolver {
     }: AddToCartInput,
     @CurrentUser() operator: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot modify carts");
-    }
+    const cart = await this.cartService.ensureCartNotExpired(cartId);
+
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId: cart.retailLocationId,
+      message:
+        "Only the staff of the related retail location can modify the cart",
+    });
 
     const inputs = [fromBookIsbn, fromBookRequestId, fromReservationId].filter(
       (input) => input !== undefined,
@@ -101,8 +109,6 @@ export class CartResolver {
         "Exactly one of bookIsbn, fromBookRequestId, or fromReservationId must be provided",
       );
     }
-
-    const cart = await this.cartService.ensureCartNotExpired(cartId);
 
     let book: PrismaBook;
 
@@ -215,11 +221,14 @@ export class CartResolver {
     @Input() { cartId, bookId }: RemoveFromCartInput,
     @CurrentUser() operator: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot modify carts");
-    }
+    const cart = await this.cartService.ensureCartNotExpired(cartId);
 
-    await this.cartService.ensureCartNotExpired(cartId);
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId: cart.retailLocationId,
+      message:
+        "Only the staff of the related retail location can modify the cart",
+    });
 
     await this.prisma.cartItem.delete({
       where: {
@@ -236,11 +245,14 @@ export class CartResolver {
     @Input() input: FinalizeCartInput,
     @CurrentUser() operator: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot modify carts");
-    }
+    const cart = await this.cartService.ensureCartNotExpired(input.cartId);
 
-    await this.cartService.ensureCartNotExpired(input.cartId);
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId: cart.retailLocationId,
+      message:
+        "Only the staff of the related retail location can modify the cart",
+    });
 
     await this.prisma.$transaction(async (prisma) => {
       await this.#finalizeCart(prisma, input, operator);
@@ -379,11 +391,18 @@ export class CartResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteCart(
     @Input() { cartId }: DeleteCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() { id: userId }: User,
   ) {
-    if (operator.role === Role.USER) {
-      throw new ForbiddenException("Regular users cannot delete carts");
-    }
+    const cart = await this.prisma.cart.findUniqueOrThrow({
+      where: { id: cartId },
+    });
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: cart.retailLocationId,
+      message:
+        "Only the staff of the related retail location can delete the cart",
+    });
 
     await this.prisma.cart.delete({
       where: { id: cartId },

@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  ForbiddenException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import {
@@ -12,7 +11,8 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Book, Reservation, Role, Sale, User } from "src/@generated";
+import { Book, Reservation, Sale, User } from "src/@generated";
+import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -24,17 +24,22 @@ import {
 
 @Resolver(() => Reservation)
 export class ReservationResolver {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Query(() => [Reservation])
   async userReservations(
     @Args() { userId, retailLocationId }: UserReservationsQueryArgs,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
-    if (currentUserId !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to view these reservations.",
-      );
+    if (currentUserId !== userId) {
+      await this.authService.assertMembership({
+        userId: currentUserId,
+        retailLocationId,
+        message: "You do not have permission to view these reservations.",
+      });
     }
 
     return this.prisma.reservation.findMany({
@@ -140,12 +145,15 @@ export class ReservationResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async createReservations(
     @Input() { userId, bookIds, retailLocationId }: CreateReservationInput,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
-    if (currentUserId !== userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to create reservations for this user.",
-      );
+    if (currentUserId !== userId) {
+      await this.authService.assertMembership({
+        userId,
+        retailLocationId,
+        message:
+          "You do not have permission to create reservations for this user.",
+      });
     }
 
     const books = await this.prisma.book.findMany({
@@ -283,16 +291,21 @@ export class ReservationResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteReservation(
     @Input() { id }: DeleteReservationInput,
-    @CurrentUser() { id: currentUserId, role }: User,
+    @CurrentUser() { id: currentUserId }: User,
   ) {
     const reservation = await this.prisma.reservation.findUniqueOrThrow({
       where: { id },
+      include: {
+        book: true,
+      },
     });
 
-    if (currentUserId !== reservation.userId && role === Role.USER) {
-      throw new ForbiddenException(
-        "You do not have permission to delete this reservation.",
-      );
+    if (currentUserId !== reservation.userId) {
+      await this.authService.assertMembership({
+        userId: currentUserId,
+        retailLocationId: reservation.book.retailLocationId,
+        message: "You do not have permission to delete this reservation.",
+      });
     }
 
     if (reservation.deletedAt !== null) {

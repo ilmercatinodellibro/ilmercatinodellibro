@@ -8,11 +8,11 @@ const prisma = new PrismaClient();
 // Be careful about the execution/completion order with relations
 // Ideally create and connect the related entities in the same seed file
 async function main() {
+  await seedRetailLocations(prisma);
+
   await seedE2eTests(prisma);
 
   await seedEvents(prisma);
-
-  await seedRetailLocations(prisma);
 }
 
 main()

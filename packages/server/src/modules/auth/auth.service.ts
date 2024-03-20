@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Inject,
   Injectable,
   UnprocessableEntityException,
@@ -6,6 +7,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 // "jsonwebtoken" is a "@nestjs/jwt" transitive dependency, which reference directly because "@nestjs/jwt" don't re-export the error class
 // Adding the dependency to our package.json is a risk as it could break our code in a subtle way if upstream transitive dependency is upgraded
+import { Role } from "@prisma/client";
 import { TokenExpiredError } from "jsonwebtoken";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { MailService } from "../mail/mail.service";
@@ -39,6 +41,30 @@ export class AuthService {
       expiresIn: VERIFICATION_TOKEN_EXPIRATION_TIME,
     });
     return token;
+  }
+
+  async assertMembership(options: {
+    userId: string;
+    retailLocationId?: string;
+    role?: Role;
+    message?: string;
+  }) {
+    try {
+      const { role } = await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId: options.userId,
+          retailLocationId: options.retailLocationId,
+        },
+        select: {
+          role: true,
+        },
+      });
+      if (options.role !== undefined && role !== options.role) {
+        throw new Error();
+      }
+    } catch {
+      throw new ForbiddenException(options.message);
+    }
   }
 
   async sendInviteLink(email: string, name: string, token: string) {

@@ -3,11 +3,11 @@ fragment CurrentUser on User {
   firstname
   lastname
   email
-  role
   emailVerified
   createdAt
   updatedAt
   phoneNumber
+  role(retailLocationId: $retailLocationId)
 }
 
 fragment AuthSummary on AuthPayload {
@@ -25,7 +25,7 @@ mutation registerWithToken($input: RegisterPayload!) {
   registerWithToken(input: $input)
 }
 
-mutation login($input: LoginPayload!) {
+mutation login($input: LoginPayload!, $retailLocationId: String!) {
   login(input: $input) {
     ...AuthSummary
   }

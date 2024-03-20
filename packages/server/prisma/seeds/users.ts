@@ -1,7 +1,7 @@
-import { PrismaClient, Role, User } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import { times } from "lodash";
 import { createUser } from "prisma/factories/user";
-import { TEST_USERS } from "test/fixtures/users";
+import { TEST_ADMIN, TEST_USER, TEST_USERS } from "test/fixtures/users";
 
 const USER_COUNT = 5;
 
@@ -37,20 +37,18 @@ export async function seedTestUsers(
 export async function retrieveTestUsers(prisma: PrismaClient) {
   const testAdmin = await prisma.user.findFirst({
     where: {
-      role: Role.ADMIN,
+      email: TEST_ADMIN.email,
     },
   });
-
   if (!testAdmin) {
     throw new Error("Test admin not found");
   }
 
   const testUser = await prisma.user.findFirst({
     where: {
-      role: Role.USER,
+      email: TEST_USER.email,
     },
   });
-
   if (!testUser) {
     throw new Error("Test user not found");
   }

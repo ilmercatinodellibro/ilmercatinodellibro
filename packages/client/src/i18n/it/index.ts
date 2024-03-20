@@ -87,7 +87,6 @@ export default {
   roleMap: {
     ADMIN: "Amministratore",
     OPERATOR: "Operatore",
-    USER: "Utente Base",
   } satisfies Record<Role, string>,
   groupingOptions: {
     none: "Nessun raggruppamento",

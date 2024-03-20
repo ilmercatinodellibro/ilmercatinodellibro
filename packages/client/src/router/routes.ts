@@ -139,6 +139,7 @@ const routes: RouteRecordRaw[] = [
         path: "roles-and-permissions",
         name: AvailableRouteNames.RolesAndPermissions,
         component: () => import("src/pages/roles-and-permissions.vue"),
+        beforeEnter: redirectIfNotAdmin,
       },
       {
         path: "books-catalog",
