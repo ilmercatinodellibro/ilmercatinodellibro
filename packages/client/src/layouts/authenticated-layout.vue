@@ -351,7 +351,7 @@
       </q-scroll-area>
     </q-drawer>
 
-    <q-page-container class="bg-layout">
+    <q-page-container class="layout-background">
       <router-view />
     </q-page-container>
   </q-layout>
@@ -472,10 +472,5 @@ const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
     top: 24px;
     bottom: 8px;
   }
-}
-
-.bg-layout {
-  // This is a custom color not used anywhere else
-  background-color: #edf2fa;
 }
 </style>

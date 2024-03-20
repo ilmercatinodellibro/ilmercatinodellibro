@@ -1,12 +1,12 @@
 <template>
   <q-page class="column justify-center registration-page">
     <div class="items-center justify-center row">
-      <q-card class="form-card full-width text-center" flat>
+      <q-card class="form-card full-width text-center">
         <q-form greedy @submit="onSubmit">
-          <q-card-section class="q-px-none text-dark text-h4">
+          <q-card-section class="text-dark text-h4">
             {{ t(`auth.register`) }}
           </q-card-section>
-          <q-card-section class="q-pa-none">
+          <q-card-section>
             <q-input
               v-model="user.firstname"
               :rules="[requiredRule]"
@@ -59,7 +59,7 @@
               data-cy="password-confirmation-field"
             />
           </q-card-section>
-          <q-card-section class="q-px-none">
+          <q-card-section>
             <q-btn
               class="full-width"
               color="accent"
