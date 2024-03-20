@@ -355,18 +355,18 @@ model School {
 }
 
 model SchoolCourse {
-  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  year       String
+  id         String           @id @default(uuid())
+  grade      Int
   section    String
   schoolCode String           @map("school_code")
   school     School           @relation("OrganizingSchool", fields: [schoolCode], references: [code], onDelete: Cascade)
   books      BooksOnCourses[] @relation("BookSchoolCourse")
 
-  @@unique([year, section, schoolCode])
+  @@unique([grade, section, schoolCode])
 }
 
 model BooksOnCourses {
-  schoolCourseId String       @map("school_course_id") @db.Uuid
+  schoolCourseId String       @map("school_course_id")
   bookId         String       @map("book_id") @db.Uuid
   schoolCourse   SchoolCourse @relation("BookSchoolCourse", fields: [schoolCourseId], references: [id], onDelete: Cascade)
   book           Book         @relation("CourseBook", fields: [bookId], references: [id], onDelete: Cascade)

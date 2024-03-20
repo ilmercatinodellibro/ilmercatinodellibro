@@ -434,7 +434,7 @@ export class BookService {
           const savedCourse = await this.prisma.schoolCourse.create({
             data: {
               section: course.section,
-              year: course.year,
+              grade: parseInt(course.year),
               schoolCode,
             },
           });
