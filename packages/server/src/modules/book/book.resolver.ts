@@ -254,7 +254,7 @@ export class BookResolver {
     } catch (error) {
       console.error("Cannot load books, error: ", error);
       throw new UnprocessableEntityException(
-        "Cannot import or process files on server, or create entities for School or School Courses or  their join table.",
+        "Could not find/process the CSV files or create DB entries.",
       );
     }
   }

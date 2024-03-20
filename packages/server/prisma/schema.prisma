@@ -345,7 +345,6 @@ model CartItem {
   @@unique([cartId, bookId])
 }
 
-//======== School and Courses ========
 model School {
   code         String @id
   name         String

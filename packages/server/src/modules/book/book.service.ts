@@ -89,10 +89,6 @@ export class BookService {
         const schoolCode = record[0];
         const provinceCode = schoolCode.substring(0, 2);
         if (locationsPrefixes.includes(provinceCode)) {
-          if (!schoolCoursesMap.has(schoolCode)) {
-            schoolCoursesMap.set(schoolCode, []);
-          }
-
           const bookIsbn = record[6];
 
           // Maps courses and books to their respective schools
@@ -191,7 +187,6 @@ export class BookService {
     });
   }
 
-  //======== Parse Schools CSV ========
   async loadSchoolsIntoDb(locationsPrefixes: string[] = ["MO", "RE"]) {
     const schoolCodes: Record<string, string[]> = {};
     const schoolCodesList: string[] = [];
