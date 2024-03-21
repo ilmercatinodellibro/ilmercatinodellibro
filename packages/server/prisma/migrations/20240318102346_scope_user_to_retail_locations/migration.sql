@@ -2,17 +2,24 @@
   Warnings:
 
   - You are about to drop the column `role` on the `User` table. All the data in the column will be lost.
+  - The values [USER] on the enum `Role` will be removed. If these variants are still used in the database, this will fail.
 
 */
 -- AlterTable
 ALTER TABLE "User" DROP COLUMN "role";
+
+-- AlterEnum
+BEGIN;
+DROP TYPE "Role";
+CREATE TYPE "Role" AS ENUM ('OPERATOR', 'ADMIN');
+COMMIT;
 
 -- CreateTable
 CREATE TABLE "LocationMember" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "retail_location_id" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT 'USER',
+    "role" "Role" NOT NULL,
 
     CONSTRAINT "LocationMember_pkey" PRIMARY KEY ("id")
 );
