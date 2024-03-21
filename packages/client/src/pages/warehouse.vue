@@ -92,11 +92,17 @@
                 v-for="{ name, field, format } in bodyHeaderCols"
                 :key="name"
               >
-                {{
-                  format
-                    ? format(getFieldValue(field, bookCopy), props.row)
-                    : getFieldValue(field, bookCopy)
-                }}
+                <template v-if="name === 'status'">
+                  <book-copy-status-chip :value="bookCopy.status" />
+                </template>
+
+                <template v-else>
+                  {{
+                    format
+                      ? format(getFieldValue(field, bookCopy), props.row)
+                      : getFieldValue(field, bookCopy)
+                  }}
+                </template>
               </q-td>
             </q-tr>
           </template>
@@ -116,10 +122,15 @@ import {
 import { QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
-import { BookCopyFilters, SchoolFilters } from "src/models/book";
+import {
+  BookCopyFilters,
+  BookCopyStatus,
+  SchoolFilters,
+} from "src/models/book";
 import { useBookService } from "src/services/book";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -202,16 +213,8 @@ const pagination = ref({
   page: page.value,
 });
 
-const enum BookCopyStatuses {
-  LOST = "lost",
-  RETURNED = "returned",
-  DONATED = "donated",
-  INCOMPLETE = "incomplete",
-  NOT_AVAILABLE = "not-available",
-}
-
 type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
-  status: BookCopyFilters | BookCopyStatuses;
+  status: BookCopyStatus;
 };
 
 const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
@@ -280,7 +283,7 @@ const getBookCopies: (bookID: string) => BookCopyDetailsWithStatus[] = (
     },
     updatedAt: 0,
     updatedById: "",
-    status: BookCopyStatuses.DONATED,
+    status: BookCopyFilters.SOLD,
   },
 ];
 

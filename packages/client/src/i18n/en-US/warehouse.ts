@@ -5,4 +5,13 @@ export default {
     options: ["Reserved", "Available", "Sold", "With Problem"],
   },
   owner: "Owner",
+  bookCopyStatus: {
+    lost: "Lost",
+    returned: "Returned",
+    donated: "Donated to the Mercatino",
+    incomplete: "Incomplete",
+    "not-available": "Not Available",
+    available: "Available",
+    sold: "Sold",
+  },
 };

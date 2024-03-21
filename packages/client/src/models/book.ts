@@ -1,9 +1,21 @@
+export const enum BookCopyStatuses {
+  LOST = "lost",
+  RETURNED = "returned",
+  DONATED = "donated",
+  INCOMPLETE = "incomplete",
+  NOT_AVAILABLE = "not-available",
+}
+
 export const enum BookCopyFilters {
   RESERVED = "reserved",
   AVAILABLE = "available",
   SOLD = "sold",
   WITH_PROBLEM = "with-problem",
 }
+
+export type BookCopyStatus =
+  | BookCopyStatuses
+  | Exclude<BookCopyFilters, "with-problem" | "reserved">;
 
 export interface SchoolFilters {
   schoolCodes: string[];
