@@ -94,7 +94,11 @@ const filterOptions = useTranslatedFilters<BookCopyFilters>(
 );
 
 const selectedFiltersToString = computed(() =>
-  filters.value.map((_, index) => filterOptions.value[index]?.label).join(", "),
+  filters.value
+    .map(
+      (filter) => filterOptions.value.find(({ key }) => key === filter)?.label,
+    )
+    .join(", "),
 );
 
 // FIXME: Add actual logic with server fetch
