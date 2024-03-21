@@ -1,8 +1,8 @@
 export const enum BookCopyFilters {
-  Reserved,
-  Available,
-  Sold,
-  WithProblem,
+  RESERVED = "reserved",
+  AVAILABLE = "available",
+  SOLD = "sold",
+  WITH_PROBLEM = "with-problem",
 }
 
 export interface SchoolFilters {

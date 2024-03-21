@@ -194,6 +194,14 @@ const pagination = ref({
   page: page.value,
 });
 
+const enum BookCopyStatuses {
+  LOST = "lost",
+  RETURNED = "returned",
+  DONATED = "donated",
+  INCOMPLETE = "incomplete",
+  NOT_AVAILABLE = "not-available",
+}
+
 const bodyHeaderCols = computed<
   QTableColumn<
     BookCopyDetailsFragment & { status: BookCopyFilters | BookCopyStatuses }
@@ -232,14 +240,6 @@ const bodyHeaderCols = computed<
   },
 ]);
 
-const enum BookCopyStatuses {
-  Lost,
-  Returned,
-  Donated,
-  Incomplete,
-  NotAvailable,
-}
-
 const getBookCopies = computed<
   (BookCopyDetailsFragment & { status: BookCopyStatuses | BookCopyFilters })[]
 >(() => [
@@ -269,7 +269,7 @@ const getBookCopies = computed<
     },
     updatedAt: 0,
     updatedById: "",
-    status: BookCopyStatuses.Donated,
+    status: BookCopyStatuses.DONATED,
   },
 ]);
 
