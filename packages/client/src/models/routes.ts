@@ -17,4 +17,5 @@ export enum AvailableRouteNames {
   MyData = "my-data",
   WhoWeAre = "who-we-are",
   JoinUs = "join-us",
+  Warehouse = "warehouse",
 }

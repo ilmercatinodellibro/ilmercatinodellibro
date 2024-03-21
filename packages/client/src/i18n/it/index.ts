@@ -16,6 +16,7 @@ import network from "./network";
 import reserveBooks from "./reserve-books";
 import salableBooks from "./salable-books";
 import validators from "./validators";
+import warehouse from "./warehouse";
 
 const durationNames = {
   day: "Giorni",
@@ -54,6 +55,7 @@ export default {
   salableBooks,
   validators,
   feedbackType,
+  warehouse,
 
   common: {
     or: "Oppure",
@@ -161,6 +163,7 @@ export default {
     [AvailableRouteNames.MyData]: "I Miei Dati",
     [AvailableRouteNames.JoinUs]: "Unisciti a Noi",
     [AvailableRouteNames.WhoWeAre]: "Chi siamo",
+    [AvailableRouteNames.Warehouse]: "Magazzino",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",

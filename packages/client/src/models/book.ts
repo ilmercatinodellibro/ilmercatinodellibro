@@ -1,3 +1,10 @@
+export const enum BookCopyFilters {
+  Reserved,
+  Available,
+  Sold,
+  WithProblem,
+}
+
 export interface SchoolFilters {
   schoolCodes: string[];
   courses: string[];
