@@ -82,11 +82,18 @@
               </q-th>
             </q-tr>
 
-            <q-tr>
+            <q-tr v-for="bookCopy in getBookCopies" :key="bookCopy.id">
               <q-td auto-width />
 
-              <q-td v-for="col in bodyHeaderCols" :key="col.name">
-                {{ col.name }}
+              <q-td
+                v-for="{ name, field, format } in bodyHeaderCols"
+                :key="name"
+              >
+                {{
+                  format
+                    ? format(getFieldValue(field, bookCopy), props.row)
+                    : getFieldValue(field, bookCopy)
+                }}
               </q-td>
             </q-tr>
           </template>
@@ -124,6 +131,11 @@ const { loading, refetchBooks, booksPaginationDetails } = useBookService(
   page,
   rowsPerPage,
 );
+const getFieldValue = <T,>(
+  getterOrKey: keyof T | ((row: T) => T[keyof T]),
+  object: T,
+) =>
+  typeof getterOrKey === "function" ? getterOrKey(object) : object[getterOrKey];
 
 const { t } = useI18n();
 
@@ -186,7 +198,11 @@ const pagination = ref({
   page: page.value,
 });
 
-const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
+const bodyHeaderCols = computed<
+  QTableColumn<
+    BookCopyDetailsFragment & { status: BookCopyFilters | BookCopyStatuses }
+  >[]
+>(() => [
   {
     name: "code",
     field: "code",
@@ -200,8 +216,7 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    // FIXME: add field
-    field: () => undefined,
+    field: "status",
     label: t("book.fields.status"),
   },
   {
@@ -218,6 +233,47 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     name: "history",
     field: () => undefined,
     label: "",
+  },
+]);
+
+const enum BookCopyStatuses {
+  Lost,
+  Returned,
+  Donated,
+  Incomplete,
+  NotAvailable,
+}
+
+const getBookCopies = computed<
+  (BookCopyDetailsFragment & { status: BookCopyStatuses | BookCopyFilters })[]
+>(() => [
+  {
+    book: {
+      title: "",
+      authorsFullName: "",
+      id: "",
+      originalPrice: 0,
+      meta: {
+        isAvailable: false,
+      },
+      subject: "",
+      isbnCode: "",
+      publisherName: "",
+      retailLocationId: "",
+    },
+    code: "",
+    createdAt: 0,
+    createdById: "",
+    id: "",
+    owner: {
+      email: "",
+      firstname: "",
+      id: "",
+      lastname: "",
+    },
+    updatedAt: 0,
+    updatedById: "",
+    status: BookCopyStatuses.Donated,
   },
 ]);
 
