@@ -32,8 +32,12 @@
         <template #header="props">
           <q-tr :props="props">
             <q-th auto-width />
-            <q-th v-for="col in props.cols" :key="col.name" :props="props">
-              {{ col.label }}
+            <q-th
+              v-for="{ name, label } in props.cols"
+              :key="name"
+              :props="props"
+            >
+              {{ label }}
             </q-th>
           </q-tr>
         </template>
@@ -78,7 +82,10 @@
               </q-th>
             </q-tr>
 
-            <q-tr v-for="bookCopy in getBookCopies" :key="bookCopy.id">
+            <q-tr
+              v-for="bookCopy in getBookCopies(props.row.id)"
+              :key="bookCopy.id"
+            >
               <q-td auto-width />
 
               <q-td
@@ -127,6 +134,7 @@ const { loading, refetchBooks, booksPaginationDetails } = useBookService(
   page,
   rowsPerPage,
 );
+
 const getFieldValue = <T,>(
   getterOrKey: keyof T | ((row: T) => T[keyof T]),
   object: T,
@@ -202,47 +210,50 @@ const enum BookCopyStatuses {
   NOT_AVAILABLE = "not-available",
 }
 
-const bodyHeaderCols = computed<
-  QTableColumn<
-    BookCopyDetailsFragment & { status: BookCopyFilters | BookCopyStatuses }
-  >[]
->(() => [
-  {
-    name: "code",
-    field: "code",
-    label: t("book.code"),
-  },
-  {
-    name: "original-code",
-    field: "originalCode",
-    label: t("book.originalCode"),
-    format: (field?: string) => field ?? "/",
-  },
-  {
-    name: "status",
-    field: "status",
-    label: t("book.fields.status"),
-  },
-  {
-    name: "owner",
-    field: ({ owner }) => owner.email,
-    label: t("warehouse.owner"),
-  },
-  {
-    name: "problems",
-    field: () => undefined,
-    label: "",
-  },
-  {
-    name: "history",
-    field: () => undefined,
-    label: "",
-  },
-]);
+type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
+  status: BookCopyFilters | BookCopyStatuses;
+};
 
-const getBookCopies = computed<
-  (BookCopyDetailsFragment & { status: BookCopyStatuses | BookCopyFilters })[]
->(() => [
+const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
+  () => [
+    {
+      name: "code",
+      field: "code",
+      label: t("book.code"),
+    },
+    {
+      name: "original-code",
+      field: "originalCode",
+      label: t("book.originalCode"),
+      format: (field?: string) => field ?? "/",
+    },
+    {
+      name: "status",
+      field: "status",
+      label: t("book.fields.status"),
+    },
+    {
+      name: "owner",
+      field: ({ owner }) => owner.email,
+      label: t("warehouse.owner"),
+    },
+    {
+      name: "problems",
+      field: () => undefined,
+      label: "",
+    },
+    {
+      name: "history",
+      field: () => undefined,
+      label: "",
+    },
+  ],
+);
+
+// FIXME: remove stub
+const getBookCopies: (bookID: string) => BookCopyDetailsWithStatus[] = (
+  bookID,
+) => [
   {
     book: {
       title: "",
@@ -257,7 +268,7 @@ const getBookCopies = computed<
       publisherName: "",
       retailLocationId: "",
     },
-    code: "",
+    code: bookID,
     createdAt: 0,
     createdById: "",
     id: "",
@@ -271,7 +282,7 @@ const getBookCopies = computed<
     updatedById: "",
     status: BookCopyStatuses.DONATED,
   },
-]);
+];
 
 const updateTable = (payload: {
   filters: BookCopyFilters[];
