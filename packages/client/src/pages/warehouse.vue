@@ -60,11 +60,7 @@
                 <status-chip :value="props.row.status" />
               </template>
               <template v-else>
-                {{
-                  typeof field === "function"
-                    ? field(props.row)
-                    : props.row[field]
-                }}
+                {{ getFieldValue(field, props.row) }}
               </template>
             </q-td>
           </q-tr>
