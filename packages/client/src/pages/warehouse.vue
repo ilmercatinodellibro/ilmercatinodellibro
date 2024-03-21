@@ -191,7 +191,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
 ]);
 
 const filteredColumns = computed(() =>
-  columns.value.filter(({ name }: QTableColumn) => name !== "problems"),
+  columns.value.filter(({ name }) => name !== "problems"),
 );
 
 const rows = ref<BookSummaryFragment[]>([]);
