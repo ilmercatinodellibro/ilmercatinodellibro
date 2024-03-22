@@ -14,6 +14,7 @@ import { emailConfiguration } from "src/config/email";
 import { QueueConfiguration, queueConfiguration } from "src/config/queue";
 import { rootConfiguration } from "src/config/root";
 import { ProblemModule } from "src/modules/problem/problem.module";
+import { ReceiptModule } from "src/modules/receipt/receipt.module";
 import { DateScalar } from "./date.scalar";
 import {
   GraphQLConnectionParams,
@@ -146,6 +147,7 @@ import { UserModule } from "./modules/user/user.module";
     SaleModule,
     UserModule,
     ProblemModule,
+    ReceiptModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }, DateScalar],
 })
