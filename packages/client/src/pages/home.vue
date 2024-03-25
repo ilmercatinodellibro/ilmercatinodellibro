@@ -2,25 +2,47 @@
 <template>
   <header-bar />
   <q-page class="column flex-center q-pa-md">
-    <h3 class="text-primary">
+    <h4 class="m-mb-36 q-mt-none readability-max-width text-accent">
       {{ t("home.title") }}
-    </h3>
-    <p class="text-accent">{{ t("home.description") }}</p>
-    <h4 class="q-my-xl">{{ t("home.actionCall") }}</h4>
+    </h4>
+    <p
+      class="m-mb-36 q-ma-none readability-max-width text-center text-h5 text-primary"
+    >
+      {{ t("home.description") }}
+    </p>
+    <h5 class="m-mb-36 q-mt-none readability-max-width text-accent">
+      {{ t("home.actionCall") }}
+    </h5>
 
-    <div class="items-center row wrap">
+    <div class="items-center justify-center row wrap">
       <action-box
         v-for="action in actionsList"
         :key="action.to.name"
-        :action-text="action.text"
         :button-label="action.label"
-      />
+        class="home-action"
+      >
+        <q-icon
+          class="q-mb-lg q-mt-xl"
+          color="white"
+          :name="action.icon"
+          size="100px"
+        />
+        <div
+          class="home-action__text-content pre q-mb-lg text-center text-h4 text-white"
+        >
+          {{ action.text }}
+        </div>
+      </action-box>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { mdiBookOpenBlankVariant, mdiCurrencyEur } from "@quasar/extras/mdi-v7";
+import {
+  mdiBookOpenBlankVariant,
+  mdiCheckDecagram,
+  mdiCurrencyEur,
+} from "@quasar/extras/mdi-v7";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import ActionBox from "src/components/action-box.vue";
@@ -38,13 +60,13 @@ const actionsList = computed(() => {
       to: { name: AvailableRouteNames.SalableBooks },
     },
     {
-      icon: mdiCurrencyEur,
+      icon: mdiBookOpenBlankVariant,
       text: t("home.actions.buyBooks.text"),
       label: t("home.actions.buyBooks.buttonLabel"),
       to: { name: AvailableRouteNames.Catalog },
     },
     {
-      icon: mdiBookOpenBlankVariant,
+      icon: mdiCheckDecagram,
       text: t("home.actions.seeMyData.text"),
       label: t("home.actions.seeMyData.buttonLabel"),
       to: { name: AvailableRouteNames.MyBooks },
@@ -52,3 +74,17 @@ const actionsList = computed(() => {
   ];
 });
 </script>
+
+<style lang="scss" scoped>
+.home-action {
+  margin: 12px;
+
+  &__text-content {
+    min-height: 160px; // Should be like this to respect mockup
+  }
+}
+
+.readability-max-width {
+  max-width: 800px;
+}
+</style>
