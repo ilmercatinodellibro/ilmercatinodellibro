@@ -1,5 +1,6 @@
 export default {
   sortByCopyCode: "Sort by book copy code",
+  sortByISBN: "Sort by ISBN",
   checkOtherWarehouse: "Check the warehouse of {0}",
   filters: {
     options: ["Reserved", "Available", "Sold", "With Problem"],

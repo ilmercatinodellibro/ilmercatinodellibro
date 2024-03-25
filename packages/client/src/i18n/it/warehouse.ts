@@ -1,5 +1,6 @@
 export default {
   sortByCopyCode: "Ordina per codice copia cartacea",
+  sortByISBN: "Ordina per ISBN",
   checkOtherWarehouse: "Consulta il magazzino di {0}",
   filters: {
     options: ["Prenotati", "Presenti", "Venduti", "Con Problema"],

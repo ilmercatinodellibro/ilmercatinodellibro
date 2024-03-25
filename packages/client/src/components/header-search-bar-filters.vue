@@ -68,13 +68,15 @@
 <script setup lang="ts">
 import { mdiMagnify } from "@quasar/extras/mdi-v7";
 import { Dialog } from "quasar";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { BookCopyFilters, SchoolFilters } from "src/models/book";
 import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 
 const { t } = useI18n();
+
+const props = defineProps<{ query: string }>();
 
 const emit = defineEmits<{
   filter: [
@@ -86,7 +88,9 @@ const emit = defineEmits<{
   ];
 }>();
 
-const searchQuery = ref("");
+const searchQuery = ref(props.query);
+
+watch(props, ({ query }) => (searchQuery.value = query));
 
 const filters = ref<BookCopyFilters[]>([]);
 const filterOptions = useTranslatedFilters<BookCopyFilters>(

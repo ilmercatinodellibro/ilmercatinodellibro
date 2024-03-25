@@ -1,14 +1,18 @@
 <template>
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
-      <header-search-bar-filters @filter="updateTable">
+      <header-search-bar-filters :query="searchQuery" @filter="updateTable">
         <template #side-actions>
           <q-btn
             :icon="mdiSort"
-            :label="t('warehouse.sortByCopyCode')"
+            :label="
+              t(
+                `warehouse.${isSortedByCopyCode ? 'sortByISBN' : 'sortByCopyCode'}`,
+              )
+            "
             no-wrap
             outline
-            @click="sortByCopyCode()"
+            @click="swapSort()"
           />
           <q-btn
             :icon-right="mdiArrowRight"
@@ -21,20 +25,23 @@
       </header-search-bar-filters>
 
       <dialog-table
-        v-model:pagination="pagination"
+        v-show="!isSortedByCopyCode"
+        v-model:pagination="isbnPagination"
         :columns="columns"
-        :loading="loading"
-        :rows="rows"
+        :loading="isbnLoading"
+        :rows="isbnRows"
         :search-query="searchQuery"
         class="flex-delegate-height-management"
-        @request="onRequest"
+        @request="onIsbnRequest"
       >
         <template #header="props">
           <q-tr :props="props">
             <q-th auto-width />
+
             <q-th
               v-for="{ name, label } in props.cols"
               :key="name"
+              :colspan="name === 'title' ? 2 : 1"
               :props="props"
             >
               {{ label }}
@@ -50,12 +57,12 @@
                 color="black-54"
                 flat
                 round
-                @click="() => (props.expand = !props.expand)"
+                @click="props.expand = !props.expand"
               />
             </q-td>
 
             <q-td
-              v-for="{ name, field } in filteredColumns"
+              v-for="{ name, field } in columns"
               :key="name"
               :colspan="name === 'title' ? 2 : 1"
               auto-width
@@ -63,8 +70,13 @@
               <template v-if="name === 'status'">
                 <status-chip :value="props.row.status" />
               </template>
+
               <template v-else>
-                {{ getFieldValue(field, props.row) }}
+                <span
+                  :class="{ 'text-underline': name === 'available-copies' }"
+                >
+                  {{ getFieldValue(field, props.row) }}
+                </span>
               </template>
             </q-td>
           </q-tr>
@@ -76,6 +88,7 @@
               <q-th
                 v-for="{ name, label } in bodyHeaderCols"
                 :key="name"
+                :colspan="getColspan(name)"
                 class="height-48 text-left"
               >
                 {{ label }}
@@ -91,9 +104,33 @@
               <q-td
                 v-for="{ name, field, format } in bodyHeaderCols"
                 :key="name"
+                :auto-width="name === 'problems'"
+                :colspan="getColspan(name)"
               >
                 <template v-if="name === 'status'">
                   <book-copy-status-chip :value="bookCopy.status" />
+                </template>
+
+                <template v-else-if="name === 'problems'">
+                  <chip-button
+                    :color="props.row.problems ? 'positive' : 'negative'"
+                    :label="
+                      t(
+                        `manageUsers.booksMovementsDialog.${props.row.problems ? 'solveProblem' : 'reportProblem'}`,
+                      )
+                    "
+                    @click="openProblemDialog(props.row)"
+                  />
+                </template>
+
+                <template v-else-if="name === 'history'">
+                  <q-btn
+                    :icon="mdiHistory"
+                    color="primary"
+                    flat
+                    round
+                    @click="openHistory(props.row)"
+                  />
                 </template>
 
                 <template v-else>
@@ -108,6 +145,18 @@
           </template>
         </template>
       </dialog-table>
+
+      <dialog-table
+        v-show="isSortedByCopyCode"
+        v-model:pagination="copyPagination"
+        :columns="columns"
+        :loading="copyLoading"
+        :rows="copyRows"
+        :search-query="searchQuery"
+        class="flex-delegate-height-management"
+        @request="onCopyRequest"
+      >
+      </dialog-table>
     </q-card>
   </q-page>
 </template>
@@ -117,34 +166,62 @@ import {
   mdiArrowRight,
   mdiChevronDown,
   mdiChevronUp,
+  mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
-import { QTableColumn, QTableProps } from "quasar";
+import { Dialog, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
+import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
+import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import {
   BookCopyFilters,
   BookCopyStatus,
   SchoolFilters,
 } from "src/models/book";
+import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import { useBookCopyService } from "src/services/book-copy";
+import {
+  BookCopyDetailsFragment,
+  ProblemDetailsFragment,
+  useReportProblemMutation,
+  useResolveProblemMutation,
+} from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { selectedLocation, retailLocations } = useRetailLocationService();
 
-const page = ref(0);
-const rowsPerPage = ref(100);
+const isbnPage = ref(0);
+const isbnRowsPerPage = ref(100);
 
-const { loading, refetchBooks, booksPaginationDetails } = useBookService(
-  page,
-  rowsPerPage,
-);
+const {
+  loading: isbnLoading,
+  refetchBooks,
+  booksPaginationDetails,
+} = useBookService(isbnPage, isbnRowsPerPage);
+
+const { useGetBookCopiesQuery } = useBookCopyService();
+const {
+  loading: copyLoading,
+  refetch: refetchBookCopies,
+  bookCopies,
+} = useGetBookCopiesQuery({
+  bookId: "",
+});
+
+const { user } = useAuthService();
+
+const { resolveProblem } = useResolveProblemMutation();
+const { reportProblem } = useReportProblemMutation();
+
+const { t } = useI18n();
 
 const getFieldValue = <T,>(
   getterOrKey: keyof T | ((row: T) => T[keyof T]),
@@ -152,7 +229,7 @@ const getFieldValue = <T,>(
 ) =>
   typeof getterOrKey === "function" ? getterOrKey(object) : object[getterOrKey];
 
-const { t } = useI18n();
+const isSortedByCopyCode = ref(false);
 
 const filters = ref<BookCopyFilters[]>();
 const schoolFilters = ref<SchoolFilters>();
@@ -184,6 +261,12 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
   },
   {
+    name: "available-copies",
+    // FIXME: add field
+    field: () => undefined,
+    label: t("reserveBooks.availableCopies"),
+  },
+  {
     name: "title",
     field: "title",
     label: t("book.fields.title"),
@@ -194,23 +277,21 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     field: () => undefined,
     label: "",
   },
-  {
-    name: "history",
-    field: () => undefined,
-    label: "",
-  },
 ]);
 
-const filteredColumns = computed(() =>
-  columns.value.filter(({ name }) => name !== "problems"),
-);
+const isbnRows = ref<BookSummaryFragment[]>([]);
+const copyRows = ref<BookCopyDetailsFragment[]>([]);
 
-const rows = ref<BookSummaryFragment[]>([]);
-
-const pagination = ref({
-  rowsPerPage: rowsPerPage.value,
+const isbnPagination = ref({
+  rowsPerPage: isbnRowsPerPage.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
-  page: page.value,
+  page: isbnPage.value,
+});
+const copyPagination = ref({
+  rowsPerPage: isbnRowsPerPage.value,
+  // FIXME: add correct field once the query supports pagination
+  rowsNumber: bookCopies.value.length,
+  page: isbnPage.value,
 });
 
 type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
@@ -244,6 +325,7 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
       name: "problems",
       field: () => undefined,
       label: "",
+      align: "center",
     },
     {
       name: "history",
@@ -254,38 +336,41 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
 );
 
 // FIXME: remove stub
-const getBookCopies: (bookID: string) => BookCopyDetailsWithStatus[] = (
-  bookID,
-) => [
-  {
-    book: {
-      title: "",
-      authorsFullName: "",
+const getBookCopies = (bookID: string): BookCopyDetailsWithStatus[] => {
+  const book = isbnRows.value.find(({ id }) => id === bookID);
+  return [
+    {
+      book: book
+        ? { ...book, retailLocationId: "" }
+        : {
+            authorsFullName: "",
+            id: "",
+            isbnCode: "",
+            meta: {
+              isAvailable: false,
+            },
+            originalPrice: 0,
+            publisherName: "",
+            retailLocationId: "",
+            subject: "",
+            title: "",
+          },
+      code: "000/000",
+      createdAt: 0,
+      createdById: "",
       id: "",
-      originalPrice: 0,
-      meta: {
-        isAvailable: false,
+      owner: {
+        email: "owner@email.com",
+        firstname: "",
+        id: "",
+        lastname: "",
       },
-      subject: "",
-      isbnCode: "",
-      publisherName: "",
-      retailLocationId: "",
+      updatedAt: 0,
+      updatedById: "",
+      status: BookCopyFilters.SOLD,
     },
-    code: bookID,
-    createdAt: 0,
-    createdById: "",
-    id: "",
-    owner: {
-      email: "",
-      firstname: "",
-      id: "",
-      lastname: "",
-    },
-    updatedAt: 0,
-    updatedById: "",
-    status: BookCopyFilters.SOLD,
-  },
-];
+  ];
+};
 
 const updateTable = (payload: {
   filters: BookCopyFilters[];
@@ -297,20 +382,46 @@ const updateTable = (payload: {
   searchQuery.value = payload.searchQuery;
 };
 
-const onRequest: QTableProps["onRequest"] = async (requestProps) => {
-  loading.value = true;
+const getColspan = (name: string) =>
+  name === "original-code" || name === "status" ? 2 : 1;
 
-  const newBooks = await refetchBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-  pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+const onIsbnRequest: QTableProps["onRequest"] = async ({
+  pagination: { page, rowsPerPage },
+}) => {
+  isbnLoading.value = true;
 
-  rows.value = newBooks?.data.books.rows ?? rows.value;
+  const newBooks = (
+    await refetchBooks({
+      page: page - 1,
+      rows: rowsPerPage,
+      filter: {
+        search: searchQuery.value,
+      },
+    })
+  )?.data.books.rows;
 
-  pagination.value.page = requestProps.pagination.page;
-  pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-  loading.value = false;
+  isbnPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+
+  isbnRows.value = newBooks ?? isbnRows.value;
+
+  isbnPagination.value.page = page;
+  isbnPagination.value.rowsPerPage = rowsPerPage;
+  isbnLoading.value = false;
+};
+
+const onCopyRequest: QTableProps["onRequest"] = async ({
+  pagination: { page, rowsPerPage },
+}) => {
+  copyLoading.value = true;
+
+  const newBooks = (await refetchBookCopies())?.data.bookCopies;
+  copyPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+
+  copyRows.value = newBooks ?? copyRows.value;
+
+  copyPagination.value.page = page;
+  copyPagination.value.rowsPerPage = rowsPerPage;
+  copyLoading.value = false;
 };
 
 // We know that there are only two retail locations in the array,
@@ -322,11 +433,45 @@ const otherCityName = computed(
     )[0]?.name,
 );
 
-function sortByCopyCode() {
-  // FIXME: sort book copies by code
+function swapSort() {
+  isSortedByCopyCode.value = !isSortedByCopyCode.value;
+  searchQuery.value = "";
 }
 
 function checkOtherWarehouse() {
   // FIXME: check other warehouse
+}
+
+function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
+  Dialog.create({
+    component: ProblemsDialog,
+    componentProps: {
+      bookCopy,
+      user,
+    },
+  }).onOk(async ({ solution, details, type }: ProblemDetailsFragment) => {
+    if (solution) {
+      await resolveProblem({
+        input: { id: bookCopy.id, solution },
+      });
+    } else {
+      await reportProblem({
+        input: {
+          bookCopyId: bookCopy.id,
+          details,
+          type,
+        },
+      });
+    }
+  });
+}
+
+function openHistory(bookCopy: BookCopyDetailsFragment) {
+  Dialog.create({
+    component: ProblemsHistoryDialog,
+    componentProps: {
+      bookCopy,
+    },
+  });
 }
 </script>
