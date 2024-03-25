@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-html vue/no-v-text-v-html-on-component -->
 <template>
   <header-bar />
-  <q-page class="column flex-center">
+  <q-page class="column flex-center q-pa-md">
     <h3 class="text-primary">
       {{ t("home.title") }}
     </h3>

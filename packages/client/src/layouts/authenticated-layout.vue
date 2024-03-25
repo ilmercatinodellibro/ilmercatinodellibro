@@ -11,6 +11,7 @@
       content-class="bg-grey-1"
       show-if-above
       role="navigation"
+      bordered
       data-cy="page-drawer"
       :aria-label="t('general.mainNavigation')"
     >
@@ -49,6 +50,7 @@
               active-class="bg-black-activated-light"
               class="drawer-item"
               clickable
+              :to="{ name: AvailableRouteNames.Home }"
               data-cy="home"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">

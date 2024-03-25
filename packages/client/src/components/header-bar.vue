@@ -13,16 +13,12 @@
     >
       <template #left>
         <q-btn
-          v-if="!currentRouteIsLogin"
+          v-if="showBackToLogin"
           :icon="mdiArrowLeft"
           color="accent"
           :label="t('auth.backToLogin')"
           :to="{ name: AvailableRouteNames.Login }"
         />
-        <span v-if="user">
-          <img :src="theme.logo" class="header-logo" />
-          <q-separator vertical inset color="white-12" class="q-mx-md" />
-        </span>
       </template>
 
       <q-btn
@@ -43,15 +39,6 @@
         :label="t('routesNames.contacts')"
         :to="{ name: AvailableRouteNames.Contacts }"
       />
-
-      <!-- [1] - We're already sure of user existence thanks to auth route guards, this check is only needed to make TS happy -->
-      <!-- [1] -->
-      <user-item
-        v-if="user && !isLayoutHeaderXs"
-        :user="user"
-        class="q-mx-md"
-        data-cy="user-item"
-      />
     </k-toolbar>
   </q-header>
 </template>
@@ -67,11 +54,9 @@ import { provideHeaderFilters } from "src/composables/header-features/use-header
 import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
 import { provideHeaderSearch } from "src/composables/header-features/use-header-search";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTheme } from "src/composables/use-theme";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import kToolbar from "./k-toolbar.vue";
-import userItem from "./user-item.vue";
 
 const { isDrawerOpen, showLateralDrawer } = useLateralDrawer();
 const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
@@ -82,15 +67,14 @@ const {
   selectedFilter,
 } = provideHeaderFilters();
 const { headerName } = provideHeaderName();
-const { theme } = useTheme();
 const { user } = useAuthService();
 const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 const { t } = useI18n();
 
 const router = useRouter();
-const currentRouteIsLogin = computed(
-  () => router.currentRoute.value.name === AvailableRouteNames.Login,
+const showBackToLogin = computed(
+  () => router.currentRoute.value.name !== AvailableRouteNames.Login && !user,
 );
 </script>
 
