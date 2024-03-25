@@ -62,8 +62,9 @@
             </q-td>
 
             <q-td
-              v-for="{ name, field } in columns"
+              v-for="{ name, field, align } in columns"
               :key="name"
+              :class="align ? `text-${align}` : 'text-left'"
               :colspan="name === 'title' ? 2 : 1"
               auto-width
             >
@@ -73,7 +74,9 @@
 
               <template v-else>
                 <span
-                  :class="{ 'text-underline': name === 'available-copies' }"
+                  :class="{
+                    'text-underline': name === 'available-copies',
+                  }"
                 >
                   {{ getFieldValue(field, props.row) }}
                 </span>
@@ -265,6 +268,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     // FIXME: add field
     field: () => undefined,
     label: t("reserveBooks.availableCopies"),
+    align: "center",
   },
   {
     name: "title",
