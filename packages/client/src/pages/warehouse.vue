@@ -12,7 +12,7 @@
             "
             no-wrap
             outline
-            @click="swapSort()"
+            @click="swapView()"
           />
           <q-btn
             :icon-right="mdiArrowRight"
@@ -477,7 +477,7 @@ const otherCityName = computed(
     )[0]?.name,
 );
 
-function swapSort() {
+function swapView() {
   isSortedByCopyCode.value = !isSortedByCopyCode.value;
   searchQuery.value = "";
 }
