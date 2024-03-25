@@ -9,13 +9,12 @@ import {
   useAuthService,
 } from "src/services/auth";
 
-// TODO: Instead of redirecting to Events, redirect to home page (when implemented)
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
     redirect: () => ({
       name: useAuthService().isAuthenticated.value
-        ? AvailableRouteNames.Events
+        ? AvailableRouteNames.Home
         : AvailableRouteNames.SelectLocation,
     }),
   },
@@ -24,7 +23,7 @@ const routes: RouteRecordRaw[] = [
     path: "/select-location",
     name: AvailableRouteNames.SelectLocation,
     component: () => import("src/pages/select-location.vue"),
-    // beforeEnter: redirectIfAuthenticated,
+    beforeEnter: redirectIfAuthenticated,
   },
 
   {
@@ -40,7 +39,7 @@ const routes: RouteRecordRaw[] = [
         path: "",
         redirect: () => ({
           name: useAuthService().isAuthenticated.value
-            ? AvailableRouteNames.Events
+            ? AvailableRouteNames.Home
             : AvailableRouteNames.SelectLocation,
         }),
       },
@@ -117,12 +116,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import("layouts/authenticated-layout.vue"),
     beforeEnter: redirectIfGuest,
     children: [
-      { path: "", redirect: { name: AvailableRouteNames.Events } },
-      {
-        path: "events",
-        name: AvailableRouteNames.Events,
-        component: () => import("src/pages/events.vue"),
-      },
+      { path: "", redirect: { name: AvailableRouteNames.Home } },
 
       {
         path: "home",
