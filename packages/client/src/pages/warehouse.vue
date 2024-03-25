@@ -149,7 +149,7 @@
       <dialog-table
         v-show="isSortedByCopyCode"
         v-model:pagination="copyPagination"
-        :columns="columns"
+        :columns="bookCopyColumns"
         :loading="copyLoading"
         :rows="copyRows"
         :search-query="searchQuery"
@@ -305,21 +305,36 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
       field: "code",
       label: t("book.code"),
     },
+    ...bookCopyColumns.value.filter(({ name }) => name !== "isbn"),
+  ],
+);
+
+const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
+  () => [
     {
       name: "original-code",
       field: "originalCode",
       label: t("book.originalCode"),
       format: (field?: string) => field ?? "/",
+      align: "left",
+    },
+    {
+      name: "isbn",
+      field: ({ book }) => book.isbnCode,
+      label: t("book.fields.isbn"),
+      align: "left",
     },
     {
       name: "status",
       field: "status",
       label: t("book.fields.status"),
+      align: "left",
     },
     {
       name: "owner",
       field: ({ owner }) => owner.email,
       label: t("warehouse.owner"),
+      align: "left",
     },
     {
       name: "problems",
