@@ -159,6 +159,31 @@
         class="flex-delegate-height-management"
         @request="onCopyRequest"
       >
+        <template #body-cell-status="{ value }">
+          <book-copy-status-chip :value="value" />
+        </template>
+
+        <template #body-cell-problems="{ value }">
+          <chip-button
+            :color="value.problems ? 'positive' : 'negative'"
+            :label="
+              t(
+                `manageUsers.booksMovementsDialog.${value.problems ? 'solveProblem' : 'reportProblem'}`,
+              )
+            "
+            @click="openProblemDialog(value)"
+          />
+        </template>
+
+        <template #body-cell-history="{ value }">
+          <q-btn
+            :icon="mdiHistory"
+            color="primary"
+            flat
+            round
+            @click="openHistory(value)"
+          />
+        </template>
       </dialog-table>
     </q-card>
   </q-page>
