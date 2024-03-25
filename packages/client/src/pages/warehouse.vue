@@ -9,23 +9,55 @@
       >
         <template #side-actions>
           <q-btn
-            :icon="mdiSort"
-            :label="
-              t(
-                `warehouse.${isSortedByCopyCode ? 'sortByISBN' : 'sortByCopyCode'}`,
-              )
-            "
-            no-wrap
-            outline
-            @click="swapView()"
-          />
-          <q-btn
-            :icon-right="mdiArrowRight"
-            :label="t('warehouse.checkOtherWarehouse', [otherCityName])"
-            color="accent"
-            no-wrap
-            @click="checkOtherWarehouse()"
-          />
+            v-if="screenWidth === WidthSize.SM"
+            :icon="mdiDotsVertical"
+            color="black-54"
+            round
+            flat
+          >
+            <q-menu>
+              <q-item clickable @click="swapView()">
+                <q-item-section>
+                  <q-item-label>
+                    {{
+                      t(
+                        `warehouse.${isSortedByCopyCode ? "sortByISBN" : "sortByCopyCode"}`,
+                      )
+                    }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable @click="checkOtherWarehouse()">
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("warehouse.checkOtherWarehouse", [otherCityName]) }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-menu>
+          </q-btn>
+
+          <template v-else>
+            <q-btn
+              :icon="mdiSort"
+              :label="
+                t(
+                  `warehouse.${isSortedByCopyCode ? 'sortByISBN' : 'sortByCopyCode'}`,
+                )
+              "
+              no-wrap
+              outline
+              @click="swapView()"
+            />
+            <q-btn
+              :icon-right="mdiArrowRight"
+              :label="t('warehouse.checkOtherWarehouse', [otherCityName])"
+              color="accent"
+              no-wrap
+              @click="checkOtherWarehouse()"
+            />
+          </template>
         </template>
       </header-search-bar-filters>
 
@@ -199,6 +231,7 @@ import {
   mdiArrowRight,
   mdiChevronDown,
   mdiChevronUp,
+  mdiDotsVertical,
   mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
@@ -212,6 +245,7 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
 import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import {
   BookCopyFilters,
   BookCopyStatus,
@@ -258,6 +292,8 @@ const { resolveProblem } = useResolveProblemMutation();
 const { reportProblem } = useReportProblemMutation();
 
 const { t } = useI18n();
+
+const screenWidth = useScreenWidth(1694);
 
 const getFieldValue = <T,>(
   getterOrKey: keyof T | ((row: T) => T[keyof T]),
