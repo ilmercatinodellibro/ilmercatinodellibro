@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Inject, Injectable } from "@nestjs/common";
 import { GenerateProps } from "@pdfme/common";
@@ -95,10 +95,10 @@ export class ReceiptService {
       userEmail: receipt.user.email,
       books,
     });
-    await writeFile(
-      resolve(this.rootConfig.fileSystemPath, `receipts/${receipt.id}.pdf`),
-      receiptPdf,
-    );
+
+    const directory = resolve(this.rootConfig.fileSystemPath, "./receipts");
+    await mkdir(directory, { recursive: true }); // Ensure the directory exists
+    await writeFile(resolve(directory, `./${receipt.id}.pdf`), receiptPdf);
 
     return receipt;
   }
