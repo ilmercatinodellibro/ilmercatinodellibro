@@ -125,6 +125,11 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
+        path: "home",
+        name: AvailableRouteNames.Home,
+        component: () => import("src/pages/home.vue"),
+      },
+      {
         path: "theme",
         name: AvailableRouteNames.Theme,
         component: () => import("src/pages/theme.vue"),
