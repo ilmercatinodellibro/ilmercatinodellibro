@@ -1,0 +1,150 @@
+{
+  "schemas": [
+    {
+      "headerTitle": {
+        "type": "readOnlyText",
+        "position": { "x": 10, "y": 6.5 },
+        "content": "Ricevuta di Acquisto",
+        "width": 100,
+        "height": 5.5,
+        "rotate": 0,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "fontSize": 10,
+        "lineHeight": 1,
+        "characterSpacing": 0,
+        "fontColor": "#000000",
+        "backgroundColor": "",
+        "opacity": 1,
+        "readOnly": true,
+        "fontName": "NotoSerifJP-Regular"
+      },
+      "headerSubtitle": {
+        "type": "text",
+        "content": "{location}",
+        "position": { "x": 10, "y": 12 },
+        "width": 100,
+        "height": 5.5,
+        "rotate": 0,
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "fontSize": 10,
+        "lineHeight": 1,
+        "characterSpacing": 0,
+        "fontColor": "#000000",
+        "backgroundColor": "",
+        "opacity": 1,
+        "fontName": "NotoSerifJP-Regular"
+      },
+      "headerDate": {
+        "type": "text",
+        "content": "{date}",
+        "position": { "x": 220, "y": 9.04 },
+        "width": 70,
+        "height": 5.75,
+        "rotate": 0,
+        "alignment": "right",
+        "verticalAlignment": "middle",
+        "fontSize": 10,
+        "lineHeight": 1,
+        "characterSpacing": 0,
+        "fontColor": "#000000",
+        "backgroundColor": "",
+        "opacity": 1,
+        "fontName": "NotoSerifJP-Regular"
+      },
+      "headerSeparator": {
+        "type": "line",
+        "position": { "x": 10, "y": 18.7 },
+        "width": 280,
+        "height": 0.5,
+        "rotate": 0,
+        "opacity": 1,
+        "readOnly": true,
+        "color": "#000000"
+      },
+      "title": {
+        "type": "text",
+        "content": "Ricevuta di {email}",
+        "position": { "x": 10, "y": 27.76 },
+        "width": 280,
+        "height": 10,
+        "rotate": 0,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "fontSize": 16,
+        "lineHeight": 1,
+        "characterSpacing": 0,
+        "fontColor": "#000000",
+        "backgroundColor": "",
+        "opacity": 1
+      },
+      "table": {
+        "type": "table",
+        "position": { "x": 10, "y": 43 },
+        "width": 280,
+        "height": 27.640000000000004,
+        "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\"]]",
+        "showHead": true,
+        "head": ["ISBN", "Titolo", "Materia", "Prezzo di Vendita"],
+        "headWidthPercentages": [
+          12.695641670590623, 50.497683704951354, 26.138244092042642,
+          10.668430532479764
+        ],
+        "tableStyles": { "borderWidth": 0, "borderColor": "" },
+        "headStyles": {
+          "fontName": "NotoSerifJP-Regular",
+          "fontSize": 10,
+          "characterSpacing": 0,
+          "alignment": "left",
+          "verticalAlignment": "middle",
+          "lineHeight": 1,
+          "fontColor": "#000000",
+          "borderColor": "",
+          "backgroundColor": "",
+          "borderWidth": {
+            "top": 0.5,
+            "right": 0.5,
+            "bottom": 0.5,
+            "left": 0.5
+          },
+          "padding": { "top": 1, "right": 1, "bottom": 1, "left": 1 }
+        },
+        "bodyStyles": {
+          "fontName": "NotoSerifJP-Regular",
+          "fontSize": 10,
+          "characterSpacing": 0,
+          "alignment": "left",
+          "verticalAlignment": "middle",
+          "lineHeight": 1,
+          "fontColor": "#000000",
+          "borderColor": "",
+          "backgroundColor": "",
+          "alternateBackgroundColor": "",
+          "borderWidth": { "top": 1, "right": 1, "bottom": 1, "left": 1 },
+          "padding": { "top": 2, "right": 1, "bottom": 2, "left": 1 }
+        },
+        "columnStyles": {}
+      },
+      "notice": {
+        "type": "text",
+        "content": "Il totale da pagare è: {totalPrice}",
+        "position": { "x": 10, "y": 76.32 },
+        "width": 279.95,
+        "height": 13.43,
+        "rotate": 0,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "fontSize": 11,
+        "lineHeight": 1,
+        "characterSpacing": 0,
+        "fontColor": "#000000",
+        "backgroundColor": "",
+        "opacity": 1,
+        "fontName": "NotoSerifJP-Regular"
+      }
+    }
+  ],
+  "basePdf": { "width": 300, "height": 215, "padding": [5, 10, 5, 10] },
+  "pdfmeVersion": "4-dev"
+}
