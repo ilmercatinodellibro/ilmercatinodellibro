@@ -1,29 +1,36 @@
 <template>
-  <div class="fit q-pa-xl row">
-    <q-spinner v-if="loading" />
+  <q-layout view="lHh Lpr lFf">
+    <q-page-container class="layout-background">
+      <q-page class="fit q-pa-xl row">
+        <q-spinner v-if="loading" />
 
-    <div
-      v-for="location in retailLocations"
-      :key="location.id"
-      class="col flex flex-center"
-    >
-      <q-btn
-        :label="location.name"
-        color="secondary"
-        @click="selectLocation(location)"
-      />
-    </div>
-  </div>
+        <div
+          v-for="location in retailLocations"
+          :key="location.id"
+          class="col flex flex-center"
+        >
+          <action-box
+            :action-text="location.name"
+            :button-label="t('auth.login')"
+            @action-clicked="selectLocation(location)"
+          />
+        </div>
+      </q-page>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+import ActionBox from "src/components/action-box.vue";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
 import { RetailLocationFragment } from "src/services/retail-location.graphql";
 
 const { retailLocations, loading, selectedLocationId } =
   useRetailLocationService();
+const { t } = useI18n();
 
 const router = useRouter();
 async function selectLocation(location: RetailLocationFragment) {
