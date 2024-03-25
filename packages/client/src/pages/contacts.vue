@@ -1,4 +1,5 @@
 <template>
+  <header-bar v-if="user" />
   <q-page class="contacts-container">
     <q-card class="contacts-card">
       <span class="contacts-title text-primary">
@@ -80,10 +81,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { defineAsyncComponent, ref } from "vue";
 import SocialButton from "src/components/social-button.vue";
 import { useAuthService } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
+
+const HeaderBar = defineAsyncComponent(
+  () => import("src/components/header-bar.vue"),
+);
 
 const userParam = ref({
   firstname: "",

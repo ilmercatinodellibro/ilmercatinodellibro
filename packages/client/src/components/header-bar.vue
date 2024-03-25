@@ -74,7 +74,8 @@ const { t } = useI18n();
 
 const router = useRouter();
 const showBackToLogin = computed(
-  () => router.currentRoute.value.name !== AvailableRouteNames.Login && !user,
+  () =>
+    router.currentRoute.value.name !== AvailableRouteNames.Login && !user.value,
 );
 </script>
 
