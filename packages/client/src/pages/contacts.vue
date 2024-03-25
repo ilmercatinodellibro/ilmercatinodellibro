@@ -12,7 +12,7 @@
               <span class="contacts-mail">
                 <a
                   href="mailto:info@ilmercatinodellibro.com"
-                  class="contacts-details text-secondary"
+                  class="contacts-details text-accent"
                   rel="noopener"
                   target="_blank"
                 >
@@ -22,10 +22,10 @@
             </template>
           </i18n-t>
         </span>
-        <span class="contacts-text text-secondary">
+        <span class="contacts-text text-accent">
           <a
             :href="'tel:+39' + selectedLocation.phoneNumber"
-            class="contacts-details text-secondary"
+            class="contacts-details text-accent"
           >
             {{ formatPhone(selectedLocation.phoneNumber) }}
           </a>
@@ -71,7 +71,7 @@
           </template>
         </q-input>
         <q-btn
-          color="secondary"
+          color="accent"
           :label="$t('contacts.form.send')"
           class="form-button"
         />
