@@ -245,4 +245,17 @@ export class BookResolver {
       );
     }
   }
+
+  async loadSchoolsIntoDb() {
+    try {
+      const result = await this.bookService.loadSchoolsIntoDb();
+
+      return result;
+    } catch (error) {
+      console.error("Cannot load books, error: ", error);
+      throw new UnprocessableEntityException(
+        "Could not find/process the CSV files or create DB entries.",
+      );
+    }
+  }
 }

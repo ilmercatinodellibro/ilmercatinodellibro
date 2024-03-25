@@ -3,14 +3,22 @@ import {
   createReadStream,
   createWriteStream,
   existsSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { join as joinPath } from "node:path";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { parse, transform } from "csv";
+import { School } from "src/@generated";
 import { PrismaService } from "../prisma/prisma.service";
-import { IngestedCsvRow } from "./book-csv.types";
+import {
+  IngestedCsvRow,
+  IngestedEquivalentSchoolRow,
+  IngestedStateSchoolRow,
+  SchoolCourseDto,
+  SchoolCsvConfiguration,
+} from "./book-csv.types";
 
 @Injectable()
 export class BookService {
@@ -62,8 +70,8 @@ export class BookService {
 
     const sourceStream = createReadStream(dataSource);
     const destinationStream = createWriteStream(dataDestination);
-    const schoolsList: string[] = [];
     const locationBooks: Record<string, string[]> = {};
+    const schoolCoursesMap = new Map<string, SchoolCourseDto[]>();
 
     for (const regionCode of locationsPrefixes) {
       locationBooks[regionCode] = [];
@@ -81,12 +89,28 @@ export class BookService {
         const schoolCode = record[0];
         const provinceCode = schoolCode.substring(0, 2);
         if (locationsPrefixes.includes(provinceCode)) {
-          if (!schoolsList.includes(schoolCode)) {
-            schoolsList.push(schoolCode);
+          const bookIsbn = record[6];
+
+          // Maps courses and books to their respective schools
+          const schoolCourses = schoolCoursesMap.get(schoolCode) ?? [];
+          const courseYear = record[1];
+          const courseSection = record[2];
+          const course = schoolCourses.find(
+            ({ year, section }) =>
+              year === courseYear && section === courseSection,
+          );
+          if (!course) {
+            schoolCourses.push({
+              section: courseSection,
+              year: courseYear,
+              booksIsbn: [bookIsbn],
+            });
+          } else if (!course.booksIsbn.includes(bookIsbn)) {
+            course.booksIsbn.push(bookIsbn);
           }
+          schoolCoursesMap.set(schoolCode, schoolCourses);
 
           // Skip book if already present for a specific retail point
-          const bookIsbn = record[6];
           if (locationBooks[provinceCode].includes(bookIsbn)) {
             return null;
           }
@@ -131,7 +155,12 @@ export class BookService {
 
         writeFileSync(
           joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
-          schoolsList.join("\n"),
+          Array.from(schoolCoursesMap.keys()).join("\n"),
+        );
+
+        writeFileSync(
+          joinPath(process.cwd(), "./tmp-files/school_courses.json"),
+          JSON.stringify(Object.fromEntries(schoolCoursesMap)),
         );
 
         resolve();
@@ -156,5 +185,278 @@ export class BookService {
         resolve();
       });
     });
+  }
+
+  async loadSchoolsIntoDb(locationsPrefixes: string[] = ["MO", "RE"]) {
+    const schoolCodes: Record<string, string[]> = {};
+    const schoolCodesList: string[] = [];
+    const schoolCodesFromBooksCsv = readFileSync(
+      joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
+      "utf-8",
+    ).split("\n");
+
+    for (const regionCode of locationsPrefixes) {
+      schoolCodes[regionCode] = [];
+    }
+
+    const schoolsToInsert: School[] = [];
+
+    await this.#parseCsvSchoolsContent({
+      sourceFileName: "SCUOLE_STATALI",
+      destinationFileName: "filtered_state_schools",
+      removeDestination: true,
+
+      csvParser: parse({
+        skip_empty_lines: true,
+        skipRecordsWithError: true,
+        on_record: (record: IngestedStateSchoolRow, { lines }) => {
+          // Skips header parsing
+          if (lines === 1) {
+            return null;
+          }
+
+          const schoolCode = record[6];
+          const provinceCode = schoolCode.substring(0, 2);
+          if (
+            provinceCode &&
+            locationsPrefixes.includes(provinceCode) &&
+            schoolCodesFromBooksCsv.includes(schoolCode) &&
+            !schoolCodesList.includes(schoolCode)
+          ) {
+            schoolCodesList.push(schoolCode);
+            schoolCodes[provinceCode].push();
+            return record;
+          }
+          return null;
+        },
+      }),
+
+      csvTransformer: transform((row: IngestedStateSchoolRow) => {
+        // [2]
+        schoolsToInsert.push({
+          code: row[6],
+          name: row[7],
+          address: row[8],
+          provinceCode: row[6].substring(0, 2),
+        });
+        return (
+          // See [1]
+          [
+            `${row[6]}`,
+            `${row[7]}`,
+            `${row[8]}`,
+            `${row[6].substring(0, 2)}`,
+          ].join(",") + "\n"
+        );
+      }),
+    });
+
+    await this.#parseCsvSchoolsContent({
+      sourceFileName: "SCUOLE_PARITARIE",
+      destinationFileName: "filtered_peer_schools",
+
+      csvParser: parse({
+        skip_empty_lines: true,
+        skipRecordsWithError: true,
+        on_record: (record: IngestedEquivalentSchoolRow, { lines }) => {
+          // Skips header parsing
+          if (lines === 1) {
+            return null;
+          }
+
+          const schoolCode = record[4];
+          const provinceCode = schoolCode.substring(0, 2);
+          if (
+            provinceCode &&
+            locationsPrefixes.includes(provinceCode) &&
+            schoolCodesFromBooksCsv.includes(schoolCode) &&
+            !schoolCodesList.includes(schoolCode)
+          ) {
+            schoolCodesList.push(schoolCode);
+            schoolCodes[provinceCode].push();
+            return record;
+          }
+          return null;
+        },
+      }),
+
+      csvTransformer: transform((row: IngestedEquivalentSchoolRow) => {
+        // [2]
+        schoolsToInsert.push({
+          code: row[4],
+          name: row[5],
+          address: row[6],
+          provinceCode: row[4].substring(0, 2),
+        });
+        return (
+          // See [1]
+          [
+            `${row[4]}`,
+            `${row[5]}`,
+            `${row[6]}`,
+            `${row[4].substring(0, 2)}`,
+          ].join(",") + "\n"
+        );
+      }),
+    });
+
+    try {
+      // [2]
+      // This should have been the correct way to import the rows into the DB inside the schools table.
+      // However when following this approach there are a bunch of schools (and always the same ones) that are not imported by the DB copy instruction
+      // The db throws no error, and even the analysis of the records does not give any meaningful result on why those records are ignored.
+      // Furthermore, if said records are left on their own inside the generated CSV file and there are just a few records, then the copy instruction can import it
+      // Additionally, it should not be a problem of how many records are there inside the CSV, because the books CSV has many more records and they are imported correctly.
+      // In the end and to save time, school insert into DB has been made using Prisma method.
+      // await this.prisma.$executeRaw`
+      // COPY "School" (code, name, address, province_code)
+      // FROM '/tmp/tmp-files/filtered_state_schools.csv'
+      // WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
+      // `;
+      // await this.prisma.$executeRaw`
+      // COPY "School" (code, name, address,  province_code)
+      // FROM '/tmp/tmp-files/filtered_peer_schools.csv'
+      // WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
+      // `;
+
+      await this.prisma.school.createMany({
+        data: schoolsToInsert,
+      });
+
+      await this.#loadCoursesIntoDb(locationsPrefixes);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async #parseCsvSchoolsContent({
+    csvParser,
+    sourceFileName,
+    csvTransformer,
+    destinationFileName,
+    removeDestination = false,
+  }: SchoolCsvConfiguration) {
+    const dataSource = joinPath(
+      process.cwd(),
+      `./tmp-files/${sourceFileName}.csv`,
+    );
+    if (!existsSync(dataSource)) {
+      throw new NotFoundException(
+        `The CSV file with name ${sourceFileName} was not found.`,
+      );
+    }
+
+    const dataDestination = joinPath(
+      process.cwd(),
+      `./tmp-files/${destinationFileName}.csv`,
+    );
+
+    if (removeDestination) {
+      rmSync(dataDestination, { force: true });
+    }
+
+    const sourceStream = createReadStream(dataSource);
+    const destinationStream = createWriteStream(dataDestination);
+
+    // This line must be written prior to add a finish listener to the stream, otherwise the finish handler will be called twice
+    await this.#writeStreamPromise(
+      destinationStream,
+      // [1] - School data CSV format
+      "code,name,address,province_code\n",
+    );
+
+    return new Promise<string>((resolve, reject) => {
+      destinationStream.addListener("finish", () => {
+        sourceStream.close();
+        destinationStream.close(() => {
+          resolve(`tmp-files/${destinationFileName}.csv`);
+        });
+      });
+
+      destinationStream.addListener("error", (error) => {
+        reject(error.message);
+      });
+
+      // Starts streaming process
+      sourceStream.pipe(csvParser).pipe(csvTransformer).pipe(destinationStream);
+    });
+  }
+
+  async #loadCoursesIntoDb(locationsPrefixes: string[]) {
+    if (locationsPrefixes.length === 0) {
+      return false;
+    }
+
+    const coursesData = JSON.parse(
+      readFileSync(
+        joinPath(process.cwd(), "./tmp-files/school_courses.json"),
+      ).toString(),
+    ) as Record<string, SchoolCourseDto[] | undefined>;
+
+    for (const prefix of locationsPrefixes) {
+      const [locationSchools, locationBooks] = await Promise.all([
+        this.prisma.school.findMany({
+          select: {
+            code: true,
+          },
+          where: {
+            provinceCode: {
+              equals: prefix,
+              mode: "insensitive",
+            },
+          },
+        }),
+        this.prisma.book.findMany({
+          select: {
+            id: true,
+            isbnCode: true,
+            retailLocationId: true,
+          },
+          where: {
+            retailLocationId: {
+              equals: prefix,
+              mode: "insensitive",
+            },
+          },
+        }),
+      ]);
+
+      for (const { code: schoolCode } of locationSchools) {
+        const schoolCourses = coursesData[schoolCode];
+        if (!schoolCourses) {
+          continue;
+        }
+
+        for (const course of schoolCourses) {
+          const savedCourse = await this.prisma.schoolCourse.create({
+            data: {
+              section: course.section,
+              grade: parseInt(course.year),
+              schoolCode,
+            },
+          });
+
+          // When inserting a Book, if one ISBN code is not found, we skip inserting that book
+          const validBooks = course.booksIsbn
+            .map((isbnCode) => ({
+              schoolCourseId: savedCourse.id,
+              bookId: locationBooks.find((book) => book.isbnCode === isbnCode)
+                ?.id,
+            }))
+            .filter(({ bookId }) => !!bookId) as {
+            schoolCourseId: string;
+            bookId: string;
+          }[];
+
+          await this.prisma.booksOnCourses.createMany({
+            data: validBooks,
+          });
+        }
+      }
+    }
+
+    return true;
   }
 }

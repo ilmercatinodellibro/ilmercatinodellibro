@@ -108,7 +108,6 @@ model PushSubscription {
   @@unique([userId, deviceToken])
 }
 
-// Schools and Books
 model RetailLocation {
   id                    String  @id
   name                  String
@@ -165,9 +164,10 @@ model Book {
   meta BookMeta @relation(fields: [id], references: [id])
 
   copies       BookCopy[]
-  reservations Reservation[] @relation("BookReservations")
-  requests     BookRequest[] @relation("BookRequested")
+  reservations Reservation[]    @relation("BookReservations")
+  requests     BookRequest[]    @relation("BookRequested")
   cartItems    CartItem[]
+  courses      BooksOnCourses[] @relation("CourseBook")
 }
 
 view BookMeta {
@@ -343,4 +343,33 @@ model CartItem {
   fromBookRequest   BookRequest? @relation(fields: [fromBookRequestId], references: [id])
 
   @@unique([cartId, bookId])
+}
+
+model School {
+  code         String @id
+  name         String
+  address      String
+  provinceCode String @map("province_code")
+
+  courses SchoolCourse[] @relation("OrganizingSchool")
+}
+
+model SchoolCourse {
+  id         String           @id @default(uuid())
+  grade      Int
+  section    String
+  schoolCode String           @map("school_code")
+  school     School           @relation("OrganizingSchool", fields: [schoolCode], references: [code], onDelete: Cascade)
+  books      BooksOnCourses[] @relation("BookSchoolCourse")
+
+  @@unique([grade, section, schoolCode])
+}
+
+model BooksOnCourses {
+  schoolCourseId String       @map("school_course_id")
+  bookId         String       @map("book_id") @db.Uuid
+  schoolCourse   SchoolCourse @relation("BookSchoolCourse", fields: [schoolCourseId], references: [id], onDelete: Cascade)
+  book           Book         @relation("CourseBook", fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolCourseId, bookId])
 }
