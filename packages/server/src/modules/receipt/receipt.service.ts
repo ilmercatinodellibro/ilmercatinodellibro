@@ -1,11 +1,13 @@
 import { writeFile } from "node:fs/promises";
-import { Injectable } from "@nestjs/common";
+import { resolve } from "node:path";
+import { Inject, Injectable } from "@nestjs/common";
 import { GenerateProps } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, readOnlyText, table, text } from "@pdfme/schemas";
 import { Book, BookCopy, Sale } from "@prisma/client";
 import { sumBy } from "lodash";
 import { ReceiptType } from "src/@generated";
+import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import purchaseTemplate from "./templates/purchase.json";
 import registrationTemplate from "./templates/registration.json";
@@ -45,7 +47,11 @@ export class ReceiptService {
     to: new Date(2024, 8, 24),
   };
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(rootConfiguration.KEY)
+    private readonly rootConfig: RootConfiguration,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async createReceipt({
     userId,
@@ -89,8 +95,10 @@ export class ReceiptService {
       userEmail: receipt.user.email,
       books,
     });
-    // TODO: Make the directory path dynamic
-    await writeFile(`./tmp-files/receipts/${receipt.id}.pdf`, receiptPdf);
+    await writeFile(
+      resolve(this.rootConfig.fileSystemPath, `receipts/${receipt.id}.pdf`),
+      receiptPdf,
+    );
 
     return receipt;
   }
