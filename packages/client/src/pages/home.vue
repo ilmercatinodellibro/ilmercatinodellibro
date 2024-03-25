@@ -19,6 +19,7 @@
         v-for="action in actionsList"
         :key="action.to.name"
         :button-label="action.label"
+        :to="action.to"
         class="home-action"
       >
         <q-icon
@@ -77,10 +78,9 @@ const actionsList = computed(() => {
 
 <style lang="scss" scoped>
 .home-action {
-  margin: 12px;
-
   &__text-content {
     min-height: 160px; // Should be like this to respect mockup
+    white-space: pre-wrap;
   }
 }
 

@@ -6,7 +6,14 @@
       </p>
     </slot>
     <q-btn
-      v-if="buttonLabel"
+      v-if="to"
+      color="accent"
+      :icon-right="mdiArrowRight"
+      :label="buttonLabel"
+      :to="to"
+    />
+    <q-btn
+      v-else
       color="accent"
       :icon-right="mdiArrowRight"
       :label="buttonLabel"
@@ -17,10 +24,12 @@
 
 <script setup lang="ts">
 import { mdiArrowRight } from "@quasar/extras/mdi-v7";
+import { RouteLocationRaw } from "vue-router";
 
 defineProps<{
+  buttonLabel: string;
   actionText?: string;
-  buttonLabel?: string;
+  to?: RouteLocationRaw;
 }>();
 
 const emit = defineEmits<{
@@ -34,6 +43,7 @@ const emit = defineEmits<{
   border-radius: 60px;
   box-sizing: border-box;
   overflow: hidden;
+  margin: 12px;
   max-width: calc(100vw - 12px);
   min-height: 400px;
   padding: 48px 16px;

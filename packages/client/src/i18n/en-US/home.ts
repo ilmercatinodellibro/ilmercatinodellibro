@@ -2,6 +2,8 @@ export default {
   title: "Welcome on Mercatino del Libro portal!",
   description:
     "From within this personal area you can check our catalog and decide which books to buy and which you want to sell.",
+  locationSelectionDescription:
+    "First of all choose which location you would like to access",
   actionCall: "What would you like to do?",
   actions: {
     buyBooks: {

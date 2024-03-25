@@ -1,15 +1,22 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container class="layout-background">
-      <q-page class="fit q-pa-xl row">
+      <q-page class="column fit flex-center q-pa-xl">
         <q-spinner v-if="loading" />
 
-        <div
-          v-for="location in retailLocations"
-          :key="location.id"
-          class="col flex flex-center"
+        <h4 class="m-mb-36 q-mt-none readability-max-width text-accent">
+          {{ t("home.title") }}
+        </h4>
+        <p
+          class="m-mb-36 q-ma-none readability-max-width text-center text-h5 text-primary"
         >
+          {{ t("home.locationSelectionDescription") }}
+        </p>
+
+        <div class="items-center justify-center row">
           <action-box
+            v-for="location in retailLocations"
+            :key="location.id"
             :action-text="location.name"
             :button-label="t('auth.login')"
             @action-clicked="selectLocation(location)"
