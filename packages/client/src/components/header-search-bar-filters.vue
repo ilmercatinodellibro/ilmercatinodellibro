@@ -76,7 +76,11 @@ import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 
 const { t } = useI18n();
 
-const props = defineProps<{ query: string }>();
+const props = defineProps<{
+  query: string;
+  filter: BookCopyFilters[];
+  schoolFilter: SchoolFilters;
+}>();
 
 const emit = defineEmits<{
   filter: [
@@ -90,9 +94,13 @@ const emit = defineEmits<{
 
 const searchQuery = ref(props.query);
 
-watch(props, ({ query }) => (searchQuery.value = query));
+watch(props, ({ query, filter, schoolFilter }) => {
+  searchQuery.value = query;
+  filters.value = filter;
+  schoolFilters = schoolFilter;
+});
 
-const filters = ref<BookCopyFilters[]>([]);
+const filters = ref<BookCopyFilters[]>(props.filter);
 const filterOptions = useTranslatedFilters<BookCopyFilters>(
   "warehouse.filters.options",
 );
@@ -111,10 +119,7 @@ const schoolFilterOptions: SchoolFilters = {
   courses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
 };
 
-let schoolFilters = reactive<SchoolFilters>({
-  schoolCodes: [],
-  courses: [],
-});
+let schoolFilters = reactive<SchoolFilters>(props.schoolFilter);
 
 function openSchoolFilterDialog() {
   Dialog.create({

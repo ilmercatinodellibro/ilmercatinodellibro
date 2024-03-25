@@ -1,7 +1,12 @@
 <template>
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
-      <header-search-bar-filters :query="searchQuery" @filter="updateTable">
+      <header-search-bar-filters
+        :filter="filters"
+        :query="searchQuery"
+        :school-filter="schoolFilters"
+        @filter="updateTable"
+      >
         <template #side-actions>
           <q-btn
             :icon="mdiSort"
@@ -26,13 +31,13 @@
 
       <dialog-table
         v-show="!isSortedByCopyCode"
-        v-model:pagination="isbnPagination"
+        v-model:pagination="booksPagination"
         :columns="columns"
-        :loading="isbnLoading"
-        :rows="isbnRows"
+        :loading="booksLoading"
+        :rows="booksRows"
         :search-query="searchQuery"
         class="flex-delegate-height-management"
-        @request="onIsbnRequest"
+        @request="onBooksRequest"
       >
         <template #header="props">
           <q-tr :props="props">
@@ -226,14 +231,17 @@ import { useRetailLocationService } from "src/services/retail-location";
 
 const { selectedLocation, retailLocations } = useRetailLocationService();
 
-const isbnPage = ref(0);
-const isbnRowsPerPage = ref(100);
+const booksPage = ref(0);
+const copyPage = ref(0);
+
+const booksRowsPerPage = ref(100);
+const copyRowsPerPage = ref(100);
 
 const {
-  loading: isbnLoading,
+  loading: booksLoading,
   refetchBooks,
   booksPaginationDetails,
-} = useBookService(isbnPage, isbnRowsPerPage);
+} = useBookService(booksPage, booksRowsPerPage);
 
 const { useGetBookCopiesQuery } = useBookCopyService();
 const {
@@ -259,8 +267,8 @@ const getFieldValue = <T,>(
 
 const isSortedByCopyCode = ref(false);
 
-const filters = ref<BookCopyFilters[]>();
-const schoolFilters = ref<SchoolFilters>();
+const filters = ref<BookCopyFilters[]>([]);
+const schoolFilters = ref<SchoolFilters>({ courses: [], schoolCodes: [] });
 const searchQuery = ref("");
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
@@ -308,19 +316,19 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const isbnRows = ref<BookSummaryFragment[]>([]);
+const booksRows = ref<BookSummaryFragment[]>([]);
 const copyRows = ref<BookCopyDetailsFragment[]>([]);
 
-const isbnPagination = ref({
-  rowsPerPage: isbnRowsPerPage.value,
+const booksPagination = ref({
+  rowsPerPage: booksRowsPerPage.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
-  page: isbnPage.value,
+  page: booksPage.value,
 });
 const copyPagination = ref({
-  rowsPerPage: isbnRowsPerPage.value,
+  rowsPerPage: copyRowsPerPage.value,
   // FIXME: add correct field once the query supports pagination
   rowsNumber: bookCopies.value.length,
-  page: isbnPage.value,
+  page: copyPage.value,
 });
 
 type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
@@ -381,7 +389,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
 
 // FIXME: remove stub
 const getBookCopies = (bookID: string): BookCopyDetailsWithStatus[] => {
-  const book = isbnRows.value.find(({ id }) => id === bookID);
+  const book = booksRows.value.find(({ id }) => id === bookID);
   return [
     {
       book: book
@@ -426,13 +434,13 @@ const updateTable = (payload: {
   searchQuery.value = payload.searchQuery;
 };
 
-const getColspan = (name: string) =>
-  name === "original-code" || name === "status" ? 2 : 1;
+const getColspan = (columnName: string) =>
+  columnName === "original-code" || columnName === "status" ? 2 : 1;
 
-const onIsbnRequest: QTableProps["onRequest"] = async ({
+const onBooksRequest: QTableProps["onRequest"] = async ({
   pagination: { page, rowsPerPage },
 }) => {
-  isbnLoading.value = true;
+  booksLoading.value = true;
 
   const newBooks = (
     await refetchBooks({
@@ -444,13 +452,13 @@ const onIsbnRequest: QTableProps["onRequest"] = async ({
     })
   )?.data.books.rows;
 
-  isbnPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+  booksPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
-  isbnRows.value = newBooks ?? isbnRows.value;
+  booksRows.value = newBooks ?? booksRows.value;
 
-  isbnPagination.value.page = page;
-  isbnPagination.value.rowsPerPage = rowsPerPage;
-  isbnLoading.value = false;
+  booksPagination.value.page = page;
+  booksPagination.value.rowsPerPage = rowsPerPage;
+  booksLoading.value = false;
 };
 
 const onCopyRequest: QTableProps["onRequest"] = async ({
@@ -479,7 +487,16 @@ const otherCityName = computed(
 
 function swapView() {
   isSortedByCopyCode.value = !isSortedByCopyCode.value;
+
   searchQuery.value = "";
+  filters.value = [];
+  schoolFilters.value = { courses: [], schoolCodes: [] };
+
+  if (isSortedByCopyCode.value) {
+    copyPagination.value.page = 0;
+  } else {
+    booksPagination.value.page = 0;
+  }
 }
 
 function checkOtherWarehouse() {
