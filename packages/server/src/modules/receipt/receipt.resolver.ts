@@ -43,4 +43,6 @@ export class ReceiptResolver {
       })
       .createdBy();
   }
+
+  // TODO: add a mutation to re-send a receipt to user's email
 }

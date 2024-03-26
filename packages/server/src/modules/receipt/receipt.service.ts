@@ -53,6 +53,13 @@ export class ReceiptService {
     private readonly prisma: PrismaService,
   ) {}
 
+  getReceiptPath(receiptId: string) {
+    const directory = resolve(this.rootConfig.fileSystemPath, "./receipts");
+    const file = resolve(directory, `./${receiptId}.pdf`);
+    return { directory, file };
+  }
+
+  // TODO: Send the receipt to the user's email
   async createReceipt({
     userId,
     retailLocationId,
@@ -96,9 +103,9 @@ export class ReceiptService {
       books,
     });
 
-    const directory = resolve(this.rootConfig.fileSystemPath, "./receipts");
-    await mkdir(directory, { recursive: true }); // Ensure the directory exists
-    await writeFile(resolve(directory, `./${receipt.id}.pdf`), receiptPdf);
+    const path = this.getReceiptPath(receipt.id);
+    await mkdir(path.directory, { recursive: true }); // Ensure the directory exists
+    await writeFile(path.file, receiptPdf);
 
     return receipt;
   }

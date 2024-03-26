@@ -164,6 +164,7 @@ export default {
     title: "Receipts",
     createdBy: "Created by",
     resend: "Send again",
+    downloadSuccess: "The receipt download will begin shortly",
     type: {
       // REQUEST: "Requests",
       PURCHASE: "Purchases",

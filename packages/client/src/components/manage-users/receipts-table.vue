@@ -39,10 +39,11 @@
 </template>
 
 <script setup lang="ts">
-import { QTableColumn, date } from "quasar";
-import { computed } from "vue";
+import { Notify, QTableColumn, date, exportFile } from "quasar";
+import { computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { ReceiptType } from "src/@generated/graphql";
+import { useAuthService } from "src/services/auth";
 import { ReceiptFragment } from "src/services/receipt.graphql";
 import ChipButton from "./chip-button.vue";
 
@@ -84,8 +85,31 @@ function sendAgain(receipt: ReceiptFragment) {
   receipt;
 }
 
-function openReceipt(receipt: ReceiptFragment) {
-  // FIXME: open receipt from link
-  receipt;
+const { getJwtHeader } = useAuthService();
+
+const objectUrls = new Map<string, string>();
+onUnmounted(() => {
+  for (const url of objectUrls.values()) {
+    URL.revokeObjectURL(url);
+  }
+});
+async function openReceipt(receipt: ReceiptFragment) {
+  const headers = getJwtHeader();
+  const response = await fetch(`/receipts/${receipt.id}`, { headers });
+  const blob = await response.blob();
+
+  const success = exportFile(`${receipt.id}.pdf`, blob, {
+    mimeType: "application/pdf",
+  });
+  if (success === true) {
+    Notify.create({
+      type: "positive",
+      message: t("manageUsers.receiptsDialog.downloadSuccess"),
+    });
+  } else {
+    const dataUrl = objectUrls.get(receipt.id) ?? URL.createObjectURL(blob);
+    objectUrls.set(receipt.id, dataUrl);
+    window.open(dataUrl, "_blank");
+  }
 }
 </script>

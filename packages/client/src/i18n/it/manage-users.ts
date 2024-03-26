@@ -168,6 +168,7 @@ export default {
     title: "Ricevute",
     createdBy: "Creata da",
     resend: "Invia di nuovo",
+    downloadSuccess: "Il download della ricevuta inizierà a breve",
     type: {
       // REQUEST: "Richieste",
       PURCHASE: "Acquisti",
