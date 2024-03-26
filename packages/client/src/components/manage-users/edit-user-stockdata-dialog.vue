@@ -184,7 +184,7 @@ function getCommonColumns<
       : (row) => {
           const book = (row as BookCopyDetailsFragment).book;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return typeof field === "function" ? field(book) : field;
+          return typeof field === "function" ? field(book) : book[field];
         };
 
   return [
