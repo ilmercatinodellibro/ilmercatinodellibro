@@ -2,10 +2,9 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        :filter="filters"
-        :query="searchQuery"
-        :school-filter="schoolFilters"
-        @filter="updateTable"
+        v-model:filters="filters"
+        v-model:search-query="searchQuery"
+        v-model:school-filters="schoolFilters"
       >
         <template #side-actions>
           <q-btn
@@ -65,9 +64,9 @@
         v-show="!isSortedByCopyCode"
         v-model:pagination="booksPagination"
         :columns="columns"
+        :filter="tableFilter"
         :loading="booksLoading"
-        :rows="booksRows"
-        :search-query="searchQuery"
+        :rows="books"
         class="flex-delegate-height-management"
         @request="onBooksRequest"
       >
@@ -190,9 +189,9 @@
         v-show="isSortedByCopyCode"
         v-model:pagination="copyPagination"
         :columns="bookCopyColumns"
+        :filter="tableFilter"
         :loading="copyLoading"
-        :rows="copyRows"
-        :search-query="searchQuery"
+        :rows="bookCopies"
         class="flex-delegate-height-management"
         @request="onCopyRequest"
       >
@@ -268,14 +267,15 @@ const { selectedLocation, retailLocations } = useRetailLocationService();
 const booksPage = ref(0);
 const copyPage = ref(0);
 
-const booksRowsPerPage = ref(100);
-const copyRowsPerPage = ref(100);
+const booksPerPage = ref(100);
+const bookCopiesPerPage = ref(100);
 
 const {
+  books,
   loading: booksLoading,
   refetchBooks,
   booksPaginationDetails,
-} = useBookService(booksPage, booksRowsPerPage);
+} = useBookService(booksPage, booksPerPage);
 
 const { useGetBookCopiesQuery } = useBookCopyService();
 const {
@@ -352,20 +352,24 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const booksRows = ref<BookSummaryFragment[]>([]);
-const copyRows = ref<BookCopyDetailsFragment[]>([]);
-
 const booksPagination = ref({
-  rowsPerPage: booksRowsPerPage.value,
+  rowsPerPage: booksPerPage.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
   page: booksPage.value,
 });
 const copyPagination = ref({
-  rowsPerPage: copyRowsPerPage.value,
+  rowsPerPage: bookCopiesPerPage.value,
   // FIXME: add correct field once the query supports pagination
   rowsNumber: bookCopies.value.length,
   page: copyPage.value,
 });
+
+// TODO: send the filters to the server
+const tableFilter = computed(() =>
+  !searchQuery.value && filters.value.length === 0
+    ? undefined
+    : { searchTerm: searchQuery.value, filters: filters.value },
+);
 
 type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
   status: BookCopyStatus;
@@ -425,7 +429,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
 
 // FIXME: remove stub
 const getBookCopies = (bookID: string): BookCopyDetailsWithStatus[] => {
-  const book = booksRows.value.find(({ id }) => id === bookID);
+  const book = books.value.find(({ id }) => id === bookID);
   return [
     {
       book: book
@@ -460,16 +464,6 @@ const getBookCopies = (bookID: string): BookCopyDetailsWithStatus[] => {
   ];
 };
 
-const updateTable = (payload: {
-  filters: BookCopyFilters[];
-  schoolFilters: SchoolFilters;
-  searchQuery: string;
-}) => {
-  filters.value = payload.filters;
-  schoolFilters.value = payload.schoolFilters;
-  searchQuery.value = payload.searchQuery;
-};
-
 const getColspan = (columnName: string) =>
   columnName === "original-code" || columnName === "status" ? 2 : 1;
 
@@ -478,7 +472,7 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
 }) => {
   booksLoading.value = true;
 
-  const newBooks = (
+  (
     await refetchBooks({
       page: page - 1,
       rows: rowsPerPage,
@@ -490,8 +484,6 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
 
   booksPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
-  booksRows.value = newBooks ?? booksRows.value;
-
   booksPagination.value.page = page;
   booksPagination.value.rowsPerPage = rowsPerPage;
   booksLoading.value = false;
@@ -502,10 +494,8 @@ const onCopyRequest: QTableProps["onRequest"] = async ({
 }) => {
   copyLoading.value = true;
 
-  const newBooks = (await refetchBookCopies())?.data.bookCopies;
+  (await refetchBookCopies())?.data.bookCopies;
   copyPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
-
-  copyRows.value = newBooks ?? copyRows.value;
 
   copyPagination.value.page = page;
   copyPagination.value.rowsPerPage = rowsPerPage;

@@ -7,9 +7,6 @@
       class="col max-width-600"
       outlined
       :placeholder="t('common.search')"
-      @update:model-value="
-        emit('filter', { filters, searchQuery, schoolFilters })
-      "
     >
       <template #append>
         <q-icon :name="mdiMagnify" />
@@ -23,9 +20,6 @@
       class="width-200"
       multiple
       outlined
-      @update:model-value="
-        emit('filter', { filters, searchQuery, schoolFilters })
-      "
     >
       <!--
         This is because the filters are translated and if a user were to switch
@@ -50,7 +44,7 @@
         </q-item>
       </template>
 
-      <template #after-options>
+      <template v-if="schoolFilters" #after-options>
         <q-item clickable @click="openSchoolFilterDialog()">
           <q-item-section>
             {{ t("book.filters.school") }}
@@ -68,40 +62,20 @@
 <script setup lang="ts">
 import { mdiMagnify } from "@quasar/extras/mdi-v7";
 import { Dialog } from "quasar";
-import { computed, reactive, ref, watch } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { BookCopyFilters, SchoolFilters } from "src/models/book";
+import { SchoolFilters } from "src/models/book";
 import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 
 const { t } = useI18n();
 
-const props = defineProps<{
-  query: string;
-  filter: BookCopyFilters[];
-  schoolFilter: SchoolFilters;
-}>();
+const searchQuery = defineModel<string>("searchQuery", { required: true });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const filters = defineModel<unknown[]>("filters", { required: true });
+const schoolFilters = defineModel<SchoolFilters | undefined>("schoolFilters");
 
-const emit = defineEmits<{
-  filter: [
-    {
-      searchQuery: string;
-      filters: BookCopyFilters[];
-      schoolFilters: SchoolFilters;
-    },
-  ];
-}>();
-
-const searchQuery = ref(props.query);
-
-watch(props, ({ query, filter, schoolFilter }) => {
-  searchQuery.value = query;
-  filters.value = filter;
-  schoolFilters = schoolFilter;
-});
-
-const filters = ref<BookCopyFilters[]>(props.filter);
-const filterOptions = useTranslatedFilters<BookCopyFilters>(
+const filterOptions = useTranslatedFilters<(typeof filters.value)[number]>(
   "warehouse.filters.options",
 );
 
@@ -119,22 +93,15 @@ const schoolFilterOptions: SchoolFilters = {
   courses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
 };
 
-let schoolFilters = reactive<SchoolFilters>(props.schoolFilter);
-
 function openSchoolFilterDialog() {
   Dialog.create({
     component: FilterBySchoolDialog,
     componentProps: {
       filters: schoolFilterOptions,
-      selectedFilters: schoolFilters,
+      selectedFilters: schoolFilters.value,
     },
   }).onOk((payload: SchoolFilters) => {
-    schoolFilters = payload;
-    emit("filter", {
-      searchQuery: searchQuery.value,
-      filters: filters.value,
-      schoolFilters: payload,
-    });
+    schoolFilters.value = payload;
   });
 }
 </script>
