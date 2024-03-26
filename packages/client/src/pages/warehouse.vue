@@ -197,29 +197,35 @@
         @request="onCopyRequest"
       >
         <template #body-cell-status="{ value }">
-          <book-copy-status-chip :value="value" />
+          <q-td>
+            <book-copy-status-chip :value="value" />
+          </q-td>
         </template>
 
-        <template #body-cell-problems="{ value }">
-          <chip-button
-            :color="value.problems ? 'positive' : 'negative'"
-            :label="
-              t(
-                `manageUsers.booksMovementsDialog.${value.problems ? 'solveProblem' : 'reportProblem'}`,
-              )
-            "
-            @click="openProblemDialog(value)"
-          />
+        <template #body-cell-problems="{ row, value }">
+          <q-td>
+            <chip-button
+              :color="value ? 'positive' : 'negative'"
+              :label="
+                t(
+                  `manageUsers.booksMovementsDialog.${value ? 'solveProblem' : 'reportProblem'}`,
+                )
+              "
+              @click="openProblemDialog(row)"
+            />
+          </q-td>
         </template>
 
         <template #body-cell-history="{ value }">
-          <q-btn
-            :icon="mdiHistory"
-            color="primary"
-            flat
-            round
-            @click="openHistory(value)"
-          />
+          <q-td>
+            <q-btn
+              :icon="mdiHistory"
+              color="primary"
+              flat
+              round
+              @click="openHistory(value)"
+            />
+          </q-td>
         </template>
       </dialog-table>
     </q-card>
@@ -421,7 +427,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
     },
     {
       name: "problems",
-      field: () => undefined,
+      field: "problems",
       label: "",
       align: "center",
     },
@@ -434,7 +440,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
 );
 
 // FIXME: remove stub
-const getBookCopies = (bookID: string): BookCopyDetailsWithStatus[] => {
+function getBookCopies(bookID: string): BookCopyDetailsWithStatus[] {
   const book = books.value.find(({ id }) => id === bookID);
   return [
     {
@@ -468,7 +474,7 @@ const getBookCopies = (bookID: string): BookCopyDetailsWithStatus[] => {
       status: BookCopyFilters.SOLD,
     },
   ];
-};
+}
 
 const getColspan = (columnName: string) =>
   columnName === "original-code" || columnName === "status" ? 2 : 1;
@@ -478,15 +484,13 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
 }) => {
   booksLoading.value = true;
 
-  (
-    await refetchBooks({
-      page: page - 1,
-      rows: rowsPerPage,
-      filter: {
-        search: searchQuery.value,
-      },
-    })
-  )?.data.books.rows;
+  await refetchBooks({
+    page: page - 1,
+    rows: rowsPerPage,
+    filter: {
+      search: searchQuery.value,
+    },
+  });
 
   booksPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
@@ -500,7 +504,7 @@ const onCopyRequest: QTableProps["onRequest"] = async ({
 }) => {
   copyLoading.value = true;
 
-  (await refetchBookCopies())?.data.bookCopies;
+  await refetchBookCopies();
   copyPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
   copyPagination.value.page = page;
