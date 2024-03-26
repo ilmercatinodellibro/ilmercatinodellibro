@@ -1,3 +1,5 @@
+import { ReceiptType } from "src/@generated/graphql";
+
 export default {
   createUser: "Crea nuovo utente",
   filter: "Filtra",
@@ -164,10 +166,12 @@ export default {
   },
   receiptsDialog: {
     title: "Ricevute",
-    requests: "Richieste",
-    retrievals: "Ritiri",
     createdBy: "Creata da",
-    purchases: "Acquisti",
     resend: "Invia di nuovo",
+    type: {
+      // REQUEST: "Richieste",
+      PURCHASE: "Acquisti",
+      REGISTRATION: "Ritiri",
+    } satisfies Record<ReceiptType, string>,
   },
 };

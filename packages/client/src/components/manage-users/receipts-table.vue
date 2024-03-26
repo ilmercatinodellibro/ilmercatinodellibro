@@ -13,13 +13,19 @@
         </span>
       </q-th>
     </template>
-    <template #body-cell-link="{ value, row }">
+
+    <template #body-cell-timestamp="{ row, value }">
       <q-td class="text-left width-200">
-        <span class="cursor-pointer text-underline" @click="openReceipt(value)">
-          {{ row.timestamp }}
-        </span>
+        <q-btn
+          class="text-underline text-weight-regular"
+          :label="value"
+          flat
+          dense
+          @click="openReceipt(row)"
+        />
       </q-td>
     </template>
+
     <template #body-cell-resend="{ value }">
       <q-td class="text-center width-0">
         <chip-button
@@ -33,53 +39,53 @@
 </template>
 
 <script setup lang="ts">
-import { QTableColumn } from "quasar";
+import { QTableColumn, date } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { Receipt } from "src/models/receipts";
+import { ReceiptType } from "src/@generated/graphql";
+import { ReceiptFragment } from "src/services/receipt.graphql";
 import ChipButton from "./chip-button.vue";
 
 const { t } = useI18n();
 
-type ReceiptType = "requests" | "retrievals" | "purchases";
-
 const props = defineProps<{
-  receipts: Receipt[];
+  receipts: ReceiptFragment[];
   type: ReceiptType;
 }>();
 
-const columns = computed<QTableColumn<Receipt>[]>(() => [
+const { formatDate } = date;
+const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
   {
-    label: t(`manageUsers.receiptsDialog.${props.type}`),
-    field: "link",
-    name: "link",
+    label: t(`manageUsers.receiptsDialog.type.${props.type}`),
+    field: "createdAt",
+    format: (date: number) => formatDate(date, "YYYY-MM-DD HH:mm:ss"),
+    name: "timestamp",
     align: "left",
   },
   {
-    label:
-      props.type === "requests"
+    label: /* props.type === "REQUEST"
         ? ""
-        : t("manageUsers.receiptsDialog.createdBy"),
-    field: "createdBy",
+        :  */ t("manageUsers.receiptsDialog.createdBy"),
+    field: ({ createdBy }) => `${createdBy.firstname} ${createdBy.lastname}`,
     name: "created-by",
     align: "left",
     classes: "ellipsis max-width-200",
   },
   {
     label: "",
-    field: "link",
+    field: () => undefined,
     name: "resend",
     align: "center",
   },
 ]);
 
-function sendAgain(receipt: Receipt) {
+function sendAgain(receipt: ReceiptFragment) {
   // FIXME: send receipt again
   receipt;
 }
 
-function openReceipt(link: string) {
+function openReceipt(receipt: ReceiptFragment) {
   // FIXME: open receipt from link
-  link;
+  receipt;
 }
 </script>
