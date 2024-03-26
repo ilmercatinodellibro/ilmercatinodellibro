@@ -133,8 +133,10 @@ import { startCase, toLower } from "lodash-es";
 import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { fetchBookByISBN } from "src/services/book";
 import {
   BookCopyDetailsFragment,
+  useCreateBookCopiesMutation,
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -286,17 +288,33 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   ],
 );
 
-function addBookToBeRegistered(bookISBN: string) {
-  // FIXME: add logic to add a book into "in retrieval" section
-  bookISBN;
+async function addBookToBeRegistered(bookISBN: string) {
+  const book = await fetchBookByISBN(bookISBN);
+  if (!book) {
+    // TODO: let the user know about this
+    return;
+  }
+
+  booksToRegister.value.push(book);
 }
 
+const { createBookCopies } = useCreateBookCopiesMutation();
 function retrieveAllBooks() {
   Dialog.create({
     component: RetrieveAllBooksDialog,
-  }).onOk((payload) => {
-    // FIXME: add the logic for the retrieval of all books
-    payload;
+  }).onOk(async (/* shouldPrint */) => {
+    // TODO: Handle shouldPrint
+
+    await createBookCopies({
+      input: {
+        ownerId: props.userData.id,
+        retailLocationId: selectedLocation.value.id,
+        bookIds: booksToRegister.value.map((book) => book.id),
+      },
+    });
+
+    booksToRegister.value = [];
+    tab.value = "retrieved";
   });
 }
 
