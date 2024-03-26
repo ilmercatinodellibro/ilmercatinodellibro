@@ -5,6 +5,7 @@
         v-model:filters="filters"
         v-model:school-filters="schoolFilters"
         v-model:search-query="searchQuery"
+        :filter-options="filterOptions"
       >
         <template #side-actions>
           <q-btn
@@ -58,6 +59,7 @@ import AddBookDialog from "src/components/add-book-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
+import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { SchoolFilters } from "src/models/book";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -81,6 +83,8 @@ enum BookFilters {
 }
 
 const filters = ref<BookFilters[]>([]);
+
+const filterOptions = useTranslatedFilters<BookFilters>("book.filters.options");
 
 const schoolFilters = ref<SchoolFilters>({
   schoolCodes: [],

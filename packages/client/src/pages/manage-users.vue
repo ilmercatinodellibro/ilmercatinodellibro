@@ -4,6 +4,7 @@
       <header-search-bar-filters
         v-model:filters="filters"
         v-model:search-query="searchQuery"
+        :filter-options="filterOptions"
       >
         <template #side-actions>
           <q-btn
@@ -213,6 +214,7 @@ import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
 import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
+import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { useCustomerService } from "src/services/customer";
 import { CustomerFragment } from "src/services/user.graphql";
 
@@ -254,6 +256,8 @@ onMounted(() => {
 
 const searchQuery = ref("");
 const filters = ref<UserFilters[]>([]);
+
+const filterOptions = useTranslatedFilters<UserFilters>("manageUsers.filters");
 
 enum UserFilters {
   withAvailable,

@@ -5,6 +5,7 @@
         v-model:filters="filters"
         v-model:search-query="searchQuery"
         v-model:school-filters="schoolFilters"
+        :filter-options="filterOptions"
       >
         <template #side-actions>
           <q-btn
@@ -244,6 +245,7 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
 import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import {
   BookCopyFilters,
@@ -304,6 +306,10 @@ const getFieldValue = <T,>(
 const isSortedByCopyCode = ref(false);
 
 const filters = ref<BookCopyFilters[]>([]);
+const filterOptions = useTranslatedFilters<BookCopyFilters>(
+  "warehouse.filters.options",
+);
+
 const schoolFilters = ref<SchoolFilters>({ courses: [], schoolCodes: [] });
 const searchQuery = ref("");
 

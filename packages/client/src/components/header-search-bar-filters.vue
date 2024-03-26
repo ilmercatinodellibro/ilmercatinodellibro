@@ -71,18 +71,17 @@ import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 const { t } = useI18n();
 
 const searchQuery = defineModel<string>("searchQuery", { required: true });
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const filters = defineModel<unknown[]>("filters", { required: true });
 const schoolFilters = defineModel<SchoolFilters | undefined>("schoolFilters");
 
-const filterOptions = useTranslatedFilters<(typeof filters.value)[number]>(
-  "warehouse.filters.options",
-);
+const props = defineProps<{
+  filterOptions: ReturnType<typeof useTranslatedFilters>["value"];
+}>();
 
 const selectedFiltersToString = computed(() =>
   filters.value
     .map(
-      (filter) => filterOptions.value.find(({ key }) => key === filter)?.label,
+      (filter) => props.filterOptions.find(({ key }) => key === filter)?.label,
     )
     .join(", "),
 );
