@@ -165,10 +165,12 @@ export default {
     createdBy: "Created by",
     resend: "Send again",
     downloadSuccess: "The receipt download will begin shortly",
+    resendSuccess:
+      "A new copy of the receipt of {type} has been sent to the user's email address",
     type: {
-      // REQUEST: "Requests",
-      PURCHASE: "Purchases",
-      REGISTRATION: "Registrations",
+      // REQUEST: "Request | Requests",
+      PURCHASE: "Purchase | Purchases",
+      REGISTRATION: "Registration | Registrations",
     } satisfies Record<ReceiptType, string>,
   },
 };

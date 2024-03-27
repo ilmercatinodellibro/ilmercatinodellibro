@@ -12,3 +12,7 @@ query getReceipts($userId: String!, $retailLocationId: String!) {
     ...Receipt
   }
 }
+
+mutation resendReceipt($input: ResendReceiptInput!) {
+  resendReceipt(input: $input)
+}

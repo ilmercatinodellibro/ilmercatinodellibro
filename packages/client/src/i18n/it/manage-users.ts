@@ -169,10 +169,12 @@ export default {
     createdBy: "Creata da",
     resend: "Invia di nuovo",
     downloadSuccess: "Il download della ricevuta inizierà a breve",
+    resendSuccess:
+      "Una nuova copia della ricevuta {type} è stata inviata all'indirizzo email dell'utente",
     type: {
-      // REQUEST: "Richieste",
-      PURCHASE: "Acquisti",
-      REGISTRATION: "Ritiri",
+      // REQUEST: "Richiesto | Richiesti",
+      PURCHASE: "Acquisto | Acquisti",
+      REGISTRATION: "Ritiro | Ritiri",
     } satisfies Record<ReceiptType, string>,
   },
 };

@@ -26,12 +26,12 @@
       </q-td>
     </template>
 
-    <template #body-cell-resend="{ value }">
+    <template #body-cell-resend="{ row }">
       <q-td class="text-center width-0">
         <chip-button
           :label="$t('manageUsers.receiptsDialog.resend')"
           color="primary"
-          @click="sendAgain(value)"
+          @click="sendAgain(row)"
         />
       </q-td>
     </template>
@@ -44,7 +44,10 @@ import { computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { ReceiptType } from "src/@generated/graphql";
 import { useAuthService } from "src/services/auth";
-import { ReceiptFragment } from "src/services/receipt.graphql";
+import {
+  ReceiptFragment,
+  useResendReceiptMutation,
+} from "src/services/receipt.graphql";
 import ChipButton from "./chip-button.vue";
 
 const { t } = useI18n();
@@ -57,7 +60,7 @@ const props = defineProps<{
 const { formatDate } = date;
 const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
   {
-    label: t(`manageUsers.receiptsDialog.type.${props.type}`),
+    label: t(`manageUsers.receiptsDialog.type.${props.type}`, 2),
     field: "createdAt",
     format: (date: number) => formatDate(date, "YYYY-MM-DD HH:mm:ss"),
     name: "timestamp",
@@ -80,9 +83,15 @@ const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
   },
 ]);
 
-function sendAgain(receipt: ReceiptFragment) {
-  // FIXME: send receipt again
-  receipt;
+const { resendReceipt } = useResendReceiptMutation();
+async function sendAgain(receipt: ReceiptFragment) {
+  await resendReceipt({ input: { receiptId: receipt.id } });
+  Notify.create({
+    type: "positive",
+    message: t("manageUsers.receiptsDialog.resendSuccess", {
+      type: t(`manageUsers.receiptsDialog.type.${receipt.type}`).toLowerCase(),
+    }),
+  });
 }
 
 const { getJwtHeader } = useAuthService();
