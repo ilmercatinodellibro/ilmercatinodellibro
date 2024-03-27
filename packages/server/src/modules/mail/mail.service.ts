@@ -1,6 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { MailerService } from "@nestjs-modules/mailer";
-import { ISendMailOptions } from "@nestjs-modules/mailer/dist/interfaces/send-mail-options.interface";
+import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
 
 // We should be using the default but it's any so we need to override it
 // import { SentMessageInfo } from 'nodemailer';

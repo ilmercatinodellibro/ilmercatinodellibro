@@ -1,13 +1,14 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Inject, Injectable } from "@nestjs/common";
 import { GenerateProps } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, readOnlyText, table, text } from "@pdfme/schemas";
-import { Book, BookCopy, Sale } from "@prisma/client";
+import { Book, BookCopy, Receipt, Sale } from "@prisma/client";
 import { sumBy } from "lodash";
 import { ReceiptType } from "src/@generated";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
+import { MailService } from "src/modules/mail/mail.service";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import purchaseTemplate from "./templates/purchase.json";
 import registrationTemplate from "./templates/registration.json";
@@ -51,6 +52,7 @@ export class ReceiptService {
     @Inject(rootConfiguration.KEY)
     private readonly rootConfig: RootConfiguration,
     private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
   ) {}
 
   getReceiptPath(receiptId: string) {
@@ -59,7 +61,32 @@ export class ReceiptService {
     return { directory, file };
   }
 
-  // TODO: Send the receipt to the user's email
+  async sendReceiptToUser(receipt: Receipt, receiptPdf?: Buffer) {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: receipt.userId },
+    });
+
+    await this.mailService.sendMail({
+      to: user.email,
+      subject: `Il Mercatino del Libro - Receipt of ${receipt.type.toLowerCase()}`,
+      template: "receipt",
+      context: {
+        receipt,
+        user,
+      },
+      attachments: [
+        {
+          filename: `receipt-${receipt.type.toLowerCase()}-${receipt.id}.pdf`,
+          contentType: "application/pdf",
+          contentDisposition: "attachment",
+          content:
+            receiptPdf ??
+            (await readFile(this.getReceiptPath(receipt.id).file)),
+        },
+      ],
+    });
+  }
+
   async createReceipt({
     userId,
     retailLocationId,
@@ -106,6 +133,8 @@ export class ReceiptService {
     const path = this.getReceiptPath(receipt.id);
     await mkdir(path.directory, { recursive: true }); // Ensure the directory exists
     await writeFile(path.file, receiptPdf);
+
+    await this.sendReceiptToUser(receipt, Buffer.from(receiptPdf));
 
     return receipt;
   }
