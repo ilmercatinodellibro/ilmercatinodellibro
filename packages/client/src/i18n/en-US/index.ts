@@ -10,6 +10,7 @@ import book from "./book";
 import contacts from "./contacts";
 import events from "./events";
 import general from "./general";
+import home from "./home";
 import manageUsers from "./manage-users";
 import myBooks from "./my-books";
 import network from "./network";
@@ -47,6 +48,7 @@ export default {
   durations,
   events,
   general,
+  home,
   manageUsers,
   myBooks,
   reserveBooks,
@@ -141,6 +143,7 @@ export default {
     [AvailableRouteNames.Catalog]: "Catalog",
     [AvailableRouteNames.Contacts]: "Contacts",
     [AvailableRouteNames.Events]: "Events",
+    [AvailableRouteNames.Home]: "Home",
     [AvailableRouteNames.Theme]: "Theme",
     [AvailableRouteNames.ResetPassword]: "Reset Password",
     [AvailableRouteNames.ForgotPassword]: "Forgot Password",

@@ -41,7 +41,7 @@ watch(user, (newUser) => {
   }
 });
 
-const AUTHENTICATED_DEFAULT_ROUTE_NAME = "events";
+const AUTHENTICATED_DEFAULT_ROUTE_NAME = "home";
 const REGISTRATION_SENT_ROUTE_NAME = "registration-sent";
 const GUEST_DEFAULT_ROUTE_NAME = "login";
 

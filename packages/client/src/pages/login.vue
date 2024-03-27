@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex items-center justify-center">
-    <q-card class="form-card text-center" flat>
+    <q-card class="form-card text-center">
       <q-form greedy @submit="onSubmit">
         <q-card-section class="text-dark text-h3">{{
           t("auth.login")

@@ -1,5 +1,5 @@
 <template>
-  <q-toolbar class="bg-primary k-toolbar q-px-md text-white">
+  <q-toolbar class="bg-white k-toolbar q-px-md text-black-87">
     <template v-if="isMobile && enableDrawer">
       <q-btn
         v-if="backRouteLocation !== undefined"
@@ -31,6 +31,7 @@
     >
       {{ title }}
     </q-toolbar-title>
+    <q-space v-else />
 
     <template v-if="$q.screen.lt.sm">
       <header-filters
@@ -86,7 +87,7 @@ const searchTextProxy = defineModel<string>("searchText", { default: "" });
 
 const drawerProxy = defineModel<boolean>("drawer");
 
-const showHeaderFilters = ref(false);
+const showHeaderFilters = ref(true);
 
 function updateSearchBarActiveState(newState: boolean) {
   showHeaderFilters.value = newState;
