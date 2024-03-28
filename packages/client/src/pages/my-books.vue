@@ -28,7 +28,7 @@
       <q-tab-panels
         v-model="selectedTab"
         animated
-        class="col column dialog-panels flex-delegate-height-management no-wrap"
+        class="col column dialog-panels flex-delegate-height-management hide-scrollbar no-wrap"
       >
         <q-tab-panel
           v-for="tab in Object.values(PageTab)"
