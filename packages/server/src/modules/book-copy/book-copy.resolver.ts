@@ -4,7 +4,6 @@ import {
 } from "@nestjs/common";
 import {
   Args,
-  Int,
   Mutation,
   Query,
   ResolveField,
@@ -310,7 +309,7 @@ export class BookCopyResolver {
     return sales[0];
   }
 
-  @Mutation(() => Int, { nullable: true })
+  @Mutation(() => [BookCopy])
   async createBookCopies(
     @Input() { bookIds, ownerId, retailLocationId }: BookCopyCreateInput,
     @CurrentUser() { id: userId }: User,
@@ -378,6 +377,6 @@ export class BookCopyResolver {
       data: bookCopies,
     });
 
-    return bookCopies.length;
+    return bookCopies;
   }
 }

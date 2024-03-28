@@ -133,15 +133,18 @@ import { startCase, toLower } from "lodash-es";
 import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { evictQuery } from "src/apollo/cache";
 import { fetchBookByISBN } from "src/services/book";
 import {
   BookCopyDetailsFragment,
+  GetBookCopiesByOwnerDocument,
   useCreateBookCopiesMutation,
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { GetReceiptsDocument } from "src/services/receipt.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UserFragment } from "src/services/user.graphql";
+import { CustomerFragmentDoc, UserFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -305,13 +308,57 @@ function retrieveAllBooks() {
   }).onOk(async (/* shouldPrint */) => {
     // TODO: Handle shouldPrint
 
-    await createBookCopies({
+    const { cache, data: newBookCopies } = await createBookCopies({
       input: {
         ownerId: props.userData.id,
         retailLocationId: selectedLocation.value.id,
         bookIds: booksToRegister.value.map((book) => book.id),
       },
     });
+
+    cache.updateFragment(
+      {
+        id: cache.identify(props.userData),
+        fragment: CustomerFragmentDoc,
+        fragmentName: "Customer",
+      },
+      (data) => {
+        if (!data) {
+          return;
+        }
+
+        return {
+          ...data,
+          booksInStock: data.booksInStock + booksToRegister.value.length,
+        };
+      },
+    );
+
+    cache.updateQuery(
+      {
+        query: GetBookCopiesByOwnerDocument,
+        variables: {
+          userId: props.userData.id,
+          retailLocationId: selectedLocation.value.id,
+        },
+      },
+      (data) => {
+        if (!data) {
+          return;
+        }
+
+        return {
+          ...data,
+          bookCopiesByOwner: [...data.bookCopiesByOwner, ...newBookCopies],
+        };
+      },
+    );
+
+    evictQuery(cache, GetReceiptsDocument, {
+      userId: props.userData.id,
+      retailLocationId: selectedLocation.value.id,
+    });
+    cache.gc();
 
     booksToRegister.value = [];
     tab.value = "retrieved";
