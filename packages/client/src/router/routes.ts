@@ -8,15 +8,25 @@ import {
   redirectIfNotOperatorOrAdmin,
   useAuthService,
 } from "src/services/auth";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
-    redirect: () => ({
-      name: useAuthService().isAuthenticated.value
-        ? AvailableRouteNames.Home
-        : AvailableRouteNames.SelectLocation,
-    }),
+    redirect() {
+      const { isAuthenticated } = useAuthService();
+      if (!isAuthenticated.value) {
+        return { name: AvailableRouteNames.SelectLocation };
+      }
+
+      const { selectedLocationId } = useRetailLocationService();
+      return {
+        name: AvailableRouteNames.Home,
+        params: {
+          locationId: selectedLocationId.value,
+        },
+      };
+    },
   },
 
   {
