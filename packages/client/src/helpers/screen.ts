@@ -9,11 +9,11 @@ export const enum WidthSize {
 
 export const useScreenWidth = (
   smallBreakpoint: number,
-  largeBreakpoint?: number,
+  largeBreakpoint = Infinity,
 ) => {
   const { screen } = useQuasar();
   return computed<WidthSize>(() =>
-    screen.width >= (largeBreakpoint ?? Infinity)
+    screen.width >= largeBreakpoint
       ? WidthSize.LG
       : screen.width >= smallBreakpoint
         ? WidthSize.MD

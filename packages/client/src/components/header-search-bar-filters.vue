@@ -27,7 +27,7 @@
         and the label is what's shown in the filter UI
       -->
       <template v-if="filters.length > 0" #selected>
-        {{ selectedFiltersToString }}
+        {{ selectedFiltersDisplay }}
       </template>
 
       <template #option="{ itemProps, opt, selected, toggleOption }">
@@ -78,7 +78,7 @@ const props = defineProps<{
   filterOptions: ReturnType<typeof useTranslatedFilters>["value"];
 }>();
 
-const selectedFiltersToString = computed(() =>
+const selectedFiltersDisplay = computed(() =>
   filters.value
     .map(
       (filter) => props.filterOptions.find(({ key }) => key === filter)?.label,

@@ -62,7 +62,7 @@
       </header-search-bar-filters>
 
       <dialog-table
-        v-show="!isSortedByCopyCode"
+        v-if="!isSortedByCopyCode"
         v-model:pagination="booksPagination"
         :columns="columns"
         :filter="tableFilter"
@@ -187,7 +187,7 @@
       </dialog-table>
 
       <dialog-table
-        v-show="isSortedByCopyCode"
+        v-else
         v-model:pagination="copyPagination"
         :columns="bookCopyColumns"
         :filter="tableFilter"
@@ -301,7 +301,10 @@ const { reportProblem } = useReportProblemMutation();
 
 const { t } = useI18n();
 
-const screenWidth = useScreenWidth(1694);
+// Setting this so that the side buttons don't overflow to two rows when the screen
+// is below the minimum width to hold them in a single row
+const smallScreenBreakpoint = 1694;
+const screenWidth = useScreenWidth(smallScreenBreakpoint);
 
 const getFieldValue = <T,>(
   getterOrKey: keyof T | ((row: T) => T[keyof T]),
