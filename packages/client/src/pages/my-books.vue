@@ -79,7 +79,7 @@
               v-if="tab === PageTab.RESERVED"
               #body-cell-actions="{ row }"
             >
-              <q-td>
+              <q-td class="text-center">
                 <chip-button
                   :label="$t('myBooks.cancelReservation')"
                   color="primary"
@@ -152,18 +152,30 @@ import {
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
 import { useReservationService } from "src/services/reservation";
+import {
+  ReservationSummaryFragment,
+  useGetReservationsQuery,
+} from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { selectedLocation } = useRetailLocationService();
 const { user } = useAuthService();
 
 const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
-  userId: user.value?.id ?? "",
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
   retailLocationId: selectedLocation.value.id,
 });
 
-const { useCreateReservationsMutation } = useReservationService();
+const { useCreateReservationsMutation, useDeleteReservationMutation } =
+  useReservationService();
 const { createReservations } = useCreateReservationsMutation();
+const { deleteReservation } = useDeleteReservationMutation();
+const { userReservations } = useGetReservationsQuery({
+  retailLocationId: selectedLocation.value.id,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+});
 
 enum PageTab {
   DELIVERED = "delivered",
@@ -172,24 +184,40 @@ enum PageTab {
   PURCHASED = "purchased",
 }
 
-const tableRowsByTab = computed<Record<PageTab, BookCopyDetailsFragment[]>>(
-  () => ({
-    [PageTab.DELIVERED]: bookCopiesByOwner.value.filter(
-      ({ owner }) => owner.id, // TODO: add correct filter to all rows
-    ),
-    [PageTab.PURCHASED]: bookCopiesByOwner.value.filter(
-      ({ owner }) => owner.id,
-    ),
-    [PageTab.REQUESTED]: bookCopiesByOwner.value.filter(
-      ({ owner }) => owner.id,
-    ),
-    [PageTab.RESERVED]: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
-  }),
-);
+const tableRowsByTab = computed<
+  Record<PageTab, (BookCopyDetailsFragment | ReservationSummaryFragment)[]>
+>(() => ({
+  [PageTab.DELIVERED]: bookCopiesByOwner.value.filter(
+    ({ owner }) => owner.id, // TODO: add correct filter to all rows
+  ),
+  [PageTab.PURCHASED]: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
+  [PageTab.REQUESTED]: userReservations.value,
+  [PageTab.RESERVED]: [
+    {
+      book: {
+        authorsFullName: "",
+        id: "",
+        isbnCode: "",
+        meta: {
+          isAvailable: false,
+        },
+        originalPrice: 0,
+        publisherName: "",
+        subject: "",
+        title: "",
+      },
+      expiresAt: 0,
+      id: "",
+      isInCart: false,
+    },
+  ],
+}));
 
 const { t } = useI18n();
 
-const commonColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
+const commonColumns = computed<
+  QTableColumn<BookCopyDetailsFragment | ReservationSummaryFragment>[]
+>(() => [
   {
     name: "isbn",
     field: ({ book }) => book.isbnCode,
@@ -222,7 +250,7 @@ const coverPriceColumn = computed<QTableColumn<BookCopyDetailsFragment>>(
   () => ({
     name: "cover-price",
     field: ({ book }) => book.originalPrice,
-    label: t("book.fields.price"),
+    label: t("book.fields.coverPrice"),
     align: "left",
     format: formatPrice,
     classes: "text-strike text-black-54",
@@ -230,7 +258,13 @@ const coverPriceColumn = computed<QTableColumn<BookCopyDetailsFragment>>(
 );
 
 const columns = computed<
-  Record<PageTab, QTableColumn<BookCopyDetailsFragment>[]>
+  Record<
+    PageTab,
+    (
+      | QTableColumn<BookCopyDetailsFragment>
+      | QTableColumn<ReservationSummaryFragment>
+    )[]
+  >
 >(() => ({
   [PageTab.DELIVERED]: [
     {
@@ -244,7 +278,7 @@ const columns = computed<
     coverPriceColumn.value,
     {
       name: "sale-price",
-      field: ({ book }) => book.originalPrice,
+      field: ({ book }: BookCopyDetailsFragment) => book.originalPrice,
       label: t("myBooks.receivedAmount"),
       align: "left",
       // TODO: change price to the right calculation
@@ -257,7 +291,7 @@ const columns = computed<
     {
       name: "paid-price",
       // TODO: update to correct field
-      field: ({ book }) => book.originalPrice,
+      field: ({ book }: BookCopyDetailsFragment) => book.originalPrice,
       label: t("myBooks.priceYouPaid"),
       align: "left",
       format: formatPrice,
@@ -267,13 +301,21 @@ const columns = computed<
     ...commonColumns.value,
     {
       name: "availability",
-      field: ({ book: { meta } }) => meta.isAvailable,
+      field: ({ book: { meta } }: BookCopyDetailsFragment) => meta.isAvailable,
       label: t("myBooks.availability"),
+      align: "left",
     },
     coverPriceColumn.value,
     {
+      name: "price",
+      field: ({ book }: BookCopyDetailsFragment) => book.originalPrice,
+      label: t("myBooks.price"),
+      align: "left",
+      format: formatPrice,
+    },
+    {
       name: "reserve",
-      field: ({ book: { meta } }) => meta.isAvailable,
+      field: ({ book: { meta } }: BookCopyDetailsFragment) => meta.isAvailable,
       label: "",
     },
     {
@@ -287,7 +329,7 @@ const columns = computed<
     coverPriceColumn.value,
     {
       name: "price",
-      field: ({ book }) => book.originalPrice,
+      field: ({ book }: BookCopyDetailsFragment) => book.originalPrice,
       label: t("myBooks.price"),
       align: "left",
       format: formatPrice,
@@ -342,9 +384,18 @@ const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({
   },
 }));
 
-function cancelReservation(bookCopy: BookCopyDetailsFragment) {
-  // FIXME: cancel reservation
-  bookCopy;
+async function cancelReservation(reservation: ReservationSummaryFragment) {
+  const { cache } = await deleteReservation({
+    input: {
+      id: reservation.id,
+    },
+  });
+
+  cache.evict({
+    id: cache.identify(reservation),
+  });
+  cache.gc();
+  // TODO: add the related request back to the request list
 }
 
 async function reserveBook({ book: { id } }: BookCopyDetailsFragment) {
