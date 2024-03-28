@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {
   WriteStream,
   createReadStream,
@@ -36,31 +37,41 @@ export class ImportBooksCommand extends CommandRunner {
     this.prisma = new PrismaClient();
   }
 
-  async run(
-    passedParam: string[],
-    options?: ImportBooksCommandOptions,
-  ): Promise<void> {
-    console.error("Yeah I have managed to run this thing", passedParam);
-    if (options?.school) {
-      await this.loadSchools();
-      return;
-    }
-
-    await this.loadBooks();
-    return;
-  }
-
   @Option({
     flags: "-s, --school",
-    description: "If the app needs to import Schools instead of books",
+    description:
+      "Use this option if the app needs to import Schools instead of books",
   })
   parseString(val: string): string {
     return val;
   }
 
-  async loadBooks() {
+  async run(_: string[], options?: ImportBooksCommandOptions): Promise<void> {
     try {
-      const result = await this.loadBooksIntoDb();
+      if (options?.school) {
+        await this.loadSchools();
+      } else {
+        await this.loadBooks();
+      }
+    } finally {
+      // No need to catch, the error must break the execution, but it is still better to make sure we're closing prisma connection.
+      await this.prisma.$disconnect();
+    }
+
+    return;
+  }
+
+  async loadBooks() {
+    if ((await this.prisma.book.count()) > 0) {
+      throw new Error(
+        "There are books inside the database. Please make sure you have run the procedure to reset the contents of the database during the close year process.",
+      );
+    }
+
+    console.log("Importing books...");
+
+    try {
+      const result = await this.#loadBooksIntoDb();
 
       if (!result) {
         throw new Error(
@@ -68,7 +79,10 @@ export class ImportBooksCommand extends CommandRunner {
         );
       }
 
-      return result;
+      const importedBooksCount = await this.prisma.book.count();
+      console.log(`Imported ${importedBooksCount} books.`);
+
+      return importedBooksCount;
     } catch (error) {
       console.error("Cannot load books, error: ", error);
       throw new Error("Cannot import or process files on server.");
@@ -76,20 +90,61 @@ export class ImportBooksCommand extends CommandRunner {
   }
 
   async loadSchools() {
+    console.log("Importing schools...");
+
+    if ((await this.prisma.book.count()) === 0) {
+      throw new Error(
+        "No books found in the database. Please import books first.",
+      );
+    }
+
+    const existingSchoolData = await this.#getSchoolAndCoursesData();
+    if (existingSchoolData.booksOnCoursesCount > 0) {
+      throw new Error(
+        `There are either schools(${existingSchoolData.schoolCount}) or courses(${existingSchoolData.coursesCount}) or book courses(${existingSchoolData.booksOnCoursesCount}). Make sure you have run the yearly reset procedure of the database.`,
+      );
+    }
+
     try {
-      const result = await this.loadSchoolsIntoDb();
+      const result = await this.#loadSchoolsIntoDb();
+
+      if (!result) {
+        throw new Error(
+          "Unable to process and import the schools and the courses from the source files.",
+        );
+      }
+
+      const { booksOnCoursesCount, schoolCount, coursesCount } =
+        await this.#getSchoolAndCoursesData();
+      console.log(
+        `Imported ${schoolCount} schools, for a total of ${coursesCount} courses having a total of ${booksOnCoursesCount} books.`,
+      );
 
       return result;
     } catch (error) {
-      console.error("Cannot load books, error: ", error);
+      console.error("Cannot load schools, error: ", error);
       throw new Error(
         "Could not find/process the CSV files or create DB entries.",
       );
     }
   }
 
-  //================ The Services ================
-  async loadBooksIntoDb() {
+  async #getSchoolAndCoursesData() {
+    const [schoolCount, coursesCount, booksOnCoursesCount] = await Promise.all([
+      this.prisma.school.count(),
+      this.prisma.schoolCourse.count(),
+      this.prisma.booksOnCourses.count(),
+    ]);
+
+    return {
+      schoolCount,
+      coursesCount,
+      booksOnCoursesCount,
+      totalCount: schoolCount + coursesCount + booksOnCoursesCount,
+    };
+  }
+
+  async #loadBooksIntoDb() {
     const locations = await this.prisma.retailLocation.findMany();
     if (locations.length === 0) {
       return false;
@@ -252,7 +307,7 @@ export class ImportBooksCommand extends CommandRunner {
     });
   }
 
-  async loadSchoolsIntoDb(locationsPrefixes: string[] = ["MO", "RE"]) {
+  async #loadSchoolsIntoDb(locationsPrefixes: string[] = ["MO", "RE"]) {
     const schoolCodes: Record<string, string[]> = {};
     const schoolCodesList: string[] = [];
     const schoolCodesFromBooksCsv = readFileSync(
@@ -392,6 +447,7 @@ export class ImportBooksCommand extends CommandRunner {
 
       return true;
     } catch (e) {
+      console.error("Error occurred during import of Schools.", e);
       return false;
     }
   }
