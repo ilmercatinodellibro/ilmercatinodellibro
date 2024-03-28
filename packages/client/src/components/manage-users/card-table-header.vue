@@ -7,7 +7,6 @@
       v-model="bookISBN"
       :placeholder="$t('manageUsers.searchHint')"
       class="width-420"
-      :debounce="200"
       :rules="[requiredRule, validISBN]"
       lazy-rules="ondemand"
       outlined
@@ -30,12 +29,11 @@
 
 <script setup lang="ts">
 import { mdiPlus } from "@quasar/extras/mdi-v7";
-import { ref } from "vue";
 import { requiredRule, validISBN } from "src/helpers/rules";
 
 defineEmits<{
   addBook: [bookISBN: string];
 }>();
 
-const bookISBN = ref("");
+const bookISBN = defineModel<string>("bookIsbn", { required: true });
 </script>

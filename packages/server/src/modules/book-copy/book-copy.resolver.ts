@@ -228,6 +228,17 @@ export class BookCopyResolver {
       .createdBy();
   }
 
+  @ResolveField(() => User)
+  async owner(@Root() bookCopy: BookCopy) {
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .owner();
+  }
+
   @ResolveField(() => User, { nullable: true })
   async returnedBy(@Root() bookCopy: BookCopy) {
     if (!bookCopy.returnedById) {

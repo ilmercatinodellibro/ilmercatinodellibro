@@ -47,6 +47,7 @@ export default {
       "Includes the copies that are still present in stock, not lost, not requested",
     retrieveBtn: "Retrieve all the books in the list",
     deleteBookBtnTooltip: "Delete permanently this copy from the database",
+    errorMessage: "Cannot accept more than one copy of the same book",
   },
   booksMovementsDialog: {
     purchasedTitle: "Books purchased by {0}",

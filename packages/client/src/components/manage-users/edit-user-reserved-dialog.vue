@@ -10,7 +10,7 @@
       "
       @cancel="onDialogCancel"
     >
-      <card-table-header>
+      <card-table-header v-model:book-isbn="searchISBN">
         <template #side-actions>
           <!-- TODO: consider extracting this into a separate component -->
           <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
@@ -192,6 +192,8 @@ const props = defineProps<{
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+
+const searchISBN = ref("");
 
 // TODO: remove the pagination management and stubs once the real queries are added
 const currentReservedPage = ref(0);

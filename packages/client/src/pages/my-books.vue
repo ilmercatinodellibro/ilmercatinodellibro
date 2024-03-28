@@ -152,6 +152,7 @@ import {
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
 import {
+  GetRequestsDocument,
   RequestSummaryFragment,
   useGetRequestsQuery,
 } from "src/services/request.graphql";
@@ -409,13 +410,35 @@ async function reserveBook(request: RequestSummaryFragment) {
     return;
   }
 
-  await createReservations({
+  const { cache } = await createReservations({
     input: {
       bookIds: [request.book.id],
       userId: user.value.id,
       retailLocationId: selectedLocation.value.id,
     },
   });
+
+  cache.updateQuery(
+    {
+      query: GetRequestsDocument,
+      variables: {
+        retailLocationId: selectedLocation.value.id,
+        userId: user.value.id,
+      },
+    },
+    (data) => {
+      if (!data) {
+        return;
+      }
+      return {
+        bookRequests: data.bookRequests.filter(
+          ({ id }) => id === request.book.id,
+        ),
+      };
+    },
+  );
+  cache.gc();
+  // TODO: add the new reservation to the reservation list
 }
 
 function cancelRequest(bookCopy: BookCopyDetailsFragment) {
