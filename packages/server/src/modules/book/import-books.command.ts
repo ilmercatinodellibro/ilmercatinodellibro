@@ -90,7 +90,7 @@ export class ImportBooksCommand extends CommandRunner {
   }
 
   async loadSchools() {
-    console.log("Importing schools...");
+    console.log("Importing schools and courses...");
 
     if ((await this.prisma.book.count()) === 0) {
       throw new Error(
