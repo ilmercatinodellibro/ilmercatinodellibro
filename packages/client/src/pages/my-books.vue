@@ -151,6 +151,10 @@ import {
   BookCopyDetailsFragment,
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
+import {
+  RequestSummaryFragment,
+  useGetRequestsQuery,
+} from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
 import {
   ReservationSummaryFragment,
@@ -176,6 +180,11 @@ const { userReservations } = useGetReservationsQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
 });
+const { bookRequests } = useGetRequestsQuery({
+  retailLocationId: selectedLocation.value.id,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+});
 
 enum PageTab {
   DELIVERED = "delivered",
@@ -184,15 +193,22 @@ enum PageTab {
   PURCHASED = "purchased",
 }
 
-const tableRowsByTab = computed<
-  Record<PageTab, (BookCopyDetailsFragment | ReservationSummaryFragment)[]>
->(() => ({
+type TablesRowsTypes =
+  | BookCopyDetailsFragment
+  | ReservationSummaryFragment
+  | RequestSummaryFragment;
+
+const tableRowsByTab = computed<Record<PageTab, TablesRowsTypes[]>>(() => ({
   [PageTab.DELIVERED]: bookCopiesByOwner.value.filter(
     ({ owner }) => owner.id, // TODO: add correct filter to all rows
   ),
   [PageTab.PURCHASED]: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
-  [PageTab.REQUESTED]: userReservations.value,
+  [PageTab.REQUESTED]: bookRequests.value.map((request) => ({
+    ...request,
+    book: { ...request.book, meta: { isAvailable: true } },
+  })),
   [PageTab.RESERVED]: [
+    ...userReservations.value,
     {
       book: {
         authorsFullName: "",
@@ -215,9 +231,7 @@ const tableRowsByTab = computed<
 
 const { t } = useI18n();
 
-const commonColumns = computed<
-  QTableColumn<BookCopyDetailsFragment | ReservationSummaryFragment>[]
->(() => [
+const commonColumns = computed<QTableColumn<TablesRowsTypes>[]>(() => [
   {
     name: "isbn",
     field: ({ book }) => book.isbnCode,
@@ -246,101 +260,93 @@ const commonColumns = computed<
   },
 ]);
 
-const coverPriceColumn = computed<QTableColumn<BookCopyDetailsFragment>>(
+const coverPriceColumn = computed<QTableColumn<TablesRowsTypes>>(() => ({
+  name: "cover-price",
+  field: ({ book }) => book.originalPrice,
+  label: t("book.fields.coverPrice"),
+  align: "left",
+  format: formatPrice,
+  classes: "text-strike text-black-54",
+}));
+
+const columns = computed<Record<PageTab, QTableColumn<TablesRowsTypes>[]>>(
   () => ({
-    name: "cover-price",
-    field: ({ book }) => book.originalPrice,
-    label: t("book.fields.coverPrice"),
-    align: "left",
-    format: formatPrice,
-    classes: "text-strike text-black-54",
+    [PageTab.DELIVERED]: [
+      {
+        name: "status",
+        // TODO: add the field
+        field: () => undefined,
+        label: t("book.fields.status"),
+        align: "left",
+      },
+      ...commonColumns.value,
+      coverPriceColumn.value,
+      {
+        name: "sale-price",
+        field: ({ book }) => book.originalPrice,
+        label: t("myBooks.receivedAmount"),
+        align: "left",
+        // TODO: change price to the right calculation
+        format: formatPrice,
+      },
+    ],
+    [PageTab.PURCHASED]: [
+      ...commonColumns.value,
+      coverPriceColumn.value,
+      {
+        name: "paid-price",
+        // TODO: update to correct field
+        field: ({ book }) => book.originalPrice,
+        label: t("myBooks.priceYouPaid"),
+        align: "left",
+        format: formatPrice,
+      },
+    ],
+    [PageTab.REQUESTED]: [
+      ...commonColumns.value,
+      {
+        name: "availability",
+        field: ({ book: { meta } }) => meta.isAvailable,
+        label: t("myBooks.availability"),
+        align: "left",
+      },
+      coverPriceColumn.value,
+      {
+        name: "price",
+        field: ({ book }) => book.originalPrice,
+        label: t("myBooks.price"),
+        align: "left",
+        format: formatPrice,
+      },
+      {
+        name: "reserve",
+        field: ({ book: { meta } }) => meta.isAvailable,
+        label: "",
+      },
+      {
+        name: "cancel-request",
+        field: () => undefined,
+        label: "",
+      },
+    ],
+    [PageTab.RESERVED]: [
+      ...commonColumns.value,
+      coverPriceColumn.value,
+      {
+        name: "price",
+        field: ({ book }) => book.originalPrice,
+        label: t("myBooks.price"),
+        align: "left",
+        format: formatPrice,
+      },
+      {
+        name: "actions",
+        field: () => undefined,
+        label: "",
+      },
+    ],
   }),
 );
-
-const columns = computed<
-  Record<
-    PageTab,
-    (
-      | QTableColumn<BookCopyDetailsFragment>
-      | QTableColumn<ReservationSummaryFragment>
-    )[]
-  >
->(() => ({
-  [PageTab.DELIVERED]: [
-    {
-      name: "status",
-      // TODO: add the field
-      field: () => undefined,
-      label: t("book.fields.status"),
-      align: "left",
-    },
-    ...commonColumns.value,
-    coverPriceColumn.value,
-    {
-      name: "sale-price",
-      field: ({ book }: BookCopyDetailsFragment) => book.originalPrice,
-      label: t("myBooks.receivedAmount"),
-      align: "left",
-      // TODO: change price to the right calculation
-      format: formatPrice,
-    },
-  ],
-  [PageTab.PURCHASED]: [
-    ...commonColumns.value,
-    coverPriceColumn.value,
-    {
-      name: "paid-price",
-      // TODO: update to correct field
-      field: ({ book }: BookCopyDetailsFragment) => book.originalPrice,
-      label: t("myBooks.priceYouPaid"),
-      align: "left",
-      format: formatPrice,
-    },
-  ],
-  [PageTab.REQUESTED]: [
-    ...commonColumns.value,
-    {
-      name: "availability",
-      field: ({ book: { meta } }: BookCopyDetailsFragment) => meta.isAvailable,
-      label: t("myBooks.availability"),
-      align: "left",
-    },
-    coverPriceColumn.value,
-    {
-      name: "price",
-      field: ({ book }: BookCopyDetailsFragment) => book.originalPrice,
-      label: t("myBooks.price"),
-      align: "left",
-      format: formatPrice,
-    },
-    {
-      name: "reserve",
-      field: ({ book: { meta } }: BookCopyDetailsFragment) => meta.isAvailable,
-      label: "",
-    },
-    {
-      name: "cancel-request",
-      field: () => undefined,
-      label: "",
-    },
-  ],
-  [PageTab.RESERVED]: [
-    ...commonColumns.value,
-    coverPriceColumn.value,
-    {
-      name: "price",
-      field: ({ book }: BookCopyDetailsFragment) => book.originalPrice,
-      label: t("myBooks.price"),
-      align: "left",
-      format: formatPrice,
-    },
-    {
-      name: "actions",
-      field: () => undefined,
-      label: "",
-    },
-  ],
-}));
 
 const selectedTab = ref(PageTab.DELIVERED);
 
@@ -398,14 +404,14 @@ async function cancelReservation(reservation: ReservationSummaryFragment) {
   // TODO: add the related request back to the request list
 }
 
-async function reserveBook({ book: { id } }: BookCopyDetailsFragment) {
+async function reserveBook(request: RequestSummaryFragment) {
   if (!user.value) {
     return;
   }
 
   await createReservations({
     input: {
-      bookIds: [id],
+      bookIds: [request.book.id],
       userId: user.value.id,
       retailLocationId: selectedLocation.value.id,
     },
