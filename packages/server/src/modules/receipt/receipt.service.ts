@@ -194,6 +194,7 @@ export class ReceiptService {
     creationDate,
     userEmail,
     locationName,
+    // TODO: manage the "registration fee" and "discount" fields
     books,
   }: GenerateReceiptInput) {
     const formattedDate = this.#formatCreationDate(creationDate);

@@ -21,7 +21,7 @@
       },
       "headerSubtitle": {
         "type": "text",
-        "content": "{location}",
+        "content": "Il Mercatino del Libro - {location}",
         "position": { "x": 10, "y": 12 },
         "width": 100,
         "height": 5.5,
