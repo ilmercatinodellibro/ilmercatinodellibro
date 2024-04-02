@@ -18,6 +18,9 @@ generator nestgraphql {
   reExport                              = All
   requireSingleFieldsInWhereUniqueInput = true
   noAtomicOperations                    = true
+  purgeOutput                           = true
+  omitModelsCount                       = true
+  emitBlocks                            = ["models", "enums"]
 
   // Use JSON scalar from graphql-scalars instead of the default (graphql-type-json)
   graphqlScalars_Json_name      = "GraphQLJSON"

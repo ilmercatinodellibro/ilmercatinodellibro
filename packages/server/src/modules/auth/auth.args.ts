@@ -1,22 +1,24 @@
 import { Field, InputType, PickType } from "@nestjs/graphql";
-import { UserCreateInput } from "src/@generated";
+import { User } from "src/@generated";
 
 @InputType()
 export class RegisterPayload extends PickType(
-  UserCreateInput,
-  ["email", "password", "firstname", "lastname"],
+  User,
+  ["email", "firstname", "lastname"],
   InputType,
 ) {
+  @Field()
+  password!: string;
+
   @Field()
   passwordConfirmation!: string;
 }
 
 @InputType()
-export class LoginPayload extends PickType(
-  UserCreateInput,
-  ["email", "password"],
-  InputType,
-) {}
+export class LoginPayload extends PickType(User, ["email"], InputType) {
+  @Field()
+  password!: string;
+}
 
 @InputType()
 export class PasswordResetPayload {
