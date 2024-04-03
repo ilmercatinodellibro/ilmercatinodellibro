@@ -5,9 +5,9 @@
       :submit-label="$t('book.filter')"
       size="sm"
       @submit="onDialogOK(newFilters)"
-      @cancel="onDialogCancel"
+      @cancel="onDialogCancel()"
     >
-      <q-card-section class="gap-16">
+      <q-card-section class="column gap-16">
         <q-select
           v-model="newFilters.courses"
           :label="$t('book.filters.schoolFilter.fields.course')"
@@ -31,6 +31,7 @@
 </template>
 
 <script setup lang="ts">
+import { cloneDeep } from "lodash-es";
 import { useDialogPluginComponent } from "quasar";
 import { reactive } from "vue";
 import { SchoolFilters } from "src/models/book";
@@ -41,18 +42,17 @@ const props = defineProps<{
   selectedFilters?: SchoolFilters;
 }>();
 
+defineEmits(useDialogPluginComponent.emitsObject);
+
 const newFilters = reactive<SchoolFilters>(
-  props.selectedFilters ??
-    ({
-      schoolCodes: [],
-      courses: [],
-    } satisfies SchoolFilters),
+  cloneDeep(props.selectedFilters) ?? {
+    schoolCodes: [],
+    courses: [],
+  },
 );
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<SchoolFilters>();
-
-defineEmits(useDialogPluginComponent.emitsObject);
 </script>
 
 <style scoped lang="scss">

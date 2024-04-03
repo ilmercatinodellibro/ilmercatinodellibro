@@ -171,6 +171,12 @@ const routes: RouteRecordRaw[] = [
         name: AvailableRouteNames.MyData,
         component: () => import("src/pages/my-data.vue"),
       },
+      {
+        path: "warehouse",
+        name: AvailableRouteNames.Warehouse,
+        component: () => import("src/pages/warehouse.vue"),
+        beforeEnter: redirectIfNotOperatorOrAdmin,
+      },
     ],
   },
 

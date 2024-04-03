@@ -9,10 +9,10 @@
         class="column flex-delegate-height-management full-height q-pa-none"
       >
         <dialog-table
+          v-model:pagination="pagination"
           :columns="columns"
           :loading="loading"
           :rows="rows"
-          :pagination="pagination"
           hide-bottom
           @request="onRequest"
         />

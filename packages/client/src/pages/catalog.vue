@@ -1,71 +1,23 @@
 <template>
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
-      <q-card-section class="flex-center gap-16 no-wrap row">
-        <q-input
-          v-model="searchQuery"
-          debounce="200"
-          type="search"
-          class="width-600"
-          outlined
-          :placeholder="$t('common.search')"
-        >
-          <template #append>
-            <q-icon :name="mdiMagnify" />
-          </template>
-        </q-input>
-        <q-select
-          v-model="filters"
-          fit
-          :options="filterOptions.map(({ key }) => key)"
-          class="width-200"
-          outlined
-          multiple
-          :label="$t('book.filter')"
-        >
-          <!--
-            This is because the filters are translated and if a user were to switch
-            language they should update so the key for each filter is an integer ID
-            and the label is what's shown in the filter UI
-          -->
-          <template v-if="filters.length > 0" #selected>
-            {{ selectedFiltersToString }}
-          </template>
-
-          <template #option="{ itemProps, opt, selected, toggleOption }">
-            <q-item v-bind="itemProps">
-              <q-item-section side top>
-                <q-checkbox
-                  :model-value="selected"
-                  @update:model-value="toggleOption(opt)"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label> {{ filterOptions[opt]?.label }} </q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
-
-          <template #after-options>
-            <q-item clickable @click="openSchoolFilterDialog">
-              <q-item-section>
-                {{ $t("book.filters.school") }}
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-
-        <q-space />
-
-        <q-btn
-          :label="$t('book.addBook')"
-          class="q-ma-sm"
-          color="accent"
-          no-wrap
-          :icon="mdiPlus"
-          @click="openBookDialog"
-        />
-      </q-card-section>
+      <header-search-bar-filters
+        v-model:filters="filters"
+        v-model:school-filters="schoolFilters"
+        v-model:search-query="searchQuery"
+        :filter-options="filterOptions"
+      >
+        <template #side-actions>
+          <q-btn
+            :label="$t('book.addBook')"
+            class="q-ma-sm"
+            color="accent"
+            no-wrap
+            :icon="mdiPlus"
+            @click="openBookDialog"
+          />
+        </template>
+      </header-search-bar-filters>
 
       <q-card-section class="col no-wrap q-pa-none row">
         <q-table
@@ -98,13 +50,13 @@
 </template>
 
 <script lang="ts" setup>
-import { mdiMagnify, mdiPlus } from "@quasar/extras/mdi-v7";
+import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AddBookDialog from "src/components/add-book-dialog.vue";
-import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
+import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
@@ -130,15 +82,10 @@ enum BookFilters {
   LowUtility,
 }
 
+const filters = ref<BookFilters[]>([]);
+
 const filterOptions = useTranslatedFilters<BookFilters>("book.filters.options");
 
-// FIXME: Add actual logic with server fetch
-const schoolFilterOptions: SchoolFilters = {
-  schoolCodes: ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
-  courses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
-};
-
-const filters = ref<BookFilters[]>([]);
 const schoolFilters = ref<SchoolFilters>({
   schoolCodes: [],
   courses: [],
@@ -148,10 +95,6 @@ const tableFilter = computed(() => ({
   search: searchQuery.value,
   isAvailable: filters.value.includes(BookFilters.Available) || undefined,
 }));
-
-const selectedFiltersToString = computed(() =>
-  filters.value.map((key) => filterOptions.value[key]?.label).join(", "),
-);
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -250,18 +193,6 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
   pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
   loading.value = false;
 };
-
-function openSchoolFilterDialog() {
-  Dialog.create({
-    component: FilterBySchoolDialog,
-    componentProps: {
-      filters: schoolFilterOptions,
-      selectedFilters: schoolFilters.value,
-    },
-  }).onOk((payload: SchoolFilters) => {
-    schoolFilters.value = payload;
-  });
-}
 
 function openBookDialog() {
   Dialog.create({
