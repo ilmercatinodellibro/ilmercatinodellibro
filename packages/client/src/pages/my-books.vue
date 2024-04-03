@@ -4,6 +4,7 @@
       <q-card-section class="q-pa-md">
         <q-input
           v-model="searchQuery"
+          :debounce="500"
           :placeholder="$t('common.search')"
           class="max-width-600"
           outlined
@@ -39,6 +40,7 @@
         >
           <dialog-table
             :columns="columns[tab]"
+            :filter="searchQuery"
             :loading="loading"
             :rows="tableRowsByTab[tab]"
             :rows-per-page-options="[0]"
@@ -184,12 +186,14 @@ const { userReservations } = useGetReservationsQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
 });
+
 const { deleteBookRequest } = useDeleteRequestMutation();
 const { bookRequests } = useGetRequestsQuery({
   retailLocationId: selectedLocation.value.id,
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
 });
+
 const { purchasedBookCopies } = useGetPurchasedBookCopiesQuery({
   retailLocationId: selectedLocation.value.id,
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -209,9 +213,7 @@ type TablesRowsTypes =
   | RequestSummaryFragment;
 
 const tableRowsByTab = computed<Record<PageTab, TablesRowsTypes[]>>(() => ({
-  [PageTab.DELIVERED]: bookCopiesByOwner.value.filter(
-    ({ owner }) => owner.id, // TODO: add correct filter to all rows
-  ),
+  [PageTab.DELIVERED]: bookCopiesByOwner.value,
   [PageTab.PURCHASED]: purchasedBookCopies.value,
   [PageTab.REQUESTED]: bookRequests.value,
   [PageTab.RESERVED]: userReservations.value,
