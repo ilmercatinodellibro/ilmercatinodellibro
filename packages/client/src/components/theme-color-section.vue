@@ -10,7 +10,7 @@
           {{ theme.colors[name] }}
         </span>
         <span class="text-black-54 text-subtitle">
-          {{ RGBTheme[name] }}
+          {{ rgbToText(hexToRgb(theme.colors[name])) }}
         </span>
       </div>
     </div>
@@ -24,10 +24,12 @@
 </template>
 
 <script setup lang="ts">
-import { Dialog } from "quasar";
+import { Dialog, colors, colorsRgba } from "quasar";
 import { useI18n } from "vue-i18n";
 import ColorPickerDialog from "src/components/color-picker-dialog.vue";
 import { ThemeColor, useTheme } from "src/composables/use-theme";
+
+const { hexToRgb } = colors;
 
 defineProps<{
   name: ThemeColor;
@@ -35,7 +37,9 @@ defineProps<{
 
 const { t } = useI18n();
 
-const { theme, RGBTheme } = useTheme();
+const { theme } = useTheme();
+
+const rgbToText = ({ r, g, b }: colorsRgba) => `R${r} G${g} B${b}`;
 
 function openColorPickerDialog(colorType: ThemeColor) {
   Dialog.create({

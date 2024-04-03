@@ -1,9 +1,7 @@
-import { cloneDeep, isEqual, mapValues } from "lodash-es";
-import { LocalStorage, Notify, colors, colorsRgba, setCssVar } from "quasar";
-import { computed, ref, watch } from "vue";
+import { cloneDeep, isEqual } from "lodash-es";
+import { LocalStorage, Notify, setCssVar } from "quasar";
+import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-
-const { hexToRgb } = colors;
 
 export type ThemeColor = "primary" | "secondary" | "accent";
 
@@ -60,32 +58,6 @@ function setDefaults() {
   hasPendingChanges.value = false;
 }
 
-function expandColorHash(colorHash: string) {
-  const sanitizedColorHash = colorHash.replace("#", "");
-
-  if (!/^([0-9A-Fa-f]{3}){1,2}$/g.test(sanitizedColorHash)) {
-    throw new Error("Invalid color hash format");
-  }
-
-  if (sanitizedColorHash.length === 3) {
-    return sanitizedColorHash
-      .split("")
-      .map((char) => char.repeat(2))
-      .join("");
-  }
-  return sanitizedColorHash;
-}
-
-function rgbToText({ r, g, b }: colorsRgba) {
-  return `R${r} G${g} B${b}`;
-}
-
-const RGBTheme = computed(() => {
-  return mapValues(theme.value.colors, (color) =>
-    rgbToText(hexToRgb(expandColorHash(color))),
-  );
-});
-
 export function useTheme() {
   const { t } = useI18n();
 
@@ -97,10 +69,10 @@ export function useTheme() {
       color: "positive",
     });
   }
+
   return {
     theme,
     defaultTheme,
-    RGBTheme,
     hasPendingChanges,
     setDefaults,
     saveChanges,
