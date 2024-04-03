@@ -31,7 +31,3 @@ query getBooks(
     rowsCount
   }
 }
-
-mutation loadBooksIntoDatabase {
-  loadBooksIntoDatabase
-}

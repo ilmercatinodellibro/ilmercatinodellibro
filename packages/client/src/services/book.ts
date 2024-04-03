@@ -3,7 +3,6 @@ import { BookQueryFilter } from "src/@generated/graphql";
 import {
   GetBooksQueryVariables,
   useGetBooksQuery,
-  useLoadBooksIntoDatabaseMutation,
 } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
@@ -25,7 +24,6 @@ export function useBookService(
     retailLocationId: selectedLocation.value.id,
   }));
 
-  const loadBooksMutation = useLoadBooksIntoDatabaseMutation();
   const books = computed(() => booksData.value?.rows ?? []);
   const booksPaginationDetails = computed(() => {
     const currentData = booksData.value;
@@ -53,7 +51,6 @@ export function useBookService(
     books,
     booksPaginationDetails,
     loading,
-    loadBooksMutation,
     refetchBooks,
   };
 }
