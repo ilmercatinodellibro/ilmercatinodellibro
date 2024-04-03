@@ -17,14 +17,10 @@ import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator"
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookCreateInput, BookQueryArgs, BookQueryResult } from "./book.args";
-import { BookService } from "./book.service";
 
 @Resolver(() => Book)
 export class BookResolver {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly bookService: BookService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Query(() => BookQueryResult)
   async books(
@@ -224,38 +220,5 @@ export class BookResolver {
         title,
       },
     });
-  }
-
-  @Mutation(() => Boolean)
-  async loadBooksIntoDatabase() {
-    try {
-      const result = await this.bookService.loadBooksIntoDb();
-
-      if (!result) {
-        throw new UnprocessableEntityException(
-          "Unable to process and import the books from the source file.",
-        );
-      }
-
-      return result;
-    } catch (error) {
-      console.error("Cannot load books, error: ", error);
-      throw new UnprocessableEntityException(
-        "Cannot import or process files on server.",
-      );
-    }
-  }
-
-  async loadSchoolsIntoDb() {
-    try {
-      const result = await this.bookService.loadSchoolsIntoDb();
-
-      return result;
-    } catch (error) {
-      console.error("Cannot load books, error: ", error);
-      throw new UnprocessableEntityException(
-        "Could not find/process the CSV files or create DB entries.",
-      );
-    }
   }
 }
