@@ -14,6 +14,7 @@
           </template>
         </q-input>
       </q-card-section>
+
       <q-tabs v-model="selectedTab" align="justify" active-color="accent">
         <q-tab
           v-for="tab in Object.values(PageTab)"
@@ -28,13 +29,13 @@
       <q-tab-panels
         v-model="selectedTab"
         animated
-        class="col column dialog-panels flex-delegate-height-management hide-scrollbar no-wrap"
+        class="column dialog-panels flex-delegate-height-management hide-scrollbar no-wrap"
       >
         <q-tab-panel
           v-for="tab in Object.values(PageTab)"
           :key="tab"
           :name="tab"
-          class="col column flex-delegate-height-management no-padding no-wrap"
+          class="column flex-delegate-height-management no-padding no-wrap"
         >
           <dialog-table
             :columns="columns[tab]"
@@ -150,6 +151,7 @@ import { useAuthService } from "src/services/auth";
 import {
   BookCopyDetailsFragment,
   useGetBookCopiesByOwnerQuery,
+  useGetPurchasedBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 import {
   GetRequestsDocument,
@@ -188,6 +190,11 @@ const { bookRequests } = useGetRequestsQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
 });
+const { purchasedBookCopies } = useGetPurchasedBookCopiesQuery({
+  retailLocationId: selectedLocation.value.id,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+});
 
 enum PageTab {
   DELIVERED = "delivered",
@@ -205,7 +212,7 @@ const tableRowsByTab = computed<Record<PageTab, TablesRowsTypes[]>>(() => ({
   [PageTab.DELIVERED]: bookCopiesByOwner.value.filter(
     ({ owner }) => owner.id, // TODO: add correct filter to all rows
   ),
-  [PageTab.PURCHASED]: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
+  [PageTab.PURCHASED]: purchasedBookCopies.value,
   [PageTab.REQUESTED]: bookRequests.value,
   [PageTab.RESERVED]: userReservations.value,
 }));
@@ -459,5 +466,6 @@ async function cancelRequest(request: RequestSummaryFragment) {
 .dialog-panels > * > .q-tab-panel[role="tabpanel"] {
   display: flex;
   overflow: auto;
+  flex-grow: 1;
 }
 </style>
