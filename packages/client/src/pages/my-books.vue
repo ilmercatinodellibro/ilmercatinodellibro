@@ -154,6 +154,7 @@ import {
 import {
   GetRequestsDocument,
   RequestSummaryFragment,
+  useDeleteRequestMutation,
   useGetRequestsQuery,
 } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
@@ -181,6 +182,7 @@ const { userReservations } = useGetReservationsQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
 });
+const { deleteBookRequest } = useDeleteRequestMutation();
 const { bookRequests } = useGetRequestsQuery({
   retailLocationId: selectedLocation.value.id,
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -204,30 +206,8 @@ const tableRowsByTab = computed<Record<PageTab, TablesRowsTypes[]>>(() => ({
     ({ owner }) => owner.id, // TODO: add correct filter to all rows
   ),
   [PageTab.PURCHASED]: bookCopiesByOwner.value.filter(({ owner }) => owner.id),
-  [PageTab.REQUESTED]: bookRequests.value.map((request) => ({
-    ...request,
-    book: { ...request.book, meta: { isAvailable: true } },
-  })),
-  [PageTab.RESERVED]: [
-    ...userReservations.value,
-    {
-      book: {
-        authorsFullName: "",
-        id: "",
-        isbnCode: "",
-        meta: {
-          isAvailable: false,
-        },
-        originalPrice: 0,
-        publisherName: "",
-        subject: "",
-        title: "",
-      },
-      expiresAt: 0,
-      id: "",
-      isInCart: false,
-    },
-  ],
+  [PageTab.REQUESTED]: bookRequests.value,
+  [PageTab.RESERVED]: userReservations.value,
 }));
 
 const { t } = useI18n();
@@ -432,7 +412,7 @@ async function reserveBook(request: RequestSummaryFragment) {
       }
       return {
         bookRequests: data.bookRequests.filter(
-          ({ id }) => id === request.book.id,
+          ({ id }) => id !== request.book.id,
         ),
       };
     },
@@ -441,9 +421,32 @@ async function reserveBook(request: RequestSummaryFragment) {
   // TODO: add the new reservation to the reservation list
 }
 
-function cancelRequest(bookCopy: BookCopyDetailsFragment) {
-  // FIXME: cancel request of the book
-  bookCopy;
+async function cancelRequest(request: RequestSummaryFragment) {
+  const { cache } = await deleteBookRequest({
+    input: {
+      id: request.id,
+    },
+  });
+
+  cache.updateQuery(
+    {
+      query: GetRequestsDocument,
+      variables: {
+        retailLocationId: selectedLocation.value.id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
+      },
+    },
+    (data) => {
+      if (!data) {
+        return;
+      }
+      return {
+        bookRequests: data.bookRequests.filter(({ id }) => id !== request.id),
+      };
+    },
+  );
+  cache.gc();
 }
 </script>
 
