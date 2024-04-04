@@ -133,13 +133,18 @@ import { startCase, toLower } from "lodash-es";
 import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { evictQuery } from "src/apollo/cache";
+import { fetchBookByISBN } from "src/services/book";
 import {
   BookCopyDetailsFragment,
+  GetBookCopiesByOwnerDocument,
+  useCreateBookCopiesMutation,
   useGetBookCopiesByOwnerQuery,
 } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { GetReceiptsDocument } from "src/services/receipt.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UserFragment } from "src/services/user.graphql";
+import { CustomerFragmentDoc, UserFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -184,7 +189,7 @@ function getCommonColumns<
       : (row) => {
           const book = (row as BookCopyDetailsFragment).book;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return typeof field === "function" ? field(book) : field;
+          return typeof field === "function" ? field(book) : book[field];
         };
 
   return [
@@ -286,17 +291,77 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   ],
 );
 
-function addBookToBeRegistered(bookISBN: string) {
-  // FIXME: add logic to add a book into "in retrieval" section
-  bookISBN;
+async function addBookToBeRegistered(bookISBN: string) {
+  const book = await fetchBookByISBN(bookISBN);
+  if (!book) {
+    // TODO: let the user know about this
+    return;
+  }
+
+  booksToRegister.value.push(book);
 }
 
+const { createBookCopies } = useCreateBookCopiesMutation();
 function retrieveAllBooks() {
   Dialog.create({
     component: RetrieveAllBooksDialog,
-  }).onOk((payload) => {
-    // FIXME: add the logic for the retrieval of all books
-    payload;
+  }).onOk(async (/* shouldPrint */) => {
+    // TODO: Handle shouldPrint
+
+    const { cache, data: newBookCopies } = await createBookCopies({
+      input: {
+        ownerId: props.userData.id,
+        retailLocationId: selectedLocation.value.id,
+        bookIds: booksToRegister.value.map((book) => book.id),
+      },
+    });
+
+    cache.updateFragment(
+      {
+        id: cache.identify(props.userData),
+        fragment: CustomerFragmentDoc,
+        fragmentName: "Customer",
+      },
+      (data) => {
+        if (!data) {
+          return;
+        }
+
+        return {
+          ...data,
+          booksInStock: data.booksInStock + booksToRegister.value.length,
+        };
+      },
+    );
+
+    cache.updateQuery(
+      {
+        query: GetBookCopiesByOwnerDocument,
+        variables: {
+          userId: props.userData.id,
+          retailLocationId: selectedLocation.value.id,
+        },
+      },
+      (data) => {
+        if (!data) {
+          return;
+        }
+
+        return {
+          ...data,
+          bookCopiesByOwner: [...data.bookCopiesByOwner, ...newBookCopies],
+        };
+      },
+    );
+
+    evictQuery(cache, GetReceiptsDocument, {
+      userId: props.userData.id,
+      retailLocationId: selectedLocation.value.id,
+    });
+    cache.gc();
+
+    booksToRegister.value = [];
+    tab.value = "retrieved";
   });
 }
 

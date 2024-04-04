@@ -4,15 +4,22 @@ import {
 } from "@nestjs/common";
 import {
   Args,
-  Int,
   Mutation,
   Query,
   ResolveField,
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Book, BookCopy, Problem, Sale, User } from "src/@generated";
+import {
+  Book,
+  BookCopy,
+  Problem,
+  ReceiptType,
+  Sale,
+  User,
+} from "src/@generated";
 import { AuthService } from "src/modules/auth/auth.service";
+import { ReceiptService } from "src/modules/receipt/receipt.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -29,6 +36,7 @@ export class BookCopyResolver {
     private readonly prisma: PrismaService,
     private readonly bookService: BookCopyService,
     private readonly authService: AuthService,
+    private readonly receiptService: ReceiptService,
   ) {}
 
   @Query(() => [BookCopy])
@@ -187,6 +195,17 @@ export class BookCopyResolver {
       .book();
   }
 
+  @ResolveField(() => User)
+  async owner(@Root() bookCopy: BookCopy) {
+    return this.prisma.bookCopy
+      .findUnique({
+        where: {
+          id: bookCopy.id,
+        },
+      })
+      .owner();
+  }
+
   @ResolveField(() => [Problem])
   async problems(@Root() bookCopy: BookCopy) {
     return this.prisma.bookCopy
@@ -290,7 +309,7 @@ export class BookCopyResolver {
     return sales[0];
   }
 
-  @Mutation(() => Int, { nullable: true })
+  @Mutation(() => [BookCopy])
   async createBookCopies(
     @Input() { bookIds, ownerId, retailLocationId }: BookCopyCreateInput,
     @CurrentUser() { id: userId }: User,
@@ -327,7 +346,7 @@ export class BookCopyResolver {
         retailLocationId,
       );
 
-      return prisma.bookCopy.createMany({
+      await prisma.bookCopy.createMany({
         data: booksCodes.map((generatedCode, index) => ({
           bookId: bookIds[index],
           code: generatedCode,
@@ -336,8 +355,28 @@ export class BookCopyResolver {
           updatedById: userId,
         })),
       });
+
+      return prisma.bookCopy.findMany({
+        where: {
+          ownerId,
+          code: {
+            in: booksCodes,
+          },
+        },
+        include: {
+          book: true,
+        },
+      });
     });
 
-    return bookCopies.count;
+    await this.receiptService.createReceipt({
+      type: ReceiptType.REGISTRATION,
+      userId: ownerId,
+      retailLocationId,
+      createdById: userId,
+      data: bookCopies,
+    });
+
+    return bookCopies;
   }
 }

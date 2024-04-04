@@ -74,6 +74,7 @@
           <template #body-cell-in-stock="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
+              always-active
               @click="openCellEditDialog(row, col, value)"
             />
           </template>
@@ -100,6 +101,7 @@
           <template #body-cell-reserved="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
+              always-active
               @click="openCellEditDialog(row, col, value)"
             />
           </template>
@@ -114,6 +116,7 @@
             <table-cell-with-dialog
               :value="value"
               :secondary-value="row.booksRequestedAndAvailable"
+              always-active
               @click="openCellEditDialog(row, col, value)"
             >
               <template #secondary-value="{ value: availableCount }">
@@ -419,10 +422,6 @@ function openCellEditDialog(
   column: QTableColumn,
   value: number,
 ) {
-  if (value === 0) {
-    return;
-  }
-
   switch (column.name) {
     case "in-stock":
       Dialog.create({
@@ -443,12 +442,17 @@ function openCellEditDialog(
       });
       break;
     case "sold":
-    case "purchased":
+    case "purchased": {
+      if (value === 0) {
+        return;
+      }
+
       Dialog.create({
         component: EditUserBooksMovementsDialog,
         componentProps: { userData, type: column.name },
       });
       break;
+    }
   }
 }
 

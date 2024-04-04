@@ -74,6 +74,8 @@ model User {
   salesInCreatedCarts Sale[]           @relation("SaleInCartOpenedBy")
   createdCarts        Cart[]           @relation("CartOperator")
   memberships         LocationMember[]
+  ownedReceipts       Receipt[]        @relation("ReceiptOwner")
+  triggeredReceipts   Receipt[]        @relation("ReceiptCreator")
 }
 
 model Event {
@@ -125,9 +127,10 @@ model RetailLocation {
   maxBookingDays        Int     @default(7) @map("max_booking_days")
   warehouseMaxBlockSize Int     @default(10) @map("warehouse_max_block_size")
 
-  books   Book[]           @relation("RetailLocationBooks")
-  carts   Cart[]
-  members LocationMember[]
+  books    Book[]           @relation("RetailLocationBooks")
+  carts    Cart[]
+  members  LocationMember[]
+  receipts Receipt[]
 }
 
 model LocationMember {
@@ -372,4 +375,24 @@ model BooksOnCourses {
   book           Book         @relation("CourseBook", fields: [bookId], references: [id], onDelete: Cascade)
 
   @@unique([schoolCourseId, bookId])
+}
+
+enum ReceiptType {
+  PURCHASE
+  REGISTRATION
+}
+
+model Receipt {
+  id   String      @id @default(uuid())
+  type ReceiptType
+
+  userId String @map("user_id")
+  user   User   @relation("ReceiptOwner", fields: [userId], references: [id])
+
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation(fields: [retailLocationId], references: [id])
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("ReceiptCreator", fields: [createdById], references: [id])
 }

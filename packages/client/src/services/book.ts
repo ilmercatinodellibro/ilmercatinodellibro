@@ -1,6 +1,8 @@
+import { useApolloClient } from "@vue/apollo-composable";
 import { ComputedRef, Ref, computed } from "vue";
 import { BookQueryFilter } from "src/@generated/graphql";
 import {
+  GetBookByIsbnDocument,
   GetBooksQueryVariables,
   useGetBooksQuery,
 } from "src/services/book.graphql";
@@ -53,4 +55,21 @@ export function useBookService(
     loading,
     refetchBooks,
   };
+}
+
+export async function fetchBookByISBN(isbnCode: string) {
+  const { selectedLocation } = useRetailLocationService();
+
+  const { resolveClient } = useApolloClient();
+  const client = resolveClient();
+
+  const result = await client.query({
+    query: GetBookByIsbnDocument,
+    variables: {
+      isbnCode,
+      retailLocationId: selectedLocation.value.id,
+    },
+  });
+
+  return result.data.books.rows[0];
 }

@@ -5,10 +5,11 @@ import {
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { Prisma, Book as PrismaBook, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
-import { Book, Cart } from "src/@generated";
+import { Book, Cart, ReceiptType } from "src/@generated";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { ReceiptService } from "src/modules/receipt/receipt.service";
 import { Input } from "../auth/decorators/input.decorator";
 import {
   AddToCartInput,
@@ -25,6 +26,7 @@ export class CartResolver {
     private readonly prisma: PrismaService,
     private readonly cartService: CartService,
     private readonly authService: AuthService,
+    private readonly receiptService: ReceiptService,
   ) {}
 
   @ResolveField(() => [Book])
@@ -350,6 +352,13 @@ export class CartResolver {
         },
         purchasedAt,
       },
+      include: {
+        bookCopy: {
+          include: {
+            book: true,
+          },
+        },
+      },
     });
     // Connect requests and reservations to the sales
     await Promise.all(
@@ -382,6 +391,14 @@ export class CartResolver {
         }
       }),
     );
+
+    await this.receiptService.createReceipt({
+      type: ReceiptType.PURCHASE,
+      userId: cart.userId,
+      retailLocationId: cart.retailLocationId,
+      createdById: operator.id,
+      data: sales,
+    });
 
     await prisma.cart.delete({
       where: { id: cartId },

@@ -11,6 +11,7 @@
       :rules="[requiredRule, validISBN]"
       lazy-rules="ondemand"
       outlined
+      hide-bottom-space
     />
 
     <q-btn

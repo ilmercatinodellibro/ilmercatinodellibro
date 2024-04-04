@@ -31,3 +31,16 @@ query getBooks(
     rowsCount
   }
 }
+
+query getBookByIsbn($isbnCode: String!, $retailLocationId: String!) {
+  books(
+    retailLocationId: $retailLocationId
+    page: 0
+    rows: 1
+    filter: { search: $isbnCode }
+  ) {
+    rows {
+      ...BookSummary
+    }
+  }
+}

@@ -75,7 +75,9 @@ query getReturnedBookCopies($retailLocationId: String!, $userId: String!) {
 }
 
 mutation createBookCopies($input: BookCopyCreateInput!) {
-  createBookCopies(input: $input)
+  createBookCopies(input: $input) {
+    ...BookCopyDetails
+  }
 }
 
 mutation reportProblem($input: ProblemCreateInput!) {

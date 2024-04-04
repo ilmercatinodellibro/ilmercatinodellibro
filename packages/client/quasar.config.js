@@ -204,6 +204,10 @@ module.exports = configure(function (ctx) {
           secure: false,
           ws: true,
         },
+        ["/receipts"]: {
+          changeOrigin: true,
+          target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
+        },
       },
     },
 

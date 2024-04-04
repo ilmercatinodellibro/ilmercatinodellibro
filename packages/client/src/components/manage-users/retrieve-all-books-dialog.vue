@@ -12,17 +12,18 @@
           :label="$t('book.retrieveBooksDialog.retrieveBooksBtn')"
           @click="onDialogOK(false)"
         />
+
         <q-space />
+
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
         <q-btn no-wrap color="primary" @click="onDialogOK(true)">
-          <q-item-label>
-            <q-icon :name="mdiInformationOutline" class="q-mr-sm" size="18px">
-              <q-tooltip>
-                {{ $t("book.retrieveBooksDialog.tooltip") }}
-              </q-tooltip>
-            </q-icon>
-            {{ $t("book.retrieveBooksDialog.retrieveAndPrint") }}
-          </q-item-label>
+          <q-icon :name="mdiInformationOutline" class="q-mr-sm" size="18px">
+            <q-tooltip>
+              {{ $t("book.retrieveBooksDialog.tooltip") }}
+            </q-tooltip>
+          </q-icon>
+
+          {{ $t("book.retrieveBooksDialog.retrieveAndPrint") }}
         </q-btn>
       </template>
     </k-dialog-card>
