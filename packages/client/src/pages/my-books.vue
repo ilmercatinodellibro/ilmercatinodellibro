@@ -23,7 +23,10 @@
           :name="tab"
           class="col text-black-54 text-weight-medium"
           @click="
-            router.push({ path: AvailableRouteNames.MyBooks, query: { tab } })
+            router.replace({
+              path: AvailableRouteNames.MyBooks,
+              query: { tab },
+            })
           "
         >
           {{ $t(`myBooks.tabsTitles.${tab}`) }}
