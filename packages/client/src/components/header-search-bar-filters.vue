@@ -53,7 +53,7 @@
       </template>
     </q-select>
 
-    <span class="col gap-16 items-center justify-end row">
+    <span class="col gap-16 items-center justify-end no-padding row">
       <slot name="side-actions" />
     </span>
   </q-card-section>

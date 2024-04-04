@@ -1,11 +1,10 @@
 <template>
   <q-form
-    class="gap-16 items-center q-pa-md row"
+    class="gap-16 items-center q-pt-md q-px-md row"
     @submit="$emit('addBook', bookISBN)"
   >
     <q-input
       v-model="bookISBN"
-      :hide-bottom-space="bookISBN.length === 0"
       :placeholder="searchLabel ?? $t('manageUsers.searchHint')"
       :rules="[requiredRule, validISBN]"
       class="width-420"
@@ -15,16 +14,19 @@
     />
 
     <q-btn
-      type="submit"
       :label="$t('book.addBookDialog')"
       :icon="mdiPlus"
+      class="bottom-separator-20"
       color="accent"
       no-wrap
+      type="submit"
     />
 
     <q-space />
 
-    <slot name="side-actions" />
+    <div class="bottom-separator-20 gap-16 no-padding row">
+      <slot name="side-actions" />
+    </div>
   </q-form>
 </template>
 
