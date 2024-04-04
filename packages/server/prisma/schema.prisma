@@ -60,6 +60,7 @@ model User {
   deletedReservations Reservation[] @relation("ReservationDeletedBy")
   reservations        Reservation[] @relation("ReservationUser") // Keeps track of the user for who the reservation was made
   requestedBooks      BookRequest[] @relation("BookRequestUser")
+  createdBookRequests BookRequest[] @relation("BookRequestMadeBy") // requests can also, also be made by operators
   deletedBookRequests BookRequest[] @relation("BookRequestDeletedBy")
   ownedCarts          Cart[]        @relation("CartOwner")
 
@@ -298,7 +299,10 @@ model BookRequest {
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation("BookRequested", fields: [bookId], references: [id])
 
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("BookRequestMadeBy", fields: [createdById], references: [id])
+
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
   deletedById String?   @map("deleted_by_id")
   deletedBy   User?     @relation("BookRequestDeletedBy", fields: [deletedById], references: [id])

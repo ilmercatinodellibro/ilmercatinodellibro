@@ -173,6 +173,7 @@ export class BookRequestResolver {
       data: {
         bookId,
         userId,
+        createdById: currentUserId,
       },
     });
   }
