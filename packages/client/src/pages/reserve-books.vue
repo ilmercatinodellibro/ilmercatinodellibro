@@ -1,94 +1,78 @@
 <template>
   <q-page>
     <q-card class="absolute-full column gap-16 no-wrap q-ma-md">
-      <q-card-section class="gap-8 items-center row">
-        <q-input
-          v-model="searchQuery"
-          :placeholder="$t('common.search')"
-          class="col max-width-600"
-          debounce="200"
-          outlined
-          type="search"
-        >
-          <template #append>
-            <q-icon :name="mdiMagnify" />
+      <card-table-header
+        v-model:book-isbn="searchQuery"
+        :search-label="t('common.search')"
+      >
+        <template #side-actions>
+          <q-btn
+            v-if="!showByClass"
+            :icon="mdiFilter"
+            :label="$t('reserveBooks.filterButton')"
+            class="text-transform-none"
+            color="accent"
+            @click="searchClassBooks()"
+          />
+
+          <template v-else>
+            <q-btn
+              :icon="mdiArrowLeft"
+              :label="t('reserveBooks.backToMainList')"
+              class="text-transform-none"
+              outline
+              @click="showByClass = false"
+            />
+            <q-btn
+              :icon="mdiPlus"
+              :label="t('reserveBooks.reserveAll')"
+              color="positive"
+              class="text-transform-none"
+              @click="openReserveAllDialog()"
+            />
           </template>
-        </q-input>
-
-        <q-space />
-
-        <q-btn
-          v-if="!showByClass"
-          :icon="mdiFilter"
-          :label="$t('reserveBooks.filterButton')"
-          class="text-transform-none"
-          color="accent"
-          @click="searchClassBooks()"
-        />
-
-        <template v-else>
-          <q-btn
-            :icon="mdiArrowLeft"
-            :label="t('reserveBooks.backToMainList')"
-            class="text-transform-none"
-            outline
-            @click="showByClass = false"
-          />
-          <q-btn
-            :icon="mdiPlus"
-            :label="t('reserveBooks.reserveAll')"
-            color="positive"
-            class="text-transform-none"
-            @click="openReserveAllDialog()"
-          />
         </template>
-      </q-card-section>
+      </card-table-header>
 
-      <q-card-section class="col no-padding">
-        <dialog-table
-          v-model:pagination="tablePagination"
-          :columns="columns"
-          :filter="searchQuery"
-          :loading="loading"
-          :rows="showByClass ? classBooks : rows"
-          class="flex-delegate-height-management"
-          @request="onRequest"
-        >
-          <template #body-cell-availability="{ value }">
-            <q-td>
-              <status-chip :value="value" />
-            </q-td>
-          </template>
-          <template #body-cell-actions="{ row }">
-            <q-td>
-              <chip-button
-                :color="row.meta.isAvailable ? 'primary' : 'accent'"
-                :label="
-                  row.meta.isAvailable
-                    ? $t('reserveBooks.reserveCopy')
-                    : $t('reserveBooks.requestCopy')
-                "
-                @click="reserveOrRequest(row)"
-              />
-            </q-td>
-          </template>
-        </dialog-table>
-      </q-card-section>
+      <dialog-table
+        v-model:pagination="tablePagination"
+        :columns="columns"
+        :filter="searchQuery"
+        :loading="loading"
+        :rows="showByClass ? classBooks : rows"
+        class="col"
+        @request="onRequest"
+      >
+        <template #body-cell-availability="{ value }">
+          <q-td>
+            <status-chip :value="value" />
+          </q-td>
+        </template>
+        <template #body-cell-actions="{ row }">
+          <q-td>
+            <chip-button
+              :color="row.meta.isAvailable ? 'primary' : 'accent'"
+              :label="
+                row.meta.isAvailable
+                  ? $t('reserveBooks.reserveCopy')
+                  : $t('reserveBooks.requestCopy')
+              "
+              @click="reserveOrRequest(row)"
+            />
+          </q-td>
+        </template>
+      </dialog-table>
     </q-card>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import {
-  mdiArrowLeft,
-  mdiFilter,
-  mdiMagnify,
-  mdiPlus,
-} from "@quasar/extras/mdi-v7";
+import { mdiArrowLeft, mdiFilter, mdiPlus } from "@quasar/extras/mdi-v7";
 import { Dialog, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import ClassFiltersDialog from "src/components/class-filters-dialog.vue";
+import CardTableHeader from "src/components/manage-users/card-table-header.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
@@ -224,32 +208,30 @@ function searchClassBooks() {
 }
 
 async function reserveOrRequest(book: BookSummaryFragment) {
-  if (user.value) {
-    if (book.meta.isAvailable) {
-      await createReservations({
-        input: {
-          bookIds: [book.id],
-          userId: user.value.id,
-          retailLocationId: selectedLocation.value.id,
-        },
-      });
-      return;
-    }
-    Dialog.create({
-      title: t("reserveBooks.requestBookDisclaimer.title"),
-      message: t("reserveBooks.requestBookDisclaimer.message"),
-      cancel: t("common.cancel"),
-      ok: t("reserveBooks.requestCopy"),
-    }).onOk(async () => {
-      if (user.value) {
-        await createBookRequest({
-          input: { bookId: book.id, userId: user.value.id },
-        });
-      }
-      // Should never be reachable, is there a need for an error display here?
+  if (book.meta.isAvailable) {
+    await createReservations({
+      input: {
+        bookIds: [book.id],
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
+        retailLocationId: selectedLocation.value.id,
+      },
     });
+
+    return;
   }
-  // Same here as the previous comment
+
+  Dialog.create({
+    title: t("reserveBooks.requestBookDisclaimer.title"),
+    message: t("reserveBooks.requestBookDisclaimer.message"),
+    cancel: t("common.cancel"),
+    ok: t("reserveBooks.requestCopy"),
+  }).onOk(async () => {
+    await createBookRequest({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      input: { bookId: book.id, userId: user.value!.id },
+    });
+  });
 }
 
 function openReserveAllDialog() {

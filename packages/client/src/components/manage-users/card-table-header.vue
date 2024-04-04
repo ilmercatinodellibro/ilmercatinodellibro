@@ -5,9 +5,10 @@
   >
     <q-input
       v-model="bookISBN"
-      :placeholder="$t('manageUsers.searchHint')"
-      class="width-420"
+      :hide-bottom-space="bookISBN.length === 0"
+      :placeholder="searchLabel ?? $t('manageUsers.searchHint')"
       :rules="[requiredRule, validISBN]"
+      class="width-420"
       lazy-rules="ondemand"
       outlined
       hide-bottom-space
@@ -30,6 +31,10 @@
 <script setup lang="ts">
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { requiredRule, validISBN } from "src/helpers/rules";
+
+defineProps<{
+  searchLabel?: string;
+}>();
 
 defineEmits<{
   addBook: [bookISBN: string];
