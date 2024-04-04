@@ -10,7 +10,7 @@
         </p>
       </q-card-section>
 
-      <q-card-section class="col column gap-24 no-padding no-wrap">
+      <q-card-section class="col column gap-4 no-padding no-wrap">
         <q-form class="flex-center gap-16 q-px-sm row" @submit="searchBook()">
           <q-input
             v-model="searchQuery"
@@ -26,7 +26,12 @@
             </template>
           </q-input>
 
-          <q-btn :label="$t('common.search')" color="accent" type="submit" />
+          <q-btn
+            :label="$t('common.search')"
+            class="bottom-separator-20"
+            color="accent"
+            type="submit"
+          />
         </q-form>
 
         <dialog-table
