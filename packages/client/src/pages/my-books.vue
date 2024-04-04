@@ -22,6 +22,9 @@
           :key="tab"
           :name="tab"
           class="col text-black-54 text-weight-medium"
+          @click="
+            router.push({ path: AvailableRouteNames.MyBooks, query: { tab } })
+          "
         >
           {{ $t(`myBooks.tabsTitles.${tab}`) }}
         </q-tab>
@@ -145,12 +148,13 @@ import { sumBy } from "lodash-es";
 import { QChipProps, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { BooksTab } from "src/models/book";
+import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import {
   BookCopyDetailsFragment,
@@ -171,6 +175,7 @@ const { selectedLocation } = useRetailLocationService();
 const { user } = useAuthService();
 
 const route = useRoute();
+const router = useRouter();
 
 const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
