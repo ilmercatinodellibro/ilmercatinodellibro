@@ -29,3 +29,10 @@ export interface CourseDetails {
   school: string;
   course: string;
 }
+
+export enum BooksTab {
+  DELIVERED = "delivered",
+  RESERVED = "reserved",
+  REQUESTED = "requested",
+  PURCHASED = "purchased",
+}

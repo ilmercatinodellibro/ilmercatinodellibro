@@ -18,7 +18,7 @@
 
       <q-tabs v-model="selectedTab" align="justify" active-color="accent">
         <q-tab
-          v-for="tab in Object.values(PageTab)"
+          v-for="tab in Object.values(BooksTab)"
           :key="tab"
           :name="tab"
           class="col text-black-54 text-weight-medium"
@@ -33,7 +33,7 @@
         class="column dialog-panels flex-delegate-height-management hide-scrollbar no-wrap"
       >
         <q-tab-panel
-          v-for="tab in Object.values(PageTab)"
+          v-for="tab in Object.values(BooksTab)"
           :key="tab"
           :name="tab"
           class="column flex-delegate-height-management no-padding no-wrap"
@@ -46,7 +46,7 @@
             :rows-per-page-options="[0]"
             class="col q-pt-sm"
           >
-            <template v-if="tab === PageTab.DELIVERED" #header="props">
+            <template v-if="tab === BooksTab.DELIVERED" #header="props">
               <q-tr class="bg-grey-1">
                 <q-th colspan="5" />
                 <q-th class="text-left">
@@ -64,7 +64,7 @@
             </template>
 
             <template
-              v-if="tab === PageTab.DELIVERED"
+              v-if="tab === BooksTab.DELIVERED"
               #body-cell-status="{ value }"
             >
               <q-td>
@@ -79,7 +79,7 @@
             </template>
 
             <template
-              v-if="tab === PageTab.RESERVED"
+              v-if="tab === BooksTab.RESERVED"
               #body-cell-actions="{ row }"
             >
               <q-td class="text-center">
@@ -92,7 +92,7 @@
             </template>
 
             <template
-              v-if="tab === PageTab.REQUESTED"
+              v-if="tab === BooksTab.REQUESTED"
               #body-cell-availability="{ value }"
             >
               <q-td>
@@ -101,7 +101,7 @@
             </template>
 
             <template
-              v-if="tab === PageTab.REQUESTED"
+              v-if="tab === BooksTab.REQUESTED"
               #body-cell-reserve="{ value, row }"
             >
               <q-td>
@@ -115,7 +115,7 @@
             </template>
 
             <template
-              v-if="tab === PageTab.REQUESTED"
+              v-if="tab === BooksTab.REQUESTED"
               #body-cell-cancel-request="{ row }"
             >
               <q-td>
@@ -145,10 +145,12 @@ import { sumBy } from "lodash-es";
 import { QChipProps, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { BooksTab } from "src/models/book";
 import { useAuthService } from "src/services/auth";
 import {
   BookCopyDetailsFragment,
@@ -168,6 +170,8 @@ import { useRetailLocationService } from "src/services/retail-location";
 const { selectedLocation } = useRetailLocationService();
 const { user } = useAuthService();
 
+const route = useRoute();
+
 const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
@@ -179,6 +183,7 @@ const {
   useDeleteReservationMutation,
   useGetReservationsQuery,
 } = useReservationService();
+
 const { createReservations } = useCreateReservationsMutation();
 const { deleteReservation } = useDeleteReservationMutation();
 const { userReservations, refetch: refetchReservations } =
@@ -201,23 +206,16 @@ const { purchasedBookCopies } = useGetPurchasedBookCopiesQuery({
   userId: user.value!.id,
 });
 
-enum PageTab {
-  DELIVERED = "delivered",
-  RESERVED = "reserved",
-  REQUESTED = "requested",
-  PURCHASED = "purchased",
-}
-
 type TablesRowsTypes =
   | BookCopyDetailsFragment
   | ReservationSummaryFragment
   | RequestSummaryFragment;
 
-const tableRowsByTab = computed<Record<PageTab, TablesRowsTypes[]>>(() => ({
-  [PageTab.DELIVERED]: bookCopiesByOwner.value,
-  [PageTab.PURCHASED]: purchasedBookCopies.value,
-  [PageTab.REQUESTED]: bookRequests.value,
-  [PageTab.RESERVED]: userReservations.value,
+const tableRowsByTab = computed<Record<BooksTab, TablesRowsTypes[]>>(() => ({
+  [BooksTab.DELIVERED]: bookCopiesByOwner.value,
+  [BooksTab.PURCHASED]: purchasedBookCopies.value,
+  [BooksTab.REQUESTED]: bookRequests.value,
+  [BooksTab.RESERVED]: userReservations.value,
 }));
 
 const { t } = useI18n();
@@ -260,9 +258,9 @@ const coverPriceColumn = computed<QTableColumn<TablesRowsTypes>>(() => ({
   classes: "text-strike text-black-54",
 }));
 
-const columns = computed<Record<PageTab, QTableColumn<TablesRowsTypes>[]>>(
+const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
   () => ({
-    [PageTab.DELIVERED]: [
+    [BooksTab.DELIVERED]: [
       {
         name: "status",
         // TODO: add the field
@@ -281,7 +279,7 @@ const columns = computed<Record<PageTab, QTableColumn<TablesRowsTypes>[]>>(
         format: formatPrice,
       },
     ],
-    [PageTab.PURCHASED]: [
+    [BooksTab.PURCHASED]: [
       ...commonColumns.value,
       coverPriceColumn.value,
       {
@@ -293,7 +291,7 @@ const columns = computed<Record<PageTab, QTableColumn<TablesRowsTypes>[]>>(
         format: formatPrice,
       },
     ],
-    [PageTab.REQUESTED]: [
+    [BooksTab.REQUESTED]: [
       ...commonColumns.value,
       {
         name: "availability",
@@ -320,7 +318,7 @@ const columns = computed<Record<PageTab, QTableColumn<TablesRowsTypes>[]>>(
         label: "",
       },
     ],
-    [PageTab.RESERVED]: [
+    [BooksTab.RESERVED]: [
       ...commonColumns.value,
       coverPriceColumn.value,
       {
@@ -339,7 +337,9 @@ const columns = computed<Record<PageTab, QTableColumn<TablesRowsTypes>[]>>(
   }),
 );
 
-const selectedTab = ref(PageTab.DELIVERED);
+const selectedTab = ref(
+  (route.query.tab as BooksTab | undefined) ?? BooksTab.DELIVERED,
+);
 
 const searchQuery = ref("");
 

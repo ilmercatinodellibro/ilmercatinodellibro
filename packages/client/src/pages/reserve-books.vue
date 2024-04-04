@@ -23,6 +23,7 @@
               outline
               @click="showByClass = false"
             />
+
             <q-btn
               :icon="mdiPlus"
               :label="t('reserveBooks.reserveAll')"
@@ -48,17 +49,10 @@
             <status-chip :value="value" />
           </q-td>
         </template>
+
         <template #body-cell-actions="{ row }">
           <q-td>
-            <chip-button
-              :color="row.meta.isAvailable ? 'primary' : 'accent'"
-              :label="
-                row.meta.isAvailable
-                  ? $t('reserveBooks.reserveCopy')
-                  : $t('reserveBooks.requestCopy')
-              "
-              @click="reserveOrRequest(row)"
-            />
+            <chip-button v-bind="getButtonData(row)" />
           </q-td>
         </template>
       </dialog-table>
@@ -68,9 +62,10 @@
 
 <script setup lang="ts">
 import { mdiArrowLeft, mdiFilter, mdiPlus } from "@quasar/extras/mdi-v7";
-import { Dialog, QTableColumn, QTableProps } from "quasar";
+import { Dialog, QBtnProps, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import ClassFiltersDialog from "src/components/class-filters-dialog.vue";
 import CardTableHeader from "src/components/manage-users/card-table-header.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
@@ -78,7 +73,8 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
-import { CourseDetails } from "src/models/book";
+import { BooksTab, CourseDetails } from "src/models/book";
+import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -86,14 +82,32 @@ import { useRequestService } from "src/services/request";
 import { useReservationService } from "src/services/reservation";
 import { useRetailLocationService } from "src/services/retail-location";
 
-const { useCreateReservationsMutation } = useReservationService();
-const { createReservations } = useCreateReservationsMutation();
-const { useCreateRequestMutation } = useRequestService();
-const { createBookRequest } = useCreateRequestMutation();
 const { user } = useAuthService();
 const { selectedLocation } = useRetailLocationService();
 
+const { useCreateReservationsMutation, useGetReservationsQuery } =
+  useReservationService();
+
+const { createReservations } = useCreateReservationsMutation();
+const { userReservations, refetch: refetchReservations } =
+  useGetReservationsQuery({
+    retailLocationId: selectedLocation.value.id,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    userId: user.value!.id,
+  });
+
+const { useCreateRequestMutation, useGetRequestsQuery } = useRequestService();
+
+const { createBookRequest } = useCreateRequestMutation();
+const { bookRequests, refetch: refetchRequests } = useGetRequestsQuery({
+  retailLocationId: selectedLocation.value.id,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+});
+
 const { t } = useI18n();
+
+const router = useRouter();
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
@@ -176,6 +190,53 @@ const showByClass = ref(false);
 
 const classBooks = ref([]);
 
+function getButtonData(book: BookSummaryFragment): QBtnProps {
+  if (userReservations.value.find(({ book: { id } }) => id === book.id)) {
+    return {
+      color: "grey-9",
+      label: t("reserveBooks.goToReservations"),
+      async onClick() {
+        await router.push({
+          path: AvailableRouteNames.MyBooks,
+          query: {
+            tab: BooksTab.RESERVED,
+          },
+        });
+      },
+    };
+  }
+  if (bookRequests.value.find(({ book: { id } }) => id === book.id)) {
+    return {
+      color: "grey-9",
+      label: t("reserveBooks.goToRequests"),
+      async onClick() {
+        await router.push({
+          path: AvailableRouteNames.MyBooks,
+          query: {
+            tab: BooksTab.REQUESTED,
+          },
+        });
+      },
+    };
+  }
+  if (book.meta.isAvailable) {
+    return {
+      color: "primary",
+      label: t("reserveBooks.reserveCopy"),
+      async onClick() {
+        await reserveBook(book.id);
+      },
+    };
+  }
+  return {
+    color: "accent",
+    label: t("reserveBooks.requestCopy"),
+    onClick() {
+      requestBook(book.id);
+    },
+  };
+}
+
 const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   loading.value = true;
 
@@ -207,20 +268,19 @@ function searchClassBooks() {
   });
 }
 
-async function reserveOrRequest(book: BookSummaryFragment) {
-  if (book.meta.isAvailable) {
-    await createReservations({
-      input: {
-        bookIds: [book.id],
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        userId: user.value!.id,
-        retailLocationId: selectedLocation.value.id,
-      },
-    });
+async function reserveBook(id: string) {
+  await createReservations({
+    input: {
+      bookIds: [id],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      userId: user.value!.id,
+      retailLocationId: selectedLocation.value.id,
+    },
+  });
+  await refetchReservations();
+}
 
-    return;
-  }
-
+function requestBook(bookId: string) {
   Dialog.create({
     title: t("reserveBooks.requestBookDisclaimer.title"),
     message: t("reserveBooks.requestBookDisclaimer.message"),
@@ -229,8 +289,9 @@ async function reserveOrRequest(book: BookSummaryFragment) {
   }).onOk(async () => {
     await createBookRequest({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      input: { bookId: book.id, userId: user.value!.id },
+      input: { bookId, userId: user.value!.id },
     });
+    await refetchRequests();
   });
 }
 
@@ -241,17 +302,18 @@ function openReserveAllDialog() {
       classBooks: classBooks.value,
     },
   }).onOk(async (books: BookSummaryFragment[]) => {
-    if (user.value) {
-      await createReservations({
-        input: {
-          bookIds: books.map(({ id }) => id),
-          userId: user.value.id,
-          retailLocationId: selectedLocation.value.id,
-        },
-      });
-      showByClass.value = false;
-      // Should never be reachable, is there a need for an error display here?
-    }
+    await createReservations({
+      input: {
+        bookIds: books.map(({ id }) => id),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
+        retailLocationId: selectedLocation.value.id,
+      },
+    });
+
+    showByClass.value = false;
+
+    await refetchReservations();
   });
 }
 </script>

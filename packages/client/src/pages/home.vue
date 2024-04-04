@@ -64,7 +64,7 @@ const actionsList = computed(() => {
       icon: mdiBookOpenBlankVariant,
       text: t("home.actions.buyBooks.text"),
       label: t("home.actions.buyBooks.buttonLabel"),
-      to: { name: AvailableRouteNames.Catalog },
+      to: { name: AvailableRouteNames.ReserveBooks },
     },
     {
       icon: mdiCheckDecagram,

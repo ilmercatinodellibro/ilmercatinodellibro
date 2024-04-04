@@ -21,4 +21,6 @@ export default {
       "Procedendo con la prenotazione, se la tua lista comprende dei libri “Non Disponibili” attiverai anche una richiesta per chiedere al Mercatino del Libro di provare a reperire le copie che ti servono.",
     removeFromList: "Rimuovi dalla lista",
   },
+  goToReservations: "Vai alle tue prenotazioni",
+  goToRequests: "Vai alle tue richieste",
 };
