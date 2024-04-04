@@ -17,6 +17,7 @@ import network from "./network";
 import reserveBooks from "./reserve-books";
 import salableBooks from "./salable-books";
 import validators from "./validators";
+import warehouse from "./warehouse";
 
 const durationNames = {
   day: "Days",
@@ -56,6 +57,7 @@ export default {
   salableBooks,
   validators,
   feedbackType,
+  warehouse,
 
   common: {
     or: "Or",
@@ -159,6 +161,7 @@ export default {
     [AvailableRouteNames.ReserveBooks]: "Reserve Books",
     [AvailableRouteNames.SelectLocation]: "Select Location",
     [AvailableRouteNames.MyData]: "My Data",
+    [AvailableRouteNames.Warehouse]: "Warehouse",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",

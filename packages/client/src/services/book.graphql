@@ -44,7 +44,3 @@ query getBookByIsbn($isbnCode: String!, $retailLocationId: String!) {
     }
   }
 }
-
-mutation loadBooksIntoDatabase {
-  loadBooksIntoDatabase
-}

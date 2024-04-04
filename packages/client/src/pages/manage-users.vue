@@ -1,64 +1,22 @@
 <template>
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
-      <q-card-section class="flex-center gap-16 no-wrap row">
-        <q-input
-          v-model="searchQuery"
-          :debounce="500"
-          class="width-600"
-          outlined
-          :placeholder="$t('common.search')"
-          type="text"
-        >
-          <template #append>
-            <q-icon :name="mdiMagnify" />
-          </template>
-        </q-input>
-
-        <q-select
-          v-model="filters"
-          class="width-200"
-          multiple
-          outlined
-          :options="options.map(({ key }) => key)"
-          :label="$t('book.filter')"
-        >
-          <!--
-            This is because the filters are translated and if a user were to switch
-            language they should update so the key for each filter is an integer ID
-            and the label is what's shown in the filter UI
-          -->
-          <template v-if="filters.length > 0" #selected>
-            {{ selectedFiltersToString }}
-          </template>
-
-          <template #option="{ itemProps, opt, selected, toggleOption }">
-            <q-item v-bind="itemProps" class="non-selectable">
-              <q-item-section side top>
-                <q-checkbox
-                  :model-value="selected"
-                  @update:model-value="toggleOption(opt)"
-                />
-              </q-item-section>
-
-              <q-item-section>
-                <q-item-label> {{ options[opt]?.label }} </q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-
-        <q-space />
-
-        <q-btn
-          class="q-ma-sm"
-          color="accent"
-          no-wrap
-          :icon="mdiPlus"
-          :label="$t('manageUsers.createUser')"
-          @click="addNewUser"
-        />
-      </q-card-section>
+      <header-search-bar-filters
+        v-model:filters="filters"
+        v-model:search-query="searchQuery"
+        :filter-options="filterOptions"
+      >
+        <template #side-actions>
+          <q-btn
+            class="q-ma-sm"
+            color="accent"
+            no-wrap
+            :icon="mdiPlus"
+            :label="$t('manageUsers.createUser')"
+            @click="addNewUser"
+          />
+        </template>
+      </header-search-bar-filters>
 
       <q-card-section class="col no-wrap q-pa-none row">
         <q-table
@@ -238,7 +196,6 @@
 import {
   mdiCart,
   mdiInformationOutline,
-  mdiMagnify,
   mdiPencil,
   mdiPlus,
   mdiReceiptText,
@@ -247,6 +204,7 @@ import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
+import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
@@ -275,18 +233,18 @@ const {
   loading,
   fetch: fetchCustomers,
 } = useCustomerService();
+
 const pagination = ref({
   page: 1,
   rowsPerPage: 100,
   rowsNumber: rowsCount.value,
 });
-const onRequest: QTableProps["onRequest"] = async (requested) => {
-  const filter = requested.filter as typeof tableFilter.value;
 
+const onRequest: QTableProps["onRequest"] = async (requested) => {
   await fetchCustomers({
     page: requested.pagination.page,
     rowsPerPage: requested.pagination.rowsPerPage,
-    searchTerm: filter?.searchTerm,
+    searchTerm: tableFilter.value?.searchTerm,
     // TODO: pass the filters to the server
   });
 
@@ -294,12 +252,15 @@ const onRequest: QTableProps["onRequest"] = async (requested) => {
   pagination.value.page = requested.pagination.page;
   pagination.value.rowsPerPage = requested.pagination.rowsPerPage;
 };
+
 onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
 
 const searchQuery = ref("");
 const filters = ref<UserFilters[]>([]);
+
+const filterOptions = useTranslatedFilters<UserFilters>("manageUsers.filters");
 
 enum UserFilters {
   withAvailable,
@@ -314,8 +275,6 @@ const tableFilter = computed(() =>
     ? undefined
     : { searchTerm: searchQuery.value, filters: filters.value },
 );
-
-const options = useTranslatedFilters<UserFilters>("manageUsers.filters");
 
 const columnTooltip = computed(() => ({
   inStock: t("manageUsers.tooltips.inStock"),
@@ -417,10 +376,6 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: "",
   },
 ]);
-
-const selectedFiltersToString = computed(() =>
-  filters.value.map((key) => options.value[key]?.label).join(", "),
-);
 
 function addNewUser() {
   Dialog.create({

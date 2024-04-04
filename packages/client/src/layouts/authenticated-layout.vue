@@ -176,19 +176,19 @@
             <!-- TODO: add router link -->
             <q-item
               v-ripple
+              :to="{ name: AvailableRouteNames.Warehouse }"
               active-class="bg-black-activated-light"
               class="drawer-item"
               clickable
               data-cy="warehouse"
             >
-              <!-- TODO: add tooltip -->
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t("general.tooltips.warehouse") }}
               </q-tooltip>
               <q-item-section side>
                 <q-icon :name="mdiBookshelf" color="black-54" />
               </q-item-section>
               <q-item-section>
-                <!-- TODO: add label -->
                 <q-item-label class="ellipsis text-size-16">
                   {{ t("general.warehouse") }}
                 </q-item-label>
