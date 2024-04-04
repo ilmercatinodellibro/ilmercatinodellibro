@@ -22,7 +22,6 @@
       <q-scroll-area class="col-grow">
         <q-list class="drawer-list" separator>
           <template v-if="user && hasUserRole">
-            <!-- TODO: add router link -->
             <q-item
               v-ripple
               :to="{ name: AvailableRouteNames.MyData }"
@@ -44,7 +43,6 @@
               </q-item-section>
             </q-item>
 
-            <!-- TODO: add router link -->
             <q-item
               v-ripple
               active-class="bg-black-activated-light"
@@ -173,7 +171,6 @@
               </q-item-section>
             </q-item>
 
-            <!-- TODO: add router link -->
             <q-item
               v-ripple
               :to="{ name: AvailableRouteNames.Warehouse }"
@@ -203,9 +200,12 @@
             </q-item>
 
             <q-item
+              v-ripple
               :to="{ name: AvailableRouteNames.Catalog }"
               active-class="bg-black-activated-light"
               class="drawer-item"
+              clickable
+              data-cy="books-catalog"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t(`routesNames.${AvailableRouteNames.Catalog}`) }}
@@ -228,9 +228,12 @@
             </q-item>
 
             <q-item
+              v-ripple
               :to="{ name: AvailableRouteNames.UsersManagement }"
               active-class="bg-black-activated-light"
               class="drawer-item"
+              clickable
+              data-cy="users-management"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
@@ -255,9 +258,12 @@
             <!-- TODO: fix route -->
             <q-item
               v-if="hasAdminRole"
+              v-ripple
               :to="{ name: AvailableRouteNames.Theme }"
               active-class="bg-black-activated-light"
               class="drawer-item"
+              clickable
+              data-cy="settings"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t(`sidebar.settings`) }}
@@ -273,9 +279,12 @@
             </q-item>
 
             <q-item
+              v-ripple
               :to="{ name: AvailableRouteNames.RolesAndPermissions }"
               active-class="bg-black-activated-light"
               class="drawer-item"
+              clickable
+              data-cy="roles-and-permissions"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{
