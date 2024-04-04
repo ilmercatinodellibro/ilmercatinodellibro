@@ -162,10 +162,7 @@ import {
   useGetRequestsQuery,
 } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
-import {
-  ReservationSummaryFragment,
-  useGetReservationsQuery,
-} from "src/services/reservation.graphql";
+import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { selectedLocation } = useRetailLocationService();
@@ -177,18 +174,22 @@ const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   retailLocationId: selectedLocation.value.id,
 });
 
-const { useCreateReservationsMutation, useDeleteReservationMutation } =
-  useReservationService();
+const {
+  useCreateReservationsMutation,
+  useDeleteReservationMutation,
+  useGetReservationsQuery,
+} = useReservationService();
 const { createReservations } = useCreateReservationsMutation();
 const { deleteReservation } = useDeleteReservationMutation();
-const { userReservations } = useGetReservationsQuery({
-  retailLocationId: selectedLocation.value.id,
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  userId: user.value!.id,
-});
+const { userReservations, refetch: refetchReservations } =
+  useGetReservationsQuery({
+    retailLocationId: selectedLocation.value.id,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    userId: user.value!.id,
+  });
 
 const { deleteBookRequest } = useDeleteRequestMutation();
-const { bookRequests } = useGetRequestsQuery({
+const { bookRequests, refetch: refetchRequests } = useGetRequestsQuery({
   retailLocationId: selectedLocation.value.id,
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
@@ -386,12 +387,12 @@ async function cancelReservation(reservation: ReservationSummaryFragment) {
       id: reservation.id,
     },
   });
+  await refetchRequests();
 
   cache.evict({
     id: cache.identify(reservation),
   });
   cache.gc();
-  // TODO: add the related request back to the request list
 }
 
 async function reserveBook(request: RequestSummaryFragment) {
@@ -406,6 +407,7 @@ async function reserveBook(request: RequestSummaryFragment) {
       retailLocationId: selectedLocation.value.id,
     },
   });
+  await refetchReservations();
 
   cache.updateQuery(
     {
@@ -428,7 +430,6 @@ async function reserveBook(request: RequestSummaryFragment) {
     },
   );
   cache.gc();
-  // TODO: add the new reservation to the reservation list
 }
 
 async function cancelRequest(request: RequestSummaryFragment) {
