@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column gap-16 no-wrap q-ma-md">
+    <q-card class="absolute-full column no-wrap q-ma-md">
       <card-table-header
         v-model:book-isbn="searchQuery"
         :search-label="t('common.search')"

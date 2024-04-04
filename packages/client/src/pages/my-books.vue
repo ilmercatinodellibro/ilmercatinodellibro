@@ -73,7 +73,7 @@
                   v-bind="
                     statusChipData[(value as BookStatus) ?? BookStatus.NOT_SOLD]
                   "
-                  class="non-selectable"
+                  class="no-pointer-events"
                 />
               </q-td>
             </template>
