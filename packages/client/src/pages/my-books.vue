@@ -419,9 +419,10 @@ async function reserveBook(request: RequestSummaryFragment) {
       if (!data) {
         return;
       }
+
       return {
         bookRequests: data.bookRequests.filter(
-          ({ id }) => id !== request.book.id,
+          ({ book: { id } }) => id !== request.book.id,
         ),
       };
     },
