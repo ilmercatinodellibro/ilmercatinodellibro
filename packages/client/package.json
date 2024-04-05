@@ -60,6 +60,7 @@
     "@graphql-codegen/cli": "^5.0.2",
     "@graphql-codegen/near-operation-file-preset": "^3.0.0",
     "@graphql-codegen/typescript-apollo-client-helpers": "^3.0.0",
+    "@parcel/watcher": "^2.4.1",
     "@quasar/app-vite": "^1.7.3",
     "@quasar/cli": "^2.3.0",
     "@quasar/quasar-app-extension-apollo": "^2.2.0",
