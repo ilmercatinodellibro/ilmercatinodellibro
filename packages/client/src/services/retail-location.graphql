@@ -13,10 +13,22 @@ fragment RetailLocation on RetailLocation {
   payOffEnabled
   maxBookingDays
   warehouseMaxBlockSize
+
+  theme {
+    primary
+    secondary
+    accent
+  }
 }
 
 query getRetailLocations {
   retailLocations {
+    ...RetailLocation
+  }
+}
+
+mutation updateRetailLocationTheme($input: UpdateRetailLocationThemeInput!) {
+  updateRetailLocationTheme(input: $input) {
     ...RetailLocation
   }
 }

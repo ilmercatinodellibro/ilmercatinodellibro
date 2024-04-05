@@ -17,6 +17,7 @@ const config: CodegenConfig = {
       DateTime: "string",
       Void: "undefined",
       ISBN: "string",
+      HexColorCode: "string",
     },
   },
   generates: {

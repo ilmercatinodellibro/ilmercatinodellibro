@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import type { Theme } from "src/modules/retail-location/theme.args";
 
 const RE_WHO_ARE_WE = `Il Mercatino del Libro è un progetto nato nel 2013 e portato avanti negli anni da diverse associazioni di Reggio Emilia. A partire dal 2019 il progetto è promosso dal <b>Comune di Reggio Emilia</b> che ne ha permesso lo svolgimento all'interno dello spazio giovani di <b><a href="">Via Cassoli 1</a></b>. Attualmente il progetto è portato avanti dall'associazione <b><a href="">The Spots</a></b>, capofila della rete di associazioni giovanili che abitano lo spazio comunale.<br /><br />
 Il Mercatino del Libro si occupa di compravendita di testi scolastici destinati a istituti superiori di primo e secondo grado. <b>I libri sono ritirati in conto vendita, e venduti al 55% del prezzo di copertina. Alla fine di ogni edizione vengono restituiti agli utenti i libri invenduti e parte dei profitti derivati dalla vendita, pari al 30% del prezzo di copertina.</b> <br /><br />
@@ -20,6 +21,11 @@ export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
   phoneNumber: "3516215189",
+  theme: {
+    primary: "#798aa8",
+    secondary: "#76e1a7",
+    accent: "#c2664d",
+  } satisfies Theme,
 };
 
 export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
@@ -32,6 +38,11 @@ export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   whoAreWeContent: RE_WHO_ARE_WE,
   joinUsContent: RE_JOIN_US,
   phoneNumber: "3515472756",
+  theme: {
+    primary: "#1f7472",
+    secondary: "#76e1a7",
+    accent: "#e2a615",
+  } satisfies Theme,
 };
 
 export default [MO_RETAIL_POINT, RE_RETAIL_POINT];

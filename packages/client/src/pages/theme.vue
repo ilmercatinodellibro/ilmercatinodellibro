@@ -11,7 +11,7 @@
             :label="t('general.saveChanges')"
             text-color="black-54"
             :disable="!hasPendingChanges"
-            @click="saveChanges()"
+            @click="saveTheme()"
           />
         </q-card-section>
 
@@ -74,7 +74,7 @@
             color="secondary"
             :label="t('general.saveChanges')"
             text-color="black-54"
-            @click="saveChanges()"
+            @click="saveTheme()"
           />
         </div>
       </q-page-sticky>
@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { Dialog, QFile, Screen } from "quasar";
+import { Dialog, Notify, QFile, Screen } from "quasar";
 import { Ref, computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteLeave } from "vue-router";
@@ -125,7 +125,19 @@ function onRejected() {
   notifyError("Uploaded file did not pass validation check");
 }
 
-watch([imagePickerModel], ([newImage]) => {
+async function saveTheme() {
+  await saveChanges();
+  Notify.create({
+    message: t("general.themeChanged"),
+    color: "positive",
+  });
+}
+
+watch(imagePickerModel, (newImage) => {
+  if (!newImage) {
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = (event) => {
     const base64Data = event.target?.result as string | undefined;
@@ -133,10 +145,6 @@ watch([imagePickerModel], ([newImage]) => {
       theme.value.logo = base64Data;
     }
   };
-  if (!newImage) {
-    return;
-  }
-
   reader.readAsDataURL(newImage);
 });
 </script>

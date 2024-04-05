@@ -1,7 +1,7 @@
 import { cloneDeep, isEqual } from "lodash-es";
-import { LocalStorage, Notify, setCssVar } from "quasar";
+import { LocalStorage, setCssVar } from "quasar";
 import { ref, watch } from "vue";
-import { useI18n } from "vue-i18n";
+import { useUpdateRetailLocationThemeMutation } from "src/services/retail-location.graphql";
 
 export type ThemeColor = "primary" | "secondary" | "accent";
 
@@ -27,6 +27,7 @@ const defaultTheme: Theme = {
   logo: `/favicon-${retailLocationId}.png`,
 };
 
+// Storage is used as kind of a fallback. See boot/retail-location.ts for the actual theme syncing logic
 const theme = ref<Theme>(
   LocalStorage.getItem<Theme>(STORAGE_THEME_KEY) ?? cloneDeep(defaultTheme),
 );
@@ -59,14 +60,16 @@ function setDefaults() {
 }
 
 export function useTheme() {
-  const { t } = useI18n();
+  const { updateRetailLocationTheme } = useUpdateRetailLocationThemeMutation();
 
-  function saveChanges() {
+  async function saveChanges() {
     hasPendingChanges.value = false;
     LocalStorage.set(STORAGE_THEME_KEY, theme.value);
-    Notify.create({
-      message: t("general.themeChanged"),
-      color: "positive",
+    await updateRetailLocationTheme({
+      input: {
+        retailLocationId,
+        theme: theme.value.colors,
+      },
     });
   }
 
