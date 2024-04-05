@@ -70,6 +70,7 @@
             color="secondary"
             :label="t('general.saveChanges')"
             text-color="black-54"
+            :disable="!hasPendingChanges"
             @click="saveTheme()"
           />
         </div>

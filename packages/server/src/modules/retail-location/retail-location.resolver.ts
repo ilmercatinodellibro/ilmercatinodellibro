@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
+import { merge } from "lodash";
 import { RetailLocation } from "src/@generated/retail-location";
 import { Input } from "src/modules/auth/decorators/input.decorator";
 import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
@@ -31,12 +32,28 @@ export class RetailLocationResolver {
   async updateRetailLocationTheme(
     @Input() { retailLocationId, theme }: UpdateRetailLocationThemeInput,
   ) {
+    const { theme: _existingTheme } =
+      await this.prisma.retailLocation.findUniqueOrThrow({
+        where: {
+          id: retailLocationId,
+        },
+        select: {
+          theme: true,
+        },
+      });
+    const existingTheme = _existingTheme as Prisma.JsonObject;
+
     return await this.prisma.retailLocation.update({
       where: {
         id: retailLocationId,
       },
       data: {
-        theme: theme as Prisma.InputJsonObject,
+        theme: {
+          logo: theme.resetLogo ? undefined : existingTheme.logo,
+          colors: theme.colors
+            ? merge(existingTheme.colors, theme.colors)
+            : existingTheme.colors,
+        },
       },
     });
   }

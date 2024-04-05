@@ -28,6 +28,9 @@ export class Theme {
 
 @InputType()
 export class ThemeInput {
+  @Field({ nullable: true })
+  resetLogo?: boolean;
+
   @Field(() => ThemeColorsInput, { nullable: true })
   colors?: ThemeColorsInput;
 }

@@ -2,7 +2,11 @@ import { Field, InputType, PickType } from "@nestjs/graphql";
 import { Problem } from "src/@generated";
 
 @InputType()
-export class ProblemCreateInput extends PickType(Problem, ["details", "type"]) {
+export class ProblemCreateInput extends PickType(
+  Problem,
+  ["details", "type"],
+  InputType,
+) {
   @Field(() => String)
   bookCopyId!: string;
 }

@@ -1,6 +1,6 @@
 import { createSharedComposable } from "@vueuse/core";
-import { cloneDeep, isEqual, merge, omit } from "lodash-es";
-import { LocalStorage, setCssVar } from "quasar";
+import { cloneDeep, isEqual, omit } from "lodash-es";
+import { setCssVar } from "quasar";
 import { ref, watch } from "vue";
 import { useAuthService } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -26,24 +26,11 @@ const defaultTheme: DeepReadonly<Theme> = Object.freeze({
   logo: "/favicon-re.png",
 });
 
-const STORAGE_THEME_KEY = "application-theme";
-const getFromStorage = () =>
-  merge(
-    cloneDeep<Theme>(defaultTheme),
-    LocalStorage.getItem<ThemeFragment>(STORAGE_THEME_KEY),
-  );
-const setToStorage = (theme: ThemeFragment) => {
-  if (isEqual(theme, getFromStorage())) {
-    LocalStorage.remove(STORAGE_THEME_KEY);
-    return;
-  }
-
-  LocalStorage.set(STORAGE_THEME_KEY, theme);
-};
+const getDefaults = () => cloneDeep<Theme>(defaultTheme);
 
 export const useTheme = createSharedComposable(() => {
-  // Storage is used as kind of a fallback. See boot/retail-location.ts for the actual theme syncing logic
-  const theme = ref<Theme>(getFromStorage());
+  // See boot/retail-location.ts for the theme syncing logic
+  const theme = ref<Theme>(getDefaults());
   const hasPendingChanges = ref(false);
 
   const { updateRetailLocationTheme } = useUpdateRetailLocationThemeMutation();
@@ -61,7 +48,7 @@ export const useTheme = createSharedComposable(() => {
   watch(
     theme,
     (theme) => {
-      if (!isEqual(theme, getFromStorage())) {
+      if (!isEqual(theme, getDefaults())) {
         hasPendingChanges.value = true;
       }
     },
@@ -69,19 +56,19 @@ export const useTheme = createSharedComposable(() => {
   );
 
   function setDefaults() {
-    theme.value = getFromStorage();
+    theme.value = getDefaults();
     hasPendingChanges.value = false;
   }
 
   const { selectedLocation } = useRetailLocationService();
   async function saveChanges(logoFile?: File) {
     hasPendingChanges.value = false;
-    setToStorage(theme.value);
 
     await updateRetailLocationTheme({
       input: {
         retailLocationId: selectedLocation.value.id,
         theme: {
+          resetLogo: theme.value.logo === defaultTheme.logo,
           colors: omit(theme.value.colors, ["__typename"]),
         },
       },

@@ -31,7 +31,7 @@ export class RetailLocationController {
   @Public()
   async getRetailLocationLogo(
     @Param("id") locationId: string,
-    @Param("path") logoName: string,
+    @Param("name") logoName: string,
   ) {
     const { theme } = await this.prisma.retailLocation.findUniqueOrThrow({
       where: {
@@ -49,7 +49,16 @@ export class RetailLocationController {
       throw new NotFoundException("Logo not found");
     }
 
-    return new StreamableFile(createReadStream(this.resolvePath(logoName)));
+    const extension = logoPath
+      .split(".")
+      .at(-1) as keyof typeof this.extensionMimeTypeMap;
+
+    return new StreamableFile(
+      createReadStream(resolve(this.getLogoDirectory(locationId), logoName)),
+      {
+        type: this.extensionMimeTypeMap[extension],
+      },
+    );
   }
 
   @Put("/location/:id/logo")
@@ -81,9 +90,7 @@ export class RetailLocationController {
       this.mimeTypeExtensionMap[
         file.mimetype as keyof typeof this.mimeTypeExtensionMap
       ];
-    const logoDirectory = this.resolvePath(
-      `./location/${retailLocationId}/logo/`,
-    );
+    const logoDirectory = this.getLogoDirectory(retailLocationId);
     const logoPath = resolve(logoDirectory, `logo.${extension}`);
     await writeFile(logoPath, file.buffer);
 
@@ -116,9 +123,16 @@ export class RetailLocationController {
     "image/svg+xml": "svg",
     "image/png": "png",
   } as const;
+  private readonly extensionMimeTypeMap = {
+    svg: "image/svg+xml",
+    png: "image/png",
+  } as const;
 
-  private resolvePath(path: string) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- TODO: use from config
-    return resolve(process.env.OS_FILESYSTEM_PATH!, path);
+  private getLogoDirectory(locationId: string) {
+    return resolve(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- TODO: use from config
+      process.env.OS_FILESYSTEM_PATH!,
+      `./location/${locationId}/logo/`,
+    );
   }
 }

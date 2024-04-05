@@ -1,6 +1,6 @@
 import { until } from "@vueuse/core";
 import { boot } from "quasar/wrappers";
-import { watch } from "vue";
+import { nextTick, watch } from "vue";
 import { useTheme } from "src/composables/use-theme";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
@@ -10,19 +10,26 @@ export default boot(async ({ router }) => {
   const { loading, selectedLocationId, selectedLocation } =
     useRetailLocationService();
 
-  const { theme } = useTheme();
+  let initialized = false;
+  const { theme, hasPendingChanges } = useTheme();
   watch(
     selectedLocationId,
     (locationId) => {
-      if (!locationId) {
+      if (!locationId || !initialized) {
         return;
       }
 
       const locationTheme = selectedLocation.value.theme;
       theme.value = {
-        colors: locationTheme.colors,
-        logo: locationTheme.logo ? `/${locationTheme.logo}` : undefined,
+        colors: {
+          ...locationTheme.colors,
+        },
+        logo: locationTheme.logo ? `/${locationTheme.logo}` : theme.value.logo,
       };
+      // to avoid making theme editor seen as dirty
+      void nextTick(() => {
+        hasPendingChanges.value = false;
+      });
     },
     { immediate: true },
   );
@@ -36,6 +43,7 @@ export default boot(async ({ router }) => {
   }
 
   await until(loading).toBe(false);
+  initialized = true;
   // TODO: Use and enforce the user's preferred location (when implemented)
   selectedLocationId.value = "re";
 });
