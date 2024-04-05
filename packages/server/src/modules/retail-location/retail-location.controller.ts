@@ -4,6 +4,7 @@ import { relative, resolve } from "node:path";
 import {
   Controller,
   Get,
+  Inject,
   NotFoundException,
   Param,
   Put,
@@ -14,6 +15,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Prisma, User } from "@prisma/client";
+import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Public } from "src/modules/auth/decorators/public-route.decorator";
@@ -23,6 +25,8 @@ import { Theme } from "src/modules/retail-location/theme.args";
 @Controller()
 export class RetailLocationController {
   constructor(
+    @Inject(rootConfiguration.KEY)
+    private readonly rootConfig: RootConfiguration,
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
   ) {}
@@ -109,11 +113,7 @@ export class RetailLocationController {
       data: {
         theme: {
           ...(location.theme as unknown as Theme),
-          logo: relative(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- TODO: use from config
-            process.env.OS_FILESYSTEM_PATH!,
-            logoPath,
-          ),
+          logo: relative(this.rootConfig.fileSystemPath, logoPath),
         } as unknown as Prisma.InputJsonObject,
       },
     });
@@ -130,8 +130,7 @@ export class RetailLocationController {
 
   private getLogoDirectory(locationId: string) {
     return resolve(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- TODO: use from config
-      process.env.OS_FILESYSTEM_PATH!,
+      this.rootConfig.fileSystemPath,
       `./location/${locationId}/logo/`,
     );
   }
