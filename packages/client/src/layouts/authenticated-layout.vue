@@ -16,7 +16,7 @@
       :aria-label="t('general.mainNavigation')"
     >
       <div v-if="!isMobile" class="flex-center q-pa-md row">
-        <img :src="theme.logo ?? '/favicon-re.png'" />
+        <img :src="theme.logo" />
       </div>
 
       <q-scroll-area class="col-grow">

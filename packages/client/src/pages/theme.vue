@@ -25,10 +25,7 @@
         class="gap-16"
       >
         <div class="column no-wrap">
-          <img
-            class="logo-container q-pa-md"
-            :src="theme.logo ?? '/favicon-re.png'"
-          />
+          <img class="logo-container q-pa-md" :src="theme.logo" />
           <p class="q-mt-sm text-black-54 text-center text-subtitle">
             {{ t("general.logoSizeMessage") }}
           </p>
