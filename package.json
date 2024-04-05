@@ -11,7 +11,7 @@
     "Alessandro Vandelli <a.vandelli@dreamonkey.com>"
   ],
   "description": "Il Mercatino del Libro monorepo",
-  "packageManager": "pnpm@8.15.5",
+  "packageManager": "pnpm@8.15.6",
   "scripts": {
     "clean": "pnpm --filter \"./packages/**\" clean",
     "generate": "pnpm --filter \"./packages/server\" generate && pnpm --filter \"./packages/client\" generate",
@@ -31,31 +31,30 @@
     "prepare": "husky install && pnpm generate",
     "preinstall": "npx only-allow pnpm"
   },
-  "devDependenciesComments": {
-    "stylelint": "We are forced to pin stylelint to 15.10.0 because vite-plugin-checker breaks with meow@10 which is full-ESM: https://github.com/fi3ework/vite-plugin-checker/issues/260"
-  },
   "devDependencies": {
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.12.4",
     "eslint": "^8.57.0",
-    "eslint-config-coralloy": "^0.2.1",
+    "eslint-config-coralloy": "^0.3.1",
     "graphql-config": "^5.0.3",
     "husky": "^8.0.3",
     "lint-staged": "^15.2.2",
     "postcss": "^8.4.37",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
-    "stylelint": "15.10.0",
-    "stylelint-config-coralloy": "^0.4.1",
-    "typescript": "^5.4.2"
+    "stylelint": "^16.3.1",
+    "stylelint-config-coralloy": "^0.5.0",
+    "typescript": "^5.4.4"
   },
   "overridesComments": {
     "vite": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077",
-    "@vitejs/plugin-vue": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077"
+    "@vitejs/plugin-vue": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077",
+    "meow": "We are forced to pin to v9 because vite-plugin-checker breaks with meow@10+ which is full-ESM: https://github.com/fi3ework/vite-plugin-checker/issues/260"
   },
   "pnpm": {
     "overrides": {
       "vite": "^4.0.0",
-      "@vitejs/plugin-vue": "^4.0.0"
+      "@vitejs/plugin-vue": "^4.0.0",
+      "stylelint@16>meow": "^9.0.0"
     },
     "patchedDependencies": {
       "prisma-nestjs-graphql@19.2.0": "patches/prisma-nestjs-graphql@19.2.0.patch"

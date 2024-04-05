@@ -233,7 +233,7 @@ function getCommonColumns<
       name: "price",
       headerClasses: "text-center",
       align: "left",
-      format: (val) => val + " €",
+      format: (val: number) => `${val.toString()} €`,
     },
     {
       label: t("book.fields.utility"),
