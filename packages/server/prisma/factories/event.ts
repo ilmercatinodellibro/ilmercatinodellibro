@@ -11,6 +11,7 @@ export async function createEvent(
     description: faker.lorem.sentence(),
 
     owner: {
+      // TODO: Do not create a user, use an existing one
       create: await createUser(),
     },
 

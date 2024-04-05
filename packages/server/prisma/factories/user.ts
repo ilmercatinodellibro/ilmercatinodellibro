@@ -9,6 +9,17 @@ import { SeedUserCreateInput } from "test/fixtures/users";
 export const PASSWORD_STUB_HASH =
   "$argon2id$v=19$m=65536,t=3,p=4$3S7CSbDtcAUVF1hcrMDkQw$Kx69jwO1b+VjdM5uILwtRHLdEwscdidcapNZjGevvm8";
 
+// The pool size can be increased if needed
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const uniqueEmailPool = faker.helpers.uniqueArray(faker.internet.email, 100);
+const getEmail = () => {
+  const email = uniqueEmailPool.pop();
+  if (!email) {
+    throw new Error("Ran out of unique emails, increase the pool size");
+  }
+  return email.toLowerCase();
+};
+
 export async function createUser({
   hashedPassword = PASSWORD_STUB_HASH,
   password,
@@ -22,8 +33,7 @@ export async function createUser({
   }
 
   return {
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    email: faker.helpers.unique(faker.internet.email).toLowerCase(),
+    email: getEmail(),
     firstname: faker.person.firstName(),
     lastname: faker.person.lastName(),
     password: hashedPassword,
