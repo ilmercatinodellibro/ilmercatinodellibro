@@ -25,7 +25,10 @@
         class="gap-16"
       >
         <div class="column no-wrap">
-          <img class="bg-primary logo-container q-pa-md" :src="theme.logo" />
+          <img
+            class="logo-container q-pa-md"
+            :src="theme.logo ?? '/favicon-re.png'"
+          />
           <p class="q-mt-sm text-black-54 text-center text-subtitle">
             {{ t("general.logoSizeMessage") }}
           </p>
@@ -39,11 +42,7 @@
             <span class="text-black-87">{{ t("general.uploadLogo") }}</span>
           </q-btn>
 
-          <q-btn
-            color="black-12"
-            outline
-            @click="theme.logo = defaultTheme.logo"
-          >
+          <q-btn color="black-12" outline @click="resetLogo">
             <span class="text-black-87"> {{ t("general.resetLogo") }} </span>
           </q-btn>
         </div>
@@ -125,8 +124,14 @@ function onRejected() {
   notifyError("Uploaded file did not pass validation check");
 }
 
+function resetLogo() {
+  theme.value.logo = defaultTheme.logo;
+  imagePickerModel.value = undefined;
+}
+
 async function saveTheme() {
-  await saveChanges();
+  await saveChanges(imagePickerModel.value);
+
   Notify.create({
     message: t("general.themeChanged"),
     color: "positive",
@@ -155,7 +160,7 @@ watch(imagePickerModel, (newImage) => {
 }
 
 .logo-container {
-  border: 1px solid rgb(0 0 0 / 12%);
+  border: 2px solid var(--q-primary);
   max-height: 200px;
   width: 100%;
 

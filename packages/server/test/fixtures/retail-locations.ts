@@ -22,9 +22,11 @@ export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   joinUsContent: RE_JOIN_US,
   phoneNumber: "3516215189",
   theme: {
-    primary: "#798aa8",
-    secondary: "#76e1a7",
-    accent: "#c2664d",
+    colors: {
+      primary: "#798aa8",
+      secondary: "#76e1a7",
+      accent: "#c2664d",
+    },
   } satisfies Theme,
 };
 
@@ -39,9 +41,11 @@ export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   joinUsContent: RE_JOIN_US,
   phoneNumber: "3515472756",
   theme: {
-    primary: "#1f7472",
-    secondary: "#76e1a7",
-    accent: "#e2a615",
+    colors: {
+      primary: "#1f7472",
+      secondary: "#76e1a7",
+      accent: "#e2a615",
+    },
   } satisfies Theme,
 };
 

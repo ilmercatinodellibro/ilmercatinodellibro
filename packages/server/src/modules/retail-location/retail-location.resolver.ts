@@ -1,4 +1,5 @@
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Prisma } from "@prisma/client";
 import { RetailLocation } from "src/@generated/retail-location";
 import { Input } from "src/modules/auth/decorators/input.decorator";
 import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
@@ -35,9 +36,7 @@ export class RetailLocationResolver {
         id: retailLocationId,
       },
       data: {
-        theme: {
-          ...theme,
-        },
+        theme: theme as Prisma.InputJsonObject,
       },
     });
   }

@@ -133,7 +133,7 @@ model RetailLocation {
   /// @FieldType({ name: 'ThemeInput', from: 'src/modules/retail-location/theme.args', input: true, match: '*Input' })
   /// @PropertyType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', namedImport: true, output: true, input: true })
   // We can't set the default to a string containing JSON due to prisma-nestjs-graphql limitations, so have to use dbgenerated(), using jsonb_ because Prisma uses jsonb for Json type
-  theme                 Json    @default(dbgenerated("jsonb_build_object('primary', '#798aa8', 'secondary', '#76e1a7', 'accent', '#c2664d')"))
+  theme                 Json    @default(dbgenerated("jsonb_build_object('colors', jsonb_build_object('primary', '#798aa8', 'secondary', '#76e1a7', 'accent', '#c2664d'))"))
 
   books    Book[]           @relation("RetailLocationBooks")
   carts    Cart[]

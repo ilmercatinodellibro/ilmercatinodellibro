@@ -1,3 +1,12 @@
+fragment Theme on Theme {
+  logo
+  colors {
+    primary
+    secondary
+    accent
+  }
+}
+
 fragment RetailLocation on RetailLocation {
   id
   name
@@ -15,9 +24,7 @@ fragment RetailLocation on RetailLocation {
   warehouseMaxBlockSize
 
   theme {
-    primary
-    secondary
-    accent
+    ...Theme
   }
 }
 

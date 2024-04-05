@@ -1,5 +1,4 @@
 import { until } from "@vueuse/core";
-import { omit } from "lodash-es";
 import { boot } from "quasar/wrappers";
 import { watch } from "vue";
 import { useTheme } from "src/composables/use-theme";
@@ -14,12 +13,16 @@ export default boot(async ({ router }) => {
   const { theme } = useTheme();
   watch(
     selectedLocationId,
-    () => {
-      if (!selectedLocationId.value) {
+    (locationId) => {
+      if (!locationId) {
         return;
       }
 
-      theme.value.colors = omit(selectedLocation.value.theme, ["__typename"]);
+      const locationTheme = selectedLocation.value.theme;
+      theme.value = {
+        colors: locationTheme.colors,
+        logo: locationTheme.logo ? `/${locationTheme.logo}` : undefined,
+      };
     },
     { immediate: true },
   );
