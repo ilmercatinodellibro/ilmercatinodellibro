@@ -58,7 +58,6 @@ module.exports = configure(function (ctx) {
     boot: [
       "apollo",
       "i18n",
-      "apexcharts",
       "refresh-token",
       "in-app-notifications",
       "firebase-messaging",
