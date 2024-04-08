@@ -32,13 +32,13 @@
     "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
-    "@types/node": "^20.12.4",
+    "@types/node": "^20.12.5",
     "eslint": "^8.57.0",
     "eslint-config-coralloy": "^0.3.1",
     "graphql-config": "^5.0.3",
     "husky": "^8.0.3",
     "lint-staged": "^15.2.2",
-    "postcss": "^8.4.37",
+    "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
     "stylelint": "^16.3.1",
