@@ -82,7 +82,7 @@ function confirmReset() {
   Dialog.create({
     title: t("general.settings.resetButton"),
     message: t("general.settings.resetMessage"),
-    cancel: t("cancel"),
+    cancel: true,
     ok: t("general.settings.resetConfirmButton"),
   }).onOk(() => {
     // FIXME: perform the yearly reset
