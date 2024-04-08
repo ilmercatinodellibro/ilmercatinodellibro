@@ -162,6 +162,7 @@ export default {
     [AvailableRouteNames.SelectLocation]: "Select Location",
     [AvailableRouteNames.MyData]: "My Data",
     [AvailableRouteNames.Warehouse]: "Warehouse",
+    [AvailableRouteNames.Settings]: "Settings",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",

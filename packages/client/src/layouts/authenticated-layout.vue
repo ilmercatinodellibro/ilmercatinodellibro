@@ -255,7 +255,6 @@
               </q-item-section>
             </q-item>
 
-            <!-- TODO: fix route -->
             <q-item
               v-if="hasAdminRole"
               v-ripple

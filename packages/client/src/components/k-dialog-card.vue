@@ -12,7 +12,11 @@
 
     <q-separator />
 
-    <q-card-actions v-if="!noActions" align="right">
+    <q-card-actions
+      v-if="!noActions"
+      align="right"
+      :class="{ 'q-pa-md': actionsPadding }"
+    >
       <slot name="card-actions">
         <q-btn
           :label="cancelLabel ?? t('common.cancel')"
@@ -42,6 +46,7 @@ withDefaults(
     CommonDialogProps & {
       saveLabel?: string;
       showSaveButton?: boolean;
+      actionsPadding?: boolean;
     }
   >(),
   {

@@ -187,6 +187,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import("src/pages/warehouse.vue"),
         beforeEnter: redirectIfNotOperatorOrAdmin,
       },
+      {
+        path: "settings",
+        name: AvailableRouteNames.Settings,
+        component: () => import("src/pages/settings.vue"),
+        beforeEnter: redirectIfNotAdmin,
+      },
     ],
   },
 
