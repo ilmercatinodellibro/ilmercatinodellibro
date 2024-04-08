@@ -1,39 +1,46 @@
 <template>
   <q-page class="column flex-center">
     <q-card class="q-ma-md width-700">
-      <k-dialog-card
+      <k-dialog-form-card
         :title="t('sidebar.settings')"
         actions-padding
         size="fullscreen"
+        @submit="updateSettings()"
       >
-        <q-card-section class="column gap-24 no-wrap q-pa-lg">
+        <q-card-section class="column gap-4 no-wrap q-pa-lg">
           <q-input
             v-model="purchaseRate"
             :placeholder="t('general.settings.purchaseRate')"
+            :rules="[numberBetween(0, 100)]"
             type="number"
             outlined
+            suffix="%"
           />
           <q-input
             v-model="saleRate"
             :placeholder="t('general.settings.saleRate')"
+            :rules="[numberBetween(0, 100)]"
             type="number"
             outlined
+            suffix="%"
           />
           <q-input
             v-model="reservationDays"
             :placeholder="t('general.settings.reservationDays')"
+            :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
             type="number"
             outlined
           />
           <q-input
             v-model="maxBooksDimension"
             :placeholder="t('general.settings.maxBooksDimension')"
+            :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
             type="number"
             outlined
           />
         </q-card-section>
 
-        <template #card-actions>
+        <template #card-actions="{ uniqueFormId }">
           <q-btn color="accent" @click="confirmReset()">
             <q-item-section>
               {{ t("general.settings.resetButton") }}
@@ -50,9 +57,14 @@
           <q-space />
 
           <q-btn :label="t('common.cancel')" flat @click="router.back()" />
-          <q-btn :label="t('common.save')" flat @click="updateSettings()" />
+          <q-btn
+            :form="uniqueFormId"
+            :label="t('common.save')"
+            flat
+            type="submit"
+          />
         </template>
-      </k-dialog-card>
+      </k-dialog-form-card>
     </q-card>
   </q-page>
 </template>
@@ -63,16 +75,24 @@ import { Dialog } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import KDialogCard from "src/components/k-dialog-card.vue";
+import KDialogFormCard from "src/components/k-dialog-form-card.vue";
+import {
+  allowOnlyIntegerNumbers,
+  greaterThanZeroRule,
+  numberBetween,
+} from "src/helpers/rules";
+import { useRetailLocationService } from "src/services/retail-location";
+
+const { selectedLocation } = useRetailLocationService();
 
 const { t } = useI18n();
 
 const router = useRouter();
 
-const purchaseRate = ref<number>();
-const saleRate = ref<number>();
-const reservationDays = ref<number>();
-const maxBooksDimension = ref<number>();
+const purchaseRate = ref(selectedLocation.value.buyRate);
+const saleRate = ref(selectedLocation.value.sellRate);
+const reservationDays = ref(selectedLocation.value.maxBookingDays);
+const maxBooksDimension = ref(selectedLocation.value.warehouseMaxBlockSize);
 
 function updateSettings() {
   // FIXME: update the settings

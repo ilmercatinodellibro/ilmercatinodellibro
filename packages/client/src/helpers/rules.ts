@@ -1,6 +1,7 @@
 // Next rules are thought for q-select and q-input rule field.
 // IMPORTANT: Every rule should consider a possible "null" type since default cleared q-select returns that.
 
+import { isInteger } from "lodash-es";
 import { ValidationRule } from "quasar";
 import { MaybeRefOrGetter, toValue } from "vue";
 import { useI18nOutsideSetup } from "src/boot/i18n";
@@ -134,6 +135,25 @@ export const greaterThanZeroRule: ValidationRule<number | string | null> = (
 export const validISBN: ValidationRule<string> = (value) =>
   value.length <= 13 || t("validators.nonValidISBN");
 
+export const numberBetween =
+  (min: number, max: number): ValidationRule<string | number | null> =>
+  (value) => {
+    const numericValue = typeof value === "string" ? parseFloat(value) : value;
+    return (
+      (!(numericValue === null) &&
+        numericValue >= min &&
+        numericValue <= max) ||
+      t("validators.numberBetweenValues", { min, max })
+    );
+  };
+
+export const allowOnlyIntegerNumbers: ValidationRule<string | number | null> = (
+  value,
+) =>
+  (!(value === null) &&
+    isInteger(typeof value === "string" ? parseFloat(value) : value)) ||
+  t("validators.onlyIntegers");
+
 // ---------- ---------- ----------
 // Next fields are not imported in other files but we need to leave these so in the future we can abstract these in a package
 
@@ -160,10 +180,4 @@ export function allowPositiveNumberOrDefaultZero(
   const parsedValue = typeof value === "string" ? parseFloat(value) : value;
 
   return parsedValue !== null && parsedValue >= 0 ? parsedValue : 0;
-}
-
-export function allowOnlyIntegerNumbers(value: number | string) {
-  const parsedValue = typeof value === "string" ? parseFloat(value) : value;
-
-  return parsedValue % 1 === 0 || "Sono accettati solo valori interi";
 }
