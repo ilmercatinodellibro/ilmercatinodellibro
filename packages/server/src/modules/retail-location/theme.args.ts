@@ -19,7 +19,11 @@ export class ThemeColorsInput extends PartialType(ThemeColors, InputType) {}
 
 @ObjectType()
 export class Theme {
-  @Field({ nullable: true })
+  @Field({
+    nullable: true,
+    description:
+      'Relative path to the logo, can be fetched by using `GET location/:id/logo/:name` through <img :src="theme.logo" />',
+  })
   logo?: string;
 
   @Field(() => ThemeColors)
