@@ -1,7 +1,9 @@
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { merge } from "lodash";
 import { RetailLocation } from "src/@generated/retail-location";
+import { AuthService } from "src/modules/auth/auth.service";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Input } from "src/modules/auth/decorators/input.decorator";
 import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
 import { Public } from "../auth/decorators/public-route.decorator";
@@ -10,7 +12,10 @@ import { RetailLocationQueryArgs } from "./retail-location.args";
 
 @Resolver()
 export class RetailLocationResolver {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Public()
   @Query(() => [RetailLocation])
@@ -31,7 +36,14 @@ export class RetailLocationResolver {
   @Mutation(() => RetailLocation)
   async updateRetailLocationTheme(
     @Input() { retailLocationId, theme }: UpdateRetailLocationThemeInput,
+    @CurrentUser() user: User,
   ) {
+    await this.authService.assertMembership({
+      userId: user.id,
+      retailLocationId,
+      role: "ADMIN",
+    });
+
     const { theme: _existingTheme } =
       await this.prisma.retailLocation.findUniqueOrThrow({
         where: {
