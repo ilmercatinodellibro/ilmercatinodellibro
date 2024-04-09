@@ -50,7 +50,3 @@ export type SettingsUpdate =
       settings: Settings;
     }
   | { type: "reset" };
-
-export type CurrentSettings = {
-  [K in keyof Settings as `${K}Current`]: Settings[K];
-};

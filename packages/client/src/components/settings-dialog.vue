@@ -16,7 +16,9 @@
         })
       "
     >
-      <q-card-section class="column gap-4 no-wrap q-pa-lg">
+      <q-card-section
+        class="column gap-4 no-wrap q-pb-xs q-pt-lg q-px-lg width-700"
+      >
         <q-input
           v-model="purchaseRate"
           :placeholder="t('general.settings.purchaseRate')"
@@ -88,9 +90,16 @@ import {
   greaterThanZeroRule,
   numberBetween,
 } from "src/helpers/rules";
-import { CurrentSettings, SettingsUpdate } from "src/models/book";
+import { SettingsUpdate } from "src/models/book";
 
-const props = defineProps<CurrentSettings>();
+const props = defineProps<{
+  maxBooksDimensionCurrent: number;
+  purchaseRateCurrent: number;
+  reservationDaysCurrent: number;
+  saleRateCurrent: number;
+}>();
+
+defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<SettingsUpdate>();

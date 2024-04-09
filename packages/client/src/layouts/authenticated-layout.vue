@@ -398,7 +398,7 @@ import {
   useLateralDrawer,
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
-import { CurrentSettings, SettingsUpdate } from "src/models/book";
+import { SettingsUpdate } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -471,7 +471,7 @@ function openSettings() {
       purchaseRateCurrent: selectedLocation.value.buyRate,
       reservationDaysCurrent: selectedLocation.value.maxBookingDays,
       saleRateCurrent: selectedLocation.value.sellRate,
-    } satisfies CurrentSettings,
+    },
   }).onOk((payload: SettingsUpdate) => {
     if (payload.type === "save") {
       // FIXME: update the settings
