@@ -6,16 +6,15 @@
     <q-input
       v-model="bookISBN"
       :placeholder="searchLabel ?? $t('manageUsers.searchHint')"
-      :rules="[requiredRule, validISBN]"
+      :rules="[validISBN]"
       class="width-420"
       lazy-rules="ondemand"
       outlined
-      hide-bottom-space
     />
 
     <q-btn
-      :label="$t('book.addBookDialog')"
       :icon="mdiPlus"
+      :label="$t('book.addBookDialog')"
       class="bottom-separator-20"
       color="accent"
       no-wrap
@@ -32,7 +31,8 @@
 
 <script setup lang="ts">
 import { mdiPlus } from "@quasar/extras/mdi-v7";
-import { requiredRule, validISBN } from "src/helpers/rules";
+import { ref } from "vue";
+import { validISBN } from "src/helpers/rules";
 
 defineProps<{
   searchLabel?: string;
@@ -42,5 +42,5 @@ defineEmits<{
   addBook: [bookISBN: string];
 }>();
 
-const bookISBN = defineModel<string>("bookIsbn", { required: true });
+const bookISBN = ref("");
 </script>

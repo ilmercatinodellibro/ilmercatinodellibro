@@ -32,10 +32,7 @@
           name="in-retrieval"
           class="col column flex-delegate-height-management no-wrap q-pa-none"
         >
-          <card-table-header
-            v-model:book-isbn="searchISBN"
-            @add-book="addBookToBeRegistered"
-          >
+          <card-table-header @add-book="addBookToBeRegistered">
             <template #side-actions>
               <q-btn
                 :disable="booksToRegister.length === 0"
@@ -170,8 +167,6 @@ const { t } = useI18n();
 const { createBookCopies } = useCreateBookCopiesMutation();
 
 const tab = ref("in-retrieval");
-
-const searchISBN = ref("");
 
 const booksToRegister = ref<BookSummaryFragment[]>([]);
 
