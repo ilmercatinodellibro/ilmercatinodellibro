@@ -39,6 +39,16 @@ export default boot(async ({ router }) => {
     { immediate: true },
   );
 
+  watch(
+    router.currentRoute,
+    (route) => {
+      if (route.params.locationId) {
+        selectedLocationId.value = route.params.locationId as string;
+      }
+    },
+    { immediate: true },
+  );
+
   const { isAuthenticated } = useAuthService();
   if (!isAuthenticated.value) {
     await router.push({
@@ -50,5 +60,4 @@ export default boot(async ({ router }) => {
   await until(loading).toBe(false);
   initialized = true;
   // TODO: Use and enforce the user's preferred location (when implemented)
-  selectedLocationId.value = "re";
 });
