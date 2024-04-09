@@ -32,7 +32,11 @@
         <dialog-table
           :columns="columns"
           :loading="loading"
-          :rows="rows"
+          :rows="
+            // We handle the different data types in #body slot, so it's safe to use a different type here
+            // prettier-ignore
+            rows as readonly BookWithStatus[]
+          "
           :rows-per-page-options="[0]"
           class="flex-delegate-height-management"
         >

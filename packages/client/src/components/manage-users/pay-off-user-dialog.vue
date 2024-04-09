@@ -39,7 +39,11 @@
         <dialog-table
           :columns="columns"
           :loading="bookLoading"
-          :rows="tableRows"
+          :rows="
+            // We handle the group header in the #body slot, so it's safe to use a type that is different than the columns definition
+            // prettier-ignore
+            tableRows as readonly BookCopyDetailsFragment[]
+          "
           :rows-per-page-options="[0]"
           hide-bottom
         >
@@ -401,16 +405,16 @@ const localizedSectionTitle = (sectionTitle: Titles) => {
   return sectionTitle === Titles.InStock
     ? t("manageUsers.payOffUserDialog.booksInStock")
     : sectionTitle === Titles.Returned
-    ? t("manageUsers.payOffUserDialog.returnedBooks")
-    : t("manageUsers.payOffUserDialog.soldBooks");
+      ? t("manageUsers.payOffUserDialog.returnedBooks")
+      : t("manageUsers.payOffUserDialog.soldBooks");
 };
 
 const rowsSelectionStatus = computed(() =>
   selectedRows.value.length === 0
     ? false
     : selectedRows.value.length === selectableRows.value.length
-    ? true
-    : undefined,
+      ? true
+      : undefined,
 );
 
 function swapAllRows() {

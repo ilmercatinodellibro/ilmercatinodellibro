@@ -192,7 +192,11 @@
         :columns="bookCopyColumns"
         :filter="tableFilter"
         :loading="copyLoading"
-        :rows="bookCopies"
+        :rows="
+          // FIXME: bookCopies don't have the status field but the columns specify it
+          // prettier-ignore
+          bookCopies as unknown as readonly BookCopyDetailsWithStatus[]
+        "
         class="flex-delegate-height-management"
         @request="onCopyRequest"
       >

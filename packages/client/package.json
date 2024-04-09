@@ -12,6 +12,7 @@
     "lint:style": "stylelint \"**/*.{css,scss,vue}\" --fix --report-needless-disables",
     "lint": "pnpm lint:script && pnpm lint:style",
     "format": "prettier --write \"**/*.{json,md,graphql,vue,js,ts,yml}\" --ignore-path .gitignore",
+    "typecheck": "vue-tsc --noEmit --project tsconfig.vue-tsc.json",
     "test": "echo \"See package.json => scripts for available tests.\" && exit 0",
     "dev": "concurrently --raw --passthrough-arguments \"quasar dev {@}\" \"pnpm:generate:watch\" --",
     "dev:pwa": "pnpm dev -m pwa",
