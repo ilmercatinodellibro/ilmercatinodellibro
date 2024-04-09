@@ -14,9 +14,14 @@ export default boot(async ({ router }) => {
   const { theme, hasPendingChanges } = useTheme();
   watch(
     selectedLocationId,
-    (locationId) => {
-      if (!locationId || !initialized) {
+    async (locationId) => {
+      if (!locationId) {
         return;
+      }
+
+      if (!initialized) {
+        await until(loading).toBe(false);
+        initialized = true;
       }
 
       const locationTheme = selectedLocation.value.theme;
