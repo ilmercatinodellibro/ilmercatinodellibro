@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { mdiArrowLeft, mdiFilter, mdiPlus } from "@quasar/extras/mdi-v7";
-import { Dialog, QBtnProps, QTableColumn, QTableProps } from "quasar";
+import { Dialog, Notify, QBtnProps, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -269,15 +269,25 @@ function searchClassBooks() {
 }
 
 async function reserveBook(id: string) {
-  await createReservations({
-    input: {
-      bookIds: [id],
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      userId: user.value!.id,
-      retailLocationId: selectedLocation.value.id,
-    },
-  });
-  await refetchReservations();
+  try {
+    await createReservations({
+      input: {
+        bookIds: [id],
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
+        retailLocationId: selectedLocation.value.id,
+      },
+    });
+  } catch (e) {
+    Notify.create(
+      t("reserveBooks.reservationOrRequestError", [
+        t("reserveBooks.reservation"),
+        e,
+      ]),
+    );
+  } finally {
+    await refetchReservations();
+  }
 }
 
 function requestBook(bookId: string) {
@@ -287,11 +297,21 @@ function requestBook(bookId: string) {
     cancel: t("common.cancel"),
     ok: t("reserveBooks.requestCopy"),
   }).onOk(async () => {
-    await createBookRequest({
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      input: { bookId, userId: user.value!.id },
-    });
-    await refetchRequests();
+    try {
+      await createBookRequest({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        input: { bookId, userId: user.value!.id },
+      });
+    } catch (e) {
+      Notify.create(
+        t("reserveBooks.reservationOrRequestError", [
+          t("reserveBooks.request"),
+          e,
+        ]),
+      );
+    } finally {
+      await refetchRequests();
+    }
   });
 }
 
@@ -302,18 +322,27 @@ function openReserveAllDialog() {
       classBooks: classBooks.value,
     },
   }).onOk(async (books: BookSummaryFragment[]) => {
-    await createReservations({
-      input: {
-        bookIds: books.map(({ id }) => id),
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        userId: user.value!.id,
-        retailLocationId: selectedLocation.value.id,
-      },
-    });
+    try {
+      await createReservations({
+        input: {
+          bookIds: books.map(({ id }) => id),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          userId: user.value!.id,
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
+    } catch (e) {
+      Notify.create(
+        t("reserveBooks.reservationOrRequestError", [
+          t("reserveBooks.reservation"),
+          e,
+        ]),
+      );
+    } finally {
+      showByClass.value = false;
 
-    showByClass.value = false;
-
-    await refetchReservations();
+      await refetchReservations();
+    }
   });
 }
 </script>

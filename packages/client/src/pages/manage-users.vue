@@ -422,6 +422,8 @@ function openCellEditDialog(
   { name }: QTableColumn,
   value: number,
 ) {
+  // TODO: update the name check to allow for the "Reserved" and "Requested"
+  // cells to always be clickable
   if (value <= 0 && name !== "in-stock") {
     return;
   }

@@ -23,4 +23,8 @@ export default {
   },
   goToReservations: "Vai alle tue prenotazioni",
   goToRequests: "Vai alle tue richieste",
+  reservationOrRequestError:
+    "C'è stato un problema durante la creazione della {0}: {1}",
+  request: "richiesta",
+  reservation: "prenotazione",
 };

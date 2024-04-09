@@ -148,7 +148,7 @@ import {
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
 import { sumBy } from "lodash-es";
-import { QChipProps, QTab, QTableColumn } from "quasar";
+import { Notify, QChipProps, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -408,64 +408,82 @@ async function reserveBook(request: RequestSummaryFragment) {
     return;
   }
 
-  const { cache } = await createReservations({
-    input: {
-      bookIds: [request.book.id],
-      userId: user.value.id,
-      retailLocationId: selectedLocation.value.id,
-    },
-  });
-  await refetchReservations();
-
-  cache.updateQuery(
-    {
-      query: GetRequestsDocument,
-      variables: {
-        retailLocationId: selectedLocation.value.id,
+  try {
+    const { cache } = await createReservations({
+      input: {
+        bookIds: [request.book.id],
         userId: user.value.id,
+        retailLocationId: selectedLocation.value.id,
       },
-    },
-    (data) => {
-      if (!data) {
-        return;
-      }
+    });
 
-      return {
-        bookRequests: data.bookRequests.filter(
-          ({ book: { id } }) => id !== request.book.id,
-        ),
-      };
-    },
-  );
-  cache.gc();
+    cache.updateQuery(
+      {
+        query: GetRequestsDocument,
+        variables: {
+          retailLocationId: selectedLocation.value.id,
+          userId: user.value.id,
+        },
+      },
+      (data) => {
+        if (!data) {
+          return;
+        }
+        return {
+          bookRequests: data.bookRequests.filter(
+            ({ book: { id } }) => id !== request.book.id,
+          ),
+        };
+      },
+    );
+    cache.gc();
+  } catch (e) {
+    Notify.create(
+      t("reserveBooks.reservationOrRequestError", [
+        t("reserveBooks.reservation"),
+        e,
+      ]),
+    );
+  } finally {
+    await refetchReservations();
+  }
 }
 
 async function cancelRequest(request: RequestSummaryFragment) {
-  const { cache } = await deleteBookRequest({
-    input: {
-      id: request.id,
-    },
-  });
-
-  cache.updateQuery(
-    {
-      query: GetRequestsDocument,
-      variables: {
-        retailLocationId: selectedLocation.value.id,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        userId: user.value!.id,
+  try {
+    const { cache } = await deleteBookRequest({
+      input: {
+        id: request.id,
       },
-    },
-    (data) => {
-      if (!data) {
-        return;
-      }
-      return {
-        bookRequests: data.bookRequests.filter(({ id }) => id !== request.id),
-      };
-    },
-  );
-  cache.gc();
+    });
+
+    cache.updateQuery(
+      {
+        query: GetRequestsDocument,
+        variables: {
+          retailLocationId: selectedLocation.value.id,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          userId: user.value!.id,
+        },
+      },
+      (data) => {
+        if (!data) {
+          return;
+        }
+        return {
+          bookRequests: data.bookRequests.filter(({ id }) => id !== request.id),
+        };
+      },
+    );
+    cache.gc();
+  } catch (e) {
+    Notify.create(
+      t("reserveBooks.reservationOrRequestError", [
+        t("reserveBooks.reservation"),
+        e,
+      ]),
+    );
+  }
 }
 </script>
 
