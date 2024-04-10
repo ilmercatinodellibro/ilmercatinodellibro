@@ -10,7 +10,10 @@
         v-if="type === 'sold'"
         :columns="soldColumns"
         :loading="soldLoading"
-        :rows="soldBookCopies"
+        :rows="
+          // prettier-ignore
+          soldBookCopies as readonly SoldBookCopy[]
+        "
         class="flex-delegate-height-management"
       >
         <template #body-cell-problems="{ value }">
@@ -45,7 +48,10 @@
         v-else
         :columns="purchasedColumns"
         :loading="purchasedLoading"
-        :rows="purchasedBookCopies"
+        :rows="
+          // prettier-ignore
+          purchasedBookCopies as readonly SoldBookCopy[]
+        "
         class="flex-delegate-height-management"
       >
         <template #body-cell-return="{ row }">

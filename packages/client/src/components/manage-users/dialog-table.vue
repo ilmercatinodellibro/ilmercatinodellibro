@@ -1,6 +1,8 @@
 <template>
   <q-table
     ref="tableRef"
+    :rows="rows"
+    :columns="columns"
     :filter="searchQuery"
     :hide-pagination="hidePagination"
     :pagination="pagination"
@@ -17,8 +19,8 @@
   </q-table>
 </template>
 
-<script setup lang="ts">
-import { QTable, QTableProps, QTableSlots } from "quasar";
+<script setup lang="ts" generic="T extends Record<string, any>">
+import { QTable, QTableColumn, QTableProps, QTableSlots } from "quasar";
 import { computed, onMounted, ref } from "vue";
 
 const tableRef = ref<QTable>();
@@ -35,6 +37,8 @@ const props = withDefaults(
   defineProps<
     {
       searchQuery?: string;
+      rows: readonly T[];
+      columns?: QTableColumn<T>[];
       // eslint-disable-next-line vue/prop-name-casing, vue/no-unused-properties
     } & Pick<
       QTableProps,
@@ -43,6 +47,7 @@ const props = withDefaults(
   >(),
   {
     searchQuery: undefined,
+    columns: undefined,
     rowsPerPageOptions: () => [5, 10, 20, 50, 100, 200],
   },
 );

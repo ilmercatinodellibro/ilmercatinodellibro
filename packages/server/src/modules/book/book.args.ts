@@ -5,8 +5,9 @@ import {
   Int,
   IntersectionType,
   ObjectType,
+  PickType,
 } from "@nestjs/graphql";
-import { Book, BookCreateWithoutRetailLocationInput } from "src/@generated";
+import { Book } from "src/@generated";
 import {
   LocationBoundInput,
   LocationBoundQueryArgs,
@@ -47,6 +48,19 @@ export class BookQueryResult {
 
 @InputType()
 export class BookCreateInput extends IntersectionType(
-  BookCreateWithoutRetailLocationInput,
+  PickType(
+    Book,
+    [
+      "id",
+      "isbnCode",
+      "title",
+      "subject",
+      "authorsFullName",
+      "publisherName",
+      "originalPrice",
+    ],
+    InputType,
+  ),
   LocationBoundInput,
+  InputType,
 ) {}

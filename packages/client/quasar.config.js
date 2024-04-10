@@ -58,7 +58,6 @@ module.exports = configure(function (ctx) {
     boot: [
       "apollo",
       "i18n",
-      "apexcharts",
       "refresh-token",
       "in-app-notifications",
       "firebase-messaging",
@@ -204,7 +203,12 @@ module.exports = configure(function (ctx) {
           secure: false,
           ws: true,
         },
-        ["/receipts"]: {
+
+        "/receipts": {
+          changeOrigin: true,
+          target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
+        },
+        "/location": {
           changeOrigin: true,
           target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
         },

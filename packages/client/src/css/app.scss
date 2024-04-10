@@ -24,42 +24,6 @@ body {
   cursor: grab;
 }
 
-// Default apexchart toolbar icons style is not what asked.
-// It must be changed in order to give different color, dimensions, padding and create a separator line
-.apexchart-custom-icons {
-  .apexcharts-canvas {
-    padding-top: $reserved-space-for-the-toolbar-addition;
-
-    /* stylelint-disable max-nesting-depth */
-    .apexcharts-toolbar {
-      border-bottom: 1px $primary solid;
-      border-radius: 0;
-      justify-content: flex-end;
-      left: 0;
-      max-width: unset !important;
-      padding-bottom: 13px;
-
-      /* stylelint-disable selector-max-compound-selectors */
-      > * {
-        margin-left: $icons-gap;
-        transform: unset !important;
-      }
-
-      svg {
-        fill: $secondary !important;
-        stroke: unset !important;
-        width: $icons-dimension;
-      }
-
-      .apexcharts-selected svg {
-        fill: rgb(0 0 0 / 87%) !important;
-      }
-      /* stylelint-enable selector-max-compound-selectors */
-    }
-    /* stylelint-enable max-nesting-depth */
-  }
-}
-
 // When creating a dialog sometimes you need to manage it's height and width in order to react to the content or the screen.
 // Also you probably need to make some content scrollable and not others.
 // In order to keep consistent behaviors between dialogs and manage common problems faster use next set of classes.

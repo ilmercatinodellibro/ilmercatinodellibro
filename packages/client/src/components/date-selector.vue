@@ -103,37 +103,37 @@ function getQuickRange(preset: AvailableQuickRanges) {
   const to = new Date();
 
   switch (preset) {
-    case "today":
+    case AvailableQuickRanges.Today:
       break;
-    case "yesterday":
+    case AvailableQuickRanges.Yesterday:
       from.setDate(now.getDate() - 1);
       to.setDate(now.getDate() - 1);
       break;
-    case "thisWeek":
+    case AvailableQuickRanges.ThisWeek:
       from.setDate(now.getDate() - now.getDay());
       to.setDate(now.getDate() + (6 - now.getDay()));
       break;
-    case "lastWeek":
+    case AvailableQuickRanges.LastWeek:
       from.setDate(now.getDate() - now.getDay() - 7);
       to.setDate(now.getDate() - now.getDay() - 1);
       break;
-    case "thisMonth":
+    case AvailableQuickRanges.ThisMonth:
       from.setDate(1);
       to.setMonth(now.getMonth() + 1);
       to.setDate(0);
       break;
-    case "lastMonth":
+    case AvailableQuickRanges.LastMonth:
       from.setMonth(now.getMonth() - 1);
       from.setDate(1);
       to.setDate(0);
       break;
-    case "thisYear":
+    case AvailableQuickRanges.ThisYear:
       from.setMonth(0);
       from.setDate(1);
       to.setMonth(11);
       to.setDate(31);
       break;
-    case "lastYear":
+    case AvailableQuickRanges.LastYear:
       from.setFullYear(now.getFullYear() - 1);
       from.setMonth(0);
       from.setDate(1);

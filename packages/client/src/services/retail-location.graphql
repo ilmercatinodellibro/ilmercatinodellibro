@@ -1,3 +1,12 @@
+fragment Theme on Theme {
+  logo
+  colors {
+    primary
+    secondary
+    accent
+  }
+}
+
 fragment RetailLocation on RetailLocation {
   id
   name
@@ -13,10 +22,20 @@ fragment RetailLocation on RetailLocation {
   payOffEnabled
   maxBookingDays
   warehouseMaxBlockSize
+
+  theme {
+    ...Theme
+  }
 }
 
 query getRetailLocations {
   retailLocations {
+    ...RetailLocation
+  }
+}
+
+mutation updateRetailLocationTheme($input: UpdateRetailLocationThemeInput!) {
+  updateRetailLocationTheme(input: $input) {
     ...RetailLocation
   }
 }

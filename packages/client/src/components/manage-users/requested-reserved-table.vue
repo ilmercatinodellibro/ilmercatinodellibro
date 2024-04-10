@@ -1,5 +1,6 @@
 <template>
   <dialog-table
+    :rows="rows"
     :columns="columns"
     :pagination="pagination"
     @request="props.onRequest"
@@ -40,8 +41,10 @@ import DialogTable from "./dialog-table.vue";
 const { t } = useI18n();
 
 const props = defineProps<
-  // eslint-disable-next-line vue/prop-name-casing, vue/no-unused-properties
-  Pick<QTableProps, "pagination" | "onRequest" | "onUpdate:pagination">
+  {
+    rows: readonly BookSummaryFragment[];
+    // eslint-disable-next-line vue/prop-name-casing, vue/no-unused-properties
+  } & Pick<QTableProps, "pagination" | "onRequest" | "onUpdate:pagination">
 >();
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
