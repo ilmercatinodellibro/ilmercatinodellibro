@@ -1,13 +1,13 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-card
-      size="fullscreen"
       :cancel-label="$t('common.close')"
       :title="
         $t('manageUsers.inStockDialog.title', [
           `${userData.firstname} ${userData.lastname}`,
         ])
       "
+      size="fullscreen"
       @cancel="onDialogCancel"
     >
       <q-tabs v-model="tab" align="justify" active-color="accent" inline-label>
@@ -26,7 +26,7 @@
       <q-tab-panels
         v-model="tab"
         animated
-        class="col column dialog-panels flex-delegate-height-management no-wrap"
+        class="col column dialog-panels flex-delegate-height-management hide-scrollbar no-wrap"
       >
         <q-tab-panel
           name="in-retrieval"
@@ -47,7 +47,6 @@
           <dialog-table
             :rows="booksToRegister"
             :columns="booksToRegisterColumns"
-            :rows-per-page-options="[0]"
             class="col"
           >
             <template #body-cell-status="{ value }">
@@ -93,7 +92,6 @@
             :rows="copiesInStock"
             :columns="copiesInStockColumns"
             :loading="inStockLoading"
-            :rows-per-page-options="[0]"
             class="col"
           >
             <template #body-cell-status="{ value }">
@@ -144,7 +142,10 @@ import {
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { GetReceiptsDocument } from "src/services/receipt.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { CustomerFragmentDoc, UserFragment } from "src/services/user.graphql";
+import {
+  CustomerFragment,
+  CustomerFragmentDoc,
+} from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -154,7 +155,7 @@ import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
 import StatusChip from "./status-chip.vue";
 
 const props = defineProps<{
-  userData: UserFragment;
+  userData: CustomerFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -162,6 +163,8 @@ defineEmits(useDialogPluginComponent.emitsObject);
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 const { t } = useI18n();
+
+const { createBookCopies } = useCreateBookCopiesMutation();
 
 const tab = ref("in-retrieval");
 
@@ -294,14 +297,15 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
 async function addBookToBeRegistered(bookISBN: string) {
   const book = await fetchBookByISBN(bookISBN);
   if (!book) {
-    // TODO: let the user know about this
+    Dialog.create({
+      message: t("manageUsers.inStockDialog.errorMessage"),
+    });
     return;
   }
 
   booksToRegister.value.push(book);
 }
 
-const { createBookCopies } = useCreateBookCopiesMutation();
 function retrieveAllBooks() {
   Dialog.create({
     component: RetrieveAllBooksDialog,

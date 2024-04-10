@@ -9,7 +9,7 @@
     target="_blank"
   >
     <span class="button-container">
-      <q-icon color="primary" :name="'svguse:icons.svg#' + name" />
+      <q-icon color="primary" :name="`svguse:/icons.svg#${name}`" />
       <span class="button-text-container">
         <span class="button-text">
           {{ name }}

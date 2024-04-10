@@ -262,6 +262,7 @@ export class ReservationResolver {
           where: {
             bookId: { in: booksToRequestAndReserve.map(({ id }) => id) },
             userId,
+            deletedAt: null,
           },
         });
 

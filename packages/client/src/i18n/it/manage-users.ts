@@ -52,6 +52,8 @@ export default {
       "Include le copie ancora presenti in magazzino, non disperse, non prenotate",
     retrieveBtn: "Ritira tutti i libri nella lista",
     deleteBookBtnTooltip: "Elimina definitivamente questa copia dal database",
+    errorMessage:
+      "Non è possibile accettare più di una copia dello stesso libro",
   },
   booksMovementsDialog: {
     purchasedTitle: "Libri acquistati da {0}",

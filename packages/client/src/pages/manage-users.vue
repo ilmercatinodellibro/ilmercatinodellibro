@@ -74,7 +74,7 @@
           <template #body-cell-in-stock="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              always-active
+              clickable-when-zero
               @click="openCellEditDialog(row, col, value)"
             />
           </template>
@@ -419,10 +419,16 @@ function openEdit(user: CustomerFragment, rowIndex: number) {
 
 function openCellEditDialog(
   userData: CustomerFragment,
-  column: QTableColumn,
+  { name }: QTableColumn,
   value: number,
 ) {
-  switch (column.name) {
+  // TODO: update the name check to allow for the "Reserved" and "Requested"
+  // cells to always be clickable
+  if (value <= 0 && name !== "in-stock") {
+    return;
+  }
+
+  switch (name) {
     case "in-stock":
       Dialog.create({
         component: EditUserStockdataDialog,
@@ -449,7 +455,7 @@ function openCellEditDialog(
 
       Dialog.create({
         component: EditUserBooksMovementsDialog,
-        componentProps: { userData, type: column.name },
+        componentProps: { userData, type: name },
       });
       break;
     }

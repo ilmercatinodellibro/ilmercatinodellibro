@@ -54,8 +54,11 @@ export class BookRequestResolver {
                 saleId: null,
               },
               {
+                // All related sales must have been refunded in order to show the request
                 sale: {
-                  refundedAt: null,
+                  refundedAt: {
+                    not: null,
+                  },
                 },
               },
             ],
@@ -69,9 +72,12 @@ export class BookRequestResolver {
                 },
               },
               {
+                // All related reservations must have been deleted in order to show the request
                 reservations: {
                   every: {
-                    deletedAt: null,
+                    deletedAt: {
+                      not: null,
+                    },
                   },
                 },
               },
@@ -173,6 +179,7 @@ export class BookRequestResolver {
       data: {
         bookId,
         userId,
+        createdById: currentUserId,
       },
     });
   }

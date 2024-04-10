@@ -1,37 +1,42 @@
 <template>
   <q-form
-    class="gap-16 items-center q-pa-md row"
+    class="gap-16 items-center q-pt-md q-px-md row"
     @submit="$emit('addBook', bookISBN)"
   >
     <q-input
       v-model="bookISBN"
-      :placeholder="$t('manageUsers.searchHint')"
+      :placeholder="searchLabel ?? $t('manageUsers.searchHint')"
+      :rules="[validISBN]"
       class="width-420"
-      :debounce="200"
-      :rules="[requiredRule, validISBN]"
       lazy-rules="ondemand"
       outlined
-      hide-bottom-space
     />
 
     <q-btn
-      type="submit"
-      :label="$t('book.addBookDialog')"
       :icon="mdiPlus"
+      :label="$t('book.addBookDialog')"
+      class="bottom-separator-20"
       color="accent"
       no-wrap
+      type="submit"
     />
 
     <q-space />
 
-    <slot name="side-actions" />
+    <div class="bottom-separator-20 gap-16 no-padding row">
+      <slot name="side-actions" />
+    </div>
   </q-form>
 </template>
 
 <script setup lang="ts">
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { ref } from "vue";
-import { requiredRule, validISBN } from "src/helpers/rules";
+import { validISBN } from "src/helpers/rules";
+
+defineProps<{
+  searchLabel?: string;
+}>();
 
 defineEmits<{
   addBook: [bookISBN: string];
