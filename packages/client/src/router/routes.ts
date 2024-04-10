@@ -134,12 +134,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import("src/pages/home.vue"),
       },
       {
-        path: "theme",
-        name: AvailableRouteNames.Theme,
-        component: () => import("src/pages/theme.vue"),
-        beforeEnter: redirectIfNotAdmin,
-      },
-      {
         path: "reset-password",
         name: AvailableRouteNames.ResetPassword,
         component: () => import("src/pages/reset-password.vue"),
