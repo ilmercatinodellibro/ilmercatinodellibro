@@ -1,4 +1,5 @@
-import { ArgsType, Field, InputType, Int } from "@nestjs/graphql";
+import { ArgsType, Field, InputType, Int, ObjectType } from "@nestjs/graphql";
+import { BookCopy } from "src/@generated";
 import {
   LocationBoundInput,
   LocationBoundQueryArgs,
@@ -50,4 +51,16 @@ export class PaginatedBookCopiesQueryArgs extends LocationBoundQueryArgs {
 
   @Field(() => BookCopyQueryFilter, { nullable: true })
   filter?: BookCopyQueryFilter;
+}
+
+@ObjectType()
+export class PaginatedBookCopyQueryResult {
+  @Field(() => Int)
+  page!: number;
+
+  @Field(() => Int)
+  rowsCount!: number;
+
+  @Field(() => [BookCopy])
+  rows!: BookCopy[];
 }

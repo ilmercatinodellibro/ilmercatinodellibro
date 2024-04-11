@@ -29,6 +29,7 @@ import {
   BookCopyCreateInput,
   BookCopyQueryArgs,
   PaginatedBookCopiesQueryArgs,
+  PaginatedBookCopyQueryResult,
 } from "./book-copy.args";
 import { BookCopyService } from "./book-copy.service";
 
@@ -186,7 +187,7 @@ export class BookCopyResolver {
     });
   }
 
-  @Query(() => [BookCopy])
+  @Query(() => PaginatedBookCopyQueryResult)
   async paginatedBookCopies(
     @Args()
     {
