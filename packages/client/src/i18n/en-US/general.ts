@@ -55,4 +55,5 @@ export default {
   },
   joinUs: "Join us",
   whoWeAre: "Who we are",
+  loading: "Loading...",
 };

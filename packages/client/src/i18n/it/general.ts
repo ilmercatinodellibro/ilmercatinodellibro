@@ -55,4 +55,5 @@ export default {
   },
   joinUs: "Unisciti a noi",
   whoWeAre: "Chi siamo",
+  loading: "Caricamento in corso...",
 };
