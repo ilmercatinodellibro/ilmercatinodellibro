@@ -6,39 +6,37 @@
       @cancel="onDialogCancel"
     >
       <q-card-section
-        class="column flex-delegate-height-management full-height q-pa-none"
+        class="column flex-delegate-height-management full-height no-padding"
       >
         <dialog-table
-          v-model:pagination="pagination"
+          v-if="bookCopy.problems?.length && bookCopy.problems.length > 0"
           :columns="columns"
-          :loading="loading"
-          :rows="rows"
-          hide-bottom
-          @request="onRequest"
+          :rows="bookCopy.problems"
         />
+
+        <div v-else class="full-width q-pa-md">
+          {{ t("manageUsers.booksMovementsDialog.noProblems") }}
+        </div>
       </q-card-section>
     </k-dialog-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import {
-  QTableColumn,
-  QTableProps,
-  date,
-  useDialogPluginComponent,
-} from "quasar";
-import { computed, ref } from "vue";
+import { QTableColumn, date, useDialogPluginComponent } from "quasar";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { BookCopy, ProblemType } from "src/@generated/graphql";
-import { ProblemDetailsFragment } from "src/services/book-copy.graphql";
+import { ProblemType } from "src/@generated/graphql";
+import {
+  BookCopyDetailsFragment,
+  ProblemDetailsFragment,
+} from "src/services/book-copy.graphql";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 
 defineProps<{
-  // eslint-disable-next-line vue/no-unused-properties
-  bookCopy: BookCopy;
+  bookCopy: BookCopyDetailsFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -48,10 +46,6 @@ const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
 const { formatDate } = date;
 
 const { t } = useI18n();
-
-const loading = ref(false);
-
-const rows = ref<ProblemDetailsFragment[]>([]);
 
 const columns = computed<QTableColumn<ProblemDetailsFragment>[]>(() => [
   {
@@ -101,59 +95,8 @@ const columns = computed<QTableColumn<ProblemDetailsFragment>[]>(() => [
     field: "resolvedBy",
     name: "resolved-by",
     align: "left",
-    format: (resolver: UserSummaryFragment) =>
-      `${resolver.firstname} ${resolver.lastname}`,
+    format: (resolver?: UserSummaryFragment) =>
+      resolver ? `${resolver.firstname} ${resolver.lastname}` : "",
   },
 ]);
-
-const page = ref(0);
-const rowsNumber = ref(8);
-
-const pagination = ref({
-  page: page.value,
-  rowsNumber: rowsNumber.value,
-  rowsPerPage: 0,
-});
-
-const onRequest: QTableProps["onRequest"] = ({
-  pagination: requestPagination,
-}) => {
-  loading.value = true;
-
-  // FIXME: add actual query logic
-  rows.value = [];
-  for (let i = 0; i < 8; i++) {
-    rows.value.push({
-      id: i.toString(),
-      createdAt: new Date(
-        Math.pow(10, 12) * parseFloat(Math.random().toFixed(12)),
-      ).getDate(),
-      type: "CUSTOM",
-      details: "Found dead",
-      createdBy: {
-        email: "email@example.com",
-        firstname: "Paolo",
-        id: "0",
-        lastname: "Caleffi",
-      },
-      updatedAt: Date.now(),
-      resolvedAt: new Date(
-        Math.pow(10, 12) * parseFloat(Math.random().toFixed(12)),
-      ).getDate(),
-      resolvedBy: {
-        email: "email@example.com",
-        firstname: "Paolo",
-        id: "0",
-        lastname: "Caleffi",
-      },
-      solution: "Books are always dead",
-    });
-  }
-
-  pagination.value.rowsNumber = 8;
-  pagination.value.page = requestPagination.page;
-  pagination.value.rowsPerPage = requestPagination.rowsPerPage;
-
-  loading.value = false;
-};
 </script>

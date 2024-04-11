@@ -205,6 +205,7 @@ import ProblemsHistoryDialog from "src/components/manage-users/problems-history-
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { hasProblem } from "src/helpers/book-copy";
+import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
 import {
@@ -440,10 +441,19 @@ function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
     },
   }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
     if (hasProblem(bookCopy)) {
-      await resolveProblem({
-        input: { id: bookCopy.id, solution },
-      });
-    } else {
+      try {
+        await resolveProblem({
+          input: { id: bookCopy.id, solution },
+        });
+
+        await refetchBookCopies();
+      } catch (e) {
+        notifyError(t("common.genericErrorMessage"));
+      }
+      return;
+    }
+
+    try {
       await reportProblem({
         input: {
           bookCopyId: bookCopy.id,
@@ -451,6 +461,12 @@ function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
           type,
         },
       });
+
+      await refetchBookCopies({
+        bookId: bookCopy.book.id,
+      });
+    } catch (e) {
+      notifyError(t("common.genericErrorMessage"));
     }
   });
 }

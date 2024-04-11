@@ -72,6 +72,7 @@ export default {
     },
     howResolved: "Come è stato risolto il problema?",
     problemsHistory: "History dei Problemi",
+    noProblems: "Questa copia non ha ancora avuto problemi",
     reportedBy: "Segnalato Da",
     resolutionDate: "Data Risoluzione",
     solution: "Soluzione",

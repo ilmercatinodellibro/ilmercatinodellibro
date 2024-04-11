@@ -66,6 +66,7 @@ export default {
     },
     howResolved: "How was the problem resolved?",
     problemsHistory: "Problems History",
+    noProblems: "This copy hasn't had any problem yet",
     reportedBy: "Reported By",
     resolutionDate: "Resolution Date",
     solution: "Solution",
