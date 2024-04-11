@@ -440,14 +440,10 @@ function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
     },
   }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
     if (hasProblem(bookCopy)) {
-      // eslint-disable-next-line no-console
-      console.log("Resolve the problem");
       await resolveProblem({
         input: { id: bookCopy.id, solution },
       });
     } else {
-      // eslint-disable-next-line no-console
-      console.log("Create the problem");
       await reportProblem({
         input: {
           bookCopyId: bookCopy.id,
