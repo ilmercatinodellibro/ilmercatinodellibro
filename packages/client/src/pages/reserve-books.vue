@@ -90,20 +90,30 @@ const { useCreateReservationsMutation, useGetReservationsQuery } =
 
 const { createReservations } = useCreateReservationsMutation();
 const { userReservations, refetch: refetchReservations } =
-  useGetReservationsQuery({
-    retailLocationId: selectedLocation.value.id,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userId: user.value!.id,
-  });
+  useGetReservationsQuery(
+    {
+      retailLocationId: selectedLocation.value?.id ?? "",
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      userId: user.value!.id,
+    },
+    {
+      enabled: !!selectedLocation.value?.id,
+    },
+  );
 
 const { useCreateRequestMutation, useGetRequestsQuery } = useRequestService();
 
 const { createBookRequest } = useCreateRequestMutation();
-const { bookRequests, refetch: refetchRequests } = useGetRequestsQuery({
-  retailLocationId: selectedLocation.value.id,
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  userId: user.value!.id,
-});
+const { bookRequests, refetch: refetchRequests } = useGetRequestsQuery(
+  {
+    retailLocationId: selectedLocation.value?.id ?? "",
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    userId: user.value!.id,
+  },
+  {
+    enabled: !!selectedLocation.value?.id,
+  },
+);
 
 const { t } = useI18n();
 
@@ -270,6 +280,10 @@ function searchClassBooks() {
 
 async function reserveBook(id: string) {
   try {
+    if (!selectedLocation.value?.id) {
+      throw new Error("No retail location selected.");
+    }
+
     await createReservations({
       input: {
         bookIds: [id],
@@ -323,6 +337,10 @@ function openReserveAllDialog() {
     },
   }).onOk(async (books: BookSummaryFragment[]) => {
     try {
+      if (!selectedLocation.value?.id) {
+        throw new Error("No location selected");
+      }
+
       await createReservations({
         input: {
           bookIds: books.map(({ id }) => id),

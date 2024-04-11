@@ -340,22 +340,37 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
 const { selectedLocation } = useRetailLocationService();
 
 const { bookCopiesByOwner: ownedCopies, loading: ownedLoading } =
-  useGetBookCopiesByOwnerQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+  useGetBookCopiesByOwnerQuery(
+    () => ({
+      userId: props.user.id,
+      retailLocationId: selectedLocation.value?.id ?? "",
+    }),
+    {
+      enabled: !!selectedLocation.value?.id,
+    },
+  );
 
 const { returnedBookCopies: returnedCopies, loading: returnedLoading } =
-  useGetReturnedBookCopiesQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+  useGetReturnedBookCopiesQuery(
+    () => ({
+      userId: props.user.id,
+      retailLocationId: selectedLocation.value?.id ?? "",
+    }),
+    {
+      enabled: !!selectedLocation.value?.id,
+    },
+  );
 
 const { soldBookCopies: soldCopies, loading: soldLoading } =
-  useGetSoldBookCopiesQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+  useGetSoldBookCopiesQuery(
+    () => ({
+      userId: props.user.id,
+      retailLocationId: selectedLocation.value?.id ?? "",
+    }),
+    {
+      enabled: !!selectedLocation.value?.id,
+    },
+  );
 
 const selectedRows = ref<BookCopyDetailsFragment[]>([]);
 

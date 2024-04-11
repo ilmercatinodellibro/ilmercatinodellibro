@@ -124,10 +124,10 @@ const { selectedLocation } = useRetailLocationService();
 const { soldBookCopies, loading: soldLoading } = useGetSoldBookCopiesQuery(
   () => ({
     userId: props.userData.id,
-    retailLocationId: selectedLocation.value.id,
+    retailLocationId: selectedLocation.value?.id ?? "",
   }),
   () => ({
-    enabled: props.type === "sold",
+    enabled: props.type === "sold" && !!selectedLocation.value?.id,
   }),
 );
 
@@ -135,10 +135,10 @@ const { purchasedBookCopies, loading: purchasedLoading } =
   useGetPurchasedBookCopiesQuery(
     () => ({
       userId: props.userData.id,
-      retailLocationId: selectedLocation.value.id,
+      retailLocationId: selectedLocation.value?.id ?? "",
     }),
     () => ({
-      enabled: props.type === "purchased",
+      enabled: props.type === "purchased" && !!selectedLocation.value?.id,
     }),
   );
 

@@ -5,7 +5,7 @@
       <span class="contacts-title text-primary">
         {{ $t("contacts.title") }}
       </span>
-      <div class="contacts-wrapper">
+      <div v-if="selectedLocation" class="contacts-wrapper">
         <span class="contacts-text">
           <i18n-t keypath="contacts.text">
             <template #email>

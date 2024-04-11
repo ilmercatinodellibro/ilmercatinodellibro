@@ -411,7 +411,7 @@ const onCopyRequest: QTableProps["onRequest"] = async ({
 const otherCityName = computed(
   () =>
     retailLocations.value.filter(
-      (location) => location.id !== selectedLocation.value.id,
+      (location) => location.id !== selectedLocation.value?.id,
     )[0]?.name,
 );
 

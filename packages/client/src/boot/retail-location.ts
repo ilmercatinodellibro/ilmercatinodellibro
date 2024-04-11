@@ -11,7 +11,7 @@ export default boot(async ({ router }) => {
     useRetailLocationService();
 
   let initialized = false;
-  const { theme, hasPendingChanges } = useTheme();
+  const { theme, hasPendingChanges, getDefaultThemeCopy } = useTheme();
   watch(
     selectedLocationId,
     async (locationId) => {
@@ -24,7 +24,8 @@ export default boot(async ({ router }) => {
         initialized = true;
       }
 
-      const locationTheme = selectedLocation.value.theme;
+      const locationTheme =
+        selectedLocation.value?.theme ?? getDefaultThemeCopy();
       theme.value = {
         colors: {
           ...locationTheme.colors,
