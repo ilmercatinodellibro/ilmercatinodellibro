@@ -151,7 +151,6 @@ export default {
     [AvailableRouteNames.Events]: "Eventi",
     [AvailableRouteNames.Catalog]: "Catalogo",
     [AvailableRouteNames.Home]: "Home",
-    [AvailableRouteNames.Theme]: "Tema",
     [AvailableRouteNames.ResetPassword]: "Reimposta password",
     [AvailableRouteNames.ForgotPassword]: "Password dimenticata",
     [AvailableRouteNames.ChangePassword]: "Cambia password",

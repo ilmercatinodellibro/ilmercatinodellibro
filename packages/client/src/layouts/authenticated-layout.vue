@@ -255,15 +255,13 @@
               </q-item-section>
             </q-item>
 
-            <!-- TODO: fix route -->
             <q-item
               v-if="hasAdminRole"
               v-ripple
-              :to="{ name: AvailableRouteNames.Theme }"
               active-class="bg-black-activated-light"
               class="drawer-item"
               clickable
-              data-cy="settings"
+              @click="openSettings()"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t(`sidebar.settings`) }}
@@ -388,10 +386,11 @@ import {
   mdiWeb,
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
-import { Notify, QTooltipProps, Screen } from "quasar";
+import { Dialog, Notify, QTooltipProps, Screen } from "quasar";
 import { computed, provide, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { setLanguage } from "src/boot/i18n";
+import SettingsDialog from "src/components/settings-dialog.vue";
 import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
 import {
   DRAWER_BREAKPOINT,
@@ -399,8 +398,10 @@ import {
   useLateralDrawer,
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
+import { SettingsUpdate } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
+import { useRetailLocationService } from "src/services/retail-location";
 
 // It would work with :inset-level="1" if we used "avatar" option instead of "side" for the header icon
 // but we only need 16px of margin from the icon, so we defined a value which would align the text accordingly
@@ -459,6 +460,26 @@ const { user, hasAdminRole, hasOperatorRole, hasUserRole } = useAuthService();
 
 const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
   useLateralDrawer();
+
+const { selectedLocation } = useRetailLocationService();
+
+function openSettings() {
+  Dialog.create({
+    component: SettingsDialog,
+    componentProps: {
+      maxBooksDimensionCurrent: selectedLocation.value.warehouseMaxBlockSize,
+      purchaseRateCurrent: selectedLocation.value.buyRate,
+      reservationDaysCurrent: selectedLocation.value.maxBookingDays,
+      saleRateCurrent: selectedLocation.value.sellRate,
+    },
+  }).onOk((payload: SettingsUpdate) => {
+    if (payload.type === "save") {
+      // FIXME: update the settings
+    } else {
+      // FIXME: reset the settings
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

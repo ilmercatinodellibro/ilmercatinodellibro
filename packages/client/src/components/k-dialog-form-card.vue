@@ -35,7 +35,11 @@
 
     <q-separator v-if="!noActions" />
 
-    <q-card-actions v-if="!noActions" align="right">
+    <q-card-actions
+      v-if="!noActions"
+      align="right"
+      :class="{ 'q-pa-md': actionsPadding }"
+    >
       <!-- Here we want to pass to the slot props the form uuid in order to be able to use the a custom submit button and still be able to connect it to the form -->
       <slot name="card-actions" :unique-form-id="uniqueFormId">
         <q-btn
@@ -74,6 +78,7 @@ withDefaults(
       submitLabel?: string;
       greedy?: boolean;
       delegateScroll?: boolean;
+      actionsPadding?: boolean;
     }
   >(),
   {
