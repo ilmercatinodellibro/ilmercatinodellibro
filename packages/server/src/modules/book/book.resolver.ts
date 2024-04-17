@@ -112,61 +112,206 @@ export class BookResolver {
       .meta();
   }
 
+  private readonly noSalesFilter: Prisma.BookCopyWhereInput[] = [
+    {
+      sales: {
+        none: {},
+      },
+    },
+    {
+      sales: {
+        every: {
+          refundedAt: {
+            not: null,
+          },
+        },
+      },
+    },
+  ];
+  private readonly noProblemsFilter: Prisma.BookCopyWhereInput[] = [
+    {
+      problems: {
+        none: {},
+      },
+    },
+    {
+      problems: {
+        every: {
+          resolvedAt: null,
+        },
+      },
+    },
+  ];
+  private readonly availableCopyFilter: Prisma.BookCopyWhereInput = {
+    returnedAt: null,
+    AND: [
+      {
+        OR: this.noSalesFilter,
+      },
+      {
+        OR: this.noProblemsFilter,
+      },
+    ],
+  };
+
   @ResolveField(() => [BookCopy])
   async copies(
     @Root() book: Book,
     @Args("isAvailable", { defaultValue: false }) isAvailable: boolean,
   ) {
-    const availableFilter: Prisma.BookCopyWhereInput = {
-      returnedAt: null,
-      AND: [
-        {
-          OR: [
-            {
-              sales: {
-                none: {},
-              },
-            },
-            {
-              sales: {
-                every: {
-                  refundedAt: {
-                    not: null,
-                  },
-                },
-              },
-            },
-          ],
-        },
-
-        {
-          OR: [
-            {
-              problems: {
-                none: {},
-              },
-            },
-            {
-              problems: {
-                every: {
-                  resolvedAt: {
-                    not: null,
-                  },
-                },
-              },
-            },
-          ],
-        },
-      ],
-    };
-
     return this.prisma.book
       .findUniqueOrThrow({
         where: { id: book.id },
       })
       .copies({
-        where: isAvailable ? availableFilter : undefined,
+        where: isAvailable ? this.availableCopyFilter : undefined,
       });
+  }
+
+  @ResolveField(() => Number)
+  async utility(@Root() book: Book) {
+    /*
+      TODO: Return all the necessary fields to satisfy the description field below
+
+      return [
+        'level' => ($utility_index > 1) ? 'good' : (($utility_index <= 0.4) ? 'bad' : 'medium'),
+        // This piece needs to be viewed by Operators and Admins when they hover the
+        // cursor on top of the book utility index chip in the UI
+        'description' => 'In warehouse: ' . $booksInWarehouse .
+          ' | All: ' . $booksTaken .
+          ' | Sold: ' . $booksSold .
+          ' | Current requests: ' . $booksRequestedCurrent .
+          ' | Richieste totali: ' . $booksRequestedTotal .
+          ' | Indice di utilità stimata: ' . $utility_index,
+      ];
+    */
+
+    const noConnectedSaleFilter: Prisma.IntersectOf<
+      Prisma.BookRequestWhereInput | Prisma.ReservationWhereInput
+    >[] = [
+      {
+        saleId: null,
+      },
+      {
+        sale: {
+          refundedAt: {
+            not: null,
+          },
+        },
+      },
+    ];
+
+    // TODO: optimize using Fluent API
+    const [
+      booksInWarehouse,
+      booksTaken,
+      booksSold,
+      booksRequestedTotal,
+      booksRequestedActive,
+    ] = await this.prisma.$transaction([
+      this.prisma.bookCopy.count({
+        where: {
+          bookId: book.id,
+          ...this.availableCopyFilter,
+        },
+      }),
+      this.prisma.bookCopy.count({
+        where: {
+          bookId: book.id,
+          OR: this.noProblemsFilter,
+        },
+      }),
+      this.prisma.bookCopy.count({
+        where: {
+          bookId: book.id,
+          returnedAt: null,
+          NOT: {
+            OR: this.noSalesFilter,
+          },
+        },
+      }),
+      this.prisma.bookRequest.count({
+        where: {
+          bookId: book.id,
+        },
+      }),
+      this.prisma.bookRequest.count({
+        where: {
+          bookId: book.id,
+          deletedAt: null,
+          AND: [
+            {
+              OR: noConnectedSaleFilter,
+            },
+
+            {
+              OR: [
+                {
+                  reservations: {
+                    none: {},
+                  },
+                },
+                {
+                  reservations: {
+                    every: {
+                      OR: noConnectedSaleFilter,
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    ]);
+
+    let utilityIndex = 0;
+
+    switch (true) {
+      // No books in the warehouse is a big bonus
+      case booksInWarehouse === 0:
+        utilityIndex += 1;
+        break;
+      // Only one book in the warehouse is a good bonus
+      case booksInWarehouse === 1:
+        utilityIndex += 0.7;
+        break;
+      // Four books in the warehouse is a little malus
+      case booksInWarehouse === 4:
+        utilityIndex -= 0.25;
+        break;
+      // Too many books in the warehouse is a severe malus
+      case booksInWarehouse >= 5:
+        utilityIndex -= 0.6;
+        break;
+    }
+
+    // If there are no current requests we give a small malus
+    if (booksRequestedActive === 0) {
+      utilityIndex -= 0.15;
+    } else {
+      // The more the not satisfiable requests with respect to total current requests, the more add to reach a positive index
+      // If there are excess books in the warehouse not requested by anyone, it subtract more and more
+      utilityIndex +=
+        (booksRequestedActive - booksInWarehouse) / booksRequestedActive;
+    }
+
+    // If there have never been requests we give a small malus
+    if (booksRequestedTotal === 0) {
+      utilityIndex -= 0.2;
+    }
+
+    // The more these kind of books have been sold, the more they are likely to be requested again
+    if (booksTaken !== 0) {
+      utilityIndex += booksSold / booksTaken;
+    }
+
+    // If a book has never been taken in or requested, we add one: we want to have at least a copy of every book
+    if (booksTaken === 0 && booksRequestedTotal === 0) {
+      utilityIndex += 1;
+    }
+
+    return utilityIndex;
   }
 
   @Mutation(() => Book, { nullable: true })

@@ -465,6 +465,7 @@ function getBookCopies(bookID: string): BookCopyDetailsWithStatus[] {
             retailLocationId: "",
             subject: "",
             title: "",
+            utility: Math.random() * 2, // [0, 2]
           },
       code: "000/000",
       createdAt: 0,
