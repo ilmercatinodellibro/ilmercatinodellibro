@@ -10,7 +10,7 @@
       size="fullscreen"
       @cancel="onDialogCancel"
     >
-      <card-table-header>
+      <card-table-header @add-book="addBookToRequest">
         <template #side-actions>
           <!-- TODO: consider extracting this into a separate component -->
           <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
@@ -123,9 +123,11 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
+import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 // import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
+import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRequestService } from "src/services/request";
 import { UserSummaryFragment } from "src/services/user.graphql";
@@ -135,6 +137,8 @@ import CartDialog from "./cart-dialog.vue";
 import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
+
+const { t } = useI18n();
 
 const smallBreakpoint = 1230;
 const largeBreakpoint = 1695;
@@ -149,8 +153,12 @@ defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
-const { useGetRequestsQuery } = useRequestService();
-const { bookRequests, loading: requestLoading } = useGetRequestsQuery(
+const { useGetRequestsQuery, useCreateRequestMutation } = useRequestService();
+const {
+  bookRequests,
+  loading: requestLoading,
+  refetch: refetchRequests,
+} = useGetRequestsQuery(
   {
     retailLocationId: props.retailLocationId,
     userId: props.userData.id,
@@ -159,6 +167,32 @@ const { bookRequests, loading: requestLoading } = useGetRequestsQuery(
     enabled: !!props.retailLocationId,
   },
 );
+
+const { createBookRequest } = useCreateRequestMutation();
+async function addBookToRequest(bookIsbn: string) {
+  const book = await fetchBookByISBN(bookIsbn);
+  if (!book) {
+    Dialog.create({
+      message: t("manageUsers.inStockDialog.errorMessage"),
+    });
+    return;
+  }
+
+  try {
+    await createBookRequest({
+      input: { bookId: book.id, userId: props.userData.id },
+    });
+  } catch (e) {
+    Notify.create(
+      t("reserveBooks.reservationOrRequestError", [
+        t("reserveBooks.request"),
+        e,
+      ]),
+    );
+  } finally {
+    await refetchRequests();
+  }
+}
 
 function reserveBook(book: BookSummaryFragment) {
   // FIXME: add reserve book logic
