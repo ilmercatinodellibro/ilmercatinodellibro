@@ -80,11 +80,9 @@
         </template>
       </card-table-header>
       <requested-reserved-table
-        v-model:pagination="pagination"
-        :loading="loading"
-        :rows="rows"
+        :loading="requestLoading"
+        :rows="bookRequests"
         class="flex-delegate-height-management"
-        @request="onRequest"
       >
         <template #book-actions="{ book }">
           <chip-button
@@ -125,11 +123,11 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QDialog, QTable, useDialogPluginComponent } from "quasar";
-import { ref } from "vue";
+import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
+// import { ref } from "vue";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
-import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { useRequestService } from "src/services/request";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -140,33 +138,27 @@ import RoundBadge from "./round-badge.vue";
 
 const smallBreakpoint = 1230;
 const largeBreakpoint = 1695;
-
 const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
 
 const props = defineProps<{
   userData: UserSummaryFragment;
+  retailLocationId: string;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-// TODO: remove the pagination management and stubs once the real queries are added
-const currentPage = ref(0);
-const numberOfRows = ref(5);
-
-const { refetchBooks, booksPaginationDetails, loading } = useBookService(
-  currentPage,
-  numberOfRows,
-);
-
-const pagination = ref({
-  rowsPerPage: numberOfRows.value,
-  rowsNumber: booksPaginationDetails.value.rowCount,
-  page: currentPage.value,
-});
-
-const rows = ref<BookSummaryFragment[]>([]);
-
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+
+const { useGetRequestsQuery } = useRequestService();
+const { bookRequests, loading: requestLoading } = useGetRequestsQuery(
+  {
+    retailLocationId: props.retailLocationId,
+    userId: props.userData.id,
+  },
+  {
+    enabled: !!props.retailLocationId,
+  },
+);
 
 function reserveBook(book: BookSummaryFragment) {
   // FIXME: add reserve book logic
@@ -206,19 +198,4 @@ function goToCart() {
     payload;
   });
 }
-
-const onRequest: QTable["onRequest"] = async function ({ pagination: pag }) {
-  loading.value = true;
-
-  const payload = await refetchBooks();
-
-  // FIXME: reserve this filtering to the actual query
-  rows.value.splice(0, rows.value.length, ...(payload?.data.books.rows ?? []));
-
-  pagination.value.rowsNumber = rows.value.length;
-  pagination.value.page = pag.page;
-  pagination.value.rowsPerPage = pag.rowsPerPage;
-
-  loading.value = false;
-};
 </script>

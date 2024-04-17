@@ -86,10 +86,9 @@
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
         <requested-reserved-table
-          v-model:pagination="reservedPagination"
-          :rows="reservedRows"
+          :rows="userReservations"
           class="col"
-          @request="onReservedRequest"
+          :loading="reservedLoading"
         >
           <template #book-actions="{ book }">
             <chip-button
@@ -120,10 +119,9 @@
         </span>
 
         <requested-reserved-table
-          v-model:pagination="requestedPagination"
-          :rows="requestedRows"
+          :rows="bookRequests"
+          :loading="requestLoading"
           class="col"
-          @request="onRequestedRequest"
         >
           <template #book-actions="{ book }">
             <chip-button
@@ -169,12 +167,12 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QDialog, QTableProps, useDialogPluginComponent } from "quasar";
-import { onMounted, ref } from "vue";
+import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
-import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { useRequestService } from "src/services/request";
+import { useReservationService } from "src/services/reservation";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -187,92 +185,45 @@ const { t } = useI18n();
 
 const props = defineProps<{
   userData: UserSummaryFragment;
+  retailLocationId: string;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
-// TODO: remove the pagination management and stubs once the real queries are added
-const currentReservedPage = ref(0);
-const currentRequestedPage = ref(0);
-
-const reservedRowsPerPage = ref(5);
-const requestedRowsPerPage = ref(5);
-
 const {
-  refetchBooks: reservedRefetchBooks,
-  booksPaginationDetails: reservedBooksPaginationDetails,
-  loading: reservedLoading,
-} = useBookService(currentReservedPage, reservedRowsPerPage);
+  // useCreateReservationsMutation,
+  // useDeleteReservationMutation,
+  useGetReservationsQuery,
+} = useReservationService();
 
-const {
-  refetchBooks: requestedRefetchBooks,
-  booksPaginationDetails: requestedBooksPaginationDetails,
-  loading: requestedLoading,
-} = useBookService(currentRequestedPage, requestedRowsPerPage);
+const { userReservations, loading: reservedLoading } = useGetReservationsQuery(
+  {
+    retailLocationId: props.retailLocationId,
+     
+    userId: props.userData.id,
+  },
+  {
+    enabled: !!props.retailLocationId,
+  },
+);
 
-const reservedPagination = ref({
-  page: currentReservedPage.value,
-  rowsPerPage: reservedRowsPerPage.value,
-  rowsNumber: reservedBooksPaginationDetails.value.rowCount,
-});
-
-const requestedPagination = ref({
-  page: currentRequestedPage.value,
-  rowsPerPage: requestedRowsPerPage.value,
-  rowsNumber: requestedBooksPaginationDetails.value.rowCount,
-});
-
-const reservedRows = ref<BookSummaryFragment[]>([]);
-const requestedRows = ref<BookSummaryFragment[]>([]);
+const { useGetRequestsQuery } = useRequestService();
+const { bookRequests, loading: requestLoading } = useGetRequestsQuery(
+  {
+    retailLocationId: props.retailLocationId,
+    userId: props.userData.id,
+  },
+  {
+    enabled: !!props.retailLocationId,
+  },
+);
 
 const largeBreakpoint = 1920;
 const smallBreakpoint = 1440;
 
 const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
-
-onMounted(async () => {
-  // FIXME: add actual query to retrieve the books
-  const reservedBooks = await reservedRefetchBooks();
-  reservedRows.value = reservedBooks?.data.books.rows ?? [];
-  const requestedBooks = await requestedRefetchBooks();
-  requestedRows.value = requestedBooks?.data.books.rows ?? [];
-});
-
-const onReservedRequest: QTableProps["onRequest"] = async (requestProps) => {
-  reservedLoading.value = true;
-
-  const payload = await reservedRefetchBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-
-  reservedRows.value = payload?.data.books.rows ?? [];
-
-  reservedPagination.value.rowsNumber = payload?.data.books.rowsCount ?? 0;
-  reservedPagination.value.page = requestProps.pagination.page;
-  reservedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  reservedLoading.value = false;
-};
-
-const onRequestedRequest: QTableProps["onRequest"] = async (requestProps) => {
-  requestedLoading.value = true;
-
-  const payload = await requestedRefetchBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-
-  requestedRows.value = payload?.data.books.rows ?? [];
-
-  requestedPagination.value.rowsNumber = payload?.data.books.rowsCount ?? 0;
-  requestedPagination.value.page = requestProps.pagination.page;
-  requestedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  requestedLoading.value = false;
-};
 
 function deleteAllReserved() {
   Dialog.create({
@@ -319,6 +270,9 @@ function reserveBook(book: BookSummaryFragment) {
   // FIXME: add reserve book logic
   book;
 }
+
+// const { createReservations } = useCreateReservationsMutation();
+// const { deleteReservation } = useDeleteReservationMutation();
 
 function deleteReservation(book: BookSummaryFragment) {
   // FIXME: add reservation deletion logic
