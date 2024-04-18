@@ -1,12 +1,14 @@
 import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { useRetailLocationService } from "src/services/retail-location";
 import {
   GetCustomersQueryVariables,
   useGetCustomersLazyQuery,
 } from "src/services/user.graphql";
 
 export function useCustomerService() {
-  // TODO: Make this dynamic
-  const retailLocationId = "re";
+  const { selectedLocation } = useRetailLocationService();
+  const { t } = useI18n();
 
   // TODO: Add convenient wrappers for lazy queries in @dreamonkey/graphql-codegen-vue-apollo-plugin
   const {
@@ -21,8 +23,11 @@ export function useCustomerService() {
     ref({
       page: 1,
       rowsPerPage: 0,
-      retailLocationId,
+      retailLocationId: selectedLocation.value?.id ?? "",
     }),
+    {
+      enabled: !!selectedLocation.value?.id,
+    },
   );
 
   const customers = computed(() => result.value?.users.rows ?? []);
@@ -31,10 +36,14 @@ export function useCustomerService() {
   async function fetch(
     variables: Omit<GetCustomersQueryVariables, "retailLocationId">,
   ) {
+    if (!selectedLocation.value?.id) {
+      throw new Error(t("retailLocation.errors.noLocation"));
+    }
+
     const queryVariables: GetCustomersQueryVariables = {
       ...variables,
       page: variables.page - 1,
-      retailLocationId,
+      retailLocationId: selectedLocation.value.id,
     };
 
     const shouldLoad = loadUsers(undefined, queryVariables);
