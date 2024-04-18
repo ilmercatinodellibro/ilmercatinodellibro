@@ -127,6 +127,7 @@ import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
+import { useCartService } from "src/services/cart";
 import { useRequestService } from "src/services/request";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
@@ -240,11 +241,11 @@ async function deleteRequest(request: RequestSummaryFragment) {
 const { useCreateReservationsMutation } = useReservationService();
 const { createReservations } = useCreateReservationsMutation();
 async function reserveAllAvailableRequested() {
-  const bookIds = bookRequests.value
+  const availableBookIds = bookRequests.value
     .filter(({ book }) => book.meta.isAvailable)
     .map(({ book }) => book.id);
 
-  if (bookIds.length === 0) {
+  if (availableBookIds.length === 0) {
     return;
   }
 
@@ -253,14 +254,14 @@ async function reserveAllAvailableRequested() {
       input: {
         userId: props.userData.id,
         retailLocationId: props.retailLocationId,
-        bookIds,
+        bookIds: availableBookIds,
       },
     });
 
     Notify.create({
       type: "positive",
       // TODO: translate this one
-      message: `Prenotato ${bookIds.length} copie di libri richiesti.`,
+      message: `Prenotato ${availableBookIds.length} copie di libri richiesti.`,
     });
   } catch {
     Notify.create({
@@ -298,12 +299,74 @@ async function reserveBook({ book }: RequestSummaryFragment) {
   }
 }
 
-function moveAllIntoCart() {
-  // FIXME: add logic to add requested books to the cart
+const { useAddToCartMutation, useOpenCartMutation } = useCartService();
+const { openCart } = useOpenCartMutation();
+const { addToCart } = useAddToCartMutation();
+async function moveAllIntoCart() {
+  const availableBooksRequestIds = bookRequests.value
+    .filter(({ book }) => book.meta.isAvailable)
+    .map(({ id }) => id);
+
+  if (availableBooksRequestIds.length === 0) {
+    return;
+  }
+
+  try {
+    const cart = await openCart({
+      input: {
+        retailLocationId: props.retailLocationId,
+        userId: props.userData.id,
+      },
+    });
+
+    await Promise.all(
+      availableBooksRequestIds.map((id) => {
+        return addToCart({
+          input: {
+            cartId: cart.data.id,
+            fromBookRequestId: id,
+          },
+        });
+      }),
+    );
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile aggiungere tutti i libri al carrello.",
+    });
+  } finally {
+    await refetchRequests();
+  }
 }
-function putBookIntoCart(request: RequestSummaryFragment) {
-  // FIXME: add book to the cart
-  request;
+async function putBookIntoCart(request: RequestSummaryFragment) {
+  if (!request.book.meta.isAvailable) {
+    return;
+  }
+
+  try {
+    const cart = await openCart({
+      input: {
+        retailLocationId: props.retailLocationId,
+        userId: props.userData.id,
+      },
+    });
+
+    await addToCart({
+      input: {
+        cartId: cart.data.id,
+        fromBookRequestId: request.id,
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile aggiungere il libro al carrello.",
+    });
+  } finally {
+    await refetchRequests();
+  }
 }
 
 function goToCart() {
