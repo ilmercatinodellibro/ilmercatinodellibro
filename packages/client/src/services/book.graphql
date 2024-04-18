@@ -6,7 +6,14 @@ fragment BookSummary on Book {
   title
   originalPrice
   publisherName
-  utility
+  utility {
+    value
+    booksTaken
+    booksInWarehouse
+    booksSold
+    requestsActive
+    requestsTotal
+  }
 
   meta {
     isAvailable

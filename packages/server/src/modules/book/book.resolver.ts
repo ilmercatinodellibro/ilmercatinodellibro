@@ -14,6 +14,7 @@ import { Prisma, User } from "@prisma/client";
 import { BookCopy, BookMeta } from "src/@generated";
 import { Book } from "src/@generated/book";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
+import { BookUtility } from "src/modules/book/book-utility";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookCreateInput, BookQueryArgs, BookQueryResult } from "./book.args";
@@ -168,24 +169,8 @@ export class BookResolver {
       });
   }
 
-  @ResolveField(() => Number)
+  @ResolveField(() => BookUtility)
   async utility(@Root() book: Book) {
-    /*
-      TODO: Return all the necessary fields to satisfy the description field below
-
-      return [
-        'level' => ($utility_index > 1) ? 'good' : (($utility_index <= 0.4) ? 'bad' : 'medium'),
-        // This piece needs to be viewed by Operators and Admins when they hover the
-        // cursor on top of the book utility index chip in the UI
-        'description' => 'In warehouse: ' . $booksInWarehouse .
-          ' | All: ' . $booksTaken .
-          ' | Sold: ' . $booksSold .
-          ' | Current requests: ' . $booksRequestedCurrent .
-          ' | Richieste totali: ' . $booksRequestedTotal .
-          ' | Indice di utilità stimata: ' . $utility_index,
-      ];
-    */
-
     const noConnectedSaleFilter: Prisma.IntersectOf<
       Prisma.BookRequestWhereInput | Prisma.ReservationWhereInput
     >[] = [
@@ -206,8 +191,8 @@ export class BookResolver {
       booksInWarehouse,
       booksTaken,
       booksSold,
-      booksRequestedTotal,
-      booksRequestedActive,
+      requestsTotal,
+      requestsActive,
     ] = await this.prisma.$transaction([
       this.prisma.bookCopy.count({
         where: {
@@ -287,17 +272,16 @@ export class BookResolver {
     }
 
     // If there are no current requests we give a small malus
-    if (booksRequestedActive === 0) {
+    if (requestsActive === 0) {
       utilityIndex -= 0.15;
     } else {
       // The more the not satisfiable requests with respect to total current requests, the more add to reach a positive index
       // If there are excess books in the warehouse not requested by anyone, it subtract more and more
-      utilityIndex +=
-        (booksRequestedActive - booksInWarehouse) / booksRequestedActive;
+      utilityIndex += (requestsActive - booksInWarehouse) / requestsActive;
     }
 
     // If there have never been requests we give a small malus
-    if (booksRequestedTotal === 0) {
+    if (requestsTotal === 0) {
       utilityIndex -= 0.2;
     }
 
@@ -307,11 +291,18 @@ export class BookResolver {
     }
 
     // If a book has never been taken in or requested, we add one: we want to have at least a copy of every book
-    if (booksTaken === 0 && booksRequestedTotal === 0) {
+    if (booksTaken === 0 && requestsTotal === 0) {
       utilityIndex += 1;
     }
 
-    return utilityIndex;
+    return {
+      booksTaken,
+      booksInWarehouse,
+      booksSold,
+      requestsActive,
+      requestsTotal,
+      value: utilityIndex,
+    } satisfies BookUtility;
   }
 
   @Mutation(() => Book, { nullable: true })

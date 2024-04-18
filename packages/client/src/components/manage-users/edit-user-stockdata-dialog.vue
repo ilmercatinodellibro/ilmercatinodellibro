@@ -57,7 +57,7 @@
 
             <template #body-cell-utility="{ value }">
               <q-td class="text-center">
-                <utility-chip :value="value" />
+                <utility-chip :utility="value" />
               </q-td>
             </template>
 
@@ -102,7 +102,7 @@
 
             <template #body-cell-utility="{ value }">
               <q-td>
-                <utility-chip :value="value" />
+                <utility-chip :utility="value" />
               </q-td>
             </template>
 

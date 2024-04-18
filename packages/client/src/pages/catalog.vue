@@ -40,7 +40,7 @@
 
           <template #body-cell-utility="{ value }">
             <q-td>
-              <utility-chip :value="value" />
+              <utility-chip :utility="value" />
             </q-td>
           </template>
         </q-table>

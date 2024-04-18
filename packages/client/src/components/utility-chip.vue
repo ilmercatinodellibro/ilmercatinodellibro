@@ -8,23 +8,32 @@
     dense
   >
     {{ $t(`book.utility.${data.label}`) }}
+
+    <q-tooltip class="white-space-pre-wrap">
+      {{
+        $t("book.utilityTooltip", {
+          warehouse: utility.booksInWarehouse,
+          all: utility.booksTaken,
+          sold: utility.booksSold,
+          activeRequests: utility.requestsActive,
+          totalRequests: utility.requestsTotal,
+          utilityIndex: utility.value,
+        })
+      }}
+    </q-tooltip>
   </q-chip>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { BookUtility } from "src/@generated/graphql";
 
 const UTILITY_LOW_THRESHOLD = 0.4;
 const UTILITY_HIGH_THRESHOLD = 1;
 
-const props = withDefaults(
-  defineProps<{
-    value?: number;
-  }>(),
-  {
-    value: 0,
-  },
-);
+const props = defineProps<{
+  utility: BookUtility;
+}>();
 
 interface ColorChipData {
   color: "negative" | "warning" | "positive";
@@ -32,9 +41,9 @@ interface ColorChipData {
 }
 
 const data = computed<ColorChipData>(() =>
-  props.value <= UTILITY_LOW_THRESHOLD
+  props.utility.value <= UTILITY_LOW_THRESHOLD
     ? { color: "negative", label: "low" }
-    : props.value <= UTILITY_HIGH_THRESHOLD
+    : props.utility.value <= UTILITY_HIGH_THRESHOLD
       ? { color: "warning", label: "medium" }
       : { color: "positive", label: "high" },
 );

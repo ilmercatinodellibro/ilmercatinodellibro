@@ -20,6 +20,14 @@ export default {
     medium: "Media",
     low: "Bassa",
   },
+  utilityTooltip: [
+    "In magazzino: {warehouse}",
+    "Tutti i libri: {all}",
+    "Libri venduti: {sold}",
+    "Richieste attive: {requestsActive}",
+    "Richieste totali: {requestsTotal}",
+    "Indice di utilità stimata: {utilityIndex}",
+  ].join("\n"),
   availability: {
     available: "Disponibile",
     notAvailable: "Non Disponibile",
