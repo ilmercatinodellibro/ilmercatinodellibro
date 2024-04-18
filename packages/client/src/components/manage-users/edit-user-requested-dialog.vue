@@ -25,7 +25,7 @@
               :label="$t('manageUsers.requestedBooksDialog.moveIntoReserved')"
               no-wrap
               outline
-              @click="reserveAllRequested()"
+              @click="reserveAllAvailableRequested()"
             />
           </span>
           <span v-if="screenWidth === WidthSize.LG" class="gap-16 row">
@@ -56,7 +56,7 @@
                       {{ $t("manageUsers.requestedBooksDialog.deleteAll") }}
                     </q-item-section>
                   </q-item>
-                  <q-item clickable @click="reserveAllRequested()">
+                  <q-item clickable @click="reserveAllAvailableRequested()">
                     <q-item-section>
                       {{
                         $t("manageUsers.requestedBooksDialog.moveIntoReserved")
@@ -129,6 +129,7 @@ import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
 import { useRequestService } from "src/services/request";
 import { RequestSummaryFragment } from "src/services/request.graphql";
+import { useReservationService } from "src/services/reservation";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -197,11 +198,6 @@ async function addBookToRequest(bookIsbn: string) {
   }
 }
 
-function reserveBook(request: RequestSummaryFragment) {
-  // FIXME: add reserve book logic
-  request;
-}
-
 const { deleteBookRequest } = useDeleteRequestMutation();
 async function deleteAllRequested() {
   try {
@@ -233,7 +229,69 @@ async function deleteRequest(request: RequestSummaryFragment) {
   } catch {
     Notify.create({
       type: "negative",
+      // TODO: translate this one
       message: "Non è stato possibile cancellare la richiesta.",
+    });
+  } finally {
+    await refetchRequests();
+  }
+}
+
+const { useCreateReservationsMutation } = useReservationService();
+const { createReservations } = useCreateReservationsMutation();
+async function reserveAllAvailableRequested() {
+  const bookIds = bookRequests.value
+    .filter(({ book }) => book.meta.isAvailable)
+    .map(({ book }) => book.id);
+
+  if (bookIds.length === 0) {
+    return;
+  }
+
+  try {
+    await createReservations({
+      input: {
+        userId: props.userData.id,
+        retailLocationId: props.retailLocationId,
+        bookIds,
+      },
+    });
+
+    Notify.create({
+      type: "positive",
+      // TODO: translate this one
+      message: `Prenotato ${bookIds.length} copie di libri richiesti.`,
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile prenotare tutte le richieste.",
+    });
+  } finally {
+    await refetchRequests();
+  }
+}
+async function reserveBook({ book }: RequestSummaryFragment) {
+  try {
+    await createReservations({
+      input: {
+        userId: props.userData.id,
+        retailLocationId: props.retailLocationId,
+        bookIds: [book.id],
+      },
+    });
+
+    Notify.create({
+      type: "positive",
+      // TODO: translate this one
+      message: `Prenotato ${book.title}.`,
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile prenotare il libro specificato.",
     });
   } finally {
     await refetchRequests();
@@ -243,14 +301,9 @@ async function deleteRequest(request: RequestSummaryFragment) {
 function moveAllIntoCart() {
   // FIXME: add logic to add requested books to the cart
 }
-
 function putBookIntoCart(request: RequestSummaryFragment) {
   // FIXME: add book to the cart
   request;
-}
-
-function reserveAllRequested() {
-  // FIXME: add logic to reserve all books
 }
 
 function goToCart() {
