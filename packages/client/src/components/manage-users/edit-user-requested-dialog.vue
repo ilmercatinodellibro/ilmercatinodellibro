@@ -153,18 +153,18 @@ defineEmits(useDialogPluginComponent.emitsObject);
 const currentPage = ref(0);
 const numberOfRows = ref(5);
 
-const { refetchBooks, booksPaginationDetails, loading } = useBookService(
-  currentPage,
-  numberOfRows,
-);
+const {
+  books: rows,
+  refetchBooks,
+  booksPaginationDetails,
+  loading,
+} = useBookService(currentPage, numberOfRows);
 
 const pagination = ref({
   rowsPerPage: numberOfRows.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
   page: currentPage.value,
 });
-
-const rows = ref<BookSummaryFragment[]>([]);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
@@ -207,17 +207,14 @@ function goToCart() {
   });
 }
 
-const onRequest: QTable["onRequest"] = async function ({ pagination: pag }) {
+const onRequest: QTable["onRequest"] = async function (requestProps) {
   loading.value = true;
 
-  const payload = await refetchBooks();
+  await refetchBooks();
+  pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
-  // FIXME: reserve this filtering to the actual query
-  rows.value.splice(0, rows.value.length, ...(payload?.data.books.rows ?? []));
-
-  pagination.value.rowsNumber = rows.value.length;
-  pagination.value.page = pag.page;
-  pagination.value.rowsPerPage = pag.rowsPerPage;
+  pagination.value.page = requestProps.pagination.page;
+  pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
 
   loading.value = false;
 };

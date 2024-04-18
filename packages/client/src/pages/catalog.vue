@@ -98,13 +98,12 @@ const tableFilter = computed(() => ({
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
-const { refetchBooks, booksPaginationDetails, loading } = useBookService(
-  currentPage,
-  numberOfRows,
-  tableFilter,
-);
-
-const tableRows = ref<BookSummaryFragment[]>([]);
+const {
+  books: tableRows,
+  refetchBooks,
+  booksPaginationDetails,
+  loading,
+} = useBookService(currentPage, numberOfRows, tableFilter);
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
@@ -175,18 +174,12 @@ onMounted(() => {
 const onRequest: QTable["onRequest"] = async function (requestProps) {
   loading.value = true;
 
-  const newBooks = await refetchBooks({
+  await refetchBooks({
     page: requestProps.pagination.page - 1,
     rows: requestProps.pagination.rowsPerPage,
     filter: tableFilter.value,
   });
   pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
-
-  tableRows.value.splice(
-    0,
-    tableRows.value.length,
-    ...(newBooks?.data.books.rows ?? tableRows.value),
-  );
 
   pagination.value.page = requestProps.pagination.page;
   pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;

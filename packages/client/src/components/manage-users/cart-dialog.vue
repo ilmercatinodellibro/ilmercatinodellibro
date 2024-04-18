@@ -225,9 +225,11 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
 const currentPage = ref(0);
 const numberOfRows = ref(10);
 
-const { refetchBooks, loading } = useBookService(currentPage, numberOfRows);
-
-const rows = ref<BookSummaryFragment[]>([]);
+const {
+  books: rows,
+  refetchBooks,
+  loading,
+} = useBookService(currentPage, numberOfRows);
 
 const stubRows = computed(() =>
   rows.value.map((row, index) => ({
@@ -267,12 +269,10 @@ const totalBooksPrice = computed(() =>
 let interval: number | undefined;
 
 onMounted(async () => {
-  const books = await refetchBooks({
+  await refetchBooks({
     page: currentPage.value,
     rows: numberOfRows.value,
   });
-
-  rows.value = books?.data.books.rows ?? [];
 
   interval = window.setInterval(() => {
     if (emptyCartTimer.value === 0) {

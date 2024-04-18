@@ -170,7 +170,7 @@ import {
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, QDialog, QTableProps, useDialogPluginComponent } from "quasar";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { useBookService } from "src/services/book";
@@ -200,13 +200,16 @@ const currentRequestedPage = ref(0);
 const reservedRowsPerPage = ref(5);
 const requestedRowsPerPage = ref(5);
 
+// TODO: add actual queries to return reserved and requested books, instead of all books
 const {
+  books: reservedRows,
   refetchBooks: reservedRefetchBooks,
   booksPaginationDetails: reservedBooksPaginationDetails,
   loading: reservedLoading,
 } = useBookService(currentReservedPage, reservedRowsPerPage);
 
 const {
+  books: requestedRows,
   refetchBooks: requestedRefetchBooks,
   booksPaginationDetails: requestedBooksPaginationDetails,
   loading: requestedLoading,
@@ -224,33 +227,21 @@ const requestedPagination = ref({
   rowsNumber: requestedBooksPaginationDetails.value.rowCount,
 });
 
-const reservedRows = ref<BookSummaryFragment[]>([]);
-const requestedRows = ref<BookSummaryFragment[]>([]);
-
 const largeBreakpoint = 1920;
 const smallBreakpoint = 1440;
 
 const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
 
-onMounted(async () => {
-  // FIXME: add actual query to retrieve the books
-  const reservedBooks = await reservedRefetchBooks();
-  reservedRows.value = reservedBooks?.data.books.rows ?? [];
-  const requestedBooks = await requestedRefetchBooks();
-  requestedRows.value = requestedBooks?.data.books.rows ?? [];
-});
-
 const onReservedRequest: QTableProps["onRequest"] = async (requestProps) => {
   reservedLoading.value = true;
 
-  const payload = await reservedRefetchBooks({
+  await reservedRefetchBooks({
     page: requestProps.pagination.page - 1,
     rows: requestProps.pagination.rowsPerPage,
   });
+  reservedPagination.value.rowsNumber =
+    reservedBooksPaginationDetails.value.rowCount;
 
-  reservedRows.value = payload?.data.books.rows ?? [];
-
-  reservedPagination.value.rowsNumber = payload?.data.books.rowsCount ?? 0;
   reservedPagination.value.page = requestProps.pagination.page;
   reservedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
 
@@ -260,14 +251,13 @@ const onReservedRequest: QTableProps["onRequest"] = async (requestProps) => {
 const onRequestedRequest: QTableProps["onRequest"] = async (requestProps) => {
   requestedLoading.value = true;
 
-  const payload = await requestedRefetchBooks({
+  await requestedRefetchBooks({
     page: requestProps.pagination.page - 1,
     rows: requestProps.pagination.rowsPerPage,
   });
+  requestedPagination.value.rowsNumber =
+    requestedBooksPaginationDetails.value.rowCount;
 
-  requestedRows.value = payload?.data.books.rows ?? [];
-
-  requestedPagination.value.rowsNumber = payload?.data.books.rowsCount ?? 0;
   requestedPagination.value.page = requestProps.pagination.page;
   requestedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
 
