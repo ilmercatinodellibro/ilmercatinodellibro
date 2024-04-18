@@ -90,18 +90,26 @@
           class="col"
           :loading="reservedLoading"
         >
-          <template #book-actions="{ book }">
+          <template #book-actions="{ requestOrReservation: reservation }">
             <chip-button
               :label="$t('manageUsers.actions')"
               color="primary"
               show-dropdown
             >
-              <q-item v-close-popup clickable @click="putBooksIntoCart([book])">
+              <q-item
+                v-close-popup
+                clickable
+                @click="putBooksIntoCart([reservation])"
+              >
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.cart") }}
                 </q-item-section>
               </q-item>
-              <q-item v-close-popup clickable @click="removeFromReserved(book)">
+              <q-item
+                v-close-popup
+                clickable
+                @click="removeFromReserved(reservation)"
+              >
                 <q-item-section>
                   {{ $t("common.delete") }}
                 </q-item-section>
@@ -123,15 +131,15 @@
           :loading="requestLoading"
           class="col"
         >
-          <template #book-actions="{ book }">
+          <template #book-actions="{ requestOrReservation: request }">
             <chip-button
               :label="$t('manageUsers.actions')"
               color="primary"
               show-dropdown
             >
               <!-- FIXME: add actual field check to show this action -->
-              <template v-if="book.status === 'available'">
-                <q-item v-close-popup clickable @click="reserveBook(book)">
+              <template v-if="request.book.meta.isAvailable">
+                <q-item v-close-popup clickable @click="reserveBook(request)">
                   <q-item-section>
                     {{ $t("book.reservedBooksDialog.options.reserved") }}
                   </q-item-section>
@@ -139,7 +147,7 @@
                 <q-item
                   v-close-popup
                   clickable
-                  @click="putBooksIntoCart([book])"
+                  @click="putBooksIntoCart([request])"
                 >
                   <q-item-section>
                     {{ $t("book.reservedBooksDialog.options.cart") }}
@@ -147,7 +155,7 @@
                 </q-item>
               </template>
 
-              <q-item v-close-popup clickable @click="deleteReservation(book)">
+              <q-item v-close-popup clickable @click="deleteRequest(request)">
                 <q-item-section>
                   {{ $t("common.delete") }}
                 </q-item-section>
@@ -170,9 +178,10 @@ import {
 import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
-import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRequestService } from "src/services/request";
+import { RequestSummaryFragment } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
+import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -201,7 +210,7 @@ const {
 const { userReservations, loading: reservedLoading } = useGetReservationsQuery(
   {
     retailLocationId: props.retailLocationId,
-     
+
     userId: props.userData.id,
   },
   {
@@ -256,26 +265,30 @@ function goToCart() {
   });
 }
 
-function putBooksIntoCart(books: BookSummaryFragment[]) {
+function putBooksIntoCart(
+  requestsOrReservations:
+    | ReservationSummaryFragment[]
+    | RequestSummaryFragment[],
+) {
   // FIXME: add book to the cart
-  books;
+  requestsOrReservations;
 }
 
-function removeFromReserved(book: BookSummaryFragment) {
+function removeFromReserved(reservation: ReservationSummaryFragment) {
   // FIXME: delete the reservation only, the book request is kept
-  book;
+  reservation;
 }
 
-function reserveBook(book: BookSummaryFragment) {
+function reserveBook(request: RequestSummaryFragment) {
   // FIXME: add reserve book logic
-  book;
+  request;
 }
 
 // const { createReservations } = useCreateReservationsMutation();
 // const { deleteReservation } = useDeleteReservationMutation();
 
-function deleteReservation(book: BookSummaryFragment) {
+function deleteRequest(request: RequestSummaryFragment) {
   // FIXME: add reservation deletion logic
-  book;
+  request;
 }
 </script>

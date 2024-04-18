@@ -84,27 +84,26 @@
         :rows="bookRequests"
         class="flex-delegate-height-management"
       >
-        <template #book-actions="{ book }">
+        <template #book-actions="{ requestOrReservation: request }">
           <chip-button
             :label="$t('manageUsers.actions')"
             color="primary"
             show-dropdown
           >
-            <!-- FIXME: add actual field check to show this action -->
-            <template v-if="book.status === 'available'">
-              <q-item v-close-popup clickable @click="reserveBook(book)">
+            <template v-if="request.book.meta.isAvailable">
+              <q-item v-close-popup clickable @click="reserveBook(request)">
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.reserved") }}
                 </q-item-section>
               </q-item>
-              <q-item v-close-popup clickable @click="putBookIntoCart(book)">
+              <q-item v-close-popup clickable @click="putBookIntoCart(request)">
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.cart") }}
                 </q-item-section>
               </q-item>
             </template>
 
-            <q-item v-close-popup clickable @click="deleteRequest(book)">
+            <q-item v-close-popup clickable @click="deleteRequest(request)">
               <q-item-section>
                 {{ $t("common.delete") }}
               </q-item-section>
@@ -128,8 +127,8 @@ import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRequestService } from "src/services/request";
+import { RequestSummaryFragment } from "src/services/request.graphql";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -153,7 +152,11 @@ defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
-const { useGetRequestsQuery, useCreateRequestMutation } = useRequestService();
+const {
+  useGetRequestsQuery,
+  useCreateRequestMutation,
+  useDeleteRequestMutation,
+} = useRequestService();
 const {
   bookRequests,
   loading: requestLoading,
@@ -194,27 +197,56 @@ async function addBookToRequest(bookIsbn: string) {
   }
 }
 
-function reserveBook(book: BookSummaryFragment) {
+function reserveBook(request: RequestSummaryFragment) {
   // FIXME: add reserve book logic
-  book;
+  request;
 }
 
-function deleteAllRequested() {
-  // FIXME: add logic to delete all requests
+const { deleteBookRequest } = useDeleteRequestMutation();
+async function deleteAllRequested() {
+  try {
+    await Promise.all(
+      bookRequests.value.map(({ id }) => {
+        return deleteBookRequest({
+          input: {
+            id,
+          },
+        });
+      }),
+    );
+  } catch {
+    Notify.create({
+      type: "negative",
+      message: "Non tutte le richieste sono state cancellate.",
+    });
+  } finally {
+    await refetchRequests();
+  }
+}
+async function deleteRequest(request: RequestSummaryFragment) {
+  try {
+    await deleteBookRequest({
+      input: {
+        id: request.id,
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      message: "Non è stato possibile cancellare la richiesta.",
+    });
+  } finally {
+    await refetchRequests();
+  }
 }
 
 function moveAllIntoCart() {
   // FIXME: add logic to add requested books to the cart
 }
 
-function putBookIntoCart(book: BookSummaryFragment) {
+function putBookIntoCart(request: RequestSummaryFragment) {
   // FIXME: add book to the cart
-  book;
-}
-
-function deleteRequest(book: BookSummaryFragment) {
-  // FIXME: add request deletion logic
-  book;
+  request;
 }
 
 function reserveAllRequested() {
