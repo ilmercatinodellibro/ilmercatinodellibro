@@ -10,7 +10,7 @@
       "
       @cancel="onDialogCancel"
     >
-      <card-table-header>
+      <card-table-header @add-book="addReservationFromIsnb">
         <template #side-actions>
           <!-- TODO: consider extracting this into a separate component -->
           <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
@@ -82,6 +82,7 @@
           </span>
         </template>
       </card-table-header>
+
       <q-card-section
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
@@ -118,7 +119,7 @@
           </template>
         </requested-reserved-table>
 
-        <span class="q-pb-md q-px-md text-h6 text-primary">
+        <span class="q-px-md q-py-md text-h6 text-primary">
           {{
             $t("manageUsers.requestedBooksDialog.title", [
               `${userData.firstname} ${userData.lastname}`,
@@ -175,9 +176,10 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
+import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
+import { fetchBookByISBN } from "src/services/book";
 import { useRequestService } from "src/services/request";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
@@ -192,6 +194,10 @@ import RoundBadge from "./round-badge.vue";
 
 const { t } = useI18n();
 
+const largeBreakpoint = 1920;
+const smallBreakpoint = 1440;
+const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
+
 const props = defineProps<{
   userData: UserSummaryFragment;
   retailLocationId: string;
@@ -202,15 +208,18 @@ defineEmits(useDialogPluginComponent.emitsObject);
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 const {
-  // useCreateReservationsMutation,
-  // useDeleteReservationMutation,
+  useCreateReservationsMutation,
+  useDeleteReservationMutation,
   useGetReservationsQuery,
 } = useReservationService();
 
-const { userReservations, loading: reservedLoading } = useGetReservationsQuery(
+const {
+  userReservations,
+  loading: reservedLoading,
+  refetch: refetchReservations,
+} = useGetReservationsQuery(
   {
     retailLocationId: props.retailLocationId,
-
     userId: props.userData.id,
   },
   {
@@ -219,7 +228,11 @@ const { userReservations, loading: reservedLoading } = useGetReservationsQuery(
 );
 
 const { useGetRequestsQuery } = useRequestService();
-const { bookRequests, loading: requestLoading } = useGetRequestsQuery(
+const {
+  bookRequests,
+  loading: requestLoading,
+  refetch: refetchRequests,
+} = useGetRequestsQuery(
   {
     retailLocationId: props.retailLocationId,
     userId: props.userData.id,
@@ -229,20 +242,110 @@ const { bookRequests, loading: requestLoading } = useGetRequestsQuery(
   },
 );
 
-const largeBreakpoint = 1920;
-const smallBreakpoint = 1440;
-
-const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
-
+const { createReservations } = useCreateReservationsMutation();
+const { deleteReservation } = useDeleteReservationMutation();
 function deleteAllReserved() {
   Dialog.create({
     title: t("manageUsers.reservedBooksDialog.confirmDialog.title"),
     ok: t("manageUsers.reservedBooksDialog.confirmDialog.confirmButton"),
     cancel: t("common.cancel"),
     message: t("manageUsers.reservedBooksDialog.confirmDialog.message"),
-  }).onOk(() => {
-    // FIXME: add logic to delete all reserved books
+  }).onOk(async () => {
+    try {
+      await Promise.all(
+        userReservations.value.map(({ id }) => {
+          return deleteReservation({
+            input: {
+              id,
+            },
+          });
+        }),
+      );
+    } catch {
+      Notify.create({
+        type: "negative",
+        // TODO: translate this one
+        message: `Non è stato possibile cancellare tutte le prenotazioni.`,
+      });
+    } finally {
+      await refetchReservations();
+    }
   });
+}
+async function removeFromReserved(reservation: ReservationSummaryFragment) {
+  try {
+    await deleteReservation({
+      input: {
+        id: reservation.id,
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: `Non è stato possibile cancellare la prenotazione.`,
+    });
+  } finally {
+    await refetchReservations();
+    await refetchRequests();
+  }
+  reservation;
+}
+async function reserveBook({ book }: RequestSummaryFragment) {
+  if (!book.meta.isAvailable) {
+    return;
+  }
+
+  try {
+    await createReservations({
+      input: {
+        userId: props.userData.id,
+        retailLocationId: props.retailLocationId,
+        bookIds: [book.id],
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile prenotare il libro.",
+    });
+  } finally {
+    await refetchReservations();
+    await refetchRequests();
+  }
+}
+async function addReservationFromIsnb(isbnCode: string) {
+  try {
+    const book = await fetchBookByISBN(isbnCode);
+
+    if (!book) {
+      Notify.create({
+        type: "negative",
+        // TODO: translate this one
+        message: "Il codice ISBN inserito non corrisponde a nessun libro.",
+      });
+      return;
+    }
+
+    if (!book.meta.isAvailable) {
+      Notify.create({
+        type: "negative",
+        // TODO: translate this one
+        message: `Il libro ${book.title} non è disponibile per essere prenotato.`,
+      });
+      return;
+    }
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile prenotare il libro.",
+    });
+  } finally {
+    await refetchReservations();
+    await refetchRequests();
+  }
 }
 
 function moveAllIntoCart() {
@@ -272,16 +375,6 @@ function putBooksIntoCart(
 ) {
   // FIXME: add book to the cart
   requestsOrReservations;
-}
-
-function removeFromReserved(reservation: ReservationSummaryFragment) {
-  // FIXME: delete the reservation only, the book request is kept
-  reservation;
-}
-
-function reserveBook(request: RequestSummaryFragment) {
-  // FIXME: add reserve book logic
-  request;
 }
 
 // const { createReservations } = useCreateReservationsMutation();
