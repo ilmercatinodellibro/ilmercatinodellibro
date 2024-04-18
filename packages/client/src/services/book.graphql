@@ -6,6 +6,8 @@ fragment BookSummary on Book {
   title
   originalPrice
   publisherName
+
+  # TODO: Make this only used for admin/operator routes as it's not needed for customers and is costly
   utility {
     value
     booksTaken
