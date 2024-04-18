@@ -25,9 +25,7 @@ export function useCustomerService() {
       rowsPerPage: 0,
       retailLocationId: selectedLocation.value?.id ?? "",
     }),
-    {
-      enabled: !!selectedLocation.value?.id,
-    },
+    // Also when using load, you must not disable the query otherwise it will likely not be run because the condition is not updated.
   );
 
   const customers = computed(() => result.value?.users.rows ?? []);
