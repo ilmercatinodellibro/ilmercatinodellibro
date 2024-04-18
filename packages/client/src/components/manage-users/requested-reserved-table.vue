@@ -1,10 +1,17 @@
 <template>
   <dialog-table :rows="rows" :columns="columns">
-    <template #body-cell-status="{ value }">
-      <!-- FIXME: change to correct check for availability -->
-      <span :class="value === 'available' ? 'text-positive' : ''">
-        {{ value }}
-      </span>
+    <template #body-cell-request-status="{ value }">
+      <q-td>
+        <span :class="value ? 'text-positive' : ''">
+          {{
+            t(
+              value
+                ? "book.availability.available"
+                : "book.availability.requested",
+            )
+          }}
+        </span>
+      </q-td>
     </template>
     <template #body-cell-utility="{ value }">
       <q-td>
@@ -17,7 +24,7 @@
           Slot here so every usage of this component can define the
           options available inside the menu and their behavior
         -->
-        <slot name="book-actions" v-bind="{ book: row }" />
+        <slot name="book-actions" v-bind="{ requestOrReservation: row }" />
       </q-td>
     </template>
   </dialog-table>
@@ -49,8 +56,7 @@ const columns = computed<
 >(() => [
   {
     name: "request-status",
-    // FIXME: add field
-    field: () => undefined,
+    field: ({ book: { meta } }) => meta.isAvailable,
     label: t("manageUsers.reservedBooksDialog.requestStatus"),
     align: "left",
   },
