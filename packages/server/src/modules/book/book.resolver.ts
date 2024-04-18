@@ -186,27 +186,56 @@ export class BookResolver {
       },
     ];
 
-    // TODO: optimize using Fluent API
+    // Helper function to reduce duplication and improve readability
+    // Since $transaction requires PrismaPromise, we couldn't simplify the result handling
+    const bookRelationQuery = <
+      T extends Prisma.BookCountOutputTypeSelect,
+      TKey extends keyof T,
+    >(
+      key: TKey,
+      params: T[TKey],
+    ) =>
+      this.prisma.book.findUniqueOrThrow({
+        where: { id: book.id },
+        select: {
+          _count: {
+            select: {
+              [key]: params,
+            },
+          },
+        },
+      });
+
     const [
-      booksInWarehouse,
-      booksTaken,
-      booksSold,
-      requestsTotal,
-      requestsActive,
-    ] = await this.prisma.$transaction([
-      this.prisma.bookCopy.count({
+      {
+        _count: { copies: booksInWarehouse },
+      },
+      {
+        _count: { copies: booksTaken },
+      },
+      {
+        _count: { copies: booksSold },
+      },
+      {
+        _count: { requests: requestsTotal },
+      },
+      {
+        _count: { requests: requestsActive },
+      },
+    ] = await Promise.all([
+      bookRelationQuery("copies", {
         where: {
           bookId: book.id,
           ...this.availableCopyFilter,
         },
       }),
-      this.prisma.bookCopy.count({
+      bookRelationQuery("copies", {
         where: {
           bookId: book.id,
           OR: this.noProblemsFilter,
         },
       }),
-      this.prisma.bookCopy.count({
+      bookRelationQuery("copies", {
         where: {
           bookId: book.id,
           returnedAt: null,
@@ -215,12 +244,12 @@ export class BookResolver {
           },
         },
       }),
-      this.prisma.bookRequest.count({
+      bookRelationQuery("requests", {
         where: {
           bookId: book.id,
         },
       }),
-      this.prisma.bookRequest.count({
+      bookRelationQuery("requests", {
         where: {
           bookId: book.id,
           deletedAt: null,
