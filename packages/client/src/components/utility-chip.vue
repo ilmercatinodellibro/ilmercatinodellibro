@@ -15,8 +15,8 @@
           warehouse: utility.booksInWarehouse,
           all: utility.booksTaken,
           sold: utility.booksSold,
-          activeRequests: utility.requestsActive,
-          totalRequests: utility.requestsTotal,
+          requestsActive: utility.requestsActive,
+          requestsTotal: utility.requestsTotal,
           utilityIndex: utility.value,
         })
       }}
