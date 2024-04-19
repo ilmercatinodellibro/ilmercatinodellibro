@@ -17,7 +17,7 @@
           sold: utility.booksSold,
           requestsActive: utility.requestsActive,
           requestsTotal: utility.requestsTotal,
-          utilityIndex: utility.value,
+          utilityIndex: utility.value.toFixed(2),
         })
       }}
     </q-tooltip>
