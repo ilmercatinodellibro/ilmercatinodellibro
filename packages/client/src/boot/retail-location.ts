@@ -10,7 +10,11 @@ export default boot(async ({ router }) => {
   const { loading, selectedLocationId, selectedLocation } =
     useRetailLocationService();
 
-  let initialized = false;
+  const ensureLocationInitialized = Promise.all([
+    until(selectedLocationId).toBeTruthy(),
+    until(loading).toBe(false),
+  ]);
+
   const { theme, hasPendingChanges } = useTheme();
   watch(
     selectedLocationId,
@@ -19,10 +23,7 @@ export default boot(async ({ router }) => {
         return;
       }
 
-      if (!initialized) {
-        await until(loading).toBe(false);
-        initialized = true;
-      }
+      await ensureLocationInitialized;
 
       const locationTheme = selectedLocation.value.theme;
       theme.value = {
@@ -39,17 +40,15 @@ export default boot(async ({ router }) => {
     { immediate: true },
   );
 
-  watch(
-    router.currentRoute,
-    (route) => {
-      if (route.params.locationId) {
-        selectedLocationId.value = route.params.locationId as string;
-      }
-    },
-    { immediate: true },
-  );
-
   const { isAuthenticated } = useAuthService();
+
+  router.beforeEach(async (to) => {
+    if (to.params.locationId) {
+      selectedLocationId.value = to.params.locationId as string;
+      await ensureLocationInitialized;
+    }
+  });
+
   if (!isAuthenticated.value) {
     await router.push({
       name: AvailableRouteNames.SelectLocation,
@@ -57,7 +56,5 @@ export default boot(async ({ router }) => {
     return;
   }
 
-  await until(loading).toBe(false);
-  initialized = true;
   // TODO: Use and enforce the user's preferred location (when implemented)
 });

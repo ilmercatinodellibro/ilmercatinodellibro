@@ -172,12 +172,13 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
 
 const currentPage = ref(0);
 const rowsPerPage = ref(100);
-const { booksPaginationDetails, loading, refetchBooks } = useBookService(
-  currentPage,
-  rowsPerPage,
-);
+const {
+  books: rows,
+  booksPaginationDetails,
+  loading,
+  refetchBooks,
+} = useBookService(currentPage, rowsPerPage);
 
-const rows = ref<BookSummaryFragment[]>([]);
 const tablePagination = ref({
   page: currentPage.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
@@ -240,17 +241,14 @@ function getButtonData(book: BookSummaryFragment): QBtnProps {
 const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   loading.value = true;
 
-  const newBooks = await refetchBooks({
+  await refetchBooks({
     page: pagination.page - 1,
     rows: pagination.rowsPerPage,
     filter: {
       search: searchQuery.value,
     },
   });
-  tablePagination.value.rowsNumber =
-    newBooks?.data.books.rowsCount ?? tablePagination.value.rowsNumber;
-
-  rows.value = newBooks?.data.books.rows ?? rows.value;
+  tablePagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
   tablePagination.value.rowsPerPage = pagination.rowsPerPage;
   tablePagination.value.page = pagination.page;

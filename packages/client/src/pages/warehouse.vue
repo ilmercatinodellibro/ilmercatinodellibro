@@ -289,14 +289,20 @@ const {
   booksPaginationDetails,
 } = useBookService(booksPage, booksPerPage);
 
+// FIXME: correctly implement/use the query
 const { useGetBookCopiesQuery } = useBookCopyService();
 const {
   loading: copyLoading,
   refetch: refetchBookCopies,
   bookCopies,
-} = useGetBookCopiesQuery({
-  bookId: "",
-});
+} = useGetBookCopiesQuery(
+  {
+    bookId: "",
+  },
+  () => ({
+    enabled: false,
+  }),
+);
 
 const { user } = useAuthService();
 
@@ -465,6 +471,14 @@ function getBookCopies(bookID: string): BookCopyDetailsWithStatus[] {
             retailLocationId: "",
             subject: "",
             title: "",
+            utility: {
+              value: Math.random() * 2, // [0, 2]
+              booksTaken: 0,
+              booksInWarehouse: 0,
+              booksSold: 0,
+              requestsTotal: 0,
+              requestsActive: 0,
+            },
           },
       code: "000/000",
       createdAt: 0,

@@ -91,15 +91,10 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import { requiredRule, validISBN } from "src/helpers/rules";
-import { useBookService } from "src/services/book";
+import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 
 const { t } = useI18n();
-
-const page = ref(0);
-const rowsPerPage = ref(1);
-
-const { loading, refetchBooks } = useBookService(page, rowsPerPage);
 
 const searchQuery = ref("");
 
@@ -190,26 +185,20 @@ const rows = computed<
       ]),
 ]);
 
+const loading = ref(false);
 async function searchBook() {
   if (
-    acceptedBooks.value.find(
+    acceptedBooks.value.some(
       ({ isbnCode }) => searchQuery.value === isbnCode,
-    ) ??
-    rejectedBooks.value.find(({ isbnCode }) => searchQuery.value === isbnCode)
+    ) ||
+    rejectedBooks.value.some(({ isbnCode }) => searchQuery.value === isbnCode)
   ) {
     Notify.create(t("salableBooks.alreadySearched"));
     return;
   }
+
   loading.value = true;
-  const foundBook = (
-    await refetchBooks({
-      page: page.value,
-      rows: rowsPerPage.value,
-      filter: {
-        search: searchQuery.value,
-      },
-    })
-  )?.data.books.rows[0];
+  const foundBook = await fetchBookByISBN(searchQuery.value);
   loading.value = false;
   if (foundBook) {
     acceptedBooks.value.push(foundBook);

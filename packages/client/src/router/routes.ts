@@ -23,7 +23,8 @@ const routes: RouteRecordRaw[] = [
       return {
         name: AvailableRouteNames.Home,
         params: {
-          locationId: selectedLocationId.value,
+          // TODO: Use and enforce the user's preferred location (when implemented)
+          locationId: selectedLocationId.value ?? "re",
         },
       };
     },
