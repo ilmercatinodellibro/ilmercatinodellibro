@@ -23,7 +23,8 @@ const routes: RouteRecordRaw[] = [
       return {
         name: AvailableRouteNames.Home,
         params: {
-          locationId: selectedLocationId.value,
+          // TODO: Use and enforce the user's preferred location (when implemented)
+          locationId: selectedLocationId.value ?? "re",
         },
       };
     },
@@ -132,12 +133,6 @@ const routes: RouteRecordRaw[] = [
         path: "home",
         name: AvailableRouteNames.Home,
         component: () => import("src/pages/home.vue"),
-      },
-      {
-        path: "theme",
-        name: AvailableRouteNames.Theme,
-        component: () => import("src/pages/theme.vue"),
-        beforeEnter: redirectIfNotAdmin,
       },
       {
         path: "reset-password",

@@ -239,14 +239,20 @@ const {
   booksPaginationDetails,
 } = useBookService(booksPage, booksPerPage);
 
+// FIXME: correctly implement/use the query
 const { useGetBookCopiesQuery } = useBookCopyService();
 const {
   loading: copyLoading,
   refetch: refetchBookCopies,
   bookCopies,
-} = useGetBookCopiesQuery({
-  bookId: "",
-});
+} = useGetBookCopiesQuery(
+  {
+    bookId: "",
+  },
+  () => ({
+    enabled: false,
+  }),
+);
 
 const { resolveProblem } = useResolveProblemMutation();
 const { reportProblem } = useReportProblemMutation();

@@ -213,6 +213,7 @@ const {
   useGetReservationsQuery,
 } = useReservationService();
 
+// TODO: add actual queries to return reserved and requested books, instead of all books
 const {
   userReservations,
   loading: reservedLoading,

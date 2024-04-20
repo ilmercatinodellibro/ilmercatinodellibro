@@ -148,7 +148,6 @@ export default {
     [AvailableRouteNames.Contacts]: "Contacts",
     [AvailableRouteNames.Events]: "Events",
     [AvailableRouteNames.Home]: "Home",
-    [AvailableRouteNames.Theme]: "Theme",
     [AvailableRouteNames.ResetPassword]: "Reset Password",
     [AvailableRouteNames.ForgotPassword]: "Forgot Password",
     [AvailableRouteNames.ChangePassword]: "Change Password",

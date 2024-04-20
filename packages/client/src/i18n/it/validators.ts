@@ -19,4 +19,7 @@ export default {
   },
   greaterThanZero: "Il valore deve essere un numero maggiore di 0",
   nonValidISBN: "L'ISBN inserito non è valido",
+  numberBetweenValues:
+    "Il valore deve essere un numero compreso tra {min} e {max}",
+  onlyIntegers: "Il valore deve essere un numero intero",
 };

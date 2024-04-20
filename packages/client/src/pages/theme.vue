@@ -88,7 +88,6 @@ import ConfirmDialog from "src/components/confirm-dialog.vue";
 import ThemeColorSection from "src/components/theme-color-section.vue";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
-import { AvailableRouteNames } from "src/models/routes";
 
 const { t } = useI18n();
 const { theme, defaultTheme, hasPendingChanges, saveChanges, setDefaults } =
@@ -99,7 +98,8 @@ const imagePickerRef = ref() as Ref<QFile>;
 const isSmallScreen = computed(() => Screen.lt.sm);
 
 onBeforeRouteLeave((_to, from, next) => {
-  if (from.name !== AvailableRouteNames.Theme || !hasPendingChanges.value) {
+  // TODO: change the empty string to the route name when it exists
+  if (from.name !== "" || !hasPendingChanges.value) {
     next();
     return;
   }

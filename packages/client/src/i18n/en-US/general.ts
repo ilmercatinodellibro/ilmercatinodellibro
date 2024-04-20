@@ -56,4 +56,17 @@ export default {
   joinUs: "Join us",
   whoWeAre: "Who we are",
   loading: "Loading...",
+  settings: {
+    resetToolTip:
+      "Performs a reset of all of the system data to prepare the software for the following year's activities",
+    purchaseRate: "Purchase Rate",
+    saleRate: "Sale Rate",
+    reservationDays: "Number of Days for Reservation",
+    maxBooksDimension:
+      "Max dimension of the book stacks to allow for fragmentation",
+    resetMessage:
+      "You are performing the reset of all the system data to prepare the software for the following year's activities. Do you wish to proceed?",
+    resetButton: "Perform annual reset",
+    resetConfirmButton: "Perform reset",
+  },
 };

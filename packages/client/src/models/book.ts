@@ -42,3 +42,17 @@ export enum BooksTab {
   REQUESTED = "requested",
   PURCHASED = "purchased",
 }
+
+interface Settings {
+  maxBooksDimension: number;
+  purchaseRate: number;
+  reservationDays: number;
+  saleRate: number;
+}
+
+export type SettingsUpdate =
+  | {
+      type: "save";
+      settings: Settings;
+    }
+  | { type: "reset" };
