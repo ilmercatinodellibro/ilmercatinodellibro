@@ -10,21 +10,12 @@ import {
 export function useMembersService() {
   const { selectedLocation } = useRetailLocationService();
 
-  const { members, loading } = useGetMembersQuery(
-    () => ({
-      retailLocationId: selectedLocation.value?.id ?? "",
-    }),
-    {
-      enabled: !!selectedLocation.value?.id,
-    },
-  );
+  const { members, loading } = useGetMembersQuery(() => ({
+    retailLocationId: selectedLocation.value.id,
+  }));
 
   const { updateRole: _updateRole } = useUpdateRoleMutation();
   async function updateRole(userId: string, role: Role) {
-    if (!selectedLocation.value?.id) {
-      return;
-    }
-
     const { cache } = await _updateRole({
       input: {
         userId,
@@ -57,10 +48,6 @@ export function useMembersService() {
 
   const { removeMember: deleteUser } = useRemoveMemberMutation();
   async function removeUser(id: string) {
-    if (!selectedLocation.value?.id) {
-      return;
-    }
-
     const { cache } = await deleteUser({
       input: {
         id,

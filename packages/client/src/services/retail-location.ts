@@ -1,6 +1,9 @@
 import { createSharedComposable } from "@vueuse/core";
-import { computed, ref } from "vue";
-import { useGetRetailLocationsQuery } from "src/services/retail-location.graphql";
+import { ComputedRef, computed, ref } from "vue";
+import {
+  RetailLocationFragment,
+  useGetRetailLocationsQuery,
+} from "src/services/retail-location.graphql";
 
 export const useRetailLocationService = createSharedComposable(() => {
   const { retailLocations, loading } = useGetRetailLocationsQuery();
@@ -23,6 +26,6 @@ export const useRetailLocationService = createSharedComposable(() => {
 
     selectedLocationId,
     // We cast it to avoid having to assert it every time we use it. It's only undefined in the location selection page.
-    selectedLocation,
+    selectedLocation: selectedLocation as ComputedRef<RetailLocationFragment>,
   };
 });

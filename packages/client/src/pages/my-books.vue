@@ -180,16 +180,11 @@ const { user } = useAuthService();
 const route = useRoute();
 const router = useRouter();
 
-const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery(
-  {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userId: user.value!.id,
-    retailLocationId: selectedLocation.value?.id ?? "",
-  },
-  {
-    enabled: !!selectedLocation.value?.id,
-  },
-);
+const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+  retailLocationId: selectedLocation.value.id,
+});
 
 const {
   useCreateReservationsMutation,
@@ -200,39 +195,24 @@ const {
 const { createReservations } = useCreateReservationsMutation();
 const { deleteReservation } = useDeleteReservationMutation();
 const { userReservations, refetch: refetchReservations } =
-  useGetReservationsQuery(
-    {
-      retailLocationId: selectedLocation.value?.id ?? "",
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      userId: user.value!.id,
-    },
-    {
-      enabled: !!selectedLocation.value?.id,
-    },
-  );
+  useGetReservationsQuery({
+    retailLocationId: selectedLocation.value.id,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    userId: user.value!.id,
+  });
 
 const { deleteBookRequest } = useDeleteRequestMutation();
-const { bookRequests, refetch: refetchRequests } = useGetRequestsQuery(
-  {
-    retailLocationId: selectedLocation.value?.id ?? "",
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userId: user.value!.id,
-  },
-  {
-    enabled: !!selectedLocation.value?.id,
-  },
-);
+const { bookRequests, refetch: refetchRequests } = useGetRequestsQuery({
+  retailLocationId: selectedLocation.value.id,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+});
 
-const { purchasedBookCopies } = useGetPurchasedBookCopiesQuery(
-  {
-    retailLocationId: selectedLocation.value?.id ?? "",
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userId: user.value!.id,
-  },
-  {
-    enabled: !!selectedLocation.value?.id,
-  },
-);
+const { purchasedBookCopies } = useGetPurchasedBookCopiesQuery({
+  retailLocationId: selectedLocation.value.id,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+});
 
 type TablesRowsTypes =
   | BookCopyDetailsFragment
@@ -424,7 +404,7 @@ async function cancelReservation(reservation: ReservationSummaryFragment) {
 }
 
 async function reserveBook(request: RequestSummaryFragment) {
-  if (!user.value || !selectedLocation.value?.id) {
+  if (!user.value) {
     return;
   }
 
@@ -471,10 +451,6 @@ async function reserveBook(request: RequestSummaryFragment) {
 
 async function cancelRequest(request: RequestSummaryFragment) {
   try {
-    if (!selectedLocation.value?.id) {
-      throw new Error("No retail location selected.");
-    }
-
     const { cache } = await deleteBookRequest({
       input: {
         id: request.id,

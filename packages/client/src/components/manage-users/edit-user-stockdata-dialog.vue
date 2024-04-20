@@ -172,15 +172,10 @@ const booksToRegister = ref<BookSummaryFragment[]>([]);
 
 const { selectedLocation } = useRetailLocationService();
 const { bookCopiesByOwner: copiesInStock, loading: inStockLoading } =
-  useGetBookCopiesByOwnerQuery(
-    () => ({
-      userId: props.userData.id,
-      retailLocationId: selectedLocation.value?.id ?? "",
-    }),
-    {
-      enabled: !!selectedLocation.value?.id,
-    },
-  );
+  useGetBookCopiesByOwnerQuery(() => ({
+    userId: props.userData.id,
+    retailLocationId: selectedLocation.value.id,
+  }));
 
 // probably unnecessarily complex, but 🤷
 function getCommonColumns<
@@ -316,10 +311,6 @@ function retrieveAllBooks() {
     component: RetrieveAllBooksDialog,
   }).onOk(async (/* shouldPrint */) => {
     // TODO: Handle shouldPrint
-
-    if (!selectedLocation.value?.id) {
-      return;
-    }
 
     const { cache, data: newBookCopies } = await createBookCopies({
       input: {

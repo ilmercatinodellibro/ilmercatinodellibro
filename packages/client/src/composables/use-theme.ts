@@ -64,11 +64,6 @@ export const useTheme = createSharedComposable(() => {
   async function saveChanges(logoFile?: File) {
     hasPendingChanges.value = false;
 
-    if (!selectedLocation.value?.id) {
-      setDefaults();
-      return;
-    }
-
     await updateRetailLocationTheme({
       input: {
         retailLocationId: selectedLocation.value.id,
@@ -110,7 +105,6 @@ export const useTheme = createSharedComposable(() => {
   return {
     theme,
     defaultTheme,
-    getDefaultThemeCopy: getDefaults,
     hasPendingChanges,
     setDefaults,
     saveChanges,

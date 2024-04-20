@@ -98,10 +98,6 @@ const { selectedLocation } = useRetailLocationService();
 const { login, loading: isLoggingIn } = useLoginMutation();
 
 async function onSubmit() {
-  if (!selectedLocation.value?.id) {
-    return;
-  }
-
   try {
     await login({
       input: user.value,

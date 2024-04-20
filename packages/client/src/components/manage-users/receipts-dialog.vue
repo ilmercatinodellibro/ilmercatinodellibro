@@ -41,15 +41,10 @@ defineEmits(useDialogPluginComponent.emitsObject);
 const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
 
 const { selectedLocation } = useRetailLocationService();
-const { receipts } = useGetReceiptsQuery(
-  () => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value?.id ?? "",
-  }),
-  {
-    enabled: !!selectedLocation.value?.id,
-  },
-);
+const { receipts } = useGetReceiptsQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
 
 // const requestReceipts = computed(() =>
 //   receipts.value.filter(({ type }) => type === "REQUEST"),

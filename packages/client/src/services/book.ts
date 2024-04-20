@@ -23,7 +23,7 @@ export function useBookService(
     page: page.value,
     rows: rows.value,
     filter: filter?.value,
-    retailLocationId: selectedLocation.value?.id ?? "",
+    retailLocationId: selectedLocation.value.id,
   }));
 
   const books = computed(() => booksData.value?.rows ?? []);
@@ -39,7 +39,7 @@ export function useBookService(
   async function refetchBooks(
     variables?: Omit<GetBooksQueryVariables, "retailLocationId">,
   ) {
-    if (!variables || !selectedLocation.value) {
+    if (!variables) {
       return await refetch();
     }
 
@@ -67,7 +67,7 @@ export async function fetchBookByISBN(isbnCode: string) {
     query: GetBookByIsbnDocument,
     variables: {
       isbnCode,
-      retailLocationId: selectedLocation.value?.id ?? "",
+      retailLocationId: selectedLocation.value.id,
     },
   });
 
