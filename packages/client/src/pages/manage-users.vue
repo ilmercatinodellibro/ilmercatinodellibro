@@ -426,7 +426,7 @@ function openCellEditDialog(
 ) {
   // cells to always be clickable
   if (
-    !selectedLocation.value?.id ||
+    !selectedLocation.value.id ||
     (value <= 0 && !["in-stock", "reserved", "requested"].includes(name))
   ) {
     return;

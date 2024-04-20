@@ -103,8 +103,7 @@ const columns = computed<
   },
   {
     name: "utility",
-    //FIXME: add field
-    field: () => undefined,
+    field: ({ book }) => book.utility,
     label: t("book.fields.utility"),
     align: "center",
   },

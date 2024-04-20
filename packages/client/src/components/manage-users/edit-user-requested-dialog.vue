@@ -163,15 +163,10 @@ const {
   bookRequests,
   loading: requestLoading,
   refetch: refetchRequests,
-} = useGetRequestsQuery(
-  {
-    retailLocationId: props.retailLocationId,
-    userId: props.userData.id,
-  },
-  {
-    enabled: !!props.retailLocationId,
-  },
-);
+} = useGetRequestsQuery({
+  retailLocationId: props.retailLocationId,
+  userId: props.userData.id,
+});
 
 const { createBookRequest } = useCreateRequestMutation();
 async function addBookToRequest(bookIsbn: string) {

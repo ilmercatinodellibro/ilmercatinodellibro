@@ -218,30 +218,20 @@ const {
   userReservations,
   loading: reservedLoading,
   refetch: refetchReservations,
-} = useGetReservationsQuery(
-  {
-    retailLocationId: props.retailLocationId,
-    userId: props.userData.id,
-  },
-  {
-    enabled: !!props.retailLocationId,
-  },
-);
+} = useGetReservationsQuery({
+  retailLocationId: props.retailLocationId,
+  userId: props.userData.id,
+});
 
 const { useGetRequestsQuery } = useRequestService();
 const {
   bookRequests,
   loading: requestLoading,
   refetch: refetchRequests,
-} = useGetRequestsQuery(
-  {
-    retailLocationId: props.retailLocationId,
-    userId: props.userData.id,
-  },
-  {
-    enabled: !!props.retailLocationId,
-  },
-);
+} = useGetRequestsQuery({
+  retailLocationId: props.retailLocationId,
+  userId: props.userData.id,
+});
 
 const { createReservations } = useCreateReservationsMutation();
 const { deleteReservation } = useDeleteReservationMutation();

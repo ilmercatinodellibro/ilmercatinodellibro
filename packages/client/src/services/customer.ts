@@ -23,7 +23,7 @@ export function useCustomerService() {
     ref({
       page: 1,
       rowsPerPage: 0,
-      retailLocationId: selectedLocation.value?.id ?? "",
+      retailLocationId: selectedLocation.value.id,
     }),
     // Also when using load, you must not disable the query otherwise it will likely not be run because the condition is not updated.
   );
@@ -34,7 +34,7 @@ export function useCustomerService() {
   async function fetch(
     variables: Omit<GetCustomersQueryVariables, "retailLocationId">,
   ) {
-    if (!selectedLocation.value?.id) {
+    if (!selectedLocation.value.id) {
       throw new Error(t("retailLocation.errors.noLocation"));
     }
 
