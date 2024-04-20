@@ -1,7 +1,7 @@
 <template>
   <q-form
     class="gap-16 items-center q-pt-md q-px-md row"
-    @submit="$emit('addBook', bookISBN)"
+    @submit="handleSubmit"
   >
     <q-input
       v-model="bookISBN"
@@ -38,9 +38,19 @@ defineProps<{
   searchLabel?: string;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   addBook: [bookISBN: string];
 }>();
 
 const bookISBN = ref("");
+
+function handleSubmit() {
+  const toEmit = bookISBN.value.trim();
+
+  if (toEmit.length === 0) {
+    return;
+  }
+
+  emit("addBook", toEmit);
+}
 </script>

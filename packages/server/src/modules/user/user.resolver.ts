@@ -242,9 +242,7 @@ export class UserResolver {
           select: {
             requestedBooks: {
               where: {
-                deletedAt: {
-                  not: null,
-                },
+                deletedAt: null,
                 cartItem: null,
                 OR: [
                   {

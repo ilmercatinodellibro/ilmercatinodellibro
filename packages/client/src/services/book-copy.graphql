@@ -4,19 +4,23 @@ fragment BookCopySummary on BookCopy {
   originalCode
 }
 
+fragment ProblemSummary on Problem {
+  details
+  solution
+  type
+}
+
 fragment ProblemDetails on Problem {
+  ...ProblemSummary
   id
   createdAt
   createdBy {
     ...UserSummary
   }
-  details
   resolvedAt
   resolvedBy {
     ...UserSummary
   }
-  solution
-  type
   updatedAt
 }
 

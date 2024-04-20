@@ -149,7 +149,7 @@ export class ReservationResolver {
   ) {
     if (currentUserId !== userId) {
       await this.authService.assertMembership({
-        userId,
+        userId: currentUserId,
         retailLocationId,
         message:
           "You do not have permission to create reservations for this user.",

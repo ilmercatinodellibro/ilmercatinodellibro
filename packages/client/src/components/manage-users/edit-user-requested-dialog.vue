@@ -10,7 +10,7 @@
       size="fullscreen"
       @cancel="onDialogCancel"
     >
-      <card-table-header>
+      <card-table-header @add-book="addBookToRequest">
         <template #side-actions>
           <!-- TODO: consider extracting this into a separate component -->
           <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
@@ -25,7 +25,7 @@
               :label="$t('manageUsers.requestedBooksDialog.moveIntoReserved')"
               no-wrap
               outline
-              @click="reserveAllRequested()"
+              @click="reserveAllAvailableRequested()"
             />
           </span>
           <span v-if="screenWidth === WidthSize.LG" class="gap-16 row">
@@ -56,7 +56,7 @@
                       {{ $t("manageUsers.requestedBooksDialog.deleteAll") }}
                     </q-item-section>
                   </q-item>
-                  <q-item clickable @click="reserveAllRequested()">
+                  <q-item clickable @click="reserveAllAvailableRequested()">
                     <q-item-section>
                       {{
                         $t("manageUsers.requestedBooksDialog.moveIntoReserved")
@@ -80,33 +80,30 @@
         </template>
       </card-table-header>
       <requested-reserved-table
-        v-model:pagination="pagination"
-        :loading="loading"
-        :rows="rows"
+        :loading="requestLoading"
+        :rows="bookRequests"
         class="flex-delegate-height-management"
-        @request="onRequest"
       >
-        <template #book-actions="{ book }">
+        <template #book-actions="{ requestOrReservation: request }">
           <chip-button
             :label="$t('manageUsers.actions')"
             color="primary"
             show-dropdown
           >
-            <!-- FIXME: add actual field check to show this action -->
-            <template v-if="book.status === 'available'">
-              <q-item v-close-popup clickable @click="reserveBook(book)">
+            <template v-if="request.book.meta.isAvailable">
+              <q-item v-close-popup clickable @click="reserveBook(request)">
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.reserved") }}
                 </q-item-section>
               </q-item>
-              <q-item v-close-popup clickable @click="putBookIntoCart(book)">
+              <q-item v-close-popup clickable @click="putBookIntoCart(request)">
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.cart") }}
                 </q-item-section>
               </q-item>
             </template>
 
-            <q-item v-close-popup clickable @click="deleteRequest(book)">
+            <q-item v-close-popup clickable @click="deleteRequest(request)">
               <q-item-section>
                 {{ $t("common.delete") }}
               </q-item-section>
@@ -125,11 +122,15 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QDialog, QTable, useDialogPluginComponent } from "quasar";
-import { ref } from "vue";
+import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
+// import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
-import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import { fetchBookByISBN } from "src/services/book";
+import { useCartService } from "src/services/cart";
+import { useRequestService } from "src/services/request";
+import { RequestSummaryFragment } from "src/services/request.graphql";
+import { useReservationService } from "src/services/reservation";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -138,61 +139,229 @@ import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
 
+const { t } = useI18n();
+
 const smallBreakpoint = 1230;
 const largeBreakpoint = 1695;
-
 const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
 
 const props = defineProps<{
   userData: UserSummaryFragment;
+  retailLocationId: string;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-// TODO: remove the pagination management and stubs once the real queries are added
-const currentPage = ref(0);
-const numberOfRows = ref(5);
-
-const {
-  books: rows,
-  refetchBooks,
-  booksPaginationDetails,
-  loading,
-} = useBookService(currentPage, numberOfRows);
-
-const pagination = ref({
-  rowsPerPage: numberOfRows.value,
-  rowsNumber: booksPaginationDetails.value.rowCount,
-  page: currentPage.value,
-});
-
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
-function reserveBook(book: BookSummaryFragment) {
-  // FIXME: add reserve book logic
-  book;
+const {
+  useGetRequestsQuery,
+  useCreateRequestMutation,
+  useDeleteRequestMutation,
+} = useRequestService();
+const {
+  bookRequests,
+  loading: requestLoading,
+  refetch: refetchRequests,
+} = useGetRequestsQuery({
+  retailLocationId: props.retailLocationId,
+  userId: props.userData.id,
+});
+
+const { createBookRequest } = useCreateRequestMutation();
+async function addBookToRequest(bookIsbn: string) {
+  const book = await fetchBookByISBN(bookIsbn);
+  if (!book) {
+    Dialog.create({
+      message: t("manageUsers.inStockDialog.errorMessage"),
+    });
+    return;
+  }
+
+  try {
+    await createBookRequest({
+      input: { bookId: book.id, userId: props.userData.id },
+    });
+  } catch (e) {
+    Notify.create(
+      t("reserveBooks.reservationOrRequestError", [
+        t("reserveBooks.request"),
+        e,
+      ]),
+    );
+  } finally {
+    await refetchRequests();
+  }
 }
 
-function deleteAllRequested() {
-  // FIXME: add logic to delete all requests
+const { deleteBookRequest } = useDeleteRequestMutation();
+async function deleteAllRequested() {
+  try {
+    await Promise.all(
+      bookRequests.value.map(({ id }) => {
+        return deleteBookRequest({
+          input: {
+            id,
+          },
+        });
+      }),
+    );
+  } catch {
+    Notify.create({
+      type: "negative",
+      message: "Non tutte le richieste sono state cancellate.",
+    });
+  } finally {
+    await refetchRequests();
+  }
+}
+async function deleteRequest(request: RequestSummaryFragment) {
+  try {
+    await deleteBookRequest({
+      input: {
+        id: request.id,
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile cancellare la richiesta.",
+    });
+  } finally {
+    await refetchRequests();
+  }
 }
 
-function moveAllIntoCart() {
-  // FIXME: add logic to add requested books to the cart
+const { useCreateReservationsMutation } = useReservationService();
+const { createReservations } = useCreateReservationsMutation();
+async function reserveAllAvailableRequested() {
+  const availableBookIds = bookRequests.value
+    .filter(({ book }) => book.meta.isAvailable)
+    .map(({ book }) => book.id);
+
+  if (availableBookIds.length === 0) {
+    return;
+  }
+
+  try {
+    await createReservations({
+      input: {
+        userId: props.userData.id,
+        retailLocationId: props.retailLocationId,
+        bookIds: availableBookIds,
+      },
+    });
+
+    Notify.create({
+      type: "positive",
+      // TODO: translate this one
+      message: `Prenotato ${availableBookIds.length} copie di libri richiesti.`,
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile prenotare tutte le richieste.",
+    });
+  } finally {
+    await refetchRequests();
+  }
+}
+async function reserveBook({ book }: RequestSummaryFragment) {
+  try {
+    await createReservations({
+      input: {
+        userId: props.userData.id,
+        retailLocationId: props.retailLocationId,
+        bookIds: [book.id],
+      },
+    });
+
+    Notify.create({
+      type: "positive",
+      // TODO: translate this one
+      message: `Prenotato ${book.title}.`,
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile prenotare il libro specificato.",
+    });
+  } finally {
+    await refetchRequests();
+  }
 }
 
-function putBookIntoCart(book: BookSummaryFragment) {
-  // FIXME: add book to the cart
-  book;
-}
+const { useAddToCartMutation, useOpenCartMutation } = useCartService();
+const { openCart } = useOpenCartMutation();
+const { addToCart } = useAddToCartMutation();
+async function moveAllIntoCart() {
+  const availableBooksRequestIds = bookRequests.value
+    .filter(({ book }) => book.meta.isAvailable)
+    .map(({ id }) => id);
 
-function deleteRequest(book: BookSummaryFragment) {
-  // FIXME: add request deletion logic
-  book;
-}
+  if (availableBooksRequestIds.length === 0) {
+    return;
+  }
 
-function reserveAllRequested() {
-  // FIXME: add logic to reserve all books
+  try {
+    const cart = await openCart({
+      input: {
+        retailLocationId: props.retailLocationId,
+        userId: props.userData.id,
+      },
+    });
+
+    await Promise.all(
+      availableBooksRequestIds.map((id) => {
+        return addToCart({
+          input: {
+            cartId: cart.data.id,
+            fromBookRequestId: id,
+          },
+        });
+      }),
+    );
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile aggiungere tutti i libri al carrello.",
+    });
+  } finally {
+    await refetchRequests();
+  }
+}
+async function putBookIntoCart(request: RequestSummaryFragment) {
+  if (!request.book.meta.isAvailable) {
+    return;
+  }
+
+  try {
+    const cart = await openCart({
+      input: {
+        retailLocationId: props.retailLocationId,
+        userId: props.userData.id,
+      },
+    });
+
+    await addToCart({
+      input: {
+        cartId: cart.data.id,
+        fromBookRequestId: request.id,
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile aggiungere il libro al carrello.",
+    });
+  } finally {
+    await refetchRequests();
+  }
 }
 
 function goToCart() {
@@ -206,16 +375,4 @@ function goToCart() {
     payload;
   });
 }
-
-const onRequest: QTable["onRequest"] = async function (requestProps) {
-  loading.value = true;
-
-  await refetchBooks();
-  pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
-
-  pagination.value.page = requestProps.pagination.page;
-  pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  loading.value = false;
-};
 </script>

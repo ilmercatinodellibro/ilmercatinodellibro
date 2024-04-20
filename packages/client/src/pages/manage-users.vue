@@ -101,7 +101,7 @@
           <template #body-cell-reserved="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
-              always-active
+              clickable-when-zero
               @click="openCellEditDialog(row, col, value)"
             />
           </template>
@@ -116,7 +116,7 @@
             <table-cell-with-dialog
               :value="value"
               :secondary-value="row.booksRequestedAndAvailable"
-              always-active
+              clickable-when-zero
               @click="openCellEditDialog(row, col, value)"
             >
               <template #secondary-value="{ value: availableCount }">
@@ -219,6 +219,7 @@ import TableCellWithDialog from "src/components/manage-users/table-cell-with-dia
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { useCustomerService } from "src/services/customer";
+import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
 
 const tableRef = ref() as Ref<QTable>;
@@ -417,14 +418,17 @@ function openEdit(user: CustomerFragment, rowIndex: number) {
   });
 }
 
+const { selectedLocation } = useRetailLocationService();
 function openCellEditDialog(
   userData: CustomerFragment,
   { name }: QTableColumn,
   value: number,
 ) {
-  // TODO: update the name check to allow for the "Reserved" and "Requested"
   // cells to always be clickable
-  if (value <= 0 && name !== "in-stock") {
+  if (
+    !selectedLocation.value.id ||
+    (value <= 0 && !["in-stock", "reserved", "requested"].includes(name))
+  ) {
     return;
   }
 
@@ -438,13 +442,19 @@ function openCellEditDialog(
     case "reserved":
       Dialog.create({
         component: EditUserReservedDialog,
-        componentProps: { userData },
+        componentProps: {
+          userData,
+          retailLocationId: selectedLocation.value.id,
+        },
       });
       break;
     case "requested":
       Dialog.create({
         component: EditUserRequestedDialog,
-        componentProps: { userData },
+        componentProps: {
+          userData,
+          retailLocationId: selectedLocation.value.id,
+        },
       });
       break;
     case "sold":

@@ -1,3 +1,5 @@
+import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+
 export const enum BookCopyStatuses {
   LOST = "lost",
   RETURNED = "returned",
@@ -16,6 +18,10 @@ export const enum BookCopyFilters {
 export type BookCopyStatus =
   | BookCopyStatuses
   | Exclude<BookCopyFilters, "with-problem" | "reserved">;
+
+export type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
+  status?: BookCopyStatus;
+};
 
 export interface SchoolFilters {
   schoolCodes: string[];

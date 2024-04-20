@@ -69,6 +69,7 @@
         :loading="booksLoading"
         :rows="books"
         class="flex-delegate-height-management"
+        row-key="id"
         @request="onBooksRequest"
       >
         <template #header="props">
@@ -122,66 +123,13 @@
           </q-tr>
 
           <template v-if="props.expand">
-            <q-tr no-hover>
-              <q-th auto-width />
-
-              <q-th
-                v-for="{ name, label } in bodyHeaderCols"
-                :key="name"
-                :colspan="getColspan(name)"
-                class="height-48 text-left"
-              >
-                {{ label }}
-              </q-th>
-            </q-tr>
-
-            <q-tr
-              v-for="bookCopy in getBookCopies(props.row.id)"
-              :key="bookCopy.id"
-            >
-              <q-td auto-width />
-
-              <q-td
-                v-for="{ name, field, format } in bodyHeaderCols"
-                :key="name"
-                :auto-width="name === 'problems'"
-                :colspan="getColspan(name)"
-              >
-                <template v-if="name === 'status'">
-                  <book-copy-status-chip :value="bookCopy.status" />
-                </template>
-
-                <template v-else-if="name === 'problems'">
-                  <chip-button
-                    :color="props.row.problems ? 'positive' : 'negative'"
-                    :label="
-                      t(
-                        `manageUsers.booksMovementsDialog.${props.row.problems ? 'solveProblem' : 'reportProblem'}`,
-                      )
-                    "
-                    @click="openProblemDialog(props.row)"
-                  />
-                </template>
-
-                <template v-else-if="name === 'history'">
-                  <q-btn
-                    :icon="mdiHistory"
-                    color="primary"
-                    flat
-                    round
-                    @click="openHistory(props.row)"
-                  />
-                </template>
-
-                <template v-else>
-                  {{
-                    format
-                      ? format(getFieldValue(field, bookCopy), props.row)
-                      : getFieldValue(field, bookCopy)
-                  }}
-                </template>
-              </q-td>
-            </q-tr>
+            <book-copy-details-table
+              :book-copy-columns="bookCopyColumns"
+              :book-id="props.row.id"
+              :table-width="9"
+              @open-history="(bookCopy) => openHistory(bookCopy)"
+              @open-problems-dialog="(bookCopy) => openProblemDialog(bookCopy)"
+            />
           </template>
         </template>
       </dialog-table>
@@ -194,8 +142,7 @@
         :loading="copyLoading"
         :rows="
           // FIXME: bookCopies don't have the status field but the columns specify it
-          // prettier-ignore
-          bookCopies as unknown as readonly BookCopyDetailsWithStatus[]
+          bookCopies
         "
         class="flex-delegate-height-management"
         @request="onCopyRequest"
@@ -248,6 +195,7 @@ import {
 import { Dialog, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import BookCopyDetailsTable from "src/components/book-copy-details-table.vue";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
@@ -256,18 +204,20 @@ import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
 import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { hasProblem } from "src/helpers/book-copy";
+import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
+import { getFieldValue } from "src/helpers/table-helpers";
 import {
+  BookCopyDetailsWithStatus,
   BookCopyFilters,
-  BookCopyStatus,
   SchoolFilters,
 } from "src/models/book";
-import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
 import { useBookCopyService } from "src/services/book-copy";
 import {
   BookCopyDetailsFragment,
-  ProblemDetailsFragment,
+  ProblemSummaryFragment,
   useReportProblemMutation,
   useResolveProblemMutation,
 } from "src/services/book-copy.graphql";
@@ -304,8 +254,6 @@ const {
   }),
 );
 
-const { user } = useAuthService();
-
 const { resolveProblem } = useResolveProblemMutation();
 const { reportProblem } = useReportProblemMutation();
 
@@ -315,12 +263,6 @@ const { t } = useI18n();
 // is below the minimum width to hold them in a single row
 const smallScreenBreakpoint = 1694;
 const screenWidth = useScreenWidth(smallScreenBreakpoint);
-
-const getFieldValue = <T,>(
-  getterOrKey: keyof T | ((row: T) => T[keyof T]),
-  object: T,
-) =>
-  typeof getterOrKey === "function" ? getterOrKey(object) : object[getterOrKey];
 
 const isSortedByCopyCode = ref(false);
 
@@ -396,21 +338,6 @@ const tableFilter = computed(() =>
     : { searchTerm: searchQuery.value, filters: filters.value },
 );
 
-type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
-  status: BookCopyStatus;
-};
-
-const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
-  () => [
-    {
-      name: "code",
-      field: "code",
-      label: t("book.code"),
-    },
-    ...bookCopyColumns.value.filter(({ name }) => name !== "isbn"),
-  ],
-);
-
 const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
   () => [
     {
@@ -451,54 +378,6 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
     },
   ],
 );
-
-// FIXME: remove stub
-function getBookCopies(bookID: string): BookCopyDetailsWithStatus[] {
-  const book = books.value.find(({ id }) => id === bookID);
-  return [
-    {
-      book: book
-        ? { ...book, retailLocationId: "" }
-        : {
-            authorsFullName: "",
-            id: "",
-            isbnCode: "",
-            meta: {
-              isAvailable: false,
-            },
-            originalPrice: 0,
-            publisherName: "",
-            retailLocationId: "",
-            subject: "",
-            title: "",
-            utility: {
-              value: Math.random() * 2, // [0, 2]
-              booksTaken: 0,
-              booksInWarehouse: 0,
-              booksSold: 0,
-              requestsTotal: 0,
-              requestsActive: 0,
-            },
-          },
-      code: "000/000",
-      createdAt: 0,
-      createdById: "",
-      id: "",
-      owner: {
-        email: "owner@email.com",
-        firstname: "",
-        id: "",
-        lastname: "",
-      },
-      updatedAt: 0,
-      updatedById: "",
-      status: BookCopyFilters.SOLD,
-    },
-  ];
-}
-
-const getColspan = (columnName: string) =>
-  columnName === "original-code" || columnName === "status" ? 2 : 1;
 
 const onBooksRequest: QTableProps["onRequest"] = async ({
   pagination: { page, rowsPerPage },
@@ -565,14 +444,22 @@ function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
     component: ProblemsDialog,
     componentProps: {
       bookCopy,
-      user,
     },
-  }).onOk(async ({ solution, details, type }: ProblemDetailsFragment) => {
-    if (solution) {
-      await resolveProblem({
-        input: { id: bookCopy.id, solution },
-      });
-    } else {
+  }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
+    if (hasProblem(bookCopy)) {
+      try {
+        await resolveProblem({
+          input: { id: bookCopy.id, solution },
+        });
+
+        await refetchBookCopies();
+      } catch (e) {
+        notifyError(t("common.genericErrorMessage"));
+      }
+      return;
+    }
+
+    try {
       await reportProblem({
         input: {
           bookCopyId: bookCopy.id,
@@ -580,6 +467,12 @@ function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
           type,
         },
       });
+
+      await refetchBookCopies({
+        bookId: bookCopy.book.id,
+      });
+    } catch (e) {
+      notifyError(t("common.genericErrorMessage"));
     }
   });
 }

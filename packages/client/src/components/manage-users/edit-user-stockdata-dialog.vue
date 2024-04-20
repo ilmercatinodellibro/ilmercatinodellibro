@@ -240,8 +240,7 @@ function getCommonColumns<
     },
     {
       label: t("book.fields.utility"),
-      // TODO: add the field name
-      field: () => undefined,
+      field: getField("utility"),
       name: "utility",
       align: "center",
     },

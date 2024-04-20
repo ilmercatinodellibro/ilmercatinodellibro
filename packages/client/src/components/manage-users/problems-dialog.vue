@@ -6,7 +6,7 @@
       @cancel="onDialogCancel"
       @submit="onDialogOK(problemsData)"
     >
-      <q-card-section v-if="activeProblem" class="column gap-16">
+      <q-card-section v-if="!hasProblem(bookCopy)" class="column gap-16">
         <q-select
           v-model="problemsData.type"
           :label="$t('manageUsers.booksMovementsDialog.problemType')"
@@ -55,23 +55,22 @@ import { useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { ProblemType } from "src/@generated/graphql";
+import { hasProblem } from "src/helpers/book-copy";
 import { requiredRule } from "src/helpers/rules";
 import {
   BookCopyDetailsFragment,
-  ProblemDetailsFragment,
+  ProblemSummaryFragment,
 } from "src/services/book-copy.graphql";
-import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
-const props = defineProps<{
+const { bookCopy } = defineProps<{
   bookCopy: BookCopyDetailsFragment;
-  user: UserSummaryFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
-  useDialogPluginComponent<ProblemDetailsFragment | undefined>();
+  useDialogPluginComponent<ProblemSummaryFragment>();
 
 const options: ProblemType[] = ["LOST", "INCOMPLETE", "CUSTOM"];
 
@@ -80,33 +79,19 @@ const { t } = useI18n();
 const title = computed(() =>
   t(
     `manageUsers.booksMovementsDialog.${
-      props.bookCopy.problems
-        ? latestProblem
-          ? "solveProblem"
-          : "reportProblem"
-        : "reportProblem"
+      hasProblem(bookCopy) ? "solveProblem" : "reportProblem"
     }`,
   ),
 );
 
-const latestProblem = props.bookCopy.problems
-  ? props.bookCopy.problems[props.bookCopy.problems.length - 1] ?? undefined
+const latestProblem = bookCopy.problems
+  ? bookCopy.problems[bookCopy.problems.length - 1]
   : undefined;
 
-const activeProblem = computed(
-  () => !(props.bookCopy.problems ? latestProblem?.resolvedAt : false),
-);
-
 // TODO: fix the current data stub with actual data
-const problemsData = ref<ProblemDetailsFragment>({
+const problemsData = ref<ProblemSummaryFragment>({
   type: latestProblem?.type ?? "LOST",
   details: latestProblem?.details ?? "",
-  createdAt: latestProblem?.createdAt ?? Date.now(),
-  createdBy: latestProblem?.createdBy ?? props.user,
-  resolvedAt: latestProblem?.resolvedAt,
-  resolvedBy: latestProblem?.resolvedBy,
   solution: latestProblem?.solution,
-  updatedAt: latestProblem?.updatedAt ?? Date.now(),
-  id: latestProblem?.id ?? "0",
 });
 </script>

@@ -1,16 +1,17 @@
 <template>
-  <dialog-table
-    :rows="rows"
-    :columns="columns"
-    :pagination="pagination"
-    @request="props.onRequest"
-    @update:pagination="props['onUpdate:pagination']"
-  >
-    <template #body-cell-status="{ value }">
-      <!-- FIXME: change to correct check for availability -->
-      <span :class="value === 'available' ? 'text-positive' : ''">
-        {{ value }}
-      </span>
+  <dialog-table :rows="rows" :columns="columns">
+    <template #body-cell-request-status="{ value }">
+      <q-td>
+        <span :class="value ? 'text-positive' : ''">
+          {{
+            t(
+              value
+                ? "book.availability.available"
+                : "book.availability.requested",
+            )
+          }}
+        </span>
+      </q-td>
     </template>
     <template #body-cell-utility="{ value }">
       <q-td>
@@ -23,7 +24,7 @@
           Slot here so every usage of this component can define the
           options available inside the menu and their behavior
         -->
-        <slot name="book-actions" v-bind="{ book: row }" />
+        <slot name="book-actions" v-bind="{ requestOrReservation: row }" />
       </q-td>
     </template>
   </dialog-table>
@@ -35,71 +36,74 @@ import { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { formatPrice } from "src/composables/use-misc-formats";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import { RequestSummaryFragment } from "src/services/request.graphql";
+import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
 const { t } = useI18n();
 
-const props = defineProps<
+defineProps<
   {
-    rows: readonly BookSummaryFragment[];
-    // eslint-disable-next-line vue/prop-name-casing, vue/no-unused-properties
-  } & Pick<QTableProps, "pagination" | "onRequest" | "onUpdate:pagination">
+    rows:
+      | readonly ReservationSummaryFragment[]
+      | readonly RequestSummaryFragment[];
+    // eslint-disable-next-line vue/no-unused-properties
+  } & Pick<QTableProps, "loading">
 >();
 
-const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+const columns = computed<
+  QTableColumn<ReservationSummaryFragment | RequestSummaryFragment>[]
+>(() => [
   {
     name: "request-status",
-    // FIXME: add field
-    field: () => undefined,
+    field: ({ book: { meta } }) => meta.isAvailable,
     label: t("manageUsers.reservedBooksDialog.requestStatus"),
     align: "left",
   },
   {
     name: "isbn",
-    field: "isbnCode",
+    field: ({ book: { isbnCode } }) => isbnCode,
     label: t("book.fields.isbn"),
     align: "left",
   },
   {
     name: "author",
-    field: "authorsFullName",
+    field: ({ book: { authorsFullName } }) => authorsFullName,
     label: t("book.fields.author"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
   },
   {
     name: "subject",
-    field: "subject",
+    field: ({ book: { subject } }) => subject,
     label: t("book.fields.subject"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
   },
   {
     name: "title",
-    field: "title",
+    field: ({ book: { title } }) => title,
     label: t("book.fields.title"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
   },
   {
     name: "publisher",
-    field: "publisherName",
+    field: ({ book: { publisherName } }) => publisherName,
     label: t("book.fields.publisher"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
   },
   {
     name: "price",
-    field: "originalPrice",
+    field: ({ book: { originalPrice } }) => originalPrice,
     label: t("book.fields.price"),
     align: "left",
     format: (val: string) => formatPrice(val),
   },
   {
     name: "utility",
-    //FIXME: add field
-    field: () => undefined,
+    field: ({ book }) => book.utility,
     label: t("book.fields.utility"),
     align: "center",
   },

@@ -6,6 +6,7 @@
     :filter="searchQuery"
     :hide-pagination="hidePagination"
     :pagination="pagination"
+    :row-key="rowKey as string"
     :rows-per-page-options="rowsPerPageOptions"
     class="full-height"
     flat
@@ -39,6 +40,7 @@ const props = withDefaults(
       searchQuery?: string;
       rows: readonly T[];
       columns?: QTableColumn<T>[];
+      rowKey?: Extract<keyof T, string>;
       // eslint-disable-next-line vue/prop-name-casing, vue/no-unused-properties
     } & Pick<
       QTableProps,
@@ -48,6 +50,7 @@ const props = withDefaults(
   {
     searchQuery: undefined,
     columns: undefined,
+    rowKey: undefined,
     rowsPerPageOptions: () => [5, 10, 20, 50, 100, 200],
   },
 );

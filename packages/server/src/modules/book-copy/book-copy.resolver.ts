@@ -10,6 +10,7 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
+import { Prisma } from "@prisma/client";
 import {
   Book,
   BookCopy,
@@ -27,6 +28,8 @@ import {
   BookCopyByUserQueryArgs,
   BookCopyCreateInput,
   BookCopyQueryArgs,
+  PaginatedBookCopiesQueryArgs,
+  PaginatedBookCopyQueryResult,
 } from "./book-copy.args";
 import { BookCopyService } from "./book-copy.service";
 
@@ -182,6 +185,135 @@ export class BookCopyResolver {
         },
       },
     });
+  }
+
+  @Query(() => PaginatedBookCopyQueryResult)
+  async paginatedBookCopies(
+    @Args()
+    {
+      page,
+      rows: rowsPerPage = 100,
+      filter = {},
+      retailLocationId,
+    }: PaginatedBookCopiesQueryArgs,
+    @CurrentUser() { id: userId }: User,
+  ) {
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId,
+      message:
+        "You don't have the necessary permissions to view the book copies for this retail location.",
+    });
+
+    // TODO: Use Prisma full-text search
+    // handle spaces by replacing them with % for the search
+    const searchText = filter.search?.trim().replaceAll(" ", "%");
+    const { hasProblem, isAvailable, isSold } = filter;
+
+    const where: Prisma.BookCopyWhereInput = {
+      book: {
+        retailLocationId,
+        ...(searchText
+          ? {
+              OR: [
+                {
+                  authorsFullName: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  isbnCode: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  publisherName: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  title: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  subject: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            }
+          : {}),
+      },
+      returnedAt: null,
+      OR: [
+        // When both isAvailable and isSold are true at the same time, they are mutually exclusive, so they are not added to the query
+        ...(isAvailable && !isSold
+          ? [
+              {
+                sales: {
+                  none: {},
+                },
+              },
+              {
+                sales: {
+                  every: {
+                    refundedAt: {
+                      not: null,
+                    },
+                  },
+                },
+              },
+            ]
+          : []),
+        ...(isSold && !isAvailable
+          ? [
+              {
+                sales: {
+                  some: {
+                    refundedAt: {
+                      not: null,
+                    },
+                  },
+                },
+              },
+            ]
+          : []),
+        ...(hasProblem
+          ? [
+              {
+                problems: {
+                  some: {
+                    resolvedAt: {
+                      not: null,
+                    },
+                  },
+                },
+              },
+            ]
+          : []),
+      ],
+    };
+
+    const [rowsCount, rows] = await this.prisma.$transaction([
+      this.prisma.bookCopy.count({ where }),
+      this.prisma.bookCopy.findMany({
+        skip: page * rowsPerPage,
+        take: rowsPerPage,
+        where,
+      }),
+    ]);
+
+    return {
+      page,
+      rowsCount,
+      rows,
+    };
   }
 
   @ResolveField(() => Book)

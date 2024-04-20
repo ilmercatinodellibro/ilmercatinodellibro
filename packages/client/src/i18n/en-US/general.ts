@@ -55,6 +55,7 @@ export default {
   },
   joinUs: "Join us",
   whoWeAre: "Who we are",
+  loading: "Loading...",
   settings: {
     resetToolTip:
       "Performs a reset of all of the system data to prepare the software for the following year's activities",

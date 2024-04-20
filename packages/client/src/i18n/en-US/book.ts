@@ -31,6 +31,7 @@ export default {
   availability: {
     available: "Available",
     notAvailable: "Not Available",
+    requested: "Requested",
   },
   filters: {
     options: ["Available", "High Utility", "Medium Utility", "Low Utility"],

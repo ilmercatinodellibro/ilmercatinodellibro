@@ -1,4 +1,5 @@
 import { FeedbackType, Role } from "src/@generated/graphql";
+import retailLocation from "src/i18n/it/retailLocation";
 import {
   AdditionalMacroIntervalDurationNames,
   AvailableQuickRanges,
@@ -57,6 +58,7 @@ export default {
   salableBooks,
   validators,
   feedbackType,
+  retailLocation,
   warehouse,
 
   common: {

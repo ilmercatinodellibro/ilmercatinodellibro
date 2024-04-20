@@ -253,7 +253,6 @@ function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
     component: ProblemsDialog,
     componentProps: {
       bookCopy,
-      user: props.userData,
     },
   }).onOk((newProblem: ProblemDetailsFragment) => {
     // FIXME: add problem to history

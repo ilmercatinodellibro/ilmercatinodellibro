@@ -10,7 +10,7 @@
       "
       @cancel="onDialogCancel"
     >
-      <card-table-header>
+      <card-table-header @add-book="addReservationFromIsnb">
         <template #side-actions>
           <!-- TODO: consider extracting this into a separate component -->
           <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
@@ -82,27 +82,35 @@
           </span>
         </template>
       </card-table-header>
+
       <q-card-section
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
         <requested-reserved-table
-          v-model:pagination="reservedPagination"
-          :rows="reservedRows"
+          :rows="userReservations"
           class="col"
-          @request="onReservedRequest"
+          :loading="reservedLoading"
         >
-          <template #book-actions="{ book }">
+          <template #book-actions="{ requestOrReservation: reservation }">
             <chip-button
               :label="$t('manageUsers.actions')"
               color="primary"
               show-dropdown
             >
-              <q-item v-close-popup clickable @click="putBooksIntoCart([book])">
+              <q-item
+                v-close-popup
+                clickable
+                @click="putBooksIntoCart([reservation])"
+              >
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.cart") }}
                 </q-item-section>
               </q-item>
-              <q-item v-close-popup clickable @click="removeFromReserved(book)">
+              <q-item
+                v-close-popup
+                clickable
+                @click="removeFromReserved(reservation)"
+              >
                 <q-item-section>
                   {{ $t("common.delete") }}
                 </q-item-section>
@@ -111,7 +119,7 @@
           </template>
         </requested-reserved-table>
 
-        <span class="q-pb-md q-px-md text-h6 text-primary">
+        <span class="q-px-md q-py-md text-h6 text-primary">
           {{
             $t("manageUsers.requestedBooksDialog.title", [
               `${userData.firstname} ${userData.lastname}`,
@@ -120,20 +128,19 @@
         </span>
 
         <requested-reserved-table
-          v-model:pagination="requestedPagination"
-          :rows="requestedRows"
+          :rows="bookRequests"
+          :loading="requestLoading"
           class="col"
-          @request="onRequestedRequest"
         >
-          <template #book-actions="{ book }">
+          <template #book-actions="{ requestOrReservation: request }">
             <chip-button
               :label="$t('manageUsers.actions')"
               color="primary"
               show-dropdown
             >
               <!-- FIXME: add actual field check to show this action -->
-              <template v-if="book.status === 'available'">
-                <q-item v-close-popup clickable @click="reserveBook(book)">
+              <template v-if="request.book.meta.isAvailable">
+                <q-item v-close-popup clickable @click="reserveBook(request)">
                   <q-item-section>
                     {{ $t("book.reservedBooksDialog.options.reserved") }}
                   </q-item-section>
@@ -141,7 +148,7 @@
                 <q-item
                   v-close-popup
                   clickable
-                  @click="putBooksIntoCart([book])"
+                  @click="putBooksIntoCart([request])"
                 >
                   <q-item-section>
                     {{ $t("book.reservedBooksDialog.options.cart") }}
@@ -149,7 +156,7 @@
                 </q-item>
               </template>
 
-              <q-item v-close-popup clickable @click="deleteReservation(book)">
+              <q-item v-close-popup clickable @click="deleteRequest(request)">
                 <q-item-section>
                   {{ $t("common.delete") }}
                 </q-item-section>
@@ -169,12 +176,14 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QDialog, QTableProps, useDialogPluginComponent } from "quasar";
-import { ref } from "vue";
+import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
-import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import { fetchBookByISBN } from "src/services/book";
+import { useRequestService } from "src/services/request";
+import { RequestSummaryFragment } from "src/services/request.graphql";
+import { useReservationService } from "src/services/reservation";
+import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -185,94 +194,149 @@ import RoundBadge from "./round-badge.vue";
 
 const { t } = useI18n();
 
+const largeBreakpoint = 1920;
+const smallBreakpoint = 1440;
+const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
+
 const props = defineProps<{
   userData: UserSummaryFragment;
+  retailLocationId: string;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
-// TODO: remove the pagination management and stubs once the real queries are added
-const currentReservedPage = ref(0);
-const currentRequestedPage = ref(0);
-
-const reservedRowsPerPage = ref(5);
-const requestedRowsPerPage = ref(5);
+const {
+  useCreateReservationsMutation,
+  useDeleteReservationMutation,
+  useGetReservationsQuery,
+} = useReservationService();
 
 // TODO: add actual queries to return reserved and requested books, instead of all books
 const {
-  books: reservedRows,
-  refetchBooks: reservedRefetchBooks,
-  booksPaginationDetails: reservedBooksPaginationDetails,
+  userReservations,
   loading: reservedLoading,
-} = useBookService(currentReservedPage, reservedRowsPerPage);
+  refetch: refetchReservations,
+} = useGetReservationsQuery({
+  retailLocationId: props.retailLocationId,
+  userId: props.userData.id,
+});
 
+const { useGetRequestsQuery } = useRequestService();
 const {
-  books: requestedRows,
-  refetchBooks: requestedRefetchBooks,
-  booksPaginationDetails: requestedBooksPaginationDetails,
-  loading: requestedLoading,
-} = useBookService(currentRequestedPage, requestedRowsPerPage);
-
-const reservedPagination = ref({
-  page: currentReservedPage.value,
-  rowsPerPage: reservedRowsPerPage.value,
-  rowsNumber: reservedBooksPaginationDetails.value.rowCount,
+  bookRequests,
+  loading: requestLoading,
+  refetch: refetchRequests,
+} = useGetRequestsQuery({
+  retailLocationId: props.retailLocationId,
+  userId: props.userData.id,
 });
 
-const requestedPagination = ref({
-  page: currentRequestedPage.value,
-  rowsPerPage: requestedRowsPerPage.value,
-  rowsNumber: requestedBooksPaginationDetails.value.rowCount,
-});
-
-const largeBreakpoint = 1920;
-const smallBreakpoint = 1440;
-
-const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
-
-const onReservedRequest: QTableProps["onRequest"] = async (requestProps) => {
-  reservedLoading.value = true;
-
-  await reservedRefetchBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-  reservedPagination.value.rowsNumber =
-    reservedBooksPaginationDetails.value.rowCount;
-
-  reservedPagination.value.page = requestProps.pagination.page;
-  reservedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  reservedLoading.value = false;
-};
-
-const onRequestedRequest: QTableProps["onRequest"] = async (requestProps) => {
-  requestedLoading.value = true;
-
-  await requestedRefetchBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-  });
-  requestedPagination.value.rowsNumber =
-    requestedBooksPaginationDetails.value.rowCount;
-
-  requestedPagination.value.page = requestProps.pagination.page;
-  requestedPagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-
-  requestedLoading.value = false;
-};
-
+const { createReservations } = useCreateReservationsMutation();
+const { deleteReservation } = useDeleteReservationMutation();
 function deleteAllReserved() {
   Dialog.create({
     title: t("manageUsers.reservedBooksDialog.confirmDialog.title"),
     ok: t("manageUsers.reservedBooksDialog.confirmDialog.confirmButton"),
     cancel: t("common.cancel"),
     message: t("manageUsers.reservedBooksDialog.confirmDialog.message"),
-  }).onOk(() => {
-    // FIXME: add logic to delete all reserved books
+  }).onOk(async () => {
+    try {
+      await Promise.all(
+        userReservations.value.map(({ id }) => {
+          return deleteReservation({
+            input: {
+              id,
+            },
+          });
+        }),
+      );
+    } catch {
+      Notify.create({
+        type: "negative",
+        // TODO: translate this one
+        message: `Non è stato possibile cancellare tutte le prenotazioni.`,
+      });
+    } finally {
+      await refetchReservations();
+    }
   });
+}
+async function removeFromReserved(reservation: ReservationSummaryFragment) {
+  try {
+    await deleteReservation({
+      input: {
+        id: reservation.id,
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: `Non è stato possibile cancellare la prenotazione.`,
+    });
+  } finally {
+    await refetchReservations();
+    await refetchRequests();
+  }
+  reservation;
+}
+async function reserveBook({ book }: RequestSummaryFragment) {
+  if (!book.meta.isAvailable) {
+    return;
+  }
+
+  try {
+    await createReservations({
+      input: {
+        userId: props.userData.id,
+        retailLocationId: props.retailLocationId,
+        bookIds: [book.id],
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile prenotare il libro.",
+    });
+  } finally {
+    await refetchReservations();
+    await refetchRequests();
+  }
+}
+async function addReservationFromIsnb(isbnCode: string) {
+  try {
+    const book = await fetchBookByISBN(isbnCode);
+
+    if (!book) {
+      Notify.create({
+        type: "negative",
+        // TODO: translate this one
+        message: "Il codice ISBN inserito non corrisponde a nessun libro.",
+      });
+      return;
+    }
+
+    if (!book.meta.isAvailable) {
+      Notify.create({
+        type: "negative",
+        // TODO: translate this one
+        message: `Il libro ${book.title} non è disponibile per essere prenotato.`,
+      });
+      return;
+    }
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile prenotare il libro.",
+    });
+  } finally {
+    await refetchReservations();
+    await refetchRequests();
+  }
 }
 
 function moveAllIntoCart() {
@@ -295,23 +359,20 @@ function goToCart() {
   });
 }
 
-function putBooksIntoCart(books: BookSummaryFragment[]) {
+function putBooksIntoCart(
+  requestsOrReservations:
+    | ReservationSummaryFragment[]
+    | RequestSummaryFragment[],
+) {
   // FIXME: add book to the cart
-  books;
+  requestsOrReservations;
 }
 
-function removeFromReserved(book: BookSummaryFragment) {
-  // FIXME: delete the reservation only, the book request is kept
-  book;
-}
+// const { createReservations } = useCreateReservationsMutation();
+// const { deleteReservation } = useDeleteReservationMutation();
 
-function reserveBook(book: BookSummaryFragment) {
-  // FIXME: add reserve book logic
-  book;
-}
-
-function deleteReservation(book: BookSummaryFragment) {
+function deleteRequest(request: RequestSummaryFragment) {
   // FIXME: add reservation deletion logic
-  book;
+  request;
 }
 </script>
