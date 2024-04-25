@@ -90,6 +90,7 @@
           :rows="userReservations"
           class="col"
           :loading="reservedLoading"
+          is-showing-reservations
         >
           <template #book-actions="{ requestOrReservation: reservation }">
             <chip-button
@@ -100,7 +101,7 @@
               <q-item
                 v-close-popup
                 clickable
-                @click="putBooksIntoCart([reservation])"
+                @click="putBooksIntoCart(reservation)"
               >
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.cart") }}
@@ -138,7 +139,6 @@
               color="primary"
               show-dropdown
             >
-              <!-- FIXME: add actual field check to show this action -->
               <template v-if="request.book.meta.isAvailable">
                 <q-item v-close-popup clickable @click="reserveBook(request)">
                   <q-item-section>
@@ -148,7 +148,7 @@
                 <q-item
                   v-close-popup
                   clickable
-                  @click="putBooksIntoCart([request])"
+                  @click="putBooksIntoCart(request)"
                 >
                   <q-item-section>
                     {{ $t("book.reservedBooksDialog.options.cart") }}
@@ -180,6 +180,7 @@ import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
+import { useCartService } from "src/services/cart";
 import { useRequestService } from "src/services/request";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
@@ -213,7 +214,6 @@ const {
   useGetReservationsQuery,
 } = useReservationService();
 
-// TODO: add actual queries to return reserved and requested books, instead of all books
 const {
   userReservations,
   loading: reservedLoading,
@@ -223,7 +223,7 @@ const {
   userId: props.userData.id,
 });
 
-const { useGetRequestsQuery } = useRequestService();
+const { useDeleteRequestMutation, useGetRequestsQuery } = useRequestService();
 const {
   bookRequests,
   loading: requestLoading,
@@ -339,12 +339,127 @@ async function addReservationFromIsnb(isbnCode: string) {
   }
 }
 
+const { useAddToCartMutation, useOpenCartMutation } = useCartService();
+const { openCart } = useOpenCartMutation();
+const { addToCart } = useAddToCartMutation();
 function moveAllIntoCart() {
-  // FIXME: add all reserved and available books into the cart
+  const reservedBooksIds = userReservations.value.map(({ id }) => id);
+  const requestedAndAvailableBooksIds = bookRequests.value
+    .filter(({ book }) => book.meta.isAvailable)
+    .map(({ id }) => id);
+
+  try {
+    const cart = await openCart({
+      input: {
+        retailLocationId: props.retailLocationId,
+        userId: props.userData.id,
+      },
+    });
+
+    await Promise.all([
+      ...reservedBooksIds.map((id) => {
+        return addToCart({
+          input: {
+            cartId: cart.data.id,
+            fromReservationId: id,
+          },
+        });
+      }),
+      ...requestedAndAvailableBooksIds.map((id) => {
+        return addToCart({
+          input: {
+            cartId: cart.data.id,
+            fromBookRequestId: id,
+          },
+        });
+      }),
+    ]);
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate
+      message:
+        "Non è stato possibile spostare tutte le prenotazioni e i libri disponibili nel carrello.",
+    });
+  } finally {
+    await refetchReservations();
+  }
+}
+async function moveReservedIntoCart() {
+  const reservedBooksIds = userReservations.value.map(({ id }) => id);
+  try {
+    const cart = await openCart({
+      input: {
+        retailLocationId: props.retailLocationId,
+        userId: props.userData.id,
+      },
+    });
+
+    await Promise.all(
+      reservedBooksIds.map((id) => {
+        return addToCart({
+          input: {
+            cartId: cart.data.id,
+            fromBookRequestId: id,
+          },
+        });
+      }),
+    );
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate
+      message: "Non è stato possibile spostare le prenotazioni nel carrello.",
+    });
+  } finally {
+    await refetchReservations();
+  }
 }
 
-function moveReservedIntoCart() {
-  // FIXME: add logic to add reserved books to the cart
+async function putBooksIntoCart(
+  requestOrReservation: ReservationSummaryFragment | RequestSummaryFragment,
+) {
+  if (
+    requestOrReservation.__typename === "BookRequest" &&
+    !requestOrReservation.book.meta.isAvailable
+  ) {
+    Notify.create({
+      type: "negative",
+      // TODO: translate
+      message:
+        "Non puoi mettere nel carrello un libro richiesto ma non disponibile.",
+    });
+    return;
+  }
+
+  const isRequest = requestOrReservation.__typename === "BookRequest";
+
+  try {
+    const cart = await openCart({
+      input: {
+        retailLocationId: props.retailLocationId,
+        userId: props.userData.id,
+      },
+    });
+
+    await addToCart({
+      input: {
+        cartId: cart.data.id,
+        ...(isRequest
+          ? { fromBookRequestId: requestOrReservation.id }
+          : { fromReservationId: requestOrReservation.id }),
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate
+      message: `Non è stato possibile ${isRequest ? "mettere il libro" : "spostare la prenotazione"} nel carrello.`,
+    });
+  } finally {
+    // Probably this can be improved with an if
+    await Promise.all([refetchReservations(), refetchRequests()]);
+  }
 }
 
 function goToCart() {
@@ -359,20 +474,22 @@ function goToCart() {
   });
 }
 
-function putBooksIntoCart(
-  requestsOrReservations:
-    | ReservationSummaryFragment[]
-    | RequestSummaryFragment[],
-) {
-  // FIXME: add book to the cart
-  requestsOrReservations;
-}
-
-// const { createReservations } = useCreateReservationsMutation();
-// const { deleteReservation } = useDeleteReservationMutation();
-
-function deleteRequest(request: RequestSummaryFragment) {
-  // FIXME: add reservation deletion logic
-  request;
+const { deleteBookRequest } = useDeleteRequestMutation();
+async function deleteRequest(request: RequestSummaryFragment) {
+  try {
+    await deleteBookRequest({
+      input: {
+        id: request.id,
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      // TODO: translate this one
+      message: "Non è stato possibile cancellare la richiesta.",
+    });
+  } finally {
+    await refetchRequests();
+  }
 }
 </script>

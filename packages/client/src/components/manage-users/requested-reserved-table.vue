@@ -5,9 +5,11 @@
         <span :class="value ? 'text-positive' : ''">
           {{
             t(
-              value
-                ? "book.availability.available"
-                : "book.availability.requested",
+              isShowingReservations
+                ? "book.availability.reserved"
+                : value
+                  ? "book.availability.available"
+                  : "book.availability.requested",
             )
           }}
         </span>
@@ -44,6 +46,7 @@ const { t } = useI18n();
 
 defineProps<
   {
+    isShowingReservations?: boolean;
     rows:
       | readonly ReservationSummaryFragment[]
       | readonly RequestSummaryFragment[];
