@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   InternalServerErrorException,
 } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   Args,
   Mutation,
@@ -40,6 +41,7 @@ export class BookCopyResolver {
     private readonly bookService: BookCopyService,
     private readonly authService: AuthService,
     private readonly receiptService: ReceiptService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Query(() => [BookCopy])
@@ -508,6 +510,9 @@ export class BookCopyResolver {
       createdById: userId,
       data: bookCopies,
     });
+
+    // TODO: emit an event to indicate the book becoming available
+    this.eventEmitter.emit("booksBecameAvailable", { bookIds });
 
     return bookCopies;
   }

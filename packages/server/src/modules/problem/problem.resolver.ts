@@ -1,4 +1,5 @@
 import { ForbiddenException } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { BookCopy, Problem, User } from "src/@generated";
 import { AuthService } from "src/modules/auth/auth.service";
@@ -12,6 +13,7 @@ export class ProblemResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @ResolveField(() => User, { nullable: true })
@@ -118,7 +120,7 @@ export class ProblemResolver {
         "You don't have the necessary permissions to resolve a problem for this book copy.",
     });
 
-    return this.prisma.problem.update({
+    const updatedProblem = await this.prisma.problem.update({
       where: {
         id,
       },
@@ -128,5 +130,11 @@ export class ProblemResolver {
         resolvedAt: new Date(),
       },
     });
+
+    this.eventEmitter.emit("booksBecameAvailable", {
+      bookIds: [problem.bookCopy.bookId],
+    });
+
+    return updatedProblem;
   }
 }
