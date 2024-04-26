@@ -214,9 +214,7 @@ export class UserResolver {
           select: {
             reservations: {
               where: {
-                deletedAt: {
-                  not: null,
-                },
+                deletedAt: null,
                 cartItem: null,
               },
             },
@@ -241,21 +239,45 @@ export class UserResolver {
         _count: {
           select: {
             requestedBooks: {
+              // This where statement should be very similar to the one of book-request.resolver
               where: {
                 deletedAt: null,
                 cartItem: null,
-                OR: [
+                AND: [
                   {
-                    reservations: {
-                      none: {},
-                    },
-                  },
-                  {
-                    reservations: {
-                      every: {
-                        deletedAt: null,
+                    OR: [
+                      {
+                        saleId: null,
                       },
-                    },
+                      {
+                        // All related sales must have been refunded in order to show the request
+                        sale: {
+                          refundedAt: {
+                            not: null,
+                          },
+                        },
+                      },
+                    ],
+                  },
+
+                  {
+                    OR: [
+                      {
+                        reservations: {
+                          none: {},
+                        },
+                      },
+                      {
+                        // All related reservations must have been deleted in order to show the request
+                        reservations: {
+                          every: {
+                            deletedAt: {
+                              not: null,
+                            },
+                          },
+                        },
+                      },
+                    ],
                   },
                 ],
                 ...(onlyAvailable
