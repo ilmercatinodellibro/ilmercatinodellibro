@@ -483,7 +483,12 @@ function openCellEditDialog(
 function openCart(user: CustomerFragment) {
   Dialog.create({
     component: CartDialog,
-    componentProps: { user },
+    componentProps: {
+      retailLocationId: selectedLocation.value.id,
+      user,
+    },
+  }).onDismiss(() => {
+    tableRef.value.requestServerInteraction();
   });
 }
 </script>

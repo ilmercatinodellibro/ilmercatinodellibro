@@ -11,7 +11,7 @@
       <card-table-header>
         <template #side-actions>
           <q-input
-            :model-value="rows.length"
+            :model-value="cartBooks.length"
             :label="$t('manageUsers.cartDialog.totalBooks')"
             disable
             outlined
@@ -39,48 +39,48 @@
       <dialog-table
         :columns="columns"
         :loading="loading"
-        :rows="stubRows"
+        :rows="cartBooks"
         :rows-per-page-options="[0]"
         class="flex-delegate-height-management"
         row-key="id"
       >
-        <template #body="props">
+        <template #body="bodyProps">
           <q-tr>
             <q-td auto-width>
               <q-btn
-                :icon="!props.expand ? mdiChevronUp : mdiChevronDown"
+                :icon="!bodyProps.expand ? mdiChevronUp : mdiChevronDown"
                 flat
                 round
-                @click="props.expand = !props.expand"
+                @click="bodyProps.expand = !bodyProps.expand"
               />
             </q-td>
-            <q-td v-for="{ name, value } in props.cols" :key="name">
+            <q-td v-for="{ name, value } in bodyProps.cols" :key="name">
               <q-btn
                 v-if="name === 'delete'"
                 :icon="mdiDelete"
                 color="negative"
                 flat
                 round
-                @click="removeBook(props.row)"
+                @click="removeBook(bodyProps.row)"
               />
               <span v-else>
                 {{ value }}
               </span>
             </q-td>
           </q-tr>
-          <q-tr v-show="!props.expand">
+          <q-tr v-show="!bodyProps.expand">
             <q-th />
             <q-th class="height-48 text-left">
               {{ $t("book.code") }}
             </q-th>
           </q-tr>
           <q-tr
-            v-for="(bookCopy, index) in props.row.bookCopies"
-            v-show="!props.expand"
-            :key="bookCopy"
+            v-for="(bookCopy, index) in bodyProps.row.copies"
+            v-show="!bodyProps.expand"
+            :key="bookCopy.id"
             :class="{
               'border-bottom-width-0':
-                index !== props.row.bookCopies.length - 1,
+                index !== bodyProps.row.copies.length - 1,
             }"
           >
             <q-td auto-width>
@@ -89,13 +89,13 @@
                 row, because the v-show model is !props.expand
               -->
               <q-radio
-                v-model="selectedBookCopies[props.row.id]"
-                :val="index"
-                @click="props.expand = true"
+                v-model="selectedBookCopies[bodyProps.row.id]"
+                :val="bookCopy.id"
+                @click="bodyProps.expand = true"
               />
             </q-td>
             <q-td colspan="100%">
-              {{ bookCopy.code /* FIXME: add actual field */ }}
+              {{ bookCopy.code }}
             </q-td>
           </q-tr>
         </template>
@@ -137,15 +137,17 @@ import { sumBy } from "lodash-es";
 import { QDialog, QTableColumn, date, useDialogPluginComponent } from "quasar";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
-import { UserFragment } from "src/services/user.graphql";
+import { useCartService } from "src/services/cart";
+import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import DialogTable from "./dialog-table.vue";
+// import { useBookCopyService } from "src/services/book-copy";
 
-const properties = defineProps<{
-  user: UserFragment;
+const props = defineProps<{
+  retailLocationId: string;
+  user: CustomerFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -221,69 +223,63 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-// TODO: remove the pagination from here when correct query get connected.
-const currentPage = ref(0);
-const numberOfRows = ref(10);
+const cartBooks = ref<BookSummaryFragment[]>([]);
 
 const {
-  books: rows,
-  refetchBooks,
-  loading,
-} = useBookService(currentPage, numberOfRows);
+  /* useAddToCartMutation, */ CART_EXPIRY_IN_SECONDS,
+  useOpenCartMutation,
+} = useCartService();
+// const { useGetBookCopiesQuery } = useBookCopyService();
+// const { query: getBookCopiesQuery,  } = useGetBookCopiesQuery();
 
-const stubRows = computed(() =>
-  rows.value.map((row, index) => ({
-    ...row,
-    bookCopies: [
-      {
-        code: `000/00${index + 1}`,
-      },
-      {
-        code: `000/00${index + 2}`,
-      },
-    ],
-  })),
-);
+// const booksWithCopies = ref<BookSummaryFragment[]>([]);
 
 const selectedBookCopies = ref<Record<string, number>>({});
 
 const discountValue = computed(() =>
   // FIXME: add actual discount calculation logic
-  properties.user.discount ? "1.00" : "0.00",
+  props.user.discount ? "1.00" : "0.00",
 );
 
-// FIXME: add the correct time to cart reset
 const emptyCartTimer = ref(30 * 60);
-
 const timeUntilEmpty = computed(() => {
   return date.formatDate(new Date(0).setSeconds(emptyCartTimer.value), "mm:ss");
 });
 
 const totalBooksPrice = computed(() =>
   sumBy(Object.keys(selectedBookCopies.value), (bookId) => {
-    const book = stubRows.value.find(({ id }) => id === bookId);
+    const book = cartBooks.value.find(({ id }) => id === bookId);
     return book?.originalPrice ?? 0;
   }).toFixed(2),
 );
 
 let interval: number | undefined;
 
+const { openCart, loading } = useOpenCartMutation();
 onMounted(async () => {
-  await refetchBooks({
-    page: currentPage.value,
-    rows: numberOfRows.value,
+  const cart = await openCart({
+    input: {
+      retailLocationId: props.retailLocationId,
+      userId: props.user.id,
+    },
   });
+  cartBooks.value = cart.data.books;
+
+  const cartExpiryInSeconds = Math.round(
+    cart.data.createdAt / 1000 + CART_EXPIRY_IN_SECONDS - Date.now() / 1000,
+  );
+  emptyCartTimer.value = cartExpiryInSeconds;
 
   interval = window.setInterval(() => {
     if (emptyCartTimer.value === 0) {
       window.clearInterval(interval);
-      // FIXME: empty cart
+      // The server automatically deletes outdated carts, the cart component only closes itself
+      onDialogHide();
     } else {
       emptyCartTimer.value--;
     }
   }, 1000);
 });
-
 onUnmounted(() => {
   window.clearInterval(interval);
 });
