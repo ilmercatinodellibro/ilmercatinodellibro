@@ -105,7 +105,7 @@
         <q-btn
           :label="$t('manageUsers.cartDialog.emptyCart')"
           color="negative"
-          @click="onDialogOK('empty-cart')"
+          @click="emptyAndDestroyCart"
         />
         <q-icon
           :name="mdiInformationOutline"
@@ -134,7 +134,14 @@ import {
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { sumBy } from "lodash-es";
-import { QDialog, QTableColumn, date, useDialogPluginComponent } from "quasar";
+import {
+  Dialog,
+  Notify,
+  QDialog,
+  QTableColumn,
+  date,
+  useDialogPluginComponent,
+} from "quasar";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -224,9 +231,11 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
 ]);
 
 const cartBooks = ref<BookSummaryFragment[]>([]);
+const cartId = ref<string>();
 
 const {
   /* useAddToCartMutation, */ CART_EXPIRY_IN_SECONDS,
+  useDeleteCartMutation,
   useOpenCartMutation,
 } = useCartService();
 // const { useGetBookCopiesQuery } = useBookCopyService();
@@ -264,6 +273,7 @@ onMounted(async () => {
     },
   });
   cartBooks.value = cart.data.books;
+  cartId.value = cart.data.id;
 
   const cartExpiryInSeconds = Math.round(
     cart.data.createdAt / 1000 + CART_EXPIRY_IN_SECONDS - Date.now() / 1000,
@@ -287,6 +297,38 @@ onUnmounted(() => {
 function removeBook(book: BookSummaryFragment) {
   // FIXME: remove from cart and put into the previous state
   book;
+}
+
+const { deleteCart } = useDeleteCartMutation();
+function emptyAndDestroyCart() {
+  Dialog.create({
+    title: "Svuotare carrello?",
+    message:
+      "Vuoi davvero svuotare il carrello del cliente attuale e ritornare i suoi libri tra le liste dei prenotati e dei richiesti?",
+    cancel: "Annulla",
+    ok: "Svuota",
+  }).onOk(async () => {
+    // Should never happen, check is for precaution
+    if (!cartId.value) {
+      return;
+    }
+
+    try {
+      await deleteCart({
+        input: {
+          cartId: cartId.value,
+        },
+      });
+    } catch {
+      Notify.create({
+        type: "negative",
+        message:
+          "Non è stato possibile eliminare il carrello per il cliente selezionato.",
+      });
+    } finally {
+      onDialogHide();
+    }
+  });
 }
 </script>
 
