@@ -1,11 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { OnEvent } from "@nestjs/event-emitter";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import {
+  Book,
   BookRequest,
   Prisma,
   RequestQueue as PrismaRequestQueue,
 } from "@prisma/client";
+import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.module";
+import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 
 type RequestQueue = PrismaRequestQueue & {
@@ -14,7 +17,10 @@ type RequestQueue = PrismaRequestQueue & {
 
 @Injectable()
 export class BookRequestService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   private readonly availableRequestFilter = {
     deletedAt: null,
@@ -59,13 +65,13 @@ export class BookRequestService {
         continue;
       }
 
-      // TODO: Notify the user
-      console.error("The requested book is now available", book.id);
+      const request = book.requests[0];
+      await this.#notifyUser(request, book);
 
       await this.prisma.requestQueue.create({
         data: {
           bookId: book.id,
-          currentRequestId: book.requests[0].id,
+          currentRequestId: request.id,
           lastCheckedAt: new Date(),
         },
       });
@@ -114,7 +120,7 @@ export class BookRequestService {
       },
       include: {
         book: {
-          select: {
+          include: {
             meta: true,
           },
         },
@@ -128,8 +134,7 @@ export class BookRequestService {
       return;
     }
 
-    // TODO: Notify the user
-    console.error("The requested book is now available", bookId);
+    await this.#notifyUser(nextRequest, nextRequest.book);
 
     await this.prisma.requestQueue.update({
       where: {
@@ -140,5 +145,28 @@ export class BookRequestService {
         lastCheckedAt: new Date(),
       },
     });
+  }
+
+  async #notifyUser(request: BookRequest, book: Book) {
+    // TODO: Maybe reuse the event (?)
+    const { notifications, ...event } = await this.prisma.event.create({
+      data: {
+        name: "Requested Book Available",
+        description: `The requested book "${book.title}" is now available for reservation.`,
+        ownerId: request.userId,
+        notifications: {
+          create: {
+            userId: request.userId,
+          },
+        },
+      },
+      include: {
+        notifications: true,
+      },
+    });
+    this.eventEmitter.emit(NEW_NOTIFICATION_EVENT, {
+      event,
+      notification: notifications[0],
+    } satisfies NewNotificationPayload);
   }
 }
