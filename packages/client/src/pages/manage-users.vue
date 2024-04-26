@@ -437,6 +437,8 @@ function openCellEditDialog(
       Dialog.create({
         component: EditUserStockdataDialog,
         componentProps: { userData },
+      }).onDismiss(() => {
+        tableRef.value.requestServerInteraction();
       });
       break;
     case "reserved":
@@ -446,6 +448,8 @@ function openCellEditDialog(
           userData,
           retailLocationId: selectedLocation.value.id,
         },
+      }).onDismiss(() => {
+        tableRef.value.requestServerInteraction();
       });
       break;
     case "requested":
@@ -455,6 +459,8 @@ function openCellEditDialog(
           userData,
           retailLocationId: selectedLocation.value.id,
         },
+      }).onDismiss(() => {
+        tableRef.value.requestServerInteraction();
       });
       break;
     case "sold":
@@ -466,6 +472,8 @@ function openCellEditDialog(
       Dialog.create({
         component: EditUserBooksMovementsDialog,
         componentProps: { userData, type: name },
+      }).onDismiss(() => {
+        tableRef.value.requestServerInteraction();
       });
       break;
     }
