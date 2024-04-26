@@ -44,8 +44,11 @@
               outline
               @click="goToCart()"
             >
-              <!-- FIXME: add correct display of number of books in the cart -->
-              <round-badge :label="0" color="accent" float-left-square />
+              <round-badge
+                :label="booksCartCount"
+                color="accent"
+                float-left-square
+              />
             </q-btn>
           </span>
           <span v-else>
@@ -177,6 +180,7 @@ import {
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
@@ -185,7 +189,7 @@ import { useRequestService } from "src/services/request";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
-import { UserSummaryFragment } from "src/services/user.graphql";
+import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import CartDialog from "./cart-dialog.vue";
@@ -200,9 +204,10 @@ const smallBreakpoint = 1440;
 const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
 
 const props = defineProps<{
-  userData: UserSummaryFragment;
+  userData: CustomerFragment;
   retailLocationId: string;
 }>();
+const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
@@ -233,7 +238,6 @@ const {
   userId: props.userData.id,
 });
 
-const { createReservations } = useCreateReservationsMutation();
 const { deleteReservation } = useDeleteReservationMutation();
 function deleteAllReserved() {
   Dialog.create({
@@ -282,6 +286,8 @@ async function removeFromReserved(reservation: ReservationSummaryFragment) {
   }
   reservation;
 }
+
+const { createReservations } = useCreateReservationsMutation();
 async function reserveBook({ book }: RequestSummaryFragment) {
   if (!book.meta.isAvailable) {
     return;
@@ -318,7 +324,6 @@ async function addReservationFromIsnb(isbnCode: string) {
       });
       return;
     }
-
     if (!book.meta.isAvailable) {
       Notify.create({
         type: "negative",
@@ -327,6 +332,14 @@ async function addReservationFromIsnb(isbnCode: string) {
       });
       return;
     }
+
+    await createReservations({
+      input: {
+        userId: props.userData.id,
+        retailLocationId: props.retailLocationId,
+        bookIds: [book.id],
+      },
+    });
   } catch {
     Notify.create({
       type: "negative",
@@ -342,7 +355,7 @@ async function addReservationFromIsnb(isbnCode: string) {
 const { useAddToCartMutation, useOpenCartMutation } = useCartService();
 const { openCart } = useOpenCartMutation();
 const { addToCart } = useAddToCartMutation();
-function moveAllIntoCart() {
+async function moveAllIntoCart() {
   const reservedBooksIds = userReservations.value.map(({ id }) => id);
   const requestedAndAvailableBooksIds = bookRequests.value
     .filter(({ book }) => book.meta.isAvailable)
@@ -356,7 +369,7 @@ function moveAllIntoCart() {
       },
     });
 
-    await Promise.all([
+    const reservationsAndRequestsToMoveIntoCart = [
       ...reservedBooksIds.map((id) => {
         return addToCart({
           input: {
@@ -373,7 +386,11 @@ function moveAllIntoCart() {
           },
         });
       }),
-    ]);
+    ];
+
+    await Promise.all(reservationsAndRequestsToMoveIntoCart);
+
+    booksCartCount.value += reservationsAndRequestsToMoveIntoCart.length;
   } catch {
     Notify.create({
       type: "negative",
@@ -405,6 +422,8 @@ async function moveReservedIntoCart() {
         });
       }),
     );
+
+    booksCartCount.value += reservedBooksIds.length;
   } catch {
     Notify.create({
       type: "negative",
@@ -450,6 +469,8 @@ async function putBooksIntoCart(
           : { fromReservationId: requestOrReservation.id }),
       },
     });
+
+    booksCartCount.value++;
   } catch {
     Notify.create({
       type: "negative",

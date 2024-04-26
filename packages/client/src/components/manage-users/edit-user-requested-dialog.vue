@@ -43,8 +43,11 @@
               outline
               @click="goToCart()"
             >
-              <!-- FIXME: add correct display of number of books in the cart -->
-              <round-badge :label="0" color="accent" float-left-square />
+              <round-badge
+                :label="booksCartCount"
+                color="accent"
+                float-left-square
+              />
             </q-btn>
           </span>
           <span v-else>
@@ -96,7 +99,11 @@
                   {{ $t("book.reservedBooksDialog.options.reserved") }}
                 </q-item-section>
               </q-item>
-              <q-item v-close-popup clickable @click="putBookIntoCart(request)">
+              <q-item
+                v-close-popup
+                clickable
+                @click="putRequestedBookIntoCart(request)"
+              >
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.cart") }}
                 </q-item-section>
@@ -123,7 +130,7 @@ import {
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
-// import { ref } from "vue";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
@@ -131,7 +138,7 @@ import { useCartService } from "src/services/cart";
 import { useRequestService } from "src/services/request";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
-import { UserSummaryFragment } from "src/services/user.graphql";
+import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import CartDialog from "./cart-dialog.vue";
@@ -146,12 +153,12 @@ const largeBreakpoint = 1695;
 const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
 
 const props = defineProps<{
-  userData: UserSummaryFragment;
+  userData: CustomerFragment;
   retailLocationId: string;
 }>();
+const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
-
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 const {
@@ -324,6 +331,8 @@ async function moveAllIntoCart() {
         });
       }),
     );
+
+    booksCartCount.value += availableBooksRequestIds.length;
   } catch {
     Notify.create({
       type: "negative",
@@ -334,7 +343,7 @@ async function moveAllIntoCart() {
     await refetchRequests();
   }
 }
-async function putBookIntoCart(request: RequestSummaryFragment) {
+async function putRequestedBookIntoCart(request: RequestSummaryFragment) {
   if (!request.book.meta.isAvailable) {
     return;
   }
@@ -353,6 +362,8 @@ async function putBookIntoCart(request: RequestSummaryFragment) {
         fromBookRequestId: request.id,
       },
     });
+
+    booksCartCount.value++;
   } catch {
     Notify.create({
       type: "negative",
