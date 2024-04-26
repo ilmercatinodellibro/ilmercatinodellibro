@@ -72,19 +72,11 @@ export class BookRequestService {
     }
   }
 
-  // TODO: this might not be necessary
-  async handleRequestQueue(bookId: string) {
-    const queue = await this.prisma.requestQueue.findUnique({
-      where: {
-        bookId,
-      },
-      include: {
-        currentRequest: true,
-      },
-    });
-
-    await this.#handleQueue(bookId, queue);
-  }
+  /**
+   * The time in minutes after which a queue should be rechecked.
+   * Don't forget to update the `@Cron` decorator when changing this value.
+   */
+  readonly #queueProcessingInterval = 30;
 
   @Cron(CronExpression.EVERY_30_MINUTES)
   async handleRequestQueues() {
@@ -106,16 +98,15 @@ export class BookRequestService {
 
   #getProcessTickTime() {
     const minute = 60 * 1000;
-    return new Date(Date.now() - 30 * minute);
+    return new Date(Date.now() - this.#queueProcessingInterval * minute);
   }
 
-  async #handleQueue(bookId: string, queue: RequestQueue | null) {
+  async #handleQueue(bookId: string, queue: RequestQueue) {
     const nextRequest = await this.prisma.bookRequest.findFirst({
       where: {
         bookId,
-        ...(queue
-          ? { createdAt: { gte: queue.currentRequest.createdAt } }
-          : {}),
+        id: { not: queue.currentRequest.id },
+        createdAt: { gte: queue.currentRequest.createdAt },
         ...this.availableRequestFilter,
       },
       orderBy: {
@@ -129,23 +120,9 @@ export class BookRequestService {
         },
       },
     });
-    if (!nextRequest) {
-      if (queue) {
-        await this.prisma.requestQueue.delete({
-          where: {
-            id: queue.id,
-          },
-        });
-      }
-
-      return;
-    }
-
-    if (!nextRequest.book.meta.isAvailable) {
+    if (!nextRequest || !nextRequest.book.meta.isAvailable) {
       await this.prisma.requestQueue.delete({
-        where: {
-          bookId,
-        },
+        where: { id: queue.id },
       });
 
       return;
@@ -154,16 +131,11 @@ export class BookRequestService {
     // TODO: Notify the user
     console.error("The requested book is now available", bookId);
 
-    await this.prisma.requestQueue.upsert({
+    await this.prisma.requestQueue.update({
       where: {
         bookId,
       },
-      create: {
-        bookId,
-        currentRequestId: nextRequest.id,
-        lastCheckedAt: new Date(),
-      },
-      update: {
+      data: {
         currentRequestId: nextRequest.id,
         lastCheckedAt: new Date(),
       },
