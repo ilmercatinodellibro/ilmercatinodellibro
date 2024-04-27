@@ -8,7 +8,7 @@
       "
       size="fullscreen"
     >
-      <card-table-header>
+      <card-table-header @add-book="addBookToCart">
         <template #side-actions>
           <q-input
             :model-value="cartBooks.length"
@@ -119,7 +119,7 @@
         <q-btn
           :label="$t('manageUsers.cartDialog.sellBooks', [totalBooksPrice])"
           color="positive"
-          @click="onDialogOK('sell-books')"
+          @click="sellBooks"
         />
       </template>
     </k-dialog-card>
@@ -144,6 +144,8 @@ import {
 } from "quasar";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import ConfirmDialog from "src/components/confirm-dialog.vue";
+import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
 import { CustomerFragment } from "src/services/user.graphql";
@@ -231,30 +233,18 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
 ]);
 
 const cartBooks = ref<BookSummaryFragment[]>([]);
+const selectedBookCopies = ref<Record<string, string>>({});
 const cartId = ref<string>();
-
-const {
-  /* useAddToCartMutation, */ CART_EXPIRY_IN_SECONDS,
-  useDeleteCartMutation,
-  useOpenCartMutation,
-} = useCartService();
-// const { useGetBookCopiesQuery } = useBookCopyService();
-// const { query: getBookCopiesQuery,  } = useGetBookCopiesQuery();
-
-// const booksWithCopies = ref<BookSummaryFragment[]>([]);
-
-const selectedBookCopies = ref<Record<string, number>>({});
-
-const discountValue = computed(() =>
-  // FIXME: add actual discount calculation logic
-  props.user.discount ? "1.00" : "0.00",
-);
 
 const emptyCartTimer = ref(30 * 60);
 const timeUntilEmpty = computed(() => {
   return date.formatDate(new Date(0).setSeconds(emptyCartTimer.value), "mm:ss");
 });
 
+const discountValue = computed(() =>
+  // FIXME: add actual discount calculation logic
+  props.user.discount ? "1.00" : "0.00",
+);
 const totalBooksPrice = computed(() =>
   sumBy(Object.keys(selectedBookCopies.value), (bookId) => {
     const book = cartBooks.value.find(({ id }) => id === bookId);
@@ -262,8 +252,16 @@ const totalBooksPrice = computed(() =>
   }).toFixed(2),
 );
 
-let interval: number | undefined;
+const {
+  CART_EXPIRY_IN_SECONDS,
+  useAddToCartMutation,
+  useDeleteCartMutation,
+  useOpenCartMutation,
+  useFinalizeCartMutation,
+  useRemoveFromCartMutation,
+} = useCartService();
 
+let interval: number | undefined;
 const { openCart, loading } = useOpenCartMutation();
 onMounted(async () => {
   const cart = await openCart({
@@ -294,19 +292,107 @@ onUnmounted(() => {
   window.clearInterval(interval);
 });
 
-function removeBook(book: BookSummaryFragment) {
-  // FIXME: remove from cart and put into the previous state
-  book;
+const { addToCart, loading: addToCartLoading } = useAddToCartMutation();
+async function addBookToCart(bookISBN?: string) {
+  if (!bookISBN || addToCartLoading.value) {
+    return;
+  }
+
+  // FIXME: this is incomplete see here for details https://zpl.io/jpjB9M6
+
+  let book: BookSummaryFragment | undefined = undefined;
+
+  try {
+    book = await fetchBookByISBN(bookISBN);
+  } catch {
+    Notify.create({
+      type: "negative",
+      message: "Un libro con ISBN specificato non è stato trovato a catalogo.",
+    });
+    return;
+  }
+
+  if (!book) {
+    // TODO: dedupe this message
+    Notify.create({
+      type: "negative",
+      message: "Un libro con ISBN specificato non è stato trovato a catalogo.",
+    });
+    return;
+  }
+
+  if (!book.meta.isAvailable) {
+    Notify.create({
+      type: "negative",
+      message: "Il libro richiesto non è disponibile a magazzino al momento.",
+    });
+    return;
+  }
+
+  if (!cartId.value) {
+    return;
+  }
+
+  try {
+    await addToCart({
+      input: {
+        cartId: cartId.value,
+      },
+    });
+  } catch {
+    Notify.create({
+      type: "negative",
+      message: "Non è stato possibile aggiungere il libro al carrello.",
+    });
+  }
+}
+
+const { removeFromCart, loading: removeBookLoading } =
+  useRemoveFromCartMutation();
+async function removeBook(book: BookSummaryFragment) {
+  const bookIndex = cartBooks.value.findIndex(({ id }) => book.id === id);
+
+  // Avoid multiple deletions until the current one has ended
+  if (bookIndex === -1 || !cartId.value || removeBookLoading.value) {
+    return;
+  }
+
+  try {
+    await removeFromCart({
+      input: {
+        bookId: book.id,
+        cartId: cartId.value,
+      },
+    });
+    cartBooks.value.splice(bookIndex, 1);
+
+    // If the book had a selected copy, deletes that one too
+    const currentlySelectedCopies = selectedBookCopies.value;
+    if (currentlySelectedCopies[book.id]) {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete currentlySelectedCopies[book.id];
+      selectedBookCopies.value = currentlySelectedCopies;
+    }
+  } catch {
+    Notify.create({
+      type: "negative",
+      message:
+        "Non è stato possibile eliminare il libro selezionato dal carrello.",
+    });
+  }
 }
 
 const { deleteCart } = useDeleteCartMutation();
 function emptyAndDestroyCart() {
   Dialog.create({
-    title: "Svuotare carrello?",
-    message:
-      "Vuoi davvero svuotare il carrello del cliente attuale e ritornare i suoi libri tra le liste dei prenotati e dei richiesti?",
-    cancel: "Annulla",
-    ok: "Svuota",
+    component: ConfirmDialog,
+    componentProps: {
+      title: "Svuotare carrello?",
+      message:
+        "Vuoi davvero svuotare il carrello del cliente attuale e ritornare i suoi libri tra le liste dei prenotati e dei richiesti?",
+      ok: "Svuota",
+      cancel: "Annulla",
+    },
   }).onOk(async () => {
     // Should never happen, check is for precaution
     if (!cartId.value) {
@@ -323,10 +409,62 @@ function emptyAndDestroyCart() {
       Notify.create({
         type: "negative",
         message:
-          "Non è stato possibile eliminare il carrello per il cliente selezionato.",
+          "Non è stato possibile eliminare il carrello del cliente selezionato.",
       });
     } finally {
       onDialogHide();
+    }
+  });
+}
+
+const { finalizeCart } = useFinalizeCartMutation();
+function sellBooks() {
+  const bookAndCopies = Object.entries(selectedBookCopies.value);
+  if (bookAndCopies.length < cartBooks.value.length) {
+    Notify.create({
+      type: "negative",
+      message:
+        "Seleziona una copia per ogni libro nel carrello oppure rimuovi dal carrello i libri senza copie selezionate.",
+    });
+    return;
+  }
+
+  Dialog.create({
+    component: ConfirmDialog,
+    componentProps: {
+      title: "Vendi libri?",
+      message: `Confermare la vendita dei libri nel carrello per un totale di ${totalBooksPrice.value}?`,
+      ok: "Vendi",
+      cancel: "Annulla",
+    },
+  }).onOk(async () => {
+    if (!cartId.value) {
+      return;
+    }
+
+    try {
+      await finalizeCart({
+        input: {
+          cartId: cartId.value,
+          bookCopyIds: bookAndCopies.map(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            ([_, selectedBookCopyId]) => selectedBookCopyId,
+          ),
+        },
+      });
+
+      Notify.create({
+        type: "positive",
+        message: "Libri venduti con successo.",
+      });
+
+      onDialogOK();
+    } catch {
+      Notify.create({
+        type: "negative",
+        message:
+          "Non è stato possibile terminare l'operazione di vendita. Prova di nuovo o riapri il carrello per selezionare nuovamente le copie dei libri.",
+      });
     }
   });
 }
