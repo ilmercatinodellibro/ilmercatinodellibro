@@ -41,7 +41,7 @@
               :label="$t('manageUsers.goToCart')"
               no-wrap
               outline
-              @click="goToCart()"
+              @click="onDialogOK()"
             >
               <round-badge
                 :label="booksCartCount"
@@ -72,7 +72,7 @@
                     {{ $t("manageUsers.requestedBooksDialog.moveIntoCart") }}
                   </q-item-section>
                 </q-item>
-                <q-item clickable @click="goToCart()">
+                <q-item clickable @click="onDialogOK()">
                   <q-item-section>
                     {{ $t("manageUsers.goToCart") }}
                   </q-item-section>
@@ -142,7 +142,6 @@ import { useReservationService } from "src/services/reservation";
 import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
-import CartDialog from "./cart-dialog.vue";
 import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
@@ -160,7 +159,8 @@ const props = defineProps<{
 const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
+  useDialogPluginComponent();
 
 const {
   useGetRequestsQuery,
@@ -351,17 +351,5 @@ async function putRequestedBookIntoCart(request: RequestSummaryFragment) {
   } finally {
     await refetchRequests();
   }
-}
-
-function goToCart() {
-  Dialog.create({
-    component: CartDialog,
-    componentProps: {
-      user: props.userData,
-    },
-  }).onOk((payload) => {
-    // FIXME: add cart management logic
-    payload;
-  });
 }
 </script>

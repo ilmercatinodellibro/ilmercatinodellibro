@@ -308,8 +308,7 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   },
   {
     name: "phone-number",
-    // field: "phoneNumber",
-    field: () => Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
+    field: "phoneNumber",
     label: t("manageUsers.fields.phoneNumber"),
     align: "left",
   },
@@ -448,9 +447,13 @@ function openCellEditDialog(
           userData,
           retailLocationId: selectedLocation.value.id,
         },
-      }).onDismiss(() => {
-        tableRef.value.requestServerInteraction();
-      });
+      })
+        .onOk(() => {
+          openCart(userData);
+        })
+        .onDismiss(() => {
+          tableRef.value.requestServerInteraction();
+        });
       break;
     case "requested":
       Dialog.create({
@@ -459,9 +462,13 @@ function openCellEditDialog(
           userData,
           retailLocationId: selectedLocation.value.id,
         },
-      }).onDismiss(() => {
-        tableRef.value.requestServerInteraction();
-      });
+      })
+        .onOk(() => {
+          openCart(userData);
+        })
+        .onDismiss(() => {
+          tableRef.value.requestServerInteraction();
+        });
       break;
     case "sold":
     case "purchased": {
