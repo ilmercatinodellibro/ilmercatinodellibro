@@ -132,6 +132,7 @@ import {
 import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
 import { useCartService } from "src/services/cart";
@@ -214,10 +215,7 @@ async function deleteAllRequested() {
       }),
     );
   } catch {
-    Notify.create({
-      type: "negative",
-      message: "Non tutte le richieste sono state cancellate.",
-    });
+    notifyError("Non tutte le richieste sono state cancellate.");
   } finally {
     await refetchRequests();
   }
@@ -230,11 +228,7 @@ async function deleteRequest(request: RequestSummaryFragment) {
       },
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile cancellare la richiesta.",
-    });
+    notifyError("Non è stato possibile cancellare la richiesta.");
   } finally {
     await refetchRequests();
   }
@@ -266,11 +260,7 @@ async function reserveAllAvailableRequested() {
       message: `Prenotato ${availableBookIds.length} copie di libri richiesti.`,
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile prenotare tutte le richieste.",
-    });
+    notifyError("Non è stato possibile prenotare tutte le richieste.");
   } finally {
     await refetchRequests();
   }
@@ -291,11 +281,7 @@ async function reserveBook({ book }: RequestSummaryFragment) {
       message: `Prenotato ${book.title}.`,
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile prenotare il libro specificato.",
-    });
+    notifyError("Non è stato possibile prenotare il libro specificato.");
   } finally {
     await refetchRequests();
   }
@@ -334,11 +320,7 @@ async function moveAllIntoCart() {
 
     booksCartCount.value += availableBooksRequestIds.length;
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile aggiungere tutti i libri al carrello.",
-    });
+    notifyError("Non è stato possibile aggiungere tutti i libri al carrello.");
   } finally {
     await refetchRequests();
   }
@@ -365,11 +347,7 @@ async function putRequestedBookIntoCart(request: RequestSummaryFragment) {
 
     booksCartCount.value++;
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile aggiungere il libro al carrello.",
-    });
+    notifyError("Non è stato possibile aggiungere il libro al carrello.");
   } finally {
     await refetchRequests();
   }

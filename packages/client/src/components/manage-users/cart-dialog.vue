@@ -146,6 +146,7 @@ import {
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
+import { notifyError } from "src/helpers/error-messages";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
 import { CustomerFragment } from "src/services/user.graphql";
@@ -310,34 +311,24 @@ async function addBookToCart(bookISBN?: string) {
   } catch (_error) {
     const error = _error as Error;
     if (!isApolloError(error)) {
-      Notify.create({
-        type: "negative",
-        message: "Non è stato possibile aggiungere il libro al carrello.",
-      });
+      notifyError("Non è stato possibile aggiungere il libro al carrello.");
       return;
     }
 
     error.graphQLErrors.forEach((graphQLError) => {
       switch (graphQLError.message) {
         case "BOOK_NOT_FOUND":
-          Notify.create({
-            type: "negative",
-            message:
-              "Un libro con ISBN specificato non è stato trovato a catalogo.",
-          });
+          notifyError(
+            "Un libro con ISBN specificato non è stato trovato a catalogo.",
+          );
           break;
         case "BOOK_NOT_AVAILABLE":
-          Notify.create({
-            type: "negative",
-            message:
-              "Il libro richiesto non è disponibile a magazzino al momento.",
-          });
+          notifyError(
+            "Il libro richiesto non è disponibile a magazzino al momento.",
+          );
           break;
         default:
-          Notify.create({
-            type: "negative",
-            message: "Non è stato possibile aggiungere il libro al carrello.",
-          });
+          notifyError("Non è stato possibile aggiungere il libro al carrello.");
       }
     });
   }
@@ -370,11 +361,9 @@ async function removeBook(book: BookSummaryFragment) {
       selectedBookCopies.value = currentlySelectedCopies;
     }
   } catch {
-    Notify.create({
-      type: "negative",
-      message:
-        "Non è stato possibile eliminare il libro selezionato dal carrello.",
-    });
+    notifyError(
+      "Non è stato possibile eliminare il libro selezionato dal carrello.",
+    );
   }
 }
 
@@ -402,11 +391,9 @@ function emptyAndDestroyCart() {
         },
       });
     } catch {
-      Notify.create({
-        type: "negative",
-        message:
-          "Non è stato possibile eliminare il carrello del cliente selezionato.",
-      });
+      notifyError(
+        "Non è stato possibile eliminare il carrello del cliente selezionato.",
+      );
     } finally {
       onDialogHide();
     }
@@ -417,11 +404,9 @@ const { finalizeCart } = useFinalizeCartMutation();
 function sellBooks() {
   const bookAndCopies = Object.entries(selectedBookCopies.value);
   if (bookAndCopies.length < cartBooks.value.length) {
-    Notify.create({
-      type: "negative",
-      message:
-        "Seleziona una copia per ogni libro nel carrello oppure rimuovi dal carrello i libri senza copie selezionate.",
-    });
+    notifyError(
+      "Seleziona una copia per ogni libro nel carrello oppure rimuovi dal carrello i libri senza copie selezionate.",
+    );
     return;
   }
 
@@ -456,11 +441,9 @@ function sellBooks() {
 
       onDialogOK();
     } catch {
-      Notify.create({
-        type: "negative",
-        message:
-          "Non è stato possibile terminare l'operazione di vendita. Prova di nuovo o riapri il carrello per selezionare nuovamente le copie dei libri.",
-      });
+      notifyError(
+        "Non è stato possibile terminare l'operazione di vendita. Prova di nuovo o riapri il carrello per selezionare nuovamente le copie dei libri.",
+      );
     }
   });
 }
