@@ -122,6 +122,12 @@ export class CartResolver {
         },
         include: {
           meta: true,
+          requests: {
+            where: {
+              userId: cart.userId,
+              deletedAt: null,
+            },
+          },
           reservations: {
             where: {
               userId: cart.userId,
@@ -148,12 +154,31 @@ export class CartResolver {
         );
       }
 
+      if (bookDetails.requests.length === 0) {
+        ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
+          data: {
+            userId: cart.userId,
+            bookId: bookDetails.id,
+            createdById: operator.id,
+          },
+        }));
+
+        if (!bookDetails.meta.isAvailable) {
+          throw new UnprocessableEntityException("The book is not available");
+        }
+      } else {
+        fromBookRequestId = bookDetails.requests[0].id;
+      }
+
       // The book availability applies to all users, so we first check if this specific user already has a reservation for the book
       if (
         bookDetails.reservations.length === 0 &&
         !bookDetails.meta.isAvailable
       ) {
         throw new UnprocessableEntityException("The book is not available");
+      } else if (bookDetails.reservations.length > 0) {
+        fromReservationId = bookDetails.reservations[0].id;
+        fromBookRequestId = undefined;
       }
     } else if (fromBookRequestId) {
       const request = await this.prisma.bookRequest.findUniqueOrThrow({
