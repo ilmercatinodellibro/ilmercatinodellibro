@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
@@ -114,8 +115,10 @@ export class CartResolver {
 
     let book: PrismaBook;
 
+    // throw new XException("CODE", { description: "Description" }) is used for known custom cases
+
     if (fromBookIsbn) {
-      const bookDetails = await this.prisma.book.findFirstOrThrow({
+      const bookDetails = await this.prisma.book.findFirst({
         where: {
           isbnCode: fromBookIsbn,
           retailLocationId: cart.retailLocationId,
@@ -136,6 +139,12 @@ export class CartResolver {
           },
         },
       });
+      if (!bookDetails) {
+        throw new NotFoundException("BOOK_NOT_FOUND", {
+          description: "Book not found",
+        });
+      }
+
       book = bookDetails;
 
       if (bookDetails.requests.length === 0) {
@@ -147,8 +156,11 @@ export class CartResolver {
           },
         }));
 
+        // no requests means there can't be reservations either, so we can safely check the book availability
         if (!bookDetails.meta.isAvailable) {
-          throw new UnprocessableEntityException("The book is not available");
+          throw new UnprocessableEntityException("BOOK_NOT_AVAILABLE", {
+            description: "The book is not available",
+          });
         }
       } else {
         fromBookRequestId = bookDetails.requests[0].id;
@@ -159,7 +171,9 @@ export class CartResolver {
         bookDetails.reservations.length === 0 &&
         !bookDetails.meta.isAvailable
       ) {
-        throw new UnprocessableEntityException("The book is not available");
+        throw new UnprocessableEntityException("BOOK_NOT_AVAILABLE", {
+          description: "The book is not available",
+        });
       } else if (bookDetails.reservations.length > 0) {
         fromReservationId = bookDetails.reservations[0].id;
         fromBookRequestId = undefined;
