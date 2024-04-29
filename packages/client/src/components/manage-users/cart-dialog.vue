@@ -15,14 +15,12 @@
             :label="$t('manageUsers.cartDialog.totalBooks')"
             disable
             outlined
-            readonly
           />
           <q-input
             :model-value="discountValue"
             :label="$t('manageUsers.cartDialog.discount')"
             disable
             outlined
-            readonly
             suffix="€"
           />
           <q-input
@@ -30,7 +28,6 @@
             :label="$t('manageUsers.cartDialog.total')"
             disable
             outlined
-            readonly
             suffix="€"
           />
         </template>
@@ -46,15 +43,18 @@
       >
         <template #body="bodyProps">
           <q-tr>
-            <q-td auto-width>
+            <q-td
+              v-for="{ name, value } in bodyProps.cols"
+              :key="name"
+              auto-width
+            >
               <q-btn
+                v-if="name === 'selection'"
                 :icon="!bodyProps.expand ? mdiChevronUp : mdiChevronDown"
                 flat
                 round
                 @click="bodyProps.expand = !bodyProps.expand"
               />
-            </q-td>
-            <q-td v-for="{ name, value } in bodyProps.cols" :key="name">
               <q-btn
                 v-if="name === 'delete'"
                 :icon="mdiDelete"
@@ -94,7 +94,7 @@
                 @click="bodyProps.expand = true"
               />
             </q-td>
-            <q-td colspan="100%">
+            <q-td colspan="11">
               {{ bookCopy.code }}
             </q-td>
           </q-tr>
