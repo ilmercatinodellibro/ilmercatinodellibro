@@ -337,6 +337,7 @@ async function addBookToCart(bookISBN?: string) {
     await addToCart({
       input: {
         cartId: cartId.value,
+        fromBookIsbn: bookISBN,
       },
     });
   } catch {
