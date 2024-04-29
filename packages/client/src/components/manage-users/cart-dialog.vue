@@ -149,16 +149,19 @@ import ConfirmDialog from "src/components/confirm-dialog.vue";
 import { notifyError } from "src/helpers/error-messages";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
+import { useRequestService } from "src/services/request";
+import { useReservationService } from "src/services/reservation";
+import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import DialogTable from "./dialog-table.vue";
-// import { useBookCopyService } from "src/services/book-copy";
 
 const props = defineProps<{
-  retailLocationId: string;
   user: CustomerFragment;
 }>();
+
+const { selectedLocationId: retailLocationId } = useRetailLocationService();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
@@ -267,7 +270,8 @@ const { openCart, loading } = useOpenCartMutation();
 onMounted(async () => {
   const { data: cart } = await openCart({
     input: {
-      retailLocationId: props.retailLocationId,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      retailLocationId: retailLocationId.value!,
       userId: props.user.id,
     },
   });
@@ -332,6 +336,18 @@ async function addBookToCart(bookISBN?: string) {
 
 const { removeFromCart, loading: removeBookLoading } =
   useRemoveFromCartMutation();
+const { useGetReservationsQuery } = useReservationService();
+const { refetch: refetchReservations } = useGetReservationsQuery({
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  retailLocationId: retailLocationId.value!,
+  userId: props.user.id,
+});
+const { useGetRequestsQuery } = useRequestService();
+const { refetch: refetchRequests } = useGetRequestsQuery({
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  retailLocationId: retailLocationId.value!,
+  userId: props.user.id,
+});
 async function removeBook(book: BookSummaryFragment) {
   const bookIndex = cartBooks.value.findIndex(({ id }) => book.id === id);
 
@@ -356,6 +372,8 @@ async function removeBook(book: BookSummaryFragment) {
       delete currentlySelectedCopies[book.id];
       selectedBookCopies.value = currentlySelectedCopies;
     }
+
+    await Promise.all([refetchReservations(), refetchRequests()]);
   } catch {
     notifyError(t("bookErrors.notCartBookDeleted"));
   }
@@ -387,6 +405,7 @@ function emptyAndDestroyCart() {
     } catch {
       notifyError(t("bookErrors.notCartDeleted"));
     } finally {
+      await Promise.all([refetchReservations(), refetchRequests()]);
       onDialogHide();
     }
   });

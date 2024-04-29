@@ -42,7 +42,7 @@
               :label="$t('manageUsers.goToCart')"
               no-wrap
               outline
-              @click="goToCart()"
+              @click="onDialogOK()"
             >
               <round-badge
                 :label="booksCartCount"
@@ -75,7 +75,7 @@
                     {{ $t("manageUsers.reservedBooksDialog.reservedIntoCart") }}
                   </q-item-section>
                 </q-item>
-                <q-item clickable @click="goToCart()">
+                <q-item clickable @click="onDialogOK()">
                   <q-item-section>
                     {{ $t("manageUsers.goToCart") }}
                   </q-item-section>
@@ -194,7 +194,6 @@ import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
-import CartDialog from "./cart-dialog.vue";
 import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
@@ -213,7 +212,8 @@ const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
+  useDialogPluginComponent();
 
 const {
   useCreateReservationsMutation,
@@ -261,10 +261,11 @@ function deleteAllReserved() {
     } catch {
       notifyError(t("bookErrors.notAllReservationsDeleted"));
     } finally {
-      await refetchReservations();
+      await Promise.all([refetchReservations(), refetchRequests()]);
     }
   });
 }
+
 async function removeFromReserved(reservation: ReservationSummaryFragment) {
   try {
     await deleteReservation({
@@ -275,8 +276,7 @@ async function removeFromReserved(reservation: ReservationSummaryFragment) {
   } catch {
     notifyError(t("bookErrors.notReservationDeleted"));
   } finally {
-    await refetchReservations();
-    await refetchRequests();
+    await Promise.all([refetchReservations(), refetchRequests()]);
   }
   reservation;
 }
@@ -447,18 +447,6 @@ async function putBooksIntoCart(
     // Probably this can be improved with an if
     await Promise.all([refetchReservations(), refetchRequests()]);
   }
-}
-
-function goToCart() {
-  Dialog.create({
-    component: CartDialog,
-    componentProps: {
-      user: props.userData,
-    },
-  }).onOk((payload) => {
-    // FIXME: add cart management logic
-    payload;
-  });
 }
 
 const { deleteBookRequest } = useDeleteRequestMutation();
