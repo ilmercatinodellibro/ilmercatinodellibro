@@ -264,17 +264,17 @@ const {
 let interval: number | undefined;
 const { openCart, loading } = useOpenCartMutation();
 onMounted(async () => {
-  const cart = await openCart({
+  const { data: cart } = await openCart({
     input: {
       retailLocationId: props.retailLocationId,
       userId: props.user.id,
     },
   });
-  cartBooks.value = cart.data.books;
-  cartId.value = cart.data.id;
+  cartBooks.value = cart.books;
+  cartId.value = cart.id;
 
   const cartExpiryInSeconds = Math.round(
-    cart.data.createdAt / 1000 + CART_EXPIRY_IN_SECONDS - Date.now() / 1000,
+    cart.createdAt / 1000 + CART_EXPIRY_IN_SECONDS - Date.now() / 1000,
   );
   emptyCartTimer.value = cartExpiryInSeconds;
 
