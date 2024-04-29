@@ -105,7 +105,7 @@
         <q-btn
           :label="$t('manageUsers.cartDialog.emptyCart')"
           color="negative"
-          @click="emptyAndDestroyCart"
+          @click="emptyAndDestroyCart()"
         />
         <q-icon
           :name="mdiInformationOutline"
@@ -119,7 +119,7 @@
         <q-btn
           :label="$t('manageUsers.cartDialog.sellBooks', [totalBooksPrice])"
           color="positive"
-          @click="sellBooks"
+          @click="sellBooks()"
         />
       </template>
     </k-dialog-card>
@@ -165,8 +165,7 @@ const { selectedLocationId: retailLocationId } = useRetailLocationService();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
-  useDialogPluginComponent<"empty-cart" | "sell-books">();
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 const { t } = useI18n();
 
@@ -433,6 +432,7 @@ function sellBooks() {
     }
 
     try {
+      loading.value = true;
       await finalizeCart({
         input: {
           cartId: cartId.value,
@@ -443,12 +443,14 @@ function sellBooks() {
         },
       });
 
+      loading.value = false;
+
       Notify.create({
         type: "positive",
         message: "Libri venduti con successo.",
       });
 
-      onDialogOK();
+      onDialogHide();
     } catch {
       notifyError(t("bookErrors.notSell"));
     }
