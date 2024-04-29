@@ -89,6 +89,7 @@ export default {
     deleteAll: "Elimina Tutti",
     moveIntoReserved: "Sposta i Disponibili nei Prenotati",
     moveIntoCart: "Metti i Disponibili nel Carrello",
+    booksRequested: "",
   },
   reservedBooksDialog: {
     title: "Libri prenotati da {0}",
@@ -102,6 +103,8 @@ export default {
         'Stai eliminando tutti i libri prenotati da questo cliente. I libri verranno segnalati come "Disponibili". Vuoi procedere?',
       confirmButton: "Elimina Tutti",
     },
+    bookReserved: "Prenotato {0}.",
+    requestsReserved: "{0} copie di libri richiesti prenotate.",
   },
   payOffUserDialog: {
     title: "Liquida Utente {0}",

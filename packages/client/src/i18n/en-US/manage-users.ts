@@ -83,6 +83,7 @@ export default {
     deleteAll: "Delete All",
     moveIntoReserved: "Move Available into Reserved",
     moveIntoCart: "Move Available into Cart",
+    booksRequested: "",
   },
   reservedBooksDialog: {
     title: "Books reserved by {0}",
@@ -96,6 +97,8 @@ export default {
         'You are deleting all the the books that were reserved by this customer. The books will be marked as "Available". Do you wish to proceed?',
       confirmButton: "Delete All",
     },
+    bookReserved: "Reserved {0}.",
+    requestsReserved: "Reserved {0} copies of requested books.",
   },
   payOffUserDialog: {
     title: "Check Out User {0}",
