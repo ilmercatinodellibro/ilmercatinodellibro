@@ -311,24 +311,20 @@ async function addBookToCart(bookISBN?: string) {
   } catch (_error) {
     const error = _error as Error;
     if (!isApolloError(error)) {
-      notifyError("Non è stato possibile aggiungere il libro al carrello.");
+      notifyError(t("bookErrors.addBook"));
       return;
     }
 
     error.graphQLErrors.forEach((graphQLError) => {
       switch (graphQLError.message) {
         case "BOOK_NOT_FOUND":
-          notifyError(
-            "Un libro con ISBN specificato non è stato trovato a catalogo.",
-          );
+          notifyError(t("bookErrors.noBook"));
           break;
         case "BOOK_NOT_AVAILABLE":
-          notifyError(
-            "Il libro richiesto non è disponibile a magazzino al momento.",
-          );
+          notifyError(t("bookErrors.notInStock"));
           break;
         default:
-          notifyError("Non è stato possibile aggiungere il libro al carrello.");
+          notifyError(t("bookErrors.addBook"));
       }
     });
   }
@@ -361,9 +357,7 @@ async function removeBook(book: BookSummaryFragment) {
       selectedBookCopies.value = currentlySelectedCopies;
     }
   } catch {
-    notifyError(
-      "Non è stato possibile eliminare il libro selezionato dal carrello.",
-    );
+    notifyError(t("bookErrors.notCartBookDeleted"));
   }
 }
 
@@ -391,9 +385,7 @@ function emptyAndDestroyCart() {
         },
       });
     } catch {
-      notifyError(
-        "Non è stato possibile eliminare il carrello del cliente selezionato.",
-      );
+      notifyError(t("bookErrors.notCartDeleted"));
     } finally {
       onDialogHide();
     }
@@ -404,9 +396,7 @@ const { finalizeCart } = useFinalizeCartMutation();
 function sellBooks() {
   const bookAndCopies = Object.entries(selectedBookCopies.value);
   if (bookAndCopies.length < cartBooks.value.length) {
-    notifyError(
-      "Seleziona una copia per ogni libro nel carrello oppure rimuovi dal carrello i libri senza copie selezionate.",
-    );
+    notifyError(t("bookErrors.selectCopyAllBooks"));
     return;
   }
 
@@ -441,9 +431,7 @@ function sellBooks() {
 
       onDialogOK();
     } catch {
-      notifyError(
-        "Non è stato possibile terminare l'operazione di vendita. Prova di nuovo o riapri il carrello per selezionare nuovamente le copie dei libri.",
-      );
+      notifyError(t("bookErrors.notSell"));
     }
   });
 }

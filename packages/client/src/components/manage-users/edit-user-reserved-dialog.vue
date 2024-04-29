@@ -179,6 +179,7 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
+import { lowerCase, startCase } from "lodash-es";
 import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -258,7 +259,7 @@ function deleteAllReserved() {
         }),
       );
     } catch {
-      notifyError("Non è stato possibile cancellare tutte le prenotazioni.");
+      notifyError(t("bookErrors.notAllReservationsDeleted"));
     } finally {
       await refetchReservations();
     }
@@ -272,7 +273,7 @@ async function removeFromReserved(reservation: ReservationSummaryFragment) {
       },
     });
   } catch {
-    notifyError("Non è stato possibile cancellare la prenotazione.");
+    notifyError(t("bookErrors.notReservationDeleted"));
   } finally {
     await refetchReservations();
     await refetchRequests();
@@ -295,7 +296,7 @@ async function reserveBook({ book }: RequestSummaryFragment) {
       },
     });
   } catch {
-    notifyError("Non è stato possibile prenotare il libro.");
+    notifyError(t("bookErrors.notReserved"));
   } finally {
     await refetchReservations();
     await refetchRequests();
@@ -306,12 +307,12 @@ async function addReservationFromIsbn(isbnCode: string) {
     const book = await fetchBookByISBN(isbnCode);
 
     if (!book) {
-      notifyError("Il codice ISBN inserito non corrisponde a nessun libro.");
+      notifyError(t("bookErrors.noBook"));
       return;
     }
     if (!book.meta.isAvailable) {
       notifyError(
-        `Il libro ${book.title} non è disponibile per essere prenotato.`,
+        t("bookErrors.notAvailable", [startCase(lowerCase(book.title))]),
       );
       return;
     }
@@ -324,7 +325,7 @@ async function addReservationFromIsbn(isbnCode: string) {
       },
     });
   } catch {
-    notifyError("Non è stato possibile prenotare il libro.");
+    notifyError(t("bookErrors.notReserved"));
   } finally {
     await refetchReservations();
     await refetchRequests();
@@ -371,9 +372,7 @@ async function moveAllIntoCart() {
 
     booksCartCount.value += reservationsAndRequestsToMoveIntoCart.length;
   } catch {
-    notifyError(
-      "Non è stato possibile spostare tutte le prenotazioni e i libri disponibili nel carrello.",
-    );
+    notifyError(t("bookErrors.notAllReservationsBooks"));
   } finally {
     await refetchReservations();
   }
@@ -401,7 +400,7 @@ async function moveReservedIntoCart() {
 
     booksCartCount.value += reservedBooksIds.length;
   } catch {
-    notifyError("Non è stato possibile spostare le prenotazioni nel carrello.");
+    notifyError(t("bookErrors.notMoveReservationsIntoCart"));
   } finally {
     await refetchReservations();
   }
@@ -414,9 +413,7 @@ async function putBooksIntoCart(
     requestOrReservation.__typename === "BookRequest" &&
     !requestOrReservation.book.meta.isAvailable
   ) {
-    notifyError(
-      "Non puoi mettere nel carrello un libro richiesto ma non disponibile.",
-    );
+    notifyError(t("bookErrors.bookNotCartable"));
     return;
   }
 
@@ -442,7 +439,9 @@ async function putBooksIntoCart(
     booksCartCount.value++;
   } catch {
     notifyError(
-      `Non è stato possibile ${isRequest ? "mettere il libro" : "spostare la prenotazione"} nel carrello.`,
+      isRequest
+        ? t("bookErrors.notIntoCart")
+        : t("bookErrors.notMoveReservationIntoCart"),
     );
   } finally {
     // Probably this can be improved with an if
@@ -471,7 +470,7 @@ async function deleteRequest(request: RequestSummaryFragment) {
       },
     });
   } catch {
-    notifyError("Non è stato possibile cancellare la richiesta.");
+    notifyError(t("bookErrors.notRequestDeleted"));
   } finally {
     await refetchRequests();
   }

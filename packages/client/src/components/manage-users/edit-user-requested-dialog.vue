@@ -215,7 +215,7 @@ async function deleteAllRequested() {
       }),
     );
   } catch {
-    notifyError("Non tutte le richieste sono state cancellate.");
+    notifyError(t("bookErrors.notAllRequestsDeleted"));
   } finally {
     await refetchRequests();
   }
@@ -228,7 +228,7 @@ async function deleteRequest(request: RequestSummaryFragment) {
       },
     });
   } catch {
-    notifyError("Non è stato possibile cancellare la richiesta.");
+    notifyError(t("bookErrors.notRequestDeleted"));
   } finally {
     await refetchRequests();
   }
@@ -260,7 +260,7 @@ async function reserveAllAvailableRequested() {
       message: `Prenotato ${availableBookIds.length} copie di libri richiesti.`,
     });
   } catch {
-    notifyError("Non è stato possibile prenotare tutte le richieste.");
+    notifyError(t("bookErrors.notAllReserved"));
   } finally {
     await refetchRequests();
   }
@@ -281,7 +281,7 @@ async function reserveBook({ book }: RequestSummaryFragment) {
       message: `Prenotato ${book.title}.`,
     });
   } catch {
-    notifyError("Non è stato possibile prenotare il libro specificato.");
+    notifyError(t("bookErrors.notReserved"));
   } finally {
     await refetchRequests();
   }
@@ -320,7 +320,7 @@ async function moveAllIntoCart() {
 
     booksCartCount.value += availableBooksRequestIds.length;
   } catch {
-    notifyError("Non è stato possibile aggiungere tutti i libri al carrello.");
+    notifyError(t("bookErrors.notAllIntoCart"));
   } finally {
     await refetchRequests();
   }
@@ -347,7 +347,7 @@ async function putRequestedBookIntoCart(request: RequestSummaryFragment) {
 
     booksCartCount.value++;
   } catch {
-    notifyError("Non è stato possibile aggiungere il libro al carrello.");
+    notifyError(t("bookErrors.notIntoCart"));
   } finally {
     await refetchRequests();
   }
