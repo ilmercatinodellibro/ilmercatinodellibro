@@ -127,6 +127,7 @@
 </template>
 
 <script setup lang="ts">
+import { isApolloError } from "@apollo/client";
 import {
   mdiChevronDown,
   mdiChevronUp,
@@ -145,7 +146,6 @@ import {
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
-import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
 import { CustomerFragment } from "src/services/user.graphql";
@@ -294,56 +294,51 @@ onUnmounted(() => {
 
 const { addToCart, loading: addToCartLoading } = useAddToCartMutation();
 async function addBookToCart(bookISBN?: string) {
-  if (!bookISBN || addToCartLoading.value) {
-    return;
-  }
-
-  // FIXME: this is incomplete see here for details https://zpl.io/jpjB9M6
-
-  let book: BookSummaryFragment | undefined = undefined;
-
-  try {
-    book = await fetchBookByISBN(bookISBN);
-  } catch {
-    Notify.create({
-      type: "negative",
-      message: "Un libro con ISBN specificato non è stato trovato a catalogo.",
-    });
-    return;
-  }
-
-  if (!book) {
-    // TODO: dedupe this message
-    Notify.create({
-      type: "negative",
-      message: "Un libro con ISBN specificato non è stato trovato a catalogo.",
-    });
-    return;
-  }
-
-  if (!book.meta.isAvailable) {
-    Notify.create({
-      type: "negative",
-      message: "Il libro richiesto non è disponibile a magazzino al momento.",
-    });
-    return;
-  }
-
-  if (!cartId.value) {
+  if (!bookISBN || !cartId.value || addToCartLoading.value) {
     return;
   }
 
   try {
-    await addToCart({
+    const { data: book } = await addToCart({
       input: {
         cartId: cartId.value,
         fromBookIsbn: bookISBN,
       },
     });
-  } catch {
-    Notify.create({
-      type: "negative",
-      message: "Non è stato possibile aggiungere il libro al carrello.",
+    console.error(book);
+    // TODO: update cart cache with new book
+  } catch (_error) {
+    const error = _error as Error;
+    if (!isApolloError(error)) {
+      Notify.create({
+        type: "negative",
+        message: "Non è stato possibile aggiungere il libro al carrello.",
+      });
+      return;
+    }
+
+    error.graphQLErrors.forEach((graphQLError) => {
+      switch (graphQLError.message) {
+        case "BOOK_NOT_FOUND":
+          Notify.create({
+            type: "negative",
+            message:
+              "Un libro con ISBN specificato non è stato trovato a catalogo.",
+          });
+          break;
+        case "BOOK_NOT_AVAILABLE":
+          Notify.create({
+            type: "negative",
+            message:
+              "Il libro richiesto non è disponibile a magazzino al momento.",
+          });
+          break;
+        default:
+          Notify.create({
+            type: "negative",
+            message: "Non è stato possibile aggiungere il libro al carrello.",
+          });
+      }
     });
   }
 }
