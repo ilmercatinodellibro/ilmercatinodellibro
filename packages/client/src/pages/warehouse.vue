@@ -128,7 +128,6 @@
               :book-id="props.row.id"
               :table-width="9"
               @open-history="(bookCopy) => openHistory(bookCopy)"
-              @open-problems-dialog="(bookCopy) => openProblemDialog(bookCopy)"
             />
           </template>
         </template>
@@ -153,17 +152,9 @@
           </q-td>
         </template>
 
-        <template #body-cell-problems="{ row, value }">
+        <template #body-cell-problems="{ row }">
           <q-td>
-            <chip-button
-              :color="value ? 'positive' : 'negative'"
-              :label="
-                t(
-                  `manageUsers.booksMovementsDialog.${value ? 'solveProblem' : 'reportProblem'}`,
-                )
-              "
-              @click="openProblemDialog(row)"
-            />
+            <problems-button :book-copy="row" />
           </q-td>
         </template>
 
@@ -198,14 +189,11 @@ import { useI18n } from "vue-i18n";
 import BookCopyDetailsTable from "src/components/book-copy-details-table.vue";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
-import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
 import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import ProblemsButton from "src/components/problems-button.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { hasProblem } from "src/helpers/book-copy";
-import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
 import {
@@ -215,12 +203,7 @@ import {
 } from "src/models/book";
 import { useBookService } from "src/services/book";
 import { useBookCopyService } from "src/services/book-copy";
-import {
-  BookCopyDetailsFragment,
-  ProblemSummaryFragment,
-  useReportProblemMutation,
-  useResolveProblemMutation,
-} from "src/services/book-copy.graphql";
+import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
@@ -253,9 +236,6 @@ const {
     enabled: false,
   }),
 );
-
-const { resolveProblem } = useResolveProblemMutation();
-const { reportProblem } = useReportProblemMutation();
 
 const { t } = useI18n();
 
@@ -437,44 +417,6 @@ function swapView() {
 
 function checkOtherWarehouse() {
   // FIXME: check other warehouse
-}
-
-function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
-  Dialog.create({
-    component: ProblemsDialog,
-    componentProps: {
-      bookCopy,
-    },
-  }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
-    if (hasProblem(bookCopy)) {
-      try {
-        await resolveProblem({
-          input: { id: bookCopy.id, solution },
-        });
-
-        await refetchBookCopies();
-      } catch (e) {
-        notifyError(t("common.genericErrorMessage"));
-      }
-      return;
-    }
-
-    try {
-      await reportProblem({
-        input: {
-          bookCopyId: bookCopy.id,
-          details,
-          type,
-        },
-      });
-
-      await refetchBookCopies({
-        bookId: bookCopy.book.id,
-      });
-    } catch (e) {
-      notifyError(t("common.genericErrorMessage"));
-    }
-  });
 }
 
 function openHistory(bookCopy: BookCopyDetailsFragment) {
