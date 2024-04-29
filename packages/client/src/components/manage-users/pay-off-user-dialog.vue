@@ -99,7 +99,9 @@
                     />
                     <q-btn
                       :label="
-                        $t('manageUsers.payOffUserDialog.returnOptions.repay')
+                        $t(
+                          'manageUsers.payOffUserDialog.returnOptions.reimburse',
+                        )
                       "
                       outline
                       @click="reimburseBooks(selectedRows)"
@@ -173,7 +175,9 @@
                       @click="reimburseBooks([row])"
                     >
                       {{
-                        $t("manageUsers.payOffUserDialog.returnOptions.repay")
+                        $t(
+                          "manageUsers.payOffUserDialog.returnOptions.reimburse",
+                        )
                       }}
                     </q-item>
                     <q-item
@@ -460,15 +464,15 @@ function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
 function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
   Dialog.create({
     title: t(
-      "manageUsers.payOffUserDialog.confirms.repay.title",
+      "manageUsers.payOffUserDialog.confirms.reimburse.title",
       bookCopies.length,
     ),
     message: `${t(
-      "manageUsers.payOffUserDialog.confirms.repay.label",
+      "manageUsers.payOffUserDialog.confirms.reimburse.label",
       bookCopies.length,
     )} ${t("manageUsers.payOffUserDialog.confirms.disclaimer")}`,
     ok: t(
-      "manageUsers.payOffUserDialog.confirms.repay.confirmLabel",
+      "manageUsers.payOffUserDialog.confirms.reimburse.confirmLabel",
       bookCopies.length,
     ),
     cancel: t("common.cancel"),
