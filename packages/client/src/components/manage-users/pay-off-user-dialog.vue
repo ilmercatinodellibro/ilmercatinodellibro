@@ -41,7 +41,6 @@
           :loading="bookLoading"
           :rows="
             // We handle the group header in the #body slot, so it's safe to use a type that is different than the columns definition
-            // prettier-ignore
             tableRows as readonly BookCopyDetailsFragment[]
           "
           :rows-per-page-options="[0]"
@@ -124,6 +123,7 @@
                 </span>
               </q-td>
             </q-tr>
+
             <q-tr v-else>
               <q-td v-for="col in cols" :key="col.name">
                 <!--
@@ -279,8 +279,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "book-code",
-    // FIXME: add field
-    field: () => undefined,
+    field: "code",
     label: t("book.code"),
     align: "left",
   },
