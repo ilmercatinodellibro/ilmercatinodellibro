@@ -44,15 +44,7 @@
         </template>
 
         <template v-else-if="name === 'problems'">
-          <chip-button
-            :color="hasProblem(bookCopy) ? 'positive' : 'negative'"
-            :label="
-              t(
-                `manageUsers.booksMovementsDialog.${hasProblem(bookCopy) ? 'solveProblem' : 'reportProblem'}`,
-              )
-            "
-            @click="emit('openProblemsDialog', bookCopy)"
-          />
+          <problems-button :book-copy="bookCopy" />
         </template>
 
         <template v-else-if="name === 'history'">
@@ -83,12 +75,11 @@ import { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
-import { hasProblem } from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
 import { BookCopyDetailsWithStatus, BookCopyStatuses } from "src/models/book";
 import { useBookCopyService } from "src/services/book-copy";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import ProblemsButton from "./problems-button.vue";
 
 const { t } = useI18n();
 
@@ -99,7 +90,6 @@ const { bookId, bookCopyColumns } = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  openProblemsDialog: [bookCopy: BookCopyDetailsFragment];
   openHistory: [bookCopy: BookCopyDetailsFragment];
 }>();
 
