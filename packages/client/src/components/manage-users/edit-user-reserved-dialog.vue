@@ -10,7 +10,7 @@
       "
       @cancel="onDialogCancel"
     >
-      <card-table-header @add-book="addReservationFromIsnb">
+      <card-table-header @add-book="addReservationFromIsbn">
         <template #side-actions>
           <!-- TODO: consider extracting this into a separate component -->
           <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
@@ -312,7 +312,7 @@ async function reserveBook({ book }: RequestSummaryFragment) {
     await refetchRequests();
   }
 }
-async function addReservationFromIsnb(isbnCode: string) {
+async function addReservationFromIsbn(isbnCode: string) {
   try {
     const book = await fetchBookByISBN(isbnCode);
 
