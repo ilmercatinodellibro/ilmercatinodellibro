@@ -70,7 +70,7 @@
             >
               <q-td>
                 <q-checkbox
-                  v-if="row.id === Titles.InStock"
+                  v-if="row.id === Titles.InStock && selectableRows.length > 0"
                   :model-value="rowsSelectionStatus"
                   dense
                   @update:model-value="swapAllRows()"
@@ -132,7 +132,9 @@
                 -->
                 <q-checkbox
                   v-if="col.name === 'select' && selectableRows.includes(row)"
-                  :model-value="selectedRows.includes(row)"
+                  :model-value="
+                    selectedRows.map(({ id }) => id).includes(row.id)
+                  "
                   dense
                   @update:model-value="swapRow(row)"
                 />
@@ -427,7 +429,7 @@ function swapAllRows() {
 }
 
 function swapRow(row: BookCopyDetailsFragment) {
-  if (selectedRows.value.includes(row)) {
+  if (selectedRows.value.map(({ id }) => id).includes(row.id)) {
     selectedRows.value.splice(selectedRows.value.indexOf(row), 1);
   } else {
     selectedRows.value.push(row);

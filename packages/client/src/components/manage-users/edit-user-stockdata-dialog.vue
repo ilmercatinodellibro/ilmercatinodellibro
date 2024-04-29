@@ -298,7 +298,9 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
 );
 
 async function addBookToBeRegistered(bookISBN: string) {
-  if (booksToRegister.value.find(({ isbnCode }) => isbnCode === bookISBN)) {
+  if (
+    booksToRegister.value.map(({ isbnCode }) => isbnCode).includes(bookISBN)
+  ) {
     notifyError(t("manageUsers.inStockDialog.errors.tooManyCopies"));
     return;
   }
