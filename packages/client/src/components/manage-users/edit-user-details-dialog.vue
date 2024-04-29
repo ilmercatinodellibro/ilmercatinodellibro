@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" full-height persistent @hide="onDialogHide">
+  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="$t('manageUsers.editUser.title')"
       size="sm"
@@ -11,7 +11,7 @@
       "
       @cancel="onDialogCancel"
     >
-      <q-card-section class="col-grow column gap-16 height-0 no-wrap">
+      <q-card-section class="column gap-16 no-wrap">
         <q-input
           v-model="newUserData.user.firstname"
           :label="$t('manageUsers.fields.firstName')"
