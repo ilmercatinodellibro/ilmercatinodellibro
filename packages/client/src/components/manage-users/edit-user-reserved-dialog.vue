@@ -179,9 +179,10 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
+import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
 import { useCartService } from "src/services/cart";
@@ -257,11 +258,7 @@ function deleteAllReserved() {
         }),
       );
     } catch {
-      Notify.create({
-        type: "negative",
-        // TODO: translate this one
-        message: `Non è stato possibile cancellare tutte le prenotazioni.`,
-      });
+      notifyError("Non è stato possibile cancellare tutte le prenotazioni.");
     } finally {
       await refetchReservations();
     }
@@ -275,11 +272,7 @@ async function removeFromReserved(reservation: ReservationSummaryFragment) {
       },
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: `Non è stato possibile cancellare la prenotazione.`,
-    });
+    notifyError("Non è stato possibile cancellare la prenotazione.");
   } finally {
     await refetchReservations();
     await refetchRequests();
@@ -302,11 +295,7 @@ async function reserveBook({ book }: RequestSummaryFragment) {
       },
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile prenotare il libro.",
-    });
+    notifyError("Non è stato possibile prenotare il libro.");
   } finally {
     await refetchReservations();
     await refetchRequests();
@@ -317,19 +306,13 @@ async function addReservationFromIsbn(isbnCode: string) {
     const book = await fetchBookByISBN(isbnCode);
 
     if (!book) {
-      Notify.create({
-        type: "negative",
-        // TODO: translate this one
-        message: "Il codice ISBN inserito non corrisponde a nessun libro.",
-      });
+      notifyError("Il codice ISBN inserito non corrisponde a nessun libro.");
       return;
     }
     if (!book.meta.isAvailable) {
-      Notify.create({
-        type: "negative",
-        // TODO: translate this one
-        message: `Il libro ${book.title} non è disponibile per essere prenotato.`,
-      });
+      notifyError(
+        `Il libro ${book.title} non è disponibile per essere prenotato.`,
+      );
       return;
     }
 
@@ -341,11 +324,7 @@ async function addReservationFromIsbn(isbnCode: string) {
       },
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile prenotare il libro.",
-    });
+    notifyError("Non è stato possibile prenotare il libro.");
   } finally {
     await refetchReservations();
     await refetchRequests();
@@ -392,12 +371,9 @@ async function moveAllIntoCart() {
 
     booksCartCount.value += reservationsAndRequestsToMoveIntoCart.length;
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate
-      message:
-        "Non è stato possibile spostare tutte le prenotazioni e i libri disponibili nel carrello.",
-    });
+    notifyError(
+      "Non è stato possibile spostare tutte le prenotazioni e i libri disponibili nel carrello.",
+    );
   } finally {
     await refetchReservations();
   }
@@ -425,11 +401,7 @@ async function moveReservedIntoCart() {
 
     booksCartCount.value += reservedBooksIds.length;
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate
-      message: "Non è stato possibile spostare le prenotazioni nel carrello.",
-    });
+    notifyError("Non è stato possibile spostare le prenotazioni nel carrello.");
   } finally {
     await refetchReservations();
   }
@@ -442,12 +414,9 @@ async function putBooksIntoCart(
     requestOrReservation.__typename === "BookRequest" &&
     !requestOrReservation.book.meta.isAvailable
   ) {
-    Notify.create({
-      type: "negative",
-      // TODO: translate
-      message:
-        "Non puoi mettere nel carrello un libro richiesto ma non disponibile.",
-    });
+    notifyError(
+      "Non puoi mettere nel carrello un libro richiesto ma non disponibile.",
+    );
     return;
   }
 
@@ -472,11 +441,9 @@ async function putBooksIntoCart(
 
     booksCartCount.value++;
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate
-      message: `Non è stato possibile ${isRequest ? "mettere il libro" : "spostare la prenotazione"} nel carrello.`,
-    });
+    notifyError(
+      `Non è stato possibile ${isRequest ? "mettere il libro" : "spostare la prenotazione"} nel carrello.`,
+    );
   } finally {
     // Probably this can be improved with an if
     await Promise.all([refetchReservations(), refetchRequests()]);
@@ -504,11 +471,7 @@ async function deleteRequest(request: RequestSummaryFragment) {
       },
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile cancellare la richiesta.",
-    });
+    notifyError("Non è stato possibile cancellare la richiesta.");
   } finally {
     await refetchRequests();
   }
