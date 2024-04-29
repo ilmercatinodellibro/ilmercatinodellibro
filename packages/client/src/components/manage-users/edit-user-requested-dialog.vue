@@ -256,8 +256,9 @@ async function reserveAllAvailableRequested() {
 
     Notify.create({
       type: "positive",
-      // TODO: translate this one
-      message: `Prenotato ${availableBookIds.length} copie di libri richiesti.`,
+      message: t("manageUsers.reservedBooksDialog.requestsReserved", [
+        availableBookIds.length,
+      ]),
     });
   } catch {
     notifyError(t("bookErrors.notAllReserved"));
@@ -277,8 +278,7 @@ async function reserveBook({ book }: RequestSummaryFragment) {
 
     Notify.create({
       type: "positive",
-      // TODO: translate this one
-      message: `Prenotato ${book.title}.`,
+      message: t("manageUsers.reservedBooksDialog.bookReserved", [book.title]),
     });
   } catch {
     notifyError(t("bookErrors.notReserved"));
