@@ -52,8 +52,12 @@ export default {
       "Include le copie ancora presenti in magazzino, non disperse, non prenotate",
     retrieveBtn: "Ritira tutti i libri nella lista",
     deleteBookBtnTooltip: "Elimina definitivamente questa copia dal database",
-    errorMessage:
-      "Non è possibile accettare più di una copia dello stesso libro",
+    errors: {
+      noBook: "Non è stato trovato nessun libro con ISBN {0}",
+      tooManyCopies:
+        "Non è possibile accettare più di una copia dello stesso libro",
+      retrieval: "C'è stato un errore nel ritiro dei libri",
+    },
   },
   booksMovementsDialog: {
     purchasedTitle: "Libri acquistati da {0}",
