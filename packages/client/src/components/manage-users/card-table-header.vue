@@ -52,5 +52,7 @@ function handleSubmit() {
   }
 
   emit("addBook", toEmit);
+
+  bookISBN.value = "";
 }
 </script>
