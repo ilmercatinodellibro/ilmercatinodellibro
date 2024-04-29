@@ -134,25 +134,9 @@ export class CartResolver {
               deletedAt: null,
             },
           },
-          copies: {
-            where: {
-              sales: {
-                some: {
-                  purchasedById: cart.userId,
-                  refundedAt: null,
-                },
-              },
-            },
-          },
         },
       });
       book = bookDetails;
-
-      if (bookDetails.copies.length > 0) {
-        throw new UnprocessableEntityException(
-          "The book has already been bought by the user",
-        );
-      }
 
       if (bookDetails.requests.length === 0) {
         ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
