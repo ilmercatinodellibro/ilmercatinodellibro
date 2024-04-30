@@ -208,7 +208,12 @@ export class BookCopyResolver {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
     const searchText = filter.search?.trim().replaceAll(" ", "%");
-    const { hasProblem, isAvailable, isSold } = filter;
+    const { hasProblem = false, isAvailable = false, isSold = false } = filter;
+
+    const showOnlyAvailable = isAvailable && !isSold;
+    const showOnlySold = isSold && !isAvailable;
+    const includeCopyOrStatement =
+      hasProblem || showOnlySold || showOnlyAvailable;
 
     const where: Prisma.BookCopyWhereInput = {
       book: {
@@ -251,53 +256,57 @@ export class BookCopyResolver {
           : {}),
       },
       returnedAt: null,
-      OR: [
-        // When both isAvailable and isSold are true at the same time, they are mutually exclusive, so they are not added to the query
-        ...(isAvailable && !isSold
-          ? [
-              {
-                sales: {
-                  none: {},
-                },
-              },
-              {
-                sales: {
-                  every: {
-                    refundedAt: {
-                      not: null,
+      ...(includeCopyOrStatement
+        ? {
+            OR: [
+              // When both isAvailable and isSold are true at the same time, they are mutually exclusive, so they are not added to the query
+              ...(showOnlyAvailable
+                ? [
+                    {
+                      sales: {
+                        none: {},
+                      },
                     },
-                  },
-                },
-              },
-            ]
-          : []),
-        ...(isSold && !isAvailable
-          ? [
-              {
-                sales: {
-                  some: {
-                    refundedAt: {
-                      not: null,
+                    {
+                      sales: {
+                        every: {
+                          refundedAt: {
+                            not: null,
+                          },
+                        },
+                      },
                     },
-                  },
-                },
-              },
-            ]
-          : []),
-        ...(hasProblem
-          ? [
-              {
-                problems: {
-                  some: {
-                    resolvedAt: {
-                      not: null,
+                  ]
+                : []),
+              ...(showOnlySold
+                ? [
+                    {
+                      sales: {
+                        some: {
+                          refundedAt: {
+                            not: null,
+                          },
+                        },
+                      },
                     },
-                  },
-                },
-              },
-            ]
-          : []),
-      ],
+                  ]
+                : []),
+              ...(hasProblem
+                ? [
+                    {
+                      problems: {
+                        some: {
+                          resolvedAt: {
+                            not: null,
+                          },
+                        },
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          }
+        : {}),
     };
 
     const [rowsCount, rows] = await this.prisma.$transaction([
