@@ -69,6 +69,7 @@ model User {
 
   // Operator/admin relations
   returnedBookCopies  BookCopy[]       @relation("CopyReturnedBy")
+  refundedBookCopies  BookCopy[]       @relation("CopyRefundedBy")
   createdBookCopies   BookCopy[]       @relation("CopyCreatedBy")
   updatedBookCopies   BookCopy[]       @relation("CopyUpdatedBy")
   reportedProblems    Problem[]        @relation("ProblemReportedBy")
@@ -205,6 +206,9 @@ model BookCopy {
   owner   User   @relation("BookCopyOwner", fields: [ownerId], references: [id])
 
   // Operator/admin relations
+  refundedAt   DateTime? @map("refunded_at") @db.Timestamptz()
+  refundedById String?   @map("refunded_by_id")
+  refundedBy   User?     @relation("CopyRefundedBy", fields: [refundedById], references: [id])
   returnedAt   DateTime? @map("returned_at") @db.Timestamptz()
   returnedById String?   @map("returned_by_id")
   returnedBy   User?     @relation("CopyReturnedBy", fields: [returnedById], references: [id])

@@ -20,13 +20,16 @@ import {
   User,
 } from "src/@generated";
 import { AuthService } from "src/modules/auth/auth.service";
+import {
+  BookCopyCreateInput,
+  RefundBookCopyInput,
+} from "src/modules/book-copy/book-copy.input";
 import { ReceiptService } from "src/modules/receipt/receipt.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   BookCopyByUserQueryArgs,
-  BookCopyCreateInput,
   BookCopyQueryArgs,
   PaginatedBookCopiesQueryArgs,
   PaginatedBookCopyQueryResult,
@@ -510,5 +513,70 @@ export class BookCopyResolver {
     });
 
     return bookCopies;
+  }
+
+  @Mutation(() => BookCopy)
+  async refundBookCopy(
+    @Input() { bookCopyId }: RefundBookCopyInput,
+    @CurrentUser() { id: userId }: User,
+  ) {
+    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
+      where: {
+        id: bookCopyId,
+      },
+      include: {
+        book: {
+          select: {
+            retailLocationId: true,
+          },
+        },
+        sales: {
+          where: {
+            refundedAt: null,
+          },
+        },
+      },
+    });
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: bookCopy.book.retailLocationId,
+      message:
+        "You don't have the necessary permissions to refund this book copy.",
+    });
+
+    if (bookCopy.sales.length === 0) {
+      throw new ForbiddenException(
+        "The book copy you are trying to refund has not been sold.",
+      );
+    }
+
+    if (bookCopy.sales.length > 1) {
+      throw new InternalServerErrorException(
+        "There are multiple sales for the same book copy that are not refunded. This should have not happened.",
+      );
+    }
+
+    const sale = bookCopy.sales[0];
+    return this.prisma.bookCopy.update({
+      where: {
+        id: bookCopyId,
+      },
+      data: {
+        updatedAt: new Date(),
+        updatedById: userId,
+        sales: {
+          update: {
+            where: {
+              id: sale.id,
+            },
+            data: {
+              refundedAt: new Date(),
+              refundedById: userId,
+            },
+          },
+        },
+      },
+    });
   }
 }
