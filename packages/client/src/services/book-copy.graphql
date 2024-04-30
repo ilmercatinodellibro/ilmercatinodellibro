@@ -54,6 +54,26 @@ query getBookCopies($bookId: String!) {
   }
 }
 
+query getPaginatedBookCopies(
+  $retailLocationId: String!
+  $page: Int!
+  $rows: Int!
+  $filter: BookCopyQueryFilter
+) {
+  paginatedBookCopies(
+    retailLocationId: $retailLocationId
+    filter: $filter
+    page: $page
+    rows: $rows
+  ) {
+    page
+    rows {
+      ...BookCopyDetails
+    }
+    rowsCount
+  }
+}
+
 query getBookCopiesByOwner($retailLocationId: String!, $userId: String!) {
   bookCopiesByOwner(retailLocationId: $retailLocationId, userId: $userId) {
     ...BookCopyDetails

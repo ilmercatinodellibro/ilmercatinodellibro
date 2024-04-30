@@ -134,14 +134,14 @@
       </dialog-table>
 
       <dialog-table
-        v-else
+        v-else-if="bookCopies"
         v-model:pagination="copyPagination"
         :columns="bookCopyColumns"
         :filter="tableFilter"
         :loading="copyLoading"
         :rows="
           // FIXME: bookCopies don't have the status field but the columns specify it
-          bookCopies
+          bookCopies.rows
         "
         class="flex-delegate-height-management"
         @request="onCopyRequest"
@@ -202,8 +202,10 @@ import {
   SchoolFilters,
 } from "src/models/book";
 import { useBookService } from "src/services/book";
-import { useBookCopyService } from "src/services/book-copy";
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import {
+  BookCopyDetailsFragment,
+  useGetPaginatedBookCopiesQuery,
+} from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
@@ -222,20 +224,15 @@ const {
   booksPaginationDetails,
 } = useBookService(booksPage, booksPerPage);
 
-// FIXME: correctly implement/use the query
-const { useGetBookCopiesQuery } = useBookCopyService();
 const {
+  paginatedBookCopies: bookCopies,
   loading: copyLoading,
   refetch: refetchBookCopies,
-  bookCopies,
-} = useGetBookCopiesQuery(
-  {
-    bookId: "",
-  },
-  () => ({
-    enabled: false,
-  }),
-);
+} = useGetPaginatedBookCopiesQuery({
+  page: copyPage.value,
+  retailLocationId: selectedLocation.value.id,
+  rows: bookCopiesPerPage.value,
+});
 
 const { t } = useI18n();
 
@@ -306,8 +303,7 @@ const booksPagination = ref({
 });
 const copyPagination = ref({
   rowsPerPage: bookCopiesPerPage.value,
-  // FIXME: add correct field once the query supports pagination
-  rowsNumber: bookCopies.value.length,
+  rowsNumber: bookCopies.value?.rowsCount,
   page: copyPage.value,
 });
 
@@ -384,8 +380,13 @@ const onCopyRequest: QTableProps["onRequest"] = async ({
 }) => {
   copyLoading.value = true;
 
-  await refetchBookCopies();
-  copyPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+  await refetchBookCopies({
+    retailLocationId: selectedLocation.value.id,
+    page: page - 1,
+    rows: rowsPerPage,
+  });
+
+  copyPagination.value.rowsNumber = bookCopies.value?.rowsCount;
 
   copyPagination.value.page = page;
   copyPagination.value.rowsPerPage = rowsPerPage;
@@ -409,9 +410,9 @@ function swapView() {
   schoolFilters.value = { courses: [], schoolCodes: [] };
 
   if (isSortedByCopyCode.value) {
-    copyPagination.value.page = 0;
+    copyPage.value = 0;
   } else {
-    booksPagination.value.page = 0;
+    booksPage.value = 0;
   }
 }
 
