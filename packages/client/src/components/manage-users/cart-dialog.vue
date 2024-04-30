@@ -103,6 +103,7 @@
 
       <template #card-actions>
         <q-btn
+          :disable="cartBooks.length === 0"
           :label="$t('manageUsers.cartDialog.emptyCart')"
           color="negative"
           @click="emptyAndDestroyCart()"
@@ -117,6 +118,7 @@
         <q-space />
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn
+          :disable="cartBooks.length === 0"
           :label="$t('manageUsers.cartDialog.sellBooks', [totalBooksPrice])"
           color="positive"
           @click="sellBooks()"
@@ -161,7 +163,7 @@ const props = defineProps<{
   user: CustomerFragment;
 }>();
 
-const { selectedLocationId: retailLocationId } = useRetailLocationService();
+const { selectedLocation: retailLocation } = useRetailLocationService();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
@@ -269,8 +271,7 @@ const { openCart, loading } = useOpenCartMutation();
 onMounted(async () => {
   const { data: cart } = await openCart({
     input: {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      retailLocationId: retailLocationId.value!,
+      retailLocationId: retailLocation.value.id,
       userId: props.user.id,
     },
   });
@@ -337,14 +338,12 @@ const { removeFromCart, loading: removeBookLoading } =
   useRemoveFromCartMutation();
 const { useGetReservationsQuery } = useReservationService();
 const { refetch: refetchReservations } = useGetReservationsQuery({
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  retailLocationId: retailLocationId.value!,
+  retailLocationId: retailLocation.value.id,
   userId: props.user.id,
 });
 const { useGetRequestsQuery } = useRequestService();
 const { refetch: refetchRequests } = useGetRequestsQuery({
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  retailLocationId: retailLocationId.value!,
+  retailLocationId: retailLocation.value.id,
   userId: props.user.id,
 });
 async function removeBook(book: BookSummaryFragment) {
