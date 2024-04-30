@@ -73,18 +73,9 @@ const numberOfRows = ref(100);
 
 const searchQuery = ref("");
 
-enum BookFilters {
-  Available,
-  Sold,
-  Requested,
-  HighUtility,
-  MediumUtility,
-  LowUtility,
-}
+const filters = ref<string[]>([]);
 
-const filters = ref<BookFilters[]>([]);
-
-const filterOptions = useTranslatedFilters<BookFilters>("book.filters.options");
+const filterOptions = useTranslatedFilters("book.filters.options");
 
 const schoolFilters = ref<SchoolFilters>({
   schoolCodes: [],
@@ -93,7 +84,6 @@ const schoolFilters = ref<SchoolFilters>({
 
 const tableFilter = computed(() => ({
   search: searchQuery.value,
-  isAvailable: filters.value.includes(BookFilters.Available) || undefined,
 }));
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];

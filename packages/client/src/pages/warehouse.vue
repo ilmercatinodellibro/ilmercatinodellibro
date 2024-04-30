@@ -126,7 +126,6 @@
             <book-copy-details-table
               :book-copy-columns="bookCopyColumns"
               :book-id="props.row.id"
-              :table-width="9"
               @open-history="(bookCopy) => openHistory(bookCopy)"
             />
           </template>
@@ -146,9 +145,9 @@
         class="flex-delegate-height-management"
         @request="onCopyRequest"
       >
-        <template #body-cell-status="{ value }">
+        <template #body-cell-status="{ row }">
           <q-td>
-            <book-copy-status-chip :value="value" />
+            <book-copy-status-chip :book-copy="row" />
           </q-td>
         </template>
 
@@ -196,11 +195,7 @@ import ProblemsButton from "src/components/problems-button.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
-import {
-  BookCopyDetailsWithStatus,
-  BookCopyFilters,
-  SchoolFilters,
-} from "src/models/book";
+import { SchoolFilters } from "src/models/book";
 import { useBookService } from "src/services/book";
 import {
   BookCopyDetailsFragment,
@@ -243,10 +238,8 @@ const screenWidth = useScreenWidth(smallScreenBreakpoint);
 
 const isSortedByCopyCode = ref(false);
 
-const filters = ref<BookCopyFilters[]>([]);
-const filterOptions = useTranslatedFilters<BookCopyFilters>(
-  "warehouse.filters.options",
-);
+const filters = ref<string[]>([]);
+const filterOptions = useTranslatedFilters("warehouse.filters");
 
 const schoolFilters = ref<SchoolFilters>({ courses: [], schoolCodes: [] });
 const searchQuery = ref("");
@@ -309,12 +302,12 @@ const copyPagination = ref({
 
 // TODO: send the filters to the server
 const tableFilter = computed(() =>
-  !searchQuery.value && filters.value.length === 0
+  !searchQuery.value && Object.entries(filters.value).length === 0
     ? undefined
     : { searchTerm: searchQuery.value, filters: filters.value },
 );
 
-const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
+const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   () => [
     {
       name: "original-code",
@@ -331,7 +324,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
     },
     {
       name: "status",
-      field: "status",
+      field: () => undefined,
       label: t("book.fields.status"),
       align: "left",
     },

@@ -32,7 +32,12 @@ export default {
       "The number of titles currently available among those requested by the user",
   },
   payOff: "Pay off user",
-  filters: ["With Available", "With Requested", "With Purchased", "With Sold"],
+  filters: {
+    withAvailable: "With Available",
+    withRequested: "With Requested",
+    withPurchased: "With Purchased",
+    withSold: "With Sold",
+  },
   editUser: {
     title: "Edit User Data",
     discount: "Apply ISEE/volunteer discount",

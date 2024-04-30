@@ -1,7 +1,7 @@
 <template>
-  <q-icon v-bind="IconData[value]" class="q-mr-md" size="24px" />
+  <q-icon v-bind="IconData[getStatus(bookCopy)]" class="q-mr-md" size="24px" />
   <span>
-    {{ t(`warehouse.bookCopyStatus.${value}`) }}
+    {{ t(`warehouse.bookCopyStatus.${getStatus(bookCopy)}`) }}
   </span>
 </template>
 
@@ -17,13 +17,26 @@ import {
 } from "@quasar/extras/mdi-v7";
 import { NamedColor } from "quasar";
 import { useI18n } from "vue-i18n";
-import { BookCopyStatus } from "src/models/book";
+import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 
 const { t } = useI18n();
 
-defineProps<{ value: BookCopyStatus }>();
+defineProps<{ bookCopy: BookCopyDetailsFragment }>();
 
-const IconData: Record<BookCopyStatus, { color: NamedColor; name: string }> = {
+type Status =
+  | "not-available"
+  | "available"
+  | "donated"
+  | "incomplete"
+  | "lost"
+  | "returned"
+  | "sold";
+
+function getStatus(bookCopy: BookCopyDetailsFragment): Status {
+  return bookCopy.returnedAt ? "returned" : "available";
+}
+
+const IconData: Record<Status, { color: NamedColor; name: string }> = {
   "not-available": {
     color: "negative",
     name: mdiCancel,

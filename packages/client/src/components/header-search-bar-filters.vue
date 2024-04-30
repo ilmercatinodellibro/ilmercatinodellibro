@@ -16,7 +16,7 @@
     <q-select
       v-model="filters"
       :label="t('book.filter')"
-      :options="filterOptions.map(({ key }) => key)"
+      :options="Object.keys(filterOptions)"
       class="width-200"
       multiple
       outlined
@@ -26,7 +26,7 @@
         language they should update, so the key for each filter is an integer ID
         and the label is what's shown in the filter UI
       -->
-      <template v-if="filters.length > 0" #selected>
+      <template v-if="Object.entries(filters).length > 0" #selected>
         {{ selectedFiltersDisplay }}
       </template>
 
@@ -39,7 +39,7 @@
             />
           </q-item-section>
           <q-item-section>
-            <q-item-label> {{ filterOptions[opt]?.label }} </q-item-label>
+            <q-item-label> {{ filterOptions[opt] }} </q-item-label>
           </q-item-section>
         </q-item>
       </template>
@@ -71,19 +71,15 @@ import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 const { t } = useI18n();
 
 const searchQuery = defineModel<string>("searchQuery", { required: true });
-const filters = defineModel<unknown[]>("filters", { required: true });
-const schoolFilters = defineModel<SchoolFilters | undefined>("schoolFilters");
+const filters = defineModel<string[]>("filters", { required: true });
+const schoolFilters = defineModel<SchoolFilters>("schoolFilters");
 
 const props = defineProps<{
   filterOptions: ReturnType<typeof useTranslatedFilters>["value"];
 }>();
 
 const selectedFiltersDisplay = computed(() =>
-  filters.value
-    .map(
-      (filter) => props.filterOptions.find(({ key }) => key === filter)?.label,
-    )
-    .join(", "),
+  filters.value.map((filter) => props.filterOptions[filter]).join(", "),
 );
 
 // FIXME: Add actual logic with server fetch

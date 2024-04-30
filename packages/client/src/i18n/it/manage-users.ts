@@ -32,12 +32,12 @@ export default {
       "Il numero di titoli attualmente disponibili tra quelli richiesti dall'utente",
   },
   payOff: "Liquida utente",
-  filters: [
-    "Con Disponibili",
-    "Con Richiesti",
-    "Con Acquistati",
-    "Con Venduti",
-  ],
+  filters: {
+    withAvailable: "Con Disponibili",
+    withRequested: "Con Richiesti",
+    withPurchased: "Con Acquistati",
+    withSold: "Con Venduti",
+  },
   editUser: {
     title: "Modifica Dati Utente",
     discount: "Applica sconto ISEE/volontario",

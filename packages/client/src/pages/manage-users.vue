@@ -259,20 +259,13 @@ onMounted(() => {
 });
 
 const searchQuery = ref("");
-const filters = ref<UserFilters[]>([]);
+const filters = ref<string[]>([]);
 
-const filterOptions = useTranslatedFilters<UserFilters>("manageUsers.filters");
-
-enum UserFilters {
-  withAvailable,
-  withRequested,
-  withPurchased,
-  withSold,
-}
+const filterOptions = useTranslatedFilters("manageUsers.filters");
 
 // TODO: send the filters to the server
 const tableFilter = computed(() =>
-  !searchQuery.value && filters.value.length === 0
+  !searchQuery.value && Object.entries(filters.value).length === 0
     ? undefined
     : { searchTerm: searchQuery.value, filters: filters.value },
 );

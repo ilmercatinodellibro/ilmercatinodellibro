@@ -25,10 +25,7 @@
       </q-th>
     </q-tr>
 
-    <q-tr
-      v-for="bookCopy in bookCopies as BookCopyDetailsWithStatus[]"
-      :key="bookCopy.id"
-    >
+    <q-tr v-for="bookCopy in bookCopies" :key="bookCopy.id">
       <q-td auto-width />
 
       <q-td
@@ -38,9 +35,7 @@
         :colspan="getColspan(name)"
       >
         <template v-if="name === 'status'">
-          <book-copy-status-chip
-            :value="bookCopy.status ?? BookCopyStatuses.DONATED"
-          />
+          <book-copy-status-chip :book-copy="bookCopy" />
         </template>
 
         <template v-else-if="name === 'problems'">
@@ -76,7 +71,6 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import { getFieldValue } from "src/helpers/table-helpers";
-import { BookCopyDetailsWithStatus, BookCopyStatuses } from "src/models/book";
 import { useBookCopyService } from "src/services/book-copy";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import ProblemsButton from "./problems-button.vue";
@@ -84,8 +78,7 @@ import ProblemsButton from "./problems-button.vue";
 const { t } = useI18n();
 
 const { bookId, bookCopyColumns } = defineProps<{
-  bookCopyColumns: QTableColumn<BookCopyDetailsWithStatus>[];
-  tableWidth: number;
+  bookCopyColumns: QTableColumn<BookCopyDetailsFragment>[];
   bookId: string;
 }>();
 
@@ -93,16 +86,16 @@ const emit = defineEmits<{
   openHistory: [bookCopy: BookCopyDetailsFragment];
 }>();
 
-const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
-  () => [
-    {
-      name: "code",
-      field: "code",
-      label: t("book.code"),
-    },
-    ...bookCopyColumns.filter(({ name }) => name !== "isbn"),
-  ],
-);
+const tableWidth = 9;
+
+const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
+  {
+    name: "code",
+    field: "code",
+    label: t("book.code"),
+  },
+  ...bookCopyColumns.filter(({ name }) => name !== "isbn"),
+]);
 
 const { useGetBookCopiesQuery } = useBookCopyService();
 

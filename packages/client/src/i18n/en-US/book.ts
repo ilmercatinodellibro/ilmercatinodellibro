@@ -35,7 +35,12 @@ export default {
     reserved: "Reserved",
   },
   filters: {
-    options: ["Available", "High Utility", "Medium Utility", "Low Utility"],
+    options: {
+      available: "Available",
+      highUtility: "High Utility",
+      mediumUtility: "Medium Utility",
+      lowUtility: "Low Utility",
+    },
     school: "Filter by School",
     schoolFilter: {
       fields: {

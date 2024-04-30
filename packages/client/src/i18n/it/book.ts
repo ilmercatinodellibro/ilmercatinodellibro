@@ -35,7 +35,12 @@ export default {
     reserved: "Prenotato",
   },
   filters: {
-    options: ["Disponibili", "Utilità Alta", "Utilità Media", "Utilità Bassa"],
+    options: {
+      available: "Disponibili",
+      highUtility: "Utilità Alta",
+      mediumUtility: "Utilità Media",
+      lowUtility: "Utilità Bassa",
+    },
     school: "Filtra per Scuola",
     schoolFilter: {
       fields: {
