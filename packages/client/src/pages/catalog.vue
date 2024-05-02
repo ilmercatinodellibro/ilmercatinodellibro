@@ -55,19 +55,23 @@ import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { BookQueryFilter } from "src/@generated/graphql";
+import { BookCreateInput, BookQueryFilter } from "src/@generated/graphql";
 import AddBookDialog from "src/components/add-book-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { notifyError } from "src/helpers/error-messages";
 import {
   BookCompleteFilters,
   SchoolFilters,
   UtilityCategory,
 } from "src/models/book";
 import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import {
+  BookSummaryFragment,
+  useCreateNewBookMutation,
+} from "src/services/book.graphql";
 import { formatPrice } from "../composables/use-misc-formats";
 const { t } = useI18n();
 
@@ -196,12 +200,18 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
   }
 };
 
+const { createBook } = useCreateNewBookMutation();
 function openBookDialog() {
   Dialog.create({
     component: AddBookDialog,
-  }).onOk((payload: string[]) => {
-    // eslint-disable-next-line no-console
-    console.log(payload); // FIXME: Load the new book in the database with the data passed from the dialog
+  }).onOk(async (input: Omit<BookCreateInput, "id">) => {
+    try {
+      await createBook({
+        input,
+      });
+    } catch {
+      notifyError(t("bookErrors.addBook"));
+    }
   });
 }
 </script>

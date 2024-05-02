@@ -51,7 +51,6 @@ export class BookCreateInput extends IntersectionType(
   PickType(
     Book,
     [
-      "id",
       "isbnCode",
       "title",
       "subject",

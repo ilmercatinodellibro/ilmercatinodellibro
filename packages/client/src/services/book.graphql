@@ -74,3 +74,9 @@ query getBookByIsbn($isbnCode: String!, $retailLocationId: String!) {
     }
   }
 }
+
+mutation createNewBook($input: BookCreateInput!) {
+  createBook(input: $input) {
+    ...BookSummary
+  }
+}
