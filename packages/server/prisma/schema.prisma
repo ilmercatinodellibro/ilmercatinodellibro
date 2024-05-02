@@ -70,6 +70,7 @@ model User {
   // Operator/admin relations
   returnedBookCopies  BookCopy[]       @relation("CopyReturnedBy")
   refundedBookCopies  BookCopy[]       @relation("CopyRefundedBy")
+  donatedBookCopies   BookCopy[]       @relation("CopyDonatedBy")
   createdBookCopies   BookCopy[]       @relation("CopyCreatedBy")
   updatedBookCopies   BookCopy[]       @relation("CopyUpdatedBy")
   reportedProblems    Problem[]        @relation("ProblemReportedBy")
@@ -196,7 +197,6 @@ model BookCopy {
   // The original code is a special field. Contains a copy of the value of the first code field that was specified for a BookCopy
   // This is meant to keep track of the fact that a book copy was returned and to the retailLocation for some reason and it is now available again.
   originalCode String? @map("original_code")
-  donatedAt    String? @map("donated_at")
 
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation(fields: [bookId], references: [id])
@@ -206,6 +206,9 @@ model BookCopy {
   owner   User   @relation("BookCopyOwner", fields: [ownerId], references: [id])
 
   // Operator/admin relations
+  donatedAt    DateTime? @map("donated_at") @db.Timestamptz()
+  donatedById  String?   @map("donated_by_id")
+  donatedBy    User?     @relation("CopyDonatedBy", fields: [donatedById], references: [id])
   refundedAt   DateTime? @map("refunded_at") @db.Timestamptz()
   refundedById String?   @map("refunded_by_id")
   refundedBy   User?     @relation("CopyRefundedBy", fields: [refundedById], references: [id])
