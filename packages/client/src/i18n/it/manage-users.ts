@@ -126,6 +126,8 @@ export default {
       return: "Restituisci",
       reimburse: "Rimborsa",
     },
+    problemsError:
+      "Non è stato possibile segnalare il problema per tutte le copie.",
     returnAndDonate: "Restituisci contanti e dona libri",
     returnEverything: "Restituisci contanti e libri ({0} €)",
     confirms: {

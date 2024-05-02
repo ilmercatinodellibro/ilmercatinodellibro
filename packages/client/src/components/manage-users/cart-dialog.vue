@@ -298,20 +298,20 @@ onUnmounted(() => {
 });
 
 const { addToCart, loading: addToCartLoading } = useAddToCartMutation();
-async function addBookToCart(bookISBN?: string) {
-  if (!bookISBN || !cartId.value || addToCartLoading.value) {
+async function addBookToCart(fromBookIsbn?: string) {
+  if (!fromBookIsbn || !cartId.value || addToCartLoading.value) {
     return;
   }
 
   try {
-    const { data: book } = await addToCart({
+    const { data } = await addToCart({
       input: {
         cartId: cartId.value,
-        fromBookIsbn: bookISBN,
+        fromBookIsbn,
       },
     });
-    console.error(book);
-    // TODO: update cart cache with new book
+
+    cartBooks.value.push(data);
   } catch (_error) {
     const error = _error as Error;
     if (!isApolloError(error)) {

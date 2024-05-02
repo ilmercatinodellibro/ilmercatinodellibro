@@ -1,5 +1,10 @@
 <template>
-  <q-icon v-bind="IconData[getStatus()]" class="q-mr-md" size="24px" />
+  <q-icon
+    v-if="!hideIcon"
+    v-bind="IconData[getStatus()]"
+    class="q-mr-md"
+    size="24px"
+  />
   <span>
     {{ t(`warehouse.bookCopyStatus.${getStatus()}`) }}
   </span>
@@ -17,23 +22,17 @@ import {
 } from "@quasar/extras/mdi-v7";
 import { NamedColor } from "quasar";
 import { useI18n } from "vue-i18n";
-import { ProblemType } from "src/@generated/graphql";
-import { getCurrentActiveProblem } from "src/helpers/book-copy";
+import { BookCopyStatus, getCurrentActiveProblem } from "src/helpers/book-copy";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 
 const { t } = useI18n();
 
-const props = defineProps<{ bookCopy: BookCopyDetailsFragment }>();
+const props = defineProps<{
+  bookCopy: BookCopyDetailsFragment;
+  hideIcon?: boolean;
+}>();
 
-type Status =
-  | "not-available"
-  | "available"
-  | "donated"
-  | "returned"
-  | "sold"
-  | Exclude<ProblemType, "CUSTOM">;
-
-function getStatus(): Status {
+function getStatus(): BookCopyStatus {
   const problemType = getCurrentActiveProblem(props.bookCopy)?.type;
 
   return props.bookCopy.returnedAt
@@ -47,7 +46,7 @@ function getStatus(): Status {
         : "available";
 }
 
-const IconData: Record<Status, { color: NamedColor; name: string }> = {
+const IconData: Record<BookCopyStatus, { color: NamedColor; name: string }> = {
   "not-available": {
     color: "negative",
     name: mdiCancel,

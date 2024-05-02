@@ -138,9 +138,10 @@
                   dense
                   @update:model-value="swapRow(row)"
                 />
-                <status-chip
+                <book-copy-status-chip
                   v-else-if="col.name === 'status'"
-                  :value="col.value"
+                  :book-copy="row"
+                  hide-icon
                 />
                 <q-btn
                   v-else-if="
@@ -153,35 +154,41 @@
                   size="sm"
                 >
                   <q-menu auto-close>
-                    <q-item
-                      class="items-center"
-                      clickable
-                      @click="returnBooks([row])"
-                    >
-                      {{
-                        $t("manageUsers.payOffUserDialog.returnOptions.return")
-                      }}
-                    </q-item>
-                    <q-item
-                      class="items-center"
-                      clickable
-                      @click="donateBooks([row])"
-                    >
-                      {{
-                        $t("manageUsers.payOffUserDialog.returnOptions.donate")
-                      }}
-                    </q-item>
-                    <q-item
-                      class="items-center"
-                      clickable
-                      @click="reimburseBooks([row])"
-                    >
-                      {{
-                        $t(
-                          "manageUsers.payOffUserDialog.returnOptions.reimburse",
-                        )
-                      }}
-                    </q-item>
+                    <template v-if="selectableRows.includes(row)">
+                      <q-item
+                        class="items-center"
+                        clickable
+                        @click="returnBooks([row])"
+                      >
+                        {{
+                          $t(
+                            "manageUsers.payOffUserDialog.returnOptions.return",
+                          )
+                        }}
+                      </q-item>
+                      <q-item
+                        class="items-center"
+                        clickable
+                        @click="donateBooks([row])"
+                      >
+                        {{
+                          $t(
+                            "manageUsers.payOffUserDialog.returnOptions.donate",
+                          )
+                        }}
+                      </q-item>
+                      <q-item
+                        class="items-center"
+                        clickable
+                        @click="reimburseBooks([row])"
+                      >
+                        {{
+                          $t(
+                            "manageUsers.payOffUserDialog.returnOptions.reimburse",
+                          )
+                        }}
+                      </q-item>
+                    </template>
                     <q-item
                       class="items-center"
                       clickable
@@ -233,19 +240,23 @@ import {
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
+import { isAvailable } from "src/helpers/book-copy";
+import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
+  BookCopyDetailsFragmentDoc,
   ProblemDetailsFragment,
   useGetBookCopiesByOwnerQuery,
   useGetReturnedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
+  useReportProblemMutation,
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserSummaryFragment } from "src/services/user.graphql";
+import BookCopyStatusChip from "../book-copy-status-chip.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
-import StatusChip from "./status-chip.vue";
 import TableHeaderWithInfo from "./table-header-with-info.vue";
 
 const { t } = useI18n();
@@ -285,8 +296,9 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    field: ({ book }) => book.meta.isAvailable,
+    field: () => undefined,
     label: t("book.fields.status"),
+    align: "left",
   },
   {
     name: "author",
@@ -362,8 +374,6 @@ const { soldBookCopies: soldCopies, loading: soldLoading } =
     retailLocationId: selectedLocation.value.id,
   }));
 
-const selectedRows = ref<BookCopyDetailsFragment[]>([]);
-
 const bookLoading = computed(
   () => ownedLoading.value || returnedLoading.value || soldLoading.value,
 );
@@ -376,6 +386,16 @@ enum Titles {
 interface GroupHeaderRow {
   id: Titles;
 }
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const getCodeIndex = (code: string) => parseInt(code.split("/")[0]!);
+const sortByCopyCode = (copies: BookCopyDetailsFragment[]) =>
+  [...copies].sort((copyA, copyB) =>
+    getCodeIndex(copyA.code) < getCodeIndex(copyB.code)
+      ? -1
+      : getCodeIndex(copyA.code) === getCodeIndex(copyB.code)
+        ? 0
+        : 1,
+  );
 // TODO: Handle the case when a group is empty (?)
 const tableRows = computed<(BookCopyDetailsFragment | GroupHeaderRow)[]>(() => [
   // Adding one empty row for each of the sub-headers, then merging all the
@@ -383,28 +403,28 @@ const tableRows = computed<(BookCopyDetailsFragment | GroupHeaderRow)[]>(() => [
   {
     id: Titles.InStock,
   },
-  ...ownedCopies.value,
+  ...sortByCopyCode(ownedCopies.value),
 
   ...(returnedCopies.value.length > 0
     ? [
         {
           id: Titles.Returned,
         },
-        ...returnedCopies.value,
+        ...sortByCopyCode(returnedCopies.value),
       ]
     : []),
 
   {
     id: Titles.Sold,
   },
-  ...soldCopies.value,
+  ...sortByCopyCode(soldCopies.value),
 ]);
 
 const selectableRows = computed(() =>
-  ownedCopies.value.filter(
-    (row) => row.id.endsWith("0") /* FIXME: add real filter logic */,
-  ),
+  ownedCopies.value.filter((row) => isAvailable(row)),
 );
+
+const selectedRows = ref<BookCopyDetailsFragment[]>([]);
 
 const localizedSectionTitle = (sectionTitle: Titles) => {
   return sectionTitle === Titles.InStock
@@ -484,20 +504,42 @@ function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
   });
 }
 
+const { reportProblem } = useReportProblemMutation();
 function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
-  // TODO: add check if any of the book copies' last problem
-  // is unresolved
   Dialog.create({
     component: ProblemsDialog,
-  }).onOk((problems: ProblemDetailsFragment) => {
-    bookCopies.forEach(({ id }) => {
-      const currentBookCopy = ownedCopies.value.find(
-        (bookCopy) => bookCopy.id === id,
-      );
-      if (currentBookCopy) {
-        currentBookCopy.problems?.push(problems);
-      }
-    });
+    componentProps: {
+      bookCopy: bookCopies[0],
+    },
+  }).onOk((problem: ProblemDetailsFragment) => {
+    try {
+      bookCopies.forEach(async (bookCopy) => {
+        const { cache } = await reportProblem({
+          input: {
+            bookCopyId: bookCopy.id,
+            details: problem.details,
+            type: problem.type,
+          },
+        });
+
+        cache.updateFragment(
+          {
+            fragment: BookCopyDetailsFragmentDoc,
+            id: cache.identify(bookCopy),
+            fragmentName: "BookCopyDetails",
+          },
+          (data) =>
+            data
+              ? { ...data, problems: [...(data.problems ?? []), problem] }
+              : null,
+        );
+      });
+
+      swapAllRows();
+    } catch {
+      notifyError(t("manageUsers.payOffUserDialog.problemsError"));
+      return;
+    }
   });
 }
 

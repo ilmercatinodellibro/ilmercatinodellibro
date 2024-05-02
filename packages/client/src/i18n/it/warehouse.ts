@@ -1,4 +1,5 @@
 import { BookCopyQueryFilter } from "src/@generated/graphql";
+import { BookCopyStatus } from "src/helpers/book-copy";
 
 export default {
   sortByCopyCode: "Ordina per codice copia cartacea",
@@ -11,12 +12,12 @@ export default {
   } satisfies Record<Exclude<keyof BookCopyQueryFilter, "search">, string>,
   owner: "Proprietario",
   bookCopyStatus: {
-    lost: "Perso",
+    LOST: "Perso",
     returned: "Restituito",
     donated: "Donato al Mercatino",
-    incomplete: "Incompleto",
+    INCOMPLETE: "Incompleto",
     "not-available": "Non Disponibile",
     available: "Disponibile",
     sold: "Venduto",
-  },
+  } satisfies Record<BookCopyStatus, string>,
 };
