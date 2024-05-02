@@ -1,3 +1,17 @@
+import { BookQueryFilter } from "src/@generated/graphql";
+
+enum BookUtilityCategory {
+  LOW_UTILITY,
+  MEDIUM_UTILITY,
+  HIGH_UTILITY,
+}
+
+export type UtilityCategory = keyof typeof BookUtilityCategory;
+
+export type BookCompleteFilters =
+  | keyof Omit<BookQueryFilter, "search">
+  | UtilityCategory;
+
 export interface SchoolFilters {
   schoolCodes: string[];
   courses: string[];

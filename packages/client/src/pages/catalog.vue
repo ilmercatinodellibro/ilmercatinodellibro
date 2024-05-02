@@ -55,12 +55,17 @@ import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { BookQueryFilter } from "src/@generated/graphql";
 import AddBookDialog from "src/components/add-book-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { SchoolFilters } from "src/models/book";
+import {
+  BookCompleteFilters,
+  SchoolFilters,
+  UtilityCategory,
+} from "src/models/book";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { formatPrice } from "../composables/use-misc-formats";
@@ -73,7 +78,7 @@ const numberOfRows = ref(100);
 
 const searchQuery = ref("");
 
-const filters = ref<string[]>([]);
+const filters = ref<BookCompleteFilters[]>([]);
 
 const filterOptions = useTranslatedFilters("book.filters.options");
 
@@ -82,8 +87,14 @@ const schoolFilters = ref<SchoolFilters>({
   courses: [],
 });
 
-const tableFilter = computed(() => ({
+const tableFilter = computed<
+  BookQueryFilter & Record<UtilityCategory, boolean>
+>(() => ({
   search: searchQuery.value,
+  isAvailable: filters.value.includes("isAvailable"),
+  HIGH_UTILITY: filters.value.includes("HIGH_UTILITY"),
+  MEDIUM_UTILITY: filters.value.includes("MEDIUM_UTILITY"),
+  LOW_UTILITY: filters.value.includes("LOW_UTILITY"),
 }));
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
@@ -164,16 +175,25 @@ onMounted(() => {
 const onRequest: QTable["onRequest"] = async function (requestProps) {
   loading.value = true;
 
-  await refetchBooks({
-    page: requestProps.pagination.page - 1,
-    rows: requestProps.pagination.rowsPerPage,
-    filter: tableFilter.value,
-  });
-  pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+  try {
+    await refetchBooks({
+      page: requestProps.pagination.page - 1,
+      rows: requestProps.pagination.rowsPerPage,
+      filter: {
+        isAvailable: tableFilter.value.isAvailable,
+        search: tableFilter.value.search,
+      }, // TODO: Include low/medium/high utility filters
+    });
 
-  pagination.value.page = requestProps.pagination.page;
-  pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
-  loading.value = false;
+    pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+
+    pagination.value.page = requestProps.pagination.page;
+    pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
 };
 
 function openBookDialog() {
