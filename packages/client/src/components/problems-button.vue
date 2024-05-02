@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { Dialog } from "quasar";
 import { useI18n } from "vue-i18n";
-import { hasProblem } from "src/helpers/book-copy";
+import { getCurrentActiveProblem, hasProblem } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -46,7 +46,8 @@ function openProblemsDialog() {
     if (hasProblem(props.bookCopy)) {
       try {
         await resolveProblem({
-          input: { id: props.bookCopy.id, solution },
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          input: { id: getCurrentActiveProblem(props.bookCopy)!.id, solution },
         });
 
         await refetchBookCopies();
