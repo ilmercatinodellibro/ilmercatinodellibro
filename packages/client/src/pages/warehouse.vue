@@ -159,14 +159,14 @@
           </q-td>
         </template>
 
-        <template #body-cell-history="{ value }">
+        <template #body-cell-history="{ row }">
           <q-td>
             <q-btn
               :icon="mdiHistory"
               color="primary"
               flat
               round
-              @click="openHistory(value)"
+              @click="openHistory(row)"
             />
           </q-td>
         </template>
@@ -331,9 +331,27 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       align: "left",
     },
     {
+      name: "author",
+      field: ({ book }) => book.authorsFullName,
+      label: t("book.fields.author"),
+      align: "left",
+    },
+    {
+      name: "subject",
+      field: ({ book }) => book.subject,
+      label: t("book.fields.subject"),
+      align: "left",
+    },
+    {
       name: "status",
       field: () => undefined,
       label: t("book.fields.status"),
+      align: "left",
+    },
+    {
+      name: "title",
+      field: ({ book }) => book.title,
+      label: t("book.fields.title"),
       align: "left",
     },
     {

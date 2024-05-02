@@ -98,7 +98,9 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: "code",
     label: t("book.code"),
   },
-  ...bookCopyColumns.filter(({ name }) => name !== "isbn"),
+  ...bookCopyColumns.filter(
+    ({ name }) => !["isbn", "author", "subject", "title"].includes(name),
+  ),
 ]);
 
 const { useGetBookCopiesQuery } = useBookCopyService();
