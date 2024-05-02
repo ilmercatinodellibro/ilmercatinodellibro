@@ -1,7 +1,7 @@
 <template>
-  <q-icon v-bind="IconData[getStatus(bookCopy)]" class="q-mr-md" size="24px" />
+  <q-icon v-bind="IconData[getStatus()]" class="q-mr-md" size="24px" />
   <span>
-    {{ t(`warehouse.bookCopyStatus.${getStatus(bookCopy)}`) }}
+    {{ t(`warehouse.bookCopyStatus.${getStatus()}`) }}
   </span>
 </template>
 
@@ -17,23 +17,34 @@ import {
 } from "@quasar/extras/mdi-v7";
 import { NamedColor } from "quasar";
 import { useI18n } from "vue-i18n";
+import { ProblemType } from "src/@generated/graphql";
+import { getCurrentActiveProblem } from "src/helpers/book-copy";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 
 const { t } = useI18n();
 
-defineProps<{ bookCopy: BookCopyDetailsFragment }>();
+const props = defineProps<{ bookCopy: BookCopyDetailsFragment }>();
 
 type Status =
   | "not-available"
   | "available"
   | "donated"
-  | "incomplete"
-  | "lost"
   | "returned"
-  | "sold";
+  | "sold"
+  | Exclude<ProblemType, "CUSTOM">;
 
-function getStatus(bookCopy: BookCopyDetailsFragment): Status {
-  return bookCopy.returnedAt ? "returned" : "available";
+function getStatus(): Status {
+  const problemType = getCurrentActiveProblem(props.bookCopy)?.type;
+
+  return props.bookCopy.returnedAt
+    ? "returned"
+    : problemType
+      ? problemType !== "CUSTOM"
+        ? problemType
+        : "not-available"
+      : props.bookCopy.purchasedAt
+        ? "sold"
+        : "available";
 }
 
 const IconData: Record<Status, { color: NamedColor; name: string }> = {
@@ -49,11 +60,11 @@ const IconData: Record<Status, { color: NamedColor; name: string }> = {
     color: "primary",
     name: mdiGift,
   },
-  incomplete: {
+  INCOMPLETE: {
     color: "primary",
     name: mdiPuzzle,
   },
-  lost: {
+  LOST: {
     color: "primary",
     name: mdiHelpCircle,
   },
