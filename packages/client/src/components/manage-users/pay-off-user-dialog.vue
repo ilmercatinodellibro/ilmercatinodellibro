@@ -244,7 +244,6 @@ import { isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
-  BookCopyDetailsFragmentDoc,
   ProblemDetailsFragment,
   useGetBookCopiesByOwnerQuery,
   useGetReturnedBookCopiesQuery,
@@ -356,11 +355,14 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
 
 const { selectedLocation } = useRetailLocationService();
 
-const { bookCopiesByOwner: ownedCopies, loading: ownedLoading } =
-  useGetBookCopiesByOwnerQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+const {
+  bookCopiesByOwner: ownedCopies,
+  loading: ownedLoading,
+  refetch: refetchBookCopiesByOwner,
+} = useGetBookCopiesByOwnerQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
 
 const { returnedBookCopies: returnedCopies, loading: returnedLoading } =
   useGetReturnedBookCopiesQuery(() => ({
@@ -511,28 +513,21 @@ function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
     componentProps: {
       bookCopy: bookCopies[0],
     },
-  }).onOk((problem: ProblemDetailsFragment) => {
+  }).onOk(async (problem: ProblemDetailsFragment) => {
     try {
       bookCopies.forEach(async (bookCopy) => {
-        const { cache } = await reportProblem({
+        await reportProblem({
           input: {
             bookCopyId: bookCopy.id,
             details: problem.details,
             type: problem.type,
           },
         });
+      });
 
-        cache.updateFragment(
-          {
-            fragment: BookCopyDetailsFragmentDoc,
-            id: cache.identify(bookCopy),
-            fragmentName: "BookCopyDetails",
-          },
-          (data) =>
-            data
-              ? { ...data, problems: [...(data.problems ?? []), problem] }
-              : null,
-        );
+      await refetchBookCopiesByOwner({
+        retailLocationId: selectedLocation.value.id,
+        userId: props.user.id,
       });
 
       swapAllRows();
