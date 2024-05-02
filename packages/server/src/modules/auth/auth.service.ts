@@ -67,6 +67,30 @@ export class AuthService {
     }
   }
 
+  async userIsAdmin(
+    userId: string,
+    retailLocationId: string,
+  ): Promise<boolean> {
+    try {
+      const { role } = await this.prisma.locationMember.findFirstOrThrow({
+        where: {
+          userId,
+          retailLocationId,
+        },
+        select: {
+          role: true,
+        },
+      });
+      if (role !== "ADMIN") {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async sendInviteLink(email: string, name: string, token: string) {
     const url = `${this.rootConfig.clientUrl}/invite?token=${token}&email=${email}`;
 

@@ -1,4 +1,11 @@
-import { ArgsType, Field, InputType, Int, ObjectType } from "@nestjs/graphql";
+import {
+  ArgsType,
+  Field,
+  InputType,
+  Int,
+  ObjectType,
+  PickType,
+} from "@nestjs/graphql";
 import { User } from "src/@generated";
 import { Role } from "src/@generated/prisma";
 import { LocationBoundInput } from "src/modules/retail-location";
@@ -42,4 +49,42 @@ export class UpdateRolePayload extends LocationBoundInput {
 
   @Field(() => Role)
   role!: Role;
+}
+
+@InputType()
+export class RegisterUserPayload extends PickType(
+  User,
+  ["email", "firstname", "lastname", "notes", "phoneNumber"],
+  InputType,
+) {
+  @Field(() => Boolean, { nullable: true })
+  discount?: boolean;
+
+  @Field()
+  password!: string;
+
+  @Field()
+  passwordConfirmation!: string;
+
+  @Field()
+  retailLocationId!: string;
+}
+
+@InputType()
+export class UpdateUserPayload extends PickType(
+  User,
+  ["email", "firstname", "lastname", "notes", "phoneNumber", "id"],
+  InputType,
+) {
+  @Field(() => Boolean, { nullable: true })
+  discount?: boolean;
+
+  @Field(() => String, { nullable: true })
+  password?: string;
+
+  @Field(() => String, { nullable: true })
+  passwordConfirmation?: string;
+
+  @Field()
+  retailLocationId!: string;
 }
