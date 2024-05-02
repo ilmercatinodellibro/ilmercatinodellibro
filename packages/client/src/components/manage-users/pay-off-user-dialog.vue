@@ -138,14 +138,16 @@
                   dense
                   @update:model-value="swapRow(row)"
                 />
+
                 <book-copy-status-chip
                   v-else-if="col.name === 'status'"
                   :book-copy="row"
                   hide-icon
                 />
+
                 <q-btn
                   v-else-if="
-                    col.name === 'actions' && ownedCopies.includes(row)
+                    col.name === 'actions' && selectableRows.includes(row)
                   "
                   :icon="mdiDotsVertical"
                   dense
@@ -154,41 +156,35 @@
                   size="sm"
                 >
                   <q-menu auto-close>
-                    <template v-if="selectableRows.includes(row)">
-                      <q-item
-                        class="items-center"
-                        clickable
-                        @click="returnBooks([row])"
-                      >
-                        {{
-                          $t(
-                            "manageUsers.payOffUserDialog.returnOptions.return",
-                          )
-                        }}
-                      </q-item>
-                      <q-item
-                        class="items-center"
-                        clickable
-                        @click="donateBooks([row])"
-                      >
-                        {{
-                          $t(
-                            "manageUsers.payOffUserDialog.returnOptions.donate",
-                          )
-                        }}
-                      </q-item>
-                      <q-item
-                        class="items-center"
-                        clickable
-                        @click="reimburseBooks([row])"
-                      >
-                        {{
-                          $t(
-                            "manageUsers.payOffUserDialog.returnOptions.reimburse",
-                          )
-                        }}
-                      </q-item>
-                    </template>
+                    <q-item
+                      class="items-center"
+                      clickable
+                      @click="returnBooks([row])"
+                    >
+                      {{
+                        $t("manageUsers.payOffUserDialog.returnOptions.return")
+                      }}
+                    </q-item>
+                    <q-item
+                      class="items-center"
+                      clickable
+                      @click="donateBooks([row])"
+                    >
+                      {{
+                        $t("manageUsers.payOffUserDialog.returnOptions.donate")
+                      }}
+                    </q-item>
+                    <q-item
+                      class="items-center"
+                      clickable
+                      @click="reimburseBooks([row])"
+                    >
+                      {{
+                        $t(
+                          "manageUsers.payOffUserDialog.returnOptions.reimburse",
+                        )
+                      }}
+                    </q-item>
                     <q-item
                       class="items-center"
                       clickable
@@ -530,7 +526,9 @@ function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
         userId: props.user.id,
       });
 
-      swapAllRows();
+      if (selectedRows.value.length > 0) {
+        swapAllRows();
+      }
     } catch {
       notifyError(t("manageUsers.payOffUserDialog.problemsError"));
       return;
