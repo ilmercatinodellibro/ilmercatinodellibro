@@ -93,6 +93,7 @@
             :rows="copiesInStock"
             :columns="copiesInStockColumns"
             :loading="inStockLoading"
+            :rows-per-page-options="[0]"
             class="col"
           >
             <template #body-cell-status="{ value }">
