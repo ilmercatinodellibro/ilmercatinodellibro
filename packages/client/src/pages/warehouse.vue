@@ -107,7 +107,7 @@
               auto-width
             >
               <template v-if="name === 'status'">
-                <status-chip :value="props.row.status" />
+                <status-chip :value="props.row.meta.isAvailable" />
               </template>
 
               <template v-else>
@@ -193,12 +193,14 @@ import ProblemsHistoryDialog from "src/components/manage-users/problems-history-
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { isAvailable } from "src/helpers/book-copy";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
 import { SchoolFilters } from "src/models/book";
 import { useBookService } from "src/services/book";
 import {
   BookCopyDetailsFragment,
+  useGetBookCopiesQuery,
   useGetPaginatedBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -271,8 +273,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "available-copies",
-    // FIXME: add field
-    field: () => undefined,
+    field: ({ id }) => getAvailableCopies(id),
     label: t("reserveBooks.availableCopies"),
     align: "center",
   },
@@ -347,6 +348,12 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
     },
   ],
 );
+function getAvailableCopies(bookId: string): number {
+  const { bookCopies } = useGetBookCopiesQuery({
+    bookId,
+  });
+  return bookCopies.value.filter((bookCopy) => isAvailable(bookCopy)).length;
+}
 
 const onBooksRequest: QTableProps["onRequest"] = async ({
   pagination: { page, rowsPerPage },
