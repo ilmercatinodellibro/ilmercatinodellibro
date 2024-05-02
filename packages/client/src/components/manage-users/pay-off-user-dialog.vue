@@ -519,16 +519,16 @@ function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
             type: problem.type,
           },
         });
+
+        selectedRows.value = selectedRows.value.filter(
+          ({ id }) => id !== bookCopy.id,
+        );
       });
 
       await refetchBookCopiesByOwner({
         retailLocationId: selectedLocation.value.id,
         userId: props.user.id,
       });
-
-      if (selectedRows.value.length > 0) {
-        swapAllRows();
-      }
     } catch {
       notifyError(t("manageUsers.payOffUserDialog.problemsError"));
       return;
