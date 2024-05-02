@@ -23,6 +23,7 @@ import { AuthService } from "src/modules/auth/auth.service";
 import {
   BookCopyCreateInput,
   RefundBookCopyInput,
+  ReturnBookCopyInput,
 } from "src/modules/book-copy/book-copy.input";
 import { ReceiptService } from "src/modules/receipt/receipt.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
@@ -576,6 +577,55 @@ export class BookCopyResolver {
             },
           },
         },
+      },
+    });
+  }
+
+  @Mutation(() => BookCopy)
+  async returnBookCopy(
+    @Input() { bookCopyId }: ReturnBookCopyInput,
+    @CurrentUser() { id: userId }: User,
+  ) {
+    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
+      where: {
+        id: bookCopyId,
+      },
+      include: {
+        book: {
+          select: {
+            retailLocationId: true,
+          },
+        },
+        sales: {
+          where: {
+            refundedAt: { not: null },
+          },
+        },
+      },
+    });
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: bookCopy.book.retailLocationId,
+      message:
+        "You don't have the necessary permissions to return this book copy.",
+    });
+
+    if (bookCopy.sales.length > 0) {
+      throw new ForbiddenException(
+        "The book copy you are trying to return has been sold. It must be refunded to the buyer first, before it can be returned to the owner.",
+      );
+    }
+
+    return this.prisma.bookCopy.update({
+      where: {
+        id: bookCopyId,
+      },
+      data: {
+        updatedAt: new Date(),
+        updatedById: userId,
+        returnedAt: new Date(),
+        returnedById: userId,
       },
     });
   }

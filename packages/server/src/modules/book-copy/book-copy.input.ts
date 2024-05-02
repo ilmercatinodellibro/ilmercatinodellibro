@@ -15,3 +15,9 @@ export class RefundBookCopyInput extends LocationBoundInput {
   @Field(() => String)
   bookCopyId!: string;
 }
+
+@InputType()
+export class ReturnBookCopyInput extends LocationBoundInput {
+  @Field(() => String)
+  bookCopyId!: string;
+}
