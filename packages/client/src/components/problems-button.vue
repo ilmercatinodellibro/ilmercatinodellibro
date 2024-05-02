@@ -31,6 +31,10 @@ const props = defineProps<{
   bookCopy: BookCopyDetailsFragment;
 }>();
 
+const emit = defineEmits<{
+  updateProblems: [];
+}>();
+
 const { resolveProblem } = useResolveProblemMutation();
 const { refetch: refetchBookCopies } = useGetBookCopiesQuery({
   bookId: props.bookCopy.book.id,
@@ -51,6 +55,8 @@ function openProblemsDialog() {
         });
 
         await refetchBookCopies();
+
+        emit("updateProblems");
       } catch (e) {
         notifyError(t("common.genericErrorMessage"));
       }
@@ -69,6 +75,8 @@ function openProblemsDialog() {
       await refetchBookCopies({
         bookId: props.bookCopy.book.id,
       });
+
+      emit("updateProblems");
     } catch (e) {
       notifyError(t("common.genericErrorMessage"));
     }

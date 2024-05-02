@@ -42,6 +42,26 @@ query getBooks(
   }
 }
 
+query getBooksWithAvailableCopies(
+  $retailLocationId: String!
+  $page: Int!
+  $rows: Int!
+  $filter: BookQueryFilter
+) {
+  books(
+    retailLocationId: $retailLocationId
+    page: $page
+    rows: $rows
+    filter: $filter
+  ) {
+    page
+    rows {
+      ...BookWithAvailableCopies
+    }
+    rowsCount
+  }
+}
+
 query getBookByIsbn($isbnCode: String!, $retailLocationId: String!) {
   books(
     retailLocationId: $retailLocationId

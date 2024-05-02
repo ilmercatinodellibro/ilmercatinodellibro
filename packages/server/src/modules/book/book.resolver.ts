@@ -138,7 +138,9 @@ export class BookResolver {
     {
       problems: {
         every: {
-          resolvedAt: null,
+          resolvedAt: {
+            not: null,
+          },
         },
       },
     },

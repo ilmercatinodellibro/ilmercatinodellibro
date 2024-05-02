@@ -63,11 +63,12 @@
 
       <dialog-table
         v-if="!isSortedByCopyCode"
+        ref="tableRef"
         v-model:pagination="booksPagination"
         :columns="columns"
         :filter="tableFilter"
         :loading="booksLoading"
-        :rows="books"
+        :rows="books?.rows ?? []"
         class="flex-delegate-height-management"
         row-key="id"
         @request="onBooksRequest"
@@ -127,6 +128,7 @@
               :book-copy-columns="bookCopyColumns"
               :book-id="props.row.id"
               @open-history="(bookCopy) => openHistory(bookCopy)"
+              @update-problems="refetchBooks()"
             />
           </template>
         </template>
@@ -182,7 +184,7 @@ import {
   mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QTableColumn, QTableProps } from "quasar";
+import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyDetailsTable from "src/components/book-copy-details-table.vue";
@@ -196,12 +198,12 @@ import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
 import { SchoolFilters } from "src/models/book";
-import { useBookService } from "src/services/book";
 import {
   BookCopyDetailsFragment,
   useGetPaginatedBookCopiesQuery,
 } from "src/services/book-copy.graphql";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import { useGetBooksWithAvailableCopiesQuery } from "src/services/book.graphql";
+import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { selectedLocation, retailLocations } = useRetailLocationService();
@@ -214,10 +216,13 @@ const bookCopiesPerPage = ref(100);
 
 const {
   books,
+  refetch: refetchBooks,
   loading: booksLoading,
-  refetchBooks,
-  booksPaginationDetails,
-} = useBookService(booksPage, booksPerPage);
+} = useGetBooksWithAvailableCopiesQuery({
+  page: booksPage.value,
+  retailLocationId: selectedLocation.value.id,
+  rows: booksPerPage.value,
+});
 
 const {
   paginatedBookCopies: bookCopies,
@@ -238,59 +243,63 @@ const screenWidth = useScreenWidth(smallScreenBreakpoint);
 
 const isSortedByCopyCode = ref(false);
 
+const tableRef = ref<QTable>();
+
 const filters = ref<string[]>([]);
 const filterOptions = useTranslatedFilters("warehouse.filters");
 
 const schoolFilters = ref<SchoolFilters>({ courses: [], schoolCodes: [] });
 const searchQuery = ref("");
 
-const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
-  {
-    name: "isbn",
-    field: "isbnCode",
-    label: t("book.fields.isbn"),
-    align: "left",
-  },
-  {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
-    align: "left",
-  },
-  {
-    name: "subject",
-    field: "subject",
-    label: t("book.fields.subject"),
-    align: "left",
-  },
-  {
-    name: "status",
-    field: ({ meta }) => meta.isAvailable,
-    label: t("book.fields.status"),
-    align: "left",
-  },
-  {
-    name: "available-copies",
-    field: () => undefined, // ({copies}) => copies.filter((copy) => isAvailable(copy)).length,
-    label: t("reserveBooks.availableCopies"),
-    align: "center",
-  },
-  {
-    name: "title",
-    field: "title",
-    label: t("book.fields.title"),
-    align: "left",
-  },
-  {
-    name: "problems",
-    field: () => undefined,
-    label: "",
-  },
-]);
+const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
+  () => [
+    {
+      name: "isbn",
+      field: "isbnCode",
+      label: t("book.fields.isbn"),
+      align: "left",
+    },
+    {
+      name: "author",
+      field: "authorsFullName",
+      label: t("book.fields.author"),
+      align: "left",
+    },
+    {
+      name: "subject",
+      field: "subject",
+      label: t("book.fields.subject"),
+      align: "left",
+    },
+    {
+      name: "status",
+      field: ({ meta }) => meta.isAvailable,
+      label: t("book.fields.status"),
+      align: "left",
+    },
+    {
+      name: "available-copies",
+      field: ({ copies }) => copies?.length ?? 0,
+      label: t("reserveBooks.availableCopies"),
+      align: "center",
+    },
+    {
+      name: "title",
+      field: "title",
+      label: t("book.fields.title"),
+      align: "left",
+    },
+    {
+      name: "problems",
+      field: () => undefined,
+      label: "",
+    },
+  ],
+);
 
 const booksPagination = ref({
   rowsPerPage: booksPerPage.value,
-  rowsNumber: booksPaginationDetails.value.rowCount,
+  rowsNumber: books.value?.rowsCount,
   page: booksPage.value,
 });
 const copyPagination = ref({
@@ -353,6 +362,7 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
   booksLoading.value = true;
 
   await refetchBooks({
+    retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
     filter: {
@@ -360,7 +370,7 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
     },
   });
 
-  booksPagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
+  booksPagination.value.rowsNumber = books.value?.rowsCount;
 
   booksPagination.value.page = page;
   booksPagination.value.rowsPerPage = rowsPerPage;

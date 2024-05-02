@@ -39,7 +39,10 @@
         </template>
 
         <template v-else-if="name === 'problems'">
-          <problems-button :book-copy="bookCopy" />
+          <problems-button
+            :book-copy="bookCopy"
+            @update-problems="() => emit('updateProblems')"
+          />
         </template>
 
         <template v-else-if="name === 'history'">
@@ -84,6 +87,7 @@ const { bookId, bookCopyColumns } = defineProps<{
 
 const emit = defineEmits<{
   openHistory: [bookCopy: BookCopyDetailsFragment];
+  updateProblems: [];
 }>();
 
 const tableWidth = 9;
