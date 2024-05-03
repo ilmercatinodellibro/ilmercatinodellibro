@@ -1,4 +1,5 @@
 import { ConflictException } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   Args,
   Mutation,
@@ -23,6 +24,7 @@ export class SaleResolver {
     private readonly prisma: PrismaService,
     private readonly saleService: SaleService,
     private readonly authService: AuthService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Query(() => [Sale])
@@ -121,7 +123,7 @@ export class SaleResolver {
     @Input() { id }: RefundSaleInput,
     @CurrentUser() { id: currentUserId }: User,
   ) {
-    return this.prisma.$transaction(async (prisma) => {
+    const [sale, bookCopy] = await this.prisma.$transaction(async (prisma) => {
       const toRefund = await prisma.sale.findUniqueOrThrow({
         where: {
           id,
@@ -145,8 +147,19 @@ export class SaleResolver {
         throw new ConflictException("This sale has already been refunded.");
       }
 
-      return this.saleService.refundSale(prisma, id, currentUserId);
+      const refundedSale = await this.saleService.refundSale(
+        prisma,
+        id,
+        currentUserId,
+      );
+      return [refundedSale, toRefund.bookCopy];
     });
+
+    this.eventEmitter.emit("booksBecameAvailable", {
+      bookIds: [bookCopy.bookId],
+    });
+
+    return sale;
   }
 
   // see the Cart module for Sale creation logic

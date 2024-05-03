@@ -180,6 +180,7 @@ model Book {
   requests     BookRequest[]    @relation("BookRequested")
   cartItems    CartItem[]
   courses      BooksOnCourses[] @relation("CourseBook")
+  requestQueue RequestQueue?
 }
 
 view BookMeta {
@@ -320,8 +321,21 @@ model BookRequest {
 
   cartItem     CartItem?
   reservations Reservation[] @relation("BookRequestReservation")
+  queueItem    RequestQueue?
 
   @@unique([userId, bookId, deletedAt])
+}
+
+model RequestQueue {
+  id String @id @default(uuid())
+
+  bookId String @unique @map("book_id") @db.Uuid
+  book   Book   @relation(fields: [bookId], references: [id])
+
+  currentRequestId String      @unique @map("current_request_id")
+  currentRequest   BookRequest @relation(fields: [currentRequestId], references: [id])
+
+  lastCheckedAt DateTime @default(now()) @map("last_checked_at") @db.Timestamptz()
 }
 
 model Cart {
