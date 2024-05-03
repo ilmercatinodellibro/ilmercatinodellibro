@@ -60,14 +60,16 @@
         <q-input
           v-model="newUserData.passwordConfirmation"
           :label="$t('auth.confirmPassword')"
-          :rules="[
+          :rules="
             newUserData.password
-              ? makeValueMatchRule(
-                  newUserData.password,
-                  $t('auth.passwordDoNotMatch'),
-                )
-              : requiredRule,
-          ]"
+              ? [
+                  makeValueMatchRule(
+                    newUserData.password,
+                    $t('auth.passwordDoNotMatch'),
+                  ),
+                ]
+              : undefined
+          "
           :type="hideConfirm ? 'password' : 'text'"
           outlined
         >

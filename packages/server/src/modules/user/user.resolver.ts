@@ -11,6 +11,7 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
+import * as argon2 from "argon2";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
 import { Role } from "src/@generated";
@@ -411,8 +412,7 @@ export class UserResolver {
       await this.authService.assertMembership({
         userId: currentUser.id,
         retailLocationId,
-        role: Role.OPERATOR,
-        message: "You are not allowed to remove members from this location.",
+        message: "You do not have permissions to edit user data.",
       });
     }
 
@@ -445,7 +445,7 @@ export class UserResolver {
         ...(!!password &&
         !!passwordConfirmation &&
         password === passwordConfirmation
-          ? { password, passwordConfirmation }
+          ? { password: await argon2.hash(password) }
           : {}),
       },
     });
