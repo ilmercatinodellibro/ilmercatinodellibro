@@ -511,7 +511,6 @@ export class BookCopyResolver {
       data: bookCopies,
     });
 
-    // TODO: emit an event to indicate the book becoming available
     this.eventEmitter.emit("booksBecameAvailable", { bookIds });
 
     return bookCopies;
