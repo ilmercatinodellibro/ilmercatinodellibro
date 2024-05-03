@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   InternalServerErrorException,
 } from "@nestjs/common";
@@ -23,6 +24,7 @@ import { AuthService } from "src/modules/auth/auth.service";
 import {
   BookCopyCreateInput,
   RefundBookCopyInput,
+  ReimburseBookCopyInput,
   ReturnBookCopyInput,
 } from "src/modules/book-copy/book-copy.input";
 import { ReceiptService } from "src/modules/receipt/receipt.service";
@@ -516,7 +518,9 @@ export class BookCopyResolver {
     return bookCopies;
   }
 
-  @Mutation(() => BookCopy)
+  @Mutation(() => BookCopy, {
+    description: "Refund the book copy to the buyer",
+  })
   async refundBookCopy(
     @Input() { bookCopyId }: RefundBookCopyInput,
     @CurrentUser() { id: userId }: User,
@@ -547,9 +551,7 @@ export class BookCopyResolver {
     });
 
     if (bookCopy.sales.length === 0) {
-      throw new ForbiddenException(
-        "The book copy you are trying to refund has not been sold.",
-      );
+      throw new ConflictException("The book copy has not been sold.");
     }
 
     if (bookCopy.sales.length > 1) {
@@ -581,7 +583,9 @@ export class BookCopyResolver {
     });
   }
 
-  @Mutation(() => BookCopy)
+  @Mutation(() => BookCopy, {
+    description: "Return the book copy to the owner",
+  })
   async returnBookCopy(
     @Input() { bookCopyId }: ReturnBookCopyInput,
     @CurrentUser() { id: userId }: User,
@@ -612,9 +616,17 @@ export class BookCopyResolver {
     });
 
     if (bookCopy.sales.length > 0) {
-      throw new ForbiddenException(
-        "The book copy you are trying to return has been sold. It must be refunded to the buyer first, before it can be returned to the owner.",
+      throw new ConflictException(
+        "The book copy has been sold. It must be refunded to the buyer first, before it can be returned to the owner.",
       );
+    }
+
+    if (bookCopy.returnedAt) {
+      throw new ConflictException("The book copy has already been returned.");
+    }
+
+    if (bookCopy.reimbursedAt) {
+      throw new ConflictException("The book copy has already been reimbursed.");
     }
 
     return this.prisma.bookCopy.update({
@@ -626,6 +638,66 @@ export class BookCopyResolver {
         updatedById: userId,
         returnedAt: new Date(),
         returnedById: userId,
+      },
+    });
+  }
+
+  @Mutation(() => BookCopy, {
+    description:
+      "Reimburse the owner of the book copy that got damaged/lost/etc. under Mercatino's responsibility.",
+  })
+  async reimburseBookCopy(
+    @Input() { bookCopyId }: ReimburseBookCopyInput,
+    @CurrentUser() { id: userId }: User,
+  ) {
+    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
+      where: {
+        id: bookCopyId,
+      },
+      include: {
+        book: {
+          select: {
+            retailLocationId: true,
+          },
+        },
+        sales: {
+          where: {
+            refundedAt: { not: null },
+          },
+        },
+      },
+    });
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: bookCopy.book.retailLocationId,
+      message:
+        "You don't have the necessary permissions to reimburse this book copy.",
+    });
+
+    if (bookCopy.sales.length > 0) {
+      throw new ConflictException(
+        "The book copy has been sold. It must be refunded to the buyer first, before it can be reimbursed to the owner.",
+      );
+    }
+
+    if (bookCopy.reimbursedAt) {
+      throw new ConflictException("The book copy has already been reimbursed.");
+    }
+
+    if (bookCopy.returnedAt) {
+      throw new ConflictException("The book copy has already been returned.");
+    }
+
+    return this.prisma.bookCopy.update({
+      where: {
+        id: bookCopyId,
+      },
+      data: {
+        updatedAt: new Date(),
+        updatedById: userId,
+        reimbursedAt: new Date(),
+        reimbursedById: userId,
       },
     });
   }
