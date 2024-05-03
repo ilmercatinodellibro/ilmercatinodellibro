@@ -6,6 +6,7 @@ import {
   BookRequest,
   Prisma,
   RequestQueue as PrismaRequestQueue,
+  RetailLocation,
 } from "@prisma/client";
 import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.module";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
@@ -43,6 +44,7 @@ export class BookRequestService {
         id: { in: bookIds },
       },
       include: {
+        retailLocation: true,
         requestQueue: true,
         meta: true,
         requests: {
@@ -122,6 +124,7 @@ export class BookRequestService {
         book: {
           include: {
             meta: true,
+            retailLocation: true,
           },
         },
       },
@@ -147,12 +150,17 @@ export class BookRequestService {
     });
   }
 
-  async #notifyUser(request: BookRequest, book: Book) {
+  async #notifyUser(
+    request: BookRequest,
+    book: Book & { retailLocation: RetailLocation },
+  ) {
     // TODO: Maybe reuse the event (?)
     const { notifications, ...event } = await this.prisma.event.create({
       data: {
-        name: "Requested Book Available",
-        description: `The requested book "${book.title}" is now available for reservation.`,
+        // name: `Requested Book Available - ${book.retailLocation.name}`,
+        // description: `The requested book "${book.title}" is now available for reservation.`,
+        name: `Libro richiesto disponibile - ${book.retailLocation.name}`,
+        description: `Il libro "${book.title}" che era stato richiesto è adesso disponibile per essere prenotato.`,
         ownerId: request.userId,
         notifications: {
           create: {
