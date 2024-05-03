@@ -368,7 +368,6 @@ export class UserResolver {
     await this.authService.assertMembership({
       userId: currentUser.id,
       retailLocationId: payload.retailLocationId,
-      role: Role.OPERATOR,
       message: "You are not allowed to create members.",
     });
 

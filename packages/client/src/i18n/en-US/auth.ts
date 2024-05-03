@@ -30,6 +30,8 @@ export default {
     "Your email has been correctly verified, you can now login using your credentials",
   backToLogin: "Back to login",
   registeredSuccessfully: "Registration successful 🎉 ",
+  couldNotRegister: "Could not register the new user.",
+  couldNotUpdate: "Could not update the selected user's data.",
   birthDate: "Date of Birth",
   nameOfDelegate: "First Name and Last Name of the delegate",
   emailAddress: "Email Address",

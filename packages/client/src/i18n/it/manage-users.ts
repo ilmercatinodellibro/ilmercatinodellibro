@@ -40,6 +40,7 @@ export default {
   },
   editUser: {
     title: "Modifica Dati Utente",
+    createUser: "Crea un Nuovo Utente",
     discount: "Applica sconto ISEE/volontario",
     notes: "Note",
   },

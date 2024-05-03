@@ -31,6 +31,9 @@ export default {
     "La tua email è stata verificata correttamente, ora puoi accedere utilizzando le tue credenziali",
   backToLogin: "Torna al login",
   registeredSuccessfully: "Registrazione riuscita 🎉 ",
+  couldNotRegister: "Non è stato possibile registrare l'utente.",
+  couldNotUpdate:
+    "Non è stato possibile aggiornare i dati dell'utente selezionato.",
   birthDate: "Data di Nascita",
   nameOfDelegate: "Nome e Cognome del delegato",
   emailAddress: "Indirizzo Email",

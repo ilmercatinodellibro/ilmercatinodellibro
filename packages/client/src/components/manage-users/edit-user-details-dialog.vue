@@ -1,40 +1,35 @@
 <template>
   <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
-      :title="$t('manageUsers.editUser.title')"
+      :title="$t(`manageUsers.editUser.${userData ? 'title' : 'createUser'}`)"
       size="sm"
-      @submit="
-        onDialogOK({
-          user: newUserData.user,
-          password: newUserData.newPassword,
-        })
-      "
+      @submit="onDialogOK(newUserData)"
       @cancel="onDialogCancel"
     >
       <q-card-section class="column gap-16 no-wrap">
         <q-input
-          v-model="newUserData.user.firstname"
+          v-model="newUserData.firstname"
           :label="$t('manageUsers.fields.firstName')"
           :rules="[requiredRule]"
           clearable
           outlined
         />
         <q-input
-          v-model="newUserData.user.lastname"
+          v-model="newUserData.lastname"
           :label="$t('manageUsers.fields.lastName')"
           :rules="[requiredRule]"
           clearable
           outlined
         />
         <q-input
-          v-model="newUserData.user.email"
+          v-model="newUserData.email"
           :label="$t('manageUsers.fields.email')"
           :rules="[requiredRule, emailRule]"
           clearable
           outlined
         />
         <q-input
-          v-model="newUserData.user.phoneNumber"
+          v-model="newUserData.phoneNumber"
           :label="$t('manageUsers.fields.phoneNumber')"
           bottom-slots
           clearable
@@ -42,9 +37,15 @@
           outlined
         />
         <q-input
-          v-model="newUserData.newPassword"
+          v-model="newUserData.password"
           :label="$t('auth.password')"
-          :rules="[newUserData.newPassword ? validatePasswordRule : () => true]"
+          :rules="[
+            userData
+              ? newUserData.password
+                ? validatePasswordRule
+                : () => true
+              : requiredRule,
+          ]"
           :type="hidePassword ? 'password' : 'text'"
           outlined
         >
@@ -57,13 +58,15 @@
           </template>
         </q-input>
         <q-input
-          v-model="newUserData.confirmPassword"
+          v-model="newUserData.passwordConfirmation"
           :label="$t('auth.confirmPassword')"
           :rules="[
-            makeValueMatchRule(
-              newUserData.newPassword,
-              $t('auth.passwordDoNotMatch'),
-            ),
+            newUserData.password
+              ? makeValueMatchRule(
+                  newUserData.password,
+                  $t('auth.passwordDoNotMatch'),
+                )
+              : requiredRule,
           ]"
           :type="hideConfirm ? 'password' : 'text'"
           outlined
@@ -77,13 +80,13 @@
           </template>
         </q-input>
         <q-input
-          v-model="newUserData.user.notes"
+          v-model="newUserData.notes"
           :label="$t('manageUsers.editUser.notes')"
           clearable
           outlined
         />
         <q-checkbox
-          v-model="newUserData.user.discount"
+          v-model="newUserData.discount"
           :disable="!hasAdminRole"
           :label="$t('manageUsers.editUser.discount')"
         />
@@ -94,9 +97,9 @@
 
 <script setup lang="ts">
 import { mdiEye, mdiEyeOff } from "@quasar/extras/mdi-v7";
-import { cloneDeep } from "lodash-es";
 import { useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
+import { RegisterUserPayload, UpdateUserPayload } from "src/@generated/graphql";
 import {
   emailRule,
   makeValueMatchRule,
@@ -104,25 +107,41 @@ import {
   validatePasswordRule,
 } from "src/helpers/rules";
 import { useAuthService } from "src/services/auth";
-import { UserFragment } from "src/services/user.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
-const props = defineProps<{
-  userData: UserFragment;
+const { userData } = defineProps<{
+  userData?: UpdateUserPayload;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
-  useDialogPluginComponent();
+  useDialogPluginComponent<DataType<typeof userData>>();
 
 const { hasAdminRole } = useAuthService();
 
-const newUserData = ref({
-  user: cloneDeep(props.userData),
-  newPassword: "",
-  confirmPassword: "",
-});
+const { selectedLocation } = useRetailLocationService();
+
+type DataType<T> = T extends undefined
+  ? RegisterUserPayload
+  : UpdateUserPayload;
+
+const newUserData = ref<DataType<typeof userData>>(
+  userData
+    ? { ...userData }
+    : {
+        retailLocationId: selectedLocation.value.id,
+        email: "",
+        firstname: "",
+        lastname: "",
+        discount: false,
+        notes: "",
+        password: "",
+        passwordConfirmation: "",
+        phoneNumber: "",
+      },
+);
 const hidePassword = ref(true);
 const hideConfirm = ref(true);
 </script>

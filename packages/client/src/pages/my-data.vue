@@ -77,9 +77,8 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import DeleteAccountDialog from "src/components/delete-account-dialog.vue";
 import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
-import { UserInfo } from "src/models/auth";
 import { useAuthService } from "src/services/auth";
-import { UserFragment } from "src/services/user.graphql";
+import { UserFragment, UserInfoFragment } from "src/services/user.graphql";
 
 const { t } = useI18n();
 
@@ -141,7 +140,7 @@ const userData = computed<ItemData[]>(() => [
 function modifyUserData() {
   Dialog.create({
     component: EditUserDataDialog,
-  }).onOk((payload: UserInfo) => {
+  }).onOk((payload: UserInfoFragment) => {
     // FIXME: add mutation of user info
     payload;
   });

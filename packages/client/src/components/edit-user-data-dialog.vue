@@ -57,8 +57,8 @@ import {
   requiredRule,
   validatePasswordRule,
 } from "src/helpers/rules";
-import { UserInfo } from "src/models/auth";
 import { useAuthService } from "src/services/auth";
+import { UserInfoFragment } from "src/services/user.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -68,9 +68,9 @@ const { t } = useI18n();
 const { user } = useAuthService();
 
 const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
-  useDialogPluginComponent<UserInfo>();
+  useDialogPluginComponent<UserInfoFragment>();
 
-type UserData = UserInfo & {
+type UserData = UserInfoFragment & {
   // TODO: remove stubbed fields
   password: string;
   date: number;
@@ -93,14 +93,17 @@ const newUserData = ref<UserData>({
 
 const hidePassword = ref(true);
 
-const formData = computed<{
-  [Key in keyof UserData]: {
-    label: string;
-    type?: QInputProps["type"];
-    infoLabel?: string;
-    rules?: ValidationRule[];
-  };
-}>(() => ({
+const formData = computed<
+  Record<
+    keyof Omit<UserData, "__typename">,
+    {
+      label: string;
+      type?: QInputProps["type"];
+      infoLabel?: string;
+      rules?: ValidationRule[];
+    }
+  >
+>(() => ({
   firstname: {
     label: t("auth.firstName"),
     rules: [requiredRule],

@@ -33,7 +33,7 @@
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           @request="onRequest"
         >
-          <template #body-cell-edit="{ row, rowIndex }">
+          <template #body-cell-edit="{ row }">
             <q-td class="text-left">
               <q-btn
                 color="primary"
@@ -41,7 +41,7 @@
                 :icon="mdiPencil"
                 round
                 size="md"
-                @click="openEdit(row, rowIndex)"
+                @click="openEdit(row)"
               />
             </q-td>
           </template>
@@ -203,7 +203,7 @@ import {
 import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
+import { RegisterUserPayload, UpdateUserPayload } from "src/@generated/graphql";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
@@ -218,9 +218,14 @@ import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { notifyError } from "src/helpers/error-messages";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
-import { CustomerFragment } from "src/services/user.graphql";
+import {
+  CustomerFragment,
+  useAddUserMutation,
+  useUpdateUserMutation,
+} from "src/services/user.graphql";
 
 const tableRef = ref() as Ref<QTable>;
 
@@ -370,12 +375,22 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   },
 ]);
 
+const { createUser } = useAddUserMutation();
 function addNewUser() {
   Dialog.create({
-    component: AddNewUserDialog,
-  }).onOk((payload) => {
-    // FIXME: add new user
-    payload;
+    component: EditUserDetailsDialog,
+  }).onOk(async (payload: RegisterUserPayload) => {
+    try {
+      await createUser({
+        input: payload,
+      });
+      await fetchCustomers({
+        page: pagination.value.page,
+        rowsPerPage: pagination.value.rowsPerPage,
+      });
+    } catch {
+      notifyError(t("auth.couldNotRegister"));
+    }
   });
 }
 
@@ -400,13 +415,45 @@ function openPayOff(user: CustomerFragment) {
   });
 }
 
-function openEdit(user: CustomerFragment, rowIndex: number) {
+const { updateUser } = useUpdateUserMutation();
+function openEdit({
+  email,
+  firstname,
+  id,
+  lastname,
+  discount,
+  notes,
+  phoneNumber,
+}: CustomerFragment) {
   Dialog.create({
     component: EditUserDetailsDialog,
-    componentProps: { userData: user },
-  }).onOk((payload: { user: CustomerFragment; password?: string }) => {
-    // FIXME: add server call to update user data
-    customers.value[rowIndex] = payload.user;
+    componentProps: {
+      userData: {
+        email,
+        firstname,
+        id,
+        lastname,
+        discount,
+        notes,
+        phoneNumber,
+        retailLocationId: selectedLocation.value.id,
+      } satisfies UpdateUserPayload,
+    },
+  }).onOk(async (user: UpdateUserPayload) => {
+    try {
+      await updateUser({
+        input: {
+          ...user,
+        },
+      });
+
+      await fetchCustomers({
+        page: pagination.value.page,
+        rowsPerPage: pagination.value.rowsPerPage,
+      });
+    } catch {
+      notifyError(t("auth.couldNotUpdate"));
+    }
   });
 }
 

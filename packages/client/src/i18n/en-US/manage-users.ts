@@ -40,6 +40,7 @@ export default {
   },
   editUser: {
     title: "Edit User Data",
+    createUser: "Create a New User",
     discount: "Apply ISEE/volunteer discount",
     notes: "Notes",
   },
