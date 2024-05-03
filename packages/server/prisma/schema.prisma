@@ -68,6 +68,7 @@ model User {
   ownedCarts          Cart[]        @relation("CartOwner")
 
   // Operator/admin relations
+  settledCopies        BookCopy[]       @relation("CopySettledBy")
   returnedBookCopies   BookCopy[]       @relation("CopyReturnedBy")
   reimbursedBookCopies BookCopy[]       @relation("CopyReimbursedBy")
   donatedBookCopies    BookCopy[]       @relation("CopyDonatedBy")
@@ -206,6 +207,9 @@ model BookCopy {
   owner   User   @relation("BookCopyOwner", fields: [ownerId], references: [id])
 
   // Operator/admin relations
+  settledAt      DateTime? @map("settled_at") @db.Timestamptz()
+  settledById    String?   @map("settled_by_id")
+  settledBy      User?     @relation("CopySettledBy", fields: [settledById], references: [id])
   donatedAt      DateTime? @map("donated_at") @db.Timestamptz()
   donatedById    String?   @map("donated_by_id")
   donatedBy      User?     @relation("CopyDonatedBy", fields: [donatedById], references: [id])
