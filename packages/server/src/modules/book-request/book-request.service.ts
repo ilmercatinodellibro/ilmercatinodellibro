@@ -8,11 +8,13 @@ import {
   RequestQueue as PrismaRequestQueue,
   RetailLocation,
 } from "@prisma/client";
+import { BookMeta } from "src/@generated";
 import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.module";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 
 type RequestQueue = PrismaRequestQueue & {
+  book: Book & { meta: BookMeta; retailLocation: RetailLocation };
   currentRequest: BookRequest;
 };
 
@@ -68,8 +70,6 @@ export class BookRequestService {
       }
 
       const request = book.requests[0];
-      await this.#notifyUser(request, book);
-
       await this.prisma.requestQueue.create({
         data: {
           bookId: book.id,
@@ -95,6 +95,12 @@ export class BookRequestService {
         },
       },
       include: {
+        book: {
+          include: {
+            meta: true,
+            retailLocation: true,
+          },
+        },
         currentRequest: true,
       },
     });
@@ -110,6 +116,15 @@ export class BookRequestService {
   }
 
   async #handleQueue(bookId: string, queue: RequestQueue) {
+    if (!queue.book.meta.isAvailable) {
+      await this.prisma.requestQueue.delete({
+        where: { id: queue.id },
+      });
+      return;
+    }
+
+    await this.#notifyUser(queue.currentRequest, queue.book);
+
     const nextRequest = await this.prisma.bookRequest.findFirst({
       where: {
         bookId,
@@ -120,24 +135,14 @@ export class BookRequestService {
       orderBy: {
         createdAt: "asc",
       },
-      include: {
-        book: {
-          include: {
-            meta: true,
-            retailLocation: true,
-          },
-        },
-      },
     });
-    if (!nextRequest || !nextRequest.book.meta.isAvailable) {
+    if (!nextRequest) {
       await this.prisma.requestQueue.delete({
         where: { id: queue.id },
       });
 
       return;
     }
-
-    await this.#notifyUser(nextRequest, nextRequest.book);
 
     await this.prisma.requestQueue.update({
       where: {
