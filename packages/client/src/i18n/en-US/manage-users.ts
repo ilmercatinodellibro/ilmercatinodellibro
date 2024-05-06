@@ -175,6 +175,12 @@ export default {
     totalBooks: "Total books to sell",
     discount: "ISEE/voluntary discount",
     total: "Total",
+    confirm: {
+      title: "Sell books?",
+      message:
+        "Confirm the sale of the books inside the cart for a total of {0}?",
+      sell: "Sell",
+    },
   },
   receiptsDialog: {
     title: "Receipts",

@@ -420,10 +420,12 @@ function sellBooks() {
   Dialog.create({
     component: ConfirmDialog,
     componentProps: {
-      title: "Vendi libri?",
-      message: `Confermare la vendita dei libri nel carrello per un totale di ${totalBooksPrice.value}?`,
+      title: t("manageUsers.cartDialog.confirm.title"),
+      message: t("manageUsers.cartDialog.confirm.message", [
+        totalBooksPrice.value,
+      ]),
       ok: "Vendi",
-      cancel: "Annulla",
+      cancel: t("common.cancel"),
     },
   }).onOk(async () => {
     if (!cartId.value) {

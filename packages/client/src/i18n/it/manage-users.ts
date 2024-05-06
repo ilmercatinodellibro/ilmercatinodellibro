@@ -176,6 +176,12 @@ export default {
     totalBooks: "Totale Libri da vendere",
     discount: "Sconto ISEE/volontario",
     total: "Totale",
+    confirm: {
+      title: "Vendi libri?",
+      message:
+        "Confermare la vendita dei libri nel carrello per un totale di {0}?",
+      sell: "Vendi",
+    },
   },
   receiptsDialog: {
     title: "Ricevute",
