@@ -71,14 +71,12 @@
 
             <template
               v-if="tab === BooksTab.DELIVERED"
-              #body-cell-status="{ value }"
+              #body-cell-status="{ row }"
             >
               <q-td>
                 <!-- TODO: update to correct book status type -->
                 <q-chip
-                  v-bind="
-                    statusChipData[(value as BookStatus) ?? BookStatus.NOT_SOLD]
-                  "
+                  v-bind="statusChipData[getStatus(row)]"
                   class="no-pointer-events"
                 />
               </q-td>
@@ -161,8 +159,8 @@ import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import {
   BookCopyDetailsFragment,
-  useGetBookCopiesByOwnerQuery,
   useGetPurchasedBookCopiesQuery,
+  useGetSoldBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 import {
   GetRequestsDocument,
@@ -180,7 +178,7 @@ const { user } = useAuthService();
 const route = useRoute();
 const router = useRouter();
 
-const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
+const { soldBookCopies, loading } = useGetSoldBookCopiesQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
   retailLocationId: selectedLocation.value.id,
@@ -220,7 +218,7 @@ type TablesRowsTypes =
   | RequestSummaryFragment;
 
 const tableRowsByTab = computed<Record<BooksTab, TablesRowsTypes[]>>(() => ({
-  [BooksTab.DELIVERED]: bookCopiesByOwner.value,
+  [BooksTab.DELIVERED]: soldBookCopies.value,
   [BooksTab.PURCHASED]: purchasedBookCopies.value,
   [BooksTab.REQUESTED]: bookRequests.value,
   [BooksTab.RESERVED]: userReservations.value,
@@ -271,7 +269,6 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
     [BooksTab.DELIVERED]: [
       {
         name: "status",
-        // TODO: add the field
         field: () => undefined,
         label: t("book.fields.status"),
         align: "left",
@@ -356,7 +353,6 @@ const totalSale = ref(
   sumBy(tableRowsByTab.value.delivered, ({ book }) => book.originalPrice),
 );
 
-// TODO: remove book status once it is implemented on the server
 enum BookStatus {
   SOLD = "sold",
   NOT_SOLD = "not-sold",
@@ -364,11 +360,20 @@ enum BookStatus {
   DONATED = "donated",
 }
 
+function getStatus(bookCopy: BookCopyDetailsFragment) {
+  // TODO: add logic for donated books
+  return bookCopy.returnedAt
+    ? BookStatus.RETURNED
+    : bookCopy.purchasedAt
+      ? BookStatus.SOLD
+      : BookStatus.NOT_SOLD;
+}
+
 const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({
   [BookStatus.SOLD]: {
     color: "positive",
     icon: mdiCurrencyEur,
-    label: t("myBooks.statusLabels.donated"),
+    label: t("myBooks.statusLabels.sold"),
     dark: true,
   },
   [BookStatus.NOT_SOLD]: {

@@ -167,15 +167,13 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   },
   {
     label: t("book.code"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: "code",
     name: "code",
     align: "left",
   },
   {
     label: t("book.originalCode"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: "originalCode",
     name: "original-code",
     align: "left",
     format: (val: string) => (val === "" ? "/" : val),
@@ -190,7 +188,6 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   },
   {
     label: "",
-    // TODO: add the field name
     field: () => undefined,
     name: "problems",
   },
@@ -210,8 +207,7 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   },
   {
     label: t("book.code"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: "code",
     name: "code",
     align: "left",
   },

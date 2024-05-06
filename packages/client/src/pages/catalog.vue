@@ -186,7 +186,7 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
       filter: {
         isAvailable: tableFilter.value.isAvailable,
         search: tableFilter.value.search,
-      }, // TODO: Include low/medium/high utility filters
+      },
     });
 
     pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;

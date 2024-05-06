@@ -109,9 +109,15 @@
             </template>
 
             <template #body-cell-actions="{ row }">
-              <!-- TODO: hide it when the book has been lost -->
               <q-td>
+                <!-- Hiding the possibility to return a lost book copy -->
                 <chip-button
+                  v-if="
+                    !(
+                      hasProblem(row) &&
+                      getCurrentActiveProblem(row)?.type === 'LOST'
+                    )
+                  "
                   :label="
                     $t('manageUsers.payOffUserDialog.returnOptions.return')
                   "
@@ -134,6 +140,7 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
+import { getCurrentActiveProblem, hasProblem } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
