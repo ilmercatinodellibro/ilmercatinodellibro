@@ -1,4 +1,5 @@
 export default {
+  noData: "No user data was found.",
   email: "Email",
   password: "Password",
   login: "Login",

@@ -1,4 +1,5 @@
 export default {
+  noData: "Non sono stati trovati i dati dell'utente richiesto.",
   email: "E-mail",
   password: "Password",
   login: "Accedi",

@@ -2,52 +2,58 @@
   <q-page>
     <q-card class="absolute-full flex-center q-ma-md row">
       <q-card-section class="column no-padding width-min-360">
-        <q-list>
-          <q-item
-            v-for="{ icon, label, field, showInfo, infoLabel } in userData"
-            :key="label"
-          >
-            <q-item-section side>
-              <q-icon :name="icon" color="primary" />
-            </q-item-section>
+        <template v-if="user">
+          <q-list>
+            <q-item
+              v-for="{ icon, label, field, showInfo, infoLabel } in userData"
+              :key="label"
+            >
+              <q-item-section side>
+                <q-icon :name="icon" color="primary" />
+              </q-item-section>
 
-            <q-item-section class="column">
-              <span class="text-subtitle1">
-                {{ label }}
-              </span>
+              <q-item-section class="column">
+                <span class="text-subtitle1">
+                  {{ label }}
+                </span>
 
-              <span class="text-black-54">
-                {{ typeof field === "function" ? field(user!) : user![field] }}
-              </span>
-            </q-item-section>
+                <span class="text-black-54">
+                  {{ typeof field === "function" ? field(user) : user[field] }}
+                </span>
+              </q-item-section>
 
-            <q-item-section v-if="showInfo" side>
-              <q-icon :name="mdiInformationOutline" color="black-54">
-                <q-tooltip>
-                  {{ infoLabel }}
-                </q-tooltip>
-              </q-icon>
-            </q-item-section>
-          </q-item>
-        </q-list>
+              <q-item-section v-if="showInfo" side>
+                <q-icon :name="mdiInformationOutline" color="black-54">
+                  <q-tooltip>
+                    {{ infoLabel }}
+                  </q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+          </q-list>
 
-        <q-separator />
+          <q-separator />
 
-        <q-btn
-          :label="t('auth.editMyData')"
-          class="q-mb-xl q-mt-md"
-          color="primary"
-          @click="modifyUserData()"
-        />
+          <q-btn
+            :label="t('auth.editMyData')"
+            class="q-mb-xl q-mt-md"
+            color="primary"
+            @click="modifyUserData()"
+          />
 
-        <q-separator />
+          <q-separator />
 
-        <q-btn
-          :label="t('auth.deleteAccount')"
-          class="q-mt-xl"
-          color="accent"
-          @click="deleteAccount()"
-        />
+          <q-btn
+            :label="t('auth.deleteAccount')"
+            class="q-mt-xl"
+            color="accent"
+            @click="deleteAccount()"
+          />
+        </template>
+
+        <span>
+          {{ t("auth.noData") }}
+        </span>
       </q-card-section>
     </q-card>
   </q-page>
