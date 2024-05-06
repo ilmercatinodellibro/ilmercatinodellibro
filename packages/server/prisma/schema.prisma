@@ -38,19 +38,22 @@ enum Role {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
+  id            String    @id @default(uuid())
+  email         String    @unique
   // Prevents password field to be leaked in the GraphQL API
   /// @HideField()
   password      String
   firstname     String
   lastname      String
-  phoneNumber   String   @default("")
-  notes         String   @default("")
-  discount      Boolean  @default(false)
-  emailVerified Boolean  @default(false)
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  dateOfBirth   DateTime? @db.Timestamptz()
+  phoneNumber   String    @default("")
+  notes         String    @default("")
+  discount      Boolean   @default(false)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  delegate String?
 
   events            Event[]
   notifications     Notification[]

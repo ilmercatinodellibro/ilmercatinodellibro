@@ -73,7 +73,16 @@ export class RegisterUserPayload extends PickType(
 @InputType()
 export class UpdateUserPayload extends PickType(
   User,
-  ["email", "firstname", "lastname", "notes", "phoneNumber", "id"],
+  [
+    "email",
+    "firstname",
+    "lastname",
+    "notes",
+    "phoneNumber",
+    "id",
+    "delegate",
+    "dateOfBirth",
+  ],
   InputType,
 ) {
   @Field(() => Boolean, { nullable: true })

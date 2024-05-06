@@ -1,12 +1,11 @@
 fragment CurrentUser on User {
-  id
-  firstname
-  lastname
-  email
+  ...UserSummary
   emailVerified
   createdAt
   updatedAt
   phoneNumber
+  dateOfBirth
+  delegate
   role(retailLocationId: $retailLocationId)
 }
 

@@ -229,6 +229,8 @@ function updateCurrentUser({
   email,
   firstname,
   lastname,
+  dateOfBirth,
+  delegate,
   phoneNumber,
 }: UpdateUserPayload) {
   if (!user.value || !isAuthenticated.value) {
@@ -240,6 +242,8 @@ function updateCurrentUser({
     email,
     firstname,
     lastname,
+    dateOfBirth,
+    delegate,
     phoneNumber: phoneNumber ?? "",
   };
 }

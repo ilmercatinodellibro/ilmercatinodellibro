@@ -4,14 +4,7 @@
       <q-card-section class="column no-padding width-min-360">
         <q-list>
           <q-item
-            v-for="{
-              icon,
-              label,
-              value,
-              showInfo,
-              format,
-              infoLabel,
-            } in userData"
+            v-for="{ icon, label, field, showInfo, infoLabel } in userData"
             :key="label"
           >
             <q-item-section side>
@@ -24,9 +17,7 @@
               </span>
 
               <span class="text-black-54">
-                {{
-                  format && typeof value === "string" ? format(value) : value
-                }}
+                {{ typeof field === "function" ? field(user!) : user![field] }}
               </span>
             </q-item-section>
 
@@ -68,11 +59,10 @@ import {
   mdiAccountTie,
   mdiCakeVariant,
   mdiInformationOutline,
-  mdiLock,
   mdiMail,
   mdiPhone,
 } from "@quasar/extras/mdi-v7";
-import { Dialog } from "quasar";
+import { Dialog, date } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
@@ -80,9 +70,9 @@ import DeleteAccountDialog from "src/components/delete-account-dialog.vue";
 import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
 import { notifyError } from "src/helpers/error-messages";
 import { useAuthService } from "src/services/auth";
+import { CurrentUserFragment } from "src/services/auth.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
-  UserFragment,
   UserFragmentDoc,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
@@ -94,53 +84,44 @@ const { user, updateCurrentUser } = useAuthService();
 interface ItemData {
   icon: string;
   label: string;
-  value: UserFragment[keyof UserFragment];
+  field: keyof CurrentUserFragment | ((row: CurrentUserFragment) => string);
   showInfo?: boolean;
   infoLabel?: string;
-  format?: (value?: string) => string | undefined;
 }
 
 const userData = computed<ItemData[]>(() => [
   {
     icon: mdiAccount,
     label: t("auth.firstName"),
-    value: user.value?.firstname,
+    field: "firstname",
   },
   {
     icon: mdiAccount,
     label: t("auth.lastName"),
-    value: user.value?.lastname,
+    field: "lastname",
   },
   {
     icon: mdiCakeVariant,
     label: t("auth.birthDate"),
-    // TODO: add the field
-    value: undefined,
+    field: ({ dateOfBirth }) =>
+      dateOfBirth ? date.formatDate(new Date(dateOfBirth), "DD MMM YYYY") : "",
   },
   {
     icon: mdiAccountTie,
     label: t("auth.nameOfDelegate"),
-    // TODO: add the field
-    value: undefined,
+    field: "delegate",
     showInfo: true,
     infoLabel: t("auth.delegateLabel"),
   },
   {
     icon: mdiMail,
     label: t("auth.emailAddress"),
-    value: user.value?.email,
+    field: "email",
   },
   {
     icon: mdiPhone,
     label: t("auth.phoneNumber"),
-    value: user.value?.phoneNumber,
-  },
-  {
-    icon: mdiLock,
-    label: t("auth.password"),
-    // TODO: add the field
-    value: undefined,
-    format: (value) => value?.replace(/./g, "*"),
+    field: "phoneNumber",
   },
 ]);
 
@@ -162,6 +143,7 @@ function modifyUserData() {
           retailLocationId: selectedLocation.value.id,
         },
       });
+
       cache.updateFragment(
         {
           fragment: UserFragmentDoc,
@@ -179,6 +161,7 @@ function modifyUserData() {
           };
         },
       );
+
       updateCurrentUser(newUserData);
     } catch {
       notifyError(t("auth.couldNotUpdate"));

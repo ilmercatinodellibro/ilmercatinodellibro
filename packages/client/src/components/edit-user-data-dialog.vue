@@ -10,6 +10,8 @@
           email: newUserData.email,
           firstname: newUserData.firstname,
           lastname: newUserData.lastname,
+          dateOfBirth: newUserData.dateOfBirth,
+          delegate: newUserData.delegate,
           password: newUserData.password,
           passwordConfirmation: newUserData.passwordConfirmation,
           phoneNumber: newUserData.phoneNumber,
@@ -86,8 +88,8 @@ const newUserData = ref<UserData>({
   lastname: user.value?.lastname ?? "",
   phoneNumber: user.value?.phoneNumber ?? "",
   password: "",
-  date: Date.now(),
-  delegate: "",
+  dateOfBirth: user.value?.dateOfBirth,
+  delegate: user.value?.delegate ?? "",
   confirmEmail: "",
   passwordConfirmation: "",
 });
@@ -110,7 +112,7 @@ const formData = computed<
     label: t("auth.lastName"),
     rules: [requiredRule],
   },
-  date: {
+  dateOfBirth: {
     label: t("auth.birthDate"),
     type: "date",
   },
