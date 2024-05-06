@@ -6,7 +6,7 @@
       @submit="onDialogOK(newUserData)"
       @cancel="onDialogCancel"
     >
-      <q-card-section class="column gap-16 no-wrap">
+      <q-card-section class="column gap-4 no-wrap">
         <q-input
           v-model="newUserData.firstname"
           :label="$t('manageUsers.fields.firstName')"
@@ -24,7 +24,8 @@
         <q-input
           v-model="newUserData.email"
           :label="$t('manageUsers.fields.email')"
-          :rules="[requiredRule, emailRule]"
+          :rules="newUserData.email ? [emailRule] : undefined"
+          autocomplete="off"
           clearable
           outlined
         />
@@ -39,14 +40,9 @@
         <q-input
           v-model="newUserData.password"
           :label="$t('auth.password')"
-          :rules="[
-            userData
-              ? newUserData.password
-                ? validatePasswordRule
-                : () => true
-              : requiredRule,
-          ]"
+          :rules="newUserData.password ? [validatePasswordRule] : undefined"
           :type="hidePassword ? 'password' : 'text'"
+          autocomplete="new-password"
           outlined
         >
           <template #append>
@@ -71,6 +67,7 @@
               : undefined
           "
           :type="hideConfirm ? 'password' : 'text'"
+          autocomplete="new-password"
           outlined
         >
           <template #append>

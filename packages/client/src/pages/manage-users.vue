@@ -439,10 +439,17 @@ function openEdit({
         retailLocationId: selectedLocation.value.id,
       } satisfies UpdateUserPayload,
     },
-  }).onOk(async (input: UpdateUserPayload) => {
+  }).onOk(async (newUserData: UpdateUserPayload) => {
     try {
       await updateUser({
-        input,
+        input: {
+          ...newUserData,
+          email:
+            newUserData.email && newUserData.email !== email
+              ? newUserData.email
+              : email,
+          password: newUserData.password ? newUserData.password : undefined,
+        },
       });
 
       await fetchCustomers({

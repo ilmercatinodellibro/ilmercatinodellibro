@@ -74,7 +74,6 @@ export class RegisterUserPayload extends PickType(
 export class UpdateUserPayload extends PickType(
   User,
   [
-    "email",
     "firstname",
     "lastname",
     "notes",
@@ -96,4 +95,7 @@ export class UpdateUserPayload extends PickType(
 
   @Field()
   retailLocationId!: string;
+
+  @Field(() => String, { nullable: true })
+  email?: string;
 }

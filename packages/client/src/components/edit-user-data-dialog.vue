@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="t('auth.editMyData')"
       :submit-label="t('common.save')"
@@ -24,6 +24,16 @@
           :key="key"
           v-model="newUserData[key]"
           v-bind="field"
+          :autocomplete="
+            [
+              'password',
+              'passwordConfirmation',
+              'email',
+              'confirmEmail',
+            ].includes(key)
+              ? 'new-password'
+              : 'off'
+          "
           bottom-slots
           lazy-rules
           outlined
@@ -125,18 +135,26 @@ const formData = computed<
   },
   email: {
     label: t("auth.emailAddress"),
-    rules: newUserData.value.email.length > 0 ? [emailRule] : undefined,
+    rules: newUserData.value.email ? [emailRule] : undefined,
   },
   confirmEmail: {
     label: t("auth.confirmEmail"),
-    rules: [
-      makeValueMatchRule(newUserData.value.email, t("auth.emailsDoNotMatch")),
-    ],
+    rules:
+      newUserData.value.email && newUserData.value.email !== user.value?.email
+        ? [
+            makeValueMatchRule(
+              newUserData.value.email,
+              t("auth.emailsDoNotMatch"),
+            ),
+          ]
+        : undefined,
   },
   password: {
     label: t("auth.password"),
     type: hidePassword.value ? "password" : "text",
-    rules: [requiredRule, validatePasswordRule],
+    rules: newUserData.value.password
+      ? [requiredRule, validatePasswordRule]
+      : undefined,
   },
   passwordConfirmation: {
     label: t("auth.confirmPassword"),

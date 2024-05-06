@@ -239,7 +239,7 @@ function updateCurrentUser({
 
   user.value = {
     ...user.value,
-    email,
+    email: email && email.length > 0 ? email : user.value.email,
     firstname,
     lastname,
     dateOfBirth,

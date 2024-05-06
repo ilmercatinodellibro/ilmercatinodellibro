@@ -139,6 +139,11 @@ function modifyUserData() {
       const { cache } = await updateUser({
         input: {
           ...newUserData,
+          email:
+            newUserData.email && newUserData.email !== user.value.email
+              ? newUserData.email
+              : user.value.email,
+          password: newUserData.password ? newUserData.password : undefined,
           id: user.value.id,
           retailLocationId: selectedLocation.value.id,
         },
@@ -151,12 +156,17 @@ function modifyUserData() {
           id: cache.identify(user.value),
         },
         (data) => {
-          if (!data) {
+          if (!data || !user.value) {
             return;
           }
           return {
             ...data,
             ...newUserData,
+            email:
+              newUserData.email && newUserData.email !== user.value.email
+                ? newUserData.email
+                : user.value.email,
+            password: newUserData.password ? newUserData.password : undefined,
             discount: newUserData.discount ?? false,
           };
         },
