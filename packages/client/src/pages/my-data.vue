@@ -51,7 +51,7 @@
           />
         </template>
 
-        <span>
+        <span v-else class="q-pa-md">
           {{ t("auth.noData") }}
         </span>
       </q-card-section>
