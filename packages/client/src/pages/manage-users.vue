@@ -439,12 +439,10 @@ function openEdit({
         retailLocationId: selectedLocation.value.id,
       } satisfies UpdateUserPayload,
     },
-  }).onOk(async (user: UpdateUserPayload) => {
+  }).onOk(async (input: UpdateUserPayload) => {
     try {
       await updateUser({
-        input: {
-          ...user,
-        },
+        input,
       });
 
       await fetchCustomers({

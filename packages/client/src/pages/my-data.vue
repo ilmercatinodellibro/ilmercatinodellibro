@@ -75,14 +75,21 @@ import {
 import { Dialog } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { UpdateUserPayload } from "src/@generated/graphql";
 import DeleteAccountDialog from "src/components/delete-account-dialog.vue";
 import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
+import { notifyError } from "src/helpers/error-messages";
 import { useAuthService } from "src/services/auth";
-import { UserFragment, UserInfoFragment } from "src/services/user.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
+import {
+  UserFragment,
+  UserFragmentDoc,
+  useUpdateUserMutation,
+} from "src/services/user.graphql";
 
 const { t } = useI18n();
 
-const { user } = useAuthService();
+const { user, updateCurrentUser } = useAuthService();
 
 interface ItemData {
   icon: string;
@@ -137,12 +144,45 @@ const userData = computed<ItemData[]>(() => [
   },
 ]);
 
+const { updateUser } = useUpdateUserMutation();
+const { selectedLocation } = useRetailLocationService();
 function modifyUserData() {
   Dialog.create({
     component: EditUserDataDialog,
-  }).onOk((payload: UserInfoFragment) => {
-    // FIXME: add mutation of user info
-    payload;
+  }).onOk(async (newUserData: UpdateUserPayload) => {
+    if (!user.value) {
+      return;
+    }
+
+    try {
+      const { cache } = await updateUser({
+        input: {
+          ...newUserData,
+          id: user.value.id,
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
+      cache.updateFragment(
+        {
+          fragment: UserFragmentDoc,
+          fragmentName: "UserSummary",
+          id: cache.identify(user.value),
+        },
+        (data) => {
+          if (!data) {
+            return;
+          }
+          return {
+            ...data,
+            ...newUserData,
+            discount: newUserData.discount ?? false,
+          };
+        },
+      );
+      updateCurrentUser(newUserData);
+    } catch {
+      notifyError(t("auth.couldNotUpdate"));
+    }
   });
 }
 
