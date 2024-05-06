@@ -55,7 +55,9 @@ export enum SettleRemainingType {
   RETURN = "RETURN",
   REFUND = "REFUND",
 }
-registerEnumType(SettleRemainingType);
+registerEnumType(SettleRemainingType, {
+  name: "SettleRemainingType",
+});
 
 @InputType()
 export class SettleUserInput extends LocationBoundInput {
