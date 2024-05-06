@@ -5,23 +5,30 @@
       :submit-label="t('common.save')"
       size="sm"
       @cancel="onDialogCancel()"
-      @submit="onDialogOK(user)"
+      @submit="
+        onDialogOK({
+          email: newUserData.email,
+          firstname: newUserData.firstname,
+          lastname: newUserData.lastname,
+          password: newUserData.password,
+          passwordConfirmation: newUserData.passwordConfirmation,
+          phoneNumber: newUserData.phoneNumber,
+        })
+      "
     >
       <q-card-section class="column gap-4 q-pb-xs q-pt-lg q-px-lg">
         <q-input
           v-for="(field, key) in formData"
           :key="key"
           v-model="newUserData[key]"
-          :label="field.label"
-          :rules="field.rules"
-          :type="field.type"
+          v-bind="field"
           bottom-slots
           lazy-rules
           outlined
         >
           <template #append>
             <q-icon
-              v-if="key === 'password' || key === 'confirmPassword'"
+              v-if="key === 'password' || key === 'passwordConfirmation'"
               :name="hidePassword ? mdiEyeOff : mdiEye"
               class="cursor-pointer"
               @click="hidePassword = !hidePassword"
@@ -48,17 +55,18 @@ import {
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
-import { QInputProps, ValidationRule, useDialogPluginComponent } from "quasar";
+import { QInputProps, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { UpdateUserPayload } from "src/@generated/graphql";
 import {
   emailRule,
   makeValueMatchRule,
   requiredRule,
   validatePasswordRule,
 } from "src/helpers/rules";
+import { UserData } from "src/models/user";
 import { useAuthService } from "src/services/auth";
-import { UserInfoFragment } from "src/services/user.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -68,16 +76,9 @@ const { t } = useI18n();
 const { user } = useAuthService();
 
 const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
-  useDialogPluginComponent<UserInfoFragment>();
-
-type UserData = UserInfoFragment & {
-  // TODO: remove stubbed fields
-  password: string;
-  date: number;
-  delegate: string;
-  confirmEmail: string;
-  confirmPassword: string;
-};
+  useDialogPluginComponent<
+    Omit<UpdateUserPayload, "id" | "retailLocationId">
+  >();
 
 const newUserData = ref<UserData>({
   email: user.value?.email ?? "",
@@ -88,19 +89,16 @@ const newUserData = ref<UserData>({
   date: Date.now(),
   delegate: "",
   confirmEmail: "",
-  confirmPassword: "",
+  passwordConfirmation: "",
 });
 
 const hidePassword = ref(true);
 
 const formData = computed<
   Record<
-    keyof Omit<UserData, "__typename">,
-    {
-      label: string;
-      type?: QInputProps["type"];
+    keyof UserData,
+    Omit<QInputProps, "modelValue"> & {
       infoLabel?: string;
-      rules?: ValidationRule[];
     }
   >
 >(() => ({
@@ -138,16 +136,18 @@ const formData = computed<
     type: hidePassword.value ? "password" : "text",
     rules: [requiredRule, validatePasswordRule],
   },
-  confirmPassword: {
+  passwordConfirmation: {
     label: t("auth.confirmPassword"),
     type: hidePassword.value ? "password" : "text",
-    rules: [
-      requiredRule,
-      makeValueMatchRule(
-        newUserData.value.password,
-        t("auth.passwordDoNotMatch"),
-      ),
-    ],
+    rules: newUserData.value.password
+      ? [
+          requiredRule,
+          makeValueMatchRule(
+            newUserData.value.password,
+            t("auth.passwordDoNotMatch"),
+          ),
+        ]
+      : undefined,
   },
 }));
 </script>

@@ -4,6 +4,7 @@ import jwtDecode, { JwtPayload } from "jwt-decode";
 import { LocalStorage } from "quasar";
 import { computed, readonly, ref, watch } from "vue";
 import { NavigationGuard, Router, useRouter } from "vue-router";
+import { UpdateUserPayload } from "src/@generated/graphql";
 import {
   CurrentUserFragment,
   useLoginMutation as useBaseLoginMutation,
@@ -224,6 +225,25 @@ function onLogout(hook: LogoutHook) {
   onLogoutHooks.push(hook);
 }
 
+function updateCurrentUser({
+  email,
+  firstname,
+  lastname,
+  phoneNumber,
+}: UpdateUserPayload) {
+  if (!user.value || !isAuthenticated.value) {
+    return;
+  }
+
+  user.value = {
+    ...user.value,
+    email,
+    firstname,
+    lastname,
+    phoneNumber: phoneNumber ?? "",
+  };
+}
+
 function getJwtHeader(authToken = token.value) {
   return {
     // It's important for the header name to be lowercase as JWT passport strategy only parses lowercase header names
@@ -243,6 +263,7 @@ export function useAuthService() {
   return {
     onLogin,
     onLogout,
+    updateCurrentUser,
     getJwtHeader,
     hasAdminRole,
     hasOperatorRole,
