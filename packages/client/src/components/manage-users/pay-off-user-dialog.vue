@@ -67,7 +67,7 @@
               class="bg-grey-1"
               no-hover
             >
-              <q-td>
+              <q-td auto-width>
                 <q-checkbox
                   v-if="row.id === Titles.InStock && selectableRows.length > 0"
                   :model-value="rowsSelectionStatus"
@@ -121,6 +121,14 @@
                     />
                   </span>
                 </span>
+              </q-td>
+            </q-tr>
+
+            <q-tr v-else-if="row.id === 'EMPTY'" no-hover>
+              <q-td auto-width />
+
+              <q-td class="text-left" colspan="11">
+                {{ t("bookErrors.noBookCopy") }}
               </q-td>
             </q-tr>
 
@@ -384,6 +392,9 @@ enum Titles {
 interface GroupHeaderRow {
   id: Titles;
 }
+interface EmptyRow {
+  id: "EMPTY";
+}
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const getCodeIndex = (code: string) => parseInt(code.split("/")[0]!);
 const sortByCopyCode = (copies: BookCopyDetailsFragment[]) =>
@@ -394,14 +405,18 @@ const sortByCopyCode = (copies: BookCopyDetailsFragment[]) =>
         ? 0
         : 1,
   );
-// TODO: Handle the case when a group is empty (?)
-const tableRows = computed<(BookCopyDetailsFragment | GroupHeaderRow)[]>(() => [
+
+const tableRows = computed<
+  (BookCopyDetailsFragment | GroupHeaderRow | EmptyRow)[]
+>(() => [
   // Adding one empty row for each of the sub-headers, then merging all the
   // separate rows into the same array to display them all in a single table
   {
     id: Titles.InStock,
   },
-  ...sortByCopyCode(ownedCopies.value),
+  ...(ownedCopies.value.length > 0
+    ? sortByCopyCode(ownedCopies.value)
+    : [{ id: "EMPTY" } satisfies EmptyRow]),
 
   ...(returnedCopies.value.length > 0
     ? [
@@ -415,7 +430,9 @@ const tableRows = computed<(BookCopyDetailsFragment | GroupHeaderRow)[]>(() => [
   {
     id: Titles.Sold,
   },
-  ...sortByCopyCode(soldCopies.value),
+  ...(soldCopies.value.length > 0
+    ? sortByCopyCode(soldCopies.value)
+    : [{ id: "EMPTY" } satisfies EmptyRow]),
 ]);
 
 const selectableRows = computed(() =>

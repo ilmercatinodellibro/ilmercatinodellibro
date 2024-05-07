@@ -30,4 +30,5 @@ export default {
     "Non è stato possibile spostare tutte le prenotazioni e i libri disponibili nel carrello.",
   bookNotCartable:
     "Non puoi mettere nel carrello un libro richiesto ma non disponibile.",
+  noBookCopy: "Nessun libro per questa sezione.",
 };

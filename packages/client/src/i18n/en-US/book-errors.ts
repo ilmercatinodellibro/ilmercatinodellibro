@@ -23,4 +23,5 @@ export default {
     "Could not add all the reservations and the available books to the cart.",
   bookNotCartable:
     "You cannot put a requested but not available book in the cart.",
+  noBookCopy: "No book for this section.",
 };

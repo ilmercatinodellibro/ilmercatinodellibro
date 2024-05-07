@@ -40,6 +40,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import KDialogCard from "./k-dialog-card.vue";
 import chipButton from "./manage-users/chip-button.vue";
 import dialogTable from "./manage-users/dialog-table.vue";
@@ -55,66 +56,67 @@ const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
 
 const { t } = useI18n();
 
-const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
-  {
-    name: "isbn",
-    field: "isbnCode",
-    label: t("book.fields.isbn"),
-    align: "left",
-  },
-  {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
-    align: "left",
-  },
-  {
-    name: "subject",
-    field: "subject",
-    label: t("book.fields.subject"),
-    align: "left",
-  },
-  {
-    name: "title",
-    field: "title",
-    label: t("book.fields.title"),
-    align: "left",
-  },
-  {
-    name: "availability",
-    field: ({ meta }) => meta.isAvailable,
-    label: t("book.fields.availability"),
-    align: "left",
-  },
-  {
-    name: "cover-price",
-    field: "originalPrice",
-    label: t("book.fields.coverPrice"),
-    align: "left",
-    format: formatPrice,
-    classes: "text-strike text-black-54",
-  },
-  {
-    name: "price",
-    // TODO: add correct calculation
-    field: ({ originalPrice }) => originalPrice,
-    label: t("book.fields.price"),
-    align: "left",
-    format: formatPrice,
-  },
-  {
-    name: "available-copies",
-    // TODO: add field
-    field: () => undefined,
-    label: t("reserveBooks.availableCopies"),
-    align: "left",
-  },
-  {
-    name: "actions",
-    field: () => undefined,
-    label: "",
-  },
-]);
+const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
+  () => [
+    {
+      name: "isbn",
+      field: "isbnCode",
+      label: t("book.fields.isbn"),
+      align: "left",
+    },
+    {
+      name: "author",
+      field: "authorsFullName",
+      label: t("book.fields.author"),
+      align: "left",
+    },
+    {
+      name: "subject",
+      field: "subject",
+      label: t("book.fields.subject"),
+      align: "left",
+    },
+    {
+      name: "title",
+      field: "title",
+      label: t("book.fields.title"),
+      align: "left",
+    },
+    {
+      name: "availability",
+      field: ({ meta }) => meta.isAvailable,
+      label: t("book.fields.availability"),
+      align: "left",
+    },
+    {
+      name: "cover-price",
+      field: "originalPrice",
+      label: t("book.fields.coverPrice"),
+      align: "left",
+      format: formatPrice,
+      classes: "text-strike text-black-54",
+    },
+    {
+      name: "price",
+      // TODO: add correct calculation
+      field: ({ originalPrice }) => originalPrice,
+      label: t("book.fields.price"),
+      align: "left",
+      format: formatPrice,
+    },
+    {
+      name: "available-copies",
+      field: ({ copies }) => copies?.length ?? 0,
+      label: t("reserveBooks.availableCopies"),
+      align: "left",
+    },
+    {
+      name: "actions",
+      field: () => undefined,
+      label: "",
+    },
+  ],
+);
 
 const booksToReserve = ref(cloneDeep(props.classBooks));
 </script>
