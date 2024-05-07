@@ -64,6 +64,7 @@ export default {
     reservationDays: "Number of Days for Reservation",
     maxBooksDimension:
       "Max dimension of the book stacks to allow for fragmentation",
+    payOffEnabled: "Enable the possibility to perform payoffs",
     resetMessage:
       "You are performing the reset of all the system data to prepare the software for the following year's activities. Do you wish to proceed?",
     resetButton: "Perform annual reset",

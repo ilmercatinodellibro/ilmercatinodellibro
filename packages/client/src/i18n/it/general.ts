@@ -64,6 +64,7 @@ export default {
     reservationDays: "Numero di Giorni per Prenotazione",
     maxBooksDimension:
       "Dimensione max dei blocchi di libri da inserire per permettere la frammentazione",
+    payOffEnabled: "Abilita la possibilità di effettuare liquidazioni",
     resetMessage:
       "Stai effettuando il reset di tutti i dati di sistema per predisporre il software alle attività dell'anno successivo. Vuoi procedere?",
     resetButton: "Effettua reset annuale",
