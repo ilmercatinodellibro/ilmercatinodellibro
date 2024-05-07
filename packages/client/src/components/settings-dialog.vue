@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="t('sidebar.settings')"
       actions-padding
@@ -16,7 +16,7 @@
       >
         <q-input
           v-model.number="purchaseRate"
-          :placeholder="t('general.settings.purchaseRate')"
+          :label="t('general.settings.purchaseRate')"
           bottom-slots
           outlined
           readonly
@@ -25,7 +25,7 @@
         />
         <q-input
           v-model.number="saleRate"
-          :placeholder="t('general.settings.saleRate')"
+          :label="t('general.settings.saleRate')"
           bottom-slots
           outlined
           readonly
@@ -34,18 +34,22 @@
         />
         <q-input
           v-model.number="newSettings.maxBookingDays"
-          :placeholder="t('general.settings.reservationDays')"
+          :label="t('general.settings.reservationDays')"
           :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
           outlined
           type="number"
         />
         <q-input
           v-model.number="newSettings.warehouseMaxBlockSize"
-          :placeholder="t('general.settings.maxBooksDimension')"
+          :label="t('general.settings.maxBooksDimension')"
           :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
           outlined
           type="number"
         />
+        <span class="gap-16 items-center q-pb-sm q-pt-none q-px-none row">
+          <q-checkbox v-model="newSettings.payOffEnabled" color="primary" />
+          {{ t("general.settings.payOffEnabled") }}
+        </span>
       </q-card-section>
 
       <template #card-actions="{ uniqueFormId }">
