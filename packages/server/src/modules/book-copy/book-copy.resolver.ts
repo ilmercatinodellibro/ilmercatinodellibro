@@ -556,7 +556,7 @@ export class BookCopyResolver {
 
     if (bookCopy.sales.length > 1) {
       throw new InternalServerErrorException(
-        "There are multiple sales for the same book copy that are not refunded. This should have not happened.",
+        "There are multiple active sales for the same book copy that are not refunded. This should not have happened.",
       );
     }
 
