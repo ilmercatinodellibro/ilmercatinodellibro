@@ -7,12 +7,7 @@
       @submit="
         onDialogOK({
           type: 'save',
-          settings: {
-            maxBooksDimension,
-            purchaseRate,
-            reservationDays,
-            saleRate,
-          },
+          settings: newSettings,
         })
       "
     >
@@ -20,34 +15,36 @@
         class="column gap-4 no-wrap q-pb-xs q-pt-lg q-px-lg width-700"
       >
         <q-input
-          v-model="purchaseRate"
+          v-model.number="purchaseRate"
           :placeholder="t('general.settings.purchaseRate')"
-          :rules="[numberBetween(0, 100)]"
-          type="number"
+          bottom-slots
           outlined
+          readonly
           suffix="%"
+          type="number"
         />
         <q-input
-          v-model="saleRate"
+          v-model.number="saleRate"
           :placeholder="t('general.settings.saleRate')"
-          :rules="[numberBetween(0, 100)]"
-          type="number"
+          bottom-slots
           outlined
+          readonly
           suffix="%"
+          type="number"
         />
         <q-input
-          v-model="reservationDays"
+          v-model.number="newSettings.maxBookingDays"
           :placeholder="t('general.settings.reservationDays')"
           :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
-          type="number"
           outlined
+          type="number"
         />
         <q-input
-          v-model="maxBooksDimension"
+          v-model.number="newSettings.warehouseMaxBlockSize"
           :placeholder="t('general.settings.maxBooksDimension')"
           :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
-          type="number"
           outlined
+          type="number"
         />
       </q-card-section>
 
@@ -82,22 +79,16 @@
 <script setup lang="ts">
 import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { Dialog, useDialogPluginComponent } from "quasar";
-import { ref } from "vue";
+import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogFormCard from "src/components/k-dialog-form-card.vue";
 import {
   allowOnlyIntegerNumbers,
   greaterThanZeroRule,
-  numberBetween,
 } from "src/helpers/rules";
-import { SettingsUpdate } from "src/models/book";
+import { Settings, SettingsUpdate, SettingsUpdateInput } from "src/models/book";
 
-const props = defineProps<{
-  maxBooksDimensionCurrent: number;
-  purchaseRateCurrent: number;
-  reservationDaysCurrent: number;
-  saleRateCurrent: number;
-}>();
+const props = defineProps<Settings>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
@@ -106,10 +97,14 @@ const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
 
 const { t } = useI18n();
 
-const purchaseRate = ref(props.purchaseRateCurrent);
-const saleRate = ref(props.saleRateCurrent);
-const reservationDays = ref(props.reservationDaysCurrent);
-const maxBooksDimension = ref(props.maxBooksDimensionCurrent);
+const newSettings = reactive<SettingsUpdateInput>({
+  maxBookingDays: props.maxBookingDays,
+  payOffEnabled: props.payOffEnabled,
+  warehouseMaxBlockSize: props.warehouseMaxBlockSize,
+});
+
+const purchaseRate = props.buyRate;
+const saleRate = props.sellRate;
 
 function confirmReset() {
   Dialog.create({

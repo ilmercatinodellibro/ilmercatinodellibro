@@ -1,4 +1,16 @@
-import { BookQueryFilter } from "src/@generated/graphql";
+import {
+  BookQueryFilter,
+  UpdateRetailLocationSettingsInput,
+} from "src/@generated/graphql";
+import { RetailLocationFragment } from "src/services/retail-location.graphql";
+
+export const enum BookCopyStatuses {
+  LOST = "lost",
+  RETURNED = "returned",
+  DONATED = "donated",
+  INCOMPLETE = "incomplete",
+  NOT_AVAILABLE = "not-available",
+}
 
 enum BookUtilityCategory {
   LOW_UTILITY,
@@ -32,16 +44,17 @@ export enum BooksTab {
   PURCHASED = "purchased",
 }
 
-interface Settings {
-  maxBooksDimension: number;
-  purchaseRate: number;
-  reservationDays: number;
-  saleRate: number;
-}
+export type SettingsUpdateInput = Omit<
+  UpdateRetailLocationSettingsInput,
+  "retailLocationId"
+>;
+
+export type Settings = Pick<RetailLocationFragment, "buyRate" | "sellRate"> &
+  SettingsUpdateInput;
 
 export type SettingsUpdate =
   | {
       type: "save";
-      settings: Settings;
+      settings: SettingsUpdateInput;
     }
   | { type: "reset" };

@@ -393,8 +393,6 @@ import {
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
 import { Dialog, Notify, QTooltipProps, Screen } from "quasar";
-import { computed, provide, watch } from "vue";
-import { useI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
 import { setLanguage } from "src/boot/i18n";
 import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
@@ -407,14 +405,17 @@ import {
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
-import { SettingsUpdate } from "src/models/book";
+import { Settings, SettingsUpdate } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
+import { useUpdateRetailLocationSettingsMutation } from "src/services/retail-location.graphql";
 import {
   UserFragmentDoc,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
+import { computed, provide, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 // It would work with :inset-level="1" if we used "avatar" option instead of "side" for the header icon
 // but we only need 16px of margin from the icon, so we defined a value which would align the text accordingly
@@ -477,20 +478,32 @@ const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
 
 const { selectedLocation } = useRetailLocationService();
 
+const { updateRetailLocationSettings } =
+  useUpdateRetailLocationSettingsMutation();
 function openSettings() {
   Dialog.create({
     component: SettingsDialog,
     componentProps: {
-      maxBooksDimensionCurrent: selectedLocation.value.warehouseMaxBlockSize,
-      purchaseRateCurrent: selectedLocation.value.buyRate,
-      reservationDaysCurrent: selectedLocation.value.maxBookingDays,
-      saleRateCurrent: selectedLocation.value.sellRate,
-    },
-  }).onOk((payload: SettingsUpdate) => {
+      warehouseMaxBlockSize: selectedLocation.value.warehouseMaxBlockSize,
+      buyRate: selectedLocation.value.buyRate,
+      maxBookingDays: selectedLocation.value.maxBookingDays,
+      sellRate: selectedLocation.value.sellRate,
+      payOffEnabled: selectedLocation.value.payOffEnabled,
+    } satisfies Settings,
+  }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
-      // FIXME: update the settings
+      try {
+        await updateRetailLocationSettings({
+          input: {
+            ...payload.settings,
+            retailLocationId: selectedLocation.value.id,
+          },
+        });
+      } catch {
+        notifyError(t("common.genericErrorMessage"));
+      }
     } else {
-      // FIXME: reset the settings
+      // TODO: perform annual reset
     }
   });
 }
