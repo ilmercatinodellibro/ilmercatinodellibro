@@ -382,11 +382,10 @@ function emptyAndDestroyCart() {
   Dialog.create({
     component: ConfirmDialog,
     componentProps: {
-      title: "Svuotare carrello?",
-      message:
-        "Vuoi davvero svuotare il carrello del cliente attuale e ritornare i suoi libri tra le liste dei prenotati e dei richiesti?",
-      ok: "Svuota",
-      cancel: "Annulla",
+      title: t("manageUsers.cartDialog.empty.title"),
+      message: t("manageUsers.cartDialog.empty.message"),
+      ok: t("manageUsers.cartDialog.empty.emptyCart"),
+      cancel: t("common.cancel"),
     },
   }).onOk(async () => {
     // Should never happen, check is for precaution
@@ -424,7 +423,7 @@ function sellBooks() {
       message: t("manageUsers.cartDialog.confirm.message", [
         totalBooksPrice.value,
       ]),
-      ok: "Vendi",
+      ok: t("manageUsers.cartDialog.confirm.sell"),
       cancel: t("common.cancel"),
     },
   }).onOk(async () => {

@@ -175,6 +175,12 @@ export default {
     totalBooks: "Total books to sell",
     discount: "ISEE/voluntary discount",
     total: "Total",
+    empty: {
+      title: "Empty the cart?",
+      message:
+        "Do you really wish to empty the cart of the current user and return their books among the lists of the reserved and requested books?",
+      emptyCart: "Empty cart",
+    },
     confirm: {
       title: "Sell books?",
       message:

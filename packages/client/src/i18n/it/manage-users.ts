@@ -176,6 +176,12 @@ export default {
     totalBooks: "Totale Libri da vendere",
     discount: "Sconto ISEE/volontario",
     total: "Totale",
+    empty: {
+      title: "Svuotare il carrello?",
+      message:
+        "Vuoi davvero svuotare il carrello del cliente attuale e ritornare i suoi libri tra le liste dei prenotati e dei richiesti?",
+      emptyCart: "Svuota",
+    },
     confirm: {
       title: "Vendi libri?",
       message:
