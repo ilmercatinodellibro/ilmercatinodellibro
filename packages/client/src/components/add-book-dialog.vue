@@ -82,8 +82,7 @@ const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
 
 const { selectedLocation } = useRetailLocationService();
 
-// TODO: Use the input type after implementing the GraphQL mutation
-const newBook = reactive<Omit<BookCreateInput, "id">>({
+const newBook = reactive<BookCreateInput>({
   authorsFullName: "",
   isbnCode: "",
   originalPrice: 0,
