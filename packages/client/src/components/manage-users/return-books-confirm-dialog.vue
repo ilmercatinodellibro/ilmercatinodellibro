@@ -86,8 +86,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "book-code",
-    // FIXME: add field
-    field: () => undefined,
+    field: "code",
     label: t("book.code"),
     align: "left",
   },
