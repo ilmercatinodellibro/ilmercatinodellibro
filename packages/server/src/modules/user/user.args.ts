@@ -1,4 +1,11 @@
-import { ArgsType, Field, InputType, Int, ObjectType } from "@nestjs/graphql";
+import {
+  ArgsType,
+  Field,
+  InputType,
+  Int,
+  ObjectType,
+  registerEnumType,
+} from "@nestjs/graphql";
 import { User } from "src/@generated";
 import { Role } from "src/@generated/prisma";
 import { LocationBoundInput } from "src/modules/retail-location";
@@ -42,4 +49,21 @@ export class UpdateRolePayload extends LocationBoundInput {
 
   @Field(() => Role)
   role!: Role;
+}
+
+export enum SettleRemainingType {
+  RETURN = "RETURN",
+  REFUND = "REFUND",
+}
+registerEnumType(SettleRemainingType, {
+  name: "SettleRemainingType",
+});
+
+@InputType()
+export class SettleUserInput extends LocationBoundInput {
+  @Field()
+  userId!: string;
+
+  @Field(() => SettleRemainingType)
+  remainingType!: SettleRemainingType;
 }

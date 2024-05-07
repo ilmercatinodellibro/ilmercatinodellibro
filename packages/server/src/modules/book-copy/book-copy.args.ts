@@ -1,9 +1,6 @@
 import { ArgsType, Field, InputType, Int, ObjectType } from "@nestjs/graphql";
 import { BookCopy } from "src/@generated";
-import {
-  LocationBoundInput,
-  LocationBoundQueryArgs,
-} from "src/modules/retail-location";
+import { LocationBoundQueryArgs } from "src/modules/retail-location";
 
 @ArgsType()
 export class BookCopyQueryArgs {
@@ -15,15 +12,6 @@ export class BookCopyQueryArgs {
 export class BookCopyByUserQueryArgs extends LocationBoundQueryArgs {
   @Field(() => String)
   userId!: string;
-}
-
-@InputType()
-export class BookCopyCreateInput extends LocationBoundInput {
-  @Field(() => [String], { nullable: false })
-  bookIds!: string[];
-
-  @Field(() => String, { nullable: false })
-  ownerId!: string;
 }
 
 @InputType()

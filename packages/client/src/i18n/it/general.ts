@@ -60,7 +60,7 @@ export default {
     resetToolTip:
       "Effettua il reset di tutti i dati di sistema per predisporre il software alle attività dell'anno successivo",
     purchaseRate: "Aliquota Acquisto",
-    saleRate: "Aliquota Acquisto",
+    saleRate: "Aliquota Vendita",
     reservationDays: "Numero di Giorni per Prenotazione",
     maxBooksDimension:
       "Dimensione max dei blocchi di libri da inserire per permettere la frammentazione",

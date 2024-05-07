@@ -68,18 +68,21 @@ model User {
   ownedCarts          Cart[]        @relation("CartOwner")
 
   // Operator/admin relations
-  returnedBookCopies  BookCopy[]       @relation("CopyReturnedBy")
-  createdBookCopies   BookCopy[]       @relation("CopyCreatedBy")
-  updatedBookCopies   BookCopy[]       @relation("CopyUpdatedBy")
-  reportedProblems    Problem[]        @relation("ProblemReportedBy")
-  resolvedProblems    Problem[]        @relation("ProblemResolvedBy")
-  refundedSales       Sale[]           @relation("CopySaleRefundedBy")
-  processedSales      Sale[]           @relation("CopySoldBy")
-  salesInCreatedCarts Sale[]           @relation("SaleInCartOpenedBy")
-  createdCarts        Cart[]           @relation("CartOperator")
-  memberships         LocationMember[]
-  ownedReceipts       Receipt[]        @relation("ReceiptOwner")
-  triggeredReceipts   Receipt[]        @relation("ReceiptCreator")
+  settledCopies        BookCopy[]       @relation("CopySettledBy")
+  returnedBookCopies   BookCopy[]       @relation("CopyReturnedBy")
+  reimbursedBookCopies BookCopy[]       @relation("CopyReimbursedBy")
+  donatedBookCopies    BookCopy[]       @relation("CopyDonatedBy")
+  createdBookCopies    BookCopy[]       @relation("CopyCreatedBy")
+  updatedBookCopies    BookCopy[]       @relation("CopyUpdatedBy")
+  reportedProblems     Problem[]        @relation("ProblemReportedBy")
+  resolvedProblems     Problem[]        @relation("ProblemResolvedBy")
+  refundedSales        Sale[]           @relation("CopySaleRefundedBy")
+  processedSales       Sale[]           @relation("CopySoldBy")
+  salesInCreatedCarts  Sale[]           @relation("SaleInCartOpenedBy")
+  createdCarts         Cart[]           @relation("CartOperator")
+  memberships          LocationMember[]
+  ownedReceipts        Receipt[]        @relation("ReceiptOwner")
+  triggeredReceipts    Receipt[]        @relation("ReceiptCreator")
 }
 
 model Event {
@@ -196,7 +199,6 @@ model BookCopy {
   // The original code is a special field. Contains a copy of the value of the first code field that was specified for a BookCopy
   // This is meant to keep track of the fact that a book copy was returned and to the retailLocation for some reason and it is now available again.
   originalCode String? @map("original_code")
-  donatedAt    String? @map("donated_at")
 
   bookId String @map("book_id") @db.Uuid
   book   Book   @relation(fields: [bookId], references: [id])
@@ -206,15 +208,24 @@ model BookCopy {
   owner   User   @relation("BookCopyOwner", fields: [ownerId], references: [id])
 
   // Operator/admin relations
-  returnedAt   DateTime? @map("returned_at") @db.Timestamptz()
-  returnedById String?   @map("returned_by_id")
-  returnedBy   User?     @relation("CopyReturnedBy", fields: [returnedById], references: [id])
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  createdById  String    @map("created_by_id")
-  createdBy    User      @relation("CopyCreatedBy", fields: [createdById], references: [id])
-  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
-  updatedById  String    @map("updated_by_id")
-  updatedBy    User      @relation("CopyUpdatedBy", fields: [updatedById], references: [id])
+  settledAt      DateTime? @map("settled_at") @db.Timestamptz()
+  settledById    String?   @map("settled_by_id")
+  settledBy      User?     @relation("CopySettledBy", fields: [settledById], references: [id])
+  donatedAt      DateTime? @map("donated_at") @db.Timestamptz()
+  donatedById    String?   @map("donated_by_id")
+  donatedBy      User?     @relation("CopyDonatedBy", fields: [donatedById], references: [id])
+  reimbursedAt   DateTime? @map("reimbursed_at") @db.Timestamptz()
+  reimbursedById String?   @map("reimbursed_by_id")
+  reimbursedBy   User?     @relation("CopyReimbursedBy", fields: [reimbursedById], references: [id])
+  returnedAt     DateTime? @map("returned_at") @db.Timestamptz()
+  returnedById   String?   @map("returned_by_id")
+  returnedBy     User?     @relation("CopyReturnedBy", fields: [returnedById], references: [id])
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdById    String    @map("created_by_id")
+  createdBy      User      @relation("CopyCreatedBy", fields: [createdById], references: [id])
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedById    String    @map("updated_by_id")
+  updatedBy      User      @relation("CopyUpdatedBy", fields: [updatedById], references: [id])
 
   problems Problem[] @relation("BookCopyProblem")
   sales    Sale[]    @relation("BookCopySale")

@@ -18,6 +18,8 @@ import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   RemoveMemberPayload,
+  SettleRemainingType,
+  SettleUserInput,
   UpdateRolePayload,
   UsersQueryArgs,
   UsersQueryResult,
@@ -407,6 +409,75 @@ export class UserResolver {
       data: {
         role,
       },
+    });
+  }
+
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async settleUser(
+    @Input() { userId, retailLocationId, remainingType }: SettleUserInput,
+    @CurrentUser() operator: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: operator.id,
+      retailLocationId,
+      message: "You are not allowed to settle users.",
+    });
+
+    await this.prisma.$transaction(async (prisma) => {
+      const bookCopies = await prisma.bookCopy.findMany({
+        where: {
+          ownerId: userId,
+          settledAt: null,
+          book: {
+            retailLocationId,
+          },
+        },
+        include: {
+          book: true,
+          sales: true,
+        },
+      });
+
+      const returnableCopies = bookCopies.filter(
+        ({ sales, returnedAt, donatedAt, reimbursedAt }) =>
+          returnedAt === null &&
+          donatedAt === null &&
+          reimbursedAt === null &&
+          sales.every(({ refundedAt }) => refundedAt !== null),
+      );
+      if (returnableCopies.length > 0) {
+        await prisma.bookCopy.updateMany({
+          where: {
+            id: {
+              in: returnableCopies.map(({ id }) => id),
+            },
+          },
+          data: {
+            ...(remainingType === SettleRemainingType.RETURN
+              ? {
+                  returnedAt: new Date(),
+                  returnedById: operator.id,
+                }
+              : {
+                  donatedAt: new Date(),
+                  donatedById: operator.id,
+                }),
+          },
+        });
+      }
+
+      // Settle all non-settled book copies
+      await prisma.bookCopy.updateMany({
+        where: {
+          id: {
+            in: bookCopies.map(({ id }) => id),
+          },
+        },
+        data: {
+          settledAt: new Date(),
+          settledById: operator.id,
+        },
+      });
     });
   }
 }
