@@ -5,7 +5,7 @@ import { useTheme } from "src/composables/use-theme";
 import { useRetailLocationService } from "src/services/retail-location";
 
 export default boot(({ router }) => {
-  const { loading, selectedLocationId, selectedLocation } =
+  const { loading, selectedLocationId, selectedLocation, retailLocations } =
     useRetailLocationService();
 
   const ensureLocationInitialized = Promise.all([
@@ -22,6 +22,16 @@ export default boot(({ router }) => {
       }
 
       await ensureLocationInitialized;
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- should not happen, meant to help with debugging
+      if (!selectedLocation.value) {
+        console.error(
+          retailLocations.value.length === 0
+            ? "No retail locations have been found. Make sure the DB is seeded properly."
+            : `Location with id ${locationId} not found`,
+        );
+        return;
+      }
 
       const locationTheme = selectedLocation.value.theme;
       theme.value = {
