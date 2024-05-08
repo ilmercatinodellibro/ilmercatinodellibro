@@ -242,3 +242,19 @@ After this step is done, all the pieces of the puzzle are in their place and the
 
 Another note: for the moment I decided not to connect Schools to a retailLocation, even if the school code already includes the province, thus the retailLocationId.
 This is because at the moment there are no requirements involving such a thing and in this way schools can be still viewed from other retailLocations.
+
+## Social login
+
+We use the `passport` library to handle social login. See [the auth module](./src/modules/auth) for implementation details.
+
+### Facebook login
+
+To enable Facebook login, you need to create a Facebook app and set some environment variables.
+See [Create an app - Facebook login use case](https://developers.facebook.com/docs/development/create-an-app/facebook-login-use-case) to create an app.
+After creating the app, add the `email` permission to the app as described in the guide. It's needed in our app to get the user's email address when registering with Facebook.
+After that, see [App dashboard - Basic settings](https://developers.facebook.com/docs/development/create-an-app/app-dashboard/basic-settings) to learn more about the basic settings for the Facebook app. From the settings page, we need the App ID and App Secret to set the following environment variables in the `.env` file:
+
+- `FACEBOOK_CLIENT_ID`: App ID from the basic app settings
+- `FACEBOOK_CLIENT_SECRET`: App Secret from the basic app settings
+
+Follow the instructions in the app dashboard to complete any other necessary steps such as business verification and publishing the app, which are required to use the app in production.
