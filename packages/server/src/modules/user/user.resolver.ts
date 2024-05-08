@@ -261,7 +261,6 @@ export class UserResolver {
                         saleId: null,
                       },
                       {
-                        // All related sales must have been refunded in order to show the request
                         sale: {
                           refundedAt: {
                             not: null,
@@ -279,7 +278,6 @@ export class UserResolver {
                         },
                       },
                       {
-                        // All related reservations must have been deleted in order to show the request
                         reservations: {
                           every: {
                             deletedAt: {
