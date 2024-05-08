@@ -1,5 +1,9 @@
 <template>
-  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    :persistent="tab === 'in-retrieval' && booksToRegister.length > 0"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :cancel-label="$t('common.close')"
       :title="
@@ -176,7 +180,9 @@ const { t } = useI18n();
 
 const { createBookCopies } = useCreateBookCopiesMutation();
 
-const tab = ref("in-retrieval");
+type Tab = "in-retrieval" | "retrieved";
+
+const tab = ref<Tab>("in-retrieval");
 
 const booksToRegister = ref<BookSummaryFragment[]>([]);
 
