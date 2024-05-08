@@ -88,7 +88,6 @@ const latestProblem = bookCopy.problems
   ? bookCopy.problems[bookCopy.problems.length - 1]
   : undefined;
 
-// TODO: fix the current data stub with actual data
 const problemsData = ref<ProblemSummaryFragment>({
   type: latestProblem?.type ?? "LOST",
   details: latestProblem?.details ?? "",

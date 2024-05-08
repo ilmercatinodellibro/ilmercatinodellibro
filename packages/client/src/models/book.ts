@@ -1,27 +1,16 @@
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import { BookQueryFilter } from "src/@generated/graphql";
 
-export const enum BookCopyStatuses {
-  LOST = "lost",
-  RETURNED = "returned",
-  DONATED = "donated",
-  INCOMPLETE = "incomplete",
-  NOT_AVAILABLE = "not-available",
+enum BookUtilityCategory {
+  LOW_UTILITY,
+  MEDIUM_UTILITY,
+  HIGH_UTILITY,
 }
 
-export const enum BookCopyFilters {
-  RESERVED = "reserved",
-  AVAILABLE = "available",
-  SOLD = "sold",
-  WITH_PROBLEM = "with-problem",
-}
+export type UtilityCategory = keyof typeof BookUtilityCategory;
 
-export type BookCopyStatus =
-  | BookCopyStatuses
-  | Exclude<BookCopyFilters, "with-problem" | "reserved">;
-
-export type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
-  status?: BookCopyStatus;
-};
+export type BookCompleteFilters =
+  | keyof Omit<BookQueryFilter, "search">
+  | UtilityCategory;
 
 export interface SchoolFilters {
   schoolCodes: string[];

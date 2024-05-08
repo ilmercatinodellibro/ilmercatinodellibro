@@ -8,21 +8,19 @@
       "
       size="fullscreen"
     >
-      <card-table-header>
+      <card-table-header @add-book="addBookToCart">
         <template #side-actions>
           <q-input
-            :model-value="rows.length"
+            :model-value="cartBooks.length"
             :label="$t('manageUsers.cartDialog.totalBooks')"
             disable
             outlined
-            readonly
           />
           <q-input
             :model-value="discountValue"
             :label="$t('manageUsers.cartDialog.discount')"
             disable
             outlined
-            readonly
             suffix="€"
           />
           <q-input
@@ -30,7 +28,6 @@
             :label="$t('manageUsers.cartDialog.total')"
             disable
             outlined
-            readonly
             suffix="€"
           />
         </template>
@@ -39,48 +36,51 @@
       <dialog-table
         :columns="columns"
         :loading="loading"
-        :rows="stubRows"
+        :rows="cartBooks"
         :rows-per-page-options="[0]"
         class="flex-delegate-height-management"
         row-key="id"
       >
-        <template #body="props">
+        <template #body="bodyProps">
           <q-tr>
-            <q-td auto-width>
+            <q-td
+              v-for="{ name, value } in bodyProps.cols"
+              :key="name"
+              auto-width
+            >
               <q-btn
-                :icon="!props.expand ? mdiChevronUp : mdiChevronDown"
+                v-if="name === 'selection'"
+                :icon="!bodyProps.expand ? mdiChevronUp : mdiChevronDown"
                 flat
                 round
-                @click="props.expand = !props.expand"
+                @click="bodyProps.expand = !bodyProps.expand"
               />
-            </q-td>
-            <q-td v-for="{ name, value } in props.cols" :key="name">
               <q-btn
                 v-if="name === 'delete'"
                 :icon="mdiDelete"
                 color="negative"
                 flat
                 round
-                @click="removeBook(props.row)"
+                @click="removeBook(bodyProps.row)"
               />
               <span v-else>
                 {{ value }}
               </span>
             </q-td>
           </q-tr>
-          <q-tr v-show="!props.expand">
+          <q-tr v-show="!bodyProps.expand">
             <q-th />
             <q-th class="height-48 text-left">
               {{ $t("book.code") }}
             </q-th>
           </q-tr>
           <q-tr
-            v-for="(bookCopy, index) in props.row.bookCopies"
-            v-show="!props.expand"
-            :key="bookCopy"
+            v-for="(bookCopy, index) in bodyProps.row.copies"
+            v-show="!bodyProps.expand"
+            :key="bookCopy.id"
             :class="{
               'border-bottom-width-0':
-                index !== props.row.bookCopies.length - 1,
+                index !== bodyProps.row.copies.length - 1,
             }"
           >
             <q-td auto-width>
@@ -89,13 +89,13 @@
                 row, because the v-show model is !props.expand
               -->
               <q-radio
-                v-model="selectedBookCopies[props.row.id]"
-                :val="index"
-                @click="props.expand = true"
+                v-model="selectedBookCopies[bodyProps.row.id]"
+                :val="bookCopy.id"
+                @click="bodyProps.expand = true"
               />
             </q-td>
-            <q-td colspan="100%">
-              {{ bookCopy.code /* FIXME: add actual field */ }}
+            <q-td colspan="11">
+              {{ bookCopy.code }}
             </q-td>
           </q-tr>
         </template>
@@ -103,9 +103,10 @@
 
       <template #card-actions>
         <q-btn
+          :disable="cartBooks.length === 0"
           :label="$t('manageUsers.cartDialog.emptyCart')"
           color="negative"
-          @click="onDialogOK('empty-cart')"
+          @click="emptyAndDestroyCart()"
         />
         <q-icon
           :name="mdiInformationOutline"
@@ -117,9 +118,10 @@
         <q-space />
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn
+          :disable="cartBooks.length === 0"
           :label="$t('manageUsers.cartDialog.sellBooks', [totalBooksPrice])"
           color="positive"
-          @click="onDialogOK('sell-books')"
+          @click="sellBooks()"
         />
       </template>
     </k-dialog-card>
@@ -127,6 +129,7 @@
 </template>
 
 <script setup lang="ts">
+import { isApolloError } from "@apollo/client";
 import {
   mdiChevronDown,
   mdiChevronUp,
@@ -134,24 +137,37 @@ import {
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { sumBy } from "lodash-es";
-import { QDialog, QTableColumn, date, useDialogPluginComponent } from "quasar";
+import {
+  Dialog,
+  Notify,
+  QDialog,
+  QTableColumn,
+  date,
+  useDialogPluginComponent,
+} from "quasar";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useBookService } from "src/services/book";
+import ConfirmDialog from "src/components/confirm-dialog.vue";
+import { notifyError } from "src/helpers/error-messages";
 import { BookSummaryFragment } from "src/services/book.graphql";
-import { UserFragment } from "src/services/user.graphql";
+import { useCartService } from "src/services/cart";
+import { useRequestService } from "src/services/request";
+import { useReservationService } from "src/services/reservation";
+import { useRetailLocationService } from "src/services/retail-location";
+import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import DialogTable from "./dialog-table.vue";
 
-const properties = defineProps<{
-  user: UserFragment;
+const props = defineProps<{
+  user: CustomerFragment;
 }>();
+
+const { selectedLocation: retailLocation } = useRetailLocationService();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
-  useDialogPluginComponent<"empty-cart" | "sell-books">();
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 
 const { t } = useI18n();
 
@@ -221,76 +237,224 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-// TODO: remove the pagination from here when correct query get connected.
-const currentPage = ref(0);
-const numberOfRows = ref(10);
+const cartBooks = ref<BookSummaryFragment[]>([]);
+const selectedBookCopies = ref<Record<string, string>>({});
+const cartId = ref<string>();
 
-const {
-  books: rows,
-  refetchBooks,
-  loading,
-} = useBookService(currentPage, numberOfRows);
-
-const stubRows = computed(() =>
-  rows.value.map((row, index) => ({
-    ...row,
-    bookCopies: [
-      {
-        code: `000/00${index + 1}`,
-      },
-      {
-        code: `000/00${index + 2}`,
-      },
-    ],
-  })),
-);
-
-const selectedBookCopies = ref<Record<string, number>>({});
-
-const discountValue = computed(() =>
-  // FIXME: add actual discount calculation logic
-  properties.user.discount ? "1.00" : "0.00",
-);
-
-// FIXME: add the correct time to cart reset
 const emptyCartTimer = ref(30 * 60);
-
 const timeUntilEmpty = computed(() => {
   return date.formatDate(new Date(0).setSeconds(emptyCartTimer.value), "mm:ss");
 });
 
+const discountValue = computed(() =>
+  // FIXME: add actual discount calculation logic
+  props.user.discount ? "1.00" : "0.00",
+);
 const totalBooksPrice = computed(() =>
   sumBy(Object.keys(selectedBookCopies.value), (bookId) => {
-    const book = stubRows.value.find(({ id }) => id === bookId);
+    const book = cartBooks.value.find(({ id }) => id === bookId);
     return book?.originalPrice ?? 0;
   }).toFixed(2),
 );
 
-let interval: number | undefined;
+const {
+  CART_EXPIRY_IN_SECONDS,
+  useAddToCartMutation,
+  useDeleteCartMutation,
+  useOpenCartMutation,
+  useFinalizeCartMutation,
+  useRemoveFromCartMutation,
+} = useCartService();
 
+let interval: number | undefined;
+const { openCart, loading } = useOpenCartMutation();
 onMounted(async () => {
-  await refetchBooks({
-    page: currentPage.value,
-    rows: numberOfRows.value,
+  const { data: cart } = await openCart({
+    input: {
+      retailLocationId: retailLocation.value.id,
+      userId: props.user.id,
+    },
   });
+  cartBooks.value = cart.books;
+  cartId.value = cart.id;
+
+  const cartExpiryInSeconds = Math.round(
+    cart.createdAt / 1000 + CART_EXPIRY_IN_SECONDS - Date.now() / 1000,
+  );
+  emptyCartTimer.value = cartExpiryInSeconds;
 
   interval = window.setInterval(() => {
     if (emptyCartTimer.value === 0) {
       window.clearInterval(interval);
-      // FIXME: empty cart
+      // The server automatically deletes outdated carts, the cart component only closes itself
+      onDialogHide();
     } else {
       emptyCartTimer.value--;
     }
   }, 1000);
 });
-
 onUnmounted(() => {
   window.clearInterval(interval);
 });
 
-function removeBook(book: BookSummaryFragment) {
-  // FIXME: remove from cart and put into the previous state
-  book;
+const { addToCart, loading: addToCartLoading } = useAddToCartMutation();
+async function addBookToCart(fromBookIsbn?: string) {
+  if (!fromBookIsbn || !cartId.value || addToCartLoading.value) {
+    return;
+  }
+
+  try {
+    const { data } = await addToCart({
+      input: {
+        cartId: cartId.value,
+        fromBookIsbn,
+      },
+    });
+
+    cartBooks.value.push(data);
+  } catch (_error) {
+    const error = _error as Error;
+    if (!isApolloError(error)) {
+      notifyError(t("bookErrors.addBook"));
+      return;
+    }
+
+    error.graphQLErrors.forEach((graphQLError) => {
+      switch (graphQLError.message) {
+        case "BOOK_NOT_FOUND":
+          notifyError(t("bookErrors.noBook"));
+          break;
+        case "BOOK_NOT_AVAILABLE":
+          notifyError(t("bookErrors.notInStock"));
+          break;
+        default:
+          notifyError(t("bookErrors.addBook"));
+      }
+    });
+  }
+}
+
+const { removeFromCart, loading: removeBookLoading } =
+  useRemoveFromCartMutation();
+const { useGetReservationsQuery } = useReservationService();
+const { refetch: refetchReservations } = useGetReservationsQuery({
+  retailLocationId: retailLocation.value.id,
+  userId: props.user.id,
+});
+const { useGetRequestsQuery } = useRequestService();
+const { refetch: refetchRequests } = useGetRequestsQuery({
+  retailLocationId: retailLocation.value.id,
+  userId: props.user.id,
+});
+async function removeBook(book: BookSummaryFragment) {
+  const bookIndex = cartBooks.value.findIndex(({ id }) => book.id === id);
+
+  // Avoid multiple deletions until the current one has ended
+  if (bookIndex === -1 || !cartId.value || removeBookLoading.value) {
+    return;
+  }
+
+  try {
+    await removeFromCart({
+      input: {
+        bookId: book.id,
+        cartId: cartId.value,
+      },
+    });
+    cartBooks.value.splice(bookIndex, 1);
+
+    // If the book had a selected copy, deletes that one too
+    const currentlySelectedCopies = selectedBookCopies.value;
+    if (currentlySelectedCopies[book.id]) {
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete currentlySelectedCopies[book.id];
+      selectedBookCopies.value = currentlySelectedCopies;
+    }
+
+    await Promise.all([refetchReservations(), refetchRequests()]);
+  } catch {
+    notifyError(t("bookErrors.notCartBookDeleted"));
+  }
+}
+
+const { deleteCart } = useDeleteCartMutation();
+function emptyAndDestroyCart() {
+  Dialog.create({
+    component: ConfirmDialog,
+    componentProps: {
+      title: t("manageUsers.cartDialog.empty.title"),
+      message: t("manageUsers.cartDialog.empty.message"),
+      ok: t("manageUsers.cartDialog.empty.emptyCart"),
+      cancel: t("common.cancel"),
+    },
+  }).onOk(async () => {
+    // Should never happen, check is for precaution
+    if (!cartId.value) {
+      return;
+    }
+
+    try {
+      await deleteCart({
+        input: {
+          cartId: cartId.value,
+        },
+      });
+    } catch {
+      notifyError(t("bookErrors.notCartDeleted"));
+    } finally {
+      await Promise.all([refetchReservations(), refetchRequests()]);
+      onDialogHide();
+    }
+  });
+}
+
+const { finalizeCart } = useFinalizeCartMutation();
+function sellBooks() {
+  const bookAndCopies = Object.entries(selectedBookCopies.value);
+  if (bookAndCopies.length < cartBooks.value.length) {
+    notifyError(t("bookErrors.selectCopyAllBooks"));
+    return;
+  }
+
+  Dialog.create({
+    component: ConfirmDialog,
+    componentProps: {
+      title: t("manageUsers.cartDialog.confirm.title"),
+      message: t("manageUsers.cartDialog.confirm.message", [
+        totalBooksPrice.value,
+      ]),
+      ok: t("manageUsers.cartDialog.confirm.sell"),
+      cancel: t("common.cancel"),
+    },
+  }).onOk(async () => {
+    if (!cartId.value) {
+      return;
+    }
+
+    try {
+      loading.value = true;
+      await finalizeCart({
+        input: {
+          cartId: cartId.value,
+          bookCopyIds: bookAndCopies.map(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            ([_, selectedBookCopyId]) => selectedBookCopyId,
+          ),
+        },
+      });
+
+      loading.value = false;
+
+      Notify.create({
+        type: "positive",
+        message: "Libri venduti con successo.",
+      });
+
+      onDialogHide();
+    } catch {
+      notifyError(t("bookErrors.notSell"));
+    }
+  });
 }
 </script>
 

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
@@ -116,38 +117,55 @@ export class CartResolver {
 
     let book: PrismaBook;
 
+    // throw new XException("CODE", { description: "Description" }) is used for known custom cases
+
     if (fromBookIsbn) {
-      const bookDetails = await this.prisma.book.findFirstOrThrow({
+      const bookDetails = await this.prisma.book.findFirst({
         where: {
           isbnCode: fromBookIsbn,
           retailLocationId: cart.retailLocationId,
         },
         include: {
           meta: true,
+          requests: {
+            where: {
+              userId: cart.userId,
+              deletedAt: null,
+            },
+          },
           reservations: {
             where: {
               userId: cart.userId,
               deletedAt: null,
             },
           },
-          copies: {
-            where: {
-              sales: {
-                some: {
-                  purchasedById: cart.userId,
-                  refundedAt: null,
-                },
-              },
-            },
-          },
         },
       });
+      if (!bookDetails) {
+        throw new NotFoundException("BOOK_NOT_FOUND", {
+          description: "Book not found",
+        });
+      }
+
       book = bookDetails;
 
-      if (bookDetails.copies.length > 0) {
-        throw new UnprocessableEntityException(
-          "The book has already been bought by the user",
-        );
+      if (bookDetails.requests.length === 0) {
+        ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
+          data: {
+            userId: cart.userId,
+            bookId: bookDetails.id,
+            createdById: operator.id,
+          },
+        }));
+
+        // no requests means there can't be reservations either, so we can safely check the book availability
+        if (!bookDetails.meta.isAvailable) {
+          throw new UnprocessableEntityException("BOOK_NOT_AVAILABLE", {
+            description: "The book is not available",
+          });
+        }
+      } else {
+        fromBookRequestId = bookDetails.requests[0].id;
       }
 
       // The book availability applies to all users, so we first check if this specific user already has a reservation for the book
@@ -155,7 +173,12 @@ export class CartResolver {
         bookDetails.reservations.length === 0 &&
         !bookDetails.meta.isAvailable
       ) {
-        throw new UnprocessableEntityException("The book is not available");
+        throw new UnprocessableEntityException("BOOK_NOT_AVAILABLE", {
+          description: "The book is not available",
+        });
+      } else if (bookDetails.reservations.length > 0) {
+        fromReservationId = bookDetails.reservations[0].id;
+        fromBookRequestId = undefined;
       }
     } else if (fromBookRequestId) {
       const request = await this.prisma.bookRequest.findUniqueOrThrow({

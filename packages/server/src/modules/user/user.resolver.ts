@@ -1,4 +1,7 @@
-import { UnprocessableEntityException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -8,7 +11,9 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
+import * as argon2 from "argon2";
 import { GraphQLVoid } from "graphql-scalars";
+import { omit } from "lodash";
 import { Role } from "src/@generated";
 import { User } from "src/@generated/user";
 import { AuthService } from "src/modules/auth/auth.service";
@@ -17,19 +22,23 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
+  RegisterUserPayload,
   RemoveMemberPayload,
   SettleRemainingType,
   SettleUserInput,
   UpdateRolePayload,
+  UpdateUserPayload,
   UsersQueryArgs,
   UsersQueryResult,
 } from "./user.args";
+import { UserService } from "./user.service";
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    private readonly userService: UserService,
   ) {}
 
   @Query(() => UsersQueryResult)
@@ -216,9 +225,7 @@ export class UserResolver {
           select: {
             reservations: {
               where: {
-                deletedAt: {
-                  not: null,
-                },
+                deletedAt: null,
                 cartItem: null,
               },
             },
@@ -243,21 +250,43 @@ export class UserResolver {
         _count: {
           select: {
             requestedBooks: {
+              // This where statement should be very similar to the one of book-request.resolver
               where: {
                 deletedAt: null,
                 cartItem: null,
-                OR: [
+                AND: [
                   {
-                    reservations: {
-                      none: {},
-                    },
-                  },
-                  {
-                    reservations: {
-                      every: {
-                        deletedAt: null,
+                    OR: [
+                      {
+                        saleId: null,
                       },
-                    },
+                      {
+                        sale: {
+                          refundedAt: {
+                            not: null,
+                          },
+                        },
+                      },
+                    ],
+                  },
+
+                  {
+                    OR: [
+                      {
+                        reservations: {
+                          none: {},
+                        },
+                      },
+                      {
+                        reservations: {
+                          every: {
+                            deletedAt: {
+                              not: null,
+                            },
+                          },
+                        },
+                      },
+                    ],
                   },
                 ],
                 ...(onlyAvailable
@@ -330,6 +359,96 @@ export class UserResolver {
 
     // Can only have one cart per retail location, so we can safely check only the first one.
     return ownedCarts[0]?._count.items ?? 0;
+  }
+
+  @Mutation(() => User)
+  async createUser(
+    @Input() payload: RegisterUserPayload,
+    @CurrentUser() currentUser: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: currentUser.id,
+      retailLocationId: payload.retailLocationId,
+      message: "You are not allowed to create members.",
+    });
+
+    if (await this.userService.findUserByEmail(payload.email)) {
+      throw new ForbiddenException("A user with this email already exists.");
+    }
+    if (payload.password !== payload.passwordConfirmation) {
+      throw new UnprocessableEntityException(
+        "Confirmation password doesn't match with provided password!",
+      );
+    }
+
+    const userIsAdmin = await this.authService.userIsAdmin(
+      currentUser.id,
+      payload.retailLocationId,
+    );
+    return this.userService.createUser(
+      omit(
+        payload,
+        userIsAdmin
+          ? ["passwordConfirmation", "retailLocationId"]
+          : ["passwordConfirmation", "retailLocationId", "discount"],
+      ),
+    );
+  }
+
+  @Mutation(() => User)
+  async updateUser(
+    @Input()
+    {
+      id: userId,
+      retailLocationId,
+      discount,
+      password,
+      passwordConfirmation,
+      ...payloadRest
+    }: UpdateUserPayload,
+    @CurrentUser() currentUser: User,
+  ) {
+    if (userId !== currentUser.id) {
+      await this.authService.assertMembership({
+        userId: currentUser.id,
+        retailLocationId,
+        message: "You do not have permissions to edit user data.",
+      });
+    }
+
+    await this.prisma.user.findFirstOrThrow({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (
+      (!!password || !!passwordConfirmation) &&
+      password !== passwordConfirmation
+    ) {
+      throw new UnprocessableEntityException(
+        "Confirmation password doesn't match with provided password!",
+      );
+    }
+    const userIsAdmin = await this.authService.userIsAdmin(
+      currentUser.id,
+      retailLocationId,
+    );
+
+    return this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ...payloadRest,
+        ...(userIsAdmin ? { discount } : {}),
+        ...(!!password &&
+        !!passwordConfirmation &&
+        password === passwordConfirmation
+          ? { password: await argon2.hash(password) }
+          : {}),
+      },
+    });
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })

@@ -125,7 +125,7 @@ export const greaterThanZeroRule: ValidationRule<number | string | null> = (
     return requiredRule(value, rules);
   }
 
-  const numericValue = typeof value === "string" ? parseInt(value) : value;
+  const numericValue = typeof value === "string" ? parseFloat(value) : value;
   return (
     (!isNaN(numericValue) && numericValue > 0) ||
     t("validators.greaterThanZero")

@@ -4,6 +4,7 @@ import {
   InputType,
   Int,
   ObjectType,
+  PickType,
   registerEnumType,
 } from "@nestjs/graphql";
 import { User } from "src/@generated";
@@ -49,6 +50,55 @@ export class UpdateRolePayload extends LocationBoundInput {
 
   @Field(() => Role)
   role!: Role;
+}
+
+@InputType()
+export class RegisterUserPayload extends PickType(
+  User,
+  ["email", "firstname", "lastname", "notes", "phoneNumber"],
+  InputType,
+) {
+  @Field(() => Boolean, { nullable: true })
+  discount?: boolean;
+
+  @Field()
+  password!: string;
+
+  @Field()
+  passwordConfirmation!: string;
+
+  @Field()
+  retailLocationId!: string;
+}
+
+@InputType()
+export class UpdateUserPayload extends PickType(
+  User,
+  [
+    "firstname",
+    "lastname",
+    "notes",
+    "phoneNumber",
+    "id",
+    "delegate",
+    "dateOfBirth",
+  ],
+  InputType,
+) {
+  @Field(() => Boolean, { nullable: true })
+  discount?: boolean;
+
+  @Field(() => String, { nullable: true })
+  password?: string;
+
+  @Field(() => String, { nullable: true })
+  passwordConfirmation?: string;
+
+  @Field()
+  retailLocationId!: string;
+
+  @Field(() => String, { nullable: true })
+  email?: string;
 }
 
 export enum SettleRemainingType {

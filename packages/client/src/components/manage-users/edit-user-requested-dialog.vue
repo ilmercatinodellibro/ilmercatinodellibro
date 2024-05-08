@@ -41,10 +41,13 @@
               :label="$t('manageUsers.goToCart')"
               no-wrap
               outline
-              @click="goToCart()"
+              @click="onDialogOK()"
             >
-              <!-- FIXME: add correct display of number of books in the cart -->
-              <round-badge :label="0" color="accent" float-left-square />
+              <round-badge
+                :label="booksCartCount"
+                color="accent"
+                float-left-square
+              />
             </q-btn>
           </span>
           <span v-else>
@@ -69,7 +72,7 @@
                     {{ $t("manageUsers.requestedBooksDialog.moveIntoCart") }}
                   </q-item-section>
                 </q-item>
-                <q-item clickable @click="goToCart()">
+                <q-item clickable @click="onDialogOK()">
                   <q-item-section>
                     {{ $t("manageUsers.goToCart") }}
                   </q-item-section>
@@ -96,7 +99,11 @@
                   {{ $t("book.reservedBooksDialog.options.reserved") }}
                 </q-item-section>
               </q-item>
-              <q-item v-close-popup clickable @click="putBookIntoCart(request)">
+              <q-item
+                v-close-popup
+                clickable
+                @click="putRequestedBookIntoCart(request)"
+              >
                 <q-item-section>
                   {{ $t("book.reservedBooksDialog.options.cart") }}
                 </q-item-section>
@@ -123,18 +130,18 @@ import {
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
-// import { ref } from "vue";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
 import { useCartService } from "src/services/cart";
 import { useRequestService } from "src/services/request";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
-import { UserSummaryFragment } from "src/services/user.graphql";
+import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
-import CartDialog from "./cart-dialog.vue";
 import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
@@ -146,13 +153,14 @@ const largeBreakpoint = 1695;
 const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
 
 const props = defineProps<{
-  userData: UserSummaryFragment;
+  userData: CustomerFragment;
   retailLocationId: string;
 }>();
+const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
-
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
+  useDialogPluginComponent();
 
 const {
   useGetRequestsQuery,
@@ -207,10 +215,7 @@ async function deleteAllRequested() {
       }),
     );
   } catch {
-    Notify.create({
-      type: "negative",
-      message: "Non tutte le richieste sono state cancellate.",
-    });
+    notifyError(t("bookErrors.notAllRequestsDeleted"));
   } finally {
     await refetchRequests();
   }
@@ -223,11 +228,7 @@ async function deleteRequest(request: RequestSummaryFragment) {
       },
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile cancellare la richiesta.",
-    });
+    notifyError(t("bookErrors.notRequestDeleted"));
   } finally {
     await refetchRequests();
   }
@@ -255,15 +256,12 @@ async function reserveAllAvailableRequested() {
 
     Notify.create({
       type: "positive",
-      // TODO: translate this one
-      message: `Prenotato ${availableBookIds.length} copie di libri richiesti.`,
+      message: t("manageUsers.reservedBooksDialog.requestsReserved", [
+        availableBookIds.length,
+      ]),
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile prenotare tutte le richieste.",
-    });
+    notifyError(t("bookErrors.notAllReserved"));
   } finally {
     await refetchRequests();
   }
@@ -280,15 +278,10 @@ async function reserveBook({ book }: RequestSummaryFragment) {
 
     Notify.create({
       type: "positive",
-      // TODO: translate this one
-      message: `Prenotato ${book.title}.`,
+      message: t("manageUsers.reservedBooksDialog.bookReserved", [book.title]),
     });
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile prenotare il libro specificato.",
-    });
+    notifyError(t("bookErrors.notReserved"));
   } finally {
     await refetchRequests();
   }
@@ -324,17 +317,15 @@ async function moveAllIntoCart() {
         });
       }),
     );
+
+    booksCartCount.value += availableBooksRequestIds.length;
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile aggiungere tutti i libri al carrello.",
-    });
+    notifyError(t("bookErrors.notAllIntoCart"));
   } finally {
     await refetchRequests();
   }
 }
-async function putBookIntoCart(request: RequestSummaryFragment) {
+async function putRequestedBookIntoCart(request: RequestSummaryFragment) {
   if (!request.book.meta.isAvailable) {
     return;
   }
@@ -353,26 +344,12 @@ async function putBookIntoCart(request: RequestSummaryFragment) {
         fromBookRequestId: request.id,
       },
     });
+
+    booksCartCount.value++;
   } catch {
-    Notify.create({
-      type: "negative",
-      // TODO: translate this one
-      message: "Non è stato possibile aggiungere il libro al carrello.",
-    });
+    notifyError(t("bookErrors.notIntoCart"));
   } finally {
     await refetchRequests();
   }
-}
-
-function goToCart() {
-  Dialog.create({
-    component: CartDialog,
-    componentProps: {
-      user: props.userData,
-    },
-  }).onOk((payload) => {
-    // FIXME: add cart management logic
-    payload;
-  });
 }
 </script>

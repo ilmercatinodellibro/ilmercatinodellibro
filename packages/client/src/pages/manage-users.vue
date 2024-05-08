@@ -33,7 +33,7 @@
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           @request="onRequest"
         >
-          <template #body-cell-edit="{ row, rowIndex }">
+          <template #body-cell-edit="{ row }">
             <q-td class="text-left">
               <q-btn
                 color="primary"
@@ -41,7 +41,7 @@
                 :icon="mdiPencil"
                 round
                 size="md"
-                @click="openEdit(row, rowIndex)"
+                @click="openEdit(row)"
               />
             </q-td>
           </template>
@@ -203,7 +203,7 @@ import {
 import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
+import { RegisterUserPayload, UpdateUserPayload } from "src/@generated/graphql";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
@@ -218,9 +218,14 @@ import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { notifyError } from "src/helpers/error-messages";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
-import { CustomerFragment } from "src/services/user.graphql";
+import {
+  CustomerFragment,
+  useAddUserMutation,
+  useUpdateUserMutation,
+} from "src/services/user.graphql";
 
 const tableRef = ref() as Ref<QTable>;
 
@@ -259,20 +264,13 @@ onMounted(() => {
 });
 
 const searchQuery = ref("");
-const filters = ref<UserFilters[]>([]);
+const filters = ref<string[]>([]);
 
-const filterOptions = useTranslatedFilters<UserFilters>("manageUsers.filters");
-
-enum UserFilters {
-  withAvailable,
-  withRequested,
-  withPurchased,
-  withSold,
-}
+const filterOptions = useTranslatedFilters("manageUsers.filters");
 
 // TODO: send the filters to the server
 const tableFilter = computed(() =>
-  !searchQuery.value && filters.value.length === 0
+  !searchQuery.value && Object.entries(filters.value).length === 0
     ? undefined
     : { searchTerm: searchQuery.value, filters: filters.value },
 );
@@ -308,8 +306,7 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   },
   {
     name: "phone-number",
-    // field: "phoneNumber",
-    field: () => Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
+    field: "phoneNumber",
     label: t("manageUsers.fields.phoneNumber"),
     align: "left",
   },
@@ -378,12 +375,22 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   },
 ]);
 
+const { createUser } = useAddUserMutation();
 function addNewUser() {
   Dialog.create({
-    component: AddNewUserDialog,
-  }).onOk((payload) => {
-    // FIXME: add new user
-    payload;
+    component: EditUserDetailsDialog,
+  }).onOk(async (payload: RegisterUserPayload) => {
+    try {
+      await createUser({
+        input: payload,
+      });
+      await fetchCustomers({
+        page: pagination.value.page,
+        rowsPerPage: pagination.value.rowsPerPage,
+      });
+    } catch {
+      notifyError(t("auth.couldNotRegister"));
+    }
   });
 }
 
@@ -408,13 +415,50 @@ function openPayOff(user: CustomerFragment) {
   });
 }
 
-function openEdit(user: CustomerFragment, rowIndex: number) {
+const { updateUser } = useUpdateUserMutation();
+function openEdit({
+  email,
+  firstname,
+  id,
+  lastname,
+  discount,
+  notes,
+  phoneNumber,
+}: CustomerFragment) {
   Dialog.create({
     component: EditUserDetailsDialog,
-    componentProps: { userData: user },
-  }).onOk((payload: { user: CustomerFragment; password?: string }) => {
-    // FIXME: add server call to update user data
-    customers.value[rowIndex] = payload.user;
+    componentProps: {
+      userData: {
+        email,
+        firstname,
+        id,
+        lastname,
+        discount,
+        notes,
+        phoneNumber,
+        retailLocationId: selectedLocation.value.id,
+      } satisfies UpdateUserPayload,
+    },
+  }).onOk(async (newUserData: UpdateUserPayload) => {
+    try {
+      await updateUser({
+        input: {
+          ...newUserData,
+          email:
+            newUserData.email && newUserData.email !== email
+              ? newUserData.email
+              : email,
+          password: newUserData.password ? newUserData.password : undefined,
+        },
+      });
+
+      await fetchCustomers({
+        page: pagination.value.page,
+        rowsPerPage: pagination.value.rowsPerPage,
+      });
+    } catch {
+      notifyError(t("auth.couldNotUpdate"));
+    }
   });
 }
 
@@ -437,6 +481,8 @@ function openCellEditDialog(
       Dialog.create({
         component: EditUserStockdataDialog,
         componentProps: { userData },
+      }).onDismiss(() => {
+        tableRef.value.requestServerInteraction();
       });
       break;
     case "reserved":
@@ -446,7 +492,13 @@ function openCellEditDialog(
           userData,
           retailLocationId: selectedLocation.value.id,
         },
-      });
+      })
+        .onOk(() => {
+          openCart(userData);
+        })
+        .onDismiss(() => {
+          tableRef.value.requestServerInteraction();
+        });
       break;
     case "requested":
       Dialog.create({
@@ -455,7 +507,13 @@ function openCellEditDialog(
           userData,
           retailLocationId: selectedLocation.value.id,
         },
-      });
+      })
+        .onOk(() => {
+          openCart(userData);
+        })
+        .onDismiss(() => {
+          tableRef.value.requestServerInteraction();
+        });
       break;
     case "sold":
     case "purchased": {
@@ -466,6 +524,8 @@ function openCellEditDialog(
       Dialog.create({
         component: EditUserBooksMovementsDialog,
         componentProps: { userData, type: name },
+      }).onDismiss(() => {
+        tableRef.value.requestServerInteraction();
       });
       break;
     }
@@ -475,7 +535,12 @@ function openCellEditDialog(
 function openCart(user: CustomerFragment) {
   Dialog.create({
     component: CartDialog,
-    componentProps: { user },
+    componentProps: {
+      retailLocationId: selectedLocation.value.id,
+      user,
+    },
+  }).onDismiss(() => {
+    tableRef.value.requestServerInteraction();
   });
 }
 </script>

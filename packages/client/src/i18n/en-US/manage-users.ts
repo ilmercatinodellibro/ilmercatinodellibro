@@ -32,9 +32,15 @@ export default {
       "The number of titles currently available among those requested by the user",
   },
   payOff: "Pay off user",
-  filters: ["With Available", "With Requested", "With Purchased", "With Sold"],
+  filters: {
+    withAvailable: "With Available",
+    withRequested: "With Requested",
+    withPurchased: "With Purchased",
+    withSold: "With Sold",
+  },
   editUser: {
     title: "Edit User Data",
+    createUser: "Create a New User",
     discount: "Apply ISEE/volunteer discount",
     notes: "Notes",
   },
@@ -47,7 +53,11 @@ export default {
       "Includes the copies that are still present in stock, not lost, not requested",
     retrieveBtn: "Retrieve all the books in the list",
     deleteBookBtnTooltip: "Delete permanently this copy from the database",
-    errorMessage: "Cannot accept more than one copy of the same book",
+    errors: {
+      noBook: "No book with the ISBN {0} was found",
+      tooManyCopies: "Cannot accept more than one copy of the same book",
+      retrieval: "There was an error during the retrieval of the books",
+    },
   },
   booksMovementsDialog: {
     purchasedTitle: "Books purchased by {0}",
@@ -79,6 +89,7 @@ export default {
     deleteAll: "Delete All",
     moveIntoReserved: "Move Available into Reserved",
     moveIntoCart: "Move Available into Cart",
+    booksRequested: "",
   },
   reservedBooksDialog: {
     title: "Books reserved by {0}",
@@ -92,6 +103,8 @@ export default {
         'You are deleting all the the books that were reserved by this customer. The books will be marked as "Available". Do you wish to proceed?',
       confirmButton: "Delete All",
     },
+    bookReserved: "Reserved {0}.",
+    requestsReserved: "Reserved {0} copies of requested books.",
   },
   payOffUserDialog: {
     title: "Check Out User {0}",
@@ -113,6 +126,7 @@ export default {
       return: "Return",
       reimburse: "Reimburse",
     },
+    problemsError: "Could not report problems for all the copies.",
     returnAndDonate: "Return money and donate books",
     returnEverything: "Return money and books ({0} €)",
     confirms: {
@@ -161,6 +175,18 @@ export default {
     totalBooks: "Total books to sell",
     discount: "ISEE/voluntary discount",
     total: "Total",
+    empty: {
+      title: "Empty the cart?",
+      message:
+        "Do you really wish to empty the cart of the current user and return their books among the lists of the reserved and requested books?",
+      emptyCart: "Empty cart",
+    },
+    confirm: {
+      title: "Sell books?",
+      message:
+        "Confirm the sale of the books inside the cart for a total of {0}?",
+      sell: "Sell",
+    },
   },
   receiptsDialog: {
     title: "Receipts",
@@ -174,5 +200,7 @@ export default {
       PURCHASE: "Purchase | Purchases",
       REGISTRATION: "Registration | Registrations",
     } satisfies Record<ReceiptType, string>,
+    noRegistration: "There are no withdrawal receipts",
+    noPurchase: "There are no purchase receipts",
   },
 };

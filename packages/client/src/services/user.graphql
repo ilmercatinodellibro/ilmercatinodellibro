@@ -12,6 +12,13 @@ fragment User on User {
   notes
 }
 
+fragment UserInfo on User {
+  phoneNumber
+  email
+  firstname
+  lastname
+}
+
 fragment Member on User {
   ...User
   role(retailLocationId: $retailLocationId)
@@ -56,4 +63,16 @@ mutation removeMember($input: RemoveMemberPayload!) {
 
 mutation updateRole($input: UpdateRolePayload!) {
   updateRole(input: $input)
+}
+
+mutation addUser($input: RegisterUserPayload!) {
+  createUser(input: $input) {
+    ...UserSummary
+  }
+}
+
+mutation updateUser($input: UpdateUserPayload!) {
+  updateUser(input: $input) {
+    ...UserSummary
+  }
 }

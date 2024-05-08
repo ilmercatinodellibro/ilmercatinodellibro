@@ -167,7 +167,13 @@
                 </q-item-label>
               </q-item-section>
               <q-item-section side>
-                <q-btn :icon="mdiPencil" color="black-54" flat round />
+                <q-btn
+                  :icon="mdiPencil"
+                  color="black-54"
+                  flat
+                  round
+                  @click="editCurrentUserData()"
+                />
               </q-item-section>
             </q-item>
 
@@ -389,7 +395,9 @@ import { useOnline } from "@vueuse/core";
 import { Dialog, Notify, QTooltipProps, Screen } from "quasar";
 import { computed, provide, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { UpdateUserPayload } from "src/@generated/graphql";
 import { setLanguage } from "src/boot/i18n";
+import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
 import SettingsDialog from "src/components/settings-dialog.vue";
 import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
 import {
@@ -398,10 +406,15 @@ import {
   useLateralDrawer,
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
+import { notifyError } from "src/helpers/error-messages";
 import { SettingsUpdate } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
+import {
+  UserFragmentDoc,
+  useUpdateUserMutation,
+} from "src/services/user.graphql";
 
 // It would work with :inset-level="1" if we used "avatar" option instead of "side" for the header icon
 // but we only need 16px of margin from the icon, so we defined a value which would align the text accordingly
@@ -456,7 +469,8 @@ const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 
 const { logout } = useLogoutMutation();
-const { user, hasAdminRole, hasOperatorRole, hasUserRole } = useAuthService();
+const { user, hasAdminRole, hasOperatorRole, hasUserRole, updateCurrentUser } =
+  useAuthService();
 
 const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
   useLateralDrawer();
@@ -477,6 +491,59 @@ function openSettings() {
       // FIXME: update the settings
     } else {
       // FIXME: reset the settings
+    }
+  });
+}
+
+const { updateUser } = useUpdateUserMutation();
+function editCurrentUserData() {
+  Dialog.create({
+    component: EditUserDataDialog,
+  }).onOk(async (newUserData: UpdateUserPayload) => {
+    if (!user.value) {
+      return;
+    }
+
+    try {
+      const { cache } = await updateUser({
+        input: {
+          ...newUserData,
+          email:
+            newUserData.email && newUserData.email !== user.value.email
+              ? newUserData.email
+              : user.value.email,
+          password: newUserData.password ? newUserData.password : undefined,
+          id: user.value.id,
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
+
+      cache.updateFragment(
+        {
+          fragment: UserFragmentDoc,
+          fragmentName: "UserSummary",
+          id: cache.identify(user.value),
+        },
+        (data) => {
+          if (!data || !user.value) {
+            return;
+          }
+          return {
+            ...data,
+            ...newUserData,
+            email:
+              newUserData.email && newUserData.email !== user.value.email
+                ? newUserData.email
+                : user.value.email,
+            password: newUserData.password ? newUserData.password : undefined,
+            discount: newUserData.discount ?? false,
+          };
+        },
+      );
+
+      updateCurrentUser(newUserData);
+    } catch {
+      notifyError(t("auth.couldNotUpdate"));
     }
   });
 }

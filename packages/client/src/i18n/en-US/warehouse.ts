@@ -1,18 +1,23 @@
+import { BookCopyQueryFilter } from "src/@generated/graphql";
+import { BookCopyStatus } from "src/helpers/book-copy";
+
 export default {
   sortByCopyCode: "Sort by book copy code",
   sortByISBN: "Sort by ISBN",
   checkOtherWarehouse: "Check the warehouse of {0}",
   filters: {
-    options: ["Reserved", "Available", "Sold", "With Problem"],
-  },
+    isAvailable: "Available",
+    isSold: "Sold",
+    hasProblem: "With Problem",
+  } satisfies Record<Exclude<keyof BookCopyQueryFilter, "search">, string>,
   owner: "Owner",
   bookCopyStatus: {
-    lost: "Lost",
+    LOST: "Lost",
     returned: "Returned",
     donated: "Donated to the Mercatino",
-    incomplete: "Incomplete",
+    INCOMPLETE: "Incomplete",
     "not-available": "Not Available",
     available: "Available",
     sold: "Sold",
-  },
+  } satisfies Record<BookCopyStatus, string>,
 };

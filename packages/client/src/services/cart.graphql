@@ -19,6 +19,7 @@ fragment Cart on Cart {
 mutation openCart($input: OpenCartInput!) {
   openCart(input: $input) {
     ...Cart
+    createdAt
   }
 }
 

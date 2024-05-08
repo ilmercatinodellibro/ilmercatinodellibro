@@ -3,7 +3,8 @@
     :columns="columns"
     :rows="receipts"
     :rows-per-page-options="[0]"
-    hide-bottom
+    :hide-bottom="receipts.length > 0"
+    :no-data-label="noDataLabel"
     square
   >
     <template #header-cell-created-by="{ col }">
@@ -54,6 +55,7 @@ const { t } = useI18n();
 
 const props = defineProps<{
   receipts: ReceiptFragment[];
+  noDataLabel: string;
   type: ReceiptType;
 }>();
 

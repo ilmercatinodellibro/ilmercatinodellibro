@@ -1,27 +1,46 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="t('auth.editMyData')"
       :submit-label="t('common.save')"
       size="sm"
       @cancel="onDialogCancel()"
-      @submit="onDialogOK(user)"
+      @submit="
+        onDialogOK({
+          email: newUserData.email,
+          firstname: newUserData.firstname,
+          lastname: newUserData.lastname,
+          dateOfBirth: newUserData.dateOfBirth,
+          delegate: newUserData.delegate,
+          password: newUserData.password,
+          passwordConfirmation: newUserData.passwordConfirmation,
+          phoneNumber: newUserData.phoneNumber,
+        })
+      "
     >
       <q-card-section class="column gap-4 q-pb-xs q-pt-lg q-px-lg">
         <q-input
           v-for="(field, key) in formData"
           :key="key"
           v-model="newUserData[key]"
-          :label="field.label"
-          :rules="field.rules"
-          :type="field.type"
+          v-bind="field"
+          :autocomplete="
+            [
+              'password',
+              'passwordConfirmation',
+              'email',
+              'confirmEmail',
+            ].includes(key)
+              ? 'new-password'
+              : 'off'
+          "
           bottom-slots
           lazy-rules
           outlined
         >
           <template #append>
             <q-icon
-              v-if="key === 'password' || key === 'confirmPassword'"
+              v-if="key === 'password' || key === 'passwordConfirmation'"
               :name="hidePassword ? mdiEyeOff : mdiEye"
               class="cursor-pointer"
               @click="hidePassword = !hidePassword"
@@ -48,16 +67,17 @@ import {
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
-import { QInputProps, ValidationRule, useDialogPluginComponent } from "quasar";
+import { QInputProps, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { UpdateUserPayload } from "src/@generated/graphql";
 import {
   emailRule,
   makeValueMatchRule,
   requiredRule,
   validatePasswordRule,
 } from "src/helpers/rules";
-import { UserInfo } from "src/models/auth";
+import { UserData } from "src/models/user";
 import { useAuthService } from "src/services/auth";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
@@ -68,16 +88,9 @@ const { t } = useI18n();
 const { user } = useAuthService();
 
 const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
-  useDialogPluginComponent<UserInfo>();
-
-type UserData = UserInfo & {
-  // TODO: remove stubbed fields
-  password: string;
-  date: number;
-  delegate: string;
-  confirmEmail: string;
-  confirmPassword: string;
-};
+  useDialogPluginComponent<
+    Omit<UpdateUserPayload, "id" | "retailLocationId">
+  >();
 
 const newUserData = ref<UserData>({
   email: user.value?.email ?? "",
@@ -85,22 +98,22 @@ const newUserData = ref<UserData>({
   lastname: user.value?.lastname ?? "",
   phoneNumber: user.value?.phoneNumber ?? "",
   password: "",
-  date: Date.now(),
-  delegate: "",
+  dateOfBirth: user.value?.dateOfBirth,
+  delegate: user.value?.delegate ?? "",
   confirmEmail: "",
-  confirmPassword: "",
+  passwordConfirmation: "",
 });
 
 const hidePassword = ref(true);
 
-const formData = computed<{
-  [Key in keyof UserData]: {
-    label: string;
-    type?: QInputProps["type"];
-    infoLabel?: string;
-    rules?: ValidationRule[];
-  };
-}>(() => ({
+const formData = computed<
+  Record<
+    keyof UserData,
+    Omit<QInputProps, "modelValue"> & {
+      infoLabel?: string;
+    }
+  >
+>(() => ({
   firstname: {
     label: t("auth.firstName"),
     rules: [requiredRule],
@@ -109,7 +122,7 @@ const formData = computed<{
     label: t("auth.lastName"),
     rules: [requiredRule],
   },
-  date: {
+  dateOfBirth: {
     label: t("auth.birthDate"),
     type: "date",
   },
@@ -122,29 +135,39 @@ const formData = computed<{
   },
   email: {
     label: t("auth.emailAddress"),
-    rules: newUserData.value.email.length > 0 ? [emailRule] : undefined,
+    rules: newUserData.value.email ? [emailRule] : undefined,
   },
   confirmEmail: {
     label: t("auth.confirmEmail"),
-    rules: [
-      makeValueMatchRule(newUserData.value.email, t("auth.emailsDoNotMatch")),
-    ],
+    rules:
+      newUserData.value.email && newUserData.value.email !== user.value?.email
+        ? [
+            makeValueMatchRule(
+              newUserData.value.email,
+              t("auth.emailsDoNotMatch"),
+            ),
+          ]
+        : undefined,
   },
   password: {
     label: t("auth.password"),
     type: hidePassword.value ? "password" : "text",
-    rules: [requiredRule, validatePasswordRule],
+    rules: newUserData.value.password
+      ? [requiredRule, validatePasswordRule]
+      : undefined,
   },
-  confirmPassword: {
+  passwordConfirmation: {
     label: t("auth.confirmPassword"),
     type: hidePassword.value ? "password" : "text",
-    rules: [
-      requiredRule,
-      makeValueMatchRule(
-        newUserData.value.password,
-        t("auth.passwordDoNotMatch"),
-      ),
-    ],
+    rules: newUserData.value.password
+      ? [
+          requiredRule,
+          makeValueMatchRule(
+            newUserData.value.password,
+            t("auth.passwordDoNotMatch"),
+          ),
+        ]
+      : undefined,
   },
 }));
 </script>

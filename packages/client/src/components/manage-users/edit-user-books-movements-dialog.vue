@@ -16,19 +16,9 @@
         "
         class="flex-delegate-height-management"
       >
-        <template #body-cell-problems="{ value }">
+        <template #body-cell-problems="{ row }">
           <q-td class="text-center">
-            <chip-button
-              :label="
-                $t(
-                  `manageUsers.booksMovementsDialog.${
-                    !value ? 'reportProblem' : 'solveProblem'
-                  }`,
-                )
-              "
-              :color="!value ? 'red' : 'green'"
-              @click="openProblemDialog(value)"
-            />
+            <problems-button :book-copy="row" />
           </q-td>
         </template>
         <template #body-cell-history="{ row }">
@@ -81,15 +71,14 @@ import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import {
   BookCopyDetailsFragment,
-  ProblemDetailsFragment,
   useGetPurchasedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserSummaryFragment } from "src/services/user.graphql";
+import ProblemsButton from "../problems-button.vue";
 import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
-import ProblemsDialog from "./problems-dialog.vue";
 import ProblemsHistoryDialog from "./problems-history-dialog.vue";
 import ReturnBookDialog from "./return-book-dialog.vue";
 
@@ -178,15 +167,13 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   },
   {
     label: t("book.code"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: "code",
     name: "code",
     align: "left",
   },
   {
     label: t("book.originalCode"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: "originalCode",
     name: "original-code",
     align: "left",
     format: (val: string) => (val === "" ? "/" : val),
@@ -201,7 +188,6 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   },
   {
     label: "",
-    // TODO: add the field name
     field: () => undefined,
     name: "problems",
   },
@@ -221,8 +207,7 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   },
   {
     label: t("book.code"),
-    // TODO: add the field name
-    field: () => undefined,
+    field: "code",
     name: "code",
     align: "left",
   },
@@ -247,18 +232,6 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     align: "center",
   },
 ]);
-
-function openProblemDialog(bookCopy: BookCopyDetailsFragment) {
-  Dialog.create({
-    component: ProblemsDialog,
-    componentProps: {
-      bookCopy,
-    },
-  }).onOk((newProblem: ProblemDetailsFragment) => {
-    // FIXME: add problem to history
-    newProblem;
-  });
-}
 
 function openHistoryDialog(bookCopy: BookCopyDetailsFragment) {
   Dialog.create({
