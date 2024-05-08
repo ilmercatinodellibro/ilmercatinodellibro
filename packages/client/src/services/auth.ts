@@ -302,38 +302,46 @@ export function useAuthService() {
   };
 }
 
-export const redirectIfAuthenticated: NavigationGuard = (to, from, next) => {
+export const redirectIfAuthenticated: NavigationGuard = (to) => {
+  const { selectedLocation } = useRetailLocationService();
   const { isAuthenticated } = useAuthService();
 
   if (isAuthenticated.value && to.name !== AUTHENTICATED_DEFAULT_ROUTE_NAME) {
-    next({ name: AUTHENTICATED_DEFAULT_ROUTE_NAME });
-  } else {
-    next();
+    return {
+      name: AUTHENTICATED_DEFAULT_ROUTE_NAME,
+      params: { locationId: selectedLocation.value.id },
+    };
   }
 };
 
-export const redirectIfGuest: NavigationGuard = (to, from, next) => {
+export const redirectIfGuest: NavigationGuard = (to) => {
   const { isAuthenticated } = useAuthService();
 
   if (!isAuthenticated.value && to.name !== GUEST_DEFAULT_ROUTE_NAME) {
-    next({ name: GUEST_DEFAULT_ROUTE_NAME });
-  } else {
-    next();
+    return { name: GUEST_DEFAULT_ROUTE_NAME };
   }
 };
 
 export const redirectIfNotAdmin: NavigationGuard = () => {
+  const { selectedLocation } = useRetailLocationService();
   const { hasAdminRole } = useAuthService();
 
   if (!hasAdminRole.value) {
-    return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
+    return {
+      name: AUTHENTICATED_DEFAULT_ROUTE_NAME,
+      params: { locationId: selectedLocation.value.id },
+    };
   }
 };
 
 export const redirectIfNotOperatorOrAdmin: NavigationGuard = () => {
+  const { selectedLocation } = useRetailLocationService();
   const { hasAdminRole, hasOperatorRole } = useAuthService();
 
   if (!hasAdminRole.value && !hasOperatorRole.value) {
-    return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
+    return {
+      name: AUTHENTICATED_DEFAULT_ROUTE_NAME,
+      params: { locationId: selectedLocation.value.id },
+    };
   }
 };
