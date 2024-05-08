@@ -1,16 +1,12 @@
 import { Injectable, UnprocessableEntityException } from "@nestjs/common";
 import * as argon2 from "argon2";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
-import { UserCreateInput, UserUpdateInput } from "src/@generated/user";
-import { PrismaService } from "../prisma/prisma.service";
+import { RegisterPayload } from "src/modules/auth/auth.args";
+import { PrismaService } from "src/modules/prisma/prisma.service";
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-
-  getUsers() {
-    return this.prisma.user.findMany();
-  }
 
   async getUser(id: string) {
     return this.prisma.user.findUnique({
@@ -28,7 +24,10 @@ export class UserService {
     });
   }
 
-  async createUser(userData: UserCreateInput, emailVerified?: boolean) {
+  async createUser(
+    userData: Omit<RegisterPayload, "passwordConfirmation">,
+    emailVerified?: boolean,
+  ) {
     userData.email = userData.email.toLowerCase();
     userData.password = await argon2.hash(userData.password);
     return this.prisma.user.create({
@@ -39,26 +38,14 @@ export class UserService {
     });
   }
 
-  async updateUserRole({ id, role }: UserUpdateInput) {
+  async updatePassword({ id, password }: { id: string; password: string }) {
     return this.prisma.user.update({
       where: {
         id,
       },
       data: {
-        role,
+        password: await argon2.hash(password),
       },
-    });
-  }
-
-  async updateUser(userData: UserUpdateInput) {
-    userData.password = userData.password
-      ? await argon2.hash(userData.password)
-      : undefined;
-    return this.prisma.user.update({
-      where: {
-        id: userData.id,
-      },
-      data: userData,
     });
   }
 
@@ -89,10 +76,9 @@ export class UserService {
   }
 
   async findUserByEmail(email: string) {
-    email = email.toLowerCase();
     return this.prisma.user.findUnique({
       where: {
-        email,
+        email: email.toLowerCase(),
       },
     });
   }

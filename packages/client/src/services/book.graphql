@@ -1,0 +1,56 @@
+fragment BookSummary on Book {
+  id
+  isbnCode
+  subject
+  authorsFullName
+  title
+  originalPrice
+  publisherName
+
+  # TODO: Make this only used for admin/operator routes as it's not needed for customers and is costly
+  utility {
+    value
+    booksTaken
+    booksInWarehouse
+    booksSold
+    requestsActive
+    requestsTotal
+  }
+
+  meta {
+    isAvailable
+  }
+}
+
+query getBooks(
+  $retailLocationId: String!
+  $page: Int!
+  $rows: Int!
+  $filter: BookQueryFilter
+) {
+  books(
+    retailLocationId: $retailLocationId
+    page: $page
+    rows: $rows
+    filter: $filter
+  ) {
+    page
+    rows {
+      ...BookSummary
+    }
+    rowsCount
+  }
+}
+
+query getBookByIsbn($isbnCode: String!, $retailLocationId: String!) {
+  books(
+    retailLocationId: $retailLocationId
+    page: 0
+    rows: 1
+    filter: { search: $isbnCode }
+  ) {
+    rows {
+      ...BookSummary
+    }
+  }
+}

@@ -5,7 +5,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  previewFeatures = ["postgresqlExtensions", "views"]
   binaryTargets   = ["native"]
 }
 
@@ -18,6 +18,9 @@ generator nestgraphql {
   reExport                              = All
   requireSingleFieldsInWhereUniqueInput = true
   noAtomicOperations                    = true
+  purgeOutput                           = true
+  omitModelsCount                       = true
+  emitBlocks                            = ["models", "enums"]
 
   // Use JSON scalar from graphql-scalars instead of the default (graphql-type-json)
   graphqlScalars_Json_name      = "GraphQLJSON"
@@ -30,7 +33,6 @@ datasource db {
 }
 
 enum Role {
-  USER
   OPERATOR
   ADMIN
 }
@@ -43,15 +45,44 @@ model User {
   password      String
   firstname     String
   lastname      String
+  phoneNumber   String   @default("")
+  notes         String   @default("")
+  discount      Boolean  @default(false)
   emailVerified Boolean  @default(false)
-  role          Role     @default(USER)
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
-  /// @HideField()
   events            Event[]
   notifications     Notification[]
   pushSubscriptions PushSubscription[]
+
+  // Any type of user
+  bookCopies          BookCopy[]    @relation("BookCopyOwner")
+  purchases           Sale[]        @relation("CopyPurchasedBy")
+  createdReservations Reservation[] @relation("ReservationMadeBy") // reservations can be made also by operators
+  deletedReservations Reservation[] @relation("ReservationDeletedBy")
+  reservations        Reservation[] @relation("ReservationUser") // Keeps track of the user for who the reservation was made
+  requestedBooks      BookRequest[] @relation("BookRequestUser")
+  createdBookRequests BookRequest[] @relation("BookRequestMadeBy") // requests can also, also be made by operators
+  deletedBookRequests BookRequest[] @relation("BookRequestDeletedBy")
+  ownedCarts          Cart[]        @relation("CartOwner")
+
+  // Operator/admin relations
+  settledCopies        BookCopy[]       @relation("CopySettledBy")
+  returnedBookCopies   BookCopy[]       @relation("CopyReturnedBy")
+  reimbursedBookCopies BookCopy[]       @relation("CopyReimbursedBy")
+  donatedBookCopies    BookCopy[]       @relation("CopyDonatedBy")
+  createdBookCopies    BookCopy[]       @relation("CopyCreatedBy")
+  updatedBookCopies    BookCopy[]       @relation("CopyUpdatedBy")
+  reportedProblems     Problem[]        @relation("ProblemReportedBy")
+  resolvedProblems     Problem[]        @relation("ProblemResolvedBy")
+  refundedSales        Sale[]           @relation("CopySaleRefundedBy")
+  processedSales       Sale[]           @relation("CopySoldBy")
+  salesInCreatedCarts  Sale[]           @relation("SaleInCartOpenedBy")
+  createdCarts         Cart[]           @relation("CartOperator")
+  memberships          LocationMember[]
+  ownedReceipts        Receipt[]        @relation("ReceiptOwner")
+  triggeredReceipts    Receipt[]        @relation("ReceiptCreator")
 }
 
 model Event {
@@ -84,4 +115,321 @@ model PushSubscription {
   deviceToken String @map("device_token")
 
   @@unique([userId, deviceToken])
+}
+
+model RetailLocation {
+  id                    String  @id
+  name                  String
+  registrationEnabled   Boolean @default(false) @map("registration_enabled")
+  payOffEnabled         Boolean @default(false) @map("pay_off_enabled")
+  fullAddress           String  @map("full_address")
+  email                 String  @unique
+  phoneNumber           String  @default("") @map("phone_number")
+  facebookLink          String  @default("") @map("facebook_link")
+  instagramLink         String  @default("") @map("instagram_link")
+  whoAreWeContent       String  @default("") @map("who_are_we_content")
+  joinUsContent         String  @default("") @map("join_us_content")
+  buyRate               Float   @default(30) @map("buy_rate")
+  sellRate              Float   @default(55) @map("sell_rate")
+  maxBookingDays        Int     @default(7) @map("max_booking_days")
+  warehouseMaxBlockSize Int     @default(10) @map("warehouse_max_block_size")
+  /// @FieldType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', output: true })
+  /// @FieldType({ name: 'ThemeInput', from: 'src/modules/retail-location/theme.args', input: true, match: '*Input' })
+  /// @PropertyType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', namedImport: true, output: true, input: true })
+  // We can't set the default to a string containing JSON due to prisma-nestjs-graphql limitations, so have to use dbgenerated(), using jsonb_ because Prisma uses jsonb for Json type
+  theme                 Json    @default(dbgenerated("jsonb_build_object('colors', jsonb_build_object('primary', '#798aa8', 'secondary', '#76e1a7', 'accent', '#c2664d'))"))
+
+  books    Book[]           @relation("RetailLocationBooks")
+  carts    Cart[]
+  members  LocationMember[]
+  receipts Receipt[]
+}
+
+model LocationMember {
+  id String @id @default(uuid())
+
+  userId           String         @map("user_id")
+  user             User           @relation(fields: [userId], references: [id])
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation(fields: [retailLocationId], references: [id])
+
+  role Role
+
+  @@unique([userId, retailLocationId])
+}
+
+model Book {
+  // The id here is typed like this for a few reasons:
+  // - using the standard method showed here https://www.prisma.io/docs/concepts/components/prisma-schema/features-without-psl-equivalent#native-database-functions
+  // in the first example only tells Prisma to autogenerate a uuid, which is done only when queries to that entity are run through Prisma's APIs.
+  // The second method showcased there is actually the one needed here to instruct the DB to actually create a UUID field which is automatically populated by the DB and not by Prisma itself
+  // This is needed at import time when the code is using the Postgre COPY command to import books into the DB.
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// @FieldType({ name: 'Scalars.GraphQLISBN', from: 'graphql-scalars', input: true })
+  isbnCode         String         @map("isbn_code")
+  subject          String
+  authorsFullName  String         @map("authors_full_name")
+  title            String
+  originalPrice    Float          @map("original_price")
+  publisherName    String         @map("publisher_name")
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation("RetailLocationBooks", fields: [retailLocationId], references: [id])
+
+  // Defining the relation from this side to be able to define it as non-nullable
+  meta BookMeta @relation(fields: [id], references: [id])
+
+  copies       BookCopy[]
+  reservations Reservation[]    @relation("BookReservations")
+  requests     BookRequest[]    @relation("BookRequested")
+  cartItems    CartItem[]
+  courses      BooksOnCourses[] @relation("CourseBook")
+  requestQueue RequestQueue?
+}
+
+view BookMeta {
+  id   String @id @map("book_id") @db.Uuid
+  book Book?
+
+  isAvailable Boolean @map("is_available")
+}
+
+model BookCopy {
+  id           String  @id @default(uuid())
+  code         String
+  // The original code is a special field. Contains a copy of the value of the first code field that was specified for a BookCopy
+  // This is meant to keep track of the fact that a book copy was returned and to the retailLocation for some reason and it is now available again.
+  originalCode String? @map("original_code")
+
+  bookId String @map("book_id") @db.Uuid
+  book   Book   @relation(fields: [bookId], references: [id])
+
+  // User/operator/admin relation - Can be any of the three
+  ownerId String @map("owner_id")
+  owner   User   @relation("BookCopyOwner", fields: [ownerId], references: [id])
+
+  // Operator/admin relations
+  settledAt      DateTime? @map("settled_at") @db.Timestamptz()
+  settledById    String?   @map("settled_by_id")
+  settledBy      User?     @relation("CopySettledBy", fields: [settledById], references: [id])
+  donatedAt      DateTime? @map("donated_at") @db.Timestamptz()
+  donatedById    String?   @map("donated_by_id")
+  donatedBy      User?     @relation("CopyDonatedBy", fields: [donatedById], references: [id])
+  reimbursedAt   DateTime? @map("reimbursed_at") @db.Timestamptz()
+  reimbursedById String?   @map("reimbursed_by_id")
+  reimbursedBy   User?     @relation("CopyReimbursedBy", fields: [reimbursedById], references: [id])
+  returnedAt     DateTime? @map("returned_at") @db.Timestamptz()
+  returnedById   String?   @map("returned_by_id")
+  returnedBy     User?     @relation("CopyReturnedBy", fields: [returnedById], references: [id])
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdById    String    @map("created_by_id")
+  createdBy      User      @relation("CopyCreatedBy", fields: [createdById], references: [id])
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedById    String    @map("updated_by_id")
+  updatedBy      User      @relation("CopyUpdatedBy", fields: [updatedById], references: [id])
+
+  problems Problem[] @relation("BookCopyProblem")
+  sales    Sale[]    @relation("BookCopySale")
+}
+
+enum ProblemType {
+  INCOMPLETE
+  LOST
+  CUSTOM
+}
+
+model Problem {
+  id         String      @id @default(uuid())
+  type       ProblemType @default(CUSTOM)
+  details    String
+  solution   String?
+  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
+  bookCopyId String      @map("book_copy_id")
+  bookCopy   BookCopy    @relation("BookCopyProblem", fields: [bookCopyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("ProblemReportedBy", fields: [createdById], references: [id])
+
+  resolvedAt   DateTime? @map("resolved_at") @db.Timestamptz()
+  resolvedById String?   @map("resolved_by_id")
+  resolvedBy   User?     @relation("ProblemResolvedBy", fields: [resolvedById], references: [id])
+}
+
+model Sale {
+  id                  String   @id @default(uuid())
+  bookCopyId          String   @map("book_copy_id")
+  bookCopy            BookCopy @relation("BookCopySale", fields: [bookCopyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  iseeDiscountApplied Boolean  @default(false) @map("isee_discount_applied")
+
+  // Any user relation
+  purchasedAt   DateTime @default(now()) @map("purchased_at") @db.Timestamptz()
+  purchasedById String   @map("purchased_by_id")
+  purchasedBy   User     @relation("CopyPurchasedBy", fields: [purchasedById], references: [id])
+
+  // Operator/admin relation
+  createdById     String @map("created_by_id")
+  createdBy       User   @relation("CopySoldBy", fields: [createdById], references: [id])
+  cartCreatedById String @map("cart_created_by_id")
+  cartCreatedBy   User   @relation("SaleInCartOpenedBy", fields: [cartCreatedById], references: [id])
+
+  // Operator/admin relation
+  refundedAt   DateTime? @map("refunded_at") @db.Timestamptz()
+  refundedById String?   @map("refunded_by_id")
+  refundedBy   User?     @relation("CopySaleRefundedBy", fields: [refundedById], references: [id])
+
+  reservation Reservation? @relation("ReservationSale")
+  bookRequest BookRequest? @relation("BookRequestSale")
+}
+
+model Reservation {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation("ReservationUser", fields: [userId], references: [id])
+  // TODO: bookId may be eliminated in favor of the request relation (reservation.request.bookId)
+  bookId String @map("book_id") @db.Uuid
+  book   Book   @relation("BookReservations", fields: [bookId], references: [id])
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("ReservationMadeBy", fields: [createdById], references: [id])
+
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedById String?   @map("deleted_by_id")
+  deletedBy   User?     @relation("ReservationDeletedBy", fields: [deletedById], references: [id])
+
+  expiresAt DateTime @map("expires_at") @db.Timestamptz()
+
+  requestId String      @map("request_id")
+  request   BookRequest @relation("BookRequestReservation", fields: [requestId], references: [id])
+
+  saleId String? @unique() @map("sale_id")
+  sale   Sale?   @relation("ReservationSale", fields: [saleId], references: [id])
+
+  cartItem CartItem?
+
+  @@unique([userId, bookId, deletedAt])
+}
+
+model BookRequest {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation("BookRequestUser", fields: [userId], references: [id])
+  bookId String @map("book_id") @db.Uuid
+  book   Book   @relation("BookRequested", fields: [bookId], references: [id])
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("BookRequestMadeBy", fields: [createdById], references: [id])
+
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedById String?   @map("deleted_by_id")
+  deletedBy   User?     @relation("BookRequestDeletedBy", fields: [deletedById], references: [id])
+
+  saleId String? @unique() @map("sale_id")
+  sale   Sale?   @relation("BookRequestSale", fields: [saleId], references: [id])
+
+  cartItem     CartItem?
+  reservations Reservation[] @relation("BookRequestReservation")
+  queueItem    RequestQueue?
+
+  @@unique([userId, bookId, deletedAt])
+}
+
+model RequestQueue {
+  id String @id @default(uuid())
+
+  bookId String @unique @map("book_id") @db.Uuid
+  book   Book   @relation(fields: [bookId], references: [id])
+
+  currentRequestId String      @unique @map("current_request_id")
+  currentRequest   BookRequest @relation(fields: [currentRequestId], references: [id])
+
+  lastCheckedAt DateTime @default(now()) @map("last_checked_at") @db.Timestamptz()
+}
+
+model Cart {
+  id String @id @default(uuid())
+
+  userId String @map("user_id")
+  user   User   @relation("CartOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation(fields: [retailLocationId], references: [id])
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("CartOperator", fields: [createdById], references: [id])
+
+  items CartItem[]
+
+  @@unique([userId, retailLocationId])
+}
+
+model CartItem {
+  id String @id @default(uuid())
+
+  cartId String @map("cart_id")
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  bookId String @map("book_id") @db.Uuid
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  fromReservationId String?      @unique @map("from_reservation_id")
+  fromReservation   Reservation? @relation(fields: [fromReservationId], references: [id])
+
+  fromBookRequestId String?      @unique @map("from_book_request_id")
+  fromBookRequest   BookRequest? @relation(fields: [fromBookRequestId], references: [id])
+
+  @@unique([cartId, bookId])
+}
+
+model School {
+  code         String @id
+  name         String
+  address      String
+  provinceCode String @map("province_code")
+
+  courses SchoolCourse[] @relation("OrganizingSchool")
+}
+
+model SchoolCourse {
+  id         String           @id @default(uuid())
+  grade      Int
+  section    String
+  schoolCode String           @map("school_code")
+  school     School           @relation("OrganizingSchool", fields: [schoolCode], references: [code], onDelete: Cascade)
+  books      BooksOnCourses[] @relation("BookSchoolCourse")
+
+  @@unique([grade, section, schoolCode])
+}
+
+model BooksOnCourses {
+  schoolCourseId String       @map("school_course_id")
+  bookId         String       @map("book_id") @db.Uuid
+  schoolCourse   SchoolCourse @relation("BookSchoolCourse", fields: [schoolCourseId], references: [id], onDelete: Cascade)
+  book           Book         @relation("CourseBook", fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolCourseId, bookId])
+}
+
+enum ReceiptType {
+  PURCHASE
+  REGISTRATION
+}
+
+model Receipt {
+  id   String      @id @default(uuid())
+  type ReceiptType
+
+  userId String @map("user_id")
+  user   User   @relation("ReceiptOwner", fields: [userId], references: [id])
+
+  retailLocationId String         @map("retail_location_id")
+  retailLocation   RetailLocation @relation(fields: [retailLocationId], references: [id])
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("ReceiptCreator", fields: [createdById], references: [id])
 }

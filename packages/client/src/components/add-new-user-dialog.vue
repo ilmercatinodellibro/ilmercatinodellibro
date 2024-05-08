@@ -1,10 +1,9 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
+      :title="t('actions.addNewUser')"
+      :submit-label="t('actions.sendInvitation')"
       size="sm"
-      :title="t(`actions.addNewUser`)"
-      :submit-label="t(`actions.sendInvitation`)"
-      :cancel-label="t('common.cancel')"
       @cancel="onDialogCancel"
       @submit="onSubmit"
     >
@@ -13,7 +12,7 @@
           v-model="email"
           :rules="[requiredRule, emailRule]"
           lazy-rules
-          :label="t(`auth.email`)"
+          :label="t('auth.email')"
           outlined
           type="email"
           data-cy="email-field"
@@ -30,12 +29,14 @@ import { useI18n } from "vue-i18n";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
-const email = ref<string>("");
-
-const { t } = useI18n();
+defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+
+const { t } = useI18n();
+
+const email = ref("");
 
 function onSubmit() {
   onDialogOK(email.value);

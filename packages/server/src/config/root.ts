@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { ConfigType, registerAs } from "@nestjs/config";
 import { z } from "zod";
 
@@ -13,6 +14,7 @@ const rootSchema = z.object({
   tokenExpirationTime: z.string(),
   clientUrl: z.string().url(),
   serverUrl: z.string().url(),
+  fileSystemPath: z.string().default(join(process.cwd(), "tmp-files")),
 });
 
 export const rootConfiguration = registerAs("root", () =>
@@ -22,6 +24,7 @@ export const rootConfiguration = registerAs("root", () =>
     tokenExpirationTime: process.env.TOKEN_EXPIRATION_TIME,
     clientUrl: process.env.CLIENT_URL,
     serverUrl: process.env.SERVER_URL,
+    fileSystemPath: process.env.OS_FILESYSTEM_PATH,
   }),
 );
 

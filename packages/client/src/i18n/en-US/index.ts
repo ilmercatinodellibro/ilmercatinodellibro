@@ -1,4 +1,5 @@
 import { FeedbackType, Role } from "src/@generated/graphql";
+import retailLocation from "src/i18n/en-US/retailLocation";
 import {
   AdditionalMacroIntervalDurationNames,
   AvailableQuickRanges,
@@ -6,10 +7,18 @@ import {
 import { AvailableRouteNames } from "src/models/routes";
 import actions from "./actions";
 import auth from "./auth";
+import book from "./book";
+import contacts from "./contacts";
 import events from "./events";
 import general from "./general";
+import home from "./home";
+import manageUsers from "./manage-users";
+import myBooks from "./my-books";
 import network from "./network";
+import reserveBooks from "./reserve-books";
+import salableBooks from "./salable-books";
 import validators from "./validators";
+import warehouse from "./warehouse";
 
 const durationNames = {
   day: "Days",
@@ -35,13 +44,22 @@ const durations = {
 export default {
   actions,
   auth,
+  book,
+  contacts,
   durationNames,
   durations,
   events,
   general,
+  home,
+  manageUsers,
+  myBooks,
+  reserveBooks,
   network,
+  salableBooks,
   validators,
   feedbackType,
+  retailLocation,
+  warehouse,
 
   common: {
     or: "Or",
@@ -73,7 +91,6 @@ export default {
   roleMap: {
     ADMIN: "Admin",
     OPERATOR: "Operator",
-    USER: "Basic User",
   } satisfies Record<Role, string>,
   groupingOptions: {
     none: "No grouping",
@@ -127,13 +144,25 @@ export default {
     },
   },
   routesNames: {
+    [AvailableRouteNames.Catalog]: "Catalog",
+    [AvailableRouteNames.Contacts]: "Contacts",
     [AvailableRouteNames.Events]: "Events",
-    [AvailableRouteNames.Theme]: "Theme",
+    [AvailableRouteNames.Home]: "Home",
     [AvailableRouteNames.ResetPassword]: "Reset Password",
     [AvailableRouteNames.ForgotPassword]: "Forgot Password",
     [AvailableRouteNames.ChangePassword]: "Change Password",
     [AvailableRouteNames.RolesAndPermissions]: "Roles And Permissions",
     [AvailableRouteNames.RegisterWithToken]: "Invite",
+    [AvailableRouteNames.Login]: "Login",
+    [AvailableRouteNames.SalableBooks]: "Salable books",
+    [AvailableRouteNames.UsersManagement]: "Users and Movements",
+    [AvailableRouteNames.MyBooks]: "My Books",
+    [AvailableRouteNames.JoinUs]: "Join Us",
+    [AvailableRouteNames.WhoWeAre]: "Who we are",
+    [AvailableRouteNames.ReserveBooks]: "Reserve Books",
+    [AvailableRouteNames.SelectLocation]: "Select Location",
+    [AvailableRouteNames.MyData]: "My Data",
+    [AvailableRouteNames.Warehouse]: "Warehouse",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",

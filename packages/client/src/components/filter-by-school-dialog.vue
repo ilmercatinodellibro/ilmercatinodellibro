@@ -1,0 +1,62 @@
+<template>
+  <q-dialog ref="dialogRef" @hide="onDialogHide">
+    <k-dialog-form-card
+      :title="$t('book.filters.school')"
+      :submit-label="$t('book.filter')"
+      size="sm"
+      @submit="onDialogOK(newFilters)"
+      @cancel="onDialogCancel()"
+    >
+      <q-card-section class="column gap-16">
+        <q-select
+          v-model="newFilters.courses"
+          :label="$t('book.filters.schoolFilter.fields.course')"
+          :options="filters.courses"
+          fill-input
+          multiple
+          outlined
+        />
+
+        <q-select
+          v-model="newFilters.schoolCodes"
+          :label="$t('book.filters.schoolFilter.fields.school')"
+          :options="filters.schoolCodes"
+          fill-input
+          multiple
+          outlined
+        />
+      </q-card-section>
+    </k-dialog-form-card>
+  </q-dialog>
+</template>
+
+<script setup lang="ts">
+import { cloneDeep } from "lodash-es";
+import { useDialogPluginComponent } from "quasar";
+import { reactive } from "vue";
+import { SchoolFilters } from "src/models/book";
+import KDialogFormCard from "./k-dialog-form-card.vue";
+
+const props = defineProps<{
+  filters: SchoolFilters;
+  selectedFilters?: SchoolFilters;
+}>();
+
+defineEmits(useDialogPluginComponent.emitsObject);
+
+const newFilters = reactive<SchoolFilters>(
+  cloneDeep(props.selectedFilters) ?? {
+    schoolCodes: [],
+    courses: [],
+  },
+);
+
+const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
+  useDialogPluginComponent<SchoolFilters>();
+</script>
+
+<style scoped lang="scss">
+.dialog-card {
+  width: 360px;
+}
+</style>

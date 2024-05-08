@@ -1,10 +1,11 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
-      size="sm"
-      :title="t('pushNotifications.permissionDialog.title')"
-      :save-label="t('pushNotifications.permissionDialog.allow')"
       :cancel-label="t('pushNotifications.permissionDialog.later')"
+      :save-label="t('pushNotifications.permissionDialog.allow')"
+      :title="t('pushNotifications.permissionDialog.title')"
+      show-save-button
+      size="sm"
       @cancel="onDialogCancel()"
       @save="onDialogOK()"
     >

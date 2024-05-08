@@ -1,19 +1,57 @@
-fragment User on User {
+fragment UserSummary on User {
   id
   firstname
   lastname
-  role
   email
 }
 
-query users {
-  users {
-    ...User
+fragment User on User {
+  ...UserSummary
+  phoneNumber
+  discount
+  notes
+}
+
+fragment Member on User {
+  ...User
+  role(retailLocationId: $retailLocationId)
+}
+
+fragment Customer on User {
+  ...User
+  createdAt
+  booksInStock
+  booksSold
+  booksReserved
+  booksRequested
+  booksRequestedAndAvailable: booksRequested(onlyAvailable: true)
+  booksBought
+  booksInCart(retailLocationId: $retailLocationId)
+}
+
+query getMembers($retailLocationId: String!) {
+  members(retailLocationId: $retailLocationId) {
+    ...Member
   }
 }
 
-mutation removeUser($input: RemoveUserPayload!) {
-  removeUser(input: $input)
+query getCustomers(
+  $page: Int!
+  $rowsPerPage: Int!
+  $retailLocationId: String!
+  $searchTerm: String
+) {
+  users(page: $page, rowsPerPage: $rowsPerPage, searchTerm: $searchTerm) {
+    page
+    rowsCount
+    rows {
+      ...Customer
+    }
+  }
+}
+
+mutation removeMember($input: RemoveMemberPayload!) {
+  removeMember(input: $input)
 }
 
 mutation updateRole($input: UpdateRolePayload!) {

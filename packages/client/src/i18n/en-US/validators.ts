@@ -19,4 +19,7 @@ export default {
       "The password should contain at least 8 and maximum 25 characters",
   },
   greaterThanZero: "The value must be a number greater than 0",
+  nonValidISBN: "The ISBN is not valid",
+  numberBetweenValues: "The value must be a number between {min} and {max}",
+  onlyIntegers: "The value must be a whole number",
 };

@@ -2,10 +2,10 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { until } from "@vueuse/core";
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { LocalStorage } from "quasar";
-import { readonly, ref, watch } from "vue";
+import { computed, readonly, ref, watch } from "vue";
 import { NavigationGuard, Router, useRouter } from "vue-router";
 import {
-  UserSummaryFragment,
+  CurrentUserFragment,
   useLoginMutation as useBaseLoginMutation,
   useRegisterMutation as useBaseRegisterMutation,
   useRegisterWithTokenMutation as useBaseRegisterWithTokenMutation,
@@ -31,7 +31,7 @@ watch(token, (newToken) => {
 
 // "?? undefined" bit is to remove null values and replace them with undefined
 const user = ref(
-  LocalStorage.getItem<UserSummaryFragment>(AUTH_USER_KEY) ?? undefined,
+  LocalStorage.getItem<CurrentUserFragment>(AUTH_USER_KEY) ?? undefined,
 );
 watch(user, (newUser) => {
   if (newUser !== undefined) {
@@ -41,7 +41,7 @@ watch(user, (newUser) => {
   }
 });
 
-const AUTHENTICATED_DEFAULT_ROUTE_NAME = "events";
+const AUTHENTICATED_DEFAULT_ROUTE_NAME = "home";
 const REGISTRATION_SENT_ROUTE_NAME = "registration-sent";
 const GUEST_DEFAULT_ROUTE_NAME = "login";
 
@@ -185,7 +185,7 @@ export function useLogoutMutation(router = useRouter()) {
   return { logout };
 }
 
-type LoginHook = (user: UserSummaryFragment) => void | Promise<void>;
+type LoginHook = (user: CurrentUserFragment) => void | Promise<void>;
 type LogoutHook = () => void | Promise<void>;
 
 const onLoginHooks: LoginHook[] = [];
@@ -233,6 +233,10 @@ function getJwtHeader(authToken = token.value) {
   };
 }
 
+const hasAdminRole = computed(() => user.value?.role === "ADMIN");
+const hasOperatorRole = computed(() => user.value?.role === "OPERATOR");
+const hasUserRole = computed(() => user.value?.role === null);
+
 // This composable is meant to work even outside a Vue component context
 // DO NOT directly use stuff that requires a Vue context (e.g. using `useRouter`) nor return methods that use them
 export function useAuthService() {
@@ -240,6 +244,9 @@ export function useAuthService() {
     onLogin,
     onLogout,
     getJwtHeader,
+    hasAdminRole,
+    hasOperatorRole,
+    hasUserRole,
     isAuthenticated: readonly(isAuthenticated),
     user: readonly(user),
   };
@@ -266,9 +273,17 @@ export const redirectIfGuest: NavigationGuard = (to, from, next) => {
 };
 
 export const redirectIfNotAdmin: NavigationGuard = () => {
-  const { user } = useAuthService();
+  const { hasAdminRole } = useAuthService();
 
-  if (user.value?.role !== "ADMIN") {
+  if (!hasAdminRole.value) {
+    return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
+  }
+};
+
+export const redirectIfNotOperatorOrAdmin: NavigationGuard = () => {
+  const { hasAdminRole, hasOperatorRole } = useAuthService();
+
+  if (!hasAdminRole.value && !hasOperatorRole.value) {
     return { name: AUTHENTICATED_DEFAULT_ROUTE_NAME };
   }
 };

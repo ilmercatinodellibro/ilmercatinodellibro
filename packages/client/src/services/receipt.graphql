@@ -1,0 +1,18 @@
+fragment Receipt on Receipt {
+  id
+  type
+  createdAt
+  createdBy {
+    ...UserSummary
+  }
+}
+
+query getReceipts($userId: String!, $retailLocationId: String!) {
+  receipts(userId: $userId, retailLocationId: $retailLocationId) {
+    ...Receipt
+  }
+}
+
+mutation resendReceipt($input: ResendReceiptInput!) {
+  resendReceipt(input: $input)
+}

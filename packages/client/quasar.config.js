@@ -58,10 +58,10 @@ module.exports = configure(function (ctx) {
     boot: [
       "apollo",
       "i18n",
-      "apexcharts",
       "refresh-token",
       "in-app-notifications",
       "firebase-messaging",
+      "retail-location",
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -70,6 +70,7 @@ module.exports = configure(function (ctx) {
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
+      // "mdi-v7",
       // 'fontawesome-v6',
       // 'eva-icons',
       // 'themify',
@@ -77,10 +78,6 @@ module.exports = configure(function (ctx) {
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
       "roboto-font", // optional, you are not bound to it
       // "material-icons", // optional, you are not bound to it
-
-      // We are forced to include the whole mdi-v5 webfont since the icons we return from
-      // the server cannot be determined at build time for now
-      "mdi-v7",
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
@@ -182,9 +179,7 @@ module.exports = configure(function (ctx) {
               // So, we simply disable it when running tests, not a big deal
               process.env.NODE_ENV === "test"
                 ? undefined
-                : {
-                    lintCommand: "stylelint ./src/**/*.{scss,css,vue}",
-                  },
+                : { lintCommand: "stylelint ./src/**/*.{scss,css,vue}" },
           },
         ],
         ["@dreamonkey/graphql-codegen-near-operation-file", {}],
@@ -207,6 +202,15 @@ module.exports = configure(function (ctx) {
           target: process.env.GRAPHQL_WS_DOMAIN,
           secure: false,
           ws: true,
+        },
+
+        "/receipts": {
+          changeOrigin: true,
+          target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
+        },
+        "/location": {
+          changeOrigin: true,
+          target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
         },
       },
     },

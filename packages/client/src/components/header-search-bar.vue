@@ -43,10 +43,9 @@ import { QInput } from "quasar";
 import { Ref, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-const emit = defineEmits({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  searchBarActiveStateToggled: (_state: boolean) => true,
-});
+const emit = defineEmits<{
+  searchBarActiveStateToggled: [state: boolean];
+}>();
 
 const { t } = useI18n();
 

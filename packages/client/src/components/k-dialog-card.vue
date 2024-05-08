@@ -1,11 +1,17 @@
 <template>
   <q-card :class="`size--${size}`" class="mobile-responsive-dialog">
-    <q-card-section class="bg-primary text-h6 text-white">
+    <q-card-section class="bg-white text-h6 text-primary">
       <slot name="title">
         {{ title }}
       </slot>
     </q-card-section>
+
+    <q-separator />
+
     <slot />
+
+    <q-separator />
+
     <q-card-actions v-if="!noActions" align="right">
       <slot name="card-actions">
         <q-btn
@@ -14,6 +20,7 @@
           @click="emit('cancel')"
         />
         <q-btn
+          v-if="showSaveButton"
           flat
           :label="saveLabel ?? t('common.confirm')"
           @click="emit('save')"
@@ -34,6 +41,7 @@ withDefaults(
   defineProps<
     CommonDialogProps & {
       saveLabel?: string;
+      showSaveButton?: boolean;
     }
   >(),
   {
@@ -41,6 +49,7 @@ withDefaults(
     size: "md",
     noActions: false,
     saveLabel: undefined,
+    showSaveButton: false,
   },
 );
 
@@ -53,11 +62,13 @@ const emit = defineEmits<{
 <style lang="scss" scoped>
 $dialog-margin: 24px;
 $complex-dialog-max-height: 800px;
-$complex-dialog-breakpoint: $complex-dialog-max-height - $dialog-margin * 2;
+$complex-dialog-breakpoint: $complex-dialog-max-height + $dialog-margin * 2;
 $dialog-fullscreen-max-height: calc(100vh - #{$dialog-margin} * 2);
 
 %fullscreen {
-  max-height: 100vh;
+  // This max-height is set so that the dialog doesn't extend below
+  // the bottom edge of the screen on certain resolutions
+  max-height: calc(100vh - 2 * #{$dialog-margin});
   max-width: 100vw;
 }
 

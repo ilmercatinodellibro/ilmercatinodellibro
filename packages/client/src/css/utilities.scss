@@ -1,3 +1,5 @@
+@use "sass:math";
+
 $additional-colors: (
   event-fatal: $negative,
   event-error: #f44336,
@@ -69,7 +71,7 @@ $gap-size-list: 4, 6, 8, 10, 12, 16, 18, 24, 32, 48;
 }
 
 // text sizes
-$text-size-list: 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48;
+$text-size-list: 10, 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48;
 
 @each $text-size in $text-size-list {
   .text-size-#{$text-size} {
@@ -83,7 +85,7 @@ $letter-spacing-list: 5, 10, 15, 25, 40, 44, 75, 100, 225, 263, 300, 375, 450,
 
 @each $letter-spacing in $letter-spacing-list {
   .letter-spacing-#{$letter-spacing} {
-    letter-spacing: ($letter-spacing / 100) + px !important;
+    letter-spacing: math.div($letter-spacing, 100) + px !important;
   }
 }
 
@@ -101,12 +103,11 @@ $line-heights-list: 16, 20, 28, 50, 75;
 
 @each $line-height in $line-heights-list {
   .line-height-#{$line-height} {
-    line-height: 1 + ($line-height / 100) !important;
+    line-height: 1 + math.div($line-height, 100) !important;
   }
 }
 
-// widths
-$widths-list: 32, 180, 200, 250, 315, 1024;
+$widths-list: 0, 24, 32, 160, 180, 200, 250, 315, 360, 420, 560, 600, 700, 1024;
 
 @each $width in $widths-list {
   .width-#{$width} {
@@ -119,6 +120,23 @@ $widths-list: 32, 180, 200, 250, 315, 1024;
 
   .max-width-#{$width} {
     max-width: $width + px !important;
+  }
+}
+
+// heights
+$heights-list: 0, 24, 48, 52, 600;
+
+@each $height in $heights-list {
+  .height-#{$height} {
+    height: $height + px !important;
+  }
+
+  .min-height-#{$height} {
+    min-height: $height + px !important;
+  }
+
+  .max-height-#{$height} {
+    max-height: $height + px !important;
   }
 }
 
@@ -147,7 +165,7 @@ $widths-list: 32, 180, 200, 250, 315, 1024;
   In order to provide an height value to the container you can set the height of that element to 0 and than let it expand using "flex-grow".
 
 */
-.height-0 {
+.flex-delegate-height-management {
   flex-grow: 1;
   height: 0;
   overflow: auto;
@@ -167,13 +185,23 @@ $widths-list: 32, 180, 200, 250, 315, 1024;
   }
 }
 
-// min-height
-$min-height-row: 52px;
-
-.min-height-52.min-height-52 {
-  min-height: $min-height-row;
-}
-
 .vertical-align-middle {
   vertical-align: middle;
+}
+
+// This is used to remove the blue color applied to links by default
+.default-color a {
+  color: unset;
+}
+
+.layout-background {
+  background-color: #edf2fa;
+}
+
+.m-mb-36 {
+  margin-bottom: 36px;
+}
+
+.bottom-separator-20 {
+  margin-bottom: 20px;
 }

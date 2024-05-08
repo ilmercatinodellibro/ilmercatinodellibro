@@ -1,0 +1,41 @@
+fragment Theme on Theme {
+  logo
+  colors {
+    primary
+    secondary
+    accent
+  }
+}
+
+fragment RetailLocation on RetailLocation {
+  id
+  name
+  fullAddress
+  phoneNumber
+  joinUsContent
+  instagramLink
+  facebookLink
+  whoAreWeContent
+
+  buyRate
+  sellRate
+  payOffEnabled
+  maxBookingDays
+  warehouseMaxBlockSize
+
+  theme {
+    ...Theme
+  }
+}
+
+query getRetailLocations {
+  retailLocations {
+    ...RetailLocation
+  }
+}
+
+mutation updateRetailLocationTheme($input: UpdateRetailLocationThemeInput!) {
+  updateRetailLocationTheme(input: $input) {
+    ...RetailLocation
+  }
+}

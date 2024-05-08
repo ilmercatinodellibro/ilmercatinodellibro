@@ -1,16 +1,17 @@
 import { faker } from "@faker-js/faker";
+import { Prisma } from "@prisma/client";
 import { random, startCase, times } from "lodash";
-import { EventCreateInput } from "src/@generated/event";
 import { createUser } from "./user";
 
 export async function createEvent(
-  overrides: Partial<EventCreateInput> = {},
-): Promise<EventCreateInput> {
+  overrides: Partial<Prisma.EventCreateInput> = {},
+): Promise<Prisma.EventCreateInput> {
   return {
     name: startCase(times(random(1, 4), () => faker.word.noun()).join(" ")),
     description: faker.lorem.sentence(),
 
     owner: {
+      // TODO: Do not create a user, use an existing one
       create: await createUser(),
     },
 

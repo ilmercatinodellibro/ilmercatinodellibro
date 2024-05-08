@@ -13,6 +13,8 @@ import { databaseConfiguration } from "src/config/database";
 import { emailConfiguration } from "src/config/email";
 import { QueueConfiguration, queueConfiguration } from "src/config/queue";
 import { rootConfiguration } from "src/config/root";
+import { ProblemModule } from "src/modules/problem/problem.module";
+import { ReceiptModule } from "src/modules/receipt/receipt.module";
 import { DateScalar } from "./date.scalar";
 import {
   GraphQLConnectionParams,
@@ -21,12 +23,19 @@ import {
 } from "./modules/auth/auth.models";
 import { AuthModule } from "./modules/auth/auth.module";
 import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth-guard";
+import { BookModule } from "./modules/book/book.module";
+import { BookCopyModule } from "./modules/book-copy/book-copy.module";
+import { BookRequestModule } from "./modules/book-request/book-request.module";
+import { CartModule } from "./modules/cart/cart.module";
 import { EventModule } from "./modules/event/event.module";
 import { FeedbackModule } from "./modules/feedback/feedback.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { NotificationModule } from "./modules/notification/notification.module";
 import { PrismaModule } from "./modules/prisma/prisma.module";
 import { PushNotificationModule } from "./modules/push-notification/push-notification.module";
+import { ReservationModule } from "./modules/reservation/reservation.module";
+import { RetailLocationModule } from "./modules/retail-location/retail-location.module";
+import { SaleModule } from "./modules/sale/sale.module";
 import { UserModule } from "./modules/user/user.module";
 
 @Module({
@@ -124,12 +133,21 @@ import { UserModule } from "./modules/user/user.module";
     }),
     PrismaModule,
     AuthModule,
+    BookModule,
+    BookCopyModule,
+    BookRequestModule,
+    CartModule,
     MailModule,
     EventModule,
     NotificationModule,
     PushNotificationModule,
+    RetailLocationModule,
     FeedbackModule,
+    ReservationModule,
+    SaleModule,
     UserModule,
+    ProblemModule,
+    ReceiptModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }, DateScalar],
 })

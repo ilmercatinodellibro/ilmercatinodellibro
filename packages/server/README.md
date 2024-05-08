@@ -142,6 +142,23 @@ export class DashboardResolver {
 
 Remember to disable generic SQL extension for this workspace and install the PostgreSQL one, when first adding.
 
+### Quick access to data on Windows
+
+Docker for Windows has a GUI executable that can be used to perform many different actions.
+
+One of them is being able to run commands directly inside the Docker instances. This can be useful if a developer needs to quickly access the data from the native Postgre tables.
+To do so, follow these steps (_Docker version 4.25.0_):
+
+1. Launch Docker and make sure the proper container for Mercatino is running.
+2. Expand the group of the container for the Mercatino and click on the `ilmercatinodellibro-postgres` container.
+3. A number of tabs should be shown to you.
+4. Click on the tab named `Exec`. A terminal should be shown inside the tab panel.
+5. in there type the following command, substituting the `${values}` with the ones coming from your `.env` file: `psql -d ${postgres_database_name} -U ${postgres_database_user}` and then press `Enter`.
+6. The terminal should change and bring you into something labelled as `postgres=#`.
+7. To select the records from a table then run, for example: `select human_readable_id from public."RetailLocation";`.
+
+Of course you can change the names of the entities to query from as you need.
+
 ## Push notifications
 
 We have different drivers for sending push notifications:
@@ -157,3 +174,71 @@ We have different drivers for sending push notifications:
 - Copy the generated private key file into `./.firebase-service-account.json`(_default path in env config_) or set the `FIREBASE_SERVICE_ACCOUNT` env variable to the path of the file
 
 Also see [Client README | Push notifications](../client/README.md#push-notifications) for setting up and configuring the client.
+
+## Importing data from files
+
+These sections explain how to load the Books and Schools plus Courses data correctly into the server at startup time for each new year.
+
+First, make sure that the Books, Schools, Courses and BooksOnCourses records have been removed, then proceed with these steps.
+
+### 1. Setup
+
+Before being able to import the books and schools and courses, the project must be installed of course and the build must be executed. So make sure you have run in the terminal:
+
+```bash
+# at root level of the project make sure you have installed the packages AND generated the prisma types
+pnpm i
+
+# inside the server packages/server folder of the terminal
+# cd packages/server
+pnpm build
+```
+
+If both installation and build were successful you can continue with the next steps. The build step is necessary because it generates the files used to run the commands inside the terminal.
+
+### 2. Import Books
+
+The first thing to do here is to import the books dataset from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Adozioni%20libri%20di%20testo) and place it into the folder called `tmp-files`. The file name should be `ALTEMILIAROMAGNA.csv`, so the location of the file, with respect to where the CLI command to run the server is executed, should be `./tmp-files/ALTEMILIAROMAGNA.csv`.
+
+This operation **must** be executed before importing the schools, because this CSV directs how the content of the other CSVs needs to be managed and parsed.
+In particular, it prints out a list of School codes that were found during the analysis of the books, and only the schools with at least a book in the `ALTEMILIAROMAGNA.csv` can be later added to the DB.
+
+Note: Additionally, from this CSV it is possible to derive which books belongs to which study course and which course belongs to which school.
+The output of this operation is stored to a file called `school_courses.json`.
+
+With all CSV files in place, the easiest way to load the Books data into DB is to run:
+
+```bash
+# from within packages/server folder inside the terminal
+pnpm import:books
+```
+
+Once this steps is concluded, we can move on to step 2.
+
+### 3. Import School CSV and connect School Courses to their Schools
+
+Before being able to actually import School and School Courses, it is necessary to:
+
+1. Have run the import of books in step 1.
+2. Download peer schools's CSV for the current year from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Scuole) It is in the section _Informazioni anagrafiche scuole paritarie_.
+3. Rename CSV downloaded in point 2 of this list to `SCUOLE_PARITARIE.csv` and place it into the folder `./tmp-files/`.
+4. From the same link in point 2 of this list, download the CSV for the state's schools from the area called _Informazioni anagrafiche scuole statali_ and pay attention to its year.
+5. Rename CSV downloaded in point 4 of this list to `SCUOLE_STATALI.csv` and place it into the folder `./tmp-files/`.
+
+After the setup operations are concluded, you can then run a command similar to the command run for importing books:
+
+```bash
+# from within packages/server folder inside the terminal
+pnpm import:schools
+```
+
+This operation takes much more time when compared to the book operation because it needs to initially create the schools, then loop through courses, create them first and then generate their books related records. From current tests it can take up to a full minute for the system to be able to create all the records it needs.
+
+Notice that it is possible that the needed execution time changes from year to year: it depends on how many records must be created each time, and so if the data changes the number of records may change.
+
+After this step is done, all the pieces of the puzzle are in their place and the data has been loaded into the DB.
+
+### Improvements for import
+
+Another note: for the moment I decided not to connect Schools to a retailLocation, even if the school code already includes the province, thus the retailLocationId.
+This is because at the moment there are no requirements involving such a thing and in this way schools can be still viewed from other retailLocations.

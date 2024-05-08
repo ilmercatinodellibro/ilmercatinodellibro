@@ -1,50 +1,5 @@
 <template>
   <q-layout view="lHh LpR fFf">
-    <q-header>
-      <k-toolbar
-        v-model:drawer="isDrawerOpen"
-        v-model:search-text="searchText"
-        :back-route-location="headerBackButtonRouteLocation"
-        :compare-function="compareFunction"
-        :enable-drawer="showLateralDrawer"
-        :filter-options="filterOptions"
-        :is-header-filters-enabled="isHeaderFiltersEnabled"
-        :selected-filter="selectedFilter"
-        :show-search-bar="isHeaderSearchEnabled"
-        :title="headerName"
-      >
-        <template #left>
-          <img :src="theme.logo" class="header-logo" />
-          <q-separator vertical inset color="white-12" class="q-mx-md" />
-        </template>
-
-        <div v-if="!isOnline" class="flex gap-6 items-center">
-          <q-icon :name="mdiCloudOffOutline" size="sm" />
-
-          <span>{{ t("network.offline") }}</span>
-        </div>
-
-        <notification-bell v-if="isWebPushEnabled" />
-
-        <!-- [1] - We're already sure of user existence thanks to auth route guards, this check is only needed to make TS happy -->
-        <!-- [1] -->
-        <user-item
-          v-if="user && !isLayoutHeaderXs"
-          :user="user"
-          class="q-mx-md"
-          data-cy="user-item"
-        />
-        <q-btn
-          :label="t('general.helpAndFeedback')"
-          class="feedbackButton"
-          color="secondary"
-          no-wrap
-          outline
-          @click="openFeedbackDialog"
-        />
-      </k-toolbar>
-    </q-header>
-
     <q-drawer
       v-if="showLateralDrawer"
       id="page-drawer"
@@ -52,85 +7,282 @@
       :breakpoint="DRAWER_BREAKPOINT"
       :mini="isDrawerMini"
       :width="DRAWER_WIDTH"
-      class="column height-0"
+      class="column flex-delegate-height-management"
       content-class="bg-grey-1"
       show-if-above
       role="navigation"
+      bordered
       data-cy="page-drawer"
       :aria-label="t('general.mainNavigation')"
     >
-      <div
-        v-if="!isMobile"
-        :class="isDrawerMini ? 'justify-center' : 'justify-end'"
-        class="bg-black drawer-toggler items-center q-pa-xs row"
-      >
-        <q-btn
-          :icon="isDrawerMini ? mdiChevronRight : mdiChevronLeft"
-          color="white"
-          flat
-          round
-          @click="isDrawerMini = !isDrawerMini"
-        />
+      <div v-if="!isMobile" class="full-width q-pa-md">
+        <q-img :src="theme.logo" />
       </div>
 
       <q-scroll-area class="col-grow">
-        <q-list class="drawer-list">
-          <!-- [1] -->
-          <user-item
-            v-if="user && isLayoutHeaderXs"
-            :user="user"
-            data-cy="user-item"
-          />
-
-          <q-item
-            :to="{ name: AvailableRouteNames.Events }"
-            active-class="bg-primary-activated-light"
-          >
-            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-              {{ $t(`routesNames.${AvailableRouteNames.Events}`) }}
-            </q-tooltip>
-            <q-item-section side>
-              <q-icon :name="mdiAlarmLight" color="secondary" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="ellipsis text-size-16">
-                {{ $t(`routesNames.${AvailableRouteNames.Events}`) }}
-              </q-item-label>
-            </q-item-section>
-            <q-item-section v-if="unreadNotificationsCount > 0" side>
-              <q-avatar color="negative" text-color="white" size="sm">
-                {{ unreadNotificationsCount }}
-              </q-avatar>
-            </q-item-section>
-          </q-item>
-
-          <template v-if="user?.role === 'ADMIN'">
-            <q-separator class="q-mb-sm" />
-
-            <q-item-label class="text-size-12" header>
-              {{ t("sidebar.settings") }}
-            </q-item-label>
-
+        <q-list class="drawer-list" separator>
+          <template v-if="user && hasUserRole">
             <q-item
-              :to="{ name: AvailableRouteNames.Theme }"
-              active-class="bg-primary-activated-light"
+              v-ripple
+              :to="{ name: AvailableRouteNames.MyData }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="my-data"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t(`routesNames.${AvailableRouteNames.Theme}`) }}
+                {{ t("general.myData") }}
               </q-tooltip>
               <q-item-section side>
-                <q-icon :name="mdiPaletteSwatch" color="secondary" />
+                <q-icon :name="mdiAccountCircle" color="black-54" />
               </q-item-section>
               <q-item-section>
                 <q-item-label class="ellipsis text-size-16">
-                  {{ t(`routesNames.${AvailableRouteNames.Theme}`) }}
+                  {{ t("general.myData") }}
                 </q-item-label>
               </q-item-section>
             </q-item>
 
             <q-item
+              v-ripple
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              :to="{ name: AvailableRouteNames.Home }"
+              data-cy="home"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t("general.home") }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiHome" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("general.home") }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.ReserveBooks }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="reserve-books"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t("general.reserveBooks") }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiBookOpenBlankVariant" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("general.reserveBooks") }}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon :name="mdiInformationOutline" color="black-54">
+                  <q-tooltip>
+                    {{ t("general.tooltips.reserveBooks") }}
+                  </q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.MyBooks }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="my-books"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t("general.myBooks") }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiCheckDecagram" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("general.myBooks") }}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon :name="mdiInformationOutline" color="black-54">
+                  <q-tooltip>
+                    {{ t("general.tooltips.myBooks") }}
+                  </q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.SalableBooks }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="salable-books"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t("general.salableBooks") }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiCurrencyEur" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("general.salableBooks") }}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon :name="mdiInformationOutline" color="black-54">
+                  <q-tooltip>
+                    {{ t("general.tooltips.salableBooks") }}
+                  </q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+          </template>
+
+          <template v-if="user && (hasAdminRole || hasOperatorRole)">
+            <q-item class="q-pr-sm q-py-md">
+              <q-item-section side>
+                <q-icon :name="mdiAccountCircle" color="primary" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="column">
+                  <span class="text-body1 text-weight-medium">
+                    {{ `${user.firstname} ${user.lastname}` }}
+                  </span>
+                  <span
+                    class="line-height-50 text-black-54 text-subtitle2 text-weight-regular"
+                  >
+                    {{ user.email }}
+                  </span>
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-btn :icon="mdiPencil" color="black-54" flat round />
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.Warehouse }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="warehouse"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t("general.tooltips.warehouse") }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiBookshelf" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("general.warehouse") }}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon :name="mdiInformationOutline" color="black-54">
+                  <q-tooltip>
+                    {{ t("general.tooltips.warehouse") }}
+                  </q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.Catalog }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="books-catalog"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t(`routesNames.${AvailableRouteNames.Catalog}`) }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiBookOpenBlankVariant" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("routesNames.catalog") }}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon :name="mdiInformationOutline" color="black-54">
+                  <q-tooltip>
+                    {{ t("general.tooltips.catalog") }}
+                  </q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.UsersManagement }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="users-management"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiAccountMultiple" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-icon :name="mdiInformationOutline" color="black-54">
+                  <q-tooltip>
+                    {{ t("general.tooltips.usersAndMovements") }}
+                  </q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-if="hasAdminRole"
+              v-ripple
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              @click="openSettings()"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t(`sidebar.settings`) }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiCog" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("sidebar.settings") }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-ripple
               :to="{ name: AvailableRouteNames.RolesAndPermissions }"
-              active-class="bg-primary-activated-light"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="roles-and-permissions"
             >
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{
@@ -138,7 +290,7 @@
                 }}
               </q-tooltip>
               <q-item-section side>
-                <q-icon :name="mdiAccountMultiple" color="secondary" />
+                <q-icon :name="mdiKey" color="black-54" />
               </q-item-section>
               <q-item-section>
                 <q-item-label class="ellipsis text-size-16">
@@ -148,20 +300,15 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
-
-            <q-separator />
           </template>
 
-          <q-expansion-item
-            :expand-icon="mdiMenuDown"
-            :expanded-icon="mdiMenuUp"
-          >
+          <q-expansion-item :expand-icon="mdiMenuDown" class="drawer-item">
             <template #header>
               <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t("general.language") }}
               </q-tooltip>
               <q-item-section side>
-                <q-icon :name="mdiWeb" color="secondary" />
+                <q-icon :name="mdiWeb" color="black-54" />
               </q-item-section>
               <q-item-section>
                 <q-item-label class="ellipsis text-size-16">
@@ -175,7 +322,9 @@
                 v-for="language in languages"
                 :key="language.code"
                 clickable
-                :class="locale === language.code ? 'selected' : ''"
+                :class="
+                  locale === language.code ? 'bg-black-activated-light' : ''
+                "
                 :inset-level="EXPANSION_ITEMS_INSET_LEVEL"
                 @click="setLanguage(language.code)"
               >
@@ -188,12 +337,18 @@
             </q-list>
           </q-expansion-item>
 
-          <q-item v-ripple clickable data-cy="logout-button" @click="logout">
+          <q-item
+            v-ripple
+            class="drawer-item"
+            clickable
+            data-cy="logout-button"
+            @click="logout"
+          >
             <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
               {{ t("auth.logOut") }}
             </q-tooltip>
             <q-item-section side>
-              <q-icon :name="mdiExitToApp" color="secondary" />
+              <q-icon :name="mdiExitToApp" color="black-54" />
             </q-item-section>
             <q-item-section>
               <q-item-label class="ellipsis text-size-16">
@@ -205,7 +360,7 @@
       </q-scroll-area>
     </q-drawer>
 
-    <q-page-container class="bg-grey-1">
+    <q-page-container class="layout-background">
       <router-view />
     </q-page-container>
   </q-layout>
@@ -213,16 +368,21 @@
 
 <script setup lang="ts">
 import {
+  mdiAccountCircle,
   mdiAccountMultiple,
-  mdiAlarmLight,
-  mdiChevronLeft,
-  mdiChevronRight,
+  mdiBookOpenBlankVariant,
+  mdiBookshelf,
+  mdiCheckDecagram,
   mdiCloudCheckOutline,
   mdiCloudOffOutline,
+  mdiCog,
+  mdiCurrencyEur,
   mdiExitToApp,
+  mdiHome,
+  mdiInformationOutline,
+  mdiKey,
   mdiMenuDown,
-  mdiMenuUp,
-  mdiPaletteSwatch,
+  mdiPencil,
   mdiWeb,
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
@@ -230,24 +390,18 @@ import { Dialog, Notify, QTooltipProps, Screen } from "quasar";
 import { computed, provide, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { setLanguage } from "src/boot/i18n";
-import FeedbackDialog from "src/components/feedback-dialog.vue";
-import KToolbar from "src/components/k-toolbar.vue";
-import NotificationBell from "src/components/notification-bell.vue";
-import UserItem from "src/components/user-item.vue";
+import SettingsDialog from "src/components/settings-dialog.vue";
 import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
-import { provideHeaderBackButton } from "src/composables/header-features/use-header-back-button";
-import { provideHeaderFilters } from "src/composables/header-features/use-header-filters";
-import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
-import { provideHeaderSearch } from "src/composables/header-features/use-header-search";
 import {
   DRAWER_BREAKPOINT,
   DRAWER_WIDTH,
   useLateralDrawer,
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
+import { SettingsUpdate } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
-import { useNotificationService } from "src/services/notification";
+import { useRetailLocationService } from "src/services/retail-location";
 
 // It would work with :inset-level="1" if we used "avatar" option instead of "side" for the header icon
 // but we only need 16px of margin from the icon, so we defined a value which would align the text accordingly
@@ -259,16 +413,14 @@ const TOOLTIP_SHARED_PROPS: QTooltipProps = {
   self: "center left",
 };
 
-const isWebPushEnabled = process.env.WEB_PUSH_ENABLED === "true";
-
 const { t, locale } = useI18n();
-
-const { theme } = useTheme();
 
 interface Language {
   code: string;
   label: string;
 }
+
+const { theme } = useTheme();
 
 const languages = [
   {
@@ -303,34 +455,34 @@ const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 
-const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
-const {
-  compareFunction,
-  filterOptions,
-  isHeaderFiltersEnabled,
-  selectedFilter,
-} = provideHeaderFilters();
-const { headerBackButtonRouteLocation } = provideHeaderBackButton();
-const { headerName } = provideHeaderName();
-
 const { logout } = useLogoutMutation();
-const { user } = useAuthService();
+const { user, hasAdminRole, hasOperatorRole, hasUserRole } = useAuthService();
 
 const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
   useLateralDrawer();
 
-const { unreadNotificationsCount } = useNotificationService();
+const { selectedLocation } = useRetailLocationService();
 
-function openFeedbackDialog() {
+function openSettings() {
   Dialog.create({
-    component: FeedbackDialog,
+    component: SettingsDialog,
+    componentProps: {
+      maxBooksDimensionCurrent: selectedLocation.value.warehouseMaxBlockSize,
+      purchaseRateCurrent: selectedLocation.value.buyRate,
+      reservationDaysCurrent: selectedLocation.value.maxBookingDays,
+      saleRateCurrent: selectedLocation.value.sellRate,
+    },
+  }).onOk((payload: SettingsUpdate) => {
+    if (payload.type === "save") {
+      // FIXME: update the settings
+    } else {
+      // FIXME: reset the settings
+    }
   });
 }
 </script>
 
 <style lang="scss" scoped>
-$header-height: 64px;
-
 .drawer-list {
   // QScrollArea both handles x andd y overflow but since we want the drawer to have a fixed width
   // and using ellipses to truncate words we need to force that width to the content container too
@@ -338,27 +490,13 @@ $header-height: 64px;
   max-width: calc(v-bind(DRAWER_WIDTH) * 1px);
 }
 
-.selected {
-  background-color: rgba(#000, 0.1);
-}
-
-.header-logo {
-  height: 36px;
-}
-
-.k-toolbar,
-.drawer-toggler {
-  height: $header-height;
+.drawer-item {
+  border-radius: 4px;
+  margin: 2px;
 }
 
 .q-btn--outline::before {
   color: rgba(#fff, 0.12);
-}
-
-// I had to force the height that way since the "dense" property makes them too small
-.custom-dense-drawer-element {
-  height: 36px;
-  min-height: 36px;
 }
 
 .q-item__label--header {

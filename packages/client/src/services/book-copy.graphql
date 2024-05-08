@@ -1,0 +1,102 @@
+fragment BookCopySummary on BookCopy {
+  id
+  code
+  originalCode
+}
+
+fragment ProblemSummary on Problem {
+  details
+  solution
+  type
+}
+
+fragment ProblemDetails on Problem {
+  ...ProblemSummary
+  id
+  createdAt
+  createdBy {
+    ...UserSummary
+  }
+  resolvedAt
+  resolvedBy {
+    ...UserSummary
+  }
+  updatedAt
+}
+
+fragment BookCopyDetails on BookCopy {
+  ...BookCopySummary
+  createdAt
+  createdById
+  book {
+    ...BookSummary
+    retailLocationId
+  }
+  problems {
+    ...ProblemDetails
+  }
+  purchasedAt
+  purchasedBy {
+    ...UserSummary
+  }
+  owner {
+    ...UserSummary
+  }
+  returnedAt
+  returnedById
+  updatedAt
+  updatedById
+}
+
+query getBookCopies($bookId: String!) {
+  bookCopies(bookId: $bookId) {
+    ...BookCopyDetails
+  }
+}
+
+query getBookCopiesByOwner($retailLocationId: String!, $userId: String!) {
+  bookCopiesByOwner(retailLocationId: $retailLocationId, userId: $userId) {
+    ...BookCopyDetails
+  }
+}
+
+query getPurchasedBookCopies($retailLocationId: String!, $userId: String!) {
+  purchasedBookCopies(retailLocationId: $retailLocationId, userId: $userId) {
+    ...BookCopyDetails
+  }
+}
+
+query getSoldBookCopies($retailLocationId: String!, $userId: String!) {
+  soldBookCopies(retailLocationId: $retailLocationId, userId: $userId) {
+    ...BookCopyDetails
+  }
+}
+
+query getReturnedBookCopies($retailLocationId: String!, $userId: String!) {
+  returnedBookCopies(retailLocationId: $retailLocationId, userId: $userId) {
+    ...BookCopyDetails
+  }
+}
+
+mutation createBookCopies($input: BookCopyCreateInput!) {
+  createBookCopies(input: $input) {
+    ...BookCopyDetails
+  }
+}
+
+mutation reportProblem($input: ProblemCreateInput!) {
+  reportProblem(input: $input) {
+    id
+    bookCopyId
+    details
+  }
+}
+
+mutation resolveProblem($input: ProblemResolveInput!) {
+  resolveProblem(input: $input) {
+    id
+    bookCopyId
+    details
+    solution
+  }
+}

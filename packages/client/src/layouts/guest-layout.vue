@@ -1,15 +1,13 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-page-container>
+    <header-bar />
+
+    <q-page-container class="layout-background">
       <router-view />
     </q-page-container>
   </q-layout>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-
-export default defineComponent({
-  name: "GuestLayout",
-});
+<script setup lang="ts">
+import HeaderBar from "src/components/header-bar.vue";
 </script>

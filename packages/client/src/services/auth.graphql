@@ -1,18 +1,19 @@
-fragment UserSummary on User {
+fragment CurrentUser on User {
   id
   firstname
   lastname
   email
-  role
   emailVerified
   createdAt
   updatedAt
+  phoneNumber
+  role(retailLocationId: $retailLocationId)
 }
 
 fragment AuthSummary on AuthPayload {
   jwt
   user {
-    ...UserSummary
+    ...CurrentUser
   }
 }
 
@@ -24,7 +25,7 @@ mutation registerWithToken($input: RegisterPayload!) {
   registerWithToken(input: $input)
 }
 
-mutation login($input: LoginPayload!) {
+mutation login($input: LoginPayload!, $retailLocationId: String!) {
   login(input: $input) {
     ...AuthSummary
   }

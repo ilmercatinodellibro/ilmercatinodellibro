@@ -11,8 +11,8 @@
     <slot v-if="$slots.actions" name="actions" />
 
     <q-input
-      v-if="searchTextProxy !== undefined && !hideSearch"
-      v-model="searchTextProxy"
+      v-if="searchTextModel !== undefined && !hideSearch"
+      v-model="searchTextModel"
       :bottom-slots="false"
       class="bg-white search-bar"
       debounce="500"
@@ -22,7 +22,7 @@
     >
       <template #append>
         <q-icon
-          v-if="searchTextProxy.length === 0"
+          v-if="searchTextModel.length === 0"
           :name="mdiMagnify"
           class="cursor-pointer"
         />
@@ -31,10 +31,10 @@
           and won't allow to set the icon color
         -->
         <q-icon
-          v-if="searchTextProxy.length > 0"
+          v-if="searchTextModel.length > 0"
           :name="mdiCloseCircle"
           class="cursor-pointer"
-          @click.stop="searchTextProxy = ''"
+          @click.stop="searchTextModel = ''"
         />
       </template>
     </q-input>
@@ -62,11 +62,6 @@ import {
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
 
-defineEmits({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  "update:searchText": (payload: string | number | null) => true,
-});
-
 withDefaults(
   defineProps<{
     hideSearch?: boolean;
@@ -76,7 +71,7 @@ withDefaults(
   },
 );
 
-const searchTextProxy = defineModel<string>("searchText");
+const searchTextModel = defineModel<string>("searchText");
 </script>
 
 <style lang="scss" scoped>

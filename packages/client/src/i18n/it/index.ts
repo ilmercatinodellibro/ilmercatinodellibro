@@ -1,4 +1,5 @@
 import { FeedbackType, Role } from "src/@generated/graphql";
+import retailLocation from "src/i18n/it/retailLocation";
 import {
   AdditionalMacroIntervalDurationNames,
   AvailableQuickRanges,
@@ -6,10 +7,18 @@ import {
 import { AvailableRouteNames } from "src/models/routes";
 import actions from "./actions";
 import auth from "./auth";
+import book from "./book";
+import contacts from "./contacts";
 import events from "./events";
 import general from "./general";
+import home from "./home";
+import manageUsers from "./manage-users";
+import myBooks from "./my-books";
 import network from "./network";
+import reserveBooks from "./reserve-books";
+import salableBooks from "./salable-books";
 import validators from "./validators";
+import warehouse from "./warehouse";
 
 const durationNames = {
   day: "Giorni",
@@ -35,13 +44,22 @@ const durations = {
 export default {
   actions,
   auth,
+  book,
+  contacts,
   durationNames,
   durations,
   events,
   general,
+  home,
+  manageUsers,
+  myBooks,
+  reserveBooks,
   network,
+  salableBooks,
   validators,
   feedbackType,
+  retailLocation,
+  warehouse,
 
   common: {
     or: "Oppure",
@@ -75,7 +93,6 @@ export default {
   roleMap: {
     ADMIN: "Amministratore",
     OPERATOR: "Operatore",
-    USER: "Utente Base",
   } satisfies Record<Role, string>,
   groupingOptions: {
     none: "Nessun raggruppamento",
@@ -132,13 +149,25 @@ export default {
     },
   },
   routesNames: {
+    [AvailableRouteNames.Contacts]: "Contatti",
     [AvailableRouteNames.Events]: "Eventi",
-    [AvailableRouteNames.Theme]: "Tema",
+    [AvailableRouteNames.Catalog]: "Catalogo",
+    [AvailableRouteNames.Home]: "Home",
     [AvailableRouteNames.ResetPassword]: "Reimposta password",
     [AvailableRouteNames.ForgotPassword]: "Password dimenticata",
     [AvailableRouteNames.ChangePassword]: "Cambia password",
-    [AvailableRouteNames.RolesAndPermissions]: "Ruoli e autorizzazioni",
+    [AvailableRouteNames.RolesAndPermissions]: "Ruoli e Permessi",
     [AvailableRouteNames.RegisterWithToken]: "Invitare",
+    [AvailableRouteNames.Login]: "Login",
+    [AvailableRouteNames.SalableBooks]: "Libri vendibili",
+    [AvailableRouteNames.UsersManagement]: "Utenti e Movimenti",
+    [AvailableRouteNames.MyBooks]: "I Miei Libri",
+    [AvailableRouteNames.ReserveBooks]: "Prenota Libri",
+    [AvailableRouteNames.SelectLocation]: "Seleziona la tua sede",
+    [AvailableRouteNames.MyData]: "I Miei Dati",
+    [AvailableRouteNames.JoinUs]: "Unisciti a Noi",
+    [AvailableRouteNames.WhoWeAre]: "Chi siamo",
+    [AvailableRouteNames.Warehouse]: "Magazzino",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",

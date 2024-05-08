@@ -14,7 +14,7 @@
         <q-btn class="q-ml-sm" color="black-12" outline @click="addUser">
           <span class="text-black-87">
             <q-icon :name="mdiAccountPlus" />
-            {{ t(`actions.addNewUser`) }}
+            {{ t("actions.addNewUser") }}
           </span>
         </q-btn>
       </q-card-section>
@@ -57,7 +57,7 @@
             no-caps
             @click="deleteUser(user.id)"
           >
-            <span class="text-black-87">{{ t(`actions.remove`) }}</span>
+            <span class="text-black-87">{{ t("actions.remove") }}</span>
           </q-btn>
         </span>
       </q-card-section>
@@ -89,24 +89,25 @@ import ConfirmDialog from "src/components/confirm-dialog.vue";
 import { notifyError } from "src/helpers/error-messages";
 import { ServerError } from "src/models/server";
 import { useSendRegistrationInviteMutation } from "src/services/auth.graphql";
-import { useUserService } from "src/services/user";
+import { useMembersService } from "src/services/member";
 
 const { t } = useI18n();
 
 const search = ref("");
 
-const { users, loading, removeUser, updateRole } = useUserService();
+const { members, loading, removeUser, updateRole } = useMembersService();
+
 const { sendRegistrationInvite } = useSendRegistrationInviteMutation();
 
-const ROLE_TYPE_OPTIONS = (["ADMIN", "OPERATOR", "USER"] as Role[]).map(
-  (type) => ({
-    label: type,
+const ROLE_TYPE_OPTIONS = computed(() =>
+  (["ADMIN", "OPERATOR"] satisfies Role[]).map((type) => ({
+    label: t(`roleMap.${type}`),
     value: type,
-  }),
+  })),
 );
 
 const filteredUserList = computed(() =>
-  users.value.filter((user) =>
+  members.value.filter((user) =>
     `${user.firstname} ${user.lastname} ${user.email}`
       .toLowerCase()
       .includes(search.value.toLowerCase()),

@@ -2,18 +2,23 @@
 
 ## Dev quick start
 
-Copy the `.env.example` files to `.env` files in both client and server folders, then execute the following commands:
+Make sure you have Corepack installed and enabled. See [Corepack - How to Install](https://github.com/nodejs/corepack#how-to-install) for more information.
+
+```bash
+$ corepack enable
+```
+
+Copy the `.env.example` files to `.env` files in both client and server folders, make adjustments if needed.
+
+Afterwards, execute the following commands:
 
 ```bash
 $ pnpm install
-# Cleans all generated NestJS/GraphQL helpers, GraphQL schema, dist bundles, etc.
-# Helpful when switching branches or when the client code generator fails
-$ pnpm clean
-# Generate all NestJS/GraphQL helpers and GraphQL schema which you'd need to run the app
-$ pnpm generate
+
 # Runs the needed docker containers
 $ pnpm db:start
-# Wipe out the DB (if present), re-run all migrations, then seed the DB
+
+# Wipe out the DB (if present), (re)run all migrations, then seed the DB
 $ pnpm server:migrate:reset
 ```
 
@@ -27,12 +32,26 @@ If this is the first time working on this project, make sure to read the followi
 ```bash
 # Runs the needed docker containers, only needed if you haven't run it already
 $ pnpm db:start
-# Open the following commands in 2 distinct terminals
+# Open the following commands in 2 separate terminals
 $ pnpm server:dev
 $ pnpm client:dev
 
 # Stops docker containers
 $ pnpm db:stop
+```
+
+## Useful commands
+
+```bash
+# Cleans all generated NestJS/GraphQL helpers, GraphQL schema, dist bundles, etc.
+# Helpful when switching branches or when the client code generator fails
+$ pnpm clean
+
+# Generate all NestJS/GraphQL helpers and GraphQL schema which you'd need to run the app
+$ pnpm generate
+
+# Wipe out the DB (if present), re-run all migrations, then seed the DB
+$ pnpm server:migrate:reset
 ```
 
 ## Generate prod bundle

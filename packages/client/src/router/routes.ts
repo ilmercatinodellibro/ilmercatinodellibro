@@ -5,15 +5,79 @@ import {
   redirectIfAuthenticated,
   redirectIfGuest,
   redirectIfNotAdmin,
+  redirectIfNotOperatorOrAdmin,
+  useAuthService,
 } from "src/services/auth";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
+    redirect() {
+      const { isAuthenticated } = useAuthService();
+      if (!isAuthenticated.value) {
+        return { name: AvailableRouteNames.SelectLocation };
+      }
+
+      const { selectedLocationId } = useRetailLocationService();
+      return {
+        name: AvailableRouteNames.Home,
+        params: {
+          // TODO: Use and enforce the user's preferred location (when implemented)
+          locationId: selectedLocationId.value ?? "re",
+        },
+      };
+    },
+  },
+
+  {
+    path: "/select-location",
+    name: AvailableRouteNames.SelectLocation,
+    component: () => import("src/pages/select-location.vue"),
+    beforeEnter: redirectIfAuthenticated,
+  },
+
+  {
+    path: "/:locationId",
+    component: () =>
+      import(
+        useAuthService().isAuthenticated.value
+          ? "layouts/authenticated-layout.vue"
+          : "layouts/guest-layout.vue"
+      ),
+    children: [
+      {
+        path: "",
+        redirect: () => ({
+          name: useAuthService().isAuthenticated.value
+            ? AvailableRouteNames.Home
+            : AvailableRouteNames.SelectLocation,
+        }),
+      },
+      {
+        path: "contacts",
+        name: AvailableRouteNames.Contacts,
+        component: () => import("pages/contacts.vue"),
+      },
+      {
+        path: "join-us",
+        name: AvailableRouteNames.JoinUs,
+        component: () => import("pages/join-us.vue"),
+      },
+      {
+        path: "who-we-are",
+        name: AvailableRouteNames.WhoWeAre,
+        component: () => import("pages/who-we-are.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/:locationId",
     component: () => import("layouts/guest-layout.vue"),
     beforeEnter: redirectIfAuthenticated,
     children: [
-      { path: "/", redirect: { name: "login" } },
+      { path: "", redirect: { name: AvailableRouteNames.SelectLocation } },
       {
         path: "login",
         name: "login",
@@ -57,23 +121,18 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+
   {
-    path: "/",
+    path: "/:locationId",
     component: () => import("layouts/authenticated-layout.vue"),
     beforeEnter: redirectIfGuest,
     children: [
-      { path: "/", redirect: { name: AvailableRouteNames.Events } },
-      {
-        path: "events",
-        name: AvailableRouteNames.Events,
-        component: () => import("src/pages/events.vue"),
-      },
+      { path: "", redirect: { name: AvailableRouteNames.Home } },
 
       {
-        path: "theme",
-        name: AvailableRouteNames.Theme,
-        component: () => import("src/pages/theme.vue"),
-        beforeEnter: redirectIfNotAdmin,
+        path: "home",
+        name: AvailableRouteNames.Home,
+        component: () => import("src/pages/home.vue"),
       },
       {
         path: "reset-password",
@@ -84,6 +143,44 @@ const routes: RouteRecordRaw[] = [
         path: "roles-and-permissions",
         name: AvailableRouteNames.RolesAndPermissions,
         component: () => import("src/pages/roles-and-permissions.vue"),
+        beforeEnter: redirectIfNotAdmin,
+      },
+      {
+        path: "books-catalog",
+        name: AvailableRouteNames.Catalog,
+        component: () => import("src/pages/catalog.vue"),
+      },
+      {
+        path: "users-management",
+        name: AvailableRouteNames.UsersManagement,
+        beforeEnter: redirectIfNotOperatorOrAdmin,
+        component: () => import("src/pages/manage-users.vue"),
+      },
+      {
+        path: "salable-books",
+        name: AvailableRouteNames.SalableBooks,
+        component: () => import("src/pages/salable-books.vue"),
+      },
+      {
+        path: "my-books",
+        name: AvailableRouteNames.MyBooks,
+        component: () => import("src/pages/my-books.vue"),
+      },
+      {
+        path: "reserve-books",
+        name: AvailableRouteNames.ReserveBooks,
+        component: () => import("src/pages/reserve-books.vue"),
+      },
+      {
+        path: "my-data",
+        name: AvailableRouteNames.MyData,
+        component: () => import("src/pages/my-data.vue"),
+      },
+      {
+        path: "warehouse",
+        name: AvailableRouteNames.Warehouse,
+        component: () => import("src/pages/warehouse.vue"),
+        beforeEnter: redirectIfNotOperatorOrAdmin,
       },
     ],
   },

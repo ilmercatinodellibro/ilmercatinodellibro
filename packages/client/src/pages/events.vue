@@ -7,6 +7,7 @@
     <div v-if="error" class="col flex flex-center full-width text-size-20">
       {{ t("common.error") }}
     </div>
+
     <events-list
       v-else-if="$q.screen.lt.sm"
       class="col full-width"
