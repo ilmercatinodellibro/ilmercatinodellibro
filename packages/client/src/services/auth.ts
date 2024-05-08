@@ -5,8 +5,11 @@ import { LocalStorage } from "quasar";
 import { computed, readonly, ref, watch } from "vue";
 import { NavigationGuard, Router, useRouter } from "vue-router";
 import { UpdateUserPayload } from "src/@generated/graphql";
+import { AvailableRouteNames } from "src/models/routes";
+import { useRetailLocationService } from "src/services/retail-location";
 import {
   CurrentUserFragment,
+  GetCurrentUserDocument,
   useLoginMutation as useBaseLoginMutation,
   useRegisterMutation as useBaseRegisterMutation,
   useRegisterWithTokenMutation as useBaseRegisterWithTokenMutation,
@@ -42,9 +45,9 @@ watch(user, (newUser) => {
   }
 });
 
-const AUTHENTICATED_DEFAULT_ROUTE_NAME = "home";
+const AUTHENTICATED_DEFAULT_ROUTE_NAME = AvailableRouteNames.Home;
 const REGISTRATION_SENT_ROUTE_NAME = "registration-sent";
-const GUEST_DEFAULT_ROUTE_NAME = "login";
+const GUEST_DEFAULT_ROUTE_NAME = AvailableRouteNames.Login;
 
 export function useLoginMutation() {
   const router = useRouter();
@@ -66,6 +69,28 @@ export function useLoginMutation() {
   }
 
   return { ...loginMutationComposable, login };
+}
+
+export function useSocialLogin() {
+  const { selectedLocation } = useRetailLocationService();
+
+  const { resolveClient } = useApolloClient();
+  const client = resolveClient();
+
+  async function login(jwt: string) {
+    token.value = jwt;
+    const { data } = await client.query({
+      query: GetCurrentUserDocument,
+      variables: {
+        retailLocationId: selectedLocation.value.id,
+      },
+    });
+    user.value = data.currentUser;
+  }
+
+  return {
+    login,
+  };
 }
 
 export function useRegisterMutation() {

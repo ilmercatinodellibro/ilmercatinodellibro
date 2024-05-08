@@ -141,8 +141,8 @@ async function onSubmit() {
       );
       void router.push({ name: "login" });
       Notify.create({
+        type: "positive",
         message: t("auth.registeredSuccessfully"),
-        color: "positive",
       });
     }
   } catch (e) {

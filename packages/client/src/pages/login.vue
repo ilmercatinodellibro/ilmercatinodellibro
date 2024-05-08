@@ -2,14 +2,15 @@
   <q-page class="flex items-center justify-center">
     <q-card class="form-card text-center">
       <q-form greedy @submit="onSubmit">
-        <q-card-section class="text-dark text-h3">{{
-          t("auth.login")
-        }}</q-card-section>
+        <q-card-section class="text-dark text-h3">
+          {{ t("auth.login") }}
+        </q-card-section>
+
         <q-card-section class="input-container">
           <q-input
             v-model="user.email"
             :rules="[requiredRule, emailRule]"
-            :label="t(`auth.email`)"
+            :label="t('auth.email')"
             lazy-rules
             outlined
             type="email"
@@ -19,7 +20,7 @@
             v-model="user.password"
             v-model:show="showPassword"
             :rules="[requiredRule]"
-            :label="t(`auth.password`)"
+            :label="t('auth.password')"
             outlined
             lazy-rules
             autocomplete="password"
@@ -28,13 +29,14 @@
           <q-btn
             class="full-width"
             color="accent"
-            :label="t(`auth.login`)"
+            :label="t('auth.login')"
             text-color="black-54"
             type="submit"
             data-cy="submit-button"
             :loading="isLoggingIn"
           />
         </q-card-section>
+
         <q-card-section>
           <router-link
             class="text-dark text-subtitle1"
@@ -44,23 +46,36 @@
             {{ t("auth.forgotPassword") }}
           </router-link>
         </q-card-section>
+
         <q-card-section>
-          <p class="text-dark">{{ t(`auth.noAccount`) }}</p>
+          <p class="text-dark">{{ t("auth.noAccount") }}</p>
           <router-link
             class="text-dark text-subtitle1"
             :to="{ name: 'registration' }"
             data-cy="registration-link"
           >
-            {{ $t(`auth.register`) }}
+            {{ $t("auth.register") }}
           </router-link>
         </q-card-section>
       </q-form>
+
+      <q-separator />
+
+      <q-card-section>
+        <!-- TODO: Make this link dynamic -->
+        <q-btn
+          :href="`http://localhost:3000/auth/facebook?locationId=${selectedLocation.id}`"
+          :icon="mdiFacebook"
+          color="blue"
+        />
+      </q-card-section>
     </q-card>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client/core";
+import { mdiFacebook } from "@quasar/extras/mdi-v7";
 import { Notify } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";

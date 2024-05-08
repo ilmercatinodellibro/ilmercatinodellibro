@@ -2,11 +2,9 @@ import { until } from "@vueuse/core";
 import { boot } from "quasar/wrappers";
 import { nextTick, watch } from "vue";
 import { useTheme } from "src/composables/use-theme";
-import { AvailableRouteNames } from "src/models/routes";
-import { useAuthService } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 
-export default boot(async ({ router }) => {
+export default boot(({ router }) => {
   const { loading, selectedLocationId, selectedLocation } =
     useRetailLocationService();
 
@@ -40,21 +38,12 @@ export default boot(async ({ router }) => {
     { immediate: true },
   );
 
-  const { isAuthenticated } = useAuthService();
-
   router.beforeEach(async (to) => {
     if (to.params.locationId) {
       selectedLocationId.value = to.params.locationId as string;
       await ensureLocationInitialized;
     }
   });
-
-  if (!isAuthenticated.value) {
-    await router.push({
-      name: AvailableRouteNames.SelectLocation,
-    });
-    return;
-  }
 
   // TODO: Use and enforce the user's preferred location (when implemented)
 });

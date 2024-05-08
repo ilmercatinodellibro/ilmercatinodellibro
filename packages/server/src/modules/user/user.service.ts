@@ -1,4 +1,5 @@
 import { Injectable, UnprocessableEntityException } from "@nestjs/common";
+import { FederatedUser, FederationProvider } from "@prisma/client";
 import * as argon2 from "argon2";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
 import { RegisterPayload } from "src/modules/auth/auth.args";
@@ -27,6 +28,7 @@ export class UserService {
   async createUser(
     userData: Omit<RegisterPayload, "passwordConfirmation">,
     emailVerified?: boolean,
+    fedaratedUser?: Omit<FederatedUser, "user" | "userId">,
   ) {
     userData.email = userData.email.toLowerCase();
     userData.password = await argon2.hash(userData.password);
@@ -34,6 +36,10 @@ export class UserService {
       data: {
         ...userData,
         emailVerified,
+
+        federatedUsers: {
+          create: fedaratedUser,
+        },
       },
     });
   }
@@ -79,6 +85,22 @@ export class UserService {
     return this.prisma.user.findUnique({
       where: {
         email: email.toLowerCase(),
+      },
+    });
+  }
+
+  async findUserByProvider(
+    provider: FederationProvider,
+    providerUserId: string,
+  ) {
+    return this.prisma.user.findFirst({
+      where: {
+        federatedUsers: {
+          some: {
+            provider,
+            providerUserId,
+          },
+        },
       },
     });
   }

@@ -9,6 +9,7 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { CloseCode, WebSocket } from "graphql-ws";
+import { authConfiguration } from "src/config/auth";
 import { databaseConfiguration } from "src/config/database";
 import { emailConfiguration } from "src/config/email";
 import { QueueConfiguration, queueConfiguration } from "src/config/queue";
@@ -44,6 +45,7 @@ import { UserModule } from "./modules/user/user.module";
       isGlobal: true,
       load: [
         rootConfiguration,
+        authConfiguration,
         databaseConfiguration,
         emailConfiguration,
         queueConfiguration,

@@ -2,7 +2,8 @@ import { Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
+import { AuthConfiguration, authConfiguration } from "src/config/auth";
+import { FacebookStrategy } from "src/modules/auth/strategies/facebook.strategy";
 import { MailModule } from "../mail/mail.module";
 import { PrismaModule } from "../prisma/prisma.module";
 import { UserModule } from "../user/user.module";
@@ -16,13 +17,13 @@ import { LocalStrategy } from "./strategies/local.strategy";
   imports: [
     ConfigModule,
     JwtModule.registerAsync({
-      useFactory: (rootConfig: RootConfiguration) => ({
-        secret: rootConfig.applicationSecret,
+      useFactory: (authConfig: AuthConfiguration) => ({
+        secret: authConfig.applicationSecret,
         signOptions: {
-          expiresIn: rootConfig.tokenExpirationTime,
+          expiresIn: authConfig.tokenExpirationTime,
         },
       }),
-      inject: [rootConfiguration.KEY],
+      inject: [authConfiguration.KEY],
     }),
     PassportModule.register({
       defaultStrategy: JWT_STRATEGY_NAME,
@@ -32,7 +33,13 @@ import { LocalStrategy } from "./strategies/local.strategy";
     MailModule,
     forwardRef(() => UserModule),
   ],
-  providers: [AuthResolver, AuthService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthResolver,
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    FacebookStrategy,
+  ],
   exports: [AuthService],
   controllers: [AuthController],
 })
