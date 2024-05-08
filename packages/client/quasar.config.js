@@ -206,11 +206,15 @@ module.exports = configure(function (ctx) {
 
         "/receipts": {
           changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
+          target: process.env.GRAPHQL_DOMAIN,
         },
         "/location": {
           changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
+          target: process.env.GRAPHQL_DOMAIN,
+        },
+        "/auth/facebook": {
+          changeOrigin: true,
+          target: process.env.GRAPHQL_DOMAIN,
         },
       },
     },

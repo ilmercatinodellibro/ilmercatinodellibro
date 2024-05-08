@@ -62,9 +62,8 @@
       <q-separator />
 
       <q-card-section>
-        <!-- TODO: Make this link dynamic -->
         <q-btn
-          :href="`http://localhost:3000/auth/facebook?locationId=${selectedLocation.id}`"
+          :href="`/auth/facebook?locationId=${selectedLocation.id}`"
           :icon="mdiFacebook"
           color="blue"
         />
