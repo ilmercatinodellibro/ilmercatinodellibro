@@ -2,6 +2,7 @@ import {
   ConflictException,
   UnprocessableEntityException,
 } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   Args,
   Mutation,
@@ -27,6 +28,7 @@ export class ReservationResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Query(() => [Reservation])
@@ -313,7 +315,7 @@ export class ReservationResolver {
       throw new ConflictException("This reservation has already been deleted.");
     }
 
-    return this.prisma.reservation.update({
+    await this.prisma.reservation.update({
       where: {
         id,
       },
@@ -321,6 +323,10 @@ export class ReservationResolver {
         deletedAt: new Date(),
         deletedById: currentUserId,
       },
+    });
+
+    this.eventEmitter.emit("booksBecameAvailable", {
+      bookIds: [reservation.bookId],
     });
   }
 }

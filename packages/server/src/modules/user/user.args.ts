@@ -5,6 +5,7 @@ import {
   Int,
   ObjectType,
   PickType,
+  registerEnumType,
 } from "@nestjs/graphql";
 import { User } from "src/@generated";
 import { Role } from "src/@generated/prisma";
@@ -98,4 +99,21 @@ export class UpdateUserPayload extends PickType(
 
   @Field(() => String, { nullable: true })
   email?: string;
+}
+
+export enum SettleRemainingType {
+  RETURN = "RETURN",
+  REFUND = "REFUND",
+}
+registerEnumType(SettleRemainingType, {
+  name: "SettleRemainingType",
+});
+
+@InputType()
+export class SettleUserInput extends LocationBoundInput {
+  @Field()
+  userId!: string;
+
+  @Field(() => SettleRemainingType)
+  remainingType!: SettleRemainingType;
 }

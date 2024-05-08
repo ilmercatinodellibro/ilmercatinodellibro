@@ -3,6 +3,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
 import { Prisma, Book as PrismaBook, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
@@ -28,6 +29,7 @@ export class CartResolver {
     private readonly cartService: CartService,
     private readonly authService: AuthService,
     private readonly receiptService: ReceiptService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @ResolveField(() => [Book])
@@ -263,6 +265,8 @@ export class CartResolver {
         },
       },
     });
+
+    this.eventEmitter.emit("booksBecameAvailable", { bookIds: [bookId] });
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
@@ -435,6 +439,9 @@ export class CartResolver {
   ) {
     const cart = await this.prisma.cart.findUniqueOrThrow({
       where: { id: cartId },
+      include: {
+        items: true,
+      },
     });
 
     await this.authService.assertMembership({
@@ -446,6 +453,10 @@ export class CartResolver {
 
     await this.prisma.cart.delete({
       where: { id: cartId },
+    });
+
+    this.eventEmitter.emit("booksBecameAvailable", {
+      bookIds: cart.items.map(({ bookId }) => bookId),
     });
   }
 }

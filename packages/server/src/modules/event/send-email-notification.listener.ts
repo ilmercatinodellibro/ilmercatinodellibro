@@ -4,8 +4,8 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
-import { Notification } from "src/@generated";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
+import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { MailService } from "../mail/mail.service";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -25,16 +25,10 @@ export class SendEmailNotificationListener {
   ) {}
 
   @OnEvent("newNotification")
-  async sendEmailAlertOnNotification(notification: Notification) {
-    return;
-
-    // TODO: decide which notifications should be sent via email and to who
-    const event = {
-      name: "Test",
-      description: "test",
-      createdAt: new Date(),
-    };
-
+  async sendEmailAlertOnNotification({
+    event,
+    notification,
+  }: NewNotificationPayload) {
     const { email: userEmail } = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: notification.userId,
@@ -55,7 +49,7 @@ export class SendEmailNotificationListener {
     email: string,
     { name, description, createdAt }: EmailPayload,
   ) {
-    const eventsUrl = `${this.rootConfig.clientUrl}/events`;
+    const reserveUrl = `${this.rootConfig.clientUrl}/reserve-books`;
     const date = createdAt.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -68,12 +62,12 @@ export class SendEmailNotificationListener {
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: `New Event: "${name}"`,
+        subject: name,
         context: {
           name,
           description,
           date,
-          eventsUrl,
+          reserveUrl,
         },
         template: "event-trigger-notification",
       });
