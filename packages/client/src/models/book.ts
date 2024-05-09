@@ -8,9 +8,8 @@ enum BookUtilityCategory {
 
 export type UtilityCategory = keyof typeof BookUtilityCategory;
 
-export type BookCompleteFilters =
-  | keyof Omit<BookQueryFilter, "search">
-  | UtilityCategory;
+export type BookCompleteFilters = keyof Omit<BookQueryFilter, "search">;
+/*| UtilityCategory*/
 
 export interface SchoolFilters {
   schoolCodes: string[];

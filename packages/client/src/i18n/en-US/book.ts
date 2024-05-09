@@ -39,9 +39,9 @@ export default {
   filters: {
     options: {
       isAvailable: "Available",
-      HIGH_UTILITY: "High Utility",
-      MEDIUM_UTILITY: "Medium Utility",
-      LOW_UTILITY: "Low Utility",
+      // HIGH_UTILITY: "High Utility",
+      // MEDIUM_UTILITY: "Medium Utility",
+      // LOW_UTILITY: "Low Utility",
     } satisfies Record<BookCompleteFilters, string>,
     school: "Filter by School",
     schoolFilter: {
