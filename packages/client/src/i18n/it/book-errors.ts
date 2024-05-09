@@ -32,5 +32,10 @@ export default {
     "Non puoi mettere nel carrello un libro richiesto ma non disponibile.",
   noBookCopy: "Nessun libro per questa sezione.",
   notReturned:
-    "Non è stato possibile restituire la copia selezionata all'utente.",
+    "Non è stato possibile restituire la copia selezionata al cliente.",
+  notAllReturned: "Non è stato possibile restituire tutte le copie al cliente.",
+  notReimbursed:
+    "Non è stato possibile rimborsare la copia selezionata al cliente.",
+  notAllReimbursed:
+    "Non è stato possibile rimborsare tutte le copie al cliente.",
 };

@@ -19,5 +19,6 @@ export default {
     "not-available": "Non Disponibile",
     available: "Disponibile",
     sold: "Venduto",
-  } satisfies Record<BookCopyStatus, string>,
+    inStock: "In Magazzino",
+  } satisfies Record<BookCopyStatus | "inStock", string>,
 };

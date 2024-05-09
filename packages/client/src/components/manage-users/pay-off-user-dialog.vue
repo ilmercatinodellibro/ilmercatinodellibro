@@ -147,11 +147,13 @@
                   @update:model-value="swapRow(row)"
                 />
 
-                <book-copy-status-chip
-                  v-else-if="col.name === 'status'"
-                  :book-copy="row"
-                  hide-icon
-                />
+                <span v-else-if="col.name === 'status'">
+                  {{
+                    t(
+                      `warehouse.bookCopyStatus.${!isAvailable(row) ? getStatus(row) : "inStock"}`,
+                    )
+                  }}
+                </span>
 
                 <q-btn
                   v-else-if="
@@ -244,7 +246,7 @@ import {
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { isAvailable } from "src/helpers/book-copy";
+import { getStatus, isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -253,10 +255,10 @@ import {
   useGetReturnedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
   useReportProblemMutation,
+  useReturnBookCopyMutation,
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserSummaryFragment } from "src/services/user.graphql";
-import BookCopyStatusChip from "../book-copy-status-chip.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
@@ -299,7 +301,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    field: () => undefined,
+    field: (bookCopy) => getStatus(bookCopy),
     label: t("book.fields.status"),
     align: "left",
   },
@@ -418,14 +420,12 @@ const tableRows = computed<
     ? sortByCopyCode(ownedCopies.value)
     : [{ id: "EMPTY" } satisfies EmptyRow]),
 
+  {
+    id: Titles.Returned,
+  },
   ...(returnedCopies.value.length > 0
-    ? [
-        {
-          id: Titles.Returned,
-        },
-        ...sortByCopyCode(returnedCopies.value),
-      ]
-    : []),
+    ? sortByCopyCode(returnedCopies.value)
+    : [{ id: "EMPTY" } satisfies EmptyRow]),
 
   {
     id: Titles.Sold,
@@ -470,9 +470,20 @@ function swapRow(row: BookCopyDetailsFragment) {
   }
 }
 
+const { returnBookCopy } = useReturnBookCopyMutation();
 function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
-  // FIXME: add logic
-  bookCopies;
+  bookCopies.forEach(async ({ id: bookCopyId }) => {
+    try {
+      await returnBookCopy({
+        input: {
+          bookCopyId,
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
+    } catch {
+      notifyError(t("bookErrors.notAllReturned"));
+    }
+  });
 }
 
 function donateBooks(bookCopies: BookCopyDetailsFragment[]) {

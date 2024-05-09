@@ -615,7 +615,7 @@ export class BookCopyResolver {
         },
         sales: {
           where: {
-            refundedAt: { not: null },
+            refundedAt: null,
           },
         },
       },
@@ -675,7 +675,7 @@ export class BookCopyResolver {
         },
         sales: {
           where: {
-            refundedAt: { not: null },
+            refundedAt: null,
           },
         },
       },

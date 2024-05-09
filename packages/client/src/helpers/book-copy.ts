@@ -9,7 +9,7 @@ export const getCurrentActiveProblem = ({
 }: BookCopyDetailsFragment) => problems?.find(({ resolvedAt }) => !resolvedAt);
 
 export const isAvailable = (bookCopy: BookCopyDetailsFragment) =>
-  !hasProblem(bookCopy) && !bookCopy.purchasedAt && !bookCopy.returnedAt;
+  getStatus(bookCopy) === "available";
 
 export type BookCopyStatus =
   | "not-available"
@@ -18,3 +18,21 @@ export type BookCopyStatus =
   | "returned"
   | "sold"
   | Exclude<ProblemType, "CUSTOM">;
+
+export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
+  const problemType = getCurrentActiveProblem(bookCopy)?.type;
+
+  return bookCopy.returnedAt
+    ? "returned"
+    : problemType
+      ? problemType !== "CUSTOM"
+        ? problemType
+        : "not-available"
+      : bookCopy.purchasedAt &&
+          (!bookCopy.returnedAt ||
+            bookCopy.sales?.some(({ refundedAt }) => !refundedAt))
+        ? "sold"
+        : bookCopy.donatedAt
+          ? "donated"
+          : "available";
+}

@@ -25,4 +25,8 @@ export default {
     "You cannot put a requested but not available book in the cart.",
   noBookCopy: "No book for this section.",
   notReturned: "Could not return the selected copy to the customer.",
+  notAllReturned: "Could not return all the selected copies to the customer.",
+  notReimbursed: "Could not reimburse the selected copy to the customer.",
+  notAllReimbursed:
+    "Could not reimburse all the selected copies to the customer.",
 };
