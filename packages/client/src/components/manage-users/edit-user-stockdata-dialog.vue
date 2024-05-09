@@ -144,7 +144,11 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
-import { getCurrentActiveProblem, hasProblem } from "src/helpers/book-copy";
+import {
+  getCurrentActiveProblem,
+  hasProblem,
+  isAvailable,
+} from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
@@ -215,26 +219,6 @@ function getCommonColumns<
 
   return [
     {
-      label: t("book.fields.author"),
-      field: getField("authorsFullName"),
-      name: "author",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-    },
-    {
-      label: t("book.fields.subject"),
-      field: getField("subject"),
-      name: "subject",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-    },
-    {
-      label: t("book.fields.status"),
-      field: getField(({ meta }) => meta.isAvailable),
-      name: "status",
-      align: "left",
-    },
-    {
       label: t("book.fields.title"),
       field: getField("title"),
       name: "title",
@@ -274,6 +258,26 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       align: "left",
       format: (val: string) => startCase(toLower(val)),
     },
+    {
+      label: t("book.fields.author"),
+      field: "authorsFullName",
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.subject"),
+      field: "subject",
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.status"),
+      field: ({ meta }) => meta.isAvailable,
+      name: "status",
+      align: "left",
+    },
 
     ...getCommonColumns("book"),
 
@@ -304,6 +308,26 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       label: t("book.originalCode"),
       field: "originalCode",
       name: "original-code",
+      align: "left",
+    },
+    {
+      label: t("book.fields.author"),
+      field: ({ book }) => book.authorsFullName,
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.subject"),
+      field: ({ book }) => book.subject,
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.status"),
+      field: (bookCopy) => isAvailable(bookCopy),
+      name: "status",
       align: "left",
     },
 
