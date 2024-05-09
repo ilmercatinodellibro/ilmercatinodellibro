@@ -53,7 +53,7 @@
       </q-card-section>
 
       <template #card-actions="{ uniqueFormId }">
-        <q-btn color="accent" @click="confirmReset()">
+        <q-btn color="accent" disable @click="confirmReset()">
           <q-item-section>
             {{ t("general.settings.resetButton") }}
           </q-item-section>
