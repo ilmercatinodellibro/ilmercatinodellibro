@@ -48,7 +48,7 @@ export class BookRequestResolver {
         deletedAt: null,
         cartItem: null,
         AND: [
-          // see <link to other comment explaining the same thing>
+          // see https://github.com/ilmercatinodellibro/ilmercatinodellibro/blob/5a97d9ace5891506199bb754daebd893b61ef000/packages/server/src/modules/user/user.resolver.ts#L258
           {
             saleId: null,
           },
