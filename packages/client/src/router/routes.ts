@@ -158,6 +158,12 @@ const routes: RouteRecordRaw[] = [
         beforeEnter: redirectIfNotAdmin,
       },
       {
+        path: "statistics",
+        name: AvailableRouteNames.Statistics,
+        component: () => import("src/pages/statistics-page.vue"),
+        beforeEnter: redirectIfNotAdmin,
+      },
+      {
         path: "books-catalog",
         name: AvailableRouteNames.Catalog,
         component: () => import("src/pages/catalog.vue"),

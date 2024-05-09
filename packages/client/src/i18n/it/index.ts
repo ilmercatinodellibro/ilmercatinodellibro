@@ -170,6 +170,7 @@ export default {
     [AvailableRouteNames.JoinUs]: "Unisciti a Noi",
     [AvailableRouteNames.WhoWeAre]: "Chi siamo",
     [AvailableRouteNames.Warehouse]: "Magazzino",
+    [AvailableRouteNames.Statistics]: "Statistiche",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",

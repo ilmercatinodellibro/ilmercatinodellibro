@@ -307,6 +307,27 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
+
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.Statistics }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="statistics"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t(`routesNames.${AvailableRouteNames.Statistics}`) }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiChartLine" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t(`routesNames.${AvailableRouteNames.Statistics}`) }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
           </template>
 
           <q-expansion-item :expand-icon="mdiMenuDown" class="drawer-item">
@@ -379,6 +400,7 @@ import {
   mdiAccountMultiple,
   mdiBookOpenBlankVariant,
   mdiBookshelf,
+  mdiChartLine,
   mdiCheckDecagram,
   mdiCloudCheckOutline,
   mdiCloudOffOutline,
