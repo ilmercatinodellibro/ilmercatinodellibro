@@ -2,10 +2,9 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        v-model:filters="filters"
-        v-model:search-query="searchQuery"
-        v-model:school-filters="schoolFilters"
+        :model-value="tableFilter"
         :filter-options="filterOptions"
+        @update:model-value="updateFilters"
       >
         <template #side-actions>
           <q-btn
@@ -67,6 +66,7 @@
         v-model:pagination="booksPagination"
         :columns="columns"
         :filter="tableFilter"
+        :filter-method="filterMethod"
         :loading="booksLoading"
         :rows="books?.rows ?? []"
         class="flex-delegate-height-management"
@@ -139,6 +139,7 @@
         v-model:pagination="copyPagination"
         :columns="bookCopyColumns"
         :filter="tableFilter"
+        :filter-method="filterMethod"
         :loading="copyLoading"
         :rows="
           // FIXME: bookCopies don't have the status field but the columns specify it
@@ -185,7 +186,7 @@ import {
   mdiSort,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyDetailsTable from "src/components/book-copy-details-table.vue";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
@@ -197,7 +198,7 @@ import ProblemsButton from "src/components/problems-button.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
-import { SchoolFilters } from "src/models/book";
+import { TableFilters } from "src/models/book";
 import {
   BookCopyDetailsFragment,
   useGetPaginatedBookCopiesQuery,
@@ -244,12 +245,26 @@ const screenWidth = useScreenWidth(smallScreenBreakpoint);
 const isSortedByCopyCode = ref(false);
 
 const tableRef = ref<QTable>();
-
-const filters = ref<string[]>([]);
 const filterOptions = useTranslatedFilters("warehouse.filters");
 
-const schoolFilters = ref<SchoolFilters>({ courses: [], schoolCodes: [] });
-const searchQuery = ref("");
+const tableFilter = reactive<TableFilters>({
+  filters: [],
+  searchQuery: "",
+  schoolFilters: {
+    courses: [],
+    schoolCodes: [],
+  },
+});
+
+function updateFilters(newFilters: TableFilters) {
+  tableFilter.searchQuery = newFilters.searchQuery;
+  tableFilter.filters = newFilters.filters;
+  tableFilter.schoolFilters = newFilters.schoolFilters;
+}
+
+const filterMethod: QTableProps["filterMethod"] = (rows) => {
+  return rows as BookWithAvailableCopiesFragment[];
+};
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [
@@ -307,13 +322,6 @@ const copyPagination = ref({
   rowsNumber: bookCopies.value?.rowsCount,
   page: copyPage.value,
 });
-
-// TODO: send the filters to the server
-const tableFilter = computed(() =>
-  !searchQuery.value && Object.entries(filters.value).length === 0
-    ? undefined
-    : { searchTerm: searchQuery.value, filters: filters.value },
-);
 
 const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   () => [
@@ -384,7 +392,7 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
     page: page - 1,
     rows: rowsPerPage,
     filter: {
-      search: searchQuery.value,
+      search: tableFilter.searchQuery,
     },
   });
 
@@ -425,9 +433,9 @@ const otherCityName = computed(
 function swapView() {
   isSortedByCopyCode.value = !isSortedByCopyCode.value;
 
-  searchQuery.value = "";
-  filters.value = [];
-  schoolFilters.value = { courses: [], schoolCodes: [] };
+  tableFilter.searchQuery = "";
+  tableFilter.filters = [];
+  tableFilter.schoolFilters = { courses: [], schoolCodes: [] };
 
   if (isSortedByCopyCode.value) {
     copyPage.value = 0;

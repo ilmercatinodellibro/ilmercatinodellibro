@@ -2,9 +2,9 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        v-model:filters="filters"
-        v-model:search-query="searchQuery"
+        :model-value="tableFilter"
         :filter-options="filterOptions"
+        @update:model-value="updateFilters"
       >
         <template #side-actions>
           <q-btn
@@ -29,6 +29,7 @@
           :rows="customers"
           :columns="columns"
           :filter="tableFilter"
+          :filter-method="filterMethod"
           :loading="loading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           @request="onRequest"
@@ -201,7 +202,7 @@ import {
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
-import { Ref, computed, onMounted, ref } from "vue";
+import { Ref, computed, onMounted, reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { RegisterUserPayload, UpdateUserPayload } from "src/@generated/graphql";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
@@ -219,6 +220,7 @@ import TableCellWithDialog from "src/components/manage-users/table-cell-with-dia
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { notifyError } from "src/helpers/error-messages";
+import { TableFilters } from "src/models/book";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
@@ -250,7 +252,7 @@ const onRequest: QTableProps["onRequest"] = async (requested) => {
   await fetchCustomers({
     page: requested.pagination.page,
     rowsPerPage: requested.pagination.rowsPerPage,
-    searchTerm: tableFilter.value?.searchTerm,
+    searchTerm: tableFilter.searchQuery,
     // TODO: pass the filters to the server
   });
 
@@ -263,17 +265,21 @@ onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
 
-const searchQuery = ref("");
-const filters = ref<string[]>([]);
+const tableFilter = reactive<TableFilters>({
+  searchQuery: "",
+  filters: [],
+});
+
+function updateFilters(newFilters: TableFilters) {
+  tableFilter.searchQuery = newFilters.searchQuery;
+  tableFilter.filters = newFilters.filters;
+}
+
+const filterMethod: QTableProps["filterMethod"] = (rows) => {
+  return rows as CustomerFragment[];
+};
 
 const filterOptions = useTranslatedFilters("manageUsers.filters");
-
-// TODO: send the filters to the server
-const tableFilter = computed(() =>
-  !searchQuery.value && Object.entries(filters.value).length === 0
-    ? undefined
-    : { searchTerm: searchQuery.value, filters: filters.value },
-);
 
 const columnTooltip = computed(() => ({
   inStock: t("manageUsers.tooltips.inStock"),

@@ -1,12 +1,13 @@
 <template>
   <q-card-section class="full-width gap-16 items-center q-pa-md row">
     <q-input
-      v-model="searchQuery"
-      debounce="200"
+      :model-value="newFilters.searchQuery"
+      debounce="400"
       type="search"
       class="col max-width-600"
       outlined
       :placeholder="t('common.search')"
+      @update:model-value="(query) => updateSearch(query as string)"
     >
       <template #append>
         <q-icon :name="mdiMagnify" />
@@ -14,19 +15,20 @@
     </q-input>
 
     <q-select
-      v-model="filters"
       :label="t('book.filter')"
+      :model-value="newFilters.filters"
       :options="Object.keys(filterOptions)"
       class="width-200"
       multiple
       outlined
+      @update:model-value="updateFilters"
     >
       <!--
         This is because the filters are translated and if a user were to switch
         language they should update, so the key for each filter is an integer ID
         and the label is what's shown in the filter UI
       -->
-      <template v-if="Object.entries(filters).length > 0" #selected>
+      <template v-if="Object.entries(newFilters.filters).length > 0" #selected>
         {{ selectedFiltersDisplay }}
       </template>
 
@@ -44,7 +46,7 @@
         </q-item>
       </template>
 
-      <template v-if="schoolFilters" #after-options>
+      <template v-if="newFilters.schoolFilters" #after-options>
         <q-item clickable @click="openSchoolFilterDialog()">
           <q-item-section>
             {{ t("book.filters.school") }}
@@ -61,26 +63,42 @@
 
 <script setup lang="ts">
 import { mdiMagnify } from "@quasar/extras/mdi-v7";
+import { cloneDeep } from "lodash-es";
 import { Dialog } from "quasar";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { SchoolFilters } from "src/models/book";
+import { SchoolFilters, TableFilters } from "src/models/book";
 import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 
 const { t } = useI18n();
 
-const searchQuery = defineModel<string>("searchQuery", { required: true });
-const filters = defineModel<string[]>("filters", { required: true });
-const schoolFilters = defineModel<SchoolFilters>("schoolFilters");
-
 const props = defineProps<{
   filterOptions: ReturnType<typeof useTranslatedFilters>["value"];
+  modelValue: TableFilters;
 }>();
 
+const emit = defineEmits<{
+  "update:modelValue": [newFilters: TableFilters];
+}>();
+
+const newFilters = ref(cloneDeep(props.modelValue));
+
 const selectedFiltersDisplay = computed(() =>
-  filters.value.map((filter) => props.filterOptions[filter]).join(", "),
+  props.modelValue.filters
+    .map((filter) => props.filterOptions[filter])
+    .join(", "),
 );
+
+function updateSearch(newSearchQuery: string) {
+  newFilters.value.searchQuery = newSearchQuery;
+  emit("update:modelValue", newFilters.value as TableFilters);
+}
+
+function updateFilters(filters: TableFilters["filters"]) {
+  newFilters.value.filters = filters;
+  emit("update:modelValue", newFilters.value);
+}
 
 // FIXME: Add actual logic with server fetch
 const schoolFilterOptions: SchoolFilters = {
@@ -93,10 +111,14 @@ function openSchoolFilterDialog() {
     component: FilterBySchoolDialog,
     componentProps: {
       filters: schoolFilterOptions,
-      selectedFilters: schoolFilters.value,
+      selectedFilters: props.modelValue.schoolFilters,
     },
-  }).onOk((payload: SchoolFilters) => {
-    schoolFilters.value = payload;
+  }).onOk((schoolFilters: SchoolFilters) => {
+    newFilters.value.schoolFilters = schoolFilters;
+    emit("update:modelValue", {
+      ...newFilters.value,
+      schoolFilters,
+    });
   });
 }
 </script>

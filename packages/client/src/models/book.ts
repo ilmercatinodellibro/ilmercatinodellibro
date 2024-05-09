@@ -25,6 +25,12 @@ export interface CourseDetails {
   course: string;
 }
 
+export interface TableFilters {
+  filters: string[];
+  searchQuery: string;
+  schoolFilters?: SchoolFilters;
+}
+
 export enum BooksTab {
   DELIVERED = "delivered",
   RESERVED = "reserved",

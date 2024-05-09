@@ -2,10 +2,9 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        v-model:filters="filters"
-        v-model:school-filters="schoolFilters"
-        v-model:search-query="searchQuery"
+        :model-value="tableFilter"
         :filter-options="filterOptions"
+        @update:model-value="updateFilters"
       >
         <template #side-actions>
           <q-btn
@@ -24,7 +23,8 @@
           ref="tableRef"
           v-model:pagination="pagination"
           :columns="columns"
-          :filter="searchQuery"
+          :filter="tableFilter"
+          :filter-method="filterMethod"
           :loading="loading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           :rows="tableRows"
@@ -52,21 +52,17 @@
 <script lang="ts" setup>
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
-import { Dialog, QTable, QTableColumn } from "quasar";
-import { computed, onMounted, ref } from "vue";
+import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { BookCreateInput, BookQueryFilter } from "src/@generated/graphql";
+import { BookCreateInput } from "src/@generated/graphql";
 import AddBookDialog from "src/components/add-book-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { notifyError } from "src/helpers/error-messages";
-import {
-  BookCompleteFilters,
-  SchoolFilters,
-  UtilityCategory,
-} from "src/models/book";
+import { BookCompleteFilters, TableFilters } from "src/models/book";
 import { useBookService } from "src/services/book";
 import {
   BookSummaryFragment,
@@ -80,26 +76,26 @@ const tableRef = ref<QTable>();
 const currentPage = ref(0);
 const numberOfRows = ref(100);
 
-const searchQuery = ref("");
-
-const filters = ref<BookCompleteFilters[]>([]);
-
 const filterOptions = useTranslatedFilters("book.filters.options");
 
-const schoolFilters = ref<SchoolFilters>({
-  schoolCodes: [],
-  courses: [],
+const tableFilter = reactive<TableFilters>({
+  searchQuery: "",
+  schoolFilters: {
+    schoolCodes: [],
+    courses: [],
+  },
+  filters: [],
 });
 
-const tableFilter = computed<
-  BookQueryFilter & Record<UtilityCategory, boolean>
->(() => ({
-  search: searchQuery.value,
-  isAvailable: filters.value.includes("isAvailable"),
-  HIGH_UTILITY: filters.value.includes("HIGH_UTILITY"),
-  MEDIUM_UTILITY: filters.value.includes("MEDIUM_UTILITY"),
-  LOW_UTILITY: filters.value.includes("LOW_UTILITY"),
-}));
+function updateFilters({ filters, schoolFilters, searchQuery }: TableFilters) {
+  tableFilter.filters = filters;
+  tableFilter.schoolFilters = schoolFilters;
+  tableFilter.searchQuery = searchQuery;
+}
+
+const filterMethod: QTableProps["filterMethod"] = (rows) => {
+  return rows as BookSummaryFragment[];
+};
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -108,7 +104,7 @@ const {
   refetchBooks,
   booksPaginationDetails,
   loading,
-} = useBookService(currentPage, numberOfRows, tableFilter);
+} = useBookService(currentPage, numberOfRows);
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
@@ -184,8 +180,10 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
       page: requestProps.pagination.page - 1,
       rows: requestProps.pagination.rowsPerPage,
       filter: {
-        isAvailable: tableFilter.value.isAvailable,
-        search: tableFilter.value.search,
+        isAvailable: (tableFilter.filters as BookCompleteFilters[]).includes(
+          "isAvailable",
+        ),
+        search: tableFilter.searchQuery,
       },
     });
 
