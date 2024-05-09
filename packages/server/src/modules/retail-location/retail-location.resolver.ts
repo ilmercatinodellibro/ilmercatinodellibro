@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from "util";
+import { BadRequestException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Prisma, User } from "@prisma/client";
 import { merge } from "lodash";
@@ -5,6 +7,7 @@ import { RetailLocation } from "src/@generated/retail-location";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Input } from "src/modules/auth/decorators/input.decorator";
+import { UpdateRetailLocationSettingsInput } from "src/modules/retail-location/retail-location.input";
 import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
 import { Public } from "../auth/decorators/public-route.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -66,6 +69,67 @@ export class RetailLocationResolver {
             ? merge(existingTheme.colors, theme.colors)
             : existingTheme.colors,
         },
+      },
+    });
+  }
+
+  @Mutation(() => RetailLocation)
+  async updateRetailLocationSettings(
+    @Input()
+    {
+      maxBookingDays,
+      payOffEnabled,
+      retailLocationId,
+      warehouseMaxBlockSize,
+    }: UpdateRetailLocationSettingsInput,
+    @CurrentUser() user: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: user.id,
+      retailLocationId,
+      role: "ADMIN",
+    });
+
+    if (
+      !maxBookingDays ||
+      !warehouseMaxBlockSize ||
+      maxBookingDays <= 0 ||
+      warehouseMaxBlockSize <= 0
+    ) {
+      throw new BadRequestException("Invalid settings values");
+    }
+
+    const existingSettings = await this.prisma.retailLocation.findUniqueOrThrow(
+      {
+        where: {
+          id: retailLocationId,
+        },
+        select: {
+          maxBookingDays: true,
+          payOffEnabled: true,
+          warehouseMaxBlockSize: true,
+        },
+      },
+    );
+
+    if (
+      isDeepStrictEqual(existingSettings, {
+        maxBookingDays,
+        payOffEnabled,
+        warehouseMaxBlockSize,
+      })
+    ) {
+      return;
+    }
+
+    return await this.prisma.retailLocation.update({
+      where: {
+        id: retailLocationId,
+      },
+      data: {
+        maxBookingDays,
+        warehouseMaxBlockSize,
+        payOffEnabled,
       },
     });
   }

@@ -39,3 +39,11 @@ mutation updateRetailLocationTheme($input: UpdateRetailLocationThemeInput!) {
     ...RetailLocation
   }
 }
+
+mutation updateRetailLocationSettings(
+  $input: UpdateRetailLocationSettingsInput!
+) {
+  updateRetailLocationSettings(input: $input) {
+    ...RetailLocation
+  }
+}
