@@ -24,4 +24,5 @@ export default {
   bookNotCartable:
     "You cannot put a requested but not available book in the cart.",
   noBookCopy: "No book for this section.",
+  notReturned: "Could not return the selected copy to the customer.",
 };

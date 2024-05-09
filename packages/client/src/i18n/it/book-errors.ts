@@ -31,4 +31,6 @@ export default {
   bookNotCartable:
     "Non puoi mettere nel carrello un libro richiesto ma non disponibile.",
   noBookCopy: "Nessun libro per questa sezione.",
+  notReturned:
+    "Non è stato possibile restituire la copia selezionata all'utente.",
 };

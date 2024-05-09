@@ -74,7 +74,6 @@
               #body-cell-status="{ row }"
             >
               <q-td>
-                <!-- TODO: update to correct book status type -->
                 <q-chip
                   v-bind="statusChipData[getStatus(row)]"
                   class="no-pointer-events"

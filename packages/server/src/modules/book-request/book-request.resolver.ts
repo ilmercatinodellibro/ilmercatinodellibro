@@ -48,20 +48,9 @@ export class BookRequestResolver {
         deletedAt: null,
         cartItem: null,
         AND: [
+          // see <link to other comment explaining the same thing>
           {
-            OR: [
-              {
-                saleId: null,
-              },
-              {
-                // All related sales must have been refunded in order to show the request
-                sale: {
-                  refundedAt: {
-                    not: null,
-                  },
-                },
-              },
-            ],
+            saleId: null,
           },
 
           {

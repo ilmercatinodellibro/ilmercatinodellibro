@@ -255,19 +255,12 @@ export class UserResolver {
                 deletedAt: null,
                 cartItem: null,
                 AND: [
+                  /*
+                   The request should not show up if a previous sale from this user was refunded, because
+                   a user that returned a certain book copy should not see it as available for sale again
+                   */
                   {
-                    OR: [
-                      {
-                        saleId: null,
-                      },
-                      {
-                        sale: {
-                          refundedAt: {
-                            not: null,
-                          },
-                        },
-                      },
-                    ],
+                    saleId: null,
                   },
 
                   {
@@ -319,9 +312,7 @@ export class UserResolver {
           select: {
             purchases: {
               where: {
-                refundedAt: {
-                  not: null,
-                },
+                refundedAt: null,
               },
             },
           },

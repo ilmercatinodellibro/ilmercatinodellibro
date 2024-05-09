@@ -47,7 +47,7 @@ export class BookResolver {
       retailLocationId,
 
       meta: {
-        isAvailable: filter.isAvailable,
+        isAvailable: filter.isAvailable ? true : undefined,
       },
 
       OR: searchText
@@ -181,9 +181,7 @@ export class BookResolver {
       },
       {
         sale: {
-          refundedAt: {
-            not: null,
-          },
+          refundedAt: null,
         },
       },
     ];

@@ -120,3 +120,21 @@ mutation resolveProblem($input: ProblemResolveInput!) {
     solution
   }
 }
+
+mutation returnBookCopy($input: ReturnBookCopyInput!) {
+  returnBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation reimburseBookCopy($input: ReimburseBookCopyInput!) {
+  reimburseBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation refundBookCopy($input: RefundBookCopyInput!) {
+  refundBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
