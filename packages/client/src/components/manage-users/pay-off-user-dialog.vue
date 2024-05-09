@@ -9,7 +9,7 @@
     >
       <q-card-section class="gap-16 items-center no-wrap q-pa-md row">
         <q-input
-          v-model="totalSoldBooks"
+          :model-value="soldCopies.length"
           :label="$t('manageUsers.payOffUserDialog.soldBooksCountLabel')"
           outlined
           readonly
@@ -277,10 +277,6 @@ type ReturnType = "return-and-donate" | "return-everything";
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<ReturnType>();
 
-const totalSoldBooks = ref(0);
-const totalCheckoutMoney = ref(0);
-const totalCheckedOutMoney = ref(0);
-
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
     name: "select",
@@ -370,17 +366,25 @@ const {
   retailLocationId: selectedLocation.value.id,
 }));
 
-const { returnedBookCopies: returnedCopies, loading: returnedLoading } =
-  useGetReturnedBookCopiesQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+const {
+  returnedBookCopies: returnedCopies,
+  loading: returnedLoading,
+  refetch: refetchReturnedBookCopes,
+} = useGetReturnedBookCopiesQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
 
-const { soldBookCopies: soldCopies, loading: soldLoading } =
-  useGetSoldBookCopiesQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+const {
+  soldBookCopies: soldCopies,
+  loading: soldLoading,
+  // refetch: refetchSoldBookCopies,
+} = useGetSoldBookCopiesQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
+const totalCheckoutMoney = ref(0);
+const totalCheckedOutMoney = ref(0);
 
 const bookLoading = computed(
   () => ownedLoading.value || returnedLoading.value || soldLoading.value,
@@ -471,19 +475,32 @@ function swapRow(row: BookCopyDetailsFragment) {
 }
 
 const { returnBookCopy } = useReturnBookCopyMutation();
-function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
-  bookCopies.forEach(async ({ id: bookCopyId }) => {
-    try {
-      await returnBookCopy({
-        input: {
-          bookCopyId,
-          retailLocationId: selectedLocation.value.id,
-        },
-      });
-    } catch {
-      notifyError(t("bookErrors.notAllReturned"));
-    }
-  });
+async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
+  try {
+    await Promise.all(
+      bookCopies.map(({ id: bookCopyId }) => {
+        return returnBookCopy({
+          input: {
+            bookCopyId,
+            retailLocationId: selectedLocation.value.id,
+          },
+        });
+      }),
+    );
+
+    const queryArgs = {
+      retailLocationId: selectedLocation.value.id,
+      userId: props.user.id,
+    };
+    await Promise.all([
+      refetchBookCopiesByOwner(queryArgs),
+      refetchReturnedBookCopes(queryArgs),
+    ]);
+
+    selectedRows.value = [];
+  } catch {
+    notifyError(t("bookErrors.notAllReturned"));
+  }
 }
 
 function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
@@ -571,7 +588,7 @@ function returnAllBooks(action: ReturnType) {
   Dialog.create({
     component: ReturnBooksConfirmDialog,
     componentProps: {
-      bookCopies: ownedCopies.value.filter((copy) =>
+      booksToReturn: ownedCopies.value.filter((copy) =>
         selectableRows.value.find((row) => row === copy),
       ),
       disclaimer: t(`${translationsPath}.disclaimer`),
@@ -591,6 +608,7 @@ function returnAllBooks(action: ReturnType) {
             : "confirms.returnEverything.title"
         }`,
       ),
+      booksSoldToOthers: soldCopies.value.length,
     },
   }).onOk(() => {
     onDialogOK(action);

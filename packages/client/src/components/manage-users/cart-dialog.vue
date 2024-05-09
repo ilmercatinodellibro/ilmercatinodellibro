@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" :persistent="loading" @hide="onDialogHide">
     <k-dialog-card
       :title="
         $t('manageUsers.cartDialog.title', [
