@@ -363,7 +363,7 @@ export class RetailLocationResolver {
       getTotals(),
     ]);
 
-    return [
+    return {
       totalBooksWithProblems,
       totalPresentBooks,
       totalSoldBooks,
@@ -373,6 +373,6 @@ export class RetailLocationResolver {
       settleableTotal,
       settledTotal,
       totalRevenue,
-    ];
+    };
   }
 }
