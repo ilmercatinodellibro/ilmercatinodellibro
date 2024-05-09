@@ -31,6 +31,7 @@ export default {
   emailVerified:
     "La tua email è stata verificata correttamente, ora puoi accedere utilizzando le tue credenziali",
   backToLogin: "Torna al login",
+  backToLocations: "Torna alle sedi",
   registeredSuccessfully: "Registrazione riuscita 🎉 ",
   couldNotRegister: "Non è stato possibile registrare l'utente.",
   couldNotUpdate:

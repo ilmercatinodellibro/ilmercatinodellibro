@@ -30,6 +30,7 @@ export default {
   emailVerified:
     "Your email has been correctly verified, you can now login using your credentials",
   backToLogin: "Back to login",
+  backToLocations: "Back to locations",
   registeredSuccessfully: "Registration successful 🎉 ",
   couldNotRegister: "Could not register the new user.",
   couldNotUpdate: "Could not update the selected user's data.",
