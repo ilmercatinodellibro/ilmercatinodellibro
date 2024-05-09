@@ -143,3 +143,9 @@ mutation refundBookCopy($input: RefundBookCopyInput!) {
     ...BookCopySummary
   }
 }
+
+mutation donateBookCopy($input: DonateBookCopyInput!) {
+  donateBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}

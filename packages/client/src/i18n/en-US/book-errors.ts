@@ -29,4 +29,6 @@ export default {
   notReimbursed: "Could not reimburse the selected copy to the customer.",
   notAllReimbursed:
     "Could not reimburse all the selected copies to the customer.",
+  notDonated: "Could not donate the selected copy to the Mercatino.",
+  notAllDonated: "Could not donate all the selected copies to the Mercatino.",
 };

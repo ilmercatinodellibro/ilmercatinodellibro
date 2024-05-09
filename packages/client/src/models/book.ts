@@ -50,3 +50,5 @@ export type SettingsUpdate =
       settings: Settings;
     }
   | { type: "reset" };
+
+export type ReturnType = "return-and-donate" | "return-everything";

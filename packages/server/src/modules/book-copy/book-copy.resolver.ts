@@ -24,6 +24,7 @@ import {
 import { AuthService } from "src/modules/auth/auth.service";
 import {
   BookCopyCreateInput,
+  DonateBookCopyInput,
   RefundBookCopyInput,
   ReimburseBookCopyInput,
   ReturnBookCopyInput,
@@ -531,6 +532,8 @@ export class BookCopyResolver {
     return bookCopies;
   }
 
+  // Consider checking for donated book copies, as they can technically no longer be reimbursed or returned
+  // Left out for now as donations should only ever occur at the end of the Mercatino's activity period
   @Mutation(() => BookCopy, {
     description: "Refund the book copy to the buyer",
   })
@@ -711,6 +714,72 @@ export class BookCopyResolver {
         updatedById: userId,
         reimbursedAt: new Date(),
         reimbursedById: userId,
+      },
+    });
+  }
+
+  @Mutation(() => BookCopy, {
+    description:
+      "Reimburse the owner of the book copy that got damaged/lost/etc. under Mercatino's responsibility.",
+  })
+  async donateBookCopy(
+    @Input() { bookCopyId }: DonateBookCopyInput,
+    @CurrentUser() { id: userId }: User,
+  ) {
+    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
+      where: {
+        id: bookCopyId,
+      },
+      include: {
+        book: {
+          select: {
+            retailLocationId: true,
+          },
+        },
+        sales: {
+          where: {
+            refundedAt: {
+              not: null,
+            },
+          },
+        },
+      },
+    });
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: bookCopy.book.retailLocationId,
+      message:
+        "You don't have the necessary permissions to donate this book copy.",
+    });
+
+    if (bookCopy.sales.length > 0) {
+      throw new ConflictException(
+        "The book copy has been sold. It must be refunded to the buyer first, before it can be reimbursed to the owner.",
+      );
+    }
+
+    if (bookCopy.returnedAt) {
+      throw new ConflictException("The book copy has already been returned.");
+    }
+
+    if (bookCopy.reimbursedAt) {
+      throw new ConflictException("The book copy has already been reimbursed.");
+    }
+
+    if (bookCopy.donatedAt) {
+      throw new ConflictException("The book copy has already been donated.");
+    }
+
+    return this.prisma.bookCopy.update({
+      where: {
+        id: bookCopy.id,
+      },
+      data: {
+        updatedAt: new Date(),
+        updatedById: userId,
+        donatedAt: new Date(),
+        donatedById: userId,
       },
     });
   }

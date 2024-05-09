@@ -248,9 +248,11 @@ import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { getStatus, isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
+import { ReturnType } from "src/models/book";
 import {
   BookCopyDetailsFragment,
   ProblemDetailsFragment,
+  useDonateBookCopyMutation,
   useGetBookCopiesByOwnerQuery,
   useGetReturnedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
@@ -271,8 +273,6 @@ const props = defineProps<{
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
-
-type ReturnType = "return-and-donate" | "return-everything";
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<ReturnType>();
@@ -497,12 +497,20 @@ async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
       refetchReturnedBookCopes(queryArgs),
     ]);
 
-    selectedRows.value = [];
+    if (bookCopies.length > 0) {
+      selectedRows.value = [];
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      selectedRows.value.splice(selectedRows.value.indexOf(bookCopies[0]!));
+    }
   } catch {
-    notifyError(t("bookErrors.notAllReturned"));
+    notifyError(
+      t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Returned`),
+    );
   }
 }
 
+const { donateBookCopy } = useDonateBookCopyMutation();
 function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
   Dialog.create({
     title: t(
@@ -519,9 +527,34 @@ function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
     ),
     cancel: t("common.cancel"),
     persistent: true,
-  }).onOk(() => {
-    // FIXME: mark as donated
-    bookCopies;
+  }).onOk(async () => {
+    try {
+      await Promise.all(
+        bookCopies.map(({ id: bookCopyId }) => {
+          return donateBookCopy({
+            input: {
+              bookCopyId,
+              retailLocationId: selectedLocation.value.id,
+            },
+          });
+        }),
+      );
+      await refetchBookCopiesByOwner({
+        retailLocationId: selectedLocation.value.id,
+        userId: props.user.id,
+      });
+
+      if (bookCopies.length > 0) {
+        selectedRows.value = [];
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        selectedRows.value.splice(selectedRows.value.indexOf(bookCopies[0]!));
+      }
+    } catch {
+      notifyError(
+        t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Donated`),
+      );
+    }
   });
 }
 
