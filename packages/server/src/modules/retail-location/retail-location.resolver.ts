@@ -90,6 +90,15 @@ export class RetailLocationResolver {
       role: "ADMIN",
     });
 
+    if (
+      !maxBookingDays ||
+      !warehouseMaxBlockSize ||
+      maxBookingDays <= 0 ||
+      warehouseMaxBlockSize <= 0
+    ) {
+      throw new BadRequestException("Invalid settings values");
+    }
+
     const existingSettings = await this.prisma.retailLocation.findUniqueOrThrow(
       {
         where: {
@@ -111,15 +120,6 @@ export class RetailLocationResolver {
       })
     ) {
       return;
-    }
-
-    if (
-      !maxBookingDays ||
-      !warehouseMaxBlockSize ||
-      maxBookingDays <= 0 ||
-      warehouseMaxBlockSize <= 0
-    ) {
-      throw new BadRequestException("Invalid settings values");
     }
 
     return await this.prisma.retailLocation.update({
