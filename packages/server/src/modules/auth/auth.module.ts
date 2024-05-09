@@ -4,6 +4,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { AuthConfiguration, authConfiguration } from "src/config/auth";
 import { FacebookStrategy } from "src/modules/auth/strategies/facebook.strategy";
+import { GoogleStrategy } from "src/modules/auth/strategies/google.strategy";
 import { MailModule } from "../mail/mail.module";
 import { PrismaModule } from "../prisma/prisma.module";
 import { UserModule } from "../user/user.module";
@@ -39,6 +40,7 @@ import { LocalStrategy } from "./strategies/local.strategy";
     LocalStrategy,
     JwtStrategy,
     FacebookStrategy,
+    GoogleStrategy,
   ],
   exports: [AuthService],
   controllers: [AuthController],

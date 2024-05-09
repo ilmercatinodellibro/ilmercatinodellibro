@@ -91,13 +91,13 @@ model User {
 
 enum FederationProvider {
   FACEBOOK
-  // GOOGLE
+  GOOGLE
 }
 
 model FederatedUser {
   provider       FederationProvider
   providerUserId String             @map("provider_user_id")
-  userId         String             @id @map("user_id")
+  userId         String             @map("user_id")
   user           User               @relation(fields: [userId], references: [id])
 
   @@unique([provider, userId])

@@ -1,19 +1,19 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
-import { Profile, Strategy, StrategyOptions } from "passport-facebook";
+import { Profile, Strategy, StrategyOptions } from "passport-google-oauth20";
 import { AuthConfiguration, authConfiguration } from "src/config/auth";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { UserService } from "src/modules/user/user.service";
 
-export const FACEBOOK_STRATEGY_NAME = "facebook";
+export const GOOGLE_STRATEGY_NAME = "google";
 
-export const FACEBOOK_STRATEGY_ENDPOINT = "auth/facebook/callback";
+export const GOOGLE_STRATEGY_ENDPOINT = "auth/google/callback";
 
 @Injectable()
-export class FacebookStrategy extends PassportStrategy(
+export class GoogleStrategy extends PassportStrategy(
   Strategy,
-  FACEBOOK_STRATEGY_NAME,
+  GOOGLE_STRATEGY_NAME,
 ) {
   constructor(
     @Inject(rootConfiguration.KEY)
@@ -24,12 +24,10 @@ export class FacebookStrategy extends PassportStrategy(
     private readonly userService: UserService,
   ) {
     super({
-      clientID: authConfig.facebook.clientId,
-      clientSecret: authConfig.facebook.clientSecret,
-      callbackURL: `${rootConfig.serverUrl}/${FACEBOOK_STRATEGY_ENDPOINT}`,
-      enableProof: true,
-      scope: ["email"],
-      profileFields: ["id", "name", "email"],
+      clientID: authConfig.google.clientId,
+      clientSecret: authConfig.google.clientSecret,
+      callbackURL: `${rootConfig.serverUrl}/${GOOGLE_STRATEGY_ENDPOINT}`,
+      scope: ["profile", "email"],
     } satisfies StrategyOptions);
   }
 
@@ -40,7 +38,7 @@ export class FacebookStrategy extends PassportStrategy(
   ) {
     return await this.userService.createFederatedUser({
       ...profile,
-      provider: "FACEBOOK",
+      provider: "GOOGLE",
     });
   }
 

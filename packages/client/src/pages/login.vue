@@ -61,11 +61,17 @@
 
       <q-separator />
 
-      <q-card-section>
+      <q-card-section class="flex flex-center gap-8">
         <q-btn
           :href="`/auth/facebook?locationId=${selectedLocation.id}`"
           :icon="mdiFacebook"
           color="blue"
+        />
+
+        <q-btn
+          :href="`/auth/google?locationId=${selectedLocation.id}`"
+          :icon="mdiGoogle"
+          color="red"
         />
       </q-card-section>
     </q-card>
@@ -74,7 +80,7 @@
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client/core";
-import { mdiFacebook } from "@quasar/extras/mdi-v7";
+import { mdiFacebook, mdiGoogle } from "@quasar/extras/mdi-v7";
 import { Notify } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";

@@ -258,3 +258,12 @@ After that, see [App dashboard - Basic settings](https://developers.facebook.com
 - `FACEBOOK_CLIENT_SECRET`: App Secret from the basic app settings
 
 Follow the instructions in the app dashboard to complete any other necessary steps such as business verification and publishing the app, which are required to use the app in production.
+
+### Google login
+
+To enable Google login, you need to create a Google project and set some environment variables.
+Go to the [Google Cloud Platform Console](https://console.cloud.google.com/) and create a new project.
+See [Create a project - Google Identity Platform](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid) to configure the project. In OAuth consent screen, in the `Scopes` step, add the `.../auth/userinfo.email` and `.../auth/userinfo.profile` scopes. In the `OAuth 2.0 Client IDs` section, create a new OAuth 2.0 Client ID. Add `http://localhost:3000/auth/google/callback` and the related production endpoint to `Authorized redirect URIs`. From the same page, get the Client ID and Client Secret to set the following environment variables in the `.env` file:
+
+- `GOOGLE_CLIENT_ID`: Client ID from the OAuth 2.0 Client ID
+- `GOOGLE_CLIENT_SECRET`: Client Secret from the OAuth 2.0 Client ID

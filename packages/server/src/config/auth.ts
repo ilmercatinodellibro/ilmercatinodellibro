@@ -9,15 +9,24 @@ const authSchema = z.object({
     clientId: z.string(),
     clientSecret: z.string(),
   }),
+  google: z.object({
+    clientId: z.string(),
+    clientSecret: z.string(),
+  }),
 });
 
 export const authConfiguration = registerAs("auth", () =>
   authSchema.parse({
     applicationSecret: process.env.APPLICATION_SECRET,
     tokenExpirationTime: process.env.TOKEN_EXPIRATION_TIME,
+
     facebook: {
       clientId: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    },
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     },
   }),
 );

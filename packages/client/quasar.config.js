@@ -212,7 +212,7 @@ module.exports = configure(function (ctx) {
           changeOrigin: true,
           target: process.env.GRAPHQL_DOMAIN,
         },
-        "/auth/facebook": {
+        "/auth": {
           changeOrigin: true,
           target: process.env.GRAPHQL_DOMAIN,
         },
