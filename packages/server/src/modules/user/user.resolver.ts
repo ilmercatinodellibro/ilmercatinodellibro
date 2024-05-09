@@ -255,10 +255,8 @@ export class UserResolver {
                 deletedAt: null,
                 cartItem: null,
                 AND: [
-                  /*
-                   The request should not show up if a previous sale from this user was refunded, because
-                   a user that returned a certain book copy should not see it as available for sale again
-                   */
+                  // The request should not show up if a previous sale from this user was refunded, because
+                  // a user that returned a certain book copy should not see it as available for sale again
                   {
                     saleId: null,
                   },
