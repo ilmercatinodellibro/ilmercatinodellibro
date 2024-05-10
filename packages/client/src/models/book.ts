@@ -24,8 +24,8 @@ export type BookCompleteFilters = keyof Omit<BookQueryFilter, "search">;
 /*| UtilityCategory*/
 
 export interface SchoolFilters {
-  schoolCodes: string[];
-  courses: string[];
+  selectedSchoolCodes: string[];
+  selectedSchoolCourseIds: string[];
 }
 
 export const COURSE_YEARS = [1, 2, 3, 4, 5] as const;

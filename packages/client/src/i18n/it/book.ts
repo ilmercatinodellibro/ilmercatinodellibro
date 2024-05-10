@@ -39,6 +39,10 @@ export default {
   filters: {
     options: {
       isAvailable: "Disponibili",
+      schoolCodes: "Codici Scuole",
+      schoolCourseIds: "Id Corsi",
+      hasProblems: "Con problemi",
+      isSold: "Venduti",
       // HIGH_UTILITY: "Utilità Alta",
       // MEDIUM_UTILITY: "Utilità Media",
       // LOW_UTILITY: "Utilità Bassa",

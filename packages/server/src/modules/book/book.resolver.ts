@@ -36,6 +36,8 @@ export class BookResolver {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
     const searchText = filter.search?.trim().replaceAll(" ", "%");
+    const schoolCodes = filter.schoolCodes;
+    const schoolCourseIds = filter.schoolCourseIds;
 
     if (rowsPerPage > 200) {
       throw new UnprocessableEntityException(
@@ -47,8 +49,92 @@ export class BookResolver {
       retailLocationId,
 
       meta: {
-        isAvailable: filter.isAvailable ? true : undefined,
+        isAvailable: filter.isAvailable ?? undefined,
       },
+
+      // Filter for sales
+      ...(filter.isSold === undefined
+        ? {}
+        : {
+            copies: {
+              some: {
+                ...(filter.isSold
+                  ? {
+                      sales: {
+                        some: { refundedAt: null },
+                      },
+                    }
+                  : {
+                      OR: [
+                        { sales: {} },
+                        {
+                          sales: {
+                            every: {
+                              refundedAt: { not: null },
+                            },
+                          },
+                        },
+                      ],
+                    }),
+              },
+            },
+          }),
+
+      // Filter for problems
+      ...(filter.hasProblems === undefined
+        ? {}
+        : {
+            copies: {
+              some: {
+                ...(filter.hasProblems
+                  ? {
+                      problems: {
+                        some: { resolvedAt: null },
+                      },
+                    }
+                  : {
+                      OR: [
+                        { problems: {} },
+                        {
+                          problems: {
+                            every: {
+                              resolvedAt: { not: null },
+                            },
+                          },
+                        },
+                      ],
+                    }),
+              },
+            },
+          }),
+
+      // Filters for school codes only if defined
+      ...(schoolCodes
+        ? {
+            courses: {
+              some: {
+                schoolCourse: {
+                  schoolCode: {
+                    in: schoolCodes,
+                  },
+                },
+              },
+            },
+          }
+        : {}),
+
+      // Filters for school courses only if defined
+      ...(schoolCourseIds
+        ? {
+            courses: {
+              some: {
+                schoolCourseId: {
+                  in: schoolCourseIds,
+                },
+              },
+            },
+          }
+        : {}),
 
       OR: searchText
         ? [

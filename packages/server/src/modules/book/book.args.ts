@@ -20,6 +20,18 @@ export class BookQueryFilter {
 
   @Field(() => Boolean, { nullable: true })
   isAvailable?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  isSold?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  hasProblems?: boolean;
+
+  @Field(() => [String], { nullable: true })
+  schoolCodes?: string[];
+
+  @Field(() => [String], { nullable: true })
+  schoolCourseIds?: string[];
 }
 
 @ArgsType()

@@ -394,6 +394,8 @@ import {
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
 import { Dialog, Notify, QTooltipProps, Screen } from "quasar";
+import { computed, provide, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
 import { setLanguage } from "src/boot/i18n";
 import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
@@ -415,8 +417,6 @@ import {
   UserFragmentDoc,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
-import { computed, provide, watch } from "vue";
-import { useI18n } from "vue-i18n";
 
 // It would work with :inset-level="1" if we used "avatar" option instead of "side" for the header icon
 // but we only need 16px of margin from the icon, so we defined a value which would align the text accordingly

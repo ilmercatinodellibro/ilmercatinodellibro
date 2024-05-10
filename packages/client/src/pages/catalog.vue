@@ -81,8 +81,8 @@ const filterOptions = useTranslatedFilters("book.filters.options");
 const tableFilter = reactive<TableFilters>({
   searchQuery: "",
   schoolFilters: {
-    schoolCodes: [],
-    courses: [],
+    selectedSchoolCodes: [],
+    selectedSchoolCourseIds: [],
   },
   filters: [],
 });

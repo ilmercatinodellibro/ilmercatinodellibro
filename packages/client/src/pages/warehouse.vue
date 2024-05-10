@@ -251,8 +251,8 @@ const tableFilter = reactive<TableFilters>({
   filters: [],
   searchQuery: "",
   schoolFilters: {
-    courses: [],
-    schoolCodes: [],
+    selectedSchoolCourseIds: [],
+    selectedSchoolCodes: [],
   },
 });
 
@@ -262,6 +262,8 @@ function updateFilters(newFilters: TableFilters) {
   tableFilter.schoolFilters = newFilters.schoolFilters;
 }
 
+// As I can understand this filter isn't actually used BUT by passing our filters to the QTable
+// allows the component to throw the "@request" event which is used to refetch our data
 const filterMethod: QTableProps["filterMethod"] = (rows) => {
   return rows as BookWithAvailableCopiesFragment[];
 };
@@ -382,18 +384,44 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   ],
 );
 
+const refetchFilterProxy = computed(() => {
+  // Only considers the checkbox options, required to send undefined in and ignore the filter when not required
+  const areFiltersSelected = tableFilter.filters.length === 0;
+  const booleanFilters = areFiltersSelected
+    ? undefined
+    : {
+        isAvailable: tableFilter.filters.includes("isAvailable"),
+        isSold: tableFilter.filters.includes("isSold"),
+        hasProblems: tableFilter.filters.includes("hasProblem"),
+      };
+
+  const selectedSchoolCodes =
+    tableFilter.schoolFilters?.selectedSchoolCodes ?? [];
+  const selectedSchoolCourseIds =
+    tableFilter.schoolFilters?.selectedSchoolCourseIds ?? [];
+
+  const schoolFilters = {
+    schoolCodes:
+      selectedSchoolCodes.length > 0 ? selectedSchoolCodes : undefined,
+    schoolCourseIds:
+      selectedSchoolCourseIds.length > 0 ? selectedSchoolCourseIds : undefined,
+  };
+
+  return {
+    search: tableFilter.searchQuery,
+    ...booleanFilters,
+    ...schoolFilters,
+  };
+});
+
 const onBooksRequest: QTableProps["onRequest"] = async ({
   pagination: { page, rowsPerPage },
 }) => {
-  booksLoading.value = true;
-
   await refetchBooks({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
-    filter: {
-      search: tableFilter.searchQuery,
-    },
+    filter: refetchFilterProxy.value,
   });
 
   booksPagination.value.rowsNumber = books.value?.rowsCount;
@@ -412,6 +440,7 @@ const onCopyRequest: QTableProps["onRequest"] = async ({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
+    filter: refetchFilterProxy.value,
   });
 
   copyPagination.value.rowsNumber = bookCopies.value?.rowsCount;
@@ -435,7 +464,10 @@ function swapView() {
 
   tableFilter.searchQuery = "";
   tableFilter.filters = [];
-  tableFilter.schoolFilters = { courses: [], schoolCodes: [] };
+  tableFilter.schoolFilters = {
+    selectedSchoolCourseIds: [],
+    selectedSchoolCodes: [],
+  };
 
   if (isSortedByCopyCode.value) {
     copyPage.value = 0;
