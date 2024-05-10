@@ -1,0 +1,23 @@
+fragment School on School {
+  code
+  name
+}
+
+query getSchools {
+  schools {
+    ...School
+  }
+}
+
+fragment SchoolCourse on SchoolCourse {
+  grade
+  id
+  schoolCode
+  section
+}
+
+query getSchoolCourses($schoolCodes: [String!]!) {
+  schoolCourses(schoolCodes: $schoolCodes) {
+    ...SchoolCourse
+  }
+}
