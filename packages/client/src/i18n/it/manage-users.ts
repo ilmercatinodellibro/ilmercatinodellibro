@@ -159,6 +159,8 @@ export default {
           "I libri nella lista sottostante saranno restituiti al cliente in quanto legittimo proprietario. Non potrai annullare questa azione. Vuoi procedere?",
         tableTitle: "Libri in restituzione",
       },
+      confirmError:
+        "Non è stato possibile terminare la liquidazione del cliente selezionato.",
     },
   },
   goToCart: "Vai al carrello",

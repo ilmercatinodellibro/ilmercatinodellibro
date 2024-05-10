@@ -40,4 +40,8 @@ export default {
     "Non è stato possibile rimborsare tutte le copie al cliente.",
   notDonated: "Non è stato possibile donare la copia selezionata al Mercatino.",
   notAllDonated: "Non è stato possibile donare tutte le copie al Mercatino.",
+  notProblem:
+    "Non è stato possibile segnalare il problema per la copia selezionata.",
+  notSolveProblem:
+    "Non è stato possibile risolvere il problema per la copia selezionata.",
 };

@@ -158,6 +158,7 @@ export default {
           "The books in the list below will be returned to the customer as they are the legitimate owner. You will not be able to cancel this action. Do you wish to proceed?",
         tableTitle: "Books in return",
       },
+      confirmError: "Could not finish the settlement of the selected customer.",
     },
   },
   goToCart: "Go to the cart",
