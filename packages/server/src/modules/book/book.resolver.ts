@@ -49,7 +49,9 @@ export class BookResolver {
       retailLocationId,
 
       meta: {
-        isAvailable: filter.isAvailable ?? undefined,
+        // This filter will only match either only available or not available if we only leave filter.isAvailable
+        // But we want filter.isAvailable: false to return every book, which means undefined in prisma's where syntax
+        isAvailable: filter.isAvailable ? true : undefined,
       },
 
       // Filter for sales

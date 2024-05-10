@@ -8,7 +8,7 @@ export default {
   filters: {
     isAvailable: "Available",
     isSold: "Sold",
-    hasProblem: "With Problem",
+    hasProblems: "With Problem",
   } satisfies Record<Exclude<keyof BookCopyQueryFilter, "search">, string>,
   owner: "Owner",
   bookCopyStatus: {

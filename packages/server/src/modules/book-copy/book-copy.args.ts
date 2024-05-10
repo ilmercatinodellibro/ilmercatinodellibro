@@ -26,7 +26,7 @@ export class BookCopyQueryFilter {
   isSold?: boolean;
 
   @Field(() => Boolean, { nullable: true })
-  hasProblem?: boolean;
+  hasProblems?: boolean;
 }
 
 @ArgsType()

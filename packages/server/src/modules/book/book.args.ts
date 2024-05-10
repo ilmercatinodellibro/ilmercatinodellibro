@@ -8,25 +8,14 @@ import {
   PickType,
 } from "@nestjs/graphql";
 import { Book } from "src/@generated";
+import { BookCopyQueryFilter } from "src/modules/book-copy/book-copy.args";
 import {
   LocationBoundInput,
   LocationBoundQueryArgs,
 } from "src/modules/retail-location";
 
 @InputType()
-export class BookQueryFilter {
-  @Field(() => String, { nullable: true })
-  search?: string;
-
-  @Field(() => Boolean, { nullable: true })
-  isAvailable?: boolean;
-
-  @Field(() => Boolean, { nullable: true })
-  isSold?: boolean;
-
-  @Field(() => Boolean, { nullable: true })
-  hasProblems?: boolean;
-
+export class BookQueryFilter extends BookCopyQueryFilter {
   @Field(() => [String], { nullable: true })
   schoolCodes?: string[];
 

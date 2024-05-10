@@ -217,7 +217,11 @@ export class BookCopyResolver {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
     const searchText = filter.search?.trim().replaceAll(" ", "%");
-    const { hasProblem = false, isAvailable = false, isSold = false } = filter;
+    const {
+      hasProblems: hasProblem = false,
+      isAvailable = false,
+      isSold = false,
+    } = filter;
 
     const showOnlyAvailable = isAvailable && !isSold;
     const showOnlySold = isSold && !isAvailable;
