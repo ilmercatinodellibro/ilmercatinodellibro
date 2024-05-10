@@ -116,8 +116,8 @@ function updateSearch(newSearchQuery: string | null) {
   emit("update:modelValue", newFilters.value as TableFilters);
 }
 
-function updateFilters(filters: TableFilters["filters"]) {
-  newFilters.value.filters = filters;
+function updateFilters(filters: TableFilters["filters"] | null) {
+  newFilters.value.filters = filters ?? [];
   emit("update:modelValue", newFilters.value);
 }
 
