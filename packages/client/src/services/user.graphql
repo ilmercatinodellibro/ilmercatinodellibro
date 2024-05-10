@@ -76,3 +76,7 @@ mutation updateUser($input: UpdateUserPayload!) {
     ...UserSummary
   }
 }
+
+mutation settleUser($input: SettleUserInput!) {
+  settleUser(input: $input)
+}

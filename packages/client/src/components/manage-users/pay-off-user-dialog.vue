@@ -221,7 +221,7 @@
         <q-btn
           outline
           :label="$t('manageUsers.payOffUserDialog.returnAndDonate')"
-          @click="returnAllBooks('return-and-donate')"
+          @click="returnAllBooks('REFUND')"
         />
         <q-btn
           color="green"
@@ -230,7 +230,7 @@
               totalCheckoutMoney.toFixed(2),
             ])
           "
-          @click="returnAllBooks('return-everything')"
+          @click="returnAllBooks('RETURN')"
         />
       </template>
     </k-dialog-card>
@@ -248,10 +248,10 @@ import {
 } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { SettleRemainingType } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { getStatus, isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
-import { ReturnType } from "src/models/book";
 import {
   BookCopyDetailsFragment,
   ProblemDetailsFragment,
@@ -264,7 +264,10 @@ import {
   useReturnBookCopyMutation,
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UserSummaryFragment } from "src/services/user.graphql";
+import {
+  UserSummaryFragment,
+  useSettleUserMutation,
+} from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
@@ -279,7 +282,7 @@ const props = defineProps<{
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
-  useDialogPluginComponent<ReturnType>();
+  useDialogPluginComponent<SettleRemainingType>();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
@@ -637,9 +640,10 @@ function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
   });
 }
 
-function returnAllBooks(action: ReturnType) {
+const { settleUser } = useSettleUserMutation();
+function returnAllBooks(remainingType: SettleRemainingType) {
   const translationsPath = `manageUsers.payOffUserDialog.confirms.${
-    action === "return-and-donate" ? "returnAndDonate" : "returnEverything"
+    remainingType === "REFUND" ? "returnAndDonate" : "returnEverything"
   }`;
   Dialog.create({
     component: ReturnBooksConfirmDialog,
@@ -648,7 +652,7 @@ function returnAllBooks(action: ReturnType) {
       disclaimer: t(`${translationsPath}.disclaimer`),
       saveLabel: t(
         `manageUsers.payOffUserDialog.${
-          action === "return-and-donate"
+          remainingType === "REFUND"
             ? "confirms.returnAndDonate.buttonText"
             : "returnEverything"
         }`,
@@ -657,7 +661,7 @@ function returnAllBooks(action: ReturnType) {
       tableTitle: t(`${translationsPath}.tableTitle`),
       title: t(
         `manageUsers.payOffUserDialog.${
-          action === "return-and-donate"
+          remainingType === "RETURN"
             ? "returnAndDonate"
             : "confirms.returnEverything.title"
         }`,
@@ -665,11 +669,16 @@ function returnAllBooks(action: ReturnType) {
       booksSoldToOthers: soldCopies.value.length,
     },
   }).onOk(async () => {
-    // FIXME: implement correct mutations
-    if (action === "return-and-donate") {
-      await donateBookCopies(selectableRows.value);
-    } else {
-      await returnBooks(selectableRows.value);
+    try {
+      await settleUser({
+        input: {
+          remainingType,
+          retailLocationId: selectedLocation.value.id,
+          userId: props.user.id,
+        },
+      });
+    } catch {
+      notifyError(t("common.genericErrorMessage"));
     }
     onDialogOK();
   });
