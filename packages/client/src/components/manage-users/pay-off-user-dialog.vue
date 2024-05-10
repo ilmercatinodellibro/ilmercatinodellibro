@@ -156,7 +156,9 @@
                 </span>
 
                 <q-btn
-                  v-else-if="col.name === 'actions'"
+                  v-else-if="
+                    col.name === 'actions' && ownedCopies.includes(row)
+                  "
                   :icon="mdiDotsVertical"
                   dense
                   flat
@@ -196,6 +198,7 @@
                       }}
                     </q-item>
                     <q-item
+                      v-if="selectableRows.includes(row)"
                       class="items-center"
                       clickable
                       @click="reportProblems([row])"
