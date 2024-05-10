@@ -111,25 +111,6 @@
                 <utility-chip :utility="value" />
               </q-td>
             </template>
-
-            <template #body-cell-actions="{ row }">
-              <q-td>
-                <!-- Hiding the possibility to return a lost book copy -->
-                <chip-button
-                  v-if="
-                    !(
-                      hasProblem(row) &&
-                      getCurrentActiveProblem(row)?.type === 'LOST'
-                    )
-                  "
-                  :label="
-                    $t('manageUsers.payOffUserDialog.returnOptions.return')
-                  "
-                  color="primary"
-                  @click="returnBook(row)"
-                />
-              </q-td>
-            </template>
           </dialog-table>
         </q-tab-panel>
       </q-tab-panels>
@@ -144,11 +125,7 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
-import {
-  getCurrentActiveProblem,
-  hasProblem,
-  isAvailable,
-} from "src/helpers/book-copy";
+import { isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
@@ -431,11 +408,6 @@ function openDeleteBookDialog(bookIndex: number) {
   }).onOk(() => {
     booksToRegister.value.splice(bookIndex, 1);
   });
-}
-
-function returnBook(book: BookSummaryFragment) {
-  // FIXME: return the book to the Mercatino
-  book;
 }
 </script>
 

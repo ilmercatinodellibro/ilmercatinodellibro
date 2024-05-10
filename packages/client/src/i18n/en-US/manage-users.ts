@@ -45,12 +45,12 @@ export default {
     notes: "Notes",
   },
   inRetrieval: "In retrieval",
-  retrieved: "Retrieved and returnable",
+  retrieved: "Retrieved",
   searchHint: "Insert an ISBN code to add the book to the list",
   inStockDialog: {
     title: "Books of {0} in Stock",
     retrievableTooltip:
-      "Includes the copies that are still present in stock, not lost, not requested",
+      "Includes the copies that are still present in stock, lost or requested",
     retrieveBtn: "Retrieve all the books in the list",
     deleteBookBtnTooltip: "Delete permanently this copy from the database",
     errors: {
