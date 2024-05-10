@@ -415,14 +415,9 @@ function openPayOff(user: CustomerFragment) {
     componentProps: {
       user,
     },
-  })
-    .onOk((payload) => {
-      // FIXME: add checkout logic
-      payload;
-    })
-    .onDismiss(() => {
-      tableRef.value.requestServerInteraction();
-    });
+  }).onDismiss(() => {
+    tableRef.value.requestServerInteraction();
+  });
 }
 
 const { updateUser } = useUpdateUserMutation();

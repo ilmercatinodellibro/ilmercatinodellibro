@@ -10,7 +10,10 @@ export const getCurrentActiveProblem = ({
 
 export const isAvailable = (bookCopy: BookCopyDetailsFragment) => {
   const status = getStatus(bookCopy);
-  return status === "available" || status === "donated";
+  return (
+    (status === "available" || status === "donated") &&
+    bookCopy.reimbursedAt === null
+  );
 };
 
 export type BookCopyStatus =

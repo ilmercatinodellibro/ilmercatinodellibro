@@ -43,8 +43,8 @@
         :rows-per-page-options="[0]"
       />
       <template #card-actions>
-        <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel" />
-        <q-btn :label="saveLabel" color="positive" @click="onDialogOK" />
+        <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
+        <q-btn :label="saveLabel" color="positive" @click="onDialogOK()" />
       </template>
     </k-dialog-card>
   </q-dialog>

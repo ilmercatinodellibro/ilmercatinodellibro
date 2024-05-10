@@ -48,6 +48,8 @@ fragment BookCopyDetails on BookCopy {
   updatedById
   donatedAt
   donatedById
+  reimbursedAt
+  reimbursedById
   sales {
     refundedAt
   }

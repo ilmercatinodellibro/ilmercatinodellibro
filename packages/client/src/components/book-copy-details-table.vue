@@ -105,9 +105,9 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
 
 const { useGetBookCopiesQuery } = useBookCopyService();
 
-const { bookCopies, loading } = useGetBookCopiesQuery({
+const { bookCopies, loading } = useGetBookCopiesQuery(() => ({
   bookId: props.bookId,
-});
+}));
 
 function getColspan(columnName: string) {
   return columnName === "original-code" || columnName === "status" ? 2 : 1;
