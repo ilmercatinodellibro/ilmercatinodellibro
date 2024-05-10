@@ -408,10 +408,11 @@ import {
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
-import { SettingsUpdate } from "src/models/book";
+import { Settings, SettingsUpdate } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
+import { useUpdateRetailLocationSettingsMutation } from "src/services/retail-location.graphql";
 import {
   UserFragmentDoc,
   useUpdateUserMutation,
@@ -478,20 +479,32 @@ const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
 
 const { selectedLocation } = useRetailLocationService();
 
+const { updateRetailLocationSettings } =
+  useUpdateRetailLocationSettingsMutation();
 function openSettings() {
   Dialog.create({
     component: SettingsDialog,
     componentProps: {
-      maxBooksDimensionCurrent: selectedLocation.value.warehouseMaxBlockSize,
-      purchaseRateCurrent: selectedLocation.value.buyRate,
-      reservationDaysCurrent: selectedLocation.value.maxBookingDays,
-      saleRateCurrent: selectedLocation.value.sellRate,
-    },
-  }).onOk((payload: SettingsUpdate) => {
+      warehouseMaxBlockSize: selectedLocation.value.warehouseMaxBlockSize,
+      buyRate: selectedLocation.value.buyRate,
+      maxBookingDays: selectedLocation.value.maxBookingDays,
+      sellRate: selectedLocation.value.sellRate,
+      payOffEnabled: selectedLocation.value.payOffEnabled,
+    } satisfies Settings,
+  }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
-      // FIXME: update the settings
+      try {
+        await updateRetailLocationSettings({
+          input: {
+            ...payload.settings,
+            retailLocationId: selectedLocation.value.id,
+          },
+        });
+      } catch {
+        notifyError(t("common.genericErrorMessage"));
+      }
     } else {
-      // FIXME: reset the settings
+      // TODO: perform annual reset
     }
   });
 }

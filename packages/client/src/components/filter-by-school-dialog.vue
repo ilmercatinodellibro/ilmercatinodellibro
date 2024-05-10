@@ -1,29 +1,64 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
-      :title="$t('book.filters.school')"
-      :submit-label="$t('book.filter')"
+      :title="t('book.filters.school')"
+      :submit-label="t('book.filter')"
       size="sm"
-      @submit="onDialogOK(newFilters)"
+      @submit="
+        onDialogOK({
+          selectedSchoolCodes,
+          selectedSchoolCourseIds,
+        })
+      "
       @cancel="onDialogCancel()"
     >
       <q-card-section class="column gap-16">
         <q-select
-          v-model="newFilters.courses"
-          :label="$t('book.filters.schoolFilter.fields.course')"
-          :options="filters.courses"
+          :model-value="selectedSchoolCodes"
+          :display-value="
+            selectedSchoolCodes.length === 0 ? t('general.all') : undefined
+          "
+          :disable="isSchoolsLoading"
+          :label="t('book.filters.schoolFilter.fields.school')"
+          :options="schools"
+          bottom-slots
+          clearable
+          emit-value
           fill-input
+          map-options
           multiple
+          option-label="name"
+          option-value="code"
           outlined
+          @update:model-value="
+            (newModel) => (selectedSchoolCodes = newModel ?? [])
+          "
         />
 
         <q-select
-          v-model="newFilters.schoolCodes"
-          :label="$t('book.filters.schoolFilter.fields.school')"
-          :options="filters.schoolCodes"
+          :model-value="selectedSchoolCourseIds"
+          :disable="
+            isSchoolsLoading ||
+            selectedSchoolCodes.length === 0 ||
+            isSchoolCoursesLoading
+          "
+          :display-value="
+            selectedSchoolCourseIds.length === 0 ? t('general.all') : undefined
+          "
+          :label="t('book.filters.schoolFilter.fields.course')"
+          :option-label="({ grade, section }) => `${grade}-${section}`"
+          :options="schoolCourses"
+          bottom-slots
+          clearable
+          emit-value
           fill-input
+          map-options
           multiple
+          option-value="id"
           outlined
+          @update:model-value="
+            (newModel) => (selectedSchoolCourseIds = newModel ?? [])
+          "
         />
       </q-card-section>
     </k-dialog-form-card>
@@ -31,25 +66,43 @@
 </template>
 
 <script setup lang="ts">
-import { cloneDeep } from "lodash-es";
 import { useDialogPluginComponent } from "quasar";
-import { reactive } from "vue";
+import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { SchoolFilters } from "src/models/book";
+import {
+  useGetSchoolCoursesQuery,
+  useGetSchoolsQuery,
+} from "src/services/school.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
+const { t } = useI18n();
+
 const props = defineProps<{
-  filters: SchoolFilters;
   selectedFilters?: SchoolFilters;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const newFilters = reactive<SchoolFilters>(
-  cloneDeep(props.selectedFilters) ?? {
-    schoolCodes: [],
-    courses: [],
-  },
+const { schools, loading: isSchoolsLoading } = useGetSchoolsQuery();
+
+const selectedSchoolCodes = ref(
+  props.selectedFilters?.selectedSchoolCodes ?? [],
 );
+
+const { schoolCourses, loading: isSchoolCoursesLoading } =
+  useGetSchoolCoursesQuery(
+    () => ({ schoolCodes: selectedSchoolCodes.value }),
+    () => ({ enabled: selectedSchoolCodes.value.length > 0 }),
+  );
+
+const selectedSchoolCourseIds = ref(
+  props.selectedFilters?.selectedSchoolCourseIds ?? [],
+);
+
+watch(selectedSchoolCodes, () => {
+  selectedSchoolCourseIds.value = [];
+});
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<SchoolFilters>();

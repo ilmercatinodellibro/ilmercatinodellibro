@@ -36,6 +36,7 @@ import { PushNotificationModule } from "./modules/push-notification/push-notific
 import { ReservationModule } from "./modules/reservation/reservation.module";
 import { RetailLocationModule } from "./modules/retail-location/retail-location.module";
 import { SaleModule } from "./modules/sale/sale.module";
+import { SchoolModule } from "./modules/school/school.module";
 import { UserModule } from "./modules/user/user.module";
 
 @Module({
@@ -148,6 +149,7 @@ import { UserModule } from "./modules/user/user.module";
     UserModule,
     ProblemModule,
     ReceiptModule,
+    SchoolModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }, DateScalar],
 })

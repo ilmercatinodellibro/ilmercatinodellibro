@@ -2,14 +2,15 @@
   <q-card-section class="full-width gap-16 items-center q-pa-md row">
     <q-input
       :model-value="newFilters.searchQuery"
-      debounce="400"
-      type="search"
-      class="col max-width-600"
-      outlined
       :placeholder="t('common.search')"
+      class="col max-width-600"
+      clearable
+      debounce="400"
+      outlined
+      type="search"
       @update:model-value="(query) => updateSearch(query as string)"
     >
-      <template #append>
+      <template v-if="newFilters.searchQuery.length === 0" #append>
         <q-icon :name="mdiMagnify" />
       </template>
     </q-input>
@@ -18,20 +19,13 @@
       :label="t('book.filter')"
       :model-value="newFilters.filters"
       :options="Object.keys(filterOptions)"
+      :display-value="selectedFiltersDisplay"
       class="width-200"
+      clearable
       multiple
       outlined
       @update:model-value="updateFilters"
     >
-      <!--
-        This is because the filters are translated and if a user were to switch
-        language they should update, so the key for each filter is an integer ID
-        and the label is what's shown in the filter UI
-      -->
-      <template v-if="Object.entries(newFilters.filters).length > 0" #selected>
-        {{ selectedFiltersDisplay }}
-      </template>
-
       <template #option="{ itemProps, opt, selected, toggleOption }">
         <q-item v-bind="itemProps">
           <q-item-section side top>
@@ -47,9 +41,22 @@
       </template>
 
       <template v-if="newFilters.schoolFilters" #after-options>
-        <q-item clickable @click="openSchoolFilterDialog()">
+        <q-item
+          clickable
+          @click="openSchoolFilterDialog(newFilters.schoolFilters)"
+        >
           <q-item-section>
             {{ t("book.filters.school") }}
+          </q-item-section>
+
+          <q-item-section v-if="isSchoolFilterSelected" side>
+            <q-btn
+              dense
+              flat
+              round
+              :icon="mdiCloseCircle"
+              @click.stop="clearSchoolFiltersFilters"
+            />
           </q-item-section>
         </q-item>
       </template>
@@ -62,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiMagnify } from "@quasar/extras/mdi-v7";
+import { mdiCloseCircle, mdiMagnify } from "@quasar/extras/mdi-v7";
 import { cloneDeep } from "lodash-es";
 import { Dialog } from "quasar";
 import { computed, ref } from "vue";
@@ -84,34 +91,49 @@ const emit = defineEmits<{
 
 const newFilters = ref(cloneDeep(props.modelValue));
 
-const selectedFiltersDisplay = computed(() =>
-  props.modelValue.filters
-    .map((filter) => props.filterOptions[filter])
-    .join(", "),
+const SCHOOL_FILTER_LABEL = t("book.filters.school");
+
+// We can just check the selection of the school to state that that filter is selected since courses
+// can be only selected after selecting at least a school
+const isSchoolFilterSelected = computed(
+  () =>
+    newFilters.value.schoolFilters &&
+    newFilters.value.schoolFilters.selectedSchoolCodes.length > 0,
 );
 
-function updateSearch(newSearchQuery: string) {
-  newFilters.value.searchQuery = newSearchQuery;
+// "selectedFiltersDisplay" is required because the filters are translated and if a user were to switch
+// language they should update, so the key for each filter is an integer ID
+// and the label is what's shown in the filter UI
+const selectedFiltersDisplay = computed(() =>
+  [
+    ...props.modelValue.filters.map((filter) => props.filterOptions[filter]),
+    ...(isSchoolFilterSelected.value ? [SCHOOL_FILTER_LABEL] : []),
+  ].join(", "),
+);
+
+function updateSearch(newSearchQuery: string | null) {
+  newFilters.value.searchQuery = newSearchQuery ?? "";
   emit("update:modelValue", newFilters.value as TableFilters);
 }
 
-function updateFilters(filters: TableFilters["filters"]) {
-  newFilters.value.filters = filters;
+function updateFilters(filters: TableFilters["filters"] | null) {
+  newFilters.value.filters = filters ?? [];
   emit("update:modelValue", newFilters.value);
 }
 
-// FIXME: Add actual logic with server fetch
-const schoolFilterOptions: SchoolFilters = {
-  schoolCodes: ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
-  courses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
-};
+function clearSchoolFiltersFilters() {
+  newFilters.value.schoolFilters = {
+    selectedSchoolCodes: [],
+    selectedSchoolCourseIds: [],
+  };
+  emit("update:modelValue", newFilters.value);
+}
 
-function openSchoolFilterDialog() {
+function openSchoolFilterDialog(selectedFilters: SchoolFilters) {
   Dialog.create({
     component: FilterBySchoolDialog,
     componentProps: {
-      filters: schoolFilterOptions,
-      selectedFilters: props.modelValue.schoolFilters,
+      selectedFilters,
     },
   }).onOk((schoolFilters: SchoolFilters) => {
     newFilters.value.schoolFilters = schoolFilters;

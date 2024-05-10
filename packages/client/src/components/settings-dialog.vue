@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="t('sidebar.settings')"
       actions-padding
@@ -7,12 +7,7 @@
       @submit="
         onDialogOK({
           type: 'save',
-          settings: {
-            maxBooksDimension,
-            purchaseRate,
-            reservationDays,
-            saleRate,
-          },
+          settings: newSettings,
         })
       "
     >
@@ -20,39 +15,45 @@
         class="column gap-4 no-wrap q-pb-xs q-pt-lg q-px-lg width-700"
       >
         <q-input
-          v-model="purchaseRate"
-          :placeholder="t('general.settings.purchaseRate')"
-          :rules="[numberBetween(0, 100)]"
-          type="number"
+          v-model.number="purchaseRate"
+          :label="t('general.settings.purchaseRate')"
+          bottom-slots
           outlined
+          readonly
           suffix="%"
+          type="number"
         />
         <q-input
-          v-model="saleRate"
-          :placeholder="t('general.settings.saleRate')"
-          :rules="[numberBetween(0, 100)]"
-          type="number"
+          v-model.number="saleRate"
+          :label="t('general.settings.saleRate')"
+          bottom-slots
           outlined
+          readonly
           suffix="%"
+          type="number"
         />
         <q-input
-          v-model="reservationDays"
-          :placeholder="t('general.settings.reservationDays')"
+          v-model.number="newSettings.maxBookingDays"
+          :label="t('general.settings.reservationDays')"
           :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
-          type="number"
           outlined
+          type="number"
         />
         <q-input
-          v-model="maxBooksDimension"
-          :placeholder="t('general.settings.maxBooksDimension')"
+          v-model.number="newSettings.warehouseMaxBlockSize"
+          :label="t('general.settings.maxBooksDimension')"
           :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
-          type="number"
           outlined
+          type="number"
         />
+        <span class="gap-16 items-center q-pb-sm q-pt-none q-px-none row">
+          <q-checkbox v-model="newSettings.payOffEnabled" color="primary" />
+          {{ t("general.settings.payOffEnabled") }}
+        </span>
       </q-card-section>
 
       <template #card-actions="{ uniqueFormId }">
-        <q-btn color="accent" @click="confirmReset()">
+        <q-btn color="accent" disable @click="confirmReset()">
           <q-item-section>
             {{ t("general.settings.resetButton") }}
           </q-item-section>
@@ -82,22 +83,16 @@
 <script setup lang="ts">
 import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { Dialog, useDialogPluginComponent } from "quasar";
-import { ref } from "vue";
+import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogFormCard from "src/components/k-dialog-form-card.vue";
 import {
   allowOnlyIntegerNumbers,
   greaterThanZeroRule,
-  numberBetween,
 } from "src/helpers/rules";
-import { SettingsUpdate } from "src/models/book";
+import { Settings, SettingsUpdate, SettingsUpdateInput } from "src/models/book";
 
-const props = defineProps<{
-  maxBooksDimensionCurrent: number;
-  purchaseRateCurrent: number;
-  reservationDaysCurrent: number;
-  saleRateCurrent: number;
-}>();
+const props = defineProps<Settings>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
@@ -106,10 +101,14 @@ const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
 
 const { t } = useI18n();
 
-const purchaseRate = ref(props.purchaseRateCurrent);
-const saleRate = ref(props.saleRateCurrent);
-const reservationDays = ref(props.reservationDaysCurrent);
-const maxBooksDimension = ref(props.maxBooksDimensionCurrent);
+const newSettings = reactive<SettingsUpdateInput>({
+  maxBookingDays: props.maxBookingDays,
+  payOffEnabled: props.payOffEnabled,
+  warehouseMaxBlockSize: props.warehouseMaxBlockSize,
+});
+
+const purchaseRate = props.buyRate;
+const saleRate = props.sellRate;
 
 function confirmReset() {
   Dialog.create({

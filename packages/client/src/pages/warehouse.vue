@@ -186,7 +186,7 @@ import {
   mdiSort,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
-import { computed, reactive, ref } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyDetailsTable from "src/components/book-copy-details-table.vue";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
@@ -195,10 +195,9 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
-import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { useTableFilters } from "src/composables/use-table-filters";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
-import { TableFilters } from "src/models/book";
 import {
   BookCopyDetailsFragment,
   useGetPaginatedBookCopiesQuery,
@@ -245,23 +244,12 @@ const screenWidth = useScreenWidth(smallScreenBreakpoint);
 const isSortedByCopyCode = ref(false);
 
 const tableRef = ref<QTable>();
-const filterOptions = useTranslatedFilters("warehouse.filters");
 
-const tableFilter = reactive<TableFilters>({
-  filters: [],
-  searchQuery: "",
-  schoolFilters: {
-    courses: [],
-    schoolCodes: [],
-  },
-});
+const { refetchFilterProxy, filterOptions, tableFilter, updateFilters } =
+  useTableFilters("warehouse.filters");
 
-function updateFilters(newFilters: TableFilters) {
-  tableFilter.searchQuery = newFilters.searchQuery;
-  tableFilter.filters = newFilters.filters;
-  tableFilter.schoolFilters = newFilters.schoolFilters;
-}
-
+// As I can understand this filter isn't actually used BUT by passing our filters to the QTable
+// allows the component to throw the "@request" event which is used to refetch our data
 const filterMethod: QTableProps["filterMethod"] = (rows) => {
   return rows as BookWithAvailableCopiesFragment[];
 };
@@ -385,15 +373,11 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
 const onBooksRequest: QTableProps["onRequest"] = async ({
   pagination: { page, rowsPerPage },
 }) => {
-  booksLoading.value = true;
-
   await refetchBooks({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
-    filter: {
-      search: tableFilter.searchQuery,
-    },
+    filter: refetchFilterProxy.value,
   });
 
   booksPagination.value.rowsNumber = books.value?.rowsCount;
@@ -406,12 +390,11 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
 const onCopyRequest: QTableProps["onRequest"] = async ({
   pagination: { page, rowsPerPage },
 }) => {
-  copyLoading.value = true;
-
   await refetchBookCopies({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
+    filter: refetchFilterProxy.value,
   });
 
   copyPagination.value.rowsNumber = bookCopies.value?.rowsCount;
@@ -435,7 +418,10 @@ function swapView() {
 
   tableFilter.searchQuery = "";
   tableFilter.filters = [];
-  tableFilter.schoolFilters = { courses: [], schoolCodes: [] };
+  tableFilter.schoolFilters = {
+    selectedSchoolCourseIds: [],
+    selectedSchoolCodes: [],
+  };
 
   if (isSortedByCopyCode.value) {
     copyPage.value = 0;

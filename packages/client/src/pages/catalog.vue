@@ -53,16 +53,15 @@
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { BookCreateInput } from "src/@generated/graphql";
 import AddBookDialog from "src/components/add-book-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
-import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
-import { BookCompleteFilters, TableFilters } from "src/models/book";
 import { useBookService } from "src/services/book";
 import {
   BookSummaryFragment,
@@ -76,23 +75,11 @@ const tableRef = ref<QTable>();
 const currentPage = ref(0);
 const numberOfRows = ref(100);
 
-const filterOptions = useTranslatedFilters("book.filters.options");
+const { refetchFilterProxy, filterOptions, tableFilter, updateFilters } =
+  useTableFilters("book.filters.options");
 
-const tableFilter = reactive<TableFilters>({
-  searchQuery: "",
-  schoolFilters: {
-    schoolCodes: [],
-    courses: [],
-  },
-  filters: [],
-});
-
-function updateFilters({ filters, schoolFilters, searchQuery }: TableFilters) {
-  tableFilter.filters = filters;
-  tableFilter.schoolFilters = schoolFilters;
-  tableFilter.searchQuery = searchQuery;
-}
-
+// As I can understand this filter isn't actually used BUT by passing our filters to the QTable
+// allows the component to throw the "@request" event which is used to refetch our data
 const filterMethod: QTableProps["filterMethod"] = (rows) => {
   return rows as BookSummaryFragment[];
 };
@@ -179,12 +166,7 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
     await refetchBooks({
       page: requestProps.pagination.page - 1,
       rows: requestProps.pagination.rowsPerPage,
-      filter: {
-        isAvailable: (tableFilter.filters as BookCompleteFilters[]).includes(
-          "isAvailable",
-        ),
-        search: tableFilter.searchQuery,
-      },
+      filter: refetchFilterProxy.value,
     });
 
     pagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
