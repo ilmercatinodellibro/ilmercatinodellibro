@@ -51,6 +51,7 @@ const GUEST_DEFAULT_ROUTE_NAME = AvailableRouteNames.Login;
 
 export function useLoginMutation() {
   const router = useRouter();
+  const { selectedLocation } = useRetailLocationService();
 
   const loginMutationComposable = useBaseLoginMutation();
 
@@ -65,7 +66,10 @@ export function useLoginMutation() {
 
     token.value = data.jwt;
     user.value = data.user;
-    void router.push({ name: AUTHENTICATED_DEFAULT_ROUTE_NAME });
+    void router.push({
+      name: AUTHENTICATED_DEFAULT_ROUTE_NAME,
+      params: { locationId: selectedLocation.value.id },
+    });
   }
 
   return { ...loginMutationComposable, login };
@@ -95,6 +99,7 @@ export function useSocialLogin() {
 
 export function useRegisterMutation() {
   const router = useRouter();
+  const { selectedLocation } = useRetailLocationService();
 
   const registerMutationComposable = useBaseRegisterMutation();
 
@@ -105,7 +110,10 @@ export function useRegisterMutation() {
       throw new Error("Already authenticated, can't register");
     }
     await registerMutationComposable.register(...params);
-    void router.push({ name: REGISTRATION_SENT_ROUTE_NAME });
+    void router.push({
+      name: REGISTRATION_SENT_ROUTE_NAME,
+      params: { locationId: selectedLocation.value.id },
+    });
   }
 
   return { ...registerMutationComposable, register };
@@ -195,6 +203,7 @@ export function initTokenRefresh(router: Router) {
 
 export function useLogoutMutation(router = useRouter()) {
   const { client } = useApolloClient();
+  const { selectedLocation } = useRetailLocationService();
 
   function logout() {
     if (!isAuthenticated.value) {
@@ -205,7 +214,10 @@ export function useLogoutMutation(router = useRouter()) {
     // Wipe out the storage completely to avoid user data being leaked (settings, etc)
     LocalStorage.clear();
     void client.clearStore();
-    void router.push({ name: GUEST_DEFAULT_ROUTE_NAME });
+    void router.push({
+      name: GUEST_DEFAULT_ROUTE_NAME,
+      params: { locationId: selectedLocation.value.id },
+    });
   }
 
   return { logout };
@@ -315,10 +327,14 @@ export const redirectIfAuthenticated: NavigationGuard = (to) => {
 };
 
 export const redirectIfGuest: NavigationGuard = (to) => {
+  const { selectedLocation } = useRetailLocationService();
   const { isAuthenticated } = useAuthService();
 
   if (!isAuthenticated.value && to.name !== GUEST_DEFAULT_ROUTE_NAME) {
-    return { name: GUEST_DEFAULT_ROUTE_NAME };
+    return {
+      name: GUEST_DEFAULT_ROUTE_NAME,
+      params: { locationId: selectedLocation.value.id },
+    };
   }
 };
 
