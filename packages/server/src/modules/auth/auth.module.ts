@@ -3,8 +3,10 @@ import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { AuthConfiguration, authConfiguration } from "src/config/auth";
+import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { FacebookStrategy } from "src/modules/auth/strategies/facebook.strategy";
 import { GoogleStrategy } from "src/modules/auth/strategies/google.strategy";
+import { UserService } from "src/modules/user/user.service";
 import { MailModule } from "../mail/mail.module";
 import { PrismaModule } from "../prisma/prisma.module";
 import { UserModule } from "../user/user.module";
@@ -39,8 +41,59 @@ import { LocalStrategy } from "./strategies/local.strategy";
     AuthService,
     LocalStrategy,
     JwtStrategy,
-    FacebookStrategy,
-    GoogleStrategy,
+
+    // Optional, only enabled if configured
+    {
+      provide: FacebookStrategy,
+      useFactory(
+        { serverUrl }: RootConfiguration,
+        { facebook }: AuthConfiguration,
+        userService: UserService,
+      ) {
+        if (
+          facebook.clientId === undefined ||
+          facebook.clientSecret === undefined
+        ) {
+          return null;
+        }
+
+        return new FacebookStrategy(
+          {
+            clientId: facebook.clientId,
+            clientSecret: facebook.clientSecret,
+            serverUrl,
+          },
+          userService,
+        );
+      },
+      inject: [rootConfiguration.KEY, authConfiguration.KEY, UserService],
+    },
+    // Optional, only enabled if configured
+    {
+      provide: GoogleStrategy,
+      useFactory(
+        { serverUrl }: RootConfiguration,
+        { google }: AuthConfiguration,
+        userService: UserService,
+      ) {
+        if (
+          google.clientId === undefined ||
+          google.clientSecret === undefined
+        ) {
+          return null;
+        }
+
+        return new GoogleStrategy(
+          {
+            clientId: google.clientId,
+            clientSecret: google.clientSecret,
+            serverUrl,
+          },
+          userService,
+        );
+      },
+      inject: [rootConfiguration.KEY, authConfiguration.KEY, UserService],
+    },
   ],
   exports: [AuthService],
   controllers: [AuthController],

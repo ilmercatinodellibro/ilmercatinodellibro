@@ -53,3 +53,9 @@ When enabled, it needs some configuration to work. Here are the steps to follow:
   - `FIREBASE_PROJECT_ID`: `projectId`
 
 Also see [Server README | Push notifications](../server/README.md#push-notifications) for setting up and configuring the server.
+
+## Social login
+
+This feature can be enabled/disabled through some environment variables for related providers in the `.env` file. You can leave some or all of the providers as disabled, for ease of setting up the environment. See the `.env.example` file for the list of available providers and their related environment variables.
+
+When a specific provider is enabled, it needs some configuration on the server app to work. See [Server README | Social login](../server/README.md#social-login) for setting up and configuring the server.

@@ -59,21 +59,25 @@
         </q-card-section>
       </q-form>
 
-      <q-separator />
+      <template v-if="SOCIAL_LOGIN_ENABLED">
+        <q-separator />
 
-      <q-card-section class="flex flex-center gap-8">
-        <q-btn
-          :href="`/auth/facebook?locationId=${selectedLocation.id}`"
-          :icon="mdiFacebook"
-          color="blue"
-        />
+        <q-card-section class="flex flex-center gap-8">
+          <q-btn
+            v-if="FACEBOOK_LOGIN_ENABLED"
+            :href="`/auth/facebook?locationId=${selectedLocation.id}`"
+            :icon="mdiFacebook"
+            color="blue"
+          />
 
-        <q-btn
-          :href="`/auth/google?locationId=${selectedLocation.id}`"
-          :icon="mdiGoogle"
-          color="red"
-        />
-      </q-card-section>
+          <q-btn
+            v-if="GOOGLE_LOGIN_ENABLED"
+            :href="`/auth/google?locationId=${selectedLocation.id}`"
+            :icon="mdiGoogle"
+            color="red"
+          />
+        </q-card-section>
+      </template>
     </q-card>
   </q-page>
 </template>
@@ -90,6 +94,10 @@ import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import { useLoginMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
+
+const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
+const FACEBOOK_LOGIN_ENABLED = process.env.FACEBOOK_LOGIN_ENABLED === "true";
+const GOOGLE_LOGIN_ENABLED = process.env.GOOGLE_LOGIN_ENABLED === "true";
 
 const props = defineProps<{
   emailVerified?: boolean;

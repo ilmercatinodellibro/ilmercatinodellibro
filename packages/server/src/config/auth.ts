@@ -5,14 +5,18 @@ const authSchema = z.object({
   applicationSecret: z.string(),
   tokenExpirationTime: z.string(),
 
-  facebook: z.object({
-    clientId: z.string(),
-    clientSecret: z.string(),
-  }),
-  google: z.object({
-    clientId: z.string(),
-    clientSecret: z.string(),
-  }),
+  facebook: z
+    .object({
+      clientId: z.string(),
+      clientSecret: z.string(),
+    })
+    .partial(),
+  google: z
+    .object({
+      clientId: z.string(),
+      clientSecret: z.string(),
+    })
+    .partial(),
 });
 
 export const authConfiguration = registerAs("auth", () =>

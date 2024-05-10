@@ -245,7 +245,7 @@ This is because at the moment there are no requirements involving such a thing a
 
 ## Social login
 
-We use the `passport` library to handle social login. See [the auth module](./src/modules/auth) for implementation details.
+We use the `passport` library to handle social login. See [the auth module](./src/modules/auth) for implementation details. All providers are optional and will be enabled only if their related environment variables are set. If you configure a provider, make sure to also enable it in the client app. See the [client README](../client/README.md#social-login) for more information.
 
 ### Facebook login
 

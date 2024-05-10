@@ -84,12 +84,18 @@ const routes: RouteRecordRaw[] = [
         component: () => import("src/pages/login.vue"),
         props: ({ query }) => ({ emailVerified: !!query.emailVerified }),
       },
+
       // The server will redirect to this route after dealing with the social provider
-      {
-        path: "login/social",
-        name: "social-login",
-        component: () => import("src/pages/social-login-redirect.vue"),
-      },
+      ...(process.env.SOCIAL_LOGIN_ENABLED === "true"
+        ? [
+            {
+              path: "login/social",
+              name: "social-login",
+              component: () => import("src/pages/social-login-redirect.vue"),
+            },
+          ]
+        : []),
+
       {
         path: "registration",
         name: "registration",
