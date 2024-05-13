@@ -254,7 +254,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { SettleRemainingType } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { getStatus, isAvailable } from "src/helpers/book-copy";
+import { getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -451,9 +451,7 @@ const tableRows = computed<
 ]);
 
 const selectableRows = computed(() =>
-  ownedCopies.value.filter(
-    (row) => isAvailable(row) && getStatus(row) !== "donated",
-  ),
+  ownedCopies.value.filter((row) => getStatus(row) === "available"),
 );
 
 const selectedRows = ref<BookCopyDetailsFragment[]>([]);
