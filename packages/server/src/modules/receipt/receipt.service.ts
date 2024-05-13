@@ -1,15 +1,15 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { GenerateProps } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, readOnlyText, table, text } from "@pdfme/schemas";
 import { Book, BookCopy, Receipt, Sale } from "@prisma/client";
 import { sumBy } from "lodash";
 import { ReceiptType } from "src/@generated";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { MailService } from "src/modules/mail/mail.service";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import purchaseTemplate from "./templates/purchase.json";
 import registrationTemplate from "./templates/registration.json";
 
@@ -49,16 +49,17 @@ export class ReceiptService {
   };
 
   constructor(
-    @Inject(rootConfiguration.KEY)
-    private readonly rootConfig: RootConfiguration,
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
+    private readonly locationService: RetailLocationService,
   ) {}
 
-  getReceiptPath(receiptId: string) {
-    // TODO: use this path instead: location/${retailLocationId}/receipts/${receiptId}.pdf
-    const directory = resolve(this.rootConfig.fileSystemPath, "./receipts");
-    const file = resolve(directory, `./${receiptId}.pdf`);
+  getReceiptPath(receipt: Receipt) {
+    const directory = this.locationService.resolveStoragePath(
+      receipt.retailLocationId,
+      "./receipts",
+    );
+    const file = resolve(directory, `./${receipt.id}.pdf`);
     return { directory, file };
   }
 
@@ -81,8 +82,7 @@ export class ReceiptService {
           contentType: "application/pdf",
           contentDisposition: "attachment",
           content:
-            receiptPdf ??
-            (await readFile(this.getReceiptPath(receipt.id).file)),
+            receiptPdf ?? (await readFile(this.getReceiptPath(receipt).file)),
         },
       ],
     });
@@ -131,7 +131,7 @@ export class ReceiptService {
       books,
     });
 
-    const path = this.getReceiptPath(receipt.id);
+    const path = this.getReceiptPath(receipt);
     await mkdir(path.directory, { recursive: true }); // Ensure the directory exists
     await writeFile(path.file, receiptPdf);
 

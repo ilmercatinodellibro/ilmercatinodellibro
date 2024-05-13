@@ -14,6 +14,14 @@ export class RetailLocationService {
     private readonly rootConfig: RootConfiguration,
   ) {}
 
+  resolveStoragePath(locationId: string, path: string) {
+    return resolve(
+      this.rootConfig.fileSystemPath,
+      `./location/${locationId}`,
+      path,
+    );
+  }
+
   async backupLocation(locationId: string) {
     const { books, receipts } =
       await this.prisma.retailLocation.findUniqueOrThrow({
@@ -55,9 +63,9 @@ export class RetailLocationService {
     };
 
     const filePromises = [];
-    const backupDirectory = resolve(
-      this.rootConfig.fileSystemPath,
-      `./location/${locationId}/backups/${Date.now()}`,
+    const backupDirectory = this.resolveStoragePath(
+      locationId,
+      `./backups/${Date.now()}`,
     );
     // Ensure the directory exists
     await mkdir(backupDirectory, { recursive: true });
@@ -68,11 +76,7 @@ export class RetailLocationService {
       filePromises.push(writeFile(file, stringifier, { encoding: "utf-8" }));
     }
 
-    // TODO: update the receipts directory, we are currently copying all receipts, not just the ones from this retail location
-    const receiptsDirectory = resolve(
-      this.rootConfig.fileSystemPath,
-      "./receipts",
-    );
+    const receiptsDirectory = this.resolveStoragePath(locationId, "./receipts");
     filePromises.push(
       cp(receiptsDirectory, resolve(backupDirectory, "./receipts"), {
         recursive: true,
@@ -117,11 +121,7 @@ export class RetailLocationService {
       },
     });
 
-    // TODO: update the receipts directory, we are currently deleting all receipts, not just the ones from this retail location
-    const receiptsDirectory = resolve(
-      this.rootConfig.fileSystemPath,
-      "./receipts",
-    );
+    const receiptsDirectory = this.resolveStoragePath(locationId, "./receipts");
     await rmdir(receiptsDirectory, { recursive: true });
     // Create the directory again
     await mkdir(receiptsDirectory);

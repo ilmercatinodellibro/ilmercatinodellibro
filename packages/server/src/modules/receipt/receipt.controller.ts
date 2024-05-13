@@ -31,7 +31,7 @@ export class ReceiptController {
       });
     }
 
-    const { file } = this.receiptService.getReceiptPath(receiptId);
+    const { file } = this.receiptService.getReceiptPath(receipt);
     return new StreamableFile(createReadStream(file));
   }
 }
