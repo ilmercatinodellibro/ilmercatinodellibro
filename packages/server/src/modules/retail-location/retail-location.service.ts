@@ -14,11 +14,11 @@ export class RetailLocationService {
     private readonly rootConfig: RootConfiguration,
   ) {}
 
-  resolveStoragePath(locationId: string, path: string) {
+  resolveStoragePath(locationId: string, path?: string) {
     return resolve(
       this.rootConfig.fileSystemPath,
       `./location/${locationId}`,
-      path,
+      path ?? "",
     );
   }
 

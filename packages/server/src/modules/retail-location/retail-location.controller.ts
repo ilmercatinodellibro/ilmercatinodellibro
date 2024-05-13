@@ -1,10 +1,9 @@
 import { createReadStream } from "node:fs";
 import { rm, writeFile } from "node:fs/promises";
-import { relative, resolve } from "node:path";
+import { resolve } from "node:path";
 import {
   Controller,
   Get,
-  Inject,
   NotFoundException,
   Param,
   Put,
@@ -15,20 +14,19 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Prisma, User } from "@prisma/client";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Public } from "src/modules/auth/decorators/public-route.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import { Theme } from "src/modules/retail-location/theme.args";
 
 @Controller()
 export class RetailLocationController {
   constructor(
-    @Inject(rootConfiguration.KEY)
-    private readonly rootConfig: RootConfiguration,
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    private readonly locationService: RetailLocationService,
   ) {}
 
   @Get("/location/:id/logo/:name")
@@ -95,7 +93,8 @@ export class RetailLocationController {
         file.mimetype as keyof typeof this.mimeTypeExtensionMap
       ];
     const logoDirectory = this.getLogoDirectory(retailLocationId);
-    const logoPath = resolve(logoDirectory, `logo.${extension}`);
+    const logoFileName = `logo.${extension}`;
+    const logoPath = resolve(logoDirectory, logoFileName);
     await writeFile(logoPath, file.buffer);
 
     await Promise.all(
@@ -113,7 +112,7 @@ export class RetailLocationController {
       data: {
         theme: {
           ...(location.theme as unknown as Theme),
-          logo: relative(this.rootConfig.fileSystemPath, logoPath),
+          logo: logoFileName,
         } as unknown as Prisma.InputJsonObject,
       },
     });
@@ -129,9 +128,6 @@ export class RetailLocationController {
   } as const;
 
   private getLogoDirectory(locationId: string) {
-    return resolve(
-      this.rootConfig.fileSystemPath,
-      `./location/${locationId}/logo/`,
-    );
+    return this.locationService.resolveStoragePath(locationId, "./logo");
   }
 }
