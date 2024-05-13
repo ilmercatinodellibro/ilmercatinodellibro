@@ -296,9 +296,7 @@ export class BookCopyResolver {
                     {
                       sales: {
                         some: {
-                          refundedAt: {
-                            not: null,
-                          },
+                          refundedAt: null,
                         },
                       },
                     },
