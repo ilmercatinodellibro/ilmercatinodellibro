@@ -147,14 +147,6 @@
                   @update:model-value="swapRow(row)"
                 />
 
-                <span v-else-if="col.name === 'status'">
-                  {{
-                    t(
-                      `warehouse.bookCopyStatus.${getStatus(row) === "available" ? "inStock" : getStatus(row)}`,
-                    )
-                  }}
-                </span>
-
                 <q-btn
                   v-else-if="
                     col.name === 'actions' &&
@@ -311,6 +303,10 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: getStatus,
     label: t("book.fields.status"),
     align: "left",
+    format: (_, row) =>
+      t(
+        `warehouse.bookCopyStatus.${selectableRows.value.includes(row) ? "inStock" : getStatus(row)}`,
+      ),
   },
   {
     name: "author",
