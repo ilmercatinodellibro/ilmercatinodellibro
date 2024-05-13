@@ -2,9 +2,8 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        :model-value="tableFilter"
+        v-model="tableFilter"
         :filter-options="filterOptions"
-        @update:model-value="updateFilters"
       >
         <template #side-actions>
           <q-btn
@@ -141,10 +140,7 @@
         :filter="tableFilter"
         :filter-method="filterMethod"
         :loading="copyLoading"
-        :rows="
-          // FIXME: bookCopies don't have the status field but the columns specify it
-          bookCopies.rows
-        "
+        :rows="bookCopies.rows"
         class="flex-delegate-height-management"
         @request="onCopyRequest"
       >
@@ -245,14 +241,8 @@ const isSortedByCopyCode = ref(false);
 
 const tableRef = ref<QTable>();
 
-const { refetchFilterProxy, filterOptions, tableFilter, updateFilters } =
+const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
   useTableFilters("warehouse.filters");
-
-// As I can understand this filter isn't actually used BUT by passing our filters to the QTable
-// allows the component to throw the "@request" event which is used to refetch our data
-const filterMethod: QTableProps["filterMethod"] = (rows) => {
-  return rows as BookWithAvailableCopiesFragment[];
-};
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [

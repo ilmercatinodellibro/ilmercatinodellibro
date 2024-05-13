@@ -1,3 +1,4 @@
+import { QTableProps } from "quasar";
 import { computed, reactive } from "vue";
 import {
   FilterPath,
@@ -16,16 +17,6 @@ export function useTableFilters(filterPath: FilterPath) {
       selectedSchoolCodes: [],
     },
   });
-
-  function updateFilters({
-    filters,
-    schoolFilters,
-    searchQuery,
-  }: TableFilters) {
-    tableFilter.filters = filters;
-    tableFilter.schoolFilters = schoolFilters;
-    tableFilter.searchQuery = searchQuery;
-  }
 
   function getBooleanFiltersFromOptions() {
     // Only considers the checkbox options, required to send undefined in and ignore the filter when not required
@@ -66,10 +57,15 @@ export function useTableFilters(filterPath: FilterPath) {
     };
   });
 
+  // This filter isn't actually used BUT by passing our filters to the QTable it allows
+  // the component to throw the "@request" event which is used to refetch our data
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  const filterMethod: QTableProps["filterMethod"] = (rows) => rows;
+
   return {
     refetchFilterProxy,
     filterOptions,
     tableFilter,
-    updateFilters,
+    filterMethod,
   };
 }

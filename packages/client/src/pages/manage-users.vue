@@ -2,9 +2,8 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        :model-value="tableFilter"
+        v-model="tableFilter"
         :filter-options="filterOptions"
-        @update:model-value="updateFilters"
       >
         <template #side-actions>
           <q-btn
@@ -202,7 +201,7 @@ import {
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
-import { Ref, computed, onMounted, reactive, ref } from "vue";
+import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { RegisterUserPayload, UpdateUserPayload } from "src/@generated/graphql";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
@@ -218,9 +217,8 @@ import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
 import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
-import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
-import { TableFilters } from "src/models/book";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
@@ -248,6 +246,10 @@ const pagination = ref({
   rowsNumber: rowsCount.value,
 });
 
+const { filterMethod, filterOptions, tableFilter } = useTableFilters(
+  "manageUsers.filters",
+);
+
 const onRequest: QTableProps["onRequest"] = async (requested) => {
   await fetchCustomers({
     page: requested.pagination.page,
@@ -264,22 +266,6 @@ const onRequest: QTableProps["onRequest"] = async (requested) => {
 onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
-
-const tableFilter = reactive<TableFilters>({
-  searchQuery: "",
-  filters: [],
-});
-
-function updateFilters(newFilters: TableFilters) {
-  tableFilter.searchQuery = newFilters.searchQuery;
-  tableFilter.filters = newFilters.filters;
-}
-
-const filterMethod: QTableProps["filterMethod"] = (rows) => {
-  return rows as CustomerFragment[];
-};
-
-const filterOptions = useTranslatedFilters("manageUsers.filters");
 
 const columnTooltip = computed(() => ({
   inStock: t("manageUsers.tooltips.inStock"),

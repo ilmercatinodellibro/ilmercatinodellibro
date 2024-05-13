@@ -2,9 +2,8 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        :model-value="tableFilter"
+        v-model="tableFilter"
         :filter-options="filterOptions"
-        @update:model-value="updateFilters"
       >
         <template #side-actions>
           <q-btn
@@ -52,7 +51,7 @@
 <script lang="ts" setup>
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
-import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
+import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { BookCreateInput } from "src/@generated/graphql";
@@ -75,14 +74,8 @@ const tableRef = ref<QTable>();
 const currentPage = ref(0);
 const numberOfRows = ref(100);
 
-const { refetchFilterProxy, filterOptions, tableFilter, updateFilters } =
+const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
   useTableFilters("book.filters.options");
-
-// As I can understand this filter isn't actually used BUT by passing our filters to the QTable
-// allows the component to throw the "@request" event which is used to refetch our data
-const filterMethod: QTableProps["filterMethod"] = (rows) => {
-  return rows as BookSummaryFragment[];
-};
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 

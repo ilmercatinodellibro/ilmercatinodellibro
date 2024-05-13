@@ -81,14 +81,9 @@ const { t } = useI18n();
 
 const props = defineProps<{
   filterOptions: ReturnType<typeof useTranslatedFilters>["value"];
-  modelValue: TableFilters;
 }>();
 
-const emit = defineEmits<{
-  "update:modelValue": [newFilters: TableFilters];
-}>();
-
-const newFilters = computed(() => props.modelValue);
+const newFilters = defineModel<TableFilters>({ required: true });
 
 // We can just check the selection of the school to state that that filter is selected since courses
 // can be only selected after selecting at least a school
@@ -103,19 +98,17 @@ const isSchoolFilterSelected = computed(
 // and the label is what's shown in the filter UI
 const selectedFiltersDisplay = computed(() =>
   [
-    ...props.modelValue.filters.map((filter) => props.filterOptions[filter]),
+    ...newFilters.value.filters.map((filter) => props.filterOptions[filter]),
     ...(isSchoolFilterSelected.value ? [t("book.filters.school")] : []),
   ].join(", "),
 );
 
 function updateSearch(newSearchQuery: string | null) {
   newFilters.value.searchQuery = newSearchQuery ?? "";
-  emit("update:modelValue", newFilters.value);
 }
 
 function updateFilters(filters: TableFilters["filters"] | null) {
   newFilters.value.filters = filters ?? [];
-  emit("update:modelValue", newFilters.value);
 }
 
 function clearSchoolFiltersFilters() {
@@ -123,7 +116,6 @@ function clearSchoolFiltersFilters() {
     selectedSchoolCodes: [],
     selectedSchoolCourseIds: [],
   };
-  emit("update:modelValue", newFilters.value);
 }
 
 function openSchoolFilterDialog(selectedFilters: SchoolFilters) {
@@ -134,10 +126,6 @@ function openSchoolFilterDialog(selectedFilters: SchoolFilters) {
     },
   }).onOk((schoolFilters: SchoolFilters) => {
     newFilters.value.schoolFilters = schoolFilters;
-    emit("update:modelValue", {
-      ...newFilters.value,
-      schoolFilters,
-    });
   });
 }
 </script>
