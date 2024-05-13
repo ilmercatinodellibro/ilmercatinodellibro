@@ -90,8 +90,6 @@ const emit = defineEmits<{
 
 const newFilters = computed(() => props.modelValue);
 
-const SCHOOL_FILTER_LABEL = t("book.filters.school");
-
 // We can just check the selection of the school to state that that filter is selected since courses
 // can be only selected after selecting at least a school
 const isSchoolFilterSelected = computed(
@@ -106,7 +104,7 @@ const isSchoolFilterSelected = computed(
 const selectedFiltersDisplay = computed(() =>
   [
     ...props.modelValue.filters.map((filter) => props.filterOptions[filter]),
-    ...(isSchoolFilterSelected.value ? [SCHOOL_FILTER_LABEL] : []),
+    ...(isSchoolFilterSelected.value ? [t("book.filters.school")] : []),
   ].join(", "),
 );
 
