@@ -75,7 +75,7 @@ const currentPage = ref(0);
 const numberOfRows = ref(100);
 
 const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
-  useTableFilters("book.filters.options");
+  useTableFilters("book.filters.options", true);
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 

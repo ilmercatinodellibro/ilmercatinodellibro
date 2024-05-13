@@ -242,7 +242,7 @@ const isSortedByCopyCode = ref(false);
 const tableRef = ref<QTable>();
 
 const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
-  useTableFilters("warehouse.filters");
+  useTableFilters("warehouse.filters", true);
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [

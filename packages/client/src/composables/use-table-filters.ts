@@ -6,16 +6,21 @@ import {
 } from "src/composables/use-filter-translations";
 import { TableFilters } from "src/models/book";
 
-export function useTableFilters(filterPath: FilterPath) {
+export function useTableFilters(
+  filterPath: FilterPath,
+  useSchoolFilters?: boolean,
+) {
   const filterOptions = useTranslatedFilters(filterPath);
 
   const tableFilter = reactive<TableFilters>({
     searchQuery: "",
     filters: [],
-    schoolFilters: {
-      selectedSchoolCourseIds: [],
-      selectedSchoolCodes: [],
-    },
+    schoolFilters: useSchoolFilters
+      ? {
+          selectedSchoolCourseIds: [],
+          selectedSchoolCodes: [],
+        }
+      : undefined,
   });
 
   function getBooleanFiltersFromOptions() {
