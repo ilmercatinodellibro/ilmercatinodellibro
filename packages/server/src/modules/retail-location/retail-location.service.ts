@@ -16,7 +16,7 @@ export class RetailLocationService {
 
   resolveStoragePath(locationId: string, path?: string) {
     return resolve(
-      this.rootConfig.fileSystemPath,
+      this.rootConfig.storagePath,
       `./location/${locationId}`,
       path ?? "",
     );

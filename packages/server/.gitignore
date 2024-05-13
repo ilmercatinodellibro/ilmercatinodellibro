@@ -31,3 +31,7 @@ lerna-debug.log*
 client-dist
 
 .firebase-service-account.json
+
+storage/**
+!storage/**/
+!storage/**/.gitkeep
