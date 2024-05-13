@@ -721,8 +721,7 @@ export class BookCopyResolver {
   }
 
   @Mutation(() => BookCopy, {
-    description:
-      "Reimburse the owner of the book copy that got damaged/lost/etc. under Mercatino's responsibility.",
+    description: "Donate the book copy to the Mercatino.",
   })
   async donateBookCopy(
     @Input() { bookCopyId }: DonateBookCopyInput,
