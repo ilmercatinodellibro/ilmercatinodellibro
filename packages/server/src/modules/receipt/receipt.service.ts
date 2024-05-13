@@ -56,6 +56,7 @@ export class ReceiptService {
   ) {}
 
   getReceiptPath(receiptId: string) {
+    // TODO: use this path instead: location/${retailLocationId}/receipts/${receiptId}.pdf
     const directory = resolve(this.rootConfig.fileSystemPath, "./receipts");
     const file = resolve(directory, `./${receiptId}.pdf`);
     return { directory, file };

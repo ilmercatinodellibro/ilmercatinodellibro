@@ -69,3 +69,7 @@ query retailLocationStatistics($retailLocationId: String!) {
     ...StatisticsQueryResult
   }
 }
+
+mutation resetRetailLocation($input: ResetRetailLocationInput!) {
+  resetRetailLocation(input: $input)
+}

@@ -483,6 +483,7 @@ import { useRetailLocationService } from "src/services/retail-location";
 import {
   RetailLocationFragmentDoc,
   RetailLocationSettingsFragment,
+  useResetRetailLocationMutation,
   useUpdateRetailLocationSettingsMutation,
 } from "src/services/retail-location.graphql";
 
@@ -532,6 +533,7 @@ const { selectedLocation } = useRetailLocationService();
 
 const { updateRetailLocationSettings } =
   useUpdateRetailLocationSettingsMutation();
+const { resetRetailLocation } = useResetRetailLocationMutation();
 function openSettings() {
   Dialog.create({
     component: SettingsDialog,
@@ -573,7 +575,12 @@ function openSettings() {
         notifyError(t("common.genericErrorMessage"));
       }
     } else {
-      // TODO: perform annual reset
+      await resetRetailLocation({
+        input: {
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
+      // window.location.reload();
     }
   });
 }
