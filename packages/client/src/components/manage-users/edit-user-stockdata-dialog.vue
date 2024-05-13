@@ -303,7 +303,7 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
     },
     {
       label: t("book.fields.status"),
-      field: (bookCopy) => isAvailable(bookCopy),
+      field: isAvailable,
       name: "status",
       align: "left",
     },

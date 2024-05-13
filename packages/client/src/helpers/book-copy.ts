@@ -8,13 +8,10 @@ export const getCurrentActiveProblem = ({
   problems,
 }: BookCopyDetailsFragment) => problems?.find(({ resolvedAt }) => !resolvedAt);
 
-export const isAvailable = (bookCopy: BookCopyDetailsFragment) => {
-  const status = getStatus(bookCopy);
-  return (
-    (status === "available" || status === "donated") &&
-    bookCopy.reimbursedAt === null
+export const isAvailable = (bookCopy: BookCopyDetailsFragment) =>
+  (["donated", "reimbursed", "available"] as BookCopyStatus[]).includes(
+    getStatus(bookCopy),
   );
-};
 
 export type BookCopyStatus =
   | "not-available"
