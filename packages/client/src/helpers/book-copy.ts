@@ -22,6 +22,7 @@ export type BookCopyStatus =
   | "donated"
   | "returned"
   | "sold"
+  | "reimbursed"
   | Exclude<ProblemType, "CUSTOM">;
 
 export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
@@ -39,5 +40,7 @@ export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
         ? "sold"
         : bookCopy.donatedAt
           ? "donated"
-          : "available";
+          : bookCopy.reimbursedAt
+            ? "reimbursed"
+            : "available";
 }

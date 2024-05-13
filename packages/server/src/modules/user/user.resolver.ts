@@ -162,6 +162,7 @@ export class UserResolver {
             bookCopies: {
               where: {
                 returnedAt: null,
+                donatedAt: null,
                 OR: [
                   {
                     sales: {

@@ -20,5 +20,6 @@ export default {
     available: "Disponibile",
     sold: "Venduto",
     inStock: "In Magazzino",
+    reimbursed: "Rimborsato",
   } satisfies Record<BookCopyStatus | "inStock", string>,
 };

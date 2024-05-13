@@ -150,14 +150,16 @@
                 <span v-else-if="col.name === 'status'">
                   {{
                     t(
-                      `warehouse.bookCopyStatus.${!isAvailable(row) ? getStatus(row) : "inStock"}`,
+                      `warehouse.bookCopyStatus.${getStatus(row) === "available" ? "inStock" : getStatus(row)}`,
                     )
                   }}
                 </span>
 
                 <q-btn
                   v-else-if="
-                    col.name === 'actions' && ownedCopies.includes(row)
+                    col.name === 'actions' &&
+                    ownedCopies.includes(row) &&
+                    ['donated', 'reimbursed'].includes(getStatus(row))
                   "
                   :icon="mdiDotsVertical"
                   dense
@@ -304,7 +306,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    field: (bookCopy) => getStatus(bookCopy),
+    field: getStatus,
     label: t("book.fields.status"),
     align: "left",
   },
@@ -447,7 +449,9 @@ const tableRows = computed<
 ]);
 
 const selectableRows = computed(() =>
-  ownedCopies.value.filter((row) => isAvailable(row)),
+  ownedCopies.value.filter(
+    (row) => isAvailable(row) && getStatus(row) !== "donated",
+  ),
 );
 
 const selectedRows = ref<BookCopyDetailsFragment[]>([]);
@@ -582,30 +586,28 @@ function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
     ),
     cancel: t("common.cancel"),
     persistent: true,
-  }).onOk(() => {
-    async () => {
-      try {
-        await Promise.all(
-          bookCopies.map(({ id: bookCopyId }) =>
-            reimburseBookCopy({
-              input: {
-                bookCopyId,
-                retailLocationId: selectedLocation.value.id,
-              },
-            }),
-          ),
-        );
-        await refetchBookCopiesByOwner({
-          retailLocationId: selectedLocation.value.id,
-          userId: props.user.id,
-        });
-        removeBookCopiesAfterAction(bookCopies);
-      } catch {
-        notifyError(
-          t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}reimbursed`),
-        );
-      }
-    };
+  }).onOk(async () => {
+    try {
+      await Promise.all(
+        bookCopies.map(({ id: bookCopyId }) =>
+          reimburseBookCopy({
+            input: {
+              bookCopyId,
+              retailLocationId: selectedLocation.value.id,
+            },
+          }),
+        ),
+      );
+      await refetchBookCopiesByOwner({
+        retailLocationId: selectedLocation.value.id,
+        userId: props.user.id,
+      });
+      removeBookCopiesAfterAction(bookCopies);
+    } catch {
+      notifyError(
+        t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}reimbursed`),
+      );
+    }
   });
 }
 

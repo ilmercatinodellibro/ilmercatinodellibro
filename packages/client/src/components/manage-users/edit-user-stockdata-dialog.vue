@@ -94,7 +94,7 @@
           class="column flex-delegate-height-management no-wrap q-pa-none"
         >
           <dialog-table
-            :rows="copiesInStock"
+            :rows="copiesInStock.filter(({ donatedAt }) => donatedAt === null)"
             :columns="copiesInStockColumns"
             :loading="inStockLoading"
             :rows-per-page-options="[0]"
