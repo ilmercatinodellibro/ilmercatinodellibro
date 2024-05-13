@@ -70,9 +70,8 @@
 
 <script setup lang="ts">
 import { mdiCloseCircle, mdiMagnify } from "@quasar/extras/mdi-v7";
-import { cloneDeep } from "lodash-es";
 import { Dialog } from "quasar";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { SchoolFilters, TableFilters } from "src/models/book";
@@ -89,7 +88,7 @@ const emit = defineEmits<{
   "update:modelValue": [newFilters: TableFilters];
 }>();
 
-const newFilters = ref(cloneDeep(props.modelValue));
+const newFilters = computed(() => props.modelValue);
 
 const SCHOOL_FILTER_LABEL = t("book.filters.school");
 
@@ -113,7 +112,7 @@ const selectedFiltersDisplay = computed(() =>
 
 function updateSearch(newSearchQuery: string | null) {
   newFilters.value.searchQuery = newSearchQuery ?? "";
-  emit("update:modelValue", newFilters.value as TableFilters);
+  emit("update:modelValue", newFilters.value);
 }
 
 function updateFilters(filters: TableFilters["filters"] | null) {
