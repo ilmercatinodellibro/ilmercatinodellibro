@@ -2,8 +2,7 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        v-model:filters="filters"
-        v-model:search-query="searchQuery"
+        v-model="tableFilter"
         :filter-options="filterOptions"
       >
         <template #side-actions>
@@ -29,6 +28,7 @@
           :rows="customers"
           :columns="columns"
           :filter="tableFilter"
+          :filter-method="filterMethod"
           :loading="loading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           @request="onRequest"
@@ -217,7 +217,7 @@ import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
 import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
-import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -246,11 +246,15 @@ const pagination = ref({
   rowsNumber: rowsCount.value,
 });
 
+const { filterMethod, filterOptions, tableFilter } = useTableFilters(
+  "manageUsers.filters",
+);
+
 const onRequest: QTableProps["onRequest"] = async (requested) => {
   await fetchCustomers({
     page: requested.pagination.page,
     rowsPerPage: requested.pagination.rowsPerPage,
-    searchTerm: tableFilter.value?.searchTerm,
+    searchTerm: tableFilter.searchQuery,
     // TODO: pass the filters to the server
   });
 
@@ -262,18 +266,6 @@ const onRequest: QTableProps["onRequest"] = async (requested) => {
 onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
-
-const searchQuery = ref("");
-const filters = ref<string[]>([]);
-
-const filterOptions = useTranslatedFilters("manageUsers.filters");
-
-// TODO: send the filters to the server
-const tableFilter = computed(() =>
-  !searchQuery.value && Object.entries(filters.value).length === 0
-    ? undefined
-    : { searchTerm: searchQuery.value, filters: filters.value },
-);
 
 const columnTooltip = computed(() => ({
   inStock: t("manageUsers.tooltips.inStock"),
@@ -409,9 +401,8 @@ function openPayOff(user: CustomerFragment) {
     componentProps: {
       user,
     },
-  }).onOk((payload) => {
-    // FIXME: add checkout logic
-    payload;
+  }).onDismiss(() => {
+    tableRef.value.requestServerInteraction();
   });
 }
 

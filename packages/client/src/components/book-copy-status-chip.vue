@@ -32,7 +32,7 @@ const props = defineProps<{
   hideIcon?: boolean;
 }>();
 
-function getStatus(): BookCopyStatus {
+function getStatus(): Exclude<BookCopyStatus, "reimbursed"> {
   const problemType = getCurrentActiveProblem(props.bookCopy)?.type;
 
   return props.bookCopy.returnedAt
@@ -46,7 +46,10 @@ function getStatus(): BookCopyStatus {
         : "available";
 }
 
-const IconData: Record<BookCopyStatus, { color: NamedColor; name: string }> = {
+const IconData: Record<
+  Exclude<BookCopyStatus, "reimbursed">,
+  { color: NamedColor; name: string }
+> = {
   "not-available": {
     color: "negative",
     name: mdiCancel,

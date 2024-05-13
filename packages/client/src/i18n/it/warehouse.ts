@@ -8,7 +8,7 @@ export default {
   filters: {
     isAvailable: "Disponibili",
     isSold: "Venduti",
-    hasProblem: "Con Problema",
+    hasProblems: "Con Problema",
   } satisfies Record<Exclude<keyof BookCopyQueryFilter, "search">, string>,
   owner: "Proprietario",
   bookCopyStatus: {
@@ -19,5 +19,7 @@ export default {
     "not-available": "Non Disponibile",
     available: "Disponibile",
     sold: "Venduto",
-  } satisfies Record<BookCopyStatus, string>,
+    inStock: "In Magazzino",
+    reimbursed: "Rimborsato",
+  } satisfies Record<BookCopyStatus | "inStock", string>,
 };

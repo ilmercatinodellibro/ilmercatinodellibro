@@ -9,7 +9,7 @@
     >
       <q-card-section class="gap-16 items-center no-wrap q-pa-md row">
         <q-input
-          v-model="totalSoldBooks"
+          :model-value="soldCopies.length"
           :label="$t('manageUsers.payOffUserDialog.soldBooksCountLabel')"
           outlined
           readonly
@@ -147,15 +147,11 @@
                   @update:model-value="swapRow(row)"
                 />
 
-                <book-copy-status-chip
-                  v-else-if="col.name === 'status'"
-                  :book-copy="row"
-                  hide-icon
-                />
-
                 <q-btn
                   v-else-if="
-                    col.name === 'actions' && selectableRows.includes(row)
+                    col.name === 'actions' &&
+                    ownedCopies.includes(row) &&
+                    !['donated', 'reimbursed'].includes(getStatus(row))
                   "
                   :icon="mdiDotsVertical"
                   dense
@@ -165,6 +161,7 @@
                 >
                   <q-menu auto-close>
                     <q-item
+                      v-if="selectableRows.includes(row)"
                       class="items-center"
                       clickable
                       @click="returnBooks([row])"
@@ -174,6 +171,7 @@
                       }}
                     </q-item>
                     <q-item
+                      v-if="selectableRows.includes(row)"
                       class="items-center"
                       clickable
                       @click="donateBooks([row])"
@@ -194,6 +192,7 @@
                       }}
                     </q-item>
                     <q-item
+                      v-if="selectableRows.includes(row)"
                       class="items-center"
                       clickable
                       @click="reportProblems([row])"
@@ -214,18 +213,20 @@
       <template #card-actions>
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
         <q-btn
+          :disable="selectableRows.length === 0"
           outline
           :label="$t('manageUsers.payOffUserDialog.returnAndDonate')"
-          @click="returnAllBooks('return-and-donate')"
+          @click="returnAllBooks('REFUND')"
         />
         <q-btn
           color="green"
+          :disable="selectableRows.length === 0"
           :label="
             $t('manageUsers.payOffUserDialog.returnEverything', [
               totalCheckoutMoney.toFixed(2),
             ])
           "
-          @click="returnAllBooks('return-everything')"
+          @click="returnAllBooks('RETURN')"
         />
       </template>
     </k-dialog-card>
@@ -243,20 +244,26 @@ import {
 } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { SettleRemainingType } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { isAvailable } from "src/helpers/book-copy";
+import { getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
   ProblemDetailsFragment,
+  useDonateBookCopyMutation,
   useGetBookCopiesByOwnerQuery,
   useGetReturnedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
+  useReimburseBookCopyMutation,
   useReportProblemMutation,
+  useReturnBookCopyMutation,
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UserSummaryFragment } from "src/services/user.graphql";
-import BookCopyStatusChip from "../book-copy-status-chip.vue";
+import {
+  UserSummaryFragment,
+  useSettleUserMutation,
+} from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
@@ -270,14 +277,8 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-type ReturnType = "return-and-donate" | "return-everything";
-
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
-  useDialogPluginComponent<ReturnType>();
-
-const totalSoldBooks = ref(0);
-const totalCheckoutMoney = ref(0);
-const totalCheckedOutMoney = ref(0);
+  useDialogPluginComponent<SettleRemainingType>();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
@@ -299,9 +300,13 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    field: () => undefined,
+    field: getStatus,
     label: t("book.fields.status"),
     align: "left",
+    format: (_, row) =>
+      t(
+        `warehouse.bookCopyStatus.${selectableRows.value.includes(row) ? "inStock" : getStatus(row)}`,
+      ),
   },
   {
     name: "author",
@@ -368,17 +373,25 @@ const {
   retailLocationId: selectedLocation.value.id,
 }));
 
-const { returnedBookCopies: returnedCopies, loading: returnedLoading } =
-  useGetReturnedBookCopiesQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+const {
+  returnedBookCopies: returnedCopies,
+  loading: returnedLoading,
+  refetch: refetchReturnedBookCopes,
+} = useGetReturnedBookCopiesQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
 
-const { soldBookCopies: soldCopies, loading: soldLoading } =
-  useGetSoldBookCopiesQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+const {
+  soldBookCopies: soldCopies,
+  loading: soldLoading,
+  // refetch: refetchSoldBookCopies,
+} = useGetSoldBookCopiesQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
+const totalCheckoutMoney = ref(0);
+const totalCheckedOutMoney = ref(0);
 
 const bookLoading = computed(
   () => ownedLoading.value || returnedLoading.value || soldLoading.value,
@@ -418,14 +431,12 @@ const tableRows = computed<
     ? sortByCopyCode(ownedCopies.value)
     : [{ id: "EMPTY" } satisfies EmptyRow]),
 
+  {
+    id: Titles.Returned,
+  },
   ...(returnedCopies.value.length > 0
-    ? [
-        {
-          id: Titles.Returned,
-        },
-        ...sortByCopyCode(returnedCopies.value),
-      ]
-    : []),
+    ? sortByCopyCode(returnedCopies.value)
+    : [{ id: "EMPTY" } satisfies EmptyRow]),
 
   {
     id: Titles.Sold,
@@ -436,18 +447,17 @@ const tableRows = computed<
 ]);
 
 const selectableRows = computed(() =>
-  ownedCopies.value.filter((row) => isAvailable(row)),
+  ownedCopies.value.filter((row) => getStatus(row) === "available"),
 );
 
 const selectedRows = ref<BookCopyDetailsFragment[]>([]);
 
-const localizedSectionTitle = (sectionTitle: Titles) => {
-  return sectionTitle === Titles.InStock
+const localizedSectionTitle = (sectionTitle: Titles) =>
+  sectionTitle === Titles.InStock
     ? t("manageUsers.payOffUserDialog.booksInStock")
     : sectionTitle === Titles.Returned
       ? t("manageUsers.payOffUserDialog.returnedBooks")
       : t("manageUsers.payOffUserDialog.soldBooks");
-};
 
 const rowsSelectionStatus = computed(() =>
   selectedRows.value.length === 0
@@ -470,11 +480,70 @@ function swapRow(row: BookCopyDetailsFragment) {
   }
 }
 
-function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
-  // FIXME: add logic
-  bookCopies;
+function removeBookCopiesAfterAction(bookCopies: BookCopyDetailsFragment[]) {
+  if (bookCopies.length > 0) {
+    selectedRows.value = [];
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    selectedRows.value.splice(selectedRows.value.indexOf(bookCopies[0]!));
+  }
 }
 
+const { returnBookCopy } = useReturnBookCopyMutation();
+async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
+  try {
+    await Promise.all(
+      bookCopies.map(({ id: bookCopyId }) =>
+        returnBookCopy({
+          input: {
+            bookCopyId,
+            retailLocationId: selectedLocation.value.id,
+          },
+        }),
+      ),
+    );
+
+    const queryArgs = {
+      retailLocationId: selectedLocation.value.id,
+      userId: props.user.id,
+    };
+    await Promise.all([
+      refetchBookCopiesByOwner(queryArgs),
+      refetchReturnedBookCopes(queryArgs),
+    ]);
+    removeBookCopiesAfterAction(bookCopies);
+  } catch {
+    notifyError(
+      t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Returned`),
+    );
+  }
+}
+
+async function donateBookCopies(bookCopies: BookCopyDetailsFragment[]) {
+  try {
+    await Promise.all(
+      bookCopies.map(({ id: bookCopyId }) =>
+        donateBookCopy({
+          input: {
+            bookCopyId,
+            retailLocationId: selectedLocation.value.id,
+          },
+        }),
+      ),
+    );
+    await refetchBookCopiesByOwner({
+      retailLocationId: selectedLocation.value.id,
+      userId: props.user.id,
+    });
+    removeBookCopiesAfterAction(bookCopies);
+  } catch {
+    notifyError(
+      t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Donated`),
+    );
+  }
+}
+
+const { donateBookCopy } = useDonateBookCopyMutation();
 function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
   Dialog.create({
     title: t(
@@ -491,12 +560,12 @@ function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
     ),
     cancel: t("common.cancel"),
     persistent: true,
-  }).onOk(() => {
-    // FIXME: mark as donated
-    bookCopies;
+  }).onOk(async () => {
+    await donateBookCopies(bookCopies);
   });
 }
 
+const { reimburseBookCopy } = useReimburseBookCopyMutation();
 function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
   Dialog.create({
     title: t(
@@ -513,9 +582,28 @@ function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
     ),
     cancel: t("common.cancel"),
     persistent: true,
-  }).onOk(() => {
-    // FIXME: mark as repaid
-    bookCopies;
+  }).onOk(async () => {
+    try {
+      await Promise.all(
+        bookCopies.map(({ id: bookCopyId }) =>
+          reimburseBookCopy({
+            input: {
+              bookCopyId,
+              retailLocationId: selectedLocation.value.id,
+            },
+          }),
+        ),
+      );
+      await refetchBookCopiesByOwner({
+        retailLocationId: selectedLocation.value.id,
+        userId: props.user.id,
+      });
+      removeBookCopiesAfterAction(bookCopies);
+    } catch {
+      notifyError(
+        t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}reimbursed`),
+      );
+    }
   });
 }
 
@@ -526,47 +614,43 @@ function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
     componentProps: {
       bookCopy: bookCopies[0],
     },
-  }).onOk(async (problem: ProblemDetailsFragment) => {
+  }).onOk(async ({ details, type }: ProblemDetailsFragment) => {
     try {
-      bookCopies.forEach(async (bookCopy) => {
-        await reportProblem({
-          input: {
-            bookCopyId: bookCopy.id,
-            details: problem.details,
-            type: problem.type,
-          },
-        });
-
-        selectedRows.value = selectedRows.value.filter(
-          ({ id }) => id !== bookCopy.id,
-        );
-      });
-
+      await Promise.all(
+        bookCopies.map(({ id: bookCopyId }) =>
+          reportProblem({
+            input: {
+              bookCopyId,
+              details,
+              type,
+            },
+          }),
+        ),
+      );
       await refetchBookCopiesByOwner({
         retailLocationId: selectedLocation.value.id,
         userId: props.user.id,
       });
+      removeBookCopiesAfterAction(bookCopies);
     } catch {
       notifyError(t("manageUsers.payOffUserDialog.problemsError"));
-      return;
     }
   });
 }
 
-function returnAllBooks(action: ReturnType) {
+const { settleUser } = useSettleUserMutation();
+function returnAllBooks(remainingType: SettleRemainingType) {
   const translationsPath = `manageUsers.payOffUserDialog.confirms.${
-    action === "return-and-donate" ? "returnAndDonate" : "returnEverything"
+    remainingType === "REFUND" ? "returnAndDonate" : "returnEverything"
   }`;
   Dialog.create({
     component: ReturnBooksConfirmDialog,
     componentProps: {
-      bookCopies: ownedCopies.value.filter((copy) =>
-        selectableRows.value.find((row) => row === copy),
-      ),
+      booksToReturn: selectableRows.value,
       disclaimer: t(`${translationsPath}.disclaimer`),
       saveLabel: t(
         `manageUsers.payOffUserDialog.${
-          action === "return-and-donate"
+          remainingType === "REFUND"
             ? "confirms.returnAndDonate.buttonText"
             : "returnEverything"
         }`,
@@ -575,14 +659,26 @@ function returnAllBooks(action: ReturnType) {
       tableTitle: t(`${translationsPath}.tableTitle`),
       title: t(
         `manageUsers.payOffUserDialog.${
-          action === "return-and-donate"
+          remainingType === "RETURN"
             ? "returnAndDonate"
             : "confirms.returnEverything.title"
         }`,
       ),
+      booksSoldToOthers: soldCopies.value.length,
     },
-  }).onOk(() => {
-    onDialogOK(action);
+  }).onOk(async () => {
+    try {
+      await settleUser({
+        input: {
+          remainingType,
+          retailLocationId: selectedLocation.value.id,
+          userId: props.user.id,
+        },
+      });
+    } catch {
+      notifyError(t("common.genericErrorMessage"));
+    }
+    onDialogOK();
   });
 }
 </script>

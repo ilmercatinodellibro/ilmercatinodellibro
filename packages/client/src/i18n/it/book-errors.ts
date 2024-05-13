@@ -31,4 +31,17 @@ export default {
   bookNotCartable:
     "Non puoi mettere nel carrello un libro richiesto ma non disponibile.",
   noBookCopy: "Nessun libro per questa sezione.",
+  notReturned:
+    "Non è stato possibile restituire la copia selezionata al cliente.",
+  notAllReturned: "Non è stato possibile restituire tutte le copie al cliente.",
+  notReimbursed:
+    "Non è stato possibile rimborsare la copia selezionata al cliente.",
+  notAllReimbursed:
+    "Non è stato possibile rimborsare tutte le copie al cliente.",
+  notDonated: "Non è stato possibile donare la copia selezionata al Mercatino.",
+  notAllDonated: "Non è stato possibile donare tutte le copie al Mercatino.",
+  notProblem:
+    "Non è stato possibile segnalare il problema per la copia selezionata.",
+  notSolveProblem:
+    "Non è stato possibile risolvere il problema per la copia selezionata.",
 };

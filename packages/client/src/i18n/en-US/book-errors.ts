@@ -24,4 +24,13 @@ export default {
   bookNotCartable:
     "You cannot put a requested but not available book in the cart.",
   noBookCopy: "No book for this section.",
+  notReturned: "Could not return the selected copy to the customer.",
+  notAllReturned: "Could not return all the selected copies to the customer.",
+  notReimbursed: "Could not reimburse the selected copy to the customer.",
+  notAllReimbursed:
+    "Could not reimburse all the selected copies to the customer.",
+  notDonated: "Could not donate the selected copy to the Mercatino.",
+  notAllDonated: "Could not donate all the selected copies to the Mercatino.",
+  notProblem: "Could not report the problem for the selected copy.",
+  notSolveProblem: "Could not solbe the problem for the selected copy.",
 };

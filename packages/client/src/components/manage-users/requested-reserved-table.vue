@@ -2,7 +2,7 @@
   <dialog-table :rows="rows" :columns="columns">
     <template #body-cell-request-status="{ value }">
       <q-td>
-        <span :class="value ? 'text-positive' : ''">
+        <span :class="value && !isShowingReservations ? 'text-positive' : ''">
           {{
             t(
               isShowingReservations

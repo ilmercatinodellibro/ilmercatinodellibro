@@ -2,9 +2,7 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        v-model:filters="filters"
-        v-model:search-query="searchQuery"
-        v-model:school-filters="schoolFilters"
+        v-model="tableFilter"
         :filter-options="filterOptions"
       >
         <template #side-actions>
@@ -67,6 +65,7 @@
         v-model:pagination="booksPagination"
         :columns="columns"
         :filter="tableFilter"
+        :filter-method="filterMethod"
         :loading="booksLoading"
         :rows="books?.rows ?? []"
         class="flex-delegate-height-management"
@@ -139,11 +138,9 @@
         v-model:pagination="copyPagination"
         :columns="bookCopyColumns"
         :filter="tableFilter"
+        :filter-method="filterMethod"
         :loading="copyLoading"
-        :rows="
-          // FIXME: bookCopies don't have the status field but the columns specify it
-          bookCopies.rows
-        "
+        :rows="bookCopies.rows"
         class="flex-delegate-height-management"
         @request="onCopyRequest"
       >
@@ -194,10 +191,9 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
-import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { useTableFilters } from "src/composables/use-table-filters";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
-import { SchoolFilters } from "src/models/book";
 import {
   BookCopyDetailsFragment,
   useGetPaginatedBookCopiesQuery,
@@ -238,18 +234,15 @@ const { t } = useI18n();
 
 // Setting this so that the side buttons don't overflow to two rows when the screen
 // is below the minimum width to hold them in a single row
-const smallScreenBreakpoint = 1694;
+const smallScreenBreakpoint = 1802;
 const screenWidth = useScreenWidth(smallScreenBreakpoint);
 
 const isSortedByCopyCode = ref(false);
 
 const tableRef = ref<QTable>();
 
-const filters = ref<string[]>([]);
-const filterOptions = useTranslatedFilters("warehouse.filters");
-
-const schoolFilters = ref<SchoolFilters>({ courses: [], schoolCodes: [] });
-const searchQuery = ref("");
+const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
+  useTableFilters("warehouse.filters", true);
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [
@@ -307,13 +300,6 @@ const copyPagination = ref({
   rowsNumber: bookCopies.value?.rowsCount,
   page: copyPage.value,
 });
-
-// TODO: send the filters to the server
-const tableFilter = computed(() =>
-  !searchQuery.value && Object.entries(filters.value).length === 0
-    ? undefined
-    : { searchTerm: searchQuery.value, filters: filters.value },
-);
 
 const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   () => [
@@ -377,15 +363,11 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
 const onBooksRequest: QTableProps["onRequest"] = async ({
   pagination: { page, rowsPerPage },
 }) => {
-  booksLoading.value = true;
-
   await refetchBooks({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
-    filter: {
-      search: searchQuery.value,
-    },
+    filter: refetchFilterProxy.value,
   });
 
   booksPagination.value.rowsNumber = books.value?.rowsCount;
@@ -398,12 +380,11 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
 const onCopyRequest: QTableProps["onRequest"] = async ({
   pagination: { page, rowsPerPage },
 }) => {
-  copyLoading.value = true;
-
   await refetchBookCopies({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
+    filter: refetchFilterProxy.value,
   });
 
   copyPagination.value.rowsNumber = bookCopies.value?.rowsCount;
@@ -425,9 +406,12 @@ const otherCityName = computed(
 function swapView() {
   isSortedByCopyCode.value = !isSortedByCopyCode.value;
 
-  searchQuery.value = "";
-  filters.value = [];
-  schoolFilters.value = { courses: [], schoolCodes: [] };
+  tableFilter.searchQuery = "";
+  tableFilter.filters = [];
+  tableFilter.schoolFilters = {
+    selectedSchoolCourseIds: [],
+    selectedSchoolCodes: [],
+  };
 
   if (isSortedByCopyCode.value) {
     copyPage.value = 0;

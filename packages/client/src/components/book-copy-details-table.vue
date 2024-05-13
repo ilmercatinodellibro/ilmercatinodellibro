@@ -80,7 +80,7 @@ import ProblemsButton from "./problems-button.vue";
 
 const { t } = useI18n();
 
-const { bookId, bookCopyColumns } = defineProps<{
+const props = defineProps<{
   bookCopyColumns: QTableColumn<BookCopyDetailsFragment>[];
   bookId: string;
 }>();
@@ -98,16 +98,16 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: "code",
     label: t("book.code"),
   },
-  ...bookCopyColumns.filter(
+  ...props.bookCopyColumns.filter(
     ({ name }) => !["isbn", "author", "subject", "title"].includes(name),
   ),
 ]);
 
 const { useGetBookCopiesQuery } = useBookCopyService();
 
-const { bookCopies, loading } = useGetBookCopiesQuery({
-  bookId,
-});
+const { bookCopies, loading } = useGetBookCopiesQuery(() => ({
+  bookId: props.bookId,
+}));
 
 function getColspan(columnName: string) {
   return columnName === "original-code" || columnName === "status" ? 2 : 1;

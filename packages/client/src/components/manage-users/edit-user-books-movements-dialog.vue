@@ -10,10 +10,7 @@
         v-if="type === 'sold'"
         :columns="soldColumns"
         :loading="soldLoading"
-        :rows="
-          // prettier-ignore
-          soldBookCopies as readonly SoldBookCopy[]
-        "
+        :rows="soldBookCopies as readonly SoldBookCopy[]"
         class="flex-delegate-height-management"
       >
         <template #body-cell-problems="{ row }">
@@ -38,10 +35,7 @@
         v-else
         :columns="purchasedColumns"
         :loading="purchasedLoading"
-        :rows="
-          // prettier-ignore
-          purchasedBookCopies as readonly SoldBookCopy[]
-        "
+        :rows="purchasedBookCopies as readonly SoldBookCopy[]"
         class="flex-delegate-height-management"
       >
         <template #body-cell-return="{ row }">
@@ -69,10 +63,12 @@ import {
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
+import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
   useGetPurchasedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
+  useRefundBookCopyMutation,
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserSummaryFragment } from "src/services/user.graphql";
@@ -242,6 +238,7 @@ function openHistoryDialog(bookCopy: BookCopyDetailsFragment) {
   });
 }
 
+const { refundBookCopy } = useRefundBookCopyMutation();
 function openReturnDialog(bookCopy: BookCopyDetailsFragment) {
   Dialog.create({
     component: ReturnBookDialog,
@@ -249,9 +246,18 @@ function openReturnDialog(bookCopy: BookCopyDetailsFragment) {
       bookCopy,
       user: props.userData,
     },
-  }).onOk((payload) => {
-    // FIXME: return book
-    payload;
+  }).onOk(async (bookCopyId: string) => {
+    try {
+      await refundBookCopy({
+        input: {
+          bookCopyId,
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
+    } catch {
+      notifyError(t("bookErrors.notReturned"));
+    }
+    onDialogHide();
   });
 }
 </script>

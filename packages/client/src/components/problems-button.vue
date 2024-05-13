@@ -58,7 +58,7 @@ function openProblemsDialog() {
 
         emit("updateProblems");
       } catch (e) {
-        notifyError(t("common.genericErrorMessage"));
+        notifyError(t("bookErrors.notSolveProblem"));
       }
       return;
     }
@@ -78,7 +78,7 @@ function openProblemsDialog() {
 
       emit("updateProblems");
     } catch (e) {
-      notifyError(t("common.genericErrorMessage"));
+      notifyError(t("bookErrors.notProblem"));
     }
   });
 }

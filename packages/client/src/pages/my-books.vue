@@ -74,7 +74,6 @@
               #body-cell-status="{ row }"
             >
               <q-td>
-                <!-- TODO: update to correct book status type -->
                 <q-chip
                   v-bind="statusChipData[getStatus(row)]"
                   class="no-pointer-events"
@@ -159,8 +158,8 @@ import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import {
   BookCopyDetailsFragment,
+  useGetBookCopiesByOwnerQuery,
   useGetPurchasedBookCopiesQuery,
-  useGetSoldBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 import {
   GetRequestsDocument,
@@ -178,7 +177,7 @@ const { user } = useAuthService();
 const route = useRoute();
 const router = useRouter();
 
-const { soldBookCopies, loading } = useGetSoldBookCopiesQuery({
+const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
   retailLocationId: selectedLocation.value.id,
@@ -218,7 +217,7 @@ type TablesRowsTypes =
   | RequestSummaryFragment;
 
 const tableRowsByTab = computed<Record<BooksTab, TablesRowsTypes[]>>(() => ({
-  [BooksTab.DELIVERED]: soldBookCopies.value,
+  [BooksTab.DELIVERED]: bookCopiesByOwner.value,
   [BooksTab.PURCHASED]: purchasedBookCopies.value,
   [BooksTab.REQUESTED]: bookRequests.value,
   [BooksTab.RESERVED]: userReservations.value,
@@ -361,12 +360,13 @@ enum BookStatus {
 }
 
 function getStatus(bookCopy: BookCopyDetailsFragment) {
-  // TODO: add logic for donated books
   return bookCopy.returnedAt
     ? BookStatus.RETURNED
-    : bookCopy.purchasedAt
-      ? BookStatus.SOLD
-      : BookStatus.NOT_SOLD;
+    : bookCopy.donatedAt
+      ? BookStatus.DONATED
+      : bookCopy.purchasedAt
+        ? BookStatus.SOLD
+        : BookStatus.NOT_SOLD;
 }
 
 const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({

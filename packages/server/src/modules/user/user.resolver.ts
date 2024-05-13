@@ -162,6 +162,7 @@ export class UserResolver {
             bookCopies: {
               where: {
                 returnedAt: null,
+                donatedAt: null,
                 OR: [
                   {
                     sales: {
@@ -261,6 +262,7 @@ export class UserResolver {
                         saleId: null,
                       },
                       {
+                        // All related sales must have been refunded in order to show the request
                         sale: {
                           refundedAt: {
                             not: null,
@@ -319,9 +321,7 @@ export class UserResolver {
           select: {
             purchases: {
               where: {
-                refundedAt: {
-                  not: null,
-                },
+                refundedAt: null,
               },
             },
           },

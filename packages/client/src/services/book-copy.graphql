@@ -46,6 +46,13 @@ fragment BookCopyDetails on BookCopy {
   returnedById
   updatedAt
   updatedById
+  donatedAt
+  donatedById
+  reimbursedAt
+  reimbursedById
+  sales {
+    refundedAt
+  }
 }
 
 query getBookCopies($bookId: String!) {
@@ -118,5 +125,29 @@ mutation resolveProblem($input: ProblemResolveInput!) {
     bookCopyId
     details
     solution
+  }
+}
+
+mutation returnBookCopy($input: ReturnBookCopyInput!) {
+  returnBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation reimburseBookCopy($input: ReimburseBookCopyInput!) {
+  reimburseBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation refundBookCopy($input: RefundBookCopyInput!) {
+  refundBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation donateBookCopy($input: DonateBookCopyInput!) {
+  donateBookCopy(input: $input) {
+    ...BookCopySummary
   }
 }

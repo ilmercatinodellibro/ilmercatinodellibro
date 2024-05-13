@@ -1,7 +1,7 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-type FilterPath =
+export type FilterPath =
   | "warehouse.filters"
   | "book.filters.options"
   | "manageUsers.filters";

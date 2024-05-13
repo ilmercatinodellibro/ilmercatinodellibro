@@ -8,7 +8,7 @@
     >
       <q-card-section class="gap-16 items-center no-wrap q-pa-md row">
         <q-input
-          v-model="totalSoldBooks"
+          :model-value="booksSoldToOthers"
           :label="$t('manageUsers.payOffUserDialog.soldBooksCountLabel')"
           outlined
           readonly
@@ -43,8 +43,8 @@
         :rows-per-page-options="[0]"
       />
       <template #card-actions>
-        <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel" />
-        <q-btn :label="saveLabel" color="positive" @click="onDialogOK" />
+        <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
+        <q-btn :label="saveLabel" color="positive" @click="onDialogOK()" />
       </template>
     </k-dialog-card>
   </q-dialog>
@@ -64,6 +64,7 @@ defineProps<{
   saveLabel: string;
   tableTitle: string;
   title: string;
+  booksSoldToOthers: number;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -73,7 +74,6 @@ const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
 
 const { t } = useI18n();
 
-const totalSoldBooks = ref(0);
 const totalCheckoutMoney = ref(0);
 const totalCheckedOutMoney = ref(0);
 

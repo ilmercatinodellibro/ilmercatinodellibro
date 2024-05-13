@@ -1,5 +1,9 @@
 <template>
-  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    :persistent="tab === 'in-retrieval' && booksToRegister.length > 0"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :cancel-label="$t('common.close')"
       :title="
@@ -90,7 +94,7 @@
           class="column flex-delegate-height-management no-wrap q-pa-none"
         >
           <dialog-table
-            :rows="copiesInStock"
+            :rows="copiesInStock.filter(({ donatedAt }) => donatedAt === null)"
             :columns="copiesInStockColumns"
             :loading="inStockLoading"
             :rows-per-page-options="[0]"
@@ -107,25 +111,6 @@
                 <utility-chip :utility="value" />
               </q-td>
             </template>
-
-            <template #body-cell-actions="{ row }">
-              <q-td>
-                <!-- Hiding the possibility to return a lost book copy -->
-                <chip-button
-                  v-if="
-                    !(
-                      hasProblem(row) &&
-                      getCurrentActiveProblem(row)?.type === 'LOST'
-                    )
-                  "
-                  :label="
-                    $t('manageUsers.payOffUserDialog.returnOptions.return')
-                  "
-                  color="primary"
-                  @click="returnBook(row)"
-                />
-              </q-td>
-            </template>
           </dialog-table>
         </q-tab-panel>
       </q-tab-panels>
@@ -140,7 +125,7 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
-import { getCurrentActiveProblem, hasProblem } from "src/helpers/book-copy";
+import { isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
@@ -176,7 +161,9 @@ const { t } = useI18n();
 
 const { createBookCopies } = useCreateBookCopiesMutation();
 
-const tab = ref("in-retrieval");
+type Tab = "in-retrieval" | "retrieved";
+
+const tab = ref<Tab>("in-retrieval");
 
 const booksToRegister = ref<BookSummaryFragment[]>([]);
 
@@ -208,26 +195,6 @@ function getCommonColumns<
         };
 
   return [
-    {
-      label: t("book.fields.author"),
-      field: getField("authorsFullName"),
-      name: "author",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-    },
-    {
-      label: t("book.fields.subject"),
-      field: getField("subject"),
-      name: "subject",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-    },
-    {
-      label: t("book.fields.status"),
-      field: getField(({ meta }) => meta.isAvailable),
-      name: "status",
-      align: "left",
-    },
     {
       label: t("book.fields.title"),
       field: getField("title"),
@@ -268,6 +235,26 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       align: "left",
       format: (val: string) => startCase(toLower(val)),
     },
+    {
+      label: t("book.fields.author"),
+      field: "authorsFullName",
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.subject"),
+      field: "subject",
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.status"),
+      field: ({ meta }) => meta.isAvailable,
+      name: "status",
+      align: "left",
+    },
 
     ...getCommonColumns("book"),
 
@@ -298,6 +285,26 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       label: t("book.originalCode"),
       field: "originalCode",
       name: "original-code",
+      align: "left",
+    },
+    {
+      label: t("book.fields.author"),
+      field: ({ book }) => book.authorsFullName,
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.subject"),
+      field: ({ book }) => book.subject,
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.status"),
+      field: isAvailable,
+      name: "status",
       align: "left",
     },
 
@@ -401,11 +408,6 @@ function openDeleteBookDialog(bookIndex: number) {
   }).onOk(() => {
     booksToRegister.value.splice(bookIndex, 1);
   });
-}
-
-function returnBook(book: BookSummaryFragment) {
-  // FIXME: return the book to the Mercatino
-  book;
 }
 </script>
 

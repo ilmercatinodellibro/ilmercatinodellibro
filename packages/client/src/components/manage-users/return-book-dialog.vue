@@ -4,12 +4,7 @@
       :submit-label="$t('manageUsers.returnBook')"
       :title="$t('manageUsers.returnBookTitle')"
       size="sm"
-      @submit="
-        onDialogOK({
-          bookCopy,
-          user,
-        })
-      "
+      @submit="onDialogOK(bookCopy.id)"
       @cancel="onDialogCancel"
     >
       <q-card-section class="column gap-16 no-wrap">
@@ -70,7 +65,7 @@ import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
-import { UserFragment, UserSummaryFragment } from "src/services/user.graphql";
+import { UserFragment } from "src/services/user.graphql";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
 defineProps<{
@@ -81,10 +76,7 @@ defineProps<{
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
-  useDialogPluginComponent<{
-    bookCopy: BookCopyDetailsFragment;
-    user: UserSummaryFragment;
-  }>();
+  useDialogPluginComponent<string>();
 
 const discount = computed(
   () =>

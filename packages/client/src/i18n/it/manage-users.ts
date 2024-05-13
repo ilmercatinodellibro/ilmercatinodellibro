@@ -45,12 +45,12 @@ export default {
     notes: "Note",
   },
   inRetrieval: "In ritiro",
-  retrieved: "Ritirati e restituibili",
+  retrieved: "Ritirati",
   searchHint: "Inserisci un codice ISBN per aggiungere il libro alla lista",
   inStockDialog: {
     title: "Libri di {0} in Magazzino",
     retrievableTooltip:
-      "Include le copie ancora presenti in magazzino, non disperse, non prenotate",
+      "Include le copie ancora presenti in magazzino, quelle disperse e quelle prenotate",
     retrieveBtn: "Ritira tutti i libri nella lista",
     deleteBookBtnTooltip: "Elimina definitivamente questa copia dal database",
     errors: {
@@ -159,6 +159,8 @@ export default {
           "I libri nella lista sottostante saranno restituiti al cliente in quanto legittimo proprietario. Non potrai annullare questa azione. Vuoi procedere?",
         tableTitle: "Libri in restituzione",
       },
+      confirmError:
+        "Non è stato possibile terminare la liquidazione del cliente selezionato.",
     },
   },
   goToCart: "Vai al carrello",
