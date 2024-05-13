@@ -177,10 +177,15 @@ const { createBook } = useCreateNewBookMutation();
 function openBookDialog() {
   Dialog.create({
     component: AddBookDialog,
-  }).onOk(async (input: Omit<BookCreateInput, "id">) => {
+  }).onOk(async (input: BookCreateInput) => {
     try {
       await createBook({
         input,
+      });
+
+      await refetchBooks({
+        page: currentPage.value,
+        rows: numberOfRows.value,
       });
     } catch {
       notifyError(t("bookErrors.addBook"));
