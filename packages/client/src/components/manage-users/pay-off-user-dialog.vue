@@ -221,12 +221,14 @@
       <template #card-actions>
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
         <q-btn
+          :disable="selectableRows.length === 0"
           outline
           :label="$t('manageUsers.payOffUserDialog.returnAndDonate')"
           @click="returnAllBooks('REFUND')"
         />
         <q-btn
           color="green"
+          :disable="selectableRows.length === 0"
           :label="
             $t('manageUsers.payOffUserDialog.returnEverything', [
               totalCheckoutMoney.toFixed(2),
