@@ -234,7 +234,7 @@ const { t } = useI18n();
 
 // Setting this so that the side buttons don't overflow to two rows when the screen
 // is below the minimum width to hold them in a single row
-const smallScreenBreakpoint = 1694;
+const smallScreenBreakpoint = 1802;
 const screenWidth = useScreenWidth(smallScreenBreakpoint);
 
 const isSortedByCopyCode = ref(false);
