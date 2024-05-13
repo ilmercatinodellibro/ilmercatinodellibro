@@ -159,7 +159,7 @@
                   v-else-if="
                     col.name === 'actions' &&
                     ownedCopies.includes(row) &&
-                    ['donated', 'reimbursed'].includes(getStatus(row))
+                    !['donated', 'reimbursed'].includes(getStatus(row))
                   "
                   :icon="mdiDotsVertical"
                   dense
