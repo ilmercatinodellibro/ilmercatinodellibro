@@ -48,9 +48,20 @@ export class BookRequestResolver {
         deletedAt: null,
         cartItem: null,
         AND: [
-          // see https://github.com/ilmercatinodellibro/ilmercatinodellibro/blob/5a97d9ace5891506199bb754daebd893b61ef000/packages/server/src/modules/user/user.resolver.ts#L258
           {
-            saleId: null,
+            OR: [
+              {
+                saleId: null,
+              },
+              {
+                // All related sales must have been refunded in order to show the request
+                sale: {
+                  refundedAt: {
+                    not: null,
+                  },
+                },
+              },
+            ],
           },
 
           {
