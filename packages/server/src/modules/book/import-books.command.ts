@@ -62,13 +62,7 @@ export class ImportBooksCommand extends CommandRunner {
   }
 
   async loadBooks() {
-    if ((await this.prisma.book.count()) > 0) {
-      throw new Error(
-        "There are books inside the database. Please make sure you have run the procedure to reset the contents of the database during the close year process.",
-      );
-    }
-
-    console.log("Importing books...");
+    console.log("Load Books command");
 
     try {
       const result = await this.#loadBooksIntoDb();
@@ -79,10 +73,12 @@ export class ImportBooksCommand extends CommandRunner {
         );
       }
 
-      const importedBooksCount = await this.prisma.book.count();
-      console.log(`Imported ${importedBooksCount} books.`);
+      const currentDbBooksCount = await this.prisma.book.count();
+      console.log(
+        `Import process complete: there are ${currentDbBooksCount} books inside the database`,
+      );
 
-      return importedBooksCount;
+      return currentDbBooksCount;
     } catch (error) {
       console.error("Cannot load books, error: ", error);
       throw new Error("Cannot import or process files on server.");
@@ -147,6 +143,9 @@ export class ImportBooksCommand extends CommandRunner {
   async #loadBooksIntoDb() {
     const locations = await this.prisma.retailLocation.findMany();
     if (locations.length === 0) {
+      console.error(
+        "No retail locations found inside the database. Please make sure to create the retail locations first.",
+      );
       return false;
     }
 
@@ -155,7 +154,21 @@ export class ImportBooksCommand extends CommandRunner {
       prefix.toLocaleUpperCase(),
     );
 
-    await this.#parseCsvBooksContent(uppercasePrefixes);
+    const booksAlreadyPresentCount = await this.prisma.book.count();
+    console.log(
+      booksAlreadyPresentCount > 0
+        ? `There are already ${booksAlreadyPresentCount} Books present before execution`
+        : "No Book in database before execution",
+    );
+
+    console.log("Parsing Books CSV...");
+
+    await this.#parseCsvBooksContent(
+      uppercasePrefixes,
+      booksAlreadyPresentCount > 0,
+    );
+
+    console.log("Importing books into DB...");
 
     // This does  work only if the file is located within the same filesystem of the Docker image.
     // Because when DB is inside a docker instance, it cannot access external files.
@@ -167,17 +180,55 @@ export class ImportBooksCommand extends CommandRunner {
       WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
       `;
       return true;
-    } catch {
+    } catch (e) {
+      console.error(
+        "Unable to execute raw query to import Books into DB table.",
+        e,
+      );
       return false;
     }
   }
 
-  async #parseCsvBooksContent(locationsPrefixes: string[] = ["MO", "RE"]) {
+  async #initializeLocationBooks(
+    locationPrefixes: string[],
+    booksAlreadyPresent = false,
+  ) {
+    const locationBooks: Record<string, string[]> = {};
+    for (const provinceCode of locationPrefixes) {
+      locationBooks[provinceCode] = [];
+    }
+
+    if (!booksAlreadyPresent) {
+      return locationBooks;
+    }
+
+    const storedBooks = await this.prisma.book.findMany({
+      select: {
+        isbnCode: true,
+        retailLocationId: true,
+      },
+    });
+
+    for (const { isbnCode, retailLocationId } of storedBooks) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (locationBooks[retailLocationId.toUpperCase()]) {
+        locationBooks[retailLocationId.toUpperCase()].push(isbnCode);
+      }
+    }
+
+    return locationBooks;
+  }
+
+  async #parseCsvBooksContent(
+    locationsPrefixes: string[] = ["MO", "RE"],
+    booksAlreadyPresent = false,
+  ) {
     const dataSource = joinPath(
       process.cwd(),
       "./tmp-files/ALTEMILIAROMAGNA.csv",
     );
     if (!existsSync(dataSource)) {
+      console.error("The books source CSV file was not found!");
       throw new Error("The CSV file was not found.");
     }
 
@@ -190,12 +241,12 @@ export class ImportBooksCommand extends CommandRunner {
 
     const sourceStream = createReadStream(dataSource);
     const destinationStream = createWriteStream(dataDestination);
-    const locationBooks: Record<string, string[]> = {};
+    const locationBooks: Record<string, string[]> =
+      await this.#initializeLocationBooks(
+        locationsPrefixes,
+        booksAlreadyPresent,
+      );
     const schoolCoursesMap = new Map<string, SchoolCourseDto[]>();
-
-    for (const regionCode of locationsPrefixes) {
-      locationBooks[regionCode] = [];
-    }
 
     const csvParser = parse({
       skip_empty_lines: true,
@@ -287,7 +338,8 @@ export class ImportBooksCommand extends CommandRunner {
       });
 
       destinationStream.addListener("error", (error) => {
-        reject(error.message);
+        console.log("Failed to write Books data to stream file.");
+        reject(error);
       });
 
       // Starts streaming process
@@ -299,7 +351,8 @@ export class ImportBooksCommand extends CommandRunner {
     return new Promise<void>((resolve, reject) => {
       stream.write(content, (possibleError) => {
         if (possibleError) {
-          reject(possibleError.message);
+          console.error("Error during execution of 'writeStreamPromise'.");
+          reject(possibleError);
         }
 
         resolve();
@@ -361,12 +414,7 @@ export class ImportBooksCommand extends CommandRunner {
         });
         return (
           // See [1]
-          [
-            `${row[6]}`,
-            `${row[7]}`,
-            `${row[8]}`,
-            `${row[6].substring(0, 2)}`,
-          ].join(",") + "\n"
+          [row[6], row[7], row[8], row[6].substring(0, 2)].join(",") + "\n"
         );
       }),
     });
@@ -410,12 +458,7 @@ export class ImportBooksCommand extends CommandRunner {
         });
         return (
           // See [1]
-          [
-            `${row[4]}`,
-            `${row[5]}`,
-            `${row[6]}`,
-            `${row[4].substring(0, 2)}`,
-          ].join(",") + "\n"
+          [row[4], row[5], row[6], row[4].substring(0, 2)].join(",") + "\n"
         );
       }),
     });
@@ -497,7 +540,7 @@ export class ImportBooksCommand extends CommandRunner {
       });
 
       destinationStream.addListener("error", (error) => {
-        reject(error.message);
+        reject(error);
       });
 
       // Starts streaming process
