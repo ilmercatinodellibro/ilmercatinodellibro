@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {
   WriteStream,
   createReadStream,
@@ -8,11 +7,13 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { join as joinPath } from "node:path";
-import { PrismaClient } from "@prisma/client";
+import { resolve } from "node:path";
+import { Inject, Logger } from "@nestjs/common";
 import { parse, transform } from "csv";
 import { Command, CommandRunner, Option } from "nest-commander";
 import { School } from "src/@generated";
+import { RootConfiguration, rootConfiguration } from "src/config/root";
+import { PrismaService } from "src/modules/prisma/prisma.service";
 import {
   IngestedCsvRow,
   IngestedEquivalentSchoolRow,
@@ -30,11 +31,21 @@ interface ImportBooksCommandOptions {
   description: "Imports Books or Schools into the database",
 })
 export class ImportBooksCommand extends CommandRunner {
-  private prisma: PrismaClient;
+  private readonly logger = new Logger(ImportBooksCommand.name);
+  private readonly tmpPath;
 
-  constructor() {
+  constructor(
+    @Inject(rootConfiguration.KEY)
+    rootConfig: RootConfiguration,
+    private readonly prisma: PrismaService,
+  ) {
     super();
-    this.prisma = new PrismaClient();
+
+    this.tmpPath = resolve(rootConfig.storagePath, "./tmp");
+  }
+
+  private resolveTmpPath(path: string) {
+    return resolve(this.tmpPath, path);
   }
 
   @Option({
@@ -53,16 +64,13 @@ export class ImportBooksCommand extends CommandRunner {
       } else {
         await this.loadBooks();
       }
-    } finally {
-      // No need to catch, the error must break the execution, but it is still better to make sure we're closing prisma connection.
-      await this.prisma.$disconnect();
+    } catch (error) {
+      this.logger.fatal("An error occurred during the import process.", error);
     }
-
-    return;
   }
 
   async loadBooks() {
-    console.log("Load Books command");
+    this.logger.log("Importing books...");
 
     try {
       const result = await this.#loadBooksIntoDb();
@@ -74,13 +82,13 @@ export class ImportBooksCommand extends CommandRunner {
       }
 
       const currentDbBooksCount = await this.prisma.book.count();
-      console.log(
+      this.logger.log(
         `Import process complete: there are ${currentDbBooksCount} books inside the database`,
       );
 
       return currentDbBooksCount;
     } catch (error) {
-      console.error("Cannot load books, error: ", error);
+      this.logger.error("Cannot load books, error: ", error);
       throw new Error("Cannot import or process files on server.");
     }
   }
@@ -103,13 +111,13 @@ export class ImportBooksCommand extends CommandRunner {
 
       const { booksOnCoursesCount, schoolCount, coursesCount } =
         await this.#getSchoolAndCoursesData();
-      console.log(
+      this.logger.log(
         `Imported ${schoolCount} schools, for a total of ${coursesCount} courses having a total of ${booksOnCoursesCount} books.`,
       );
 
       return result;
     } catch (error) {
-      console.error("Cannot load schools, error: ", error);
+      this.logger.error("Cannot load schools, error: ", error);
       throw new Error(
         "Could not find/process the CSV files or create DB entries.",
       );
@@ -134,7 +142,7 @@ export class ImportBooksCommand extends CommandRunner {
   async #loadBooksIntoDb() {
     const locations = await this.prisma.retailLocation.findMany();
     if (locations.length === 0) {
-      console.error(
+      this.logger.error(
         "No retail locations found inside the database. Please make sure to create the retail locations first.",
       );
       return false;
@@ -146,20 +154,20 @@ export class ImportBooksCommand extends CommandRunner {
     );
 
     const booksAlreadyPresentCount = await this.prisma.book.count();
-    console.log(
+    this.logger.log(
       booksAlreadyPresentCount > 0
         ? `There are already ${booksAlreadyPresentCount} Books present before execution`
         : "No Book in database before execution",
     );
 
-    console.log("Parsing Books CSV...");
+    this.logger.log("Parsing Books CSV...");
 
     await this.#parseCsvBooksContent(
       uppercasePrefixes,
       booksAlreadyPresentCount > 0,
     );
 
-    console.log("Importing books into DB...");
+    this.logger.log("Importing books into DB...");
 
     // This does  work only if the file is located within the same filesystem of the Docker image.
     // Because when DB is inside a docker instance, it cannot access external files.
@@ -171,10 +179,10 @@ export class ImportBooksCommand extends CommandRunner {
       WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
       `;
       return true;
-    } catch (e) {
-      console.error(
+    } catch (error) {
+      this.logger.error(
         "Unable to execute raw query to import Books into DB table.",
-        e,
+        error,
       );
       return false;
     }
@@ -188,7 +196,6 @@ export class ImportBooksCommand extends CommandRunner {
     for (const provinceCode of locationPrefixes) {
       locationBooks[provinceCode] = [];
     }
-
     if (!booksAlreadyPresent) {
       return locationBooks;
     }
@@ -201,9 +208,13 @@ export class ImportBooksCommand extends CommandRunner {
     });
 
     for (const { isbnCode, retailLocationId } of storedBooks) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (locationBooks[retailLocationId.toUpperCase()]) {
-        locationBooks[retailLocationId.toUpperCase()].push(isbnCode);
+      const locationId = retailLocationId.toUpperCase();
+      if (locationId in locationBooks) {
+        locationBooks[locationId].push(isbnCode);
+      } else {
+        this.logger.warn(
+          `Book with ISBN code "${isbnCode}" has a location code "${locationId}" that is not found in the provided location prefixes(${locationPrefixes.join(",")}).`,
+        );
       }
     }
 
@@ -214,19 +225,13 @@ export class ImportBooksCommand extends CommandRunner {
     locationsPrefixes: string[] = ["MO", "RE"],
     booksAlreadyPresent = false,
   ) {
-    const dataSource = joinPath(
-      process.cwd(),
-      "./tmp-files/ALTEMILIAROMAGNA.csv",
-    );
+    const dataSource = this.resolveTmpPath("./ALTEMILIAROMAGNA.csv");
     if (!existsSync(dataSource)) {
-      console.error("The books source CSV file was not found!");
+      this.logger.error("The books source CSV file was not found!");
       throw new Error("The CSV file was not found.");
     }
 
-    const dataDestination = joinPath(
-      process.cwd(),
-      "./tmp-files/books-source.csv",
-    );
+    const dataDestination = this.resolveTmpPath("./books-source.csv");
 
     rmSync(dataDestination, { force: true });
 
@@ -316,12 +321,12 @@ export class ImportBooksCommand extends CommandRunner {
         destinationStream.close();
 
         writeFileSync(
-          joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
+          this.resolveTmpPath("./school_codes.csv"),
           Array.from(schoolCoursesMap.keys()).join("\n"),
         );
 
         writeFileSync(
-          joinPath(process.cwd(), "./tmp-files/school_courses.json"),
+          this.resolveTmpPath("./school_courses.json"),
           JSON.stringify(Object.fromEntries(schoolCoursesMap)),
         );
 
@@ -329,7 +334,7 @@ export class ImportBooksCommand extends CommandRunner {
       });
 
       destinationStream.addListener("error", (error) => {
-        console.log("Failed to write Books data to stream file.");
+        this.logger.error("Failed to write Books data to stream file.");
         reject(error);
       });
 
@@ -342,7 +347,7 @@ export class ImportBooksCommand extends CommandRunner {
     return new Promise<void>((resolve, reject) => {
       stream.write(content, (possibleError) => {
         if (possibleError) {
-          console.error("Error during execution of 'writeStreamPromise'.");
+          this.logger.error("Error during execution of 'writeStreamPromise'.");
           reject(possibleError);
         }
 
@@ -352,7 +357,7 @@ export class ImportBooksCommand extends CommandRunner {
   }
 
   async #loadSchoolsIntoDb(locationsPrefixes: string[] = ["MO", "RE"]) {
-    console.log("Begin importing schools and courses...");
+    this.logger.log("Begin importing schools and courses...");
 
     // If the code of a school has already been inserted, skip it.
     const schoolCodesList: string[] = (
@@ -363,13 +368,13 @@ export class ImportBooksCommand extends CommandRunner {
       })
     ).map(({ code }) => code);
     const schoolCodesFromBooksCsv = readFileSync(
-      joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
+      this.resolveTmpPath("./school_codes.csv"),
       "utf-8",
     ).split("\n");
 
     const schoolsToInsert: School[] = [];
 
-    console.log("Parsing state schools");
+    this.logger.log("Parsing state schools");
     await this.#parseCsvSchoolsContent({
       sourceFileName: "SCUOLE_STATALI",
       destinationFileName: "filtered_state_schools",
@@ -414,7 +419,7 @@ export class ImportBooksCommand extends CommandRunner {
       }),
     });
 
-    console.log("Parsing paritary schools");
+    this.logger.log("Parsing paritary schools");
     await this.#parseCsvSchoolsContent({
       sourceFileName: "SCUOLE_PARITARIE",
       destinationFileName: "filtered_peer_schools",
@@ -477,17 +482,17 @@ export class ImportBooksCommand extends CommandRunner {
       // WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
       // `;
 
-      console.log("Inserting schools into database");
+      this.logger.log("Inserting schools into database");
       await this.prisma.school.createMany({
         data: schoolsToInsert,
       });
-      console.log("Schools inserted");
+      this.logger.log("Schools inserted");
 
       await this.#loadCoursesIntoDb(locationsPrefixes);
 
       return true;
     } catch (e) {
-      console.error("Error occurred during import of Schools.", e);
+      this.logger.error("Error occurred during import of Schools.", e);
       return false;
     }
   }
@@ -499,20 +504,14 @@ export class ImportBooksCommand extends CommandRunner {
     destinationFileName,
     removeDestination = false,
   }: SchoolCsvConfiguration) {
-    const dataSource = joinPath(
-      process.cwd(),
-      `./tmp-files/${sourceFileName}.csv`,
-    );
+    const dataSource = this.resolveTmpPath(`./${sourceFileName}.csv`);
     if (!existsSync(dataSource)) {
       throw new Error(
         `The CSV file with name ${sourceFileName} was not found.`,
       );
     }
 
-    const dataDestination = joinPath(
-      process.cwd(),
-      `./tmp-files/${destinationFileName}.csv`,
-    );
+    const dataDestination = this.resolveTmpPath(`./${destinationFileName}.csv`);
 
     if (removeDestination) {
       rmSync(dataDestination, { force: true });
@@ -528,11 +527,11 @@ export class ImportBooksCommand extends CommandRunner {
       "code,name,address,province_code\n",
     );
 
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       destinationStream.addListener("finish", () => {
         sourceStream.close();
         destinationStream.close(() => {
-          resolve(`tmp-files/${destinationFileName}.csv`);
+          resolve();
         });
       });
 
@@ -546,19 +545,17 @@ export class ImportBooksCommand extends CommandRunner {
   }
 
   async #loadCoursesIntoDb(locationsPrefixes: string[]) {
-    console.log("Begin parsing of courses...");
+    this.logger.log("Begin parsing of courses...");
     if (locationsPrefixes.length === 0) {
       return false;
     }
 
     const coursesData = JSON.parse(
-      readFileSync(
-        joinPath(process.cwd(), "./tmp-files/school_courses.json"),
-      ).toString(),
+      readFileSync(this.resolveTmpPath("./school_courses.json")).toString(),
     ) as Record<string, SchoolCourseDto[] | undefined>;
 
     for (const prefix of locationsPrefixes) {
-      console.log(`Loading data of ${prefix} location`);
+      this.logger.log(`Loading data of ${prefix} location`);
       const [locationSchools, locationBooks, storedCourses] = await Promise.all(
         [
           this.prisma.school.findMany({
@@ -605,7 +602,7 @@ export class ImportBooksCommand extends CommandRunner {
         ],
       );
 
-      console.log(`Inserting courses of ${prefix} location`);
+      this.logger.log(`Inserting courses of ${prefix} location`);
       for (const { code: schoolCode } of locationSchools) {
         const schoolCourses = coursesData[schoolCode];
         if (!schoolCourses) {
@@ -656,7 +653,7 @@ export class ImportBooksCommand extends CommandRunner {
       }
     }
 
-    console.log("Courses inserted.");
+    this.logger.log("Courses inserted");
     return true;
   }
 }
