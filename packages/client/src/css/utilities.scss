@@ -5,6 +5,8 @@ $additional-colors: (
   event-error: #f44336,
   event-warning: $warning,
   event-info: #2196f3,
+
+  facebook-blue: #1877f2,
 );
 
 @each $color-name, $color in $additional-colors {

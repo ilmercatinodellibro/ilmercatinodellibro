@@ -3,12 +3,14 @@ export default {
   email: "E-mail",
   password: "Password",
   login: "Accedi",
+  loginWith: "Accedi con {provider}",
   register: "Registrati",
+  registerWith: "Registrati con {provider}",
   reset: "Resettare",
-  noAccount: "Non hai ancora un account?",
+  noAccount: "Oppure, se è la prima volta che accedi al Mercatino del Libro",
   firstName: "Nome",
   lastName: "Cognome",
-  forgotPassword: "Hai dimenticato la password?",
+  forgotPassword: "Ho dimenticato la mia password",
   noWorries:
     "Nessun problema, ci siamo passati tutti. Inserisci gentilmente la tua email e facciamo Far pagare!",
   checkInbox:

@@ -203,7 +203,7 @@ export function initTokenRefresh(router: Router) {
 
 export function useLogoutMutation(router = useRouter()) {
   const { client } = useApolloClient();
-  const { selectedLocation } = useRetailLocationService();
+  const { selectedLocationId } = useRetailLocationService();
 
   function logout() {
     if (!isAuthenticated.value) {
@@ -214,10 +214,16 @@ export function useLogoutMutation(router = useRouter()) {
     // Wipe out the storage completely to avoid user data being leaked (settings, etc)
     LocalStorage.clear();
     void client.clearStore();
-    void router.push({
-      name: GUEST_DEFAULT_ROUTE_NAME,
-      params: { locationId: selectedLocation.value.id },
-    });
+    if (selectedLocationId.value) {
+      void router.push({
+        name: GUEST_DEFAULT_ROUTE_NAME,
+        params: { locationId: selectedLocationId.value },
+      });
+    } else {
+      void router.push({
+        name: AvailableRouteNames.SelectLocation,
+      });
+    }
   }
 
   return { logout };

@@ -2,8 +2,8 @@
   <q-page class="flex items-center justify-center">
     <q-card class="form-card text-center">
       <q-form greedy @submit="onSubmit">
-        <q-card-section class="text-dark text-h3">
-          {{ t("auth.login") }}
+        <q-card-section class="q-mx-xl">
+          <q-img :src="theme.logo" />
         </q-card-section>
 
         <q-card-section class="input-container">
@@ -16,6 +16,7 @@
             type="email"
             data-cy="email-field"
           />
+
           <k-password-input
             v-model="user.password"
             v-model:show="showPassword"
@@ -26,6 +27,7 @@
             autocomplete="password"
             data-cy="password-field"
           />
+
           <q-btn
             class="full-width"
             color="accent"
@@ -37,59 +39,74 @@
           />
         </q-card-section>
 
+        <template v-if="SOCIAL_LOGIN_ENABLED">
+          <q-separator inset spaced />
+
+          <q-card-section class="column gap-8">
+            <span class="text-black-87">{{ t("common.or") }}</span>
+
+            <q-btn
+              v-if="GOOGLE_LOGIN_ENABLED"
+              :href="`/auth/google?locationId=${selectedLocation.id}`"
+              icon="svguse:/icons.svg#google"
+              :label="t('auth.loginWith', { provider: 'Google' })"
+              class="google-button text-weight-regular"
+              color="black-87"
+              outline
+              no-caps
+            />
+
+            <q-btn
+              v-if="FACEBOOK_LOGIN_ENABLED"
+              :href="`/auth/facebook?locationId=${selectedLocation.id}`"
+              icon="svguse:/icons.svg#facebook"
+              :label="t('auth.loginWith', { provider: 'Facebook' })"
+              color="facebook-blue"
+              class="text-weight-regular"
+              outline
+              no-caps
+            />
+          </q-card-section>
+        </template>
+
+        <q-separator inset spaced />
+
+        <q-card-section>
+          <p class="text-black-87">{{ t("auth.noAccount") }}</p>
+
+          <q-btn
+            :to="{ name: 'registration' }"
+            :label="t('auth.register')"
+            class="full-width outline-black-12"
+            color="black-87"
+            outline
+          />
+        </q-card-section>
+
+        <q-separator inset spaced />
+
         <q-card-section>
           <router-link
-            class="text-dark text-subtitle1"
+            class="text-black-87 text-subtitle1"
             :to="{ name: 'forgot-password' }"
             data-cy="forgot-password-link"
           >
             {{ t("auth.forgotPassword") }}
           </router-link>
         </q-card-section>
-
-        <q-card-section>
-          <p class="text-dark">{{ t("auth.noAccount") }}</p>
-          <router-link
-            class="text-dark text-subtitle1"
-            :to="{ name: 'registration' }"
-            data-cy="registration-link"
-          >
-            {{ $t("auth.register") }}
-          </router-link>
-        </q-card-section>
       </q-form>
-
-      <template v-if="SOCIAL_LOGIN_ENABLED">
-        <q-separator />
-
-        <q-card-section class="flex flex-center gap-8">
-          <q-btn
-            v-if="FACEBOOK_LOGIN_ENABLED"
-            :href="`/auth/facebook?locationId=${selectedLocation.id}`"
-            :icon="mdiFacebook"
-            color="blue"
-          />
-
-          <q-btn
-            v-if="GOOGLE_LOGIN_ENABLED"
-            :href="`/auth/google?locationId=${selectedLocation.id}`"
-            :icon="mdiGoogle"
-            color="red"
-          />
-        </q-card-section>
-      </template>
     </q-card>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client/core";
-import { mdiFacebook, mdiGoogle } from "@quasar/extras/mdi-v7";
 import { Notify } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { LoginPayload } from "src/@generated/graphql";
 import KPasswordInput from "src/components/k-password-input.vue";
+import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import { useLoginMutation } from "src/services/auth";
@@ -104,6 +121,8 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+
+const { theme } = useTheme();
 
 if (props.emailVerified) {
   Notify.create({
@@ -147,7 +166,7 @@ async function onSubmit() {
 </script>
 
 <style lang="scss" scoped>
-$form-width: 300px;
+$form-width: 308px;
 
 .input-container {
   > *:not(:last-child) {
@@ -162,5 +181,21 @@ $form-width: 300px;
 .form-card {
   max-width: $form-width;
   width: 100%;
+  padding: 8px;
+}
+
+.outline-black-12::before {
+  border-color: rgb(0 0 0 / 12%);
+}
+
+.google-button {
+  &::before {
+    border-color: rgb(0 0 0 / 54%);
+  }
+
+  :deep(.q-icon) {
+    width: 20px;
+    height: 20px;
+  }
 }
 </style>

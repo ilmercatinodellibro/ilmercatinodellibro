@@ -2,8 +2,6 @@
   <q-layout view="lHh Lpr lFf">
     <q-page-container class="layout-background">
       <q-page class="column fit flex-center q-pa-xl">
-        <q-spinner v-if="loading" />
-
         <h4 class="m-mb-36 q-mt-none readability-max-width text-accent">
           {{ t("home.title") }}
         </h4>
@@ -14,6 +12,8 @@
         </p>
 
         <div class="items-center justify-center row">
+          <q-spinner v-if="loading" size="xl" />
+
           <action-box
             v-for="location in retailLocations"
             :key="location.id"
