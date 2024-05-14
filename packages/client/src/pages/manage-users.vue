@@ -217,6 +217,7 @@ import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
 import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
+import { AvailableFilterPaths } from "src/composables/use-filter-translations";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { useCustomerService } from "src/services/customer";
@@ -247,7 +248,7 @@ const pagination = ref({
 });
 
 const { filterMethod, filterOptions, tableFilter } = useTableFilters(
-  "manageUsers.filters",
+  AvailableFilterPaths.ManageUsers,
 );
 
 const onRequest: QTableProps["onRequest"] = async (requested) => {

@@ -1,7 +1,4 @@
-import {
-  BookQueryFilter,
-  UpdateRetailLocationSettingsInput,
-} from "src/@generated/graphql";
+import { UpdateRetailLocationSettingsInput } from "src/@generated/graphql";
 import { RetailLocationFragment } from "src/services/retail-location.graphql";
 
 export const enum BookCopyStatuses {
@@ -20,8 +17,13 @@ enum BookUtilityCategory {
 
 export type UtilityCategory = keyof typeof BookUtilityCategory;
 
-export type BookCompleteFilters = keyof Omit<BookQueryFilter, "search">;
-/*| UtilityCategory*/
+export enum AvailableBookFilters {
+  IsAvailable = "isAvailable",
+  SchoolCodes = "schoolCodes",
+  SchoolCourseIds = "schoolCourseIds",
+  HasProblems = "hasProblems",
+  IsSold = "isSold",
+}
 
 export interface SchoolFilters {
   selectedSchoolCodes: string[];

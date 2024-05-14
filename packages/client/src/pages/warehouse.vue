@@ -191,6 +191,7 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
+import { AvailableFilterPaths } from "src/composables/use-filter-translations";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
@@ -242,7 +243,7 @@ const isSortedByCopyCode = ref(false);
 const tableRef = ref<QTable>();
 
 const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
-  useTableFilters("warehouse.filters", true);
+  useTableFilters(AvailableFilterPaths.Warehouse, true);
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [

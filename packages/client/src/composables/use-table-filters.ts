@@ -1,16 +1,16 @@
 import { QTableProps } from "quasar";
 import { computed, reactive } from "vue";
 import {
-  FilterPath,
+  AvailableFilterPaths,
   useTranslatedFilters,
 } from "src/composables/use-filter-translations";
 import { TableFilters } from "src/models/book";
 
 export function useTableFilters(
-  filterPath: FilterPath,
+  filterPath: AvailableFilterPaths,
   useSchoolFilters?: boolean,
 ) {
-  const filterOptions = useTranslatedFilters(filterPath);
+  const { options: filterOptions } = useTranslatedFilters(filterPath);
 
   const tableFilter = reactive<TableFilters>({
     searchQuery: "",
@@ -33,8 +33,8 @@ export function useTableFilters(
 
     const booleanFiltersToReturn: Record<string, boolean> = {};
 
-    Object.keys(filterOptions.value).forEach((key) => {
-      booleanFiltersToReturn[key] = tableFilter.filters.includes(key);
+    filterOptions.forEach(({ value }) => {
+      booleanFiltersToReturn[value] = tableFilter.filters.includes(value);
     });
 
     return booleanFiltersToReturn;

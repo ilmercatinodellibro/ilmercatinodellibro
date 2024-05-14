@@ -1,4 +1,4 @@
-import { BookCopyQueryFilter } from "src/@generated/graphql";
+import { AvailableWarehouseFilterOptions } from "src/composables/use-filter-translations";
 import { BookCopyStatus } from "src/helpers/book-copy";
 
 export default {
@@ -9,7 +9,7 @@ export default {
     isAvailable: "Disponibili",
     isSold: "Venduti",
     hasProblems: "Con Problema",
-  } satisfies Record<Exclude<keyof BookCopyQueryFilter, "search">, string>,
+  } satisfies Record<AvailableWarehouseFilterOptions, string>,
   owner: "Proprietario",
   bookCopyStatus: {
     LOST: "Perso",

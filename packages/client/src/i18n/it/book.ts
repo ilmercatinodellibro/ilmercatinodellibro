@@ -1,4 +1,4 @@
-import { BookCompleteFilters } from "src/models/book";
+import { AvailableBookFilters } from "src/models/book";
 
 export default {
   noResult: "Nessun libro trovato",
@@ -46,7 +46,7 @@ export default {
       // HIGH_UTILITY: "Utilità Alta",
       // MEDIUM_UTILITY: "Utilità Media",
       // LOW_UTILITY: "Utilità Bassa",
-    } satisfies Record<BookCompleteFilters, string>,
+    } satisfies Record<AvailableBookFilters, string>,
     school: "Filtra per Scuola",
     schoolFilter: {
       fields: {

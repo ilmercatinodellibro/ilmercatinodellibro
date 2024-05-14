@@ -59,6 +59,7 @@ import AddBookDialog from "src/components/add-book-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
+import { AvailableFilterPaths } from "src/composables/use-filter-translations";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { useBookService } from "src/services/book";
@@ -75,7 +76,7 @@ const currentPage = ref(0);
 const numberOfRows = ref(100);
 
 const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
-  useTableFilters("book.filters.options", true);
+  useTableFilters(AvailableFilterPaths.Book, true);
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
