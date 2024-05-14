@@ -1,10 +1,11 @@
 <template>
+  <!-- TODO: Adjust the page to the new mockup -->
   <q-page class="column justify-center registration-page">
     <div class="items-center justify-center row">
       <q-card class="form-card full-width text-center">
         <q-form greedy @submit="onSubmit">
           <q-card-section class="text-dark text-h4">
-            {{ t(`auth.register`) }}
+            {{ t("auth.register") }}
           </q-card-section>
           <q-card-section>
             <q-input
@@ -13,14 +14,14 @@
               type="text"
               outlined
               lazy-rules
-              :label="t(`auth.firstName`)"
+              :label="t('auth.firstName')"
               data-cy="name-field"
             />
             <q-input
               v-model="user.lastname"
               :rules="[requiredRule]"
               lazy-rules
-              :label="t(`auth.lastName`)"
+              :label="t('auth.lastName')"
               outlined
               type="text"
               data-cy="surname-field"
@@ -29,7 +30,7 @@
               v-model="user.email"
               :rules="[requiredRule, emailRule]"
               lazy-rules
-              :label="t(`auth.email`)"
+              :label="t('auth.email')"
               outlined
               type="email"
               data-cy="email-field"
@@ -38,7 +39,7 @@
               v-model="user.password"
               v-model:show="showPassword"
               :rules="[requiredRule, validatePasswordRule]"
-              :label="t(`auth.password`)"
+              :label="t('auth.password')"
               outlined
               lazy-rules
               autocomplete="password"
@@ -52,29 +53,43 @@
               v-model="user.passwordConfirmation"
               v-model:show="showPassword"
               :rules="[requiredRule, passwordMatchRule]"
-              :label="t(`auth.confirmPassword`)"
+              :label="t('auth.confirmPassword')"
               outlined
               lazy-rules
               autocomplete="password"
               data-cy="password-confirmation-field"
             />
           </q-card-section>
+
           <q-card-section>
             <q-btn
               class="full-width"
               color="accent"
-              :label="t(`auth.register`)"
+              :label="t('auth.register')"
               text-color="black-54"
               type="submit"
               :loading="isRegistering"
               data-cy="submit-button"
             />
           </q-card-section>
+
+          <template v-if="SOCIAL_LOGIN_ENABLED">
+            <q-separator inset spaced />
+
+            <q-card-section class="column gap-8">
+              <span class="text-black-87">{{ t("common.or") }}</span>
+
+              <social-auth-buttons type="register" />
+            </q-card-section>
+          </template>
+
+          <q-separator inset spaced />
+
           <q-card-section>
             <span class="text-dark text-subtitle1">
-              {{ t(`common.or`) }}&nbsp;
+              {{ t("common.or") }}&nbsp;
               <router-link to="login" class="text-dark">
-                {{ t(`auth.login`) }}
+                {{ t("auth.login") }}
               </router-link>
             </span>
           </q-card-section>
@@ -89,6 +104,7 @@ import { ApolloError } from "@apollo/client/core";
 import { reactive, ref, toRaw } from "vue";
 import { useI18n } from "vue-i18n";
 import PasswordStrengthBar from "components/password-strength-bar.vue";
+import SocialAuthButtons from "components/social-auth-buttons.vue";
 import { RegisterPayload } from "src/@generated/graphql";
 import KPasswordInput from "src/components/k-password-input.vue";
 import { STRENGTH_BAR_STEPS } from "src/components/models";
@@ -100,6 +116,8 @@ import {
   validatePasswordRule,
 } from "src/helpers/rules";
 import { useRegisterMutation } from "src/services/auth";
+
+const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
 
 const { t } = useI18n();
 
@@ -143,7 +161,7 @@ $breakpoint-smaller: 400px;
 $breakpoint-medium: 700px;
 $breakpoint-large: 1200px;
 $breakpoint-extra-large: 1640px;
-$form-width: 280px;
+$form-width: 308px;
 $registration-page-padding-lg: 25px 100px;
 $registration-page-padding-sm: 50px;
 $registration-page-padding: 50px 16px;

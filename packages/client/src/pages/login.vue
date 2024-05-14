@@ -45,27 +45,7 @@
           <q-card-section class="column gap-8">
             <span class="text-black-87">{{ t("common.or") }}</span>
 
-            <q-btn
-              v-if="GOOGLE_LOGIN_ENABLED"
-              :href="`/auth/google?locationId=${selectedLocation.id}`"
-              icon="svguse:/icons.svg#google"
-              :label="t('auth.loginWith', { provider: 'Google' })"
-              class="google-button text-weight-regular"
-              color="black-87"
-              outline
-              no-caps
-            />
-
-            <q-btn
-              v-if="FACEBOOK_LOGIN_ENABLED"
-              :href="`/auth/facebook?locationId=${selectedLocation.id}`"
-              icon="svguse:/icons.svg#facebook"
-              :label="t('auth.loginWith', { provider: 'Facebook' })"
-              color="facebook-blue"
-              class="text-weight-regular"
-              outline
-              no-caps
-            />
+            <social-auth-buttons type="login" />
           </q-card-section>
         </template>
 
@@ -106,6 +86,7 @@ import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { LoginPayload } from "src/@generated/graphql";
 import KPasswordInput from "src/components/k-password-input.vue";
+import SocialAuthButtons from "src/components/social-auth-buttons.vue";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
@@ -113,8 +94,6 @@ import { useLoginMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
-const FACEBOOK_LOGIN_ENABLED = process.env.FACEBOOK_LOGIN_ENABLED === "true";
-const GOOGLE_LOGIN_ENABLED = process.env.GOOGLE_LOGIN_ENABLED === "true";
 
 const props = defineProps<{
   emailVerified?: boolean;
@@ -186,16 +165,5 @@ $form-width: 308px;
 
 .outline-black-12::before {
   border-color: rgb(0 0 0 / 12%);
-}
-
-.google-button {
-  &::before {
-    border-color: rgb(0 0 0 / 54%);
-  }
-
-  :deep(.q-icon) {
-    width: 20px;
-    height: 20px;
-  }
 }
 </style>
