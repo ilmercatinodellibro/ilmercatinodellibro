@@ -1,5 +1,23 @@
 <template>
   <dialog-table :rows="rows" :columns="columns">
+    <template #body-cell-author="{ value, col }">
+      <q-td :class="col.classes">
+        <q-tooltip>
+          {{ value }}
+        </q-tooltip>
+        {{ value }}
+      </q-td>
+    </template>
+
+    <template #body-cell-subject="{ value, col }">
+      <q-td :class="col.classes">
+        <q-tooltip>
+          {{ value }}
+        </q-tooltip>
+        {{ value }}
+      </q-td>
+    </template>
+
     <template #body-cell-request-status="{ value }">
       <q-td>
         <span :class="value && !isShowingReservations ? 'text-positive' : ''">
@@ -75,6 +93,7 @@ const columns = computed<
     label: t("book.fields.author"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "subject",
@@ -82,6 +101,7 @@ const columns = computed<
     label: t("book.fields.subject"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
@@ -89,6 +109,7 @@ const columns = computed<
     label: t("book.fields.title"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
+    classes: "text-wrap",
   },
   {
     name: "publisher",

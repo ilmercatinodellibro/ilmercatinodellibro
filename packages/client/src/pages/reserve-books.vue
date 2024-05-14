@@ -44,6 +44,24 @@
         class="col"
         @request="onRequest"
       >
+        <template #body-cell-author="{ value, col }">
+          <q-td :class="col.classes">
+            <q-tooltip>
+              {{ value }}
+            </q-tooltip>
+            {{ value }}
+          </q-td>
+        </template>
+
+        <template #body-cell-subject="{ value, col }">
+          <q-td :class="col.classes">
+            <q-tooltip>
+              {{ value }}
+            </q-tooltip>
+            {{ value }}
+          </q-td>
+        </template>
+
         <template #body-cell-availability="{ value }">
           <q-td>
             <status-chip :value="value" />
@@ -123,18 +141,21 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       field: "authorsFullName",
       label: t("book.fields.author"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "subject",
       field: "subject",
       label: t("book.fields.subject"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "title",
       field: "title",
       label: t("book.fields.title"),
       align: "left",
+      classes: "text-wrap",
     },
     {
       name: "availability",
@@ -152,11 +173,11 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
     },
     {
       name: "price",
-      // TODO: add correct calculation
-      field: ({ originalPrice }) => originalPrice,
+      // FIXME: add correct field and enable format
+      field: () => undefined,
       label: t("book.fields.price"),
       align: "left",
-      format: formatPrice,
+      // format: formatPrice,
     },
     {
       name: "available-copies",

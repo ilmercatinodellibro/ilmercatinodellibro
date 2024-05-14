@@ -69,7 +69,8 @@
             >
               <q-td auto-width>
                 <q-checkbox
-                  v-if="row.id === Titles.InStock && selectableRows.length > 0"
+                  v-if="row.id === Titles.InStock"
+                  :disable="selectableRows.length === 0"
                   :model-value="rowsSelectionStatus"
                   dense
                   @update:model-value="swapAllRows()"
@@ -133,7 +134,7 @@
             </q-tr>
 
             <q-tr v-else>
-              <q-td v-for="col in cols" :key="col.name">
+              <q-td v-for="col in cols" :key="col.name" :class="col.classes">
                 <!--
                   Since we can't use #body-cell-[column-name] because we're using
                   the #body slot, we have to use v-if on the col.name instead
@@ -202,6 +203,9 @@
                   </q-menu>
                 </q-btn>
                 <span v-else>
+                  <q-tooltip v-if="['subject', 'author'].includes(col.name)">
+                    {{ col.value }}
+                  </q-tooltip>
                   {{ col.value }}
                 </span>
               </q-td>
@@ -313,6 +317,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.authorsFullName,
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "publisher",
@@ -325,12 +330,14 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.subject,
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
   {
     name: "cover-price",

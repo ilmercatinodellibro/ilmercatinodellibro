@@ -289,12 +289,14 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     field: "firstname",
     label: t("manageUsers.fields.firstName"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "last-name",
     field: "lastname",
     label: t("manageUsers.fields.lastName"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "phone-number",

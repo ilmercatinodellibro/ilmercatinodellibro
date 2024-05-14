@@ -54,6 +54,24 @@
             :loading="loading"
             class="col"
           >
+            <template #body-cell-author="{ value, col }">
+              <q-td :class="col.classes">
+                <q-tooltip>
+                  {{ value }}
+                </q-tooltip>
+                {{ value }}
+              </q-td>
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <q-td :class="col.classes">
+                <q-tooltip>
+                  {{ value }}
+                </q-tooltip>
+                {{ value }}
+              </q-td>
+            </template>
+
             <template #body-cell-status="{ value }">
               <q-td>
                 <status-chip :value="value" />
@@ -100,6 +118,24 @@
             :rows-per-page-options="[0]"
             class="col"
           >
+            <template #body-cell-author="{ value, col }">
+              <q-td :class="col.classes">
+                <q-tooltip>
+                  {{ value }}
+                </q-tooltip>
+                {{ value }}
+              </q-td>
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <q-td :class="col.classes">
+                <q-tooltip>
+                  {{ value }}
+                </q-tooltip>
+                {{ value }}
+              </q-td>
+            </template>
+
             <template #body-cell-status="{ value }">
               <q-td>
                 <status-chip :value="value" />
@@ -201,6 +237,7 @@ function getCommonColumns<
       name: "title",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "text-wrap",
     },
     {
       label: t("book.fields.publisher"),
@@ -241,6 +278,7 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       name: "author",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.subject"),
@@ -248,6 +286,7 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       name: "subject",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.status"),
@@ -293,6 +332,7 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       name: "author",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.subject"),
@@ -300,12 +340,14 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       name: "subject",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.status"),
       field: isAvailable,
       name: "status",
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
 
     ...getCommonColumns("copy"),

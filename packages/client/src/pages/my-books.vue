@@ -69,6 +69,24 @@
               </q-tr>
             </template>
 
+            <template #body-cell-author="{ value, col }">
+              <q-td :class="col.classes">
+                <q-tooltip>
+                  {{ value }}
+                </q-tooltip>
+                {{ value }}
+              </q-td>
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <q-td :class="col.classes">
+                <q-tooltip>
+                  {{ value }}
+                </q-tooltip>
+                {{ value }}
+              </q-td>
+            </template>
+
             <template
               v-if="tab === BooksTab.DELIVERED"
               #body-cell-status="{ row }"
@@ -251,6 +269,7 @@ const commonColumns = computed<QTableColumn<TablesRowsTypes>[]>(() => [
     field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
 ]);
 

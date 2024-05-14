@@ -44,9 +44,9 @@
         <template #body="bodyProps">
           <q-tr>
             <q-td
-              v-for="{ name, value } in bodyProps.cols"
+              v-for="{ name, value, classes } in bodyProps.cols"
               :key="name"
-              auto-width
+              :class="classes"
             >
               <q-btn
                 v-if="name === 'selection'"
@@ -64,6 +64,9 @@
                 @click="removeBook(bodyProps.row)"
               />
               <span v-else>
+                <q-tooltip v-if="['subject', 'author'].includes(name)">
+                  {{ value }}
+                </q-tooltip>
                 {{ value }}
               </span>
             </q-td>
@@ -188,6 +191,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     field: "authorsFullName",
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "publisher",
@@ -200,12 +204,14 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     field: "subject",
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: "title",
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
   {
     name: "cover-price",

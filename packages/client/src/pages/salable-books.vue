@@ -61,9 +61,13 @@
               </q-td>
             </q-tr>
             <q-tr v-else>
-              <q-td v-for="col in cols" :key="col.name">
+              <q-td
+                v-for="{ name, value, classes } in cols"
+                :key="name"
+                :class="classes"
+              >
                 <span
-                  v-if="col.name === 'status'"
+                  v-if="name === 'status'"
                   :class="`text-${
                     row.status === AcceptanceStatus.ACCEPTED
                       ? 'positive'
@@ -73,7 +77,10 @@
                   {{ $t(`salableBooks.acceptanceStatus.${row.status}`) }}
                 </span>
                 <span v-else>
-                  {{ col.value }}
+                  <q-tooltip v-if="['subject', 'author'].includes(name)">
+                    {{ value }}
+                  </q-tooltip>
+                  {{ value }}
                 </span>
               </q-td>
             </q-tr>
@@ -116,18 +123,21 @@ const columns = computed<QTableColumn<BookWithStatus>[]>(() => [
     field: "authorsFullName",
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "subject",
     field: "subject",
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: "title",
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
 ]);
 
