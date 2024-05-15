@@ -150,6 +150,8 @@ import {
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
+import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
@@ -217,23 +219,21 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     field: "originalPrice",
     label: t("book.fields.price"),
     align: "left",
-    format: (val: number) => `${val.toFixed(2)} €`,
+    format: formatPrice,
   },
   {
     name: "buy-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: "originalPrice",
     label: t("manageUsers.payOffUserDialog.buyPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "buy"),
   },
   {
     name: "public-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: "originalPrice",
     label: t("manageUsers.payOffUserDialog.publicPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "sell"),
   },
   {
     name: "delete",
@@ -252,14 +252,30 @@ const timeUntilEmpty = computed(() => {
 });
 
 const discountValue = computed(() =>
-  // FIXME: add actual discount calculation logic
-  props.user.discount ? "1.00" : "0.00",
+  props.user.discount
+    ? sumBy(
+        cartBooks.value,
+        ({ originalPrice }) =>
+          (originalPrice * retailLocation.value.sellRate -
+            originalPrice * retailLocation.value.buyRate) /
+          100,
+      )
+    : 0,
 );
 const totalBooksPrice = computed(() =>
   sumBy(Object.keys(selectedBookCopies.value), (bookId) => {
     const book = cartBooks.value.find(({ id }) => id === bookId);
-    return book?.originalPrice ?? 0;
-  }).toFixed(2),
+    if (!book) {
+      return 0;
+    }
+    return (
+      (book.originalPrice *
+        (props.user.discount
+          ? retailLocation.value.buyRate
+          : retailLocation.value.sellRate)) /
+      100
+    );
+  }),
 );
 
 const {

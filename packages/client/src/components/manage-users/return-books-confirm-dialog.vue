@@ -37,7 +37,11 @@
         {{ tableTitle }}
       </span>
       <q-separator />
-      <dialog-table :columns="columns" :rows="booksToReturn" />
+      <dialog-table
+        :columns="columns"
+        :rows="booksToReturn"
+        class="flex-delegate-height-management"
+      />
       <template #card-actions>
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn :label="saveLabel" color="positive" @click="onDialogOK()" />
@@ -48,7 +52,7 @@
 
 <script setup lang="ts">
 import { QTableColumn, useDialogPluginComponent } from "quasar";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import KDialogCard from "../k-dialog-card.vue";
@@ -61,6 +65,8 @@ defineProps<{
   tableTitle: string;
   title: string;
   booksSoldToOthers: number;
+  totalCheckoutMoney: number;
+  totalCheckedOutMoney: number;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -69,9 +75,6 @@ const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
 
 const { t } = useI18n();
-
-const totalCheckoutMoney = ref(0);
-const totalCheckedOutMoney = ref(0);
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {

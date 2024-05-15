@@ -237,7 +237,7 @@
 
 <script setup lang="ts">
 import { mdiDotsVertical, mdiInformationOutline } from "@quasar/extras/mdi-v7";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, sumBy } from "lodash-es";
 import {
   Dialog,
   QDialog,
@@ -248,7 +248,8 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { SettleRemainingType } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { getStatus } from "src/helpers/book-copy";
+import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice, getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -261,11 +262,9 @@ import {
   useReportProblemMutation,
   useReturnBookCopyMutation,
 } from "src/services/book-copy.graphql";
+import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import {
-  UserSummaryFragment,
-  useSettleUserMutation,
-} from "src/services/user.graphql";
+import { UserFragment, useSettleUserMutation } from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
@@ -274,7 +273,7 @@ import TableHeaderWithInfo from "./table-header-with-info.vue";
 const { t } = useI18n();
 
 const props = defineProps<{
-  user: UserSummaryFragment;
+  user: UserFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -342,23 +341,21 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.originalPrice,
     label: t("book.fields.price"),
     align: "left",
-    format: (val: number) => `${val.toFixed(2)} €`,
+    format: formatPrice,
   },
   {
     name: "buy-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: ({ book }) => book.originalPrice,
     label: t("manageUsers.payOffUserDialog.buyPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "buy"),
   },
   {
     name: "public-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: ({ book }) => book.originalPrice,
     label: t("manageUsers.payOffUserDialog.publicPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "sell"),
   },
   {
     name: "actions",
@@ -387,16 +384,35 @@ const {
   retailLocationId: selectedLocation.value.id,
 }));
 
-const {
-  soldBookCopies: soldCopies,
-  loading: soldLoading,
-  // refetch: refetchSoldBookCopies,
-} = useGetSoldBookCopiesQuery(() => ({
-  userId: props.user.id,
-  retailLocationId: selectedLocation.value.id,
-}));
-const totalCheckoutMoney = ref(0);
-const totalCheckedOutMoney = ref(0);
+const { soldBookCopies: soldCopies, loading: soldLoading } =
+  useGetSoldBookCopiesQuery(() => ({
+    userId: props.user.id,
+    retailLocationId: selectedLocation.value.id,
+  }));
+
+const getSettledOrToSettleCopiesPriceSum = (
+  settledAt: number | null | undefined,
+  book: BookSummaryFragment,
+  settled: boolean,
+) =>
+  (settled ? settledAt : !settledAt)
+    ? (book.originalPrice *
+        (props.user.discount
+          ? selectedLocation.value.buyRate
+          : selectedLocation.value.sellRate)) /
+      100
+    : 0;
+
+const totalCheckoutMoney = computed(() =>
+  sumBy(ownedCopies.value, ({ settledAt, book }) =>
+    getSettledOrToSettleCopiesPriceSum(settledAt, book, false),
+  ),
+);
+const totalCheckedOutMoney = computed(() =>
+  sumBy(ownedCopies.value, ({ settledAt, book }) =>
+    getSettledOrToSettleCopiesPriceSum(settledAt, book, true),
+  ),
+);
 
 const bookLoading = computed(
   () => ownedLoading.value || returnedLoading.value || soldLoading.value,
@@ -670,6 +686,8 @@ function returnAllBooks(remainingType: SettleRemainingType) {
         }`,
       ),
       booksSoldToOthers: soldCopies.value.length,
+      totalCheckoutMoney: totalCheckoutMoney.value,
+      totalCheckedOutMoney: totalCheckedOutMoney.value,
     },
   }).onOk(async () => {
     try {

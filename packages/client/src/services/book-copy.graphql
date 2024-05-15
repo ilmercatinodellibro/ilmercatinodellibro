@@ -53,6 +53,8 @@ fragment BookCopyDetails on BookCopy {
   sales {
     refundedAt
   }
+  settledAt
+  settledById
 }
 
 query getBookCopies($bookId: String!) {

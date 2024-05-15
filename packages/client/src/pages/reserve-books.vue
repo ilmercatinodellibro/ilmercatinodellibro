@@ -91,6 +91,7 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { BooksTab, CourseDetails } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
@@ -173,11 +174,10 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
     },
     {
       name: "price",
-      // FIXME: add correct field and enable format
-      field: () => undefined,
+      field: "originalPrice",
       label: t("book.fields.price"),
       align: "left",
-      // format: formatPrice,
+      format: (val: number) => discountedPrice(val, "sell"),
     },
     {
       name: "available-copies",

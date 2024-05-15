@@ -49,7 +49,7 @@
           </template>
         </q-checkbox>
         <q-input
-          :model-value="discount"
+          :model-value="moneyToReimburse"
           :label="$t('manageUsers.moneyToGive')"
           outlined
           readonly
@@ -65,10 +65,11 @@ import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
 import { UserFragment } from "src/services/user.graphql";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
-defineProps<{
+const { user, bookCopy } = defineProps<{
   bookCopy: BookCopyDetailsFragment;
   user: UserFragment;
 }>();
@@ -78,9 +79,11 @@ defineEmits(useDialogPluginComponent.emitsObject);
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent<string>();
 
-const discount = computed(
-  () =>
-    // FIXME: add actual calculation of the discount
-    "10,00",
+const { selectedLocation } = useRetailLocationService();
+
+const moneyToReimburse = computed(() =>
+  user.discount
+    ? (bookCopy.book.originalPrice * selectedLocation.value.buyRate) / 100
+    : (bookCopy.book.originalPrice * selectedLocation.value.sellRate) / 100,
 );
 </script>

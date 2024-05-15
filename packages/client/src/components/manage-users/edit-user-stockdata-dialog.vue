@@ -160,7 +160,7 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
-import { isAvailable } from "src/helpers/book-copy";
+import { discountedPrice, isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
@@ -251,7 +251,7 @@ function getCommonColumns<
       name: "price",
       headerClasses: "text-center",
       align: "left",
-      format: (val: number) => `${val.toFixed(2)} €`,
+      format: (val: number) => discountedPrice(val, "sell"),
     },
     {
       label: t("book.fields.utility"),
@@ -324,6 +324,7 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       field: "originalCode",
       name: "original-code",
       align: "left",
+      format: (code?: string) => code ?? "/",
     },
     {
       label: t("book.fields.author"),

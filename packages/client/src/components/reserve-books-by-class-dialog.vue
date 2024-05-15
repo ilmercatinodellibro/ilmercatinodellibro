@@ -39,6 +39,7 @@ import { QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import KDialogCard from "./k-dialog-card.vue";
@@ -98,11 +99,10 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
     },
     {
       name: "price",
-      // TODO: add correct calculation
       field: ({ originalPrice }) => originalPrice,
       label: t("book.fields.price"),
       align: "left",
-      format: formatPrice,
+      format: (val: number) => discountedPrice(val, "sell"),
     },
     {
       name: "available-copies",

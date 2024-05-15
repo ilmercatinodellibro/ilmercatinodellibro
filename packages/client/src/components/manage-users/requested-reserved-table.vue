@@ -55,7 +55,7 @@ import { startCase, toLower } from "lodash-es";
 import { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import UtilityChip from "../utility-chip.vue";
@@ -123,7 +123,7 @@ const columns = computed<
     field: ({ book: { originalPrice } }) => originalPrice,
     label: t("book.fields.price"),
     align: "left",
-    format: (val: string) => formatPrice(val),
+    format: (val: number) => discountedPrice(val, "sell"),
   },
   {
     name: "utility",

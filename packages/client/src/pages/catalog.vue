@@ -144,7 +144,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.coverPrice"),
     field: "originalPrice",
     align: "left",
-    format: (val: string) => formatPrice(val),
+    format: formatPrice,
   },
   {
     name: "status",

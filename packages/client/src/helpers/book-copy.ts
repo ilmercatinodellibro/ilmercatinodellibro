@@ -1,5 +1,9 @@
 import { ProblemType } from "src/@generated/graphql";
+import { formatPrice } from "src/composables/use-misc-formats";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
+
+const { selectedLocation } = useRetailLocationService();
 
 export const hasProblem = ({ problems }: BookCopyDetailsFragment) =>
   problems?.some(({ resolvedAt }) => !resolvedAt);
@@ -41,3 +45,12 @@ export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
             ? "reimbursed"
             : "available";
 }
+
+export const discountedPrice = (originalPrice: number, kind: "sell" | "buy") =>
+  formatPrice(
+    (originalPrice *
+      (kind === "buy"
+        ? selectedLocation.value.buyRate
+        : selectedLocation.value.sellRate)) /
+      100,
+  );
