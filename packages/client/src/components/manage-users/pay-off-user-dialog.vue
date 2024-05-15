@@ -409,7 +409,7 @@ const totalCheckoutMoney = computed(() =>
   ),
 );
 const totalCheckedOutMoney = computed(() =>
-  sumBy(ownedCopies.value, ({ settledAt, book }) =>
+  sumBy(returnedCopies.value, ({ settledAt, book }) =>
     getSettledOrToSettleCopiesPriceSum(settledAt, book, true),
   ),
 );

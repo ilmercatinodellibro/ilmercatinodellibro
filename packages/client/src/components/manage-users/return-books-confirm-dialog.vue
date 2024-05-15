@@ -36,12 +36,33 @@
       <span class="bg-grey-1 height-48 q-pa-md text-size-13 text-weight-medium">
         {{ tableTitle }}
       </span>
+
       <q-separator />
+
       <dialog-table
         :columns="columns"
         :rows="booksToReturn"
         class="flex-delegate-height-management"
       />
+
+      <template #body-cell-author="{ value, col }">
+        <q-td :class="col.classes">
+          <q-tooltip>
+            {{ value }}
+          </q-tooltip>
+          {{ value }}
+        </q-td>
+      </template>
+
+      <template #body-cell-subject="{ value, col }">
+        <q-td :class="col.classes">
+          <q-tooltip>
+            {{ value }}
+          </q-tooltip>
+          {{ value }}
+        </q-td>
+      </template>
+
       <template #card-actions>
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn :label="saveLabel" color="positive" @click="onDialogOK()" />
@@ -94,6 +115,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.authorsFullName,
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "publisher",
@@ -106,12 +128,14 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.subject,
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
 ]);
 </script>
