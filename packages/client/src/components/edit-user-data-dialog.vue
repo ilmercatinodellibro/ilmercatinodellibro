@@ -10,7 +10,7 @@
           email: newUserData.email,
           firstname: newUserData.firstname,
           lastname: newUserData.lastname,
-          dateOfBirth: newUserData.dateOfBirth,
+          dateOfBirth: Date.parse(newUserData.dateOfBirth),
           delegate: newUserData.delegate,
           password: newUserData.password,
           passwordConfirmation: newUserData.passwordConfirmation,
@@ -67,7 +67,7 @@ import {
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
-import { QInputProps, useDialogPluginComponent } from "quasar";
+import { QInputProps, date, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
@@ -92,13 +92,17 @@ const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
     Omit<UpdateUserPayload, "id" | "retailLocationId">
   >();
 
-const newUserData = ref<UserData>({
+const newUserData = ref<
+  Omit<UserData, "dateOfBirth"> & { dateOfBirth: string }
+>({
   email: user.value?.email ?? "",
   firstname: user.value?.firstname ?? "",
   lastname: user.value?.lastname ?? "",
   phoneNumber: user.value?.phoneNumber ?? "",
   password: "",
-  dateOfBirth: user.value?.dateOfBirth,
+  dateOfBirth: user.value?.dateOfBirth
+    ? date.formatDate(new Date(user.value.dateOfBirth), "YYYY-MM-DD")
+    : "",
   delegate: user.value?.delegate ?? "",
   confirmEmail: "",
   passwordConfirmation: "",
@@ -113,61 +117,72 @@ const formData = computed<
       infoLabel?: string;
     }
   >
->(() => ({
-  firstname: {
-    label: t("auth.firstName"),
-    rules: [requiredRule],
-  },
-  lastname: {
-    label: t("auth.lastName"),
-    rules: [requiredRule],
-  },
-  dateOfBirth: {
-    label: t("auth.birthDate"),
-    type: "date",
-  },
-  delegate: {
-    label: t("auth.nameOfDelegate"),
-    infoLabel: t("auth.delegateLabel"),
-  },
-  phoneNumber: {
-    label: t("auth.phoneNumber"),
-  },
-  email: {
-    label: t("auth.emailAddress"),
-    rules: newUserData.value.email ? [emailRule] : undefined,
-  },
-  confirmEmail: {
-    label: t("auth.confirmEmail"),
-    rules:
-      newUserData.value.email && newUserData.value.email !== user.value?.email
+>(() => {
+  // eslint-disable-next-line no-console
+  console.log(user.value?.dateOfBirth);
+  return {
+    firstname: {
+      label: t("auth.firstName"),
+      rules: [requiredRule],
+    },
+    lastname: {
+      label: t("auth.lastName"),
+      rules: [requiredRule],
+    },
+    dateOfBirth: {
+      label: t("auth.birthDate"),
+      type: "date",
+    },
+    delegate: {
+      label: t("auth.nameOfDelegate"),
+      infoLabel: t("auth.delegateLabel"),
+      rules:
+        newUserData.value.dateOfBirth &&
+        new Date().getUTCFullYear() -
+          new Date(newUserData.value.dateOfBirth).getUTCFullYear() <
+          18
+          ? [requiredRule]
+          : undefined,
+    },
+    phoneNumber: {
+      label: t("auth.phoneNumber"),
+    },
+    email: {
+      label: t("auth.emailAddress"),
+      rules: newUserData.value.email ? [emailRule] : undefined,
+    },
+    confirmEmail: {
+      label: t("auth.confirmEmail"),
+      rules:
+        newUserData.value.email && newUserData.value.email !== user.value?.email
+          ? [
+              makeValueMatchRule(
+                newUserData.value.email,
+                t("auth.emailsDoNotMatch"),
+              ),
+            ]
+          : undefined,
+    },
+    password: {
+      label: t("auth.password"),
+      type: hidePassword.value ? "password" : "text",
+      rules: newUserData.value.password
+        ? [requiredRule, validatePasswordRule]
+        : undefined,
+    },
+    passwordConfirmation: {
+      label: t("auth.confirmPassword"),
+      type: hidePassword.value ? "password" : "text",
+      rules: newUserData.value.password
         ? [
+            requiredRule,
             makeValueMatchRule(
-              newUserData.value.email,
-              t("auth.emailsDoNotMatch"),
+              newUserData.value.password,
+              t("auth.passwordDoNotMatch"),
             ),
           ]
         : undefined,
-  },
-  password: {
-    label: t("auth.password"),
-    type: hidePassword.value ? "password" : "text",
-    rules: newUserData.value.password
-      ? [requiredRule, validatePasswordRule]
-      : undefined,
-  },
-  passwordConfirmation: {
-    label: t("auth.confirmPassword"),
-    type: hidePassword.value ? "password" : "text",
-    rules: newUserData.value.password
-      ? [
-          requiredRule,
-          makeValueMatchRule(
-            newUserData.value.password,
-            t("auth.passwordDoNotMatch"),
-          ),
-        ]
-      : undefined,
-  },
-}));
+    },
+  };
+});
 </script>
