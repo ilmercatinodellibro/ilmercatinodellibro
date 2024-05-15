@@ -43,8 +43,6 @@
             // We handle the group header in the #body slot, so it's safe to use a type that is different than the columns definition
             tableRows as readonly BookCopyDetailsFragment[]
           "
-          :rows-per-page-options="[0]"
-          hide-bottom
         >
           <template #header-cell-buy-price>
             <table-header-with-info

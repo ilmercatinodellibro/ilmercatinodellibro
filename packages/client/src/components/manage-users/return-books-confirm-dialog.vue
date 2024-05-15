@@ -37,11 +37,7 @@
         {{ tableTitle }}
       </span>
       <q-separator />
-      <dialog-table
-        :columns="columns"
-        :rows="booksToReturn"
-        :rows-per-page-options="[0]"
-      />
+      <dialog-table :columns="columns" :rows="booksToReturn" />
       <template #card-actions>
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn :label="saveLabel" color="positive" @click="onDialogOK()" />

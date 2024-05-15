@@ -37,7 +37,6 @@
         :columns="columns"
         :loading="loading"
         :rows="cartBooks"
-        :rows-per-page-options="[0]"
         class="flex-delegate-height-management"
         row-key="id"
       >

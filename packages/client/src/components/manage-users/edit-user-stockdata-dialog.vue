@@ -115,7 +115,6 @@
             :rows="copiesInStock.filter(({ donatedAt }) => donatedAt === null)"
             :columns="copiesInStockColumns"
             :loading="inStockLoading"
-            :rows-per-page-options="[0]"
             class="col"
           >
             <template #body-cell-author="{ value, col }">
@@ -355,12 +354,6 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
 );
 
 async function addBookToBeRegistered(bookISBN: string) {
-  if (
-    booksToRegister.value.map(({ isbnCode }) => isbnCode).includes(bookISBN)
-  ) {
-    notifyError(t("manageUsers.inStockDialog.errors.tooManyCopies"));
-    return;
-  }
   const book = await fetchBookByISBN(bookISBN);
   if (!book) {
     notifyError(t("manageUsers.inStockDialog.errors.noBook", [bookISBN]));

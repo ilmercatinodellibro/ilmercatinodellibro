@@ -2,7 +2,6 @@
   <q-table
     :columns="columns"
     :rows="receipts"
-    :rows-per-page-options="[0]"
     :hide-bottom="receipts.length > 0"
     :no-data-label="noDataLabel"
     square

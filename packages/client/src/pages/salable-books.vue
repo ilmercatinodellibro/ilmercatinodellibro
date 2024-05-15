@@ -42,7 +42,6 @@
             // prettier-ignore
             rows as readonly BookWithStatus[]
           "
-          :rows-per-page-options="[0]"
           class="flex-delegate-height-management"
         >
           <template #body="{ row, cols }">

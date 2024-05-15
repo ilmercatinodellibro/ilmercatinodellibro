@@ -5,7 +5,10 @@
     :columns="columns"
     :filter="searchQuery"
     :hide-pagination="hidePagination"
-    :pagination="pagination"
+    :pagination="{
+      ...pagination,
+      rowsPerPage: hidePagination ? 0 : pagination?.rowsPerPage,
+    }"
     :row-key="rowKey as string"
     :rows-per-page-options="rowsPerPageOptions"
     class="full-height"

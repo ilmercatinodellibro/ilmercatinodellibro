@@ -49,7 +49,6 @@
             :filter="searchQuery"
             :loading="loading"
             :rows="tableRowsByTab[tab]"
-            :rows-per-page-options="[0]"
             class="col q-pt-sm"
           >
             <template v-if="tab === BooksTab.DELIVERED" #header="props">
