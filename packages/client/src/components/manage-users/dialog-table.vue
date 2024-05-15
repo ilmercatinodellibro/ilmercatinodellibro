@@ -5,10 +5,7 @@
     :columns="columns"
     :filter="searchQuery"
     :hide-pagination="hidePagination"
-    :pagination="{
-      ...pagination,
-      rowsPerPage: hidePagination ? 0 : pagination?.rowsPerPage,
-    }"
+    :pagination="pagination"
     :row-key="rowKey as string"
     :rows-per-page-options="rowsPerPageOptions"
     class="full-height"
@@ -54,7 +51,7 @@ const props = withDefaults(
     searchQuery: undefined,
     columns: undefined,
     rowKey: undefined,
-    rowsPerPageOptions: () => [5, 10, 20, 50, 100, 200],
+    rowsPerPageOptions: () => [0],
   },
 );
 
