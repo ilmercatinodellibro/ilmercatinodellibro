@@ -1,4 +1,3 @@
-import { isDeepStrictEqual } from "util";
 import { BadRequestException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Prisma, User } from "@prisma/client";
@@ -81,6 +80,8 @@ export class RetailLocationResolver {
       payOffEnabled,
       retailLocationId,
       warehouseMaxBlockSize,
+      buyRate,
+      sellRate,
     }: UpdateRetailLocationSettingsInput,
     @CurrentUser() user: User,
   ) {
@@ -91,35 +92,14 @@ export class RetailLocationResolver {
     });
 
     if (
-      !maxBookingDays ||
-      !warehouseMaxBlockSize ||
-      maxBookingDays <= 0 ||
-      warehouseMaxBlockSize <= 0
+      Object.values({
+        maxBookingDays,
+        warehouseMaxBlockSize,
+        buyRate,
+        sellRate,
+      }).some((value) => !value || value < 0)
     ) {
       throw new BadRequestException("Invalid settings values");
-    }
-
-    const existingSettings = await this.prisma.retailLocation.findUniqueOrThrow(
-      {
-        where: {
-          id: retailLocationId,
-        },
-        select: {
-          maxBookingDays: true,
-          payOffEnabled: true,
-          warehouseMaxBlockSize: true,
-        },
-      },
-    );
-
-    if (
-      isDeepStrictEqual(existingSettings, {
-        maxBookingDays,
-        payOffEnabled,
-        warehouseMaxBlockSize,
-      })
-    ) {
-      return;
     }
 
     return await this.prisma.retailLocation.update({
@@ -130,6 +110,8 @@ export class RetailLocationResolver {
         maxBookingDays,
         warehouseMaxBlockSize,
         payOffEnabled,
+        buyRate,
+        sellRate,
       },
     });
   }

@@ -408,11 +408,14 @@ import {
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
-import { Settings, SettingsUpdate } from "src/models/book";
+import { SettingsUpdate } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
-import { useUpdateRetailLocationSettingsMutation } from "src/services/retail-location.graphql";
+import {
+  RetailLocationSettingsFragment,
+  useUpdateRetailLocationSettingsMutation,
+} from "src/services/retail-location.graphql";
 import {
   UserFragmentDoc,
   useUpdateUserMutation,
@@ -490,7 +493,7 @@ function openSettings() {
       maxBookingDays: selectedLocation.value.maxBookingDays,
       sellRate: selectedLocation.value.sellRate,
       payOffEnabled: selectedLocation.value.payOffEnabled,
-    } satisfies Settings,
+    } satisfies RetailLocationSettingsFragment,
   }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
       try {

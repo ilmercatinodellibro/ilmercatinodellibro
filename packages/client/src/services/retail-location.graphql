@@ -7,6 +7,14 @@ fragment Theme on Theme {
   }
 }
 
+fragment RetailLocationSettings on RetailLocation {
+  buyRate
+  sellRate
+  payOffEnabled
+  maxBookingDays
+  warehouseMaxBlockSize
+}
+
 fragment RetailLocation on RetailLocation {
   id
   name
@@ -17,11 +25,7 @@ fragment RetailLocation on RetailLocation {
   facebookLink
   whoAreWeContent
 
-  buyRate
-  sellRate
-  payOffEnabled
-  maxBookingDays
-  warehouseMaxBlockSize
+  ...RetailLocationSettings
 
   theme {
     ...Theme
@@ -44,6 +48,6 @@ mutation updateRetailLocationSettings(
   $input: UpdateRetailLocationSettingsInput!
 ) {
   updateRetailLocationSettings(input: $input) {
-    ...RetailLocation
+    ...RetailLocationSettings
   }
 }

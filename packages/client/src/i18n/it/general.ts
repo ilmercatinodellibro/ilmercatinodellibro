@@ -65,6 +65,9 @@ export default {
     maxBooksDimension:
       "Dimensione max dei blocchi di libri da inserire per permettere la frammentazione",
     payOffEnabled: "Abilita la possibilità di effettuare liquidazioni",
+    updateRatesConfirmTitle: "Aggiornare l'aliquota di acquisto/vendita?",
+    updateRatesConfirmMessage:
+      "ATTENZIONE: stai aggiornando le aliquote di acquisto e/o vendita; assicurati che questo sia effettuato solamente all'inizio o alla fine del periodo di attività del Mercatino.",
     resetMessage:
       "Stai effettuando il reset di tutti i dati di sistema per predisporre il software alle attività dell'anno successivo. Vuoi procedere?",
     resetButton: "Effettua reset annuale",
