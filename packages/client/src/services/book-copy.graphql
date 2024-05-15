@@ -113,18 +113,13 @@ mutation createBookCopies($input: BookCopyCreateInput!) {
 
 mutation reportProblem($input: ProblemCreateInput!) {
   reportProblem(input: $input) {
-    id
-    bookCopyId
-    details
+    ...ProblemDetails
   }
 }
 
 mutation resolveProblem($input: ProblemResolveInput!) {
   resolveProblem(input: $input) {
-    id
-    bookCopyId
-    details
-    solution
+    ...ProblemDetails
   }
 }
 

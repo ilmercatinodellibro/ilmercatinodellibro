@@ -17,8 +17,8 @@ import { getCurrentActiveProblem, hasProblem } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
+  BookCopyDetailsFragmentDoc,
   ProblemSummaryFragment,
-  useGetBookCopiesQuery,
   useReportProblemMutation,
   useResolveProblemMutation,
 } from "src/services/book-copy.graphql";
@@ -31,14 +31,7 @@ const props = defineProps<{
   bookCopy: BookCopyDetailsFragment;
 }>();
 
-const emit = defineEmits<{
-  updateProblems: [];
-}>();
-
 const { resolveProblem } = useResolveProblemMutation();
-const { refetch: refetchBookCopies } = useGetBookCopiesQuery({
-  bookId: props.bookCopy.book.id,
-});
 const { reportProblem } = useReportProblemMutation();
 function openProblemsDialog() {
   Dialog.create({
@@ -49,14 +42,29 @@ function openProblemsDialog() {
   }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
     if (hasProblem(props.bookCopy)) {
       try {
-        await resolveProblem({
+        const { data: updatedProblem, cache } = await resolveProblem({
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           input: { id: getCurrentActiveProblem(props.bookCopy)!.id, solution },
         });
 
-        await refetchBookCopies();
-
-        emit("updateProblems");
+        cache.updateFragment(
+          {
+            id: cache.identify(props.bookCopy),
+            fragment: BookCopyDetailsFragmentDoc,
+            fragmentName: "BookCopyDetails",
+          },
+          (data) => {
+            if (!data) {
+              return;
+            }
+            return {
+              ...data,
+              problems: data.problems?.map((problem) =>
+                problem.id === updatedProblem.id ? updatedProblem : problem,
+              ),
+            };
+          },
+        );
       } catch (e) {
         notifyError(t("bookErrors.notSolveProblem"));
       }
@@ -64,7 +72,7 @@ function openProblemsDialog() {
     }
 
     try {
-      await reportProblem({
+      const { data: newProblem, cache } = await reportProblem({
         input: {
           bookCopyId: props.bookCopy.id,
           details,
@@ -72,11 +80,23 @@ function openProblemsDialog() {
         },
       });
 
-      await refetchBookCopies({
-        bookId: props.bookCopy.book.id,
-      });
+      cache.updateFragment(
+        {
+          id: cache.identify(props.bookCopy),
+          fragment: BookCopyDetailsFragmentDoc,
+          fragmentName: "BookCopyDetails",
+        },
+        (data) => {
+          if (!data) {
+            return;
+          }
 
-      emit("updateProblems");
+          return {
+            ...data,
+            problems: [...(data.problems ?? []), newProblem],
+          };
+        },
+      );
     } catch (e) {
       notifyError(t("bookErrors.notProblem"));
     }

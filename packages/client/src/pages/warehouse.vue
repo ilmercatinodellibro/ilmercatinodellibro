@@ -127,7 +127,6 @@
               :book-copy-columns="bookCopyColumns"
               :book-id="props.row.id"
               @open-history="(bookCopy) => openHistory(bookCopy)"
-              @update-problems="refetchBooks()"
             />
           </template>
         </template>
