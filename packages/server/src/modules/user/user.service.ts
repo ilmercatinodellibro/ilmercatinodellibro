@@ -1,5 +1,7 @@
 import { Injectable, UnprocessableEntityException } from "@nestjs/common";
+import { FederationProvider } from "@prisma/client";
 import * as argon2 from "argon2";
+import { Profile } from "passport";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
 import { RegisterPayload } from "src/modules/auth/auth.args";
 import { PrismaService } from "src/modules/prisma/prisma.service";
@@ -30,10 +32,61 @@ export class UserService {
   ) {
     userData.email = userData.email.toLowerCase();
     userData.password = await argon2.hash(userData.password);
+
     return this.prisma.user.create({
       data: {
         ...userData,
         emailVerified,
+      },
+    });
+  }
+
+  async createFederatedUser({
+    id,
+    name,
+    emails,
+    provider,
+  }: Profile & { provider: FederationProvider }) {
+    if (!name) {
+      throw new Error("No name found");
+    }
+
+    if (!emails || emails.length === 0) {
+      throw new Error("No email found");
+    }
+
+    const user = await this.findUserByProvider(provider, id);
+    if (user) {
+      return user;
+    }
+
+    const email = emails[0].value;
+    return this.prisma.user.upsert({
+      where: {
+        email,
+      },
+      create: {
+        firstname: name.givenName,
+        lastname: name.familyName,
+        email,
+        emailVerified: true,
+        // to satisfy the schema by still preserving the security
+        password: await argon2.hash(Math.random().toString(16)),
+
+        federatedUsers: {
+          create: {
+            provider,
+            providerUserId: id,
+          },
+        },
+      },
+      update: {
+        federatedUsers: {
+          create: {
+            provider,
+            providerUserId: id,
+          },
+        },
       },
     });
   }
@@ -79,6 +132,22 @@ export class UserService {
     return this.prisma.user.findUnique({
       where: {
         email: email.toLowerCase(),
+      },
+    });
+  }
+
+  async findUserByProvider(
+    provider: FederationProvider,
+    providerUserId: string,
+  ) {
+    return this.prisma.user.findFirst({
+      where: {
+        federatedUsers: {
+          some: {
+            provider,
+            providerUserId,
+          },
+        },
       },
     });
   }

@@ -16,6 +16,12 @@ fragment AuthSummary on AuthPayload {
   }
 }
 
+query getCurrentUser($retailLocationId: String!) {
+  currentUser {
+    ...CurrentUser
+  }
+}
+
 mutation register($input: RegisterPayload!) {
   register(input: $input)
 }

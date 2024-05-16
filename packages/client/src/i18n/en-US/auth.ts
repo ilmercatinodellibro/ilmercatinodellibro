@@ -2,14 +2,16 @@ export default {
   noData: "No user data was found.",
   email: "Email",
   password: "Password",
-  login: "Login",
+  login: "Log in",
+  loginWith: "Login with {provider}",
   register: "Register",
+  registerWith: "Register with {provider}",
   reset: "Reset",
-  noAccount: "Don't have an account yet?",
+  noAccount: "Or, if this is your first time logging in to Mercatino del Libro",
   firstName: "First name",
   lastName: "Last name",
   resetPassword: "Reset password",
-  forgotPassword: "Forgot password?",
+  forgotPassword: "I forgot my password",
   noWorries:
     "No worries, we've all been there. Kindly enter your email and let's get you back!",
   checkInbox:
@@ -30,6 +32,7 @@ export default {
   emailVerified:
     "Your email has been correctly verified, you can now login using your credentials",
   backToLogin: "Back to login",
+  backToLocations: "Back to locations",
   registeredSuccessfully: "Registration successful 🎉 ",
   couldNotRegister: "Could not register the new user.",
   couldNotUpdate: "Could not update the selected user's data.",

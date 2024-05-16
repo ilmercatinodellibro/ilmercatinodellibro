@@ -84,6 +84,18 @@ const routes: RouteRecordRaw[] = [
         component: () => import("src/pages/login.vue"),
         props: ({ query }) => ({ emailVerified: !!query.emailVerified }),
       },
+
+      // The server will redirect to this route after dealing with the social provider
+      ...(process.env.SOCIAL_LOGIN_ENABLED === "true"
+        ? [
+            {
+              path: "login/social",
+              name: "social-login",
+              component: () => import("src/pages/social-login-redirect.vue"),
+            },
+          ]
+        : []),
+
       {
         path: "registration",
         name: "registration",
@@ -189,6 +201,7 @@ const routes: RouteRecordRaw[] = [
   // but you can also remove it
   {
     path: "/:catchAll(.*)*",
+    name: "error",
     component: ErrorNotFoundPage,
   },
 ];

@@ -13,6 +13,14 @@
     >
       <template #left>
         <q-btn
+          v-if="showBackToLocations"
+          :icon="mdiArrowLeft"
+          color="accent"
+          :label="t('auth.backToLocations')"
+          :to="{ name: AvailableRouteNames.SelectLocation }"
+        />
+
+        <q-btn
           v-if="showBackToLogin"
           :icon="mdiArrowLeft"
           color="accent"
@@ -48,7 +56,7 @@ import { mdiArrowLeft } from "@quasar/extras/mdi-v7";
 import { Screen } from "quasar";
 import { computed, provide } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
 import { provideHeaderFilters } from "src/composables/header-features/use-header-filters";
 import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
@@ -72,10 +80,12 @@ const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 const { t } = useI18n();
 
-const router = useRouter();
+const route = useRoute();
+const showBackToLocations = computed(
+  () => route.name === AvailableRouteNames.Login && !user.value,
+);
 const showBackToLogin = computed(
-  () =>
-    router.currentRoute.value.name !== AvailableRouteNames.Login && !user.value,
+  () => route.name !== AvailableRouteNames.Login && !user.value,
 );
 </script>
 

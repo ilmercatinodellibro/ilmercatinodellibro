@@ -123,6 +123,14 @@ module.exports = configure(function (ctx) {
         FIREBASE_MESSAGING_SENDER_ID: process.env.FIREBASE_MESSAGING_SENDER_ID,
         FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
 
+        SOCIAL_LOGIN_ENABLED:
+          process.env.FACEBOOK_LOGIN_ENABLED === "true" ||
+          process.env.GOOGLE_LOGIN_ENABLED === "true"
+            ? "true"
+            : "false",
+        FACEBOOK_LOGIN_ENABLED: process.env.FACEBOOK_LOGIN_ENABLED || "false",
+        GOOGLE_LOGIN_ENABLED: process.env.GOOGLE_LOGIN_ENABLED || "false",
+
         IS_DEMO: ctx.dev ? "true" : process.env.IS_DEMO || "false",
       },
       rawDefine: {
@@ -206,11 +214,15 @@ module.exports = configure(function (ctx) {
 
         "/receipts": {
           changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
+          target: process.env.GRAPHQL_DOMAIN,
         },
         "/location": {
           changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN.replace("/graphql", ""),
+          target: process.env.GRAPHQL_DOMAIN,
+        },
+        "/auth": {
+          changeOrigin: true,
+          target: process.env.GRAPHQL_DOMAIN,
         },
       },
     },

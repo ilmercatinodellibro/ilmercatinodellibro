@@ -1,8 +1,9 @@
 import { UnprocessableEntityException, UseGuards } from "@nestjs/common";
-import { Mutation, Resolver } from "@nestjs/graphql";
+import { Mutation, Query, Resolver } from "@nestjs/graphql";
 import { User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
+import { User as GraphQLUser } from "src/@generated";
 import { UserService } from "../user/user.service";
 import {
   LoginPayload,
@@ -25,6 +26,11 @@ export class AuthResolver {
     private readonly authService: AuthService,
     private readonly userService: UserService,
   ) {}
+
+  @Query(() => GraphQLUser)
+  currentUser(@CurrentUser() user: User) {
+    return user;
+  }
 
   @Public()
   @Mutation(() => GraphQLVoid, { nullable: true })

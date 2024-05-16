@@ -60,15 +60,16 @@ model User {
   pushSubscriptions PushSubscription[]
 
   // Any type of user
-  bookCopies          BookCopy[]    @relation("BookCopyOwner")
-  purchases           Sale[]        @relation("CopyPurchasedBy")
-  createdReservations Reservation[] @relation("ReservationMadeBy") // reservations can be made also by operators
-  deletedReservations Reservation[] @relation("ReservationDeletedBy")
-  reservations        Reservation[] @relation("ReservationUser") // Keeps track of the user for who the reservation was made
-  requestedBooks      BookRequest[] @relation("BookRequestUser")
-  createdBookRequests BookRequest[] @relation("BookRequestMadeBy") // requests can also, also be made by operators
-  deletedBookRequests BookRequest[] @relation("BookRequestDeletedBy")
-  ownedCarts          Cart[]        @relation("CartOwner")
+  federatedUsers      FederatedUser[]
+  bookCopies          BookCopy[]      @relation("BookCopyOwner")
+  purchases           Sale[]          @relation("CopyPurchasedBy")
+  createdReservations Reservation[]   @relation("ReservationMadeBy") // reservations can be made also by operators
+  deletedReservations Reservation[]   @relation("ReservationDeletedBy")
+  reservations        Reservation[]   @relation("ReservationUser") // Keeps track of the user for who the reservation was made
+  requestedBooks      BookRequest[]   @relation("BookRequestUser")
+  createdBookRequests BookRequest[]   @relation("BookRequestMadeBy") // requests can also, also be made by operators
+  deletedBookRequests BookRequest[]   @relation("BookRequestDeletedBy")
+  ownedCarts          Cart[]          @relation("CartOwner")
 
   // Operator/admin relations
   settledCopies        BookCopy[]       @relation("CopySettledBy")
@@ -86,6 +87,21 @@ model User {
   memberships          LocationMember[]
   ownedReceipts        Receipt[]        @relation("ReceiptOwner")
   triggeredReceipts    Receipt[]        @relation("ReceiptCreator")
+}
+
+enum FederationProvider {
+  FACEBOOK
+  GOOGLE
+}
+
+model FederatedUser {
+  provider       FederationProvider
+  providerUserId String             @map("provider_user_id")
+  userId         String             @map("user_id")
+  user           User               @relation(fields: [userId], references: [id])
+
+  @@unique([provider, userId])
+  @@unique([provider, providerUserId])
 }
 
 model Event {
