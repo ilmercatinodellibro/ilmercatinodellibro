@@ -1,6 +1,9 @@
 <template>
   <q-td>
-    <span v-if="value <= 0 && !clickableWhenZero" class="text-body2">
+    <span
+      v-if="disable || (value <= 0 && !clickableWhenZero)"
+      class="text-body2"
+    >
       {{ value }}
     </span>
     <q-btn v-else square flat class="absolute-full">
@@ -34,5 +37,6 @@ defineProps<{
   value: number;
   secondaryValue?: number;
   clickableWhenZero?: boolean;
+  disable?: boolean;
 }>();
 </script>

@@ -38,16 +38,23 @@
             :label="t('auth.editMyData')"
             class="q-mb-xl q-mt-md"
             color="primary"
-            @click="modifyUserData()"
+            @click="modifyUserData"
           />
 
           <q-separator />
 
           <q-btn
+            :label="t('auth.downloadUserData')"
+            class="q-mt-xl"
+            color="accent"
+            @click="downloadUserData"
+          />
+
+          <q-btn
             :label="t('auth.deleteAccount')"
             class="q-mt-xl"
             color="accent"
-            @click="deleteAccount()"
+            @click="deleteAccount"
           />
         </template>
 
@@ -183,6 +190,10 @@ function modifyUserData() {
       notifyError(t("auth.couldNotUpdate"));
     }
   });
+}
+
+function downloadUserData() {
+  // TODO: add download of the user's data
 }
 
 function deleteAccount() {

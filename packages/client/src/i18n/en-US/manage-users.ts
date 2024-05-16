@@ -44,6 +44,10 @@ export default {
     createUser: "Create a New User",
     discount: "Apply ISEE/volunteer discount",
     notes: "Notes",
+
+    downloadData: "Download Data",
+    deleteUser: "Delete User",
+    cancelUserDeletion: "Cancel User Deletion",
   },
   inRetrieval: "In retrieval",
   retrieved: "Retrieved",
