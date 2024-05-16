@@ -46,8 +46,11 @@ export default {
     notes: "Notes",
 
     downloadData: "Download Data",
+    downloadDataSuccess: "The account data will be downloaded shortly",
     deleteUser: "Delete User",
+    deleteUserSuccess: "The user has been scheduled for deletion in 7 days",
     cancelUserDeletion: "Cancel User Deletion",
+    cancelUserDeletionSuccess: "The user's deletion has been canceled",
   },
   inRetrieval: "In retrieval",
   retrieved: "Retrieved",

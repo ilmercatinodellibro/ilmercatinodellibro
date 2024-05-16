@@ -36,23 +36,21 @@
 
           <q-btn
             :label="t('auth.editMyData')"
-            class="q-mb-xl q-mt-md"
+            class="q-mt-md"
             color="primary"
             @click="modifyUserData"
           />
 
-          <q-separator />
-
           <q-btn
             :label="t('auth.downloadUserData')"
-            class="q-mt-xl"
+            class="q-mt-md"
             color="accent"
             @click="downloadUserData"
           />
 
           <q-btn
             :label="t('auth.deleteAccount')"
-            class="q-mt-xl"
+            class="q-mt-md"
             color="accent"
             @click="deleteAccount"
           />
@@ -82,11 +80,13 @@ import { UpdateUserPayload } from "src/@generated/graphql";
 import DeleteAccountDialog from "src/components/delete-account-dialog.vue";
 import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
 import { notifyError } from "src/helpers/error-messages";
-import { useAuthService } from "src/services/auth";
+import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { CurrentUserFragment } from "src/services/auth.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
+import { useDownloadUserData } from "src/services/user";
 import {
   UserFragmentDoc,
+  useDeleteUserAccountMutation,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
 
@@ -192,15 +192,25 @@ function modifyUserData() {
   });
 }
 
-function downloadUserData() {
-  // TODO: add download of the user's data
+const { downloadData } = useDownloadUserData();
+async function downloadUserData() {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  await downloadData(user.value!.id);
 }
 
+const { deleteUserAccount } = useDeleteUserAccountMutation();
+const { logout } = useLogoutMutation();
 function deleteAccount() {
   Dialog.create({
     component: DeleteAccountDialog,
-  }).onOk(() => {
-    // FIXME: add deletion of the user's account and log out
+  }).onOk(async () => {
+    await deleteUserAccount({
+      input: {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
+      },
+    });
+    logout();
   });
 }
 </script>

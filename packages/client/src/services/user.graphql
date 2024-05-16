@@ -81,3 +81,23 @@ mutation updateUser($input: UpdateUserPayload!) {
 mutation settleUser($input: SettleUserInput!) {
   settleUser(input: $input)
 }
+
+query getUserData($userId: String!) {
+  userData(userId: $userId)
+}
+
+mutation deleteUserAccount($input: DeleteUserAccountInput!) {
+  # Request just enough data so that the cache gets updated automatically
+  deleteUserAccount(input: $input) {
+    id
+    deletedAt
+  }
+}
+
+mutation cancelUserAccountDeletion($input: CancelUserAccountDeletionInput!) {
+  # Request just enough data so that the cache gets updated automatically
+  cancelUserAccountDeletion(input: $input) {
+    id
+    deletedAt
+  }
+}
