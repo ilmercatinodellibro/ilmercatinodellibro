@@ -119,7 +119,13 @@ export class UserService {
     );
 
     // Avoid precise error messages to limit information leakage
-    if (!existingUser || !passwordIsCorrect || !existingUser.emailVerified) {
+    if (
+      !existingUser ||
+      !passwordIsCorrect ||
+      !existingUser.emailVerified ||
+      // The user account is scheduled for deletion or they somehow managed to guess the anonymized credentials after the deletion
+      existingUser.deletedAt
+    ) {
       throw new UnprocessableEntityException(
         "User either does not exist, password is incorrect or the email has not been verified yet.",
       );

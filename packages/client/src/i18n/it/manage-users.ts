@@ -44,6 +44,10 @@ export default {
     createUser: "Crea un Nuovo Utente",
     discount: "Applica sconto ISEE/volontario",
     notes: "Note",
+
+    downloadData: "Scarica Dati",
+    deleteUser: "Elimina Utente",
+    cancelUserDeletion: "Annulla Eliminazione Utente",
   },
   inRetrieval: "In ritiro",
   retrieved: "Ritirati",

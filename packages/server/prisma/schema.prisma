@@ -52,6 +52,7 @@ model User {
   emailVerified Boolean   @default(false)
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz()
 
   delegate String?
 
@@ -70,8 +71,10 @@ model User {
   createdBookRequests BookRequest[]   @relation("BookRequestMadeBy") // requests can also, also be made by operators
   deletedBookRequests BookRequest[]   @relation("BookRequestDeletedBy")
   ownedCarts          Cart[]          @relation("CartOwner")
+  ownedReceipts       Receipt[]       @relation("ReceiptOwner")
 
   // Operator/admin relations
+  memberships          LocationMember[]
   settledCopies        BookCopy[]       @relation("CopySettledBy")
   returnedBookCopies   BookCopy[]       @relation("CopyReturnedBy")
   reimbursedBookCopies BookCopy[]       @relation("CopyReimbursedBy")
@@ -84,8 +87,6 @@ model User {
   processedSales       Sale[]           @relation("CopySoldBy")
   salesInCreatedCarts  Sale[]           @relation("SaleInCartOpenedBy")
   createdCarts         Cart[]           @relation("CartOperator")
-  memberships          LocationMember[]
-  ownedReceipts        Receipt[]        @relation("ReceiptOwner")
   triggeredReceipts    Receipt[]        @relation("ReceiptCreator")
 }
 

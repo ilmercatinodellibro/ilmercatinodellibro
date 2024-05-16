@@ -27,6 +27,7 @@ fragment Member on User {
 fragment Customer on User {
   ...User
   createdAt
+  scheduledForDeletionAt: deletedAt
   booksInStock
   booksSold
   booksReserved

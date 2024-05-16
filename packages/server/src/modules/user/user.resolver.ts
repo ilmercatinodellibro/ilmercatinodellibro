@@ -68,25 +68,40 @@ export class UserResolver {
 
     const where: Prisma.UserWhereInput = {
       emailVerified: true,
+      AND: [
+        // Also include accounts that are scheduled for deletion so that they can be restored while they are still within the grace period
+        {
+          OR: [
+            {
+              deletedAt: null,
+            },
+            {
+              deletedAt: { gt: new Date() },
+            },
+          ],
+        },
 
-      ...(searchText
-        ? {
-            OR: [
+        ...(searchText
+          ? [
               {
-                firstname: searchFilter,
+                OR: [
+                  {
+                    firstname: searchFilter,
+                  },
+                  {
+                    lastname: searchFilter,
+                  },
+                  {
+                    email: searchFilter,
+                  },
+                  {
+                    phoneNumber: searchFilter,
+                  },
+                ],
               },
-              {
-                lastname: searchFilter,
-              },
-              {
-                email: searchFilter,
-              },
-              {
-                phoneNumber: searchFilter,
-              },
-            ],
-          }
-        : {}),
+            ]
+          : [{}]),
+      ],
     };
 
     const [rowsCount, rows] = await this.prisma.$transaction([
@@ -120,6 +135,7 @@ export class UserResolver {
 
     return this.prisma.user.findMany({
       where: {
+        deletedAt: null,
         memberships: {
           some: {
             retailLocationId,

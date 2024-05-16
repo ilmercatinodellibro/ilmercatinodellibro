@@ -45,9 +45,11 @@ export default {
   delegateLabel:
     "Il nome e il cognome di una persona maggiorenne con delega di consegnare e ritirare libri presso la sede del Mercatino del Libro",
   editMyData: "Modifica i miei dati",
-  deleteAccount: "Elimina il tuo account",
   confirmEmail: "Conferma Email",
   emailsDoNotMatch: "Le email non coincidono",
+  downloadUserData: "Scarica i tuoi dati",
+  deleteAccount: "Elimina il tuo account",
+  cancelAccountDeletion: "Annulla l'eliminazione dell'account",
   deleteAccountDialog: {
     disclaimer:
       "Attenzione, stai per eliminare definitivamente il tuo account utente. Tra 7 giorni le tue informazioni personali verranno rimosse dal nostro database e il tuo account diventerà permanentemente inaccessibile. Sei sicuro di voler continuare?",

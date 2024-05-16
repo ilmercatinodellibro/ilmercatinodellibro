@@ -75,6 +75,7 @@
             <table-cell-with-dialog
               :value="value"
               clickable-when-zero
+              :disable="willBeDeleted(row)"
               @click="openCellEditDialog(row, col, value)"
             />
           </template>
@@ -88,6 +89,7 @@
           <template #body-cell-sold="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
+              :disable="willBeDeleted(row)"
               @click="openCellEditDialog(row, col, value)"
             />
           </template>
@@ -102,6 +104,7 @@
             <table-cell-with-dialog
               :value="value"
               clickable-when-zero
+              :disable="willBeDeleted(row)"
               @click="openCellEditDialog(row, col, value)"
             />
           </template>
@@ -117,6 +120,7 @@
               :value="value"
               :secondary-value="row.booksRequestedAndAvailable"
               clickable-when-zero
+              :disable="willBeDeleted(row)"
               @click="openCellEditDialog(row, col, value)"
             >
               <template #secondary-value="{ value: availableCount }">
@@ -140,6 +144,7 @@
           <template #body-cell-purchased="{ col, row, value }">
             <table-cell-with-dialog
               :value="value"
+              :disable="willBeDeleted(row)"
               @click="openCellEditDialog(row, col, value)"
             />
           </template>
@@ -147,6 +152,7 @@
           <template #body-cell-shopping-cart="{ row, value }">
             <q-td class="text-center">
               <q-btn
+                :disable="willBeDeleted(row)"
                 :icon="mdiCart"
                 color="primary"
                 flat
@@ -180,6 +186,7 @@
           <template #body-cell-pay-off="{ row }">
             <q-td>
               <chip-button
+                :disable="willBeDeleted(row)"
                 color="primary"
                 :disabled="!selectedLocation.payOffEnabled"
                 :label="$t('manageUsers.payOff')"
@@ -208,7 +215,7 @@ import {
 import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { RegisterUserPayload, UpdateUserPayload } from "src/@generated/graphql";
+import { UpdateUserPayload } from "src/@generated/graphql";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
@@ -224,6 +231,7 @@ import TableCellWithDialog from "src/components/manage-users/table-cell-with-dia
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
+import { UserDialogPayload } from "src/models/user";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
@@ -378,10 +386,10 @@ const { createUser } = useAddUserMutation();
 function addNewUser() {
   Dialog.create({
     component: EditUserDetailsDialog,
-  }).onOk(async (payload: RegisterUserPayload) => {
+  }).onOk(async (payload: Extract<UserDialogPayload, { type: "create" }>) => {
     try {
       await createUser({
-        input: payload,
+        input: payload.data,
       });
       await fetchCustomers({
         page: pagination.value.page,
@@ -413,6 +421,8 @@ function openPayOff(user: CustomerFragment) {
   });
 }
 
+const willBeDeleted = (user: CustomerFragment) => !!user.scheduledForDeletionAt;
+
 const { updateUser } = useUpdateUserMutation();
 function openEdit({
   email,
@@ -422,6 +432,7 @@ function openEdit({
   discount,
   notes,
   phoneNumber,
+  scheduledForDeletionAt,
 }: CustomerFragment) {
   Dialog.create({
     component: EditUserDetailsDialog,
@@ -437,7 +448,20 @@ function openEdit({
         retailLocationId: selectedLocation.value.id,
       } satisfies UpdateUserPayload,
     },
-  }).onOk(async (newUserData: UpdateUserPayload) => {
+  }).onOk(async (payload: Exclude<UserDialogPayload, { type: "create" }>) => {
+    if (payload.type === "toggleDeletion") {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const isDelete = !!scheduledForDeletionAt;
+      // TODO: handle deletion/cancellation
+      return;
+    }
+
+    if (payload.type === "downloadData") {
+      // TODO: handle download
+      return;
+    }
+
+    const newUserData = payload.data;
     try {
       await updateUser({
         input: {
