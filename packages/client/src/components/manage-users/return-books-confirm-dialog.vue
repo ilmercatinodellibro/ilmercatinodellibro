@@ -43,25 +43,25 @@
         :columns="columns"
         :rows="booksToReturn"
         class="flex-delegate-height-management"
-      />
-
-      <template #body-cell-author="{ value, col }">
-        <q-td :class="col.classes">
-          <q-tooltip>
+      >
+        <template #body-cell-author="{ value, col }">
+          <q-td :class="col.classes">
+            <q-tooltip>
+              {{ value }}
+            </q-tooltip>
             {{ value }}
-          </q-tooltip>
-          {{ value }}
-        </q-td>
-      </template>
+          </q-td>
+        </template>
 
-      <template #body-cell-subject="{ value, col }">
-        <q-td :class="col.classes">
-          <q-tooltip>
+        <template #body-cell-subject="{ value, col }">
+          <q-td :class="col.classes">
+            <q-tooltip>
+              {{ value }}
+            </q-tooltip>
             {{ value }}
-          </q-tooltip>
-          {{ value }}
-        </q-td>
-      </template>
+          </q-td>
+        </template>
+      </dialog-table>
 
       <template #card-actions>
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
