@@ -3,6 +3,8 @@
     <span
       v-if="disable || (value <= 0 && !clickableWhenZero)"
       class="text-body2"
+      :class="{ 'cursor-not-allowed': disable }"
+      @click.stop
     >
       {{ value }}
     </span>
