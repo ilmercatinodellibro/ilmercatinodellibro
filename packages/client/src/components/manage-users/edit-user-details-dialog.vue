@@ -6,6 +6,7 @@
       @submit="onDialogOK(newUserData)"
       @cancel="onDialogCancel"
     >
+      <!-- bottom-slots prop is used when there are no rules/hint/etc. to unify bottom padding with the ones that do have -->
       <q-card-section class="column gap-4 no-wrap">
         <q-input
           v-model="newUserData.firstname"
@@ -37,60 +38,62 @@
           mask="phone"
           outlined
         />
-        <q-item-section class="column gap-24 no-padding no-wrap">
-          <q-input
-            v-model="newUserData.password"
-            :label="$t('auth.password')"
-            :rules="newUserData.password ? [validatePasswordRule] : undefined"
-            :type="hidePassword ? 'password' : 'text'"
-            autocomplete="new-password"
-            outlined
-          >
-            <template #append>
-              <q-icon
-                :name="hidePassword ? mdiEyeOff : mdiEye"
-                class="cursor-pointer"
-                @click="hidePassword = !hidePassword"
-              />
-            </template>
-          </q-input>
-          <q-input
-            v-model="newUserData.passwordConfirmation"
-            :label="$t('auth.confirmPassword')"
-            :rules="
-              newUserData.password
-                ? [
-                    makeValueMatchRule(
-                      newUserData.password,
-                      $t('auth.passwordDoNotMatch'),
-                    ),
-                  ]
-                : undefined
-            "
-            :type="hideConfirm ? 'password' : 'text'"
-            autocomplete="new-password"
-            outlined
-          >
-            <template #append>
-              <q-icon
-                :name="hideConfirm ? mdiEyeOff : mdiEye"
-                class="cursor-pointer"
-                @click="hideConfirm = !hideConfirm"
-              />
-            </template>
-          </q-input>
-          <q-input
-            v-model="newUserData.notes"
-            :label="$t('manageUsers.editUser.notes')"
-            clearable
-            outlined
-          />
-          <q-checkbox
-            v-model="newUserData.discount"
-            :disable="!hasAdminRole"
-            :label="$t('manageUsers.editUser.discount')"
-          />
-        </q-item-section>
+        <q-input
+          v-model="newUserData.password"
+          :label="$t('auth.password')"
+          :rules="newUserData.password ? [validatePasswordRule] : undefined"
+          :type="hidePassword ? 'password' : 'text'"
+          autocomplete="new-password"
+          outlined
+          bottom-slots
+        >
+          <template #append>
+            <q-icon
+              :name="hidePassword ? mdiEyeOff : mdiEye"
+              class="cursor-pointer"
+              @click="hidePassword = !hidePassword"
+            />
+          </template>
+        </q-input>
+        <q-input
+          v-model="newUserData.passwordConfirmation"
+          :label="$t('auth.confirmPassword')"
+          :rules="
+            newUserData.password
+              ? [
+                  makeValueMatchRule(
+                    newUserData.password,
+                    $t('auth.passwordDoNotMatch'),
+                  ),
+                ]
+              : undefined
+          "
+          :type="hideConfirm ? 'password' : 'text'"
+          autocomplete="new-password"
+          outlined
+          bottom-slots
+        >
+          <template #append>
+            <q-icon
+              :name="hideConfirm ? mdiEyeOff : mdiEye"
+              class="cursor-pointer"
+              @click="hideConfirm = !hideConfirm"
+            />
+          </template>
+        </q-input>
+        <q-input
+          v-model="newUserData.notes"
+          :label="$t('manageUsers.editUser.notes')"
+          clearable
+          outlined
+          bottom-slots
+        />
+        <q-checkbox
+          v-model="newUserData.discount"
+          :disable="!hasAdminRole"
+          :label="$t('manageUsers.editUser.discount')"
+          bottom-slots
+        />
       </q-card-section>
     </k-dialog-form-card>
   </q-dialog>
