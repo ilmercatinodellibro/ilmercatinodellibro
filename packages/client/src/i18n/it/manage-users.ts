@@ -46,8 +46,12 @@ export default {
     notes: "Note",
 
     downloadData: "Scarica Dati",
+    downloadDataSuccess: "I dati dell'account verranno scaricati a breve",
     deleteUser: "Elimina Utente",
+    deleteUserSuccess:
+      "L'utente è stato programmato per l'eliminazione tra 7 giorni",
     cancelUserDeletion: "Annulla Eliminazione Utente",
+    cancelUserDeletionSuccess: "L'eliminazione dell'utente è stata annullata",
   },
   inRetrieval: "In ritiro",
   retrieved: "Ritirati",

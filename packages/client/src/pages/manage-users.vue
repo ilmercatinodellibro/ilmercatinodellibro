@@ -212,7 +212,7 @@ import {
   mdiPlus,
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
+import { Dialog, Notify, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
@@ -234,9 +234,12 @@ import { notifyError } from "src/helpers/error-messages";
 import { UserDialogPayload } from "src/models/user";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
+import { useDownloadUserData } from "src/services/user";
 import {
   CustomerFragment,
   useAddUserMutation,
+  useCancelUserAccountDeletionMutation,
+  useDeleteUserAccountMutation,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
 
@@ -424,6 +427,9 @@ function openPayOff(user: CustomerFragment) {
 const willBeDeleted = (user: CustomerFragment) => !!user.scheduledForDeletionAt;
 
 const { updateUser } = useUpdateUserMutation();
+const { downloadData } = useDownloadUserData();
+const { deleteUserAccount } = useDeleteUserAccountMutation();
+const { cancelUserAccountDeletion } = useCancelUserAccountDeletionMutation();
 function openEdit({
   email,
   firstname,
@@ -447,17 +453,33 @@ function openEdit({
         phoneNumber,
         retailLocationId: selectedLocation.value.id,
       } satisfies UpdateUserPayload,
+      scheduledForDeletion: !!scheduledForDeletionAt,
     },
   }).onOk(async (payload: Exclude<UserDialogPayload, { type: "create" }>) => {
     if (payload.type === "toggleDeletion") {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const isDelete = !!scheduledForDeletionAt;
-      // TODO: handle deletion/cancellation
+      try {
+        const shouldDelete = !scheduledForDeletionAt;
+        if (shouldDelete) {
+          await deleteUserAccount({ input: { userId: id } });
+          Notify.create({
+            type: "info",
+            message: t("manageUsers.editUser.deleteUserSuccess"),
+          });
+        } else {
+          await cancelUserAccountDeletion({ input: { userId: id } });
+          Notify.create({
+            type: "info",
+            message: t("manageUsers.editUser.cancelUserDeletionSuccess"),
+          });
+        }
+      } catch {
+        notifyError(t("auth.couldNotUpdate"));
+      }
       return;
     }
 
     if (payload.type === "downloadData") {
-      // TODO: handle download
+      await downloadData(id);
       return;
     }
 
