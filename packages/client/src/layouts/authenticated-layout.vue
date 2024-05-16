@@ -409,6 +409,7 @@ import {
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import { SettingsUpdate } from "src/models/book";
+import { languages } from "src/models/language";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -433,23 +434,7 @@ const TOOLTIP_SHARED_PROPS: QTooltipProps = {
 
 const { t, locale } = useI18n();
 
-interface Language {
-  code: string;
-  label: string;
-}
-
 const { theme } = useTheme();
-
-const languages = [
-  {
-    code: "en-US" as const,
-    label: "English",
-  },
-  {
-    code: "it" as const,
-    label: "Italiano",
-  },
-] satisfies Language[];
 
 const isOnline = useOnline();
 watch(isOnline, (becomeOnline) => {
