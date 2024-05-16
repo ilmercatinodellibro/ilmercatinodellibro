@@ -90,6 +90,7 @@
             <book-copy-details-table
               :book-copy-columns="bookCopyColumns"
               :book-id="props.row.id"
+              :show-only-available="booleanFilters?.isAvailable"
               @open-history="(bookCopy) => openHistory(bookCopy)"
               @update-problems="refetchBooks()"
             />
@@ -197,8 +198,13 @@ const isSortedByCopyCode = ref(false);
 
 const tableRef = ref<QTable>();
 
-const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
-  useTableFilters("warehouse.filters", true);
+const {
+  refetchFilterProxy,
+  filterOptions,
+  tableFilter,
+  filterMethod,
+  booleanFilters,
+} = useTableFilters("warehouse.filters", true);
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [
@@ -326,7 +332,7 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
-    filter: refetchFilterProxy.value,
+    filter: { ...refetchFilterProxy.value, isAvailable: true },
   });
 
   booksPagination.value.rowsNumber = books.value?.rowsCount;

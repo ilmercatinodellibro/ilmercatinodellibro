@@ -1,5 +1,6 @@
 import { QTableProps } from "quasar";
 import { computed, reactive } from "vue";
+import { BookCopyQueryFilter } from "src/@generated/graphql";
 import {
   FilterPath,
   useTranslatedFilters,
@@ -62,6 +63,21 @@ export function useTableFilters(
     };
   });
 
+  const booleanFilters = computed<
+    Omit<BookCopyQueryFilter, "search"> | undefined
+  >(() =>
+    tableFilter.filters.length === 0
+      ? undefined
+      : {
+          // tableFilter is the checkbox array model
+          isAvailable: tableFilter.filters.includes(
+            "isAvailable" satisfies keyof BookCopyQueryFilter,
+          )
+            ? true
+            : undefined,
+        },
+  );
+
   // This filter isn't actually used BUT by passing our filters to the QTable it allows
   // the component to throw the "@request" event which is used to refetch our data
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -72,5 +88,6 @@ export function useTableFilters(
     filterOptions,
     tableFilter,
     filterMethod,
+    booleanFilters,
   };
 }

@@ -25,7 +25,7 @@
       </q-th>
     </q-tr>
 
-    <q-tr v-for="bookCopy in bookCopies" :key="bookCopy.id">
+    <q-tr v-for="bookCopy in tableRows" :key="bookCopy.id">
       <q-td auto-width />
 
       <q-td
@@ -73,6 +73,7 @@ import { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
+import { isAvailable } from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
 import { useBookCopyService } from "src/services/book-copy";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
@@ -83,6 +84,7 @@ const { t } = useI18n();
 const props = defineProps<{
   bookCopyColumns: QTableColumn<BookCopyDetailsFragment>[];
   bookId: string;
+  showOnlyAvailable?: boolean | null;
 }>();
 
 const emit = defineEmits<{
@@ -108,6 +110,12 @@ const { useGetBookCopiesQuery } = useBookCopyService();
 const { bookCopies, loading } = useGetBookCopiesQuery(() => ({
   bookId: props.bookId,
 }));
+
+const tableRows = computed(() =>
+  props.showOnlyAvailable
+    ? bookCopies.value.filter((copy) => isAvailable(copy))
+    : bookCopies.value,
+);
 
 function getColspan(columnName: string) {
   return columnName === "original-code" || columnName === "status" ? 2 : 1;
