@@ -380,6 +380,7 @@ export class UserResolver {
         "Confirmation password doesn't match with provided password!",
       );
     }
+    // TODO: require delegate full name when the user is a minor
 
     const userIsAdmin = await this.authService.userIsAdmin(
       currentUser.id,
@@ -428,6 +429,17 @@ export class UserResolver {
     ) {
       throw new UnprocessableEntityException(
         "Confirmation password doesn't match with provided password!",
+      );
+    }
+    if (
+      payloadRest.dateOfBirth &&
+      new Date().getUTCFullYear() -
+        new Date(payloadRest.dateOfBirth).getUTCFullYear() <
+        18 &&
+      (!payloadRest.delegate || payloadRest.delegate.length === 0)
+    ) {
+      throw new UnprocessableEntityException(
+        "Trying to register a user which is a minor, but not providing an adult delegate for the user.",
       );
     }
     const userIsAdmin = await this.authService.userIsAdmin(
