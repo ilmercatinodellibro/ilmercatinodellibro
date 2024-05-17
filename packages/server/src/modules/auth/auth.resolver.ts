@@ -34,10 +34,7 @@ export class AuthResolver {
 
   @Public()
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async register(
-    @Input()
-    registerPayload: RegisterPayload,
-  ) {
+  async register(@Input() registerPayload: RegisterPayload) {
     const existingUser = await this.userService.findUserByEmail(
       registerPayload.email,
     );
@@ -46,6 +43,7 @@ export class AuthResolver {
     if (existingUser) {
       return;
     }
+    // TODO: should we notify the user if they are trying to register while their account is in the deletion grace period?
 
     if (registerPayload.password !== registerPayload.passwordConfirmation) {
       throw new UnprocessableEntityException(
@@ -62,10 +60,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async registerWithToken(
-    @Input()
-    registerPayload: RegisterPayload,
-  ) {
+  async registerWithToken(@Input() registerPayload: RegisterPayload) {
     const existingUser = await this.userService.findUserByEmail(
       registerPayload.email,
     );
@@ -94,8 +89,7 @@ export class AuthResolver {
     // This parameter is implicitly used by the LocalStrategy
     // We need it here to autogenerate the GraphQL schema
     // That's why it's defined as a param but not used within this method
-    @Input()
-    loginPayload: LoginPayload,
+    @Input() _loginPayload: LoginPayload,
     @CurrentUser() user: User,
   ): AuthPayload {
     const jwt = this.authService.createAccessToken(user.id);
@@ -112,7 +106,8 @@ export class AuthResolver {
     const user = await this.userService.findUserByEmail(email);
     // To prevent user enumeration attacks, we don't throw an error
     // TODO: it can still be guessed with the response time difference, add a relevant delay
-    if (!user) {
+    // TODO: if the deletion is in the grace period, should we send an email explaining the situation or just ignore it?
+    if (!user || user.deletedAt) {
       return;
     }
 
@@ -122,8 +117,7 @@ export class AuthResolver {
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async resetForgottenPassword(
-    @Input()
-    { newPassword, confirmNewPassword }: ResetForgottenPasswordPayload,
+    @Input() { newPassword, confirmNewPassword }: ResetForgottenPasswordPayload,
     @CurrentUser() user: User,
   ) {
     if (newPassword !== confirmNewPassword) {
@@ -143,8 +137,8 @@ export class AuthResolver {
   }
 
   @Mutation(() => String)
-  refreshToken(@CurrentUser("id") userId: string): string {
-    return this.authService.createAccessToken(userId);
+  refreshToken(@CurrentUser() user: User) {
+    return this.authService.createAccessToken(user.id);
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
@@ -178,10 +172,10 @@ export class AuthResolver {
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async sendRegistrationInvite(
-    @Input()
-    { email }: RegistrationInviteLinkPayload,
-    @CurrentUser() { firstname, id }: User,
+    @Input() { email }: RegistrationInviteLinkPayload,
+    @CurrentUser() { id, firstname }: User,
   ) {
+    // FIXME: VULNERABILITY: we are sending an access token of the current user. The user we are sending to can use that to impersonate the current user.
     const inviteToken = this.authService.createAccessToken(id);
     await this.authService.sendInviteLink(email, firstname, inviteToken);
   }

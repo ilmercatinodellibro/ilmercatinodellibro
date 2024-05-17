@@ -91,7 +91,7 @@ export class AuthService {
     }
   }
 
-  async sendInviteLink(email: string, name: string, token: string) {
+  async sendInviteLink(email: string, invitedByName: string, token: string) {
     const url = `${this.rootConfig.clientUrl}/invite?token=${token}&email=${email}`;
 
     try {
@@ -99,7 +99,7 @@ export class AuthService {
         subject: "Invitation to join Il Mercatino del Libro",
         to: email,
         context: {
-          name,
+          invitedByName,
           url,
         },
         template: "invite-user",
