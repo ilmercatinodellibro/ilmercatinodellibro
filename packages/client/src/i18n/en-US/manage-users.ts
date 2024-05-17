@@ -47,10 +47,14 @@ export default {
 
     downloadData: "Download Data",
     downloadDataSuccess: "The account data will be downloaded shortly",
+    downloadDataFailed:
+      "Could not download the account data. Please contact the support.",
     deleteUser: "Delete User",
     deleteUserSuccess: "The user has been scheduled for deletion in 7 days",
+    deleteUserFailed: "Could not delete the user",
     cancelUserDeletion: "Cancel User Deletion",
     cancelUserDeletionSuccess: "The user's deletion has been canceled",
+    cancelUserDeletionFailed: "Could not cancel the user's deletion",
   },
   inRetrieval: "In retrieval",
   retrieved: "Retrieved",

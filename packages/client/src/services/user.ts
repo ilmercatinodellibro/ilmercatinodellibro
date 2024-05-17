@@ -18,7 +18,7 @@ export function useDownloadUserData() {
       fetchPolicy: "network-only",
     });
     if (error) {
-      notifyError(t("auth.couldNotDownload"));
+      notifyError(t("manageUsers.editUser.downloadDataFailed"));
       return;
     }
 
@@ -27,9 +27,11 @@ export function useDownloadUserData() {
       mimeType: "application/json",
     });
     if (result !== true) {
-      notifyError(t("auth.couldNotDownload"));
+      console.error(result);
+      notifyError(t("manageUsers.editUser.downloadDataFailed"));
       return;
     }
+
     Notify.create({
       type: "positive",
       message: t("manageUsers.editUser.downloadDataSuccess"),
