@@ -415,7 +415,6 @@ import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
   RetailLocationSettingsFragment,
-  RetailLocationSettingsFragmentDoc,
   useUpdateRetailLocationSettingsMutation,
 } from "src/services/retail-location.graphql";
 import {
@@ -483,21 +482,12 @@ function openSettings() {
   }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
       try {
-        const { cache } = await updateRetailLocationSettings({
+        await updateRetailLocationSettings({
           input: {
             ...payload.settings,
             retailLocationId: selectedLocation.value.id,
           },
         });
-
-        cache.updateFragment(
-          {
-            fragment: RetailLocationSettingsFragmentDoc,
-            fragmentName: "RetailLocationSettings",
-            id: cache.identify(selectedLocation.value),
-          },
-          () => ({ ...payload.settings }),
-        );
       } catch {
         notifyError(t("common.genericErrorMessage"));
       }

@@ -48,6 +48,7 @@ mutation updateRetailLocationSettings(
   $input: UpdateRetailLocationSettingsInput!
 ) {
   updateRetailLocationSettings(input: $input) {
+    id # include the id so that the cache gets updated automatically
     ...RetailLocationSettings
   }
 }
