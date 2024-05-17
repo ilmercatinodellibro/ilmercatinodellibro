@@ -86,18 +86,9 @@ export class ImportBooksCommand extends CommandRunner {
   }
 
   async loadSchools() {
-    console.log("Importing schools and courses...");
-
     if ((await this.prisma.book.count()) === 0) {
       throw new Error(
-        "No books found in the database. Please import books first.",
-      );
-    }
-
-    const existingSchoolData = await this.#getSchoolAndCoursesData();
-    if (existingSchoolData.booksOnCoursesCount > 0) {
-      throw new Error(
-        `There are either schools(${existingSchoolData.schoolCount}) or courses(${existingSchoolData.coursesCount}) or book courses(${existingSchoolData.booksOnCoursesCount}). Make sure you have run the yearly reset procedure of the database.`,
+        "No books found in the database. Please import books before importing schools.",
       );
     }
 
@@ -361,19 +352,24 @@ export class ImportBooksCommand extends CommandRunner {
   }
 
   async #loadSchoolsIntoDb(locationsPrefixes: string[] = ["MO", "RE"]) {
-    const schoolCodes: Record<string, string[]> = {};
-    const schoolCodesList: string[] = [];
+    console.log("Begin importing schools and courses...");
+
+    // If the code of a school has already been inserted, skip it.
+    const schoolCodesList: string[] = (
+      await this.prisma.school.findMany({
+        select: {
+          code: true,
+        },
+      })
+    ).map(({ code }) => code);
     const schoolCodesFromBooksCsv = readFileSync(
       joinPath(process.cwd(), "./tmp-files/school_codes.csv"),
       "utf-8",
     ).split("\n");
 
-    for (const regionCode of locationsPrefixes) {
-      schoolCodes[regionCode] = [];
-    }
-
     const schoolsToInsert: School[] = [];
 
+    console.log("Parsing state schools");
     await this.#parseCsvSchoolsContent({
       sourceFileName: "SCUOLE_STATALI",
       destinationFileName: "filtered_state_schools",
@@ -397,7 +393,6 @@ export class ImportBooksCommand extends CommandRunner {
             !schoolCodesList.includes(schoolCode)
           ) {
             schoolCodesList.push(schoolCode);
-            schoolCodes[provinceCode].push();
             return record;
           }
           return null;
@@ -419,6 +414,7 @@ export class ImportBooksCommand extends CommandRunner {
       }),
     });
 
+    console.log("Parsing paritary schools");
     await this.#parseCsvSchoolsContent({
       sourceFileName: "SCUOLE_PARITARIE",
       destinationFileName: "filtered_peer_schools",
@@ -441,7 +437,6 @@ export class ImportBooksCommand extends CommandRunner {
             !schoolCodesList.includes(schoolCode)
           ) {
             schoolCodesList.push(schoolCode);
-            schoolCodes[provinceCode].push();
             return record;
           }
           return null;
@@ -482,9 +477,11 @@ export class ImportBooksCommand extends CommandRunner {
       // WITH (FORMAT CSV, DELIMITER(','), HEADER MATCH);
       // `;
 
+      console.log("Inserting schools into database");
       await this.prisma.school.createMany({
         data: schoolsToInsert,
       });
+      console.log("Schools inserted");
 
       await this.#loadCoursesIntoDb(locationsPrefixes);
 
@@ -549,6 +546,7 @@ export class ImportBooksCommand extends CommandRunner {
   }
 
   async #loadCoursesIntoDb(locationsPrefixes: string[]) {
+    console.log("Begin parsing of courses...");
     if (locationsPrefixes.length === 0) {
       return false;
     }
@@ -560,33 +558,54 @@ export class ImportBooksCommand extends CommandRunner {
     ) as Record<string, SchoolCourseDto[] | undefined>;
 
     for (const prefix of locationsPrefixes) {
-      const [locationSchools, locationBooks] = await Promise.all([
-        this.prisma.school.findMany({
-          select: {
-            code: true,
-          },
-          where: {
-            provinceCode: {
-              equals: prefix,
-              mode: "insensitive",
+      console.log(`Loading data of ${prefix} location`);
+      const [locationSchools, locationBooks, storedCourses] = await Promise.all(
+        [
+          this.prisma.school.findMany({
+            select: {
+              code: true,
             },
-          },
-        }),
-        this.prisma.book.findMany({
-          select: {
-            id: true,
-            isbnCode: true,
-            retailLocationId: true,
-          },
-          where: {
-            retailLocationId: {
-              equals: prefix,
-              mode: "insensitive",
+            where: {
+              provinceCode: {
+                equals: prefix,
+                mode: "insensitive",
+              },
             },
-          },
-        }),
-      ]);
+          }),
+          this.prisma.book.findMany({
+            select: {
+              id: true,
+              isbnCode: true,
+              retailLocationId: true,
+            },
+            where: {
+              retailLocationId: {
+                equals: prefix,
+                mode: "insensitive",
+              },
+            },
+          }),
+          this.prisma.schoolCourse.findMany({
+            select: {
+              id: true,
+              schoolCode: true,
+              grade: true,
+              section: true,
+              books: true,
+            },
+            where: {
+              school: {
+                provinceCode: {
+                  equals: prefix,
+                  mode: "insensitive",
+                },
+              },
+            },
+          }),
+        ],
+      );
 
+      console.log(`Inserting courses of ${prefix} location`);
       for (const { code: schoolCode } of locationSchools) {
         const schoolCourses = coursesData[schoolCode];
         if (!schoolCourses) {
@@ -594,13 +613,21 @@ export class ImportBooksCommand extends CommandRunner {
         }
 
         for (const course of schoolCourses) {
-          const savedCourse = await this.prisma.schoolCourse.create({
-            data: {
-              section: course.section,
-              grade: parseInt(course.year),
-              schoolCode,
-            },
-          });
+          const savedCourse = storedCourses.find(
+            ({ grade, section, schoolCode: csc }) =>
+              grade === parseInt(course.year) &&
+              section === course.section &&
+              csc === schoolCode,
+          ) ?? {
+            ...(await this.prisma.schoolCourse.create({
+              data: {
+                section: course.section,
+                grade: parseInt(course.year),
+                schoolCode,
+              },
+            })),
+            books: [],
+          };
 
           // When inserting a Book, if one ISBN code is not found, we skip inserting that book
           const validBooks = course.booksIsbn
@@ -609,7 +636,15 @@ export class ImportBooksCommand extends CommandRunner {
               bookId: locationBooks.find((book) => book.isbnCode === isbnCode)
                 ?.id,
             }))
-            .filter(({ bookId }) => !!bookId) as {
+            .filter(
+              ({ bookId, schoolCourseId }) =>
+                !!bookId &&
+                !savedCourse.books.find(
+                  (boc) =>
+                    boc.bookId === bookId &&
+                    boc.schoolCourseId === schoolCourseId,
+                ),
+            ) as {
             schoolCourseId: string;
             bookId: string;
           }[];
@@ -621,6 +656,7 @@ export class ImportBooksCommand extends CommandRunner {
       }
     }
 
+    console.log("Courses inserted.");
     return true;
   }
 }
