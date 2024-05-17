@@ -123,7 +123,10 @@ export class UserService {
       !existingUser ||
       !passwordIsCorrect ||
       !existingUser.emailVerified ||
-      // The user account is scheduled for deletion or they somehow managed to guess the anonymized credentials after the deletion
+      // The user account is scheduled for deletion. The user can only register again after the deletion date.
+      // Alternatively, the account can be restored so that the user can log in again.
+      // Side note: it's impossible to guess the credentials of a deleted account as the email is random
+      // and the password is not hashed, thus technically can't be compared against
       existingUser.deletedAt
     ) {
       throw new UnprocessableEntityException(
