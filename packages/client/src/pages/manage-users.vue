@@ -457,8 +457,8 @@ function openEdit({
     },
   }).onOk(async (payload: Exclude<UserDialogPayload, { type: "create" }>) => {
     if (payload.type === "toggleDeletion") {
+      const shouldDelete = !scheduledForDeletionAt;
       try {
-        const shouldDelete = !scheduledForDeletionAt;
         if (shouldDelete) {
           await deleteUserAccount({ input: { userId: id } });
           Notify.create({
@@ -472,8 +472,13 @@ function openEdit({
             message: t("manageUsers.editUser.cancelUserDeletionSuccess"),
           });
         }
-      } catch {
-        notifyError(t("auth.couldNotUpdate"));
+      } catch (error) {
+        console.error(error);
+        if (shouldDelete) {
+          notifyError(t("manageUsers.editUser.deleteUserFailed"));
+        } else {
+          notifyError(t("manageUsers.editUser.cancelUserDeletionFailed"));
+        }
       }
       return;
     }

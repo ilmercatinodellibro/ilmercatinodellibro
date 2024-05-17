@@ -47,11 +47,16 @@ export default {
 
     downloadData: "Scarica Dati",
     downloadDataSuccess: "I dati dell'account verranno scaricati a breve",
+    downloadDataFailed:
+      "Non è stato possibile scaricare i dati dell'account. Si prega di contattare il supporto.",
     deleteUser: "Elimina Utente",
     deleteUserSuccess:
       "L'utente è stato programmato per l'eliminazione tra 7 giorni",
+    deleteUserFailed: "Non è stato possibile eliminare l'utente",
     cancelUserDeletion: "Annulla Eliminazione Utente",
     cancelUserDeletionSuccess: "L'eliminazione dell'utente è stata annullata",
+    cancelUserDeletionFailed:
+      "Non è stato possibile annullare l'eliminazione dell'utente",
   },
   inRetrieval: "In ritiro",
   retrieved: "Ritirati",
