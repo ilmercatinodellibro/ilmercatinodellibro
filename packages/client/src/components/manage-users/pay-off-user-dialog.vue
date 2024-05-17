@@ -396,11 +396,7 @@ const getSettledOrToSettleCopiesPriceSum = (
   settled: boolean,
 ) =>
   (settled ? settledAt : !settledAt)
-    ? (book.originalPrice *
-        (props.user.discount
-          ? selectedLocation.value.buyRate
-          : selectedLocation.value.sellRate)) /
-      100
+    ? (book.originalPrice * selectedLocation.value.buyRate) / 100
     : 0;
 
 const totalCheckoutMoney = computed(() =>

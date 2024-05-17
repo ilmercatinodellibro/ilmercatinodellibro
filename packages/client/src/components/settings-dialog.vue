@@ -117,7 +117,7 @@ function validateSettings() {
     Dialog.create({
       title: t("general.settings.updateRatesConfirmTitle"),
       message: t("general.settings.updateRatesConfirmMessage"),
-      ok: t("actions.continue"),
+      ok: t("actions.update"),
       cancel: t("common.cancel"),
     }).onOk(() => {
       onDialogOK(settingsUpdate);

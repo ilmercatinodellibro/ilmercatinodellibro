@@ -18,6 +18,8 @@
             @click="swapView()"
           />
         </template>
+
+        <!-- TODO: add a button to check the other warehouse out -->
       </header-search-bar-filters>
 
       <dialog-table

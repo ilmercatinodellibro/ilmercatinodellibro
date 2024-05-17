@@ -17,4 +17,5 @@ export default {
   selectAtLeastOneOption: "Select at least one option",
   editName: "Edit Name",
   selectFeedbackType: "Select feedback type",
+  update: "Update",
 };

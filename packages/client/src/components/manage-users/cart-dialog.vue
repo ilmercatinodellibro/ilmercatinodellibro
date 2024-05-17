@@ -392,7 +392,7 @@ async function removeBook(book: BookSummaryFragment) {
       selectedBookCopies.value = currentlySelectedCopies;
     }
 
-    await Promise.all([refetchReservations(), refetchRequests()]);
+    await Promise.all([refetchReservations, refetchRequests]);
   } catch {
     notifyError(t("bookErrors.notCartBookDeleted"));
   }
@@ -423,7 +423,7 @@ function emptyAndDestroyCart() {
     } catch {
       notifyError(t("bookErrors.notCartDeleted"));
     } finally {
-      await Promise.all([refetchReservations(), refetchRequests()]);
+      await Promise.all([refetchReservations, refetchRequests]);
       onDialogHide();
     }
   });
@@ -458,8 +458,7 @@ function sellBooks() {
         input: {
           cartId: cartId.value,
           bookCopyIds: bookAndCopies.map(
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            ([_, selectedBookCopyId]) => selectedBookCopyId,
+            ([, selectedBookCopyId]) => selectedBookCopyId,
           ),
         },
       });
@@ -470,10 +469,11 @@ function sellBooks() {
         type: "positive",
         message: "Libri venduti con successo.",
       });
-
-      onDialogHide();
     } catch {
       notifyError(t("bookErrors.notSell"));
+    } finally {
+      await Promise.all([refetchRequests, refetchReservations]);
+      onDialogHide();
     }
   });
 }

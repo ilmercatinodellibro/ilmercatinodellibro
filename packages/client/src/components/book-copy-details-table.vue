@@ -25,7 +25,7 @@
       </q-th>
     </q-tr>
 
-    <q-tr v-for="bookCopy in tableRows" :key="bookCopy.id">
+    <q-tr v-for="bookCopy in filteredBookCopies" :key="bookCopy.id">
       <q-td auto-width />
 
       <q-td
@@ -111,7 +111,7 @@ const { bookCopies, loading } = useGetBookCopiesQuery(() => ({
   bookId: props.bookId,
 }));
 
-const tableRows = computed(() =>
+const filteredBookCopies = computed(() =>
   props.showOnlyAvailable
     ? bookCopies.value.filter((copy) => isAvailable(copy))
     : bookCopies.value,

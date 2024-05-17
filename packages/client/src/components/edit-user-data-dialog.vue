@@ -118,8 +118,6 @@ const formData = computed<
     }
   >
 >(() => {
-  // eslint-disable-next-line no-console
-  console.log(user.value?.dateOfBirth);
   return {
     firstname: {
       label: t("auth.firstName"),
