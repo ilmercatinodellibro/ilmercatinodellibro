@@ -130,8 +130,6 @@ module.exports = configure(function (ctx) {
             : "false",
         FACEBOOK_LOGIN_ENABLED: process.env.FACEBOOK_LOGIN_ENABLED || "false",
         GOOGLE_LOGIN_ENABLED: process.env.GOOGLE_LOGIN_ENABLED || "false",
-
-        IS_DEMO: ctx.dev ? "true" : process.env.IS_DEMO || "false",
       },
       rawDefine: {
         // As pre-compilation doesn't work, we have to use runtime + compiler version of vue-i18n. (default)
