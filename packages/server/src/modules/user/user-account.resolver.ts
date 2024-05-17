@@ -1,5 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { ForbiddenException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import { GraphQLJSONObject } from "graphql-scalars";
 import { User } from "src/@generated/user";
 import { AuthService } from "src/modules/auth/auth.service";
@@ -148,6 +150,13 @@ export class UserAccountResolver {
       },
       data: {
         deletedAt: new Date(Date.now() + 7 * 24 * HOUR), // 7 days from now
+
+        // Remove all push subscriptions to prevent sending notifications to the user
+        // after the deletion, as the user should no longer receive any notifications.
+        // If the deletion is canceled, the user can resubscribe, it's not a big deal.
+        pushSubscriptions: {
+          deleteMany: {},
+        },
       },
     });
   }
@@ -190,5 +199,66 @@ export class UserAccountResolver {
         deletedAt: null,
       },
     });
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async deleteScheduledUserAccounts() {
+    const usersToAnonymize = await this.prisma.user.findMany({
+      where: {
+        deletedAt: {
+          lte: new Date(),
+        },
+      },
+      select: { id: true },
+    });
+    if (usersToAnonymize.length === 0) {
+      return;
+    }
+
+    await this.prisma.$transaction(
+      usersToAnonymize.map((user) =>
+        this.prisma.user.update({
+          where: { id: user.id },
+          data: {
+            firstname: "Deleted",
+            lastname: "User",
+            email: `deleted-user-${randomUUID()}@ilmercatinodellibro.com`,
+            phoneNumber: "",
+            dateOfBirth: null,
+            delegate: null,
+            discount: false,
+            notes: "",
+            password: "deleted", // does not have to be hashed as it won't be compared against and also does not carry a security risk
+
+            memberships: {
+              deleteMany: {},
+            },
+            events: {
+              deleteMany: {},
+            },
+            ownedCarts: {
+              deleteMany: {},
+            },
+            // Receipt files contain the user's email so we must delete the data in DB so that they can't be traced back to the user
+            // The files themselves will stay as is for accounting purposes
+            // TODO: is this compliant with GDPR? If not, we should either delete the files, update the generation logic to not include the email, or somehow update the files to anonymize the email
+            ownedReceipts: {
+              deleteMany: {},
+            },
+            reservations: {
+              updateMany: {
+                where: {
+                  deletedAt: null,
+                },
+                data: {
+                  deletedAt: new Date(),
+                  expiresAt: new Date(),
+                },
+              },
+            },
+          },
+        }),
+      ),
+    );
   }
 }
