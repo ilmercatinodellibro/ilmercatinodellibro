@@ -58,10 +58,8 @@
           </template>
         </template>
       </header-search-bar-filters>
-
       <dialog-table
         v-if="!isSortedByCopyCode"
-        ref="tableRef"
         v-model:pagination="booksPagination"
         :columns="columns"
         :filter="tableFilter"
@@ -180,7 +178,7 @@ import {
   mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
+import { Dialog, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyDetailsTable from "src/components/book-copy-details-table.vue";
@@ -238,8 +236,6 @@ const smallScreenBreakpoint = 1802;
 const screenWidth = useScreenWidth(smallScreenBreakpoint);
 
 const isSortedByCopyCode = ref(false);
-
-const tableRef = ref<QTable>();
 
 const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
   useTableFilters(AvailableFilterPaths.Warehouse, true);

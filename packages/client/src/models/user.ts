@@ -6,16 +6,8 @@ export type UserData = Omit<
 > & { email: string; confirmEmail: string };
 
 export enum AvailableManageUserFilterOptions {
-  Email = "email",
-  FirstName = "firstName",
-  LastName = "lastName",
-  PhoneNumber = "phoneNumber",
-  InStock = "inStock",
-  Sold = "sold",
-  Requested = "requested",
-  Purchased = "purchased",
-  CreationDate = "creationDate",
-  Receipts = "receipts",
-  Reserved = "reserved",
-  Cart = "cart",
+  WithAvailable = "withAvailable",
+  WithRequested = "withRequested",
+  WithPurchased = "withPurchased",
+  WithSold = "withSold",
 }

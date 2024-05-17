@@ -247,16 +247,15 @@ const pagination = ref({
   rowsNumber: rowsCount.value,
 });
 
-const { filterMethod, filterOptions, tableFilter } = useTableFilters(
-  AvailableFilterPaths.ManageUsers,
-);
+const { filterMethod, filterOptions, tableFilter, refetchFilterProxy } =
+  useTableFilters(AvailableFilterPaths.ManageUsers);
 
 const onRequest: QTableProps["onRequest"] = async (requested) => {
   await fetchCustomers({
     page: requested.pagination.page,
     rowsPerPage: requested.pagination.rowsPerPage,
     searchTerm: tableFilter.searchQuery,
-    // TODO: pass the filters to the server
+    filter: refetchFilterProxy.value,
   });
 
   pagination.value.rowsNumber = rowsCount.value;
