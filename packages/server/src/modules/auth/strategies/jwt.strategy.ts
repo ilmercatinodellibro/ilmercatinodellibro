@@ -38,6 +38,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, JWT_STRATEGY_NAME) {
         "User related to this token has not been found in our system",
       );
     }
+    if (user.deletedAt) {
+      throw new Error("User related to this token has been deleted");
+    }
 
     return user;
   }
