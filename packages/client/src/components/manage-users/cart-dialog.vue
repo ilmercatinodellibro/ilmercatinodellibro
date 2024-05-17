@@ -153,8 +153,10 @@ import ConfirmDialog from "src/components/confirm-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
+import { useGetBookCopiesByOwnerQuery } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
+import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
 import { useReservationService } from "src/services/reservation";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -242,7 +244,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const cartBooks = ref<BookSummaryFragment[]>([]);
+const cartBooks = ref<BookWithAvailableCopiesFragment[]>([]);
 const selectedBookCopies = ref<Record<string, string>>({});
 const cartId = ref<string>();
 
@@ -430,6 +432,10 @@ function emptyAndDestroyCart() {
 }
 
 const { finalizeCart } = useFinalizeCartMutation();
+const { refetch: refetchBookCopiesByOwner } = useGetBookCopiesByOwnerQuery({
+  retailLocationId: "", // Dummy params, the real params are set when calling refetch
+  userId: "",
+});
 function sellBooks() {
   const bookAndCopies = Object.entries(selectedBookCopies.value);
   if (bookAndCopies.length < cartBooks.value.length) {
@@ -462,6 +468,31 @@ function sellBooks() {
           ),
         },
       });
+    } catch {
+      notifyError(t("bookErrors.notSell"));
+    } finally {
+      const ownersToUpdate = cartBooks.value.map(
+        ({ copies }) =>
+          (copies
+            ? copies.find(
+                ({ book, id }) => selectedBookCopies.value[book.id] === id,
+              )
+            : undefined
+          )?.owner,
+      );
+
+      await Promise.all([
+        ...ownersToUpdate.map((user) => {
+          if (user) {
+            return refetchBookCopiesByOwner({
+              retailLocationId: retailLocation.value.id,
+              userId: user.id,
+            });
+          }
+        }),
+        refetchRequests,
+        refetchReservations,
+      ]);
 
       loading.value = false;
 
@@ -469,10 +500,6 @@ function sellBooks() {
         type: "positive",
         message: "Libri venduti con successo.",
       });
-    } catch {
-      notifyError(t("bookErrors.notSell"));
-    } finally {
-      await Promise.all([refetchRequests, refetchReservations]);
       onDialogHide();
     }
   });

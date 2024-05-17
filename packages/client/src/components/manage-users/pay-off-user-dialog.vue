@@ -696,8 +696,10 @@ function returnAllBooks(remainingType: SettleRemainingType) {
       });
     } catch {
       notifyError(t("common.genericErrorMessage"));
+    } finally {
+      await Promise.all([refetchBookCopiesByOwner, refetchReturnedBookCopes]);
+      onDialogOK();
     }
-    onDialogOK();
   });
 }
 </script>
