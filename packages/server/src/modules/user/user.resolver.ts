@@ -100,7 +100,7 @@ export class UserResolver {
                 ],
               },
             ]
-          : [{}]),
+          : []),
       ],
     };
 
