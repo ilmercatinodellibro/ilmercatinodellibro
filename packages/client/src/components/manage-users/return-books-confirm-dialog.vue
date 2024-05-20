@@ -45,21 +45,11 @@
         class="flex-delegate-height-management"
       >
         <template #body-cell-author="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-subject="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
       </dialog-table>
 
@@ -78,6 +68,7 @@ import { useI18n } from "vue-i18n";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
+import tableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 defineProps<{
   booksToReturn: BookCopyDetailsFragment[];

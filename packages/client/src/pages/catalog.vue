@@ -30,21 +30,11 @@
         @request="onRequest"
       >
         <template #body-cell-author="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-subject="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-status="{ value }">
@@ -82,6 +72,8 @@ import {
   useCreateNewBookMutation,
 } from "src/services/book.graphql";
 import { formatPrice } from "../composables/use-misc-formats";
+import tableCellWithTooltip from "./table-cell-with-tooltip.vue";
+
 const { t } = useI18n();
 
 const tableRef = ref<QTable>();

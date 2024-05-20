@@ -55,7 +55,6 @@ export default {
     deleteBookBtnTooltip: "Delete permanently this copy from the database",
     errors: {
       noBook: "No book with the ISBN {0} was found",
-      tooManyCopies: "Cannot accept more than one copy of the same book",
       retrieval: "There was an error during the retrieval of the books",
     },
   },

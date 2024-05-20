@@ -45,21 +45,11 @@
         @request="onRequest"
       >
         <template #body-cell-author="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-subject="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-availability="{ value }">
@@ -101,6 +91,7 @@ import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
 import { useReservationService } from "src/services/reservation";
 import { useRetailLocationService } from "src/services/retail-location";
+import tableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 const { user } = useAuthService();
 const { selectedLocation } = useRetailLocationService();

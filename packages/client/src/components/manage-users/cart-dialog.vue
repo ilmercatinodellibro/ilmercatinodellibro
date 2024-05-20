@@ -149,16 +149,19 @@ import {
 } from "quasar";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { evictQuery } from "src/apollo/cache";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
-import { useGetBookCopiesByOwnerQuery } from "src/services/book-copy.graphql";
+import { GetBookCopiesByOwnerDocument } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
+import { GetRequestsDocument } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
+import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
@@ -378,7 +381,7 @@ async function removeBook(book: BookSummaryFragment) {
   }
 
   try {
-    await removeFromCart({
+    const { cache } = await removeFromCart({
       input: {
         bookId: book.id,
         cartId: cartId.value,
@@ -394,7 +397,14 @@ async function removeBook(book: BookSummaryFragment) {
       selectedBookCopies.value = currentlySelectedCopies;
     }
 
-    await Promise.all([refetchReservations, refetchRequests]);
+    evictQuery(cache, GetReservationsDocument, {
+      retailLocationId: retailLocation.value.id,
+      userId: props.user.id,
+    });
+    evictQuery(cache, GetRequestsDocument, {
+      retailLocationId: retailLocation.value.id,
+      userId: props.user.id,
+    });
   } catch {
     notifyError(t("bookErrors.notCartBookDeleted"));
   }
@@ -432,10 +442,6 @@ function emptyAndDestroyCart() {
 }
 
 const { finalizeCart } = useFinalizeCartMutation();
-const { refetch: refetchBookCopiesByOwner } = useGetBookCopiesByOwnerQuery({
-  retailLocationId: "", // Dummy params, the real params are set when calling refetch
-  userId: "",
-});
 function sellBooks() {
   const bookAndCopies = Object.entries(selectedBookCopies.value);
   if (bookAndCopies.length < cartBooks.value.length) {
@@ -460,7 +466,8 @@ function sellBooks() {
 
     try {
       loading.value = true;
-      await finalizeCart({
+
+      const { cache } = await finalizeCart({
         input: {
           cartId: cartId.value,
           bookCopyIds: bookAndCopies.map(
@@ -468,32 +475,29 @@ function sellBooks() {
           ),
         },
       });
+      const ownersToUpdate = cartBooks.value.map(
+        ({ copies }) =>
+          copies?.find(
+            ({ book, id }) => selectedBookCopies.value[book.id] === id,
+          )?.owner,
+      );
+      ownersToUpdate.forEach((user) => {
+        if (user) {
+          evictQuery(cache, GetBookCopiesByOwnerDocument, {
+            retailLocationId: retailLocation.value.id,
+            userId: user.id,
+          });
+        }
+      });
+      evictQuery(cache, GetReservationsDocument, {
+        retailLocationId: retailLocation.value.id,
+        userId: props.user.id,
+      });
+      evictQuery(cache, GetRequestsDocument);
+      cache.gc();
     } catch {
       notifyError(t("bookErrors.notSell"));
     } finally {
-      const ownersToUpdate = cartBooks.value.map(
-        ({ copies }) =>
-          (copies
-            ? copies.find(
-                ({ book, id }) => selectedBookCopies.value[book.id] === id,
-              )
-            : undefined
-          )?.owner,
-      );
-
-      await Promise.all([
-        ...ownersToUpdate.map((user) => {
-          if (user) {
-            return refetchBookCopiesByOwner({
-              retailLocationId: retailLocation.value.id,
-              userId: user.id,
-            });
-          }
-        }),
-        refetchRequests,
-        refetchReservations,
-      ]);
-
       loading.value = false;
 
       Notify.create({

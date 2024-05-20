@@ -14,21 +14,11 @@
         class="flex-delegate-height-management"
       >
         <template #body-cell-author="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-subject="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-problems="{ row }">
@@ -58,21 +48,11 @@
         class="flex-delegate-height-management"
       >
         <template #body-cell-author="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-subject="{ value, col }">
-          <q-td :class="col.classes">
-            <q-tooltip>
-              {{ value }}
-            </q-tooltip>
-            {{ value }}
-          </q-td>
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
         <template #body-cell-return="{ row }">
@@ -114,6 +94,7 @@ import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsHistoryDialog from "./problems-history-dialog.vue";
 import ReturnBookDialog from "./return-book-dialog.vue";
+import tableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 // sold and purchased means the same thing, it's just a different perspective depending on which side the user is
 type SoldBookCopy = BookCopyDetailsFragment & {

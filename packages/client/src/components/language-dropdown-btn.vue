@@ -5,7 +5,7 @@
         v-for="language in languages"
         :key="language.code"
         clickable
-        @click="locale = language.code"
+        @click="setLanguage(language.code)"
       >
         <q-item-section>
           <q-item-label>
@@ -20,6 +20,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { setLanguage } from "src/boot/i18n";
 import { languages } from "src/models/language";
 const { locale } = useI18n();
 const selectedLanguageLabel = computed(
