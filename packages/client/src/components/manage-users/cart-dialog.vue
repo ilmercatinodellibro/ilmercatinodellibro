@@ -131,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { isApolloError } from "@apollo/client";
+import { ApolloCache, isApolloError } from "@apollo/client";
 import {
   mdiChevronDown,
   mdiChevronUp,
@@ -158,9 +158,7 @@ import { GetBookCopiesByOwnerDocument } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
-import { useRequestService } from "src/services/request";
 import { GetRequestsDocument } from "src/services/request.graphql";
-import { useReservationService } from "src/services/reservation";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
@@ -360,18 +358,21 @@ async function addBookToCart(fromBookIsbn?: string) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function evictRequestsReservationsQueries(cache: ApolloCache<any>) {
+  evictQuery(cache, GetReservationsDocument, {
+    retailLocationId: retailLocation.value.id,
+    userId: props.user.id,
+  });
+  evictQuery(cache, GetRequestsDocument, {
+    retailLocationId: retailLocation.value.id,
+    userId: props.user.id,
+  });
+  cache.gc();
+}
+
 const { removeFromCart, loading: removeBookLoading } =
   useRemoveFromCartMutation();
-const { useGetReservationsQuery } = useReservationService();
-const { refetch: refetchReservations } = useGetReservationsQuery({
-  retailLocationId: retailLocation.value.id,
-  userId: props.user.id,
-});
-const { useGetRequestsQuery } = useRequestService();
-const { refetch: refetchRequests } = useGetRequestsQuery({
-  retailLocationId: retailLocation.value.id,
-  userId: props.user.id,
-});
 async function removeBook(book: BookSummaryFragment) {
   const bookIndex = cartBooks.value.findIndex(({ id }) => book.id === id);
 
@@ -397,14 +398,7 @@ async function removeBook(book: BookSummaryFragment) {
       selectedBookCopies.value = currentlySelectedCopies;
     }
 
-    evictQuery(cache, GetReservationsDocument, {
-      retailLocationId: retailLocation.value.id,
-      userId: props.user.id,
-    });
-    evictQuery(cache, GetRequestsDocument, {
-      retailLocationId: retailLocation.value.id,
-      userId: props.user.id,
-    });
+    evictRequestsReservationsQueries(cache);
   } catch {
     notifyError(t("bookErrors.notCartBookDeleted"));
   }
@@ -427,15 +421,16 @@ function emptyAndDestroyCart() {
     }
 
     try {
-      await deleteCart({
+      const { cache } = await deleteCart({
         input: {
           cartId: cartId.value,
         },
       });
+
+      evictRequestsReservationsQueries(cache);
     } catch {
       notifyError(t("bookErrors.notCartDeleted"));
     } finally {
-      await Promise.all([refetchReservations, refetchRequests]);
       onDialogHide();
     }
   });
@@ -489,12 +484,8 @@ function sellBooks() {
           });
         }
       });
-      evictQuery(cache, GetReservationsDocument, {
-        retailLocationId: retailLocation.value.id,
-        userId: props.user.id,
-      });
-      evictQuery(cache, GetRequestsDocument);
-      cache.gc();
+
+      evictRequestsReservationsQueries(cache);
     } catch {
       notifyError(t("bookErrors.notSell"));
     } finally {
