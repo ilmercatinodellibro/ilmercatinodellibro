@@ -1,8 +1,8 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
-      :title="t('book.filters.school')"
-      :submit-label="t('book.filter')"
+      :title="title"
+      :submit-label="submitLabel"
       size="sm"
       @submit="
         onDialogOK({
@@ -84,6 +84,8 @@ import KDialogFormCard from "./k-dialog-form-card.vue";
 const { t } = useI18n();
 
 const props = defineProps<{
+  title: string;
+  submitLabel: string;
   selectedFilters?: SchoolFilters;
 }>();
 

@@ -123,6 +123,8 @@ function openSchoolFilterDialog(selectedFilters: SchoolFilters) {
     component: FilterBySchoolDialog,
     componentProps: {
       selectedFilters,
+      title: t("book.filters.school"),
+      submitLabel: t("book.filter"),
     },
   }).onOk((schoolFilters: SchoolFilters) => {
     newFilters.value.schoolFilters = schoolFilters;

@@ -3,7 +3,7 @@
     <q-card class="absolute-full column no-wrap q-ma-md">
       <q-card-section class="gap-16 row">
         <q-input
-          :model-value="searchQuery"
+          :model-value="tableFilter.searchQuery"
           :placeholder="t('common.search')"
           class="col max-width-600"
           clearable
@@ -11,10 +11,10 @@
           outlined
           type="search"
           @update:model-value="
-            (value) => (searchQuery = (value as string) ?? '')
+            (value) => (tableFilter.searchQuery = (value as string) ?? '')
           "
         >
-          <template v-if="searchQuery.length === 0" #append>
+          <template v-if="tableFilter.searchQuery.length === 0" #append>
             <q-icon :name="mdiMagnify" />
           </template>
         </q-input>
@@ -28,7 +28,7 @@
             :label="$t('reserveBooks.filterButton')"
             class="text-transform-none"
             color="accent"
-            @click="searchClassBooks()"
+            @click="swapView()"
           />
 
           <template v-else>
@@ -37,7 +37,7 @@
               :label="t('reserveBooks.backToMainList')"
               class="text-transform-none"
               outline
-              @click="showByClass = false"
+              @click="swapView()"
             />
 
             <q-btn
@@ -54,9 +54,11 @@
       <dialog-table
         v-model:pagination="tablePagination"
         :columns="columns"
-        :filter="searchQuery"
+        :filter="tableFilter"
+        :filter-method="filterMethod"
         :loading="loading"
-        :rows="showByClass ? classBooks : rows"
+        :rows="rows"
+        :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
         class="col"
         @request="onRequest"
       >
@@ -91,11 +93,12 @@ import {
   mdiMagnify,
   mdiPlus,
 } from "@quasar/extras/mdi-v7";
+import { cloneDeep } from "lodash-es";
 import { Dialog, Notify, QBtnProps, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import ClassFiltersDialog from "src/components/class-filters-dialog.vue";
+import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
@@ -104,7 +107,7 @@ import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dia
 import { formatPrice } from "src/composables/use-misc-formats";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { discountedPrice } from "src/helpers/book-copy";
-import { BooksTab, CourseDetails, SchoolFilters } from "src/models/book";
+import { BooksTab, SchoolFilters } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
@@ -220,11 +223,13 @@ const tablePagination = ref({
   rowsPerPage: rowsPerPage.value,
 });
 
-const searchQuery = ref("");
-
 const showByClass = ref(false);
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
-const classBooks = ref([]);
+const { refetchFilterProxy, tableFilter, filterMethod } = useTableFilters(
+  "book.filters.options",
+  true,
+);
 
 function getButtonData(book: BookSummaryFragment): QBtnProps {
   if (userReservations.value.find(({ book: { id } }) => id === book.id)) {
@@ -289,22 +294,23 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   loading.value = false;
 };
 
-const { refetchFilterProxy, tableFilter } = useTableFilters(
-  "book.filters.options",
-  true,
-);
-
-function searchClassBooks() {
-  Dialog.create({
-    component: ClassFiltersDialog,
-    componentProps: {
-      ...tableFilter.schoolFilters,
-    } satisfies Partial<SchoolFilters>,
-  }).onOk((payload: CourseDetails) => {
-    showByClass.value = true;
-    // TODO: put specified class books into classBooks
-    payload;
-  });
+function swapView() {
+  if (!showByClass.value) {
+    Dialog.create({
+      component: FilterBySchoolDialog,
+      componentProps: {
+        selectedFilters: tableFilter.schoolFilters,
+        title: t("reserveBooks.findBooksDialog.title"),
+        submitLabel: t("book.filter"),
+      },
+    }).onOk((newFilters: SchoolFilters) => {
+      showByClass.value = true;
+      tableFilter.schoolFilters = cloneDeep(newFilters);
+    });
+  } else {
+    showByClass.value = false;
+    tableFilter.schoolFilters = undefined;
+  }
 }
 
 async function reserveBook(id: string) {
@@ -358,7 +364,7 @@ function openReserveAllDialog() {
   Dialog.create({
     component: ReserveBooksByClassDialog,
     componentProps: {
-      classBooks: classBooks.value,
+      classBooks: rows.value,
     },
   }).onOk(async (books: BookSummaryFragment[]) => {
     try {
