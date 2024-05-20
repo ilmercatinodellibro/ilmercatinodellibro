@@ -32,7 +32,7 @@ export default {
       "The number of titles currently available among those requested by the user",
   },
   payOff: "Pay off user",
-  payOffDisabled: "User pay-offs are currently disabled.",
+  payOffDisabled: "User payoffs are currently disabled.",
   filters: {
     withAvailable: "With Available",
     withRequested: "With Requested",

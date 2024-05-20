@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  NotAcceptableException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import {
@@ -553,6 +554,22 @@ export class UserResolver {
       retailLocationId,
       message: "You are not allowed to settle users.",
     });
+
+    const { payOffEnabled } =
+      await this.prisma.retailLocation.findUniqueOrThrow({
+        where: {
+          id: retailLocationId,
+        },
+        select: {
+          payOffEnabled: true,
+        },
+      });
+
+    if (!payOffEnabled) {
+      throw new NotAcceptableException(
+        "Cannot settle users at the current time: settlement for this retail location is disabled",
+      );
+    }
 
     await this.prisma.$transaction(async (prisma) => {
       const bookCopies = await prisma.bookCopy.findMany({
