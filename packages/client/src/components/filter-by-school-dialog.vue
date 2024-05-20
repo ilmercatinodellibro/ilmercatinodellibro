@@ -16,17 +16,22 @@
         <q-select
           :model-value="selectedSchoolCodes"
           :display-value="
-            selectedSchoolCodes.length === 0 ? t('general.all') : undefined
+            selectedSchoolCodes.length === 0
+              ? requireCourse
+                ? t('actions.selectAtLeastOneOption')
+                : t('general.all')
+              : undefined
           "
           :disable="isSchoolsLoading"
           :label="t('book.filters.schoolFilter.fields.school')"
+          :multiple="!requireCourse"
           :options="schools"
+          :rules="requireCourse ? [requiredRule] : undefined"
           bottom-slots
           clearable
           emit-value
           fill-input
           map-options
-          multiple
           option-label="name"
           option-value="code"
           outlined
@@ -43,20 +48,25 @@
             isSchoolCoursesLoading
           "
           :display-value="
-            selectedSchoolCourseIds.length === 0 ? t('general.all') : undefined
+            selectedSchoolCourseIds.length === 0
+              ? requireCourse
+                ? t('actions.selectAtLeastOneOption')
+                : t('general.all')
+              : undefined
           "
           :label="t('book.filters.schoolFilter.fields.course')"
           :option-label="
             ({ grade, section, school }: SchoolCourseFragment) =>
               `${grade}-${section} - ${school.name}`
           "
+          :multiple="!requireCourse"
           :options="schoolCourses"
+          :rules="requireCourse ? [requiredRule] : undefined"
           bottom-slots
           clearable
           emit-value
           fill-input
           map-options
-          multiple
           option-value="id"
           outlined
           @update:model-value="
@@ -72,6 +82,7 @@
 import { useDialogPluginComponent } from "quasar";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { requiredRule } from "src/helpers/rules";
 import { SchoolFilters } from "src/models/book";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
@@ -87,6 +98,7 @@ const props = defineProps<{
   title: string;
   submitLabel: string;
   selectedFilters?: SchoolFilters;
+  requireCourse?: boolean;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);

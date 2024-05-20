@@ -77,7 +77,7 @@
         </template>
 
         <template #body-cell-actions="{ row }">
-          <q-td>
+          <q-td auto-width class="text-center">
             <chip-button v-bind="getButtonData(row)" />
           </q-td>
         </template>
@@ -98,6 +98,7 @@ import { Dialog, Notify, QBtnProps, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
+import { evictQuery } from "src/apollo/cache";
 import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
@@ -114,7 +115,9 @@ import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
+import { GetRequestsDocument } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
+import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { user } = useAuthService();
@@ -124,21 +127,20 @@ const { useCreateReservationsMutation, useGetReservationsQuery } =
   useReservationService();
 
 const { createReservations } = useCreateReservationsMutation();
-const { userReservations, refetch: refetchReservations } =
-  useGetReservationsQuery({
-    retailLocationId: selectedLocation.value.id,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userId: user.value!.id,
-  });
-
-const { useCreateRequestMutation, useGetRequestsQuery } = useRequestService();
-
-const { createBookRequest } = useCreateRequestMutation();
-const { bookRequests, refetch: refetchRequests } = useGetRequestsQuery({
+const { userReservations } = useGetReservationsQuery({
   retailLocationId: selectedLocation.value.id,
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
 });
+
+const { useCreateRequestMutation, useGetRequestsQuery } = useRequestService();
+
+const { createBookRequest } = useCreateRequestMutation();
+const { bookRequests } = useGetRequestsQuery(() => ({
+  retailLocationId: selectedLocation.value.id,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+}));
 
 const { t } = useI18n();
 
@@ -302,10 +304,16 @@ function swapView() {
         selectedFilters: tableFilter.schoolFilters,
         title: t("reserveBooks.findBooksDialog.title"),
         submitLabel: t("book.filter"),
+        requireCourse: true,
       },
     }).onOk((newFilters: SchoolFilters) => {
-      showByClass.value = true;
-      tableFilter.schoolFilters = cloneDeep(newFilters);
+      if (
+        newFilters.selectedSchoolCodes.length > 0 ||
+        newFilters.selectedSchoolCourseIds.length > 0
+      ) {
+        showByClass.value = true;
+        tableFilter.schoolFilters = cloneDeep(newFilters);
+      }
     });
   } else {
     showByClass.value = false;
@@ -315,7 +323,7 @@ function swapView() {
 
 async function reserveBook(id: string) {
   try {
-    await createReservations({
+    const { cache } = await createReservations({
       input: {
         bookIds: [id],
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -323,6 +331,13 @@ async function reserveBook(id: string) {
         retailLocationId: selectedLocation.value.id,
       },
     });
+
+    evictQuery(cache, GetReservationsDocument, {
+      retailLocationId: selectedLocation.value.id,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      userId: user.value!.id,
+    });
+    cache.gc();
   } catch (e) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
@@ -331,7 +346,7 @@ async function reserveBook(id: string) {
       ]),
     );
   } finally {
-    await refetchReservations();
+    swapView();
   }
 }
 
@@ -343,9 +358,15 @@ function requestBook(bookId: string) {
     ok: t("reserveBooks.requestCopy"),
   }).onOk(async () => {
     try {
-      await createBookRequest({
+      const { cache } = await createBookRequest({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         input: { bookId, userId: user.value!.id },
+      });
+
+      evictQuery(cache, GetRequestsDocument, {
+        retailLocationId: selectedLocation.value.id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
       });
     } catch (e) {
       Notify.create(
@@ -354,8 +375,6 @@ function requestBook(bookId: string) {
           e,
         ]),
       );
-    } finally {
-      await refetchRequests();
     }
   });
 }
@@ -368,7 +387,7 @@ function openReserveAllDialog() {
     },
   }).onOk(async (books: BookSummaryFragment[]) => {
     try {
-      await createReservations({
+      const { cache } = await createReservations({
         input: {
           bookIds: books.map(({ id }) => id),
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -376,6 +395,13 @@ function openReserveAllDialog() {
           retailLocationId: selectedLocation.value.id,
         },
       });
+
+      evictQuery(cache, GetReservationsDocument, {
+        retailLocationId: selectedLocation.value.id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
+      });
+      cache.gc();
     } catch (e) {
       Notify.create(
         t("reserveBooks.reservationOrRequestError", [
@@ -384,9 +410,7 @@ function openReserveAllDialog() {
         ]),
       );
     } finally {
-      showByClass.value = false;
-
-      await refetchReservations();
+      swapView();
     }
   });
 }
