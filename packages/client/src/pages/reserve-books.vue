@@ -1,11 +1,27 @@
 <template>
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
-      <card-table-header
-        :search-label="t('common.search')"
-        @add-book="(bookISBN) => (searchQuery = bookISBN)"
-      >
-        <template #side-actions>
+      <q-card-section class="gap-16 row">
+        <q-input
+          :model-value="searchQuery"
+          :placeholder="t('common.search')"
+          class="col max-width-600"
+          clearable
+          debounce="400"
+          outlined
+          type="search"
+          @update:model-value="
+            (value) => (searchQuery = (value as string) ?? '')
+          "
+        >
+          <template v-if="searchQuery.length === 0" #append>
+            <q-icon :name="mdiMagnify" />
+          </template>
+        </q-input>
+
+        <q-space />
+
+        <div class="flex-center gap-16 no-padding no-wrap row">
           <q-btn
             v-if="!showByClass"
             :icon="mdiFilter"
@@ -32,8 +48,8 @@
               @click="openReserveAllDialog()"
             />
           </template>
-        </template>
-      </card-table-header>
+        </div>
+      </q-card-section>
 
       <dialog-table
         v-model:pagination="tablePagination"
@@ -69,13 +85,17 @@
 </template>
 
 <script setup lang="ts">
-import { mdiArrowLeft, mdiFilter, mdiPlus } from "@quasar/extras/mdi-v7";
+import {
+  mdiArrowLeft,
+  mdiFilter,
+  mdiMagnify,
+  mdiPlus,
+} from "@quasar/extras/mdi-v7";
 import { Dialog, Notify, QBtnProps, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import ClassFiltersDialog from "src/components/class-filters-dialog.vue";
-import CardTableHeader from "src/components/manage-users/card-table-header.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
