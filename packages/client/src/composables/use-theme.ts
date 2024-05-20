@@ -23,7 +23,7 @@ const defaultTheme: DeepReadonly<Theme> = Object.freeze({
     secondary: "#76e1a7",
     accent: "#c2664d",
   }),
-  logo: "/favicon-re.png",
+  logo: "/logo/logo-reggio-emilia.svg",
 });
 
 const getDefaults = () => cloneDeep<Theme>(defaultTheme);
