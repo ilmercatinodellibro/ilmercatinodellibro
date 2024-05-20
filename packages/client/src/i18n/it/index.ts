@@ -171,6 +171,8 @@ export default {
     [AvailableRouteNames.WhoWeAre]: "Chi siamo",
     [AvailableRouteNames.Warehouse]: "Magazzino",
     [AvailableRouteNames.Statistics]: "Statistiche",
+    [AvailableRouteNames.Registration]: "Registrazione",
+    [AvailableRouteNames.RegistrationSent]: "Registrazione effettuata",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Impostazioni",

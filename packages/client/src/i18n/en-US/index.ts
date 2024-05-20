@@ -166,6 +166,8 @@ export default {
     [AvailableRouteNames.MyData]: "My Data",
     [AvailableRouteNames.Warehouse]: "Warehouse",
     [AvailableRouteNames.Statistics]: "Statistics",
+    [AvailableRouteNames.Registration]: "Registration",
+    [AvailableRouteNames.RegistrationSent]: "Registration sent",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",
