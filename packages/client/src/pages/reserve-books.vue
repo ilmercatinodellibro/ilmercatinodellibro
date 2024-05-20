@@ -102,8 +102,9 @@ import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { useTableFilters } from "src/composables/use-table-filters";
 import { discountedPrice } from "src/helpers/book-copy";
-import { BooksTab, CourseDetails } from "src/models/book";
+import { BooksTab, CourseDetails, SchoolFilters } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
@@ -278,9 +279,7 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   await refetchBooks({
     page: pagination.page - 1,
     rows: pagination.rowsPerPage,
-    filter: {
-      search: searchQuery.value,
-    },
+    filter: refetchFilterProxy.value,
   });
   tablePagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
@@ -290,9 +289,17 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   loading.value = false;
 };
 
+const { refetchFilterProxy, tableFilter } = useTableFilters(
+  "book.filters.options",
+  true,
+);
+
 function searchClassBooks() {
   Dialog.create({
     component: ClassFiltersDialog,
+    componentProps: {
+      ...tableFilter.schoolFilters,
+    } satisfies Partial<SchoolFilters>,
   }).onOk((payload: CourseDetails) => {
     showByClass.value = true;
     // TODO: put specified class books into classBooks

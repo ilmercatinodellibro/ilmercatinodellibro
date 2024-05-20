@@ -1,6 +1,9 @@
 import { Args, Query, Resolver } from "@nestjs/graphql";
 import { School, SchoolCourse } from "src/@generated";
-import { SchoolCoursesArgs } from "src/modules/school/school.args";
+import {
+  SchoolCoursesArgs,
+  SchoolQueryPayload,
+} from "src/modules/school/school.args";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Resolver()
@@ -8,14 +11,21 @@ export class SchoolResolver {
   constructor(private readonly prisma: PrismaService) {}
 
   @Query(() => [School])
-  async schools() {
-    return await this.prisma.school.findMany({});
+  async schools(@Args() { retailLocationId }: SchoolQueryPayload) {
+    return await this.prisma.school.findMany({
+      where: {
+        provinceCode: retailLocationId.toLocaleUpperCase(),
+      },
+    });
   }
 
   @Query(() => [SchoolCourse])
   async schoolCourses(@Args() { schoolCodes }: SchoolCoursesArgs) {
     return await this.prisma.schoolCourse.findMany({
       where: { schoolCode: { in: schoolCodes } },
+      include: {
+        school: true,
+      },
     });
   }
 }

@@ -3,8 +3,8 @@ fragment School on School {
   name
 }
 
-query getSchools {
-  schools {
+query getSchools($retailLocationId: String!) {
+  schools(retailLocationId: $retailLocationId) {
     ...School
   }
 }
@@ -14,6 +14,9 @@ fragment SchoolCourse on SchoolCourse {
   id
   schoolCode
   section
+  school {
+    name
+  }
 }
 
 query getSchoolCourses($schoolCodes: [String!]!) {

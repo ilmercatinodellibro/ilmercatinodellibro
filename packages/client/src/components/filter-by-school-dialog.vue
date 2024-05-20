@@ -46,7 +46,10 @@
             selectedSchoolCourseIds.length === 0 ? t('general.all') : undefined
           "
           :label="t('book.filters.schoolFilter.fields.course')"
-          :option-label="({ grade, section }) => `${grade}-${section}`"
+          :option-label="
+            ({ grade, section, school }: SchoolCourseFragment) =>
+              `${grade}-${section} - ${school.name}`
+          "
           :options="schoolCourses"
           bottom-slots
           clearable
@@ -70,7 +73,9 @@ import { useDialogPluginComponent } from "quasar";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { SchoolFilters } from "src/models/book";
+import { useRetailLocationService } from "src/services/retail-location";
 import {
+  SchoolCourseFragment,
   useGetSchoolCoursesQuery,
   useGetSchoolsQuery,
 } from "src/services/school.graphql";
@@ -84,7 +89,10 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { schools, loading: isSchoolsLoading } = useGetSchoolsQuery();
+const { selectedLocation } = useRetailLocationService();
+const { schools, loading: isSchoolsLoading } = useGetSchoolsQuery(() => ({
+  retailLocationId: selectedLocation.value.id,
+}));
 
 const selectedSchoolCodes = ref(
   props.selectedFilters?.selectedSchoolCodes ?? [],
