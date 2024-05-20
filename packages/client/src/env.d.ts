@@ -19,7 +19,5 @@ declare namespace NodeJS {
 
     FACEBOOK_LOGIN_ENABLED: string;
     GOOGLE_LOGIN_ENABLED: string;
-
-    IS_DEMO: string;
   }
 }
