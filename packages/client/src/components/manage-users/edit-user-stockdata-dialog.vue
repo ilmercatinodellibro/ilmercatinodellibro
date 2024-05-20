@@ -55,21 +55,11 @@
             class="col"
           >
             <template #body-cell-author="{ value, col }">
-              <q-td :class="col.classes">
-                <q-tooltip>
-                  {{ value }}
-                </q-tooltip>
-                {{ value }}
-              </q-td>
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
             </template>
 
             <template #body-cell-subject="{ value, col }">
-              <q-td :class="col.classes">
-                <q-tooltip>
-                  {{ value }}
-                </q-tooltip>
-                {{ value }}
-              </q-td>
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
             </template>
 
             <template #body-cell-status="{ value }">
@@ -118,21 +108,11 @@
             class="col"
           >
             <template #body-cell-author="{ value, col }">
-              <q-td :class="col.classes">
-                <q-tooltip>
-                  {{ value }}
-                </q-tooltip>
-                {{ value }}
-              </q-td>
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
             </template>
 
             <template #body-cell-subject="{ value, col }">
-              <q-td :class="col.classes">
-                <q-tooltip>
-                  {{ value }}
-                </q-tooltip>
-                {{ value }}
-              </q-td>
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
             </template>
 
             <template #body-cell-status="{ value }">
@@ -183,6 +163,7 @@ import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
 import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
 import StatusChip from "./status-chip.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 const props = defineProps<{
   userData: CustomerFragment;

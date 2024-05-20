@@ -69,21 +69,11 @@
             </template>
 
             <template #body-cell-author="{ value, col }">
-              <q-td :class="col.classes">
-                <q-tooltip>
-                  {{ value }}
-                </q-tooltip>
-                {{ value }}
-              </q-td>
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
             </template>
 
             <template #body-cell-subject="{ value, col }">
-              <q-td :class="col.classes">
-                <q-tooltip>
-                  {{ value }}
-                </q-tooltip>
-                {{ value }}
-              </q-td>
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
             </template>
 
             <template
@@ -169,6 +159,7 @@ import { useRoute, useRouter } from "vue-router";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
 import { BooksTab } from "src/models/book";

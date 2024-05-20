@@ -1,21 +1,11 @@
 <template>
   <dialog-table :rows="rows" :columns="columns">
     <template #body-cell-author="{ value, col }">
-      <q-td :class="col.classes">
-        <q-tooltip>
-          {{ value }}
-        </q-tooltip>
-        {{ value }}
-      </q-td>
+      <table-cell-with-tooltip :class="col.classes" :value="value" />
     </template>
 
     <template #body-cell-subject="{ value, col }">
-      <q-td :class="col.classes">
-        <q-tooltip>
-          {{ value }}
-        </q-tooltip>
-        {{ value }}
-      </q-td>
+      <table-cell-with-tooltip :class="col.classes" :value="value" />
     </template>
 
     <template #body-cell-request-status="{ value }">
@@ -60,6 +50,7 @@ import { RequestSummaryFragment } from "src/services/request.graphql";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 const { t } = useI18n();
 
 defineProps<
