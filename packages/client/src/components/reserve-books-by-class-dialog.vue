@@ -16,7 +16,19 @@
           {{ $t("reserveBooks.confirmReserveByClassDialog.disclaimer") }}
         </p>
       </q-card-section>
-      <dialog-table :columns="columns" :rows="booksToReserve">
+
+      <dialog-table
+        :columns="columns"
+        :rows="booksToReserve"
+        class="flex-delegate-height-management"
+      >
+        <template #body-cell-author="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
+        <template #body-cell-subject="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
         <template #body-cell-actions="{ row }">
           <q-td>
             <chip-button
@@ -45,6 +57,7 @@ import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import KDialogCard from "./k-dialog-card.vue";
 import chipButton from "./manage-users/chip-button.vue";
 import dialogTable from "./manage-users/dialog-table.vue";
+import TableCellWithTooltip from "./manage-users/table-cell-with-tooltip.vue";
 
 const props = defineProps<{
   classBooks: BookSummaryFragment[];
@@ -70,18 +83,21 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       field: "authorsFullName",
       label: t("book.fields.author"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "subject",
       field: "subject",
       label: t("book.fields.subject"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "title",
       field: "title",
       label: t("book.fields.title"),
       align: "left",
+      classes: "text-wrap",
     },
     {
       name: "availability",
