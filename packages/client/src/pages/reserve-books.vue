@@ -136,11 +136,11 @@ const { userReservations } = useGetReservationsQuery({
 const { useCreateRequestMutation, useGetRequestsQuery } = useRequestService();
 
 const { createBookRequest } = useCreateRequestMutation();
-const { bookRequests } = useGetRequestsQuery(() => ({
+const { bookRequests } = useGetRequestsQuery({
   retailLocationId: selectedLocation.value.id,
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
-}));
+});
 
 const { t } = useI18n();
 
