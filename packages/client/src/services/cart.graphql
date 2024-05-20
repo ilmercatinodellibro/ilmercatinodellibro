@@ -5,7 +5,10 @@ fragment CartSummary on Cart {
 fragment BookWithAvailableCopies on Book {
   ...BookSummary
   copies(isAvailable: true) {
-    ...BookCopySummary
+    ...BookCopyDetails
+    owner {
+      ...UserSummary
+    }
   }
 }
 

@@ -8,7 +8,13 @@ export class UpdateRetailLocationSettingsInput extends IntersectionType(
   LocationBoundInput,
   PickType(
     RetailLocation,
-    ["maxBookingDays", "payOffEnabled", "warehouseMaxBlockSize"],
+    [
+      "maxBookingDays",
+      "payOffEnabled",
+      "warehouseMaxBlockSize",
+      "buyRate",
+      "sellRate",
+    ],
     InputType,
   ),
 ) {}

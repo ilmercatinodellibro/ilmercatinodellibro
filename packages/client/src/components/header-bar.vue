@@ -47,6 +47,7 @@
         :label="t('routesNames.contacts')"
         :to="{ name: AvailableRouteNames.Contacts }"
       />
+      <language-dropdown-btn v-if="!isAuthenticated" />
     </k-toolbar>
   </q-header>
 </template>
@@ -65,6 +66,7 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import kToolbar from "./k-toolbar.vue";
+import LanguageDropdownBtn from "./language-dropdown-btn.vue";
 
 const { isDrawerOpen, showLateralDrawer } = useLateralDrawer();
 const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
@@ -75,7 +77,7 @@ const {
   selectedFilter,
 } = provideHeaderFilters();
 const { headerName } = provideHeaderName();
-const { user } = useAuthService();
+const { user, isAuthenticated } = useAuthService();
 const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 const { t } = useI18n();

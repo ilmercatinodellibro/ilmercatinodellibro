@@ -49,7 +49,6 @@
             :filter="searchQuery"
             :loading="loading"
             :rows="tableRowsByTab[tab]"
-            :rows-per-page-options="[0]"
             class="col q-pt-sm"
           >
             <template v-if="tab === BooksTab.DELIVERED" #header="props">
@@ -67,6 +66,14 @@
                   {{ col.label }}
                 </q-th>
               </q-tr>
+            </template>
+
+            <template #body-cell-author="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
             </template>
 
             <template
@@ -152,7 +159,9 @@ import { useRoute, useRouter } from "vue-router";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { BooksTab } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
@@ -251,6 +260,7 @@ const commonColumns = computed<QTableColumn<TablesRowsTypes>[]>(() => [
     field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
 ]);
 
@@ -279,8 +289,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.receivedAmount"),
         align: "left",
-        // TODO: change price to the right calculation
-        format: formatPrice,
+        format: (val: number) => discountedPrice(val, "buy"),
       },
     ],
     [BooksTab.PURCHASED]: [
@@ -288,11 +297,10 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       coverPriceColumn.value,
       {
         name: "paid-price",
-        // TODO: update to correct field
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.priceYouPaid"),
         align: "left",
-        format: formatPrice,
+        format: (val: number) => discountedPrice(val, "sell"),
       },
     ],
     [BooksTab.REQUESTED]: [
@@ -309,7 +317,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.price"),
         align: "left",
-        format: formatPrice,
+        format: (val: number) => discountedPrice(val, "sell"),
       },
       {
         name: "reserve",
@@ -330,7 +338,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.price"),
         align: "left",
-        format: formatPrice,
+        format: (val: number) => discountedPrice(val, "sell"),
       },
       {
         name: "actions",

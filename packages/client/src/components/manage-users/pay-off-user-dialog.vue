@@ -43,8 +43,6 @@
             // We handle the group header in the #body slot, so it's safe to use a type that is different than the columns definition
             tableRows as readonly BookCopyDetailsFragment[]
           "
-          :rows-per-page-options="[0]"
-          hide-bottom
         >
           <template #header-cell-buy-price>
             <table-header-with-info
@@ -69,7 +67,8 @@
             >
               <q-td auto-width>
                 <q-checkbox
-                  v-if="row.id === Titles.InStock && selectableRows.length > 0"
+                  v-if="row.id === Titles.InStock"
+                  :disable="selectableRows.length === 0"
                   :model-value="rowsSelectionStatus"
                   dense
                   @update:model-value="swapAllRows()"
@@ -133,7 +132,7 @@
             </q-tr>
 
             <q-tr v-else>
-              <q-td v-for="col in cols" :key="col.name">
+              <q-td v-for="col in cols" :key="col.name" :class="col.classes">
                 <!--
                   Since we can't use #body-cell-[column-name] because we're using
                   the #body slot, we have to use v-if on the col.name instead
@@ -202,6 +201,9 @@
                   </q-menu>
                 </q-btn>
                 <span v-else>
+                  <q-tooltip v-if="['subject', 'author'].includes(col.name)">
+                    {{ col.value }}
+                  </q-tooltip>
                   {{ col.value }}
                 </span>
               </q-td>
@@ -235,7 +237,7 @@
 
 <script setup lang="ts">
 import { mdiDotsVertical, mdiInformationOutline } from "@quasar/extras/mdi-v7";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, sumBy } from "lodash-es";
 import {
   Dialog,
   QDialog,
@@ -246,7 +248,8 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { SettleRemainingType } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { getStatus } from "src/helpers/book-copy";
+import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice, getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -259,11 +262,9 @@ import {
   useReportProblemMutation,
   useReturnBookCopyMutation,
 } from "src/services/book-copy.graphql";
+import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import {
-  UserSummaryFragment,
-  useSettleUserMutation,
-} from "src/services/user.graphql";
+import { UserFragment, useSettleUserMutation } from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
@@ -272,7 +273,7 @@ import TableHeaderWithInfo from "./table-header-with-info.vue";
 const { t } = useI18n();
 
 const props = defineProps<{
-  user: UserSummaryFragment;
+  user: UserFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -313,6 +314,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.authorsFullName,
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "publisher",
@@ -325,35 +327,35 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.subject,
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
   {
     name: "cover-price",
     field: ({ book }) => book.originalPrice,
     label: t("book.fields.price"),
     align: "left",
-    format: (val: number) => `${val.toFixed(2)} €`,
+    format: formatPrice,
   },
   {
     name: "buy-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: ({ book }) => book.originalPrice,
     label: t("manageUsers.payOffUserDialog.buyPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "buy"),
   },
   {
     name: "public-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: ({ book }) => book.originalPrice,
     label: t("manageUsers.payOffUserDialog.publicPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "sell"),
   },
   {
     name: "actions",
@@ -382,16 +384,31 @@ const {
   retailLocationId: selectedLocation.value.id,
 }));
 
-const {
-  soldBookCopies: soldCopies,
-  loading: soldLoading,
-  // refetch: refetchSoldBookCopies,
-} = useGetSoldBookCopiesQuery(() => ({
-  userId: props.user.id,
-  retailLocationId: selectedLocation.value.id,
-}));
-const totalCheckoutMoney = ref(0);
-const totalCheckedOutMoney = ref(0);
+const { soldBookCopies: soldCopies, loading: soldLoading } =
+  useGetSoldBookCopiesQuery(() => ({
+    userId: props.user.id,
+    retailLocationId: selectedLocation.value.id,
+  }));
+
+const getSettledOrToSettleCopiesPriceSum = (
+  settledAt: number | null | undefined,
+  book: BookSummaryFragment,
+  settled: boolean,
+) =>
+  (settled ? settledAt : !settledAt)
+    ? (book.originalPrice * selectedLocation.value.buyRate) / 100
+    : 0;
+
+const totalCheckoutMoney = computed(() =>
+  sumBy(ownedCopies.value, ({ settledAt, book }) =>
+    getSettledOrToSettleCopiesPriceSum(settledAt, book, false),
+  ),
+);
+const totalCheckedOutMoney = computed(() =>
+  sumBy(returnedCopies.value, ({ settledAt, book }) =>
+    getSettledOrToSettleCopiesPriceSum(settledAt, book, true),
+  ),
+);
 
 const bookLoading = computed(
   () => ownedLoading.value || returnedLoading.value || soldLoading.value,
@@ -665,6 +682,8 @@ function returnAllBooks(remainingType: SettleRemainingType) {
         }`,
       ),
       booksSoldToOthers: soldCopies.value.length,
+      totalCheckoutMoney: totalCheckoutMoney.value,
+      totalCheckedOutMoney: totalCheckedOutMoney.value,
     },
   }).onOk(async () => {
     try {
@@ -677,8 +696,10 @@ function returnAllBooks(remainingType: SettleRemainingType) {
       });
     } catch {
       notifyError(t("common.genericErrorMessage"));
+    } finally {
+      await Promise.all([refetchBookCopiesByOwner, refetchReturnedBookCopes]);
+      onDialogOK();
     }
-    onDialogOK();
   });
 }
 </script>

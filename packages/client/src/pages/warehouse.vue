@@ -7,56 +7,19 @@
       >
         <template #side-actions>
           <q-btn
-            v-if="screenWidth === WidthSize.SM"
-            :icon="mdiDotsVertical"
-            color="black-54"
-            round
-            flat
-          >
-            <q-menu>
-              <q-item clickable @click="swapView()">
-                <q-item-section>
-                  <q-item-label>
-                    {{
-                      t(
-                        `warehouse.${isSortedByCopyCode ? "sortByISBN" : "sortByCopyCode"}`,
-                      )
-                    }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-
-              <q-item clickable @click="checkOtherWarehouse()">
-                <q-item-section>
-                  <q-item-label>
-                    {{ t("warehouse.checkOtherWarehouse", [otherCityName]) }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-menu>
-          </q-btn>
-
-          <template v-else>
-            <q-btn
-              :icon="mdiSort"
-              :label="
-                t(
-                  `warehouse.${isSortedByCopyCode ? 'sortByISBN' : 'sortByCopyCode'}`,
-                )
-              "
-              no-wrap
-              outline
-              @click="swapView()"
-            />
-            <q-btn
-              :icon-right="mdiArrowRight"
-              :label="t('warehouse.checkOtherWarehouse', [otherCityName])"
-              color="accent"
-              no-wrap
-              @click="checkOtherWarehouse()"
-            />
-          </template>
+            :icon="mdiSort"
+            :label="
+              t(
+                `warehouse.${isSortedByCopyCode ? 'sortByISBN' : 'sortByCopyCode'}`,
+              )
+            "
+            no-wrap
+            outline
+            @click="swapView()"
+          />
         </template>
+
+        <!-- TODO: add a button to check the other warehouse out -->
       </header-search-bar-filters>
 
       <dialog-table
@@ -100,9 +63,9 @@
             </q-td>
 
             <q-td
-              v-for="{ name, field, align } in columns"
+              v-for="{ name, field, align, classes } in columns"
               :key="name"
-              :class="align ? `text-${align}` : 'text-left'"
+              :class="[align ? `text-${align}` : 'text-left', classes]"
               :colspan="name === 'title' ? 2 : 1"
               auto-width
             >
@@ -116,6 +79,9 @@
                     'text-underline': name === 'available-copies',
                   }"
                 >
+                  <q-tooltip v-if="['subject', 'author'].includes(name)">
+                    {{ getFieldValue(field, props.row) }}
+                  </q-tooltip>
                   {{ getFieldValue(field, props.row) }}
                 </span>
               </template>
@@ -126,6 +92,7 @@
             <book-copy-details-table
               :book-copy-columns="bookCopyColumns"
               :book-id="props.row.id"
+              :show-only-available="booleanFilters?.isAvailable"
               @open-history="(bookCopy) => openHistory(bookCopy)"
               @update-problems="refetchBooks()"
             />
@@ -174,10 +141,8 @@
 
 <script setup lang="ts">
 import {
-  mdiArrowRight,
   mdiChevronDown,
   mdiChevronUp,
-  mdiDotsVertical,
   mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
@@ -192,7 +157,6 @@ import ProblemsHistoryDialog from "src/components/manage-users/problems-history-
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
-import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { getFieldValue } from "src/helpers/table-helpers";
 import {
   BookCopyDetailsFragment,
@@ -202,7 +166,7 @@ import { useGetBooksWithAvailableCopiesQuery } from "src/services/book.graphql";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
-const { selectedLocation, retailLocations } = useRetailLocationService();
+const { selectedLocation } = useRetailLocationService();
 
 const booksPage = ref(0);
 const copyPage = ref(0);
@@ -232,17 +196,17 @@ const {
 
 const { t } = useI18n();
 
-// Setting this so that the side buttons don't overflow to two rows when the screen
-// is below the minimum width to hold them in a single row
-const smallScreenBreakpoint = 1802;
-const screenWidth = useScreenWidth(smallScreenBreakpoint);
-
 const isSortedByCopyCode = ref(false);
 
 const tableRef = ref<QTable>();
 
-const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
-  useTableFilters("warehouse.filters", true);
+const {
+  refetchFilterProxy,
+  filterOptions,
+  tableFilter,
+  filterMethod,
+  booleanFilters,
+} = useTableFilters("warehouse.filters", true);
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [
@@ -257,12 +221,14 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       field: "authorsFullName",
       label: t("book.fields.author"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "subject",
       field: "subject",
       label: t("book.fields.subject"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "status",
@@ -281,6 +247,7 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       field: "title",
       label: t("book.fields.title"),
       align: "left",
+      classes: "text-wrap",
     },
     {
       name: "problems",
@@ -367,7 +334,7 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
-    filter: refetchFilterProxy.value,
+    filter: { ...refetchFilterProxy.value, isAvailable: true },
   });
 
   booksPagination.value.rowsNumber = books.value?.rowsCount;
@@ -394,15 +361,6 @@ const onCopyRequest: QTableProps["onRequest"] = async ({
   copyLoading.value = false;
 };
 
-// We know that there are only two retail locations in the array,
-// so we filter out the currently selected one
-const otherCityName = computed(
-  () =>
-    retailLocations.value.filter(
-      (location) => location.id !== selectedLocation.value.id,
-    )[0]?.name,
-);
-
 function swapView() {
   isSortedByCopyCode.value = !isSortedByCopyCode.value;
 
@@ -418,10 +376,6 @@ function swapView() {
   } else {
     booksPage.value = 0;
   }
-}
-
-function checkOtherWarehouse() {
-  // FIXME: check other warehouse
 }
 
 function openHistory(bookCopy: BookCopyDetailsFragment) {

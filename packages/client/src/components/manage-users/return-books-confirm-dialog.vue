@@ -36,12 +36,23 @@
       <span class="bg-grey-1 height-48 q-pa-md text-size-13 text-weight-medium">
         {{ tableTitle }}
       </span>
+
       <q-separator />
+
       <dialog-table
         :columns="columns"
         :rows="booksToReturn"
-        :rows-per-page-options="[0]"
-      />
+        class="flex-delegate-height-management"
+      >
+        <template #body-cell-author="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
+        <template #body-cell-subject="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+      </dialog-table>
+
       <template #card-actions>
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn :label="saveLabel" color="positive" @click="onDialogOK()" />
@@ -52,11 +63,12 @@
 
 <script setup lang="ts">
 import { QTableColumn, useDialogPluginComponent } from "quasar";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 defineProps<{
   booksToReturn: BookCopyDetailsFragment[];
@@ -65,6 +77,8 @@ defineProps<{
   tableTitle: string;
   title: string;
   booksSoldToOthers: number;
+  totalCheckoutMoney: number;
+  totalCheckedOutMoney: number;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -73,9 +87,6 @@ const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
 
 const { t } = useI18n();
-
-const totalCheckoutMoney = ref(0);
-const totalCheckedOutMoney = ref(0);
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
@@ -95,6 +106,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.authorsFullName,
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "publisher",
@@ -107,12 +119,14 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.subject,
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
 ]);
 </script>

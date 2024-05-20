@@ -4,31 +4,24 @@
       :title="t('sidebar.settings')"
       actions-padding
       size="fullscreen"
-      @submit="
-        onDialogOK({
-          type: 'save',
-          settings: newSettings,
-        })
-      "
+      @submit="validateSettings()"
     >
       <q-card-section
         class="column gap-4 no-wrap q-pb-xs q-pt-lg q-px-lg width-700"
       >
         <q-input
-          v-model.number="purchaseRate"
+          v-model.number="newSettings.buyRate"
           :label="t('general.settings.purchaseRate')"
           bottom-slots
           outlined
-          readonly
           suffix="%"
           type="number"
         />
         <q-input
-          v-model.number="saleRate"
+          v-model.number="newSettings.sellRate"
           :label="t('general.settings.saleRate')"
           bottom-slots
           outlined
-          readonly
           suffix="%"
           type="number"
         />
@@ -69,6 +62,7 @@
         <q-space />
 
         <q-btn :label="t('common.cancel')" flat @click="onDialogCancel()" />
+
         <q-btn
           :form="uniqueFormId"
           :label="t('common.save')"
@@ -90,9 +84,10 @@ import {
   allowOnlyIntegerNumbers,
   greaterThanZeroRule,
 } from "src/helpers/rules";
-import { Settings, SettingsUpdate, SettingsUpdateInput } from "src/models/book";
+import { SettingsUpdate } from "src/models/book";
+import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
 
-const props = defineProps<Settings>();
+const props = defineProps<Omit<RetailLocationSettingsFragment, "__typename">>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
@@ -101,14 +96,36 @@ const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
 
 const { t } = useI18n();
 
-const newSettings = reactive<SettingsUpdateInput>({
+const newSettings = reactive<RetailLocationSettingsFragment>({
   maxBookingDays: props.maxBookingDays,
   payOffEnabled: props.payOffEnabled,
   warehouseMaxBlockSize: props.warehouseMaxBlockSize,
+  buyRate: props.buyRate,
+  sellRate: props.sellRate,
 });
 
-const purchaseRate = props.buyRate;
-const saleRate = props.sellRate;
+function validateSettings() {
+  const settingsUpdate = {
+    type: "save" as const,
+    settings: newSettings,
+  };
+
+  if (
+    newSettings.buyRate !== props.buyRate ||
+    newSettings.sellRate !== props.sellRate
+  ) {
+    Dialog.create({
+      title: t("general.settings.updateRatesConfirmTitle"),
+      message: t("general.settings.updateRatesConfirmMessage"),
+      ok: t("actions.update"),
+      cancel: t("common.cancel"),
+    }).onOk(() => {
+      onDialogOK(settingsUpdate);
+    });
+  } else {
+    onDialogOK(settingsUpdate);
+  }
+}
 
 function confirmReset() {
   Dialog.create({

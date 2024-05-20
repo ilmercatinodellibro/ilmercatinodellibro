@@ -44,6 +44,14 @@
         class="col"
         @request="onRequest"
       >
+        <template #body-cell-author="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
+        <template #body-cell-subject="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
         <template #body-cell-availability="{ value }">
           <q-td>
             <status-chip :value="value" />
@@ -71,8 +79,10 @@ import CardTableHeader from "src/components/manage-users/card-table-header.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { BooksTab, CourseDetails } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
@@ -123,18 +133,21 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       field: "authorsFullName",
       label: t("book.fields.author"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "subject",
       field: "subject",
       label: t("book.fields.subject"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "title",
       field: "title",
       label: t("book.fields.title"),
       align: "left",
+      classes: "text-wrap",
     },
     {
       name: "availability",
@@ -152,11 +165,10 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
     },
     {
       name: "price",
-      // TODO: add correct calculation
-      field: ({ originalPrice }) => originalPrice,
+      field: "originalPrice",
       label: t("book.fields.price"),
       align: "left",
-      format: formatPrice,
+      format: (val: number) => discountedPrice(val, "sell"),
     },
     {
       name: "available-copies",

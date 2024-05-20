@@ -13,11 +13,20 @@
         :rows="soldBookCopies as readonly SoldBookCopy[]"
         class="flex-delegate-height-management"
       >
+        <template #body-cell-author="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
+        <template #body-cell-subject="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
         <template #body-cell-problems="{ row }">
           <q-td class="text-center">
             <problems-button :book-copy="row" />
           </q-td>
         </template>
+
         <template #body-cell-history="{ row }">
           <q-td class="text-center">
             <q-btn
@@ -38,6 +47,14 @@
         :rows="purchasedBookCopies as readonly SoldBookCopy[]"
         class="flex-delegate-height-management"
       >
+        <template #body-cell-author="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
+        <template #body-cell-subject="{ value, col }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
         <template #body-cell-return="{ row }">
           <q-td class="text-center">
             <chip-button
@@ -77,6 +94,7 @@ import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsHistoryDialog from "./problems-history-dialog.vue";
 import ReturnBookDialog from "./return-book-dialog.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 // sold and purchased means the same thing, it's just a different perspective depending on which side the user is
 type SoldBookCopy = BookCopyDetailsFragment & {
@@ -133,18 +151,21 @@ const bookMiddleInfoColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     field: ({ book }) => book.authorsFullName,
     name: "author",
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     label: t("book.fields.subject"),
     field: ({ book }) => book.subject,
     name: "subject",
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     label: t("book.fields.title"),
     field: ({ book }) => book.title,
     name: "title",
     align: "left",
+    classes: "text-wrap",
   },
   {
     label: t("book.fields.publisher"),
@@ -172,7 +193,7 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     field: "originalCode",
     name: "original-code",
     align: "left",
-    format: (val: string) => (val === "" ? "/" : val),
+    format: (val?: string) => val ?? "/",
   },
   ...bookMiddleInfoColumns.value,
   // TODO: not in the mockups, but should we add the date? (as an alternative to opening the history)

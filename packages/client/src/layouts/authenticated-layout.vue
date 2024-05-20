@@ -408,11 +408,15 @@ import {
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
-import { Settings, SettingsUpdate } from "src/models/book";
+import { SettingsUpdate } from "src/models/book";
+import { languages } from "src/models/language";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
-import { useUpdateRetailLocationSettingsMutation } from "src/services/retail-location.graphql";
+import {
+  RetailLocationSettingsFragment,
+  useUpdateRetailLocationSettingsMutation,
+} from "src/services/retail-location.graphql";
 import {
   UserFragmentDoc,
   useUpdateUserMutation,
@@ -430,23 +434,7 @@ const TOOLTIP_SHARED_PROPS: QTooltipProps = {
 
 const { t, locale } = useI18n();
 
-interface Language {
-  code: string;
-  label: string;
-}
-
 const { theme } = useTheme();
-
-const languages = [
-  {
-    code: "en-US" as const,
-    label: "English",
-  },
-  {
-    code: "it" as const,
-    label: "Italiano",
-  },
-] satisfies Language[];
 
 const isOnline = useOnline();
 watch(isOnline, (becomeOnline) => {
@@ -490,7 +478,7 @@ function openSettings() {
       maxBookingDays: selectedLocation.value.maxBookingDays,
       sellRate: selectedLocation.value.sellRate,
       payOffEnabled: selectedLocation.value.payOffEnabled,
-    } satisfies Settings,
+    } satisfies RetailLocationSettingsFragment,
   }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
       try {

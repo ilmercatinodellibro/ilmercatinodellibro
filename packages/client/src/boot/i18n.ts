@@ -25,7 +25,7 @@ declare module "vue-i18n" {
 
 // This breaks SSR
 const i18n = createI18n<[MessageSchema], MessageLanguages, false>({
-  locale: "en-US",
+  locale: "it",
   fallbackLocale: "en-US",
   legacy: false,
   messages,

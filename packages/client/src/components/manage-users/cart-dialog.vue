@@ -37,16 +37,15 @@
         :columns="columns"
         :loading="loading"
         :rows="cartBooks"
-        :rows-per-page-options="[0]"
         class="flex-delegate-height-management"
         row-key="id"
       >
         <template #body="bodyProps">
           <q-tr>
             <q-td
-              v-for="{ name, value } in bodyProps.cols"
+              v-for="{ name, value, classes } in bodyProps.cols"
               :key="name"
-              auto-width
+              :class="classes"
             >
               <q-btn
                 v-if="name === 'selection'"
@@ -64,6 +63,9 @@
                 @click="removeBook(bodyProps.row)"
               />
               <span v-else>
+                <q-tooltip v-if="['subject', 'author'].includes(name)">
+                  {{ value }}
+                </q-tooltip>
                 {{ value }}
               </span>
             </q-td>
@@ -129,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { isApolloError } from "@apollo/client";
+import { ApolloCache, isApolloError } from "@apollo/client";
 import {
   mdiChevronDown,
   mdiChevronUp,
@@ -147,12 +149,17 @@ import {
 } from "quasar";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { evictQuery } from "src/apollo/cache";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
+import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
+import { GetBookCopiesByOwnerDocument } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
-import { useRequestService } from "src/services/request";
-import { useReservationService } from "src/services/reservation";
+import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
+import { GetRequestsDocument } from "src/services/request.graphql";
+import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
@@ -188,6 +195,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     field: "authorsFullName",
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "publisher",
@@ -200,35 +208,35 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     field: "subject",
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: "title",
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
   {
     name: "cover-price",
     field: "originalPrice",
     label: t("book.fields.price"),
     align: "left",
-    format: (val: number) => `${val.toFixed(2)} €`,
+    format: formatPrice,
   },
   {
     name: "buy-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: "originalPrice",
     label: t("manageUsers.payOffUserDialog.buyPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "buy"),
   },
   {
     name: "public-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: "originalPrice",
     label: t("manageUsers.payOffUserDialog.publicPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "sell"),
   },
   {
     name: "delete",
@@ -237,7 +245,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
-const cartBooks = ref<BookSummaryFragment[]>([]);
+const cartBooks = ref<BookWithAvailableCopiesFragment[]>([]);
 const selectedBookCopies = ref<Record<string, string>>({});
 const cartId = ref<string>();
 
@@ -247,14 +255,30 @@ const timeUntilEmpty = computed(() => {
 });
 
 const discountValue = computed(() =>
-  // FIXME: add actual discount calculation logic
-  props.user.discount ? "1.00" : "0.00",
+  props.user.discount
+    ? sumBy(
+        cartBooks.value,
+        ({ originalPrice }) =>
+          (originalPrice * retailLocation.value.sellRate -
+            originalPrice * retailLocation.value.buyRate) /
+          100,
+      )
+    : 0,
 );
 const totalBooksPrice = computed(() =>
   sumBy(Object.keys(selectedBookCopies.value), (bookId) => {
     const book = cartBooks.value.find(({ id }) => id === bookId);
-    return book?.originalPrice ?? 0;
-  }).toFixed(2),
+    if (!book) {
+      return 0;
+    }
+    return (
+      (book.originalPrice *
+        (props.user.discount
+          ? retailLocation.value.buyRate
+          : retailLocation.value.sellRate)) /
+      100
+    );
+  }),
 );
 
 const {
@@ -334,18 +358,21 @@ async function addBookToCart(fromBookIsbn?: string) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function evictRequestsReservationsQueries(cache: ApolloCache<any>) {
+  evictQuery(cache, GetReservationsDocument, {
+    retailLocationId: retailLocation.value.id,
+    userId: props.user.id,
+  });
+  evictQuery(cache, GetRequestsDocument, {
+    retailLocationId: retailLocation.value.id,
+    userId: props.user.id,
+  });
+  cache.gc();
+}
+
 const { removeFromCart, loading: removeBookLoading } =
   useRemoveFromCartMutation();
-const { useGetReservationsQuery } = useReservationService();
-const { refetch: refetchReservations } = useGetReservationsQuery({
-  retailLocationId: retailLocation.value.id,
-  userId: props.user.id,
-});
-const { useGetRequestsQuery } = useRequestService();
-const { refetch: refetchRequests } = useGetRequestsQuery({
-  retailLocationId: retailLocation.value.id,
-  userId: props.user.id,
-});
 async function removeBook(book: BookSummaryFragment) {
   const bookIndex = cartBooks.value.findIndex(({ id }) => book.id === id);
 
@@ -355,7 +382,7 @@ async function removeBook(book: BookSummaryFragment) {
   }
 
   try {
-    await removeFromCart({
+    const { cache } = await removeFromCart({
       input: {
         bookId: book.id,
         cartId: cartId.value,
@@ -371,7 +398,7 @@ async function removeBook(book: BookSummaryFragment) {
       selectedBookCopies.value = currentlySelectedCopies;
     }
 
-    await Promise.all([refetchReservations(), refetchRequests()]);
+    evictRequestsReservationsQueries(cache);
   } catch {
     notifyError(t("bookErrors.notCartBookDeleted"));
   }
@@ -394,15 +421,16 @@ function emptyAndDestroyCart() {
     }
 
     try {
-      await deleteCart({
+      const { cache } = await deleteCart({
         input: {
           cartId: cartId.value,
         },
       });
+
+      evictRequestsReservationsQueries(cache);
     } catch {
       notifyError(t("bookErrors.notCartDeleted"));
     } finally {
-      await Promise.all([refetchReservations(), refetchRequests()]);
       onDialogHide();
     }
   });
@@ -433,26 +461,41 @@ function sellBooks() {
 
     try {
       loading.value = true;
-      await finalizeCart({
+
+      const { cache } = await finalizeCart({
         input: {
           cartId: cartId.value,
           bookCopyIds: bookAndCopies.map(
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            ([_, selectedBookCopyId]) => selectedBookCopyId,
+            ([, selectedBookCopyId]) => selectedBookCopyId,
           ),
         },
       });
+      const ownersToUpdate = cartBooks.value.map(
+        ({ copies }) =>
+          copies?.find(
+            ({ book, id }) => selectedBookCopies.value[book.id] === id,
+          )?.owner,
+      );
+      ownersToUpdate.forEach((user) => {
+        if (user) {
+          evictQuery(cache, GetBookCopiesByOwnerDocument, {
+            retailLocationId: retailLocation.value.id,
+            userId: user.id,
+          });
+        }
+      });
 
+      evictRequestsReservationsQueries(cache);
+    } catch {
+      notifyError(t("bookErrors.notSell"));
+    } finally {
       loading.value = false;
 
       Notify.create({
         type: "positive",
         message: "Libri venduti con successo.",
       });
-
       onDialogHide();
-    } catch {
-      notifyError(t("bookErrors.notSell"));
     }
   });
 }

@@ -32,6 +32,7 @@ export default {
       "Il numero di titoli attualmente disponibili tra quelli richiesti dall'utente",
   },
   payOff: "Liquida utente",
+  payOffDisabled: "Le liquidazioni al momento sono disabilitate.",
   filters: {
     withAvailable: "Con Disponibili",
     withRequested: "Con Richiesti",
@@ -55,8 +56,6 @@ export default {
     deleteBookBtnTooltip: "Elimina definitivamente questa copia dal database",
     errors: {
       noBook: "Non è stato trovato nessun libro con ISBN {0}",
-      tooManyCopies:
-        "Non è possibile accettare più di una copia dello stesso libro",
       retrieval: "C'è stato un errore nel ritiro dei libri",
     },
   },

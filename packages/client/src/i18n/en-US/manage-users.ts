@@ -32,6 +32,7 @@ export default {
       "The number of titles currently available among those requested by the user",
   },
   payOff: "Pay off user",
+  payOffDisabled: "User payoffs are currently disabled.",
   filters: {
     withAvailable: "With Available",
     withRequested: "With Requested",
@@ -55,7 +56,6 @@ export default {
     deleteBookBtnTooltip: "Delete permanently this copy from the database",
     errors: {
       noBook: "No book with the ISBN {0} was found",
-      tooManyCopies: "Cannot accept more than one copy of the same book",
       retrieval: "There was an error during the retrieval of the books",
     },
   },

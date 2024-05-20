@@ -178,6 +178,10 @@ $heights-list: 0, 24, 48, 52, 400, 600;
   white-space: pre-wrap;
 }
 
+.text-wrap {
+  white-space: wrap !important;
+}
+
 .sticky {
   position: sticky;
 

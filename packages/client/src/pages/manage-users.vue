@@ -181,9 +181,14 @@
             <q-td>
               <chip-button
                 color="primary"
+                :disabled="!selectedLocation.payOffEnabled"
                 :label="$t('manageUsers.payOff')"
                 @click="openPayOff(row)"
-              />
+              >
+                <q-tooltip v-if="!selectedLocation.payOffEnabled">
+                  {{ t("manageUsers.payOffDisabled") }}
+                </q-tooltip>
+              </chip-button>
             </q-td>
           </template>
         </q-table>
@@ -289,12 +294,14 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     field: "firstname",
     label: t("manageUsers.fields.firstName"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "last-name",
     field: "lastname",
     label: t("manageUsers.fields.lastName"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "phone-number",

@@ -5,6 +5,7 @@ import { LocalStorage } from "quasar";
 import { computed, readonly, ref, watch } from "vue";
 import { NavigationGuard, Router, useRouter } from "vue-router";
 import { UpdateUserPayload } from "src/@generated/graphql";
+import { MessageLanguages, STORAGE_LOCALE_KEY } from "src/boot/i18n";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
@@ -211,8 +212,12 @@ export function useLogoutMutation(router = useRouter()) {
     }
     token.value = undefined;
     user.value = undefined;
-    // Wipe out the storage completely to avoid user data being leaked (settings, etc)
+    // Wipe out the storage completely to avoid user data being leaked (settings, etc), only keep the locale
+    const locale = LocalStorage.getItem<MessageLanguages>(STORAGE_LOCALE_KEY);
     LocalStorage.clear();
+    if (locale) {
+      LocalStorage.set(STORAGE_LOCALE_KEY, locale);
+    }
     void client.clearStore();
     if (selectedLocationId.value) {
       void router.push({

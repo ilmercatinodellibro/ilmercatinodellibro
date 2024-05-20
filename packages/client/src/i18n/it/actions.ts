@@ -17,4 +17,5 @@ export default {
   selectAtLeastOneOption: "Seleziona almeno una opzione",
   editName: "Modifica Nome",
   selectFeedbackType: "Seleziona il tipo di feedback",
+  update: "Aggiorna",
 };

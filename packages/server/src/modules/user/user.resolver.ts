@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  NotAcceptableException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import {
@@ -380,6 +381,7 @@ export class UserResolver {
         "Confirmation password doesn't match with provided password!",
       );
     }
+    // TODO: require delegate full name when the user is a minor
 
     const userIsAdmin = await this.authService.userIsAdmin(
       currentUser.id,
@@ -428,6 +430,17 @@ export class UserResolver {
     ) {
       throw new UnprocessableEntityException(
         "Confirmation password doesn't match with provided password!",
+      );
+    }
+    if (
+      payloadRest.dateOfBirth &&
+      new Date().getUTCFullYear() -
+        new Date(payloadRest.dateOfBirth).getUTCFullYear() <
+        18 &&
+      (!payloadRest.delegate || payloadRest.delegate.length === 0)
+    ) {
+      throw new UnprocessableEntityException(
+        "Trying to register a user which is a minor, but not providing an adult delegate for the user.",
       );
     }
     const userIsAdmin = await this.authService.userIsAdmin(
@@ -541,6 +554,22 @@ export class UserResolver {
       retailLocationId,
       message: "You are not allowed to settle users.",
     });
+
+    const { payOffEnabled } =
+      await this.prisma.retailLocation.findUniqueOrThrow({
+        where: {
+          id: retailLocationId,
+        },
+        select: {
+          payOffEnabled: true,
+        },
+      });
+
+    if (!payOffEnabled) {
+      throw new NotAcceptableException(
+        "Cannot settle users at the current time: settlement for this retail location is disabled",
+      );
+    }
 
     await this.prisma.$transaction(async (prisma) => {
       const bookCopies = await prisma.bookCopy.findMany({

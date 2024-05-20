@@ -1,8 +1,5 @@
-import {
-  BookQueryFilter,
-  UpdateRetailLocationSettingsInput,
-} from "src/@generated/graphql";
-import { RetailLocationFragment } from "src/services/retail-location.graphql";
+import { BookQueryFilter } from "src/@generated/graphql";
+import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
 
 export const enum BookCopyStatuses {
   LOST = "lost",
@@ -49,17 +46,9 @@ export enum BooksTab {
   PURCHASED = "purchased",
 }
 
-export type SettingsUpdateInput = Omit<
-  UpdateRetailLocationSettingsInput,
-  "retailLocationId"
->;
-
-export type Settings = Pick<RetailLocationFragment, "buyRate" | "sellRate"> &
-  SettingsUpdateInput;
-
 export type SettingsUpdate =
   | {
       type: "save";
-      settings: SettingsUpdateInput;
+      settings: RetailLocationSettingsFragment;
     }
   | { type: "reset" };

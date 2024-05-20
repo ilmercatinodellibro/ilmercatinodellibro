@@ -2,6 +2,7 @@
   <q-dialog
     ref="dialogRef"
     :persistent="tab === 'in-retrieval' && booksToRegister.length > 0"
+    full-width
     @hide="onDialogHide"
   >
     <k-dialog-card
@@ -54,6 +55,14 @@
             :loading="loading"
             class="col"
           >
+            <template #body-cell-author="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
             <template #body-cell-status="{ value }">
               <q-td>
                 <status-chip :value="value" />
@@ -97,9 +106,16 @@
             :rows="copiesInStock.filter(({ donatedAt }) => donatedAt === null)"
             :columns="copiesInStockColumns"
             :loading="inStockLoading"
-            :rows-per-page-options="[0]"
             class="col"
           >
+            <template #body-cell-author="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
             <template #body-cell-status="{ value }">
               <q-td>
                 <status-chip :value="value" />
@@ -125,7 +141,7 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
-import { isAvailable } from "src/helpers/book-copy";
+import { discountedPrice, isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
@@ -148,6 +164,7 @@ import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
 import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
 import StatusChip from "./status-chip.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 const props = defineProps<{
   userData: CustomerFragment;
@@ -201,6 +218,7 @@ function getCommonColumns<
       name: "title",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "text-wrap",
     },
     {
       label: t("book.fields.publisher"),
@@ -215,7 +233,7 @@ function getCommonColumns<
       name: "price",
       headerClasses: "text-center",
       align: "left",
-      format: (val: number) => `${val.toFixed(2)} €`,
+      format: (val: number) => discountedPrice(val, "sell"),
     },
     {
       label: t("book.fields.utility"),
@@ -241,6 +259,7 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       name: "author",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.subject"),
@@ -248,6 +267,7 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       name: "subject",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.status"),
@@ -286,6 +306,7 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       field: "originalCode",
       name: "original-code",
       align: "left",
+      format: (code?: string) => code ?? "/",
     },
     {
       label: t("book.fields.author"),
@@ -293,6 +314,7 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       name: "author",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.subject"),
@@ -300,12 +322,14 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       name: "subject",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.status"),
       field: isAvailable,
       name: "status",
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
 
     ...getCommonColumns("copy"),
@@ -313,12 +337,6 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
 );
 
 async function addBookToBeRegistered(bookISBN: string) {
-  if (
-    booksToRegister.value.map(({ isbnCode }) => isbnCode).includes(bookISBN)
-  ) {
-    notifyError(t("manageUsers.inStockDialog.errors.tooManyCopies"));
-    return;
-  }
   const book = await fetchBookByISBN(bookISBN);
   if (!book) {
     notifyError(t("manageUsers.inStockDialog.errors.noBook", [bookISBN]));
