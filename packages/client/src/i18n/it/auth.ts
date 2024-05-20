@@ -12,7 +12,7 @@ export default {
   lastName: "Cognome",
   forgotPassword: "Ho dimenticato la mia password",
   noWorries:
-    "Nessun problema, ci siamo passati tutti. Inserisci gentilmente la tua email e facciamo Far pagare!",
+    "Nessun problema, ci siamo passati tutti. Inserisci gentilmente la tua email e facciamoci far pagare!",
   checkInbox:
     "Se quell'indirizzo e-mail è nel nostro database, riceverai un'e-mail per reimpostare la password. Puoi chiudere questa scheda ora!",
   resetPassword: "Resettare password",
