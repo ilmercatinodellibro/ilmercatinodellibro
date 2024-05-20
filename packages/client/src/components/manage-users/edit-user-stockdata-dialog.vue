@@ -2,6 +2,7 @@
   <q-dialog
     ref="dialogRef"
     :persistent="tab === 'in-retrieval' && booksToRegister.length > 0"
+    full-width
     @hide="onDialogHide"
   >
     <k-dialog-card
