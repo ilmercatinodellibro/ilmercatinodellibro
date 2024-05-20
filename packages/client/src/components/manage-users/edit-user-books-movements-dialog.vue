@@ -94,7 +94,7 @@ import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsHistoryDialog from "./problems-history-dialog.vue";
 import ReturnBookDialog from "./return-book-dialog.vue";
-import tableCellWithTooltip from "./table-cell-with-tooltip.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 // sold and purchased means the same thing, it's just a different perspective depending on which side the user is
 type SoldBookCopy = BookCopyDetailsFragment & {

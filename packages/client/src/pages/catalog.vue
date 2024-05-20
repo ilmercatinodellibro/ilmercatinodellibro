@@ -63,7 +63,7 @@ import { BookCreateInput } from "src/@generated/graphql";
 import AddBookDialog from "src/components/add-book-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
-import tableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";

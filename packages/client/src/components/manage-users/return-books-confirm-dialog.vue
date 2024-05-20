@@ -68,7 +68,7 @@ import { useI18n } from "vue-i18n";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
-import tableCellWithTooltip from "./table-cell-with-tooltip.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 defineProps<{
   booksToReturn: BookCopyDetailsFragment[];

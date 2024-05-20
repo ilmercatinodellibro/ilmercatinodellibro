@@ -79,6 +79,7 @@ import CardTableHeader from "src/components/manage-users/card-table-header.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
@@ -91,7 +92,6 @@ import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
 import { useReservationService } from "src/services/reservation";
 import { useRetailLocationService } from "src/services/retail-location";
-import tableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 const { user } = useAuthService();
 const { selectedLocation } = useRetailLocationService();
