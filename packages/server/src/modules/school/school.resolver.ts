@@ -16,6 +16,9 @@ export class SchoolResolver {
       where: {
         provinceCode: retailLocationId.toLocaleUpperCase(),
       },
+      orderBy: {
+        name: "asc",
+      },
     });
   }
 
@@ -25,6 +28,9 @@ export class SchoolResolver {
       where: { schoolCode: { in: schoolCodes } },
       include: {
         school: true,
+      },
+      orderBy: {
+        grade: "asc",
       },
     });
   }
