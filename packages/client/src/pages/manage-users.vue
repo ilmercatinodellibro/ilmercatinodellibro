@@ -181,9 +181,14 @@
             <q-td>
               <chip-button
                 color="primary"
+                :disabled="!selectedLocation.payOffEnabled"
                 :label="$t('manageUsers.payOff')"
                 @click="openPayOff(row)"
-              />
+              >
+                <q-tooltip v-if="!selectedLocation.payOffEnabled">
+                  {{ t("manageUsers.payOffDisabled") }}
+                </q-tooltip>
+              </chip-button>
             </q-td>
           </template>
         </q-table>

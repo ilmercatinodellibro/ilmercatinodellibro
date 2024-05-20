@@ -32,6 +32,7 @@ export default {
       "Il numero di titoli attualmente disponibili tra quelli richiesti dall'utente",
   },
   payOff: "Liquida utente",
+  payOffDisabled: "Le liquidazioni al momento sono disabilitate.",
   filters: {
     withAvailable: "Con Disponibili",
     withRequested: "Con Richiesti",
