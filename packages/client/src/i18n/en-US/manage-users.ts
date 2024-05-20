@@ -199,7 +199,7 @@ export default {
     type: {
       // REQUEST: "Request | Requests",
       PURCHASE: "Purchase | Purchases",
-      REGISTRATION: "Registration | Registrations",
+      WITHDRAWAL: "Withdrawal | Withdrawals",
     } satisfies Record<ReceiptType, string>,
     noRegistration: "There are no withdrawal receipts",
     noPurchase: "There are no purchase receipts",

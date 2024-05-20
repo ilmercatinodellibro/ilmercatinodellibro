@@ -522,7 +522,7 @@ export class BookCopyResolver {
     });
 
     await this.receiptService.createReceipt({
-      type: ReceiptType.REGISTRATION,
+      type: ReceiptType.WITHDRAWAL,
       userId: ownerId,
       retailLocationId,
       createdById: userId,

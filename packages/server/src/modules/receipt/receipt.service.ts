@@ -24,7 +24,7 @@ export type CreateReceiptInput = {
       data: (Sale & { bookCopy: BookCopyWithBook })[];
     }
   | {
-      type: ReceiptType.REGISTRATION;
+      type: ReceiptType.WITHDRAWAL;
       data: BookCopyWithBook[];
     }
 );
