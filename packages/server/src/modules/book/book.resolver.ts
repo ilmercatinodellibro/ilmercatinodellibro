@@ -180,6 +180,9 @@ export class BookResolver {
         skip: page * rowsPerPage,
         take: rowsPerPage,
         where,
+        orderBy: {
+          isbnCode: "asc",
+        },
       }),
     ]);
 
