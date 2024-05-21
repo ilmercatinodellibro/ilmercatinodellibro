@@ -3,7 +3,6 @@ import {
   ForbiddenException,
   Get,
   Inject,
-  Param,
   Query,
   Req,
   Res,
@@ -32,13 +31,18 @@ export class AuthController {
   ) {}
 
   @Public()
-  @Get(`${EMAIL_VERIFICATION_ENDPOINT}/:token`)
-  async validateEmail(@Param("token") token: string, @Res() res: Response) {
+  @Get(EMAIL_VERIFICATION_ENDPOINT)
+  async validateEmail(
+    @Query("locationId") locationId: string,
+    @Query("token") token: string,
+    @Res() res: Response,
+  ) {
     await this.authService.validateEmailVerificationToken(token);
 
-    // TODO: involve location id
     // TODO: login the user automatically
-    res.redirect(`${this.rootConfig.clientUrl}/login?emailVerified=true`);
+    res.redirect(
+      `${this.rootConfig.clientUrl}/${locationId}/login?emailVerified=true`,
+    );
   }
 
   @Public()

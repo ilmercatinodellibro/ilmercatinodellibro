@@ -90,6 +90,7 @@ import { notifyError } from "src/helpers/error-messages";
 import { ServerError } from "src/models/server";
 import { useSendRegistrationInviteMutation } from "src/services/auth.graphql";
 import { useMembersService } from "src/services/member";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const { t } = useI18n();
 
@@ -163,6 +164,7 @@ function deleteUser(id: string) {
   });
 }
 
+const { selectedLocation } = useRetailLocationService();
 function addUser() {
   Dialog.create({
     component: AddNewUserDialog,
@@ -171,7 +173,12 @@ function addUser() {
     },
   }).onOk(async (email: string) => {
     try {
-      await sendRegistrationInvite({ input: { email } });
+      await sendRegistrationInvite({
+        input: {
+          email,
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
       Notify.create({
         message: t("general.inviteSent"),
         color: "positive",

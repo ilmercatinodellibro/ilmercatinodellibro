@@ -1,11 +1,11 @@
-import { Field, InputType, PickType } from "@nestjs/graphql";
+import { Field, InputType, IntersectionType, PickType } from "@nestjs/graphql";
 import { User } from "src/@generated";
+import { LocationBoundInput } from "src/modules/retail-location";
 
 @InputType()
-export class RegisterPayload extends PickType(
-  User,
-  ["email", "firstname", "lastname"],
-  InputType,
+export class RegisterPayload extends IntersectionType(
+  PickType(User, ["email", "firstname", "lastname"], InputType),
+  LocationBoundInput,
 ) {
   @Field()
   password!: string;
@@ -31,13 +31,13 @@ export class PasswordResetPayload {
 }
 
 @InputType()
-export class PasswordResetLinkPayload {
+export class PasswordResetLinkPayload extends LocationBoundInput {
   @Field()
   email!: string;
 }
 
 @InputType()
-export class RegistrationInviteLinkPayload {
+export class RegistrationInviteLinkPayload extends LocationBoundInput {
   @Field()
   email!: string;
 }

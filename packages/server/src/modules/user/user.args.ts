@@ -3,6 +3,7 @@ import {
   Field,
   InputType,
   Int,
+  IntersectionType,
   ObjectType,
   PickType,
   registerEnumType,
@@ -53,10 +54,13 @@ export class UpdateRolePayload extends LocationBoundInput {
 }
 
 @InputType()
-export class RegisterUserPayload extends PickType(
-  User,
-  ["email", "firstname", "lastname", "notes", "phoneNumber"],
-  InputType,
+export class RegisterUserPayload extends IntersectionType(
+  PickType(
+    User,
+    ["email", "firstname", "lastname", "notes", "phoneNumber"],
+    InputType,
+  ),
+  LocationBoundInput,
 ) {
   @Field(() => Boolean, { nullable: true })
   discount?: boolean;
@@ -66,24 +70,24 @@ export class RegisterUserPayload extends PickType(
 
   @Field()
   passwordConfirmation!: string;
-
-  @Field()
-  retailLocationId!: string;
 }
 
 @InputType()
-export class UpdateUserPayload extends PickType(
-  User,
-  [
-    "firstname",
-    "lastname",
-    "notes",
-    "phoneNumber",
-    "id",
-    "delegate",
-    "dateOfBirth",
-  ],
-  InputType,
+export class UpdateUserPayload extends IntersectionType(
+  PickType(
+    User,
+    [
+      "firstname",
+      "lastname",
+      "notes",
+      "phoneNumber",
+      "id",
+      "delegate",
+      "dateOfBirth",
+    ],
+    InputType,
+  ),
+  LocationBoundInput,
 ) {
   @Field(() => Boolean, { nullable: true })
   discount?: boolean;
@@ -93,9 +97,6 @@ export class UpdateUserPayload extends PickType(
 
   @Field(() => String, { nullable: true })
   passwordConfirmation?: string;
-
-  @Field()
-  retailLocationId!: string;
 
   @Field(() => String, { nullable: true })
   email?: string;

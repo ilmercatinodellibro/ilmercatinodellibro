@@ -27,7 +27,10 @@ export class UserService {
   }
 
   async createUser(
-    userData: Omit<RegisterPayload, "passwordConfirmation">,
+    userData: Omit<
+      RegisterPayload,
+      "passwordConfirmation" | "retailLocationId"
+    >,
     emailVerified?: boolean,
   ) {
     userData.email = userData.email.toLowerCase();

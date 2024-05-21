@@ -116,6 +116,7 @@ import {
   validatePasswordRule,
 } from "src/helpers/rules";
 import { useRegisterMutation } from "src/services/auth";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
 
@@ -123,7 +124,7 @@ const { t } = useI18n();
 
 const showPassword = ref(false);
 
-const user = reactive<RegisterPayload>({
+const user = reactive<Omit<RegisterPayload, "retailLocationId">>({
   email: "",
   firstname: "",
   lastname: "",
@@ -138,9 +139,15 @@ const passwordMatchRule = makeValueMatchRule(
   () => t("auth.passwordDoNotMatch"),
 );
 
+const { selectedLocation } = useRetailLocationService();
 async function onSubmit() {
   try {
-    await register({ input: toRaw(user) });
+    await register({
+      input: {
+        ...toRaw(user),
+        retailLocationId: selectedLocation.value.id,
+      },
+    });
   } catch (error) {
     const { message, graphQLErrors } = error as ApolloError;
     const status = graphQLErrors[0]?.extensions?.status as number | undefined;

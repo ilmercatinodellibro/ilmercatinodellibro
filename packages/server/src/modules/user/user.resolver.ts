@@ -381,10 +381,10 @@ export class UserResolver {
   @Mutation(() => User)
   async createUser(
     @Input() payload: RegisterUserPayload,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() actor: User,
   ) {
     await this.authService.assertMembership({
-      userId: currentUser.id,
+      userId: actor.id,
       retailLocationId: payload.retailLocationId,
       message: "You are not allowed to create members.",
     });
@@ -399,17 +399,16 @@ export class UserResolver {
     }
     // TODO: require delegate full name when the user is a minor
 
-    const userIsAdmin = await this.authService.userIsAdmin(
-      currentUser.id,
+    const actorIsAdmin = await this.authService.userIsAdmin(
+      actor.id,
       payload.retailLocationId,
     );
     return this.userService.createUser(
-      omit(
-        payload,
-        userIsAdmin
-          ? ["passwordConfirmation", "retailLocationId"]
-          : ["passwordConfirmation", "retailLocationId", "discount"],
-      ),
+      omit(payload, [
+        "passwordConfirmation",
+        "retailLocationId",
+        ...(actorIsAdmin ? [] : (["discount"] as const)),
+      ]),
     );
   }
 
@@ -424,11 +423,11 @@ export class UserResolver {
       passwordConfirmation,
       ...payloadRest
     }: UpdateUserPayload,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() actor: User,
   ) {
-    if (userId !== currentUser.id) {
+    if (userId !== actor.id) {
       await this.authService.assertMembership({
-        userId: currentUser.id,
+        userId: actor.id,
         retailLocationId,
         message: "You do not have permissions to edit user data.",
       });
@@ -460,7 +459,7 @@ export class UserResolver {
       );
     }
     const userIsAdmin = await this.authService.userIsAdmin(
-      currentUser.id,
+      actor.id,
       retailLocationId,
     );
 
