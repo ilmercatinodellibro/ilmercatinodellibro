@@ -89,8 +89,8 @@ const RE_FAQ = `<section>
         href="/2-uncategorised/2-termini-e-condizioni-d-utilizzo"
         rel="alternate"
         >Termini e condizioni di utilizzo</a
-      >e i cookies&nbsp;</span
-    >("I agree").
+      > e i cookies&nbsp;</span
+    > ("I agree").
   </p>
   <p>
     <strong
@@ -220,7 +220,7 @@ const RE_FAQ = `<section>
           Quest'anno la nostra sede continua a essere lo spazio giovanile di <a
             href="https://www.facebook.com/viacassoliuno/"
             rel="alternate"
-            >#ViaCassoliUno</a
+            > #ViaCassoliUno</a
           >!&nbsp;<br />Ci trovate in<strong> Via Cassoli 1</strong> ,<strong>
             sulla</strong
           ><b
@@ -249,7 +249,7 @@ const RE_FAQ = `<section>
             href="/2-uncategorised/2-termini-e-condizioni-d-utilizzo"
             rel="alternate"
             >Termini e condizioni di utilizzo</a
-          >e i cookies!
+          > e i cookies!
         </p>
         <p>Vi aspettiamo,</p>
         <p><em> Lo staff de Il Mercatino del Libro RE</em></p>
