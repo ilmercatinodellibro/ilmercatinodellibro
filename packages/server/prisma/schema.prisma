@@ -435,7 +435,7 @@ model BooksOnCourses {
 
 enum ReceiptType {
   PURCHASE
-  REGISTRATION
+  WITHDRAWAL
 }
 
 model Receipt {
