@@ -7,7 +7,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 // "jsonwebtoken" is a "@nestjs/jwt" transitive dependency, which reference directly because "@nestjs/jwt" don't re-export the error class
 // Adding the dependency to our package.json is a risk as it could break our code in a subtle way if upstream transitive dependency is upgraded
-import { Role } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { TokenExpiredError } from "jsonwebtoken";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { MailService } from "../mail/mail.service";
@@ -109,15 +109,15 @@ export class AuthService {
     }
   }
 
-  async sendVerificationLink(email: string, token: string) {
+  async sendVerificationLink(user: User, token: string) {
     const url = `${this.rootConfig.serverUrl}/${EMAIL_VERIFICATION_ENDPOINT}/${token}`;
 
     try {
       return await this.mailerService.sendMail({
-        to: email,
+        to: user.email,
         subject: "Email confirmation",
         context: {
-          name: "user",
+          name: `${user.firstname} ${user.lastname}`,
           url,
         },
         template: "welcome",
@@ -127,16 +127,16 @@ export class AuthService {
     }
   }
 
-  async sendPasswordResetLink(email: string, token: string) {
+  async sendPasswordResetLink(user: User, token: string) {
     // Make sure the URL below is in sync with `AvailableRouteNames.ChangePassword` in the client project
     const url = `${this.rootConfig.clientUrl}/change-password?token=${token}`;
 
     try {
       return await this.mailerService.sendMail({
-        to: email,
+        to: user.email,
         subject: "Reset password",
         context: {
-          name: "user",
+          name: `${user.firstname} ${user.lastname}`,
           url,
         },
         template: "forgot-password",
@@ -162,10 +162,10 @@ export class AuthService {
 
     try {
       this.jwtService.verify(token);
-    } catch (err) {
-      if (err instanceof TokenExpiredError) {
+    } catch (error) {
+      if (error instanceof TokenExpiredError) {
         const token = this.createVerificationToken(user.email);
-        await this.sendVerificationLink(user.email, token);
+        await this.sendVerificationLink(user, token);
         throw new UnprocessableEntityException(
           "Verification token Expired. We sent you a new verification link, please check your inbox.",
         );

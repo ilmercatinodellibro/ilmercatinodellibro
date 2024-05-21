@@ -56,7 +56,7 @@ export class AuthResolver {
     const token = this.authService.createVerificationToken(user.email);
 
     //TODO: use queues instead of doing await
-    await this.authService.sendVerificationLink(user.email, token);
+    await this.authService.sendVerificationLink(user, token);
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
@@ -112,7 +112,7 @@ export class AuthResolver {
     }
 
     const token = this.authService.createAccessToken(user.id);
-    await this.authService.sendPasswordResetLink(email, token);
+    await this.authService.sendPasswordResetLink(user, token);
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
