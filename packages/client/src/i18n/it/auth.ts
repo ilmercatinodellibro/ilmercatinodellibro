@@ -6,16 +6,16 @@ export default {
   loginWith: "Accedi con {provider}",
   register: "Registrati",
   registerWith: "Registrati con {provider}",
-  reset: "Resettare",
+  reset: "Reimposta",
   noAccount: "Oppure, se è la prima volta che accedi al Mercatino del Libro",
   firstName: "Nome",
   lastName: "Cognome",
   forgotPassword: "Ho dimenticato la mia password",
   noWorries:
-    "Nessun problema, ci siamo passati tutti. Inserisci gentilmente la tua email e facciamoci far pagare!",
+    "Nessun problema, ci siamo passati tutti. Inserisci gentilmente il tuo indirizzo e-mail ti invieremo una email per reimpostare la password!",
   checkInbox:
-    "Se quell'indirizzo e-mail è nel nostro database, riceverai un'e-mail per reimpostare la password. Puoi chiudere questa scheda ora!",
-  resetPassword: "Resettare password",
+    "Se quell'indirizzo e-mail è nel nostro database, riceverai un'e-mail per reimpostare la password. Puoi chiudere questa scheda ora.",
+  resetPassword: "Reimposta password",
   addCurrentPassword: "Aggiungi password corrente",
   addNewPassword: "Aggiungi nuova password",
   confirmPassword: "Conferma password",
@@ -25,7 +25,7 @@ export default {
   dangerousPassword: "ATTENZIONE: Password non sicura!",
   verificationEmailSent: "Email di verifica inviata!",
   pleaseCheckYourInboxForVerificationEmail:
-    "Controlla la tua casella di posta per un'email di verifica.",
+    "Controlla la tua casella di posta per un'e-mail di verifica.",
   logOut: "Esci",
   passwordChangedSuccessfully:
     "La tua password è stata modificata correttamente",
@@ -34,7 +34,7 @@ export default {
     "La tua email è stata verificata correttamente, ora puoi accedere utilizzando le tue credenziali",
   backToLogin: "Torna al login",
   backToLocations: "Torna alle sedi",
-  registeredSuccessfully: "Registrazione riuscita 🎉 ",
+  registeredSuccessfully: "Registrazione riuscita!",
   couldNotRegister: "Non è stato possibile registrare l'utente.",
   couldNotUpdate:
     "Non è stato possibile aggiornare i dati dell'utente selezionato.",
