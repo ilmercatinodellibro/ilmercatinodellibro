@@ -47,6 +47,13 @@
         :label="t('routesNames.contacts')"
         :to="{ name: AvailableRouteNames.Contacts }"
       />
+      <q-btn
+        v-if="isAuthenticated"
+        flat
+        stretch
+        :label="t('routesNames.faq')"
+        :to="{ name: AvailableRouteNames.FAQ }"
+      />
       <language-dropdown-btn v-if="!isAuthenticated" />
     </k-toolbar>
   </q-header>

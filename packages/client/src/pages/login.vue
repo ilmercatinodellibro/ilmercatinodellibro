@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex items-center justify-center">
+  <q-page class="column flex-center gap-32 q-pa-md">
     <q-card class="form-card text-center">
       <q-form greedy @submit="onSubmit">
         <q-card-section class="q-mx-xl">
@@ -76,6 +76,8 @@
         </q-card-section>
       </q-form>
     </q-card>
+
+    <faq-info />
   </q-page>
 </template>
 
@@ -85,6 +87,7 @@ import { Notify } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { LoginPayload } from "src/@generated/graphql";
+import FaqInfo from "src/components/faq-info.vue";
 import KPasswordInput from "src/components/k-password-input.vue";
 import SocialAuthButtons from "src/components/social-auth-buttons.vue";
 import { useTheme } from "src/composables/use-theme";

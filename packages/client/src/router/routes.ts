@@ -142,6 +142,11 @@ const routes: RouteRecordRaw[] = [
       { path: "", redirect: { name: AvailableRouteNames.Home } },
 
       {
+        path: "faq",
+        name: AvailableRouteNames.FAQ,
+        component: () => import("src/pages/faq.vue"),
+      },
+      {
         path: "home",
         name: AvailableRouteNames.Home,
         component: () => import("src/pages/home.vue"),

@@ -21,4 +21,5 @@ export enum AvailableRouteNames {
   Statistics = "statistics",
   Registration = "registration",
   RegistrationSent = "registration-sent",
+  FAQ = "faq",
 }
