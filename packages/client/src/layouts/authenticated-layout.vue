@@ -309,6 +309,7 @@
             </q-item>
 
             <q-item
+              v-if="hasAdminRole"
               v-ripple
               :to="{ name: AvailableRouteNames.Statistics }"
               active-class="bg-black-activated-light"
