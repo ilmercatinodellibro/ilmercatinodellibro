@@ -580,7 +580,7 @@ function openSettings() {
           retailLocationId: selectedLocation.value.id,
         },
       });
-      // window.location.reload();
+      window.location.reload();
     }
   });
 }
