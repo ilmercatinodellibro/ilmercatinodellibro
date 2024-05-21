@@ -488,12 +488,11 @@ async function cancelRequest(request: RequestSummaryFragment) {
         };
       },
     );
-    cache.gc();
-  } catch (e) {
+  } catch (error) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
         t("reserveBooks.reservation"),
-        e,
+        error,
       ]),
     );
   }

@@ -188,7 +188,10 @@ import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
 import { useCartService } from "src/services/cart";
 import { useRequestService } from "src/services/request";
-import { RequestSummaryFragment } from "src/services/request.graphql";
+import {
+  GetRequestsDocument,
+  RequestSummaryFragment,
+} from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { CustomerFragment } from "src/services/user.graphql";
@@ -452,15 +455,32 @@ async function putBooksIntoCart(
 const { deleteBookRequest } = useDeleteRequestMutation();
 async function deleteRequest(request: RequestSummaryFragment) {
   try {
-    await deleteBookRequest({
+    const { cache } = await deleteBookRequest({
       input: {
         id: request.id,
       },
     });
+
+    cache.updateQuery(
+      {
+        query: GetRequestsDocument,
+        variables: {
+          retailLocationId: props.retailLocationId,
+          userId: props.userData.id,
+        },
+      },
+      (data) => {
+        if (!data) {
+          return;
+        }
+
+        return {
+          bookRequests: data.bookRequests.filter(({ id }) => id !== request.id),
+        };
+      },
+    );
   } catch {
     notifyError(t("bookErrors.notRequestDeleted"));
-  } finally {
-    await refetchRequests();
   }
 }
 </script>
