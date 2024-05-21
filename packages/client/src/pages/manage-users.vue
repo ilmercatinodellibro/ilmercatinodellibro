@@ -186,9 +186,8 @@
           <template #body-cell-pay-off="{ row }">
             <q-td>
               <chip-button
-                :disable="willBeDeleted(row)"
+                :disable="!selectedLocation.payOffEnabled || willBeDeleted(row)"
                 color="primary"
-                :disabled="!selectedLocation.payOffEnabled"
                 :label="$t('manageUsers.payOff')"
                 @click="openPayOff(row)"
               >
