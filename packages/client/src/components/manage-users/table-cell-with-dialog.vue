@@ -1,10 +1,11 @@
 <template>
-  <q-td>
+  <q-td
+    :class="{ 'cursor-not-allowed': disable }"
+    @click="!disable ? emit('click', $event) : undefined"
+  >
     <span
       v-if="disable || (value <= 0 && !clickableWhenZero)"
       class="text-body2"
-      :class="{ 'cursor-not-allowed': disable }"
-      @click.stop
     >
       {{ value }}
     </span>
@@ -40,5 +41,9 @@ defineProps<{
   secondaryValue?: number;
   clickableWhenZero?: boolean;
   disable?: boolean;
+}>();
+
+const emit = defineEmits<{
+  click: [MouseEvent];
 }>();
 </script>
