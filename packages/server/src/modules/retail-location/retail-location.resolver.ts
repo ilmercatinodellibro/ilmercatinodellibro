@@ -122,7 +122,7 @@ export class RetailLocationResolver {
 
   private readonly notSoldOrRefunded: Prisma.BookCopyWhereInput[] = [
     {
-      // Sold but refunded (if one of the sales has a null "refundedAt")
+      // Sold but refunded (if at least one of the sales has a null "refundedAt")
       sales: {
         every: {
           refundedAt: {

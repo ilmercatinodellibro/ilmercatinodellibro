@@ -28,8 +28,8 @@ export class StatisticsQueryResult {
   @Field(() => Number)
   totalPresentBooks!: number;
 
-  // The total number of book copies that were reserved based on the number of the available copies
-  // No need for a relation with the "bookCopy" since it's not important which one will be selled.
+  // The total number of book copies that are currently reserved based on the number of the available copies
+  // No need for a relation with the "bookCopy" since it's not important which one will be sold.
   // The important thing is that the number of reservations for that book are <= than the available copies
   @Field(() => Number)
   totalReservedBooks!: number;
