@@ -27,6 +27,9 @@ export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
       secondary: "#76e1a7",
       accent: "#c2664d",
     },
+    // TODO: THis image is saved on client side since right now we do not support custom theme
+    // in the future consider seeding the images in the DB too
+    logo: "logo/logo-reggio-emilia.svg",
   } satisfies Theme,
 };
 
@@ -46,6 +49,9 @@ export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
       secondary: "#76e1a7",
       accent: "#e2a615",
     },
+    // TODO: THis image is saved on client side since right now we do not support custom theme
+    // in the future consider seeding the images in the DB too
+    logo: "logo/logo-modena.svg",
   } satisfies Theme,
 };
 

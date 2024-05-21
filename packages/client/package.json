@@ -6,7 +6,7 @@
   "author": "Dreamonkey Srl <info@dreamonkey.com> (https://dreamonkey.com)",
   "private": true,
   "scripts": {
-    "icons:generate": "pnpm dlx @quasar/icongenie g -i src/assets/favicon.png",
+    "icons:generate": "pnpm dlx @quasar/icongenie g -i src/assets/favicon-reggio-emilia.png --skip-trim",
     "clean": "rimraf .quasar && rimraf src/@generated **.graphql.ts",
     "lint:script": "eslint --ext .js,.ts,.vue ./ --fix --report-unused-disable-directives",
     "lint:style": "stylelint \"**/*.{css,scss,vue}\" --fix --report-needless-disables",
