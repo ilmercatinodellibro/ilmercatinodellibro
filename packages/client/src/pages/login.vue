@@ -1,6 +1,6 @@
 <template>
-  <q-page class="column flex-center gap-32 q-pa-md">
-    <q-card class="form-card text-center">
+  <q-page class="gap-32 items-start justify-evenly q-pa-md reverse row">
+    <q-card class="form-card q-ma-xl text-center">
       <q-form greedy @submit="onSubmit">
         <q-card-section class="q-mx-xl">
           <q-img :src="theme.logo" />
