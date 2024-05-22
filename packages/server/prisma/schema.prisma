@@ -113,6 +113,9 @@ model Event {
   ownerId String @map("owner_id")
   owner   User   @relation(fields: [ownerId], references: [id])
 
+  locationId String         @map("location_id")
+  location   RetailLocation @relation(fields: [locationId], references: [id])
+
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   notifications Notification[]
@@ -164,6 +167,7 @@ model RetailLocation {
   carts    Cart[]
   members  LocationMember[]
   receipts Receipt[]
+  events   Event[]
 }
 
 model LocationMember {

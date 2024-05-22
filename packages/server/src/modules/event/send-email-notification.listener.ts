@@ -4,16 +4,15 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
+import { Event, RetailLocation } from "@prisma/client";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { MailService } from "../mail/mail.service";
 import { PrismaService } from "../prisma/prisma.service";
 
-interface EmailPayload {
-  name: string;
-  description: string;
-  createdAt: Date;
-}
+type EmailPayload = Pick<Event, "name" | "description" | "createdAt"> & {
+  location: RetailLocation;
+};
 
 @Injectable()
 export class SendEmailNotificationListener {
@@ -37,19 +36,25 @@ export class SendEmailNotificationListener {
         email: true,
       },
     });
+    const location = await this.prisma.retailLocation.findUniqueOrThrow({
+      where: {
+        id: event.locationId,
+      },
+    });
 
     await this.#sendEventEmail(userEmail, {
       name: event.name,
       description: event.description,
       createdAt: event.createdAt,
+      location,
     });
   }
 
   async #sendEventEmail(
     email: string,
-    { name, description, createdAt }: EmailPayload,
+    { name, description, createdAt, location }: EmailPayload,
   ) {
-    const reserveUrl = `${this.rootConfig.clientUrl}/reserve-books`;
+    const reserveUrl = `${this.rootConfig.clientUrl}/${location.id}/reserve-books`;
     const date = createdAt.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -58,13 +63,14 @@ export class SendEmailNotificationListener {
       minute: "2-digit",
       hour12: false,
     });
+    const eventName = `${name} - ${location.name}`;
 
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: name,
+        subject: eventName,
         context: {
-          name,
+          name: eventName,
           description,
           date,
           reserveUrl,

@@ -162,11 +162,12 @@ export class BookRequestService {
     // TODO: Maybe reuse the event (?)
     const { notifications, ...event } = await this.prisma.event.create({
       data: {
-        // name: `Requested Book Available - ${book.retailLocation.name}`,
+        // name: "Requested Book Available",
         // description: `The requested book "${book.title}" is now available for reservation.`,
-        name: `Libro richiesto disponibile - ${book.retailLocation.name}`,
+        name: "Libro richiesto disponibile",
         description: `Il libro "${book.title}" che era stato richiesto è adesso disponibile per essere prenotato.`,
         ownerId: request.userId,
+        locationId: book.retailLocationId,
         notifications: {
           create: {
             userId: request.userId,
