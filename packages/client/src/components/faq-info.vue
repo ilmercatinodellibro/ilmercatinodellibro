@@ -1,5 +1,5 @@
 <template>
-  <q-card-section class="column no-wrap width-700">
+  <q-card-section class="column faq-container no-wrap width-700">
     <h3 class="text-primary">{{ t("routesNames.faq") }}</h3>
     <!-- eslint-disable-next-line vue/no-v-html -->
     <div v-html="selectedLocation.faqContent" />
@@ -15,7 +15,7 @@ const { selectedLocation } = useRetailLocationService();
 </script>
 
 <style lang="scss">
-a {
+.faq-container a {
   color: $accent;
   text-decoration: none;
 }
