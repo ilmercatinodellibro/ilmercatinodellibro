@@ -79,7 +79,15 @@ export class UpdateRolePayload extends LocationBoundInput {
 export class RegisterUserPayload extends IntersectionType(
   PickType(
     User,
-    ["email", "firstname", "lastname", "notes", "phoneNumber"],
+    [
+      "email",
+      "firstname",
+      "lastname",
+      "notes",
+      "phoneNumber",
+      "delegate",
+      "dateOfBirth",
+    ],
     InputType,
   ),
   LocationBoundInput,

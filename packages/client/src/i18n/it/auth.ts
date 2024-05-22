@@ -12,7 +12,7 @@ export default {
   lastName: "Cognome",
   forgotPassword: "Ho dimenticato la mia password",
   noWorries:
-    "Nessun problema, ci siamo passati tutti. Inserisci gentilmente il tuo indirizzo e-mail ti invieremo una email per reimpostare la password!",
+    "Nessun problema, ci siamo passati tutti. Inserisci gentilmente il tuo indirizzo e-mail e ti invieremo una email per reimpostare la password!",
   checkInbox:
     "Se quell'indirizzo e-mail è nel nostro database, riceverai un'e-mail per reimpostare la password. Puoi chiudere questa scheda ora.",
   resetPassword: "Reimposta password",
@@ -23,6 +23,8 @@ export default {
   vulnerablePassword: "Password non del tutto sicura.",
   vulnerablePasswordWarning: "Attenzione: Password non sicura.",
   dangerousPassword: "ATTENZIONE: Password non sicura!",
+  alreadyRegistered: "Hai già un profilo?",
+  goToLogin: "Effettua il log in",
   verificationEmailSent: "Email di verifica inviata!",
   pleaseCheckYourInboxForVerificationEmail:
     "Controlla la tua casella di posta per un'e-mail di verifica.",

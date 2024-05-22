@@ -1,12 +1,10 @@
 <template>
   <q-page class="gap-32 items-start justify-evenly q-pa-md reverse row">
-    <q-card class="form-card q-ma-xl text-center">
-      <q-form greedy @submit="onSubmit">
-        <q-card-section class="q-mx-xl">
-          <q-img :src="theme.logo" />
-        </q-card-section>
+    <q-card class="column form-card gap-24 q-pa-lg text-center">
+      <q-img :src="theme.logo" fit="contain" height="60px" />
 
-        <q-card-section class="input-container">
+      <q-card-section class="no-padding">
+        <q-form greedy class="column gap-8" @submit="onSubmit">
           <q-input
             v-model="user.email"
             :rules="[requiredRule, emailRule]"
@@ -30,51 +28,48 @@
 
           <q-btn
             class="full-width"
-            color="accent"
+            color="primary"
             :label="t('auth.login')"
-            text-color="black-54"
             type="submit"
             data-cy="submit-button"
             :loading="isLoggingIn"
           />
+        </q-form>
+      </q-card-section>
+
+      <template v-if="SOCIAL_LOGIN_ENABLED">
+        <q-separator />
+
+        <q-card-section class="column gap-8 no-padding">
+          <span class="text-black-87"> {{ t("common.or") }} </span>
+
+          <social-auth-buttons type="login" />
         </q-card-section>
+      </template>
 
-        <template v-if="SOCIAL_LOGIN_ENABLED">
-          <q-separator inset spaced />
+      <q-separator />
 
-          <q-card-section class="column gap-8">
-            <span class="text-black-87">{{ t("common.or") }}</span>
+      <q-card-section class="no-padding">
+        <p class="text-black-87">{{ t("auth.noAccount") }}</p>
 
-            <social-auth-buttons type="login" />
-          </q-card-section>
-        </template>
+        <q-btn
+          :to="{ name: 'registration' }"
+          :label="t('auth.register')"
+          class="full-width outline-black-12"
+          color="black-87"
+          outline
+        />
+      </q-card-section>
 
-        <q-separator inset spaced />
+      <q-separator />
 
-        <q-card-section>
-          <p class="text-black-87">{{ t("auth.noAccount") }}</p>
-
-          <q-btn
-            :to="{ name: 'registration' }"
-            :label="t('auth.register')"
-            class="full-width outline-black-12"
-            color="black-87"
-            outline
-          />
-        </q-card-section>
-
-        <q-separator inset spaced />
-
-        <q-card-section>
-          <router-link
-            class="text-black-87 text-subtitle1"
-            :to="{ name: 'forgot-password' }"
-            data-cy="forgot-password-link"
-          >
-            {{ t("auth.forgotPassword") }}
-          </router-link>
-        </q-card-section>
-      </q-form>
+      <router-link
+        class="text-black-87 text-subtitle1"
+        :to="{ name: 'forgot-password' }"
+        data-cy="forgot-password-link"
+      >
+        {{ t("auth.forgotPassword") }}
+      </router-link>
     </q-card>
 
     <faq-info />
@@ -150,20 +145,9 @@ async function onSubmit() {
 <style lang="scss" scoped>
 $form-width: 308px;
 
-.input-container {
-  > *:not(:last-child) {
-    margin-bottom: 12px;
-  }
-
-  > *:last-child {
-    margin-bottom: unset;
-  }
-}
-
 .form-card {
   max-width: $form-width;
   width: 100%;
-  padding: 8px;
 }
 
 .outline-black-12::before {

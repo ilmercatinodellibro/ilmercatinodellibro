@@ -23,6 +23,8 @@ export default {
   vulnerablePassword: "Password is not secure enough",
   vulnerablePasswordWarning: "Warning: Insecure password.",
   dangerousPassword: "WARNING: Password is very insecure.",
+  alreadyRegistered: "Already got a profile?",
+  goToLogin: "Go to the login",
   verificationEmailSent: "Verification email sent.",
   pleaseCheckYourInboxForVerificationEmail:
     "Check your inbox for a verification email.",
