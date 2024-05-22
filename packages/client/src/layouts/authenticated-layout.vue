@@ -147,6 +147,27 @@
                 </q-icon>
               </q-item-section>
             </q-item>
+
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.FAQ }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="faq"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                {{ t("general.faq") }}
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiHelpCircle" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("general.faq") }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
           </template>
 
           <template v-if="user && (hasAdminRole || hasOperatorRole)">
@@ -408,6 +429,7 @@ import {
   mdiCog,
   mdiCurrencyEur,
   mdiExitToApp,
+  mdiHelpCircle,
   mdiHome,
   mdiInformationOutline,
   mdiKey,

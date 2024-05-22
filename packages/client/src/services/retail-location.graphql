@@ -24,6 +24,7 @@ fragment RetailLocation on RetailLocation {
   instagramLink
   facebookLink
   whoAreWeContent
+  faqContent
 
   ...RetailLocationSettings
 

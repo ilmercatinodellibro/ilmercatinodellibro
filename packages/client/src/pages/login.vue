@@ -1,6 +1,6 @@
 <template>
-  <q-page class="flex items-center justify-center">
-    <q-card class="form-card text-center">
+  <q-page class="gap-32 items-start justify-evenly q-pa-md reverse row">
+    <q-card class="form-card q-ma-xl text-center">
       <q-form greedy @submit="onSubmit">
         <q-card-section class="q-mx-xl">
           <q-img :src="theme.logo" />
@@ -76,6 +76,8 @@
         </q-card-section>
       </q-form>
     </q-card>
+
+    <faq-info />
   </q-page>
 </template>
 
@@ -85,6 +87,7 @@ import { Notify } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { LoginPayload } from "src/@generated/graphql";
+import FaqInfo from "src/components/faq-info.vue";
 import KPasswordInput from "src/components/k-password-input.vue";
 import SocialAuthButtons from "src/components/social-auth-buttons.vue";
 import { useTheme } from "src/composables/use-theme";

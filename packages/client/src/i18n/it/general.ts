@@ -55,6 +55,7 @@ export default {
   },
   joinUs: "Unisciti a noi",
   whoWeAre: "Chi siamo",
+  faq: "FAQ",
   loading: "Caricamento in corso...",
   settings: {
     resetToolTip:
