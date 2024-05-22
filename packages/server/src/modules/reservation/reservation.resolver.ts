@@ -172,6 +172,9 @@ export class ReservationResolver {
             userId,
             deletedAt: null,
           },
+          include: {
+            sale: true,
+          },
         },
         meta: true,
       },
@@ -207,7 +210,10 @@ export class ReservationResolver {
 
     if (
       books.some(
-        ({ requests }) => requests.length > 0 && requests[0].saleId !== null,
+        ({ requests }) =>
+          requests.length > 0 &&
+          requests[0].saleId !== null &&
+          requests[0].sale?.refundedAt === null,
       )
     ) {
       throw new UnprocessableEntityException(

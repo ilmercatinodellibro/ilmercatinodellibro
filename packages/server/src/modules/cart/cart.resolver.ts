@@ -190,7 +190,7 @@ export class CartResolver {
       });
       if (
         request.deletedAt !== null ||
-        (request.saleId !== null && request.sale?.refundedAt !== null)
+        (request.saleId !== null && request.sale?.refundedAt === null)
       ) {
         throw new UnprocessableEntityException(
           "The request is no longer valid",
@@ -213,7 +213,7 @@ export class CartResolver {
       });
       if (
         reservation.deletedAt !== null ||
-        (reservation.saleId !== null && reservation.sale?.refundedAt !== null)
+        (reservation.saleId !== null && reservation.sale?.refundedAt === null)
       ) {
         throw new UnprocessableEntityException(
           "The reservation is no longer valid",
