@@ -540,7 +540,7 @@ export class BookCopyResolver {
     description: "Refund the book copy to the buyer",
   })
   async refundBookCopy(
-    @Input() { bookCopyId }: RefundBookCopyInput,
+    @Input() { bookCopyId, retailLocationId }: RefundBookCopyInput,
     @CurrentUser() { id: userId }: User,
   ) {
     const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
@@ -578,26 +578,38 @@ export class BookCopyResolver {
       );
     }
 
-    const sale = bookCopy.sales[0];
-    return this.prisma.bookCopy.update({
-      where: {
-        id: bookCopyId,
-      },
-      data: {
-        updatedAt: new Date(),
-        updatedById: userId,
-        sales: {
-          update: {
-            where: {
-              id: sale.id,
-            },
-            data: {
-              refundedAt: new Date(),
-              refundedById: userId,
+    return this.prisma.$transaction(async (prisma) => {
+      const codes = await this.bookService.calculateBookCodes(
+        prisma,
+        [bookCopy.bookId],
+        retailLocationId,
+      );
+
+      const newBookCopyCode = codes[0];
+      const sale = bookCopy.sales[0];
+      return prisma.bookCopy.update({
+        where: {
+          id: bookCopyId,
+        },
+        data: {
+          code: newBookCopyCode,
+          // Original code must be updated only the first time a book is returned, so when there is no original code set.
+          ...(bookCopy.originalCode ? {} : { originalCode: bookCopy.code }),
+          updatedAt: new Date(),
+          updatedById: userId,
+          sales: {
+            update: {
+              where: {
+                id: sale.id,
+              },
+              data: {
+                refundedAt: new Date(),
+                refundedById: userId,
+              },
             },
           },
         },
-      },
+      });
     });
   }
 
