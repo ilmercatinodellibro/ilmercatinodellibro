@@ -14,8 +14,8 @@ const { t } = useI18n();
 const { selectedLocation } = useRetailLocationService();
 </script>
 
-<style lang="scss">
-.faq-container a {
+<style lang="scss" scoped>
+.faq-container :deep(a) {
   color: $accent;
   text-decoration: none;
 }
