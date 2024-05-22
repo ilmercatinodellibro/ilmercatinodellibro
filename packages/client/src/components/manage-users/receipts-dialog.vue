@@ -19,7 +19,7 @@
           :no-data-label="$t('manageUsers.receiptsDialog.noRegistration')"
           :receipts="registrationReceipts"
           class="flex-grow"
-          type="REGISTRATION"
+          type="WITHDRAWAL"
         />
         <receipts-table
           :no-data-label="$t('manageUsers.receiptsDialog.noPurchase')"
@@ -62,7 +62,7 @@ const { receipts } = useGetReceiptsQuery(() => ({
 //   receipts.value.filter(({ type }) => type === "REQUEST"),
 // )
 const registrationReceipts = computed(() =>
-  receipts.value.filter(({ type }) => type === "REGISTRATION"),
+  receipts.value.filter(({ type }) => type === "WITHDRAWAL"),
 );
 const purchaseReceipts = computed(() =>
   receipts.value.filter(({ type }) => type === "PURCHASE"),

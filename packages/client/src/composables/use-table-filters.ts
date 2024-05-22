@@ -78,8 +78,6 @@ export function useTableFilters(
         },
   );
 
-  // This filter isn't actually used BUT by passing our filters to the QTable it allows
-  // the component to throw the "@request" event which is used to refetch our data
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const filterMethod: QTableProps["filterMethod"] = (rows) => rows;
 
@@ -87,6 +85,10 @@ export function useTableFilters(
     refetchFilterProxy,
     filterOptions,
     tableFilter,
+    /**
+     * This filter isn't actually used, but by passing any filters to the QTable it allows
+     * the component to throw the "@request" event which is used to refetch our data
+     */
     filterMethod,
     booleanFilters,
   };

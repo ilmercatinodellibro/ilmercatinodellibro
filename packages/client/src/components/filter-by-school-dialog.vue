@@ -1,8 +1,8 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
-      :title="t('book.filters.school')"
-      :submit-label="t('book.filter')"
+      :title="title"
+      :submit-label="submitLabel"
       size="sm"
       @submit="
         onDialogOK({
@@ -16,18 +16,25 @@
         <q-select
           :model-value="selectedSchoolCodes"
           :display-value="
-            selectedSchoolCodes.length === 0 ? t('general.all') : undefined
+            selectedSchoolCodes.length === 0
+              ? requireCourse
+                ? t('actions.selectAtLeastOneOption')
+                : t('general.all')
+              : undefined
           "
           :disable="isSchoolsLoading"
           :label="t('book.filters.schoolFilter.fields.school')"
+          :multiple="!requireCourse"
           :options="schools"
+          :option-label="
+            ({ name, address }: SchoolFragment) => `${name}, ${address}`
+          "
+          :rules="requireCourse ? [requiredRule] : undefined"
           bottom-slots
           clearable
           emit-value
           fill-input
           map-options
-          multiple
-          option-label="name"
           option-value="code"
           outlined
           @update:model-value="
@@ -43,17 +50,25 @@
             isSchoolCoursesLoading
           "
           :display-value="
-            selectedSchoolCourseIds.length === 0 ? t('general.all') : undefined
+            selectedSchoolCourseIds.length === 0
+              ? requireCourse
+                ? t('actions.selectAtLeastOneOption')
+                : t('general.all')
+              : undefined
           "
           :label="t('book.filters.schoolFilter.fields.course')"
-          :option-label="({ grade, section }) => `${grade}-${section}`"
+          :option-label="
+            ({ grade, section, school }: SchoolCourseFragment) =>
+              `${grade}-${section}${!requireCourse && selectedSchoolCodes.length > 1 ? ` - ${school.name}, ${school.address}` : ''}`
+          "
+          :multiple="!requireCourse"
           :options="schoolCourses"
+          :rules="requireCourse ? [requiredRule] : undefined"
           bottom-slots
           clearable
           emit-value
           fill-input
           map-options
-          multiple
           option-value="id"
           outlined
           @update:model-value="
@@ -69,8 +84,12 @@
 import { useDialogPluginComponent } from "quasar";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { requiredRule } from "src/helpers/rules";
 import { SchoolFilters } from "src/models/book";
+import { useRetailLocationService } from "src/services/retail-location";
 import {
+  SchoolCourseFragment,
+  SchoolFragment,
   useGetSchoolCoursesQuery,
   useGetSchoolsQuery,
 } from "src/services/school.graphql";
@@ -79,12 +98,18 @@ import KDialogFormCard from "./k-dialog-form-card.vue";
 const { t } = useI18n();
 
 const props = defineProps<{
+  title: string;
+  submitLabel: string;
   selectedFilters?: SchoolFilters;
+  requireCourse?: boolean;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { schools, loading: isSchoolsLoading } = useGetSchoolsQuery();
+const { selectedLocation } = useRetailLocationService();
+const { schools, loading: isSchoolsLoading } = useGetSchoolsQuery(() => ({
+  retailLocationId: selectedLocation.value.id,
+}));
 
 const selectedSchoolCodes = ref(
   props.selectedFilters?.selectedSchoolCodes ?? [],

@@ -1,18 +1,34 @@
 <template>
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
-      <card-table-header
-        :search-label="t('common.search')"
-        @add-book="(bookISBN) => (searchQuery = bookISBN)"
-      >
-        <template #side-actions>
+      <q-card-section class="gap-16 row">
+        <q-input
+          :model-value="tableFilter.searchQuery"
+          :placeholder="t('common.search')"
+          class="col max-width-600"
+          clearable
+          debounce="400"
+          outlined
+          type="search"
+          @update:model-value="
+            (value) => (tableFilter.searchQuery = (value as string) ?? '')
+          "
+        >
+          <template v-if="tableFilter.searchQuery.length === 0" #append>
+            <q-icon :name="mdiMagnify" />
+          </template>
+        </q-input>
+
+        <q-space />
+
+        <div class="flex-center gap-16 no-padding no-wrap row">
           <q-btn
             v-if="!showByClass"
             :icon="mdiFilter"
             :label="$t('reserveBooks.filterButton')"
             class="text-transform-none"
             color="accent"
-            @click="searchClassBooks()"
+            @click="swapView()"
           />
 
           <template v-else>
@@ -21,7 +37,7 @@
               :label="t('reserveBooks.backToMainList')"
               class="text-transform-none"
               outline
-              @click="showByClass = false"
+              @click="swapView()"
             />
 
             <q-btn
@@ -32,15 +48,17 @@
               @click="openReserveAllDialog()"
             />
           </template>
-        </template>
-      </card-table-header>
+        </div>
+      </q-card-section>
 
       <dialog-table
         v-model:pagination="tablePagination"
         :columns="columns"
-        :filter="searchQuery"
+        :filter="tableFilter"
+        :filter-method="filterMethod"
         :loading="loading"
-        :rows="showByClass ? classBooks : rows"
+        :rows="rows"
+        :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
         class="col"
         @request="onRequest"
       >
@@ -59,7 +77,7 @@
         </template>
 
         <template #body-cell-actions="{ row }">
-          <q-td>
+          <q-td auto-width class="text-center">
             <chip-button v-bind="getButtonData(row)" />
           </q-td>
         </template>
@@ -69,28 +87,37 @@
 </template>
 
 <script setup lang="ts">
-import { mdiArrowLeft, mdiFilter, mdiPlus } from "@quasar/extras/mdi-v7";
+import {
+  mdiArrowLeft,
+  mdiFilter,
+  mdiMagnify,
+  mdiPlus,
+} from "@quasar/extras/mdi-v7";
+import { cloneDeep } from "lodash-es";
 import { Dialog, Notify, QBtnProps, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import ClassFiltersDialog from "src/components/class-filters-dialog.vue";
-import CardTableHeader from "src/components/manage-users/card-table-header.vue";
+import { evictQuery } from "src/apollo/cache";
+import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { useTableFilters } from "src/composables/use-table-filters";
 import { discountedPrice } from "src/helpers/book-copy";
-import { BooksTab, CourseDetails } from "src/models/book";
+import { BooksTab, SchoolFilters } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
+import { GetRequestsDocument } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
+import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { user } = useAuthService();
@@ -100,17 +127,16 @@ const { useCreateReservationsMutation, useGetReservationsQuery } =
   useReservationService();
 
 const { createReservations } = useCreateReservationsMutation();
-const { userReservations, refetch: refetchReservations } =
-  useGetReservationsQuery({
-    retailLocationId: selectedLocation.value.id,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    userId: user.value!.id,
-  });
+const { userReservations } = useGetReservationsQuery({
+  retailLocationId: selectedLocation.value.id,
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  userId: user.value!.id,
+});
 
 const { useCreateRequestMutation, useGetRequestsQuery } = useRequestService();
 
 const { createBookRequest } = useCreateRequestMutation();
-const { bookRequests, refetch: refetchRequests } = useGetRequestsQuery({
+const { bookRequests } = useGetRequestsQuery({
   retailLocationId: selectedLocation.value.id,
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
@@ -199,11 +225,13 @@ const tablePagination = ref({
   rowsPerPage: rowsPerPage.value,
 });
 
-const searchQuery = ref("");
-
 const showByClass = ref(false);
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
-const classBooks = ref([]);
+const { refetchFilterProxy, tableFilter, filterMethod } = useTableFilters(
+  "book.filters.options",
+  true,
+);
 
 function getButtonData(book: BookSummaryFragment): QBtnProps {
   if (userReservations.value.find(({ book: { id } }) => id === book.id)) {
@@ -258,9 +286,7 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   await refetchBooks({
     page: pagination.page - 1,
     rows: pagination.rowsPerPage,
-    filter: {
-      search: searchQuery.value,
-    },
+    filter: refetchFilterProxy.value,
   });
   tablePagination.value.rowsNumber = booksPaginationDetails.value.rowCount;
 
@@ -270,19 +296,34 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
   loading.value = false;
 };
 
-function searchClassBooks() {
-  Dialog.create({
-    component: ClassFiltersDialog,
-  }).onOk((payload: CourseDetails) => {
-    showByClass.value = true;
-    // TODO: put specified class books into classBooks
-    payload;
-  });
+function swapView() {
+  if (!showByClass.value) {
+    Dialog.create({
+      component: FilterBySchoolDialog,
+      componentProps: {
+        selectedFilters: tableFilter.schoolFilters,
+        title: t("reserveBooks.findBooksDialog.title"),
+        submitLabel: t("book.filter"),
+        requireCourse: true,
+      },
+    }).onOk((newFilters: SchoolFilters) => {
+      if (
+        newFilters.selectedSchoolCodes.length > 0 ||
+        newFilters.selectedSchoolCourseIds.length > 0
+      ) {
+        showByClass.value = true;
+        tableFilter.schoolFilters = cloneDeep(newFilters);
+      }
+    });
+  } else {
+    showByClass.value = false;
+    tableFilter.schoolFilters = undefined;
+  }
 }
 
 async function reserveBook(id: string) {
   try {
-    await createReservations({
+    const { cache } = await createReservations({
       input: {
         bookIds: [id],
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -290,6 +331,13 @@ async function reserveBook(id: string) {
         retailLocationId: selectedLocation.value.id,
       },
     });
+
+    evictQuery(cache, GetReservationsDocument, {
+      retailLocationId: selectedLocation.value.id,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      userId: user.value!.id,
+    });
+    cache.gc();
   } catch (e) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
@@ -298,7 +346,7 @@ async function reserveBook(id: string) {
       ]),
     );
   } finally {
-    await refetchReservations();
+    swapView();
   }
 }
 
@@ -310,9 +358,15 @@ function requestBook(bookId: string) {
     ok: t("reserveBooks.requestCopy"),
   }).onOk(async () => {
     try {
-      await createBookRequest({
+      const { cache } = await createBookRequest({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         input: { bookId, userId: user.value!.id },
+      });
+
+      evictQuery(cache, GetRequestsDocument, {
+        retailLocationId: selectedLocation.value.id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
       });
     } catch (e) {
       Notify.create(
@@ -321,8 +375,6 @@ function requestBook(bookId: string) {
           e,
         ]),
       );
-    } finally {
-      await refetchRequests();
     }
   });
 }
@@ -331,11 +383,11 @@ function openReserveAllDialog() {
   Dialog.create({
     component: ReserveBooksByClassDialog,
     componentProps: {
-      classBooks: classBooks.value,
+      classBooks: rows.value,
     },
   }).onOk(async (books: BookSummaryFragment[]) => {
     try {
-      await createReservations({
+      const { cache } = await createReservations({
         input: {
           bookIds: books.map(({ id }) => id),
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -343,6 +395,13 @@ function openReserveAllDialog() {
           retailLocationId: selectedLocation.value.id,
         },
       });
+
+      evictQuery(cache, GetReservationsDocument, {
+        retailLocationId: selectedLocation.value.id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        userId: user.value!.id,
+      });
+      cache.gc();
     } catch (e) {
       Notify.create(
         t("reserveBooks.reservationOrRequestError", [
@@ -351,9 +410,7 @@ function openReserveAllDialog() {
         ]),
       );
     } finally {
-      showByClass.value = false;
-
-      await refetchReservations();
+      swapView();
     }
   });
 }
