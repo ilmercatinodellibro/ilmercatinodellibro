@@ -1,6 +1,7 @@
 fragment School on School {
   code
   name
+  address
 }
 
 query getSchools($retailLocationId: String!) {
@@ -15,7 +16,7 @@ fragment SchoolCourse on SchoolCourse {
   schoolCode
   section
   school {
-    name
+    ...School
   }
 }
 

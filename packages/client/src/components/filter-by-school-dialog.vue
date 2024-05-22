@@ -26,13 +26,15 @@
           :label="t('book.filters.schoolFilter.fields.school')"
           :multiple="!requireCourse"
           :options="schools"
+          :option-label="
+            ({ name, address }: SchoolFragment) => `${name}, ${address}`
+          "
           :rules="requireCourse ? [requiredRule] : undefined"
           bottom-slots
           clearable
           emit-value
           fill-input
           map-options
-          option-label="name"
           option-value="code"
           outlined
           @update:model-value="
@@ -57,7 +59,7 @@
           :label="t('book.filters.schoolFilter.fields.course')"
           :option-label="
             ({ grade, section, school }: SchoolCourseFragment) =>
-              `${grade}-${section} - ${school.name}`
+              `${grade}-${section}${!requireCourse && selectedSchoolCodes.length > 1 ? ` - ${school.name}, ${school.address}` : ''}`
           "
           :multiple="!requireCourse"
           :options="schoolCourses"
@@ -87,6 +89,7 @@ import { SchoolFilters } from "src/models/book";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
   SchoolCourseFragment,
+  SchoolFragment,
   useGetSchoolCoursesQuery,
   useGetSchoolsQuery,
 } from "src/services/school.graphql";

@@ -14,7 +14,10 @@ export class SchoolResolver {
   async schools(@Args() { retailLocationId }: SchoolQueryPayload) {
     return await this.prisma.school.findMany({
       where: {
-        provinceCode: retailLocationId.toLocaleUpperCase(),
+        provinceCode: {
+          equals: retailLocationId,
+          mode: "insensitive",
+        },
       },
       orderBy: {
         name: "asc",
@@ -29,9 +32,14 @@ export class SchoolResolver {
       include: {
         school: true,
       },
-      orderBy: {
-        grade: "asc",
-      },
+      orderBy: [
+        {
+          grade: "asc",
+        },
+        {
+          section: "asc",
+        },
+      ],
     });
   }
 }
