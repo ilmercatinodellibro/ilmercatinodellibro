@@ -1,5 +1,4 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { GraphQLISBN } from "graphql-scalars";
 import { LocationBoundInput } from "src/modules/retail-location";
 
 @InputType()
@@ -13,7 +12,7 @@ export class AddToCartInput {
   @Field()
   cartId!: string;
 
-  @Field(() => GraphQLISBN, { nullable: true })
+  @Field(() => String, { nullable: true })
   fromBookIsbn?: string;
 
   @Field({ nullable: true })

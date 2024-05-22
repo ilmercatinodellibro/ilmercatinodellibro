@@ -149,7 +149,10 @@ export class CartResolver {
 
       book = bookDetails;
 
-      if (bookDetails.requests.length === 0) {
+      if (
+        bookDetails.requests.filter(({ deletedAt }) => deletedAt === null)
+          .length === 0
+      ) {
         ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
           data: {
             userId: cart.userId,
@@ -228,6 +231,12 @@ export class CartResolver {
       book = reservation.book;
     } else {
       throw new Error("Unreachable code"); // to satisfy TypeScript
+    }
+
+    if (cart.items.find(({ bookId }) => bookId === book.id)) {
+      throw new UnprocessableEntityException(
+        "The book was already added to the cart",
+      );
     }
 
     await this.prisma.cartItem.create({
