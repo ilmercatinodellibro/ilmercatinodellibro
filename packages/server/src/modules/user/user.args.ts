@@ -40,6 +40,24 @@ export class UsersQueryResult {
 }
 
 @InputType()
+export class MembersQueryFilter {
+  @Field(() => String, { defaultValue: "" })
+  search?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  [Role.ADMIN]?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  [Role.OPERATOR]?: boolean;
+}
+
+@ArgsType()
+export class MembersQueryArgs extends LocationBoundInput {
+  @Field(() => MembersQueryFilter, { nullable: true })
+  filters?: MembersQueryFilter;
+}
+
+@InputType()
 export class RemoveMemberPayload extends LocationBoundInput {
   @Field()
   id!: string;

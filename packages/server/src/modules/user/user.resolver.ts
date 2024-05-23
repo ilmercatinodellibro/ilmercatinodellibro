@@ -15,7 +15,7 @@ import { Prisma } from "@prisma/client";
 import * as argon2 from "argon2";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
-import { Role } from "src/@generated";
+import { QueryMode, Role } from "src/@generated";
 import { User } from "src/@generated/user";
 import { AuthService } from "src/modules/auth/auth.service";
 import { LocationBoundQueryArgs } from "src/modules/retail-location";
@@ -23,6 +23,7 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
+  MembersQueryArgs,
   RegisterUserPayload,
   RemoveMemberPayload,
   SettleRemainingType,
@@ -122,7 +123,7 @@ export class UserResolver {
 
   @Query(() => [User])
   async members(
-    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @Args() { retailLocationId, filters }: MembersQueryArgs,
     @CurrentUser() user: User,
   ) {
     await this.authService.assertMembership({
@@ -133,14 +134,121 @@ export class UserResolver {
         "You are not allowed to view the list of members for this location.",
     });
 
-    return this.prisma.user.findMany({
-      where: {
-        deletedAt: null,
-        memberships: {
-          some: {
-            retailLocationId,
+    return (
+      await this.prisma.locationMember.findMany({
+        where: {
+          retailLocationId,
+          AND: [
+            {
+              user: {
+                deletedAt: null,
+                memberships: {
+                  some: {
+                    retailLocationId,
+                  },
+                },
+              },
+            },
+            ...(filters
+              ? [
+                  {
+                    OR: [
+                      ...(filters.ADMIN
+                        ? [
+                            {
+                              role: Role.ADMIN,
+                            },
+                          ]
+                        : []),
+                      ...(filters.OPERATOR
+                        ? [
+                            {
+                              role: Role.OPERATOR,
+                            },
+                          ]
+                        : []),
+
+                      ...(filters.search
+                        ? [
+                            {
+                              user: {
+                                OR: [
+                                  {
+                                    firstname: {
+                                      contains: filters.search,
+                                      mode: QueryMode.insensitive,
+                                    },
+                                  },
+                                  {
+                                    lastname: {
+                                      contains: filters.search,
+                                      mode: QueryMode.insensitive,
+                                    },
+                                  },
+                                  {
+                                    email: {
+                                      contains: filters.search,
+                                      mode: QueryMode.insensitive,
+                                    },
+                                  },
+                                  {
+                                    phoneNumber: {
+                                      contains: filters.search,
+                                      mode: QueryMode.insensitive,
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]
+              : []),
+          ],
+        },
+        include: {
+          user: true,
+        },
+        distinct: "userId",
+        orderBy: {
+          user: {
+            firstname: "asc",
           },
         },
+      })
+    ).map(({ user }) => user);
+  }
+
+  @Query(() => [User])
+  async allUsers(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() user: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: user.id,
+      message: "You are not allowed to see the customer list of this location",
+    });
+
+    return await this.prisma.user.findMany({
+      where: {
+        emailVerified: true,
+        memberships: {
+          every: {
+            NOT: {
+              retailLocationId,
+            },
+          },
+        },
+        OR: [
+          {
+            deletedAt: null,
+          },
+          {
+            deletedAt: { gt: new Date() },
+          },
+        ],
       },
     });
   }

@@ -1,71 +1,54 @@
 <template>
-  <q-page class="justify-center q-pa-xl row">
-    <q-card class="col-grow column max-width-1024 relative">
-      <q-card-section class="justify-end row">
-        <q-input v-model="search" dense :label="t(`common.search`)" outlined>
-          <template #append>
-            <q-icon
-              :name="mdiMagnify"
-              color="black-54"
-              class="cursor-pointer"
-            />
-          </template>
-        </q-input>
-        <q-btn class="q-ml-sm" color="black-12" outline @click="addUser">
-          <span class="text-black-87">
-            <q-icon :name="mdiAccountPlus" />
-            {{ t("actions.addNewUser") }}
-          </span>
-        </q-btn>
-      </q-card-section>
-      <q-separator color="black-12" />
-      <q-card-section v-if="!loading" class="column">
-        <span
-          v-for="user in filteredUserList"
-          :key="user.id"
-          class="items-center min-height-52 q-my-sm row"
-        >
-          <span class="col-3">
-            <q-icon
-              class="q-mr-sm"
-              :name="mdiAccountCircle"
-              color="secondary"
-              size="sm"
-            />
-
-            {{ `${user.firstname} ${user.lastname}` }}
-          </span>
-          <span class="col items-center justify-center q-ml-md text-black-54">
-            {{ user.email }}
-          </span>
-          <q-select
-            :model-value="user.role"
-            :options="ROLE_TYPE_OPTIONS"
-            class="col-2"
-            color="secondary"
-            outlined
-            dense
-            map-options
-            @update:model-value="(value) => updateUser(user.id, value.value)"
-          />
+  <q-page class="justify-center row">
+    <q-card class="absolute-full column q-ma-md">
+      <header-search-bar-filters
+        v-model="tableFilter"
+        :filter-options="filterOptions"
+      >
+        <template #side-actions>
           <q-btn
-            class="q-ml-md"
-            color="black-12"
-            outline
-            dense
-            padding="xs sm"
-            no-caps
-            @click="deleteUser(user.id)"
-          >
-            <span class="text-black-87">{{ t("actions.remove") }}</span>
-          </q-btn>
-        </span>
+            :label="t('actions.addNewUser')"
+            color="accent"
+            @click="addUser()"
+          />
+        </template>
+      </header-search-bar-filters>
+
+      <q-separator color="black-12" />
+
+      <q-card-section v-if="!loading" class="col column no-padding">
+        <dialog-table
+          v-model:pagination="pagination"
+          :columns="columns"
+          :filter="tableFilter"
+          :filter-method="filterMethod"
+          :loading="loading"
+          :rows="members"
+          class="col flex-delegate-height-management"
+          @request="onRequest"
+        >
+          <template #body-cell-actions="{ row, col }">
+            <q-td :class="col.classes" auto-width>
+              <chip-button
+                v-if="row.role !== 'ADMIN'"
+                :label="
+                  // check if this needs a different label
+                  t('actions.remove')
+                "
+                color="negative"
+                @click="deleteUser(row.id)"
+              />
+            </q-td>
+          </template>
+        </dialog-table>
       </q-card-section>
+
       <q-card-section v-else class="col items-center justify-center row">
         <q-spinner size="xl" />
       </q-card-section>
+
       <span
-        v-if="filteredUserList.length === 0"
+        v-if="members.length === 0"
         class="absolute-center items-center justify-center text-black-54 text-subtitle1"
       >
         {{ t("general.noSearchResults") }}
@@ -75,65 +58,84 @@
 </template>
 
 <script setup lang="ts">
-import {
-  mdiAccountCircle,
-  mdiAccountPlus,
-  mdiMagnify,
-} from "@quasar/extras/mdi-v5";
-import { Dialog, Notify } from "quasar";
+import { ApolloError } from "@apollo/client";
+import { Dialog, Notify, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Role } from "src/@generated/graphql";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
+import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
+import ChipButton from "src/components/manage-users/chip-button.vue";
+import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
-import { ServerError } from "src/models/server";
 import { useSendRegistrationInviteMutation } from "src/services/auth.graphql";
 import { useMembersService } from "src/services/member";
 import { useRetailLocationService } from "src/services/retail-location";
+import { MemberFragment, useGetMembersQuery } from "src/services/user.graphql";
 
 const { t } = useI18n();
 
-const search = ref("");
+const { loading, removeUser } = useMembersService();
+const { members, refetch: refetchMembers } = useGetMembersQuery(() => ({
+  retailLocationId: selectedLocation.value.id,
+}));
 
-const { members, loading, removeUser, updateRole } = useMembersService();
+const pagination = ref({
+  rowsNumber: members.value.length,
+});
+
+const { filterMethod, filterOptions, tableFilter, refetchFilterProxy } =
+  useTableFilters("general.rolesAndPermissions.filters");
 
 const { sendRegistrationInvite } = useSendRegistrationInviteMutation();
 
-const ROLE_TYPE_OPTIONS = computed(() =>
-  (["ADMIN", "OPERATOR"] satisfies Role[]).map((type) => ({
-    label: t(`roleMap.${type}`),
-    value: type,
-  })),
-);
-
-const filteredUserList = computed(() =>
-  members.value.filter((user) =>
-    `${user.firstname} ${user.lastname} ${user.email}`
-      .toLowerCase()
-      .includes(search.value.toLowerCase()),
-  ),
-);
-
-async function updateUser(id: string, role: Role) {
+const onRequest: QTableProps["onRequest"] = async () => {
   try {
-    await updateRole(id, role);
-    Notify.create({
-      message: t("general.userRoleUpdated"),
-      color: "positive",
+    await refetchMembers({
+      retailLocationId: selectedLocation.value.id,
+      filters: refetchFilterProxy.value,
     });
-  } catch (e) {
-    const { message, status } = e as ServerError;
-
-    // TODO: implement centralized error handling
-
-    notifyError(message);
-
-    if (![401, 422].includes(status)) {
-      throw e;
-    }
+    pagination.value.rowsNumber = members.value.length;
+  } catch (error) {
+    console.error(error);
   }
-}
+};
+
+const columns = computed<QTableColumn<MemberFragment>[]>(() => [
+  {
+    field: "firstname",
+    label: t("auth.firstName"),
+    name: "first-name",
+    align: "left",
+  },
+  {
+    field: "lastname",
+    label: t("auth.lastName"),
+    name: "last-name",
+    align: "left",
+  },
+  {
+    field: "email",
+    label: t("auth.email"),
+    name: "email",
+    align: "left",
+  },
+  {
+    field: "role",
+    label: t("general.role"),
+    name: "role",
+    align: "left",
+    format: (val: Role) => t(`roleMap.${val}`),
+  },
+  {
+    field: () => undefined,
+    label: "",
+    name: "actions",
+    align: "center",
+  },
+]);
 
 function deleteUser(id: string) {
   Dialog.create({
@@ -151,15 +153,11 @@ function deleteUser(id: string) {
         color: "positive",
       });
     } catch (e) {
-      const { message, status } = e as ServerError;
+      const { message } = e as ApolloError;
 
       // TODO: implement centralized error handling
 
       notifyError(message);
-
-      if (![401, 422].includes(status)) {
-        throw e;
-      }
     }
   });
 }
@@ -168,9 +166,6 @@ const { selectedLocation } = useRetailLocationService();
 function addUser() {
   Dialog.create({
     component: AddNewUserDialog,
-    componentProps: {
-      title: t("actions.addUser"),
-    },
   }).onOk(async (email: string) => {
     try {
       await sendRegistrationInvite({
@@ -184,15 +179,11 @@ function addUser() {
         color: "positive",
       });
     } catch (e) {
-      const { message, status } = e as ServerError;
+      const { message } = e as ApolloError;
 
       // TODO: implement centralized error handling
 
       notifyError(message);
-
-      if (![401, 422].includes(status)) {
-        throw e;
-      }
     }
   });
 }

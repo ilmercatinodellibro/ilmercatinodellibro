@@ -1,3 +1,5 @@
+import { Role } from "src/@generated/graphql";
+
 export default {
   mainNavigation: "Principale",
   username: "Nome utente",
@@ -73,5 +75,18 @@ export default {
       "Stai effettuando il reset di tutti i dati di sistema per predisporre il software alle attività dell'anno successivo. Vuoi procedere?",
     resetButton: "Effettua reset annuale",
     resetConfirmButton: "Effettua reset",
+  },
+  role: "Ruolo",
+  rolesAndPermissions: {
+    filters: {
+      // customer: "Clienti",
+      OPERATOR: "Operatori",
+      ADMIN: "Amministratori",
+    } satisfies Record<Role, string>,
+    addNewOperator: {
+      title: "Aggiungi Operatore",
+      message:
+        "Gli operatori hanno i permessi per accedere alle pagine di gestione (Magazzino, Catalogo, Utenti e Movimenti) e alle loro funzionalità.",
+    },
   },
 };

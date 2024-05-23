@@ -10,7 +10,11 @@ import {
 export function useMembersService() {
   const { selectedLocation } = useRetailLocationService();
 
-  const { members, loading } = useGetMembersQuery(() => ({
+  const {
+    members,
+    loading,
+    refetch: refetchMembers,
+  } = useGetMembersQuery(() => ({
     retailLocationId: selectedLocation.value.id,
   }));
 
@@ -65,5 +69,6 @@ export function useMembersService() {
     loading,
     removeUser,
     updateRole,
+    refetchMembers,
   };
 }

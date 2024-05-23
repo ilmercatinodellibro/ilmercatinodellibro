@@ -46,8 +46,8 @@ fragment Customer on User {
   booksInCart(retailLocationId: $retailLocationId)
 }
 
-query getMembers($retailLocationId: String!) {
-  members(retailLocationId: $retailLocationId) {
+query getMembers($retailLocationId: String!, $filters: MembersQueryFilter) {
+  members(filters: $filters) {
     ...Member
   }
 }
@@ -63,7 +63,15 @@ query getCustomers(
     rowsCount
     rows {
       ...Customer
+      ...Member
     }
+  }
+}
+
+query getAllCustomers($retailLocationId: String!) {
+  allUsers(retailLocationId: $retailLocationId) {
+    ...Customer
+    ...Member
   }
 }
 
