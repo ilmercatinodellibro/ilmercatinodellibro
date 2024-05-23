@@ -7,7 +7,8 @@
       >
         <template #side-actions>
           <q-btn
-            :label="t('actions.addNewUser')"
+            :icon="mdiPlus"
+            :label="t('general.rolesAndPermissions.addNewOperator.title')"
             color="accent"
             @click="addUser()"
           />
@@ -59,6 +60,7 @@
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client";
+import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { Dialog, Notify, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
