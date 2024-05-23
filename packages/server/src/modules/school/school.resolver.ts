@@ -34,6 +34,9 @@ export class SchoolResolver {
       },
       orderBy: [
         {
+          schoolCode: "asc",
+        },
+        {
           grade: "asc",
         },
         {
