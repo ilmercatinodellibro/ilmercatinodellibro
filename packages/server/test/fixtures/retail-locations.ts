@@ -16,7 +16,7 @@ const IT_RE_FAQ = `<section>
   <p>
     <span style="font-size: 14pt"
       ><strong
-        ><span style="text-decoration: underline"> IMPORTANTE!</span> Per
+        ><span style="text-decoration: underline">IMPORTANTE!</span> Per
         comprare/vendere libri, è consigliato prendere appuntamento. Sarà
         possibile farlo tramite mail, Facebook, Instagram e telefono.<br /></strong
     ></span>
@@ -233,12 +233,12 @@ const IT_RE_FAQ = `<section>
           >.
         </p>
         <p>
-          Dal 2023<strong
+          Dal 2023 <strong
             >non viene più richiesta la quota di iscrizione iniziale</strong
-          >di 2 euro.<br />Dovrete effettuare la<strong> registrazione</strong>
-          &nbsp;ai nostri servizi direttamente<strong>
+          > di 2 euro.<br />Dovrete effettuare la<strong> registrazione</strong>
+          ai nostri servizi direttamente<strong>
             &nbsp;online da casa</strong
-          ><strong> vostra</strong> , ciò<strong> &nbsp;</strong> vi permetterà
+          ><strong>vostra</strong> , ciò<strong> &nbsp;</strong> vi permetterà
           di risparmiare tempo ed energie: una volta registrati potrete infatti
           controllare comodamente da casa vostra quali libri abbiamo in
           magazzino e di conseguenza inviarci le vostre richieste, oltre a
@@ -320,7 +320,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
     ><span> Creare un utente registrandosi sul nostro sito</span
     > <a href="https://mo.ilmercatinodellibro.com/"
       ><span> mo.ilmercatinodellibro.com</span></a
-    ><span> , direttamente da casa o in sede.</span>
+    ><span>, direttamente da casa o in sede.</span>
   </p>
   <p>
     <b> Mi conviene creare l'utente da casa?</b
@@ -429,9 +429,9 @@ export const RE_RETAIL_POINT: translatedRetailLocationCreateInput = {
       whoAreWeContent: IT_WHO_ARE_WE,
     },
     "en-US": {
-      faqContent: "",
-      joinUsContent: "",
-      whoAreWeContent: "",
+      faqContent: IT_RE_FAQ,
+      joinUsContent: IT_JOIN_US,
+      whoAreWeContent: IT_WHO_ARE_WE,
     },
   },
   phoneNumber: "3516215189",
@@ -461,9 +461,9 @@ export const MO_RETAIL_POINT: translatedRetailLocationCreateInput = {
       whoAreWeContent: IT_WHO_ARE_WE,
     },
     "en-US": {
-      faqContent: "",
-      joinUsContent: "",
-      whoAreWeContent: "",
+      faqContent: IT_MO_FAQ,
+      joinUsContent: IT_JOIN_US,
+      whoAreWeContent: IT_WHO_ARE_WE,
     },
   },
   phoneNumber: "3515472756",
