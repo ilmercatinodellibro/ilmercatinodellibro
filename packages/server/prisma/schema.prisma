@@ -142,27 +142,26 @@ model PushSubscription {
 }
 
 model RetailLocation {
-  id                    String  @id
-  name                  String
-  registrationEnabled   Boolean @default(false) @map("registration_enabled")
-  payOffEnabled         Boolean @default(false) @map("pay_off_enabled")
-  fullAddress           String  @map("full_address")
-  email                 String  @unique
-  phoneNumber           String  @default("") @map("phone_number")
-  facebookLink          String  @default("") @map("facebook_link")
-  instagramLink         String  @default("") @map("instagram_link")
-  whoAreWeContent       String  @default("") @map("who_are_we_content")
-  joinUsContent         String  @default("") @map("join_us_content")
-  faqContent            String  @default("") @map("faq_content")
-  buyRate               Float   @default(30) @map("buy_rate")
-  sellRate              Float   @default(55) @map("sell_rate")
-  maxBookingDays        Int     @default(7) @map("max_booking_days")
-  warehouseMaxBlockSize Int     @default(10) @map("warehouse_max_block_size")
+  id                  String  @id
+  name                String
+  registrationEnabled Boolean @default(false) @map("registration_enabled")
+  payOffEnabled       Boolean @default(false) @map("pay_off_enabled")
+  fullAddress         String  @map("full_address")
+  email               String  @unique
+  phoneNumber         String  @default("") @map("phone_number")
+  facebookLink        String  @default("") @map("facebook_link")
+  instagramLink       String  @default("") @map("instagram_link")
+  infoPagesContent    Json?   @map("info_pages_content")
+
+  buyRate               Float @default(30) @map("buy_rate")
+  sellRate              Float @default(55) @map("sell_rate")
+  maxBookingDays        Int   @default(7) @map("max_booking_days")
+  warehouseMaxBlockSize Int   @default(10) @map("warehouse_max_block_size")
   /// @FieldType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', output: true })
   /// @FieldType({ name: 'ThemeInput', from: 'src/modules/retail-location/theme.args', input: true, match: '*Input' })
   /// @PropertyType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', namedImport: true, output: true, input: true })
   // We can't set the default to a string containing JSON due to prisma-nestjs-graphql limitations, so have to use dbgenerated(), using jsonb_ because Prisma uses jsonb for Json type
-  theme                 Json    @default(dbgenerated("jsonb_build_object('colors', jsonb_build_object('primary', '#798aa8', 'secondary', '#76e1a7', 'accent', '#c2664d'))"))
+  theme                 Json  @default(dbgenerated("jsonb_build_object('colors', jsonb_build_object('primary', '#798aa8', 'secondary', '#76e1a7', 'accent', '#c2664d'))"))
 
   books    Book[]           @relation("RetailLocationBooks")
   carts    Cart[]

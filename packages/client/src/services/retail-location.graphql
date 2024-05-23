@@ -20,11 +20,9 @@ fragment RetailLocation on RetailLocation {
   name
   fullAddress
   phoneNumber
-  joinUsContent
   instagramLink
   facebookLink
-  whoAreWeContent
-  faqContent
+  infoPagesContent
 
   ...RetailLocationSettings
 
