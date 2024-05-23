@@ -21,28 +21,46 @@
 
       <q-scroll-area class="col-grow">
         <q-list class="drawer-list" separator>
-          <template v-if="user && hasUserRole">
-            <q-item
-              v-ripple
-              :to="{ name: AvailableRouteNames.MyData }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="my-data"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t("general.myData") }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiAccountCircle" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("general.myData") }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
+          <q-item v-if="user" class="q-py-md">
+            <q-item-section side>
+              <q-icon :name="mdiAccountCircle" color="primary" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="column">
+                <span class="text-body1 text-weight-medium">
+                  {{ `${user.firstname} ${user.lastname}` }}
+                </span>
+                <span
+                  class="line-height-50 text-black-54 text-subtitle2 text-weight-regular"
+                >
+                  {{ user.email }}
+                </span>
+              </q-item-label>
+            </q-item-section>
+          </q-item>
 
+          <q-item
+            v-ripple
+            :to="{ name: AvailableRouteNames.MyData }"
+            active-class="bg-black-activated-light"
+            class="drawer-item"
+            clickable
+            data-cy="my-data"
+          >
+            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+              {{ t("general.myData") }}
+            </q-tooltip>
+            <q-item-section side>
+              <q-icon :name="mdiBadgeAccountHorizontal" color="black-54" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="ellipsis text-size-16">
+                {{ t("general.myData") }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <template v-if="user && hasUserRole">
             <q-item
               v-ripple
               active-class="bg-black-activated-light"
@@ -171,33 +189,6 @@
           </template>
 
           <template v-if="user && (hasAdminRole || hasOperatorRole)">
-            <q-item class="q-pr-sm q-py-md">
-              <q-item-section side>
-                <q-icon :name="mdiAccountCircle" color="primary" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="column">
-                  <span class="text-body1 text-weight-medium">
-                    {{ `${user.firstname} ${user.lastname}` }}
-                  </span>
-                  <span
-                    class="line-height-50 text-black-54 text-subtitle2 text-weight-regular"
-                  >
-                    {{ user.email }}
-                  </span>
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-btn
-                  :icon="mdiPencil"
-                  color="black-54"
-                  flat
-                  round
-                  @click="editCurrentUserData()"
-                />
-              </q-item-section>
-            </q-item>
-
             <q-item
               v-ripple
               :to="{ name: AvailableRouteNames.Warehouse }"
@@ -420,6 +411,7 @@
 import {
   mdiAccountCircle,
   mdiAccountMultiple,
+  mdiBadgeAccountHorizontal,
   mdiBookOpenBlankVariant,
   mdiBookshelf,
   mdiChartLine,
@@ -434,16 +426,13 @@ import {
   mdiInformationOutline,
   mdiKey,
   mdiMenuDown,
-  mdiPencil,
   mdiWeb,
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
 import { Dialog, Notify, QTooltipProps, Screen } from "quasar";
 import { computed, provide, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { UpdateUserPayload } from "src/@generated/graphql";
 import { setLanguage } from "src/boot/i18n";
-import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
 import SettingsDialog from "src/components/settings-dialog.vue";
 import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
 import {
@@ -501,8 +490,7 @@ const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 
 const { logout } = useLogoutMutation();
-const { user, hasAdminRole, hasOperatorRole, hasUserRole, updateCurrentUser } =
-  useAuthService();
+const { user, hasAdminRole, hasOperatorRole, hasUserRole } = useAuthService();
 
 const { isDrawerMini, isDrawerOpen, showLateralDrawer, isMobile } =
   useLateralDrawer();
