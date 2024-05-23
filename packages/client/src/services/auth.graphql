@@ -6,6 +6,7 @@ fragment CurrentUser on User {
   phoneNumber
   dateOfBirth
   delegate
+  locale
   role(retailLocationId: $retailLocationId)
 }
 

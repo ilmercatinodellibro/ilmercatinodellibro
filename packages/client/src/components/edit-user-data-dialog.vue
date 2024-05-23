@@ -112,7 +112,7 @@ const hidePassword = ref(true);
 
 const formData = computed<
   Record<
-    keyof UserData,
+    Exclude<keyof UserData, "locale">,
     Omit<QInputProps, "modelValue"> & {
       infoLabel?: string;
     }

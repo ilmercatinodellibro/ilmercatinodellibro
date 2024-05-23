@@ -403,13 +403,15 @@ export class UserResolver {
       actor.id,
       payload.retailLocationId,
     );
-    return this.userService.createUser(
-      omit(payload, [
+    return this.userService.createUser({
+      ...omit(payload, [
         "passwordConfirmation",
         "retailLocationId",
         ...(actorIsAdmin ? [] : (["discount"] as const)),
       ]),
-    );
+      // TODO: maybe offer a way to choose the locale when inviting a user
+      locale: actor.locale,
+    });
   }
 
   @Mutation(() => User)

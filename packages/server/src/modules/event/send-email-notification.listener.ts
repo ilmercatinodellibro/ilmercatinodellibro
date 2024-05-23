@@ -12,6 +12,7 @@ import { PrismaService } from "../prisma/prisma.service";
 
 type EmailPayload = Pick<Event, "name" | "description" | "createdAt"> & {
   location: RetailLocation;
+  locale: string;
 };
 
 @Injectable()
@@ -28,14 +29,16 @@ export class SendEmailNotificationListener {
     event,
     notification,
   }: NewNotificationPayload) {
-    const { email: userEmail } = await this.prisma.user.findUniqueOrThrow({
-      where: {
-        id: notification.userId,
-      },
-      select: {
-        email: true,
-      },
-    });
+    const { email: userEmail, locale } =
+      await this.prisma.user.findUniqueOrThrow({
+        where: {
+          id: notification.userId,
+        },
+        select: {
+          email: true,
+          locale: true,
+        },
+      });
     const location = await this.prisma.retailLocation.findUniqueOrThrow({
       where: {
         id: event.locationId,
@@ -47,12 +50,13 @@ export class SendEmailNotificationListener {
       description: event.description,
       createdAt: event.createdAt,
       location,
+      locale: locale ?? "it",
     });
   }
 
   async #sendEventEmail(
     email: string,
-    { name, description, createdAt, location }: EmailPayload,
+    { name, description, createdAt, location, locale }: EmailPayload,
   ) {
     const reserveUrl = `${this.rootConfig.clientUrl}/${location.id}/reserve-books`;
     const date = createdAt.toLocaleDateString("en-US", {
@@ -75,7 +79,7 @@ export class SendEmailNotificationListener {
           date,
           reserveUrl,
         },
-        template: "event-trigger-notification",
+        template: `${locale}/event-trigger-notification`,
       });
     } catch {
       throw new UnprocessableEntityException("Unable to send email");

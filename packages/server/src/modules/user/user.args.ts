@@ -5,6 +5,7 @@ import {
   Int,
   IntersectionType,
   ObjectType,
+  PartialType,
   PickType,
   registerEnumType,
 } from "@nestjs/graphql";
@@ -75,7 +76,7 @@ export class RegisterUserPayload extends IntersectionType(
 @InputType()
 export class UpdateUserPayload extends IntersectionType(
   PickType(
-    User,
+    PartialType(User),
     [
       "firstname",
       "lastname",
@@ -84,6 +85,7 @@ export class UpdateUserPayload extends IntersectionType(
       "id",
       "delegate",
       "dateOfBirth",
+      "locale",
     ],
     InputType,
   ),

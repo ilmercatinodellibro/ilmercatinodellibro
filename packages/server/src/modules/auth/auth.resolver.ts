@@ -192,6 +192,8 @@ export class AuthResolver {
       invitedBy: operator,
       token: inviteToken,
       locationId: retailLocationId,
+      // TODO: allow the operator to specify the locale to invite the user in
+      locale: operator.locale ?? "it",
     });
   }
 }

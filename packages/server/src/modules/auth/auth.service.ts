@@ -26,6 +26,7 @@ interface SendInvitePayload {
   invitedBy: User;
   token: string;
   locationId: string;
+  locale: string;
 }
 
 @Injectable()
@@ -108,18 +109,22 @@ export class AuthService {
     invitedBy,
     locationId,
     token,
+    locale,
   }: SendInvitePayload) {
     const url = `${this.rootConfig.clientUrl}/${locationId}/invite?token=${token}&email=${toEmail}`;
 
     try {
       return await this.mailerService.sendMail({
-        subject: "Invitation to join Il Mercatino del Libro",
+        subject:
+          locale === "en-US"
+            ? "Invitation to join Il Mercatino del Libro"
+            : "Invito a unirsi a Il Mercatino del Libro",
         to: toEmail,
         context: {
           invitedByName: `${invitedBy.firstname} ${invitedBy.lastname}`,
           url,
         },
-        template: "invite-user",
+        template: `${locale}/invite-user`,
       });
     } catch {
       throw new UnprocessableEntityException("Unable to send email");
@@ -128,16 +133,17 @@ export class AuthService {
 
   async sendVerificationLink(locationId: string, user: User, token: string) {
     const url = `${this.rootConfig.serverUrl}/${EMAIL_VERIFICATION_ENDPOINT}?locationId=${locationId}&token=${token}`;
+    const locale = user.locale ?? "it";
 
     try {
       return await this.mailerService.sendMail({
         to: user.email,
-        subject: "Email confirmation",
+        subject: locale === "en-US" ? "Email confirmation" : "Conferma email",
         context: {
           name: `${user.firstname} ${user.lastname}`,
           url,
         },
-        template: "welcome",
+        template: `${locale}/welcome`,
       });
     } catch {
       throw new UnprocessableEntityException("Unable to send email");
@@ -147,16 +153,17 @@ export class AuthService {
   async sendPasswordResetLink(locationId: string, user: User, token: string) {
     // Make sure the URL below is in sync with `AvailableRouteNames.ChangePassword` in the client project
     const url = `${this.rootConfig.clientUrl}/${locationId}/change-password?token=${token}`;
+    const locale = user.locale ?? "it";
 
     try {
       return await this.mailerService.sendMail({
         to: user.email,
-        subject: "Reset password",
+        subject: locale === "en-US" ? "Reset password" : "Reimposta password",
         context: {
           name: `${user.firstname} ${user.lastname}`,
           url,
         },
-        template: "forgot-password",
+        template: `${locale}/forgot-password`,
       });
     } catch {
       throw new UnprocessableEntityException("Unable to send email");
