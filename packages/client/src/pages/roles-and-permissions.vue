@@ -32,10 +32,7 @@
             <q-td :class="col.classes" auto-width>
               <chip-button
                 v-if="row.role !== 'ADMIN'"
-                :label="
-                  // check if this needs a different label
-                  t('actions.remove')
-                "
+                :label="t('actions.removeOperator')"
                 color="negative"
                 @click="deleteUser(row.id)"
               />

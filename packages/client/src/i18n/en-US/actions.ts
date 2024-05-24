@@ -18,4 +18,5 @@ export default {
   editName: "Edit Name",
   selectFeedbackType: "Select feedback type",
   update: "Update",
+  removeOperator: "Remove Operator Role",
 };
