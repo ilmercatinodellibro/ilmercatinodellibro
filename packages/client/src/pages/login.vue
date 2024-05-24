@@ -1,6 +1,6 @@
 <template>
-  <q-page class="gap-32 items-start justify-evenly q-pa-md reverse row">
-    <q-card class="column form-card gap-24 q-pa-lg text-center">
+  <q-page class="gap-32 items-start justify-evenly q-pa-lg reverse row">
+    <q-card class="column form-card gap-24 q-my-xl q-pa-lg text-center">
       <q-img :src="theme.logo" fit="contain" height="60px" />
 
       <q-card-section class="no-padding">
