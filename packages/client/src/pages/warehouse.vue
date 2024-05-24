@@ -6,17 +6,18 @@
         :filter-options="filterOptions"
       >
         <template #side-actions>
-          <q-btn
-            :icon="mdiSort"
-            :label="
-              t(
-                `warehouse.${isSortedByCopyCode ? 'sortByISBN' : 'sortByCopyCode'}`,
-              )
-            "
-            no-wrap
-            outline
-            @click="swapView()"
-          />
+          <q-btn color="black-12" no-wrap outline @click="swapView()">
+            <q-item-section class="q-pl-none q-pr-sm text-black-87" side>
+              <q-icon :name="mdiSort" />
+            </q-item-section>
+            <q-item-section class="text-black-87">
+              {{
+                t(
+                  `warehouse.${isSortedByCopyCode ? "sortByISBN" : "sortByCopyCode"}`,
+                )
+              }}
+            </q-item-section>
+          </q-btn>
         </template>
 
         <!-- TODO: add a button to check the other warehouse out -->

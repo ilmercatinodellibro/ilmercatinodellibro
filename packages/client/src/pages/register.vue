@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Adjust the page to the new mockup -->
   <q-page class="justify-center registration-page row">
     <q-card class="column form-card gap-24 items-stretch no-wrap q-pa-lg">
       <q-card-section class="column gap-24 no-padding no-wrap">
