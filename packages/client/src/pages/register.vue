@@ -9,51 +9,57 @@
           greedy
           @submit="onSubmit"
         >
-          <q-input
-            v-for="fieldData in formData"
-            :key="fieldData.field"
-            v-model="user[fieldData.field]"
-            v-bind="fieldData.inputData"
-            :autocomplete="
-              [
-                'password',
-                'passwordConfirmation',
-                'email',
-                'confirmEmail',
-              ].includes(fieldData.field)
-                ? 'new-password'
-                : 'off'
-            "
-            bottom-slots
-            class="col"
-            outlined
-            reactive-rules
-          >
-            <template
-              v-if="
-                ['password', 'passwordConfirmation', 'delegate'].includes(
-                  fieldData.field,
-                )
+          <template v-for="fieldData in formData" :key="fieldData.field">
+            <q-input
+              v-model="user[fieldData.field]"
+              v-bind="fieldData.inputData"
+              :autocomplete="
+                [
+                  'password',
+                  'passwordConfirmation',
+                  'email',
+                  'confirmEmail',
+                ].includes(fieldData.field)
+                  ? 'new-password'
+                  : 'off'
               "
-              #append
+              bottom-slots
+              class="col"
+              outlined
+              reactive-rules
             >
-              <q-icon
+              <template
                 v-if="
-                  fieldData.field === 'password' ||
-                  fieldData.field === 'passwordConfirmation'
+                  ['password', 'passwordConfirmation', 'delegate'].includes(
+                    fieldData.field,
+                  )
                 "
-                :name="showPassword ? mdiEyeOff : mdiEye"
-                class="cursor-pointer"
-                @click="showPassword = !showPassword"
-              />
+                #append
+              >
+                <q-icon
+                  v-if="
+                    fieldData.field === 'password' ||
+                    fieldData.field === 'passwordConfirmation'
+                  "
+                  :name="showPassword ? mdiEyeOff : mdiEye"
+                  class="cursor-pointer"
+                  @click="showPassword = !showPassword"
+                />
 
-              <q-icon v-if="fieldData.tooltip" :name="mdiInformationOutline">
-                <q-tooltip>
-                  {{ fieldData.tooltip }}
-                </q-tooltip>
-              </q-icon>
-            </template>
-          </q-input>
+                <q-icon v-if="fieldData.tooltip" :name="mdiInformationOutline">
+                  <q-tooltip>
+                    {{ fieldData.tooltip }}
+                  </q-tooltip>
+                </q-icon>
+              </template>
+            </q-input>
+
+            <password-strength-bar
+              v-if="fieldData.field === 'password'"
+              :password-to-check="user[fieldData.field]"
+              :steps="STRENGTH_BAR_STEPS"
+            />
+          </template>
 
           <q-btn
             class="full-width"
@@ -113,11 +119,14 @@ import {
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
+import { omit } from "lodash-es";
 import { QInputProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import SocialAuthButtons from "components/social-auth-buttons.vue";
 import { RegisterUserPayload } from "src/@generated/graphql";
+import { STRENGTH_BAR_STEPS } from "src/components/models";
+import PasswordStrengthBar from "src/components/password-strength-bar.vue";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import {
@@ -254,11 +263,7 @@ async function onSubmit() {
   try {
     await register({
       input: {
-        email: user.value.email,
-        firstname: user.value.firstname,
-        lastname: user.value.lastname,
-        password: user.value.password,
-        passwordConfirmation: user.value.passwordConfirmation,
+        ...omit(user.value, ["confirmEmail"]),
         retailLocationId: selectedLocation.value.id,
         delegate: user.value.delegate,
         locale: locale.value,
