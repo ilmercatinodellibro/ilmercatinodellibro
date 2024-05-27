@@ -5,6 +5,7 @@
         <q-img :src="theme.logo" fit="contain" height="60px" />
 
         <q-form
+          :id="`register-form-${uid()}`"
           class="column gap-16 items-stretch justify-center no-padding"
           greedy
           @submit="onSubmit"
@@ -120,7 +121,7 @@ import {
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { omit } from "lodash-es";
-import { QInputProps } from "quasar";
+import { QInputProps, uid } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import SocialAuthButtons from "components/social-auth-buttons.vue";
@@ -223,7 +224,8 @@ const formData = computed<
     field: "phoneNumber",
     inputData: {
       label: t("auth.phoneNumber"),
-      type: "tel",
+      mask: "phone",
+      unmaskedValue: true,
     },
   },
   {

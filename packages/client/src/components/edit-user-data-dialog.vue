@@ -144,6 +144,8 @@ const formData = computed<
     },
     phoneNumber: {
       label: t("auth.phoneNumber"),
+      mask: "phone",
+      unmaskedValue: true,
     },
     email: {
       label: t("auth.emailAddress"),
