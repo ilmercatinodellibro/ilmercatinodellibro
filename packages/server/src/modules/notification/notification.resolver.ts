@@ -2,6 +2,7 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Args, Mutation, Query, Resolver, Subscription } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
 import { Notification } from "src/@generated";
+import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { GraphQLContext } from "../auth/auth.models";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
@@ -71,17 +72,24 @@ export class NotificationResolver {
         },
       },
     });
-    const randomNotification = await this.prisma.notification.findFirstOrThrow({
-      skip: Math.floor(Math.random() * notificationsCount),
-      where: {
-        userId: {
-          not: userId,
+    const { event, ...randomNotification } =
+      await this.prisma.notification.findFirstOrThrow({
+        skip: Math.floor(Math.random() * notificationsCount),
+        where: {
+          userId: {
+            not: userId,
+          },
         },
-      },
-    });
+        include: {
+          event: true,
+        },
+      });
     this.eventEmitter.emit(NEW_NOTIFICATION_EVENT, {
-      ...randomNotification,
-      userId,
-    });
+      event,
+      notification: {
+        ...randomNotification,
+        userId,
+      },
+    } satisfies NewNotificationPayload);
   }
 }

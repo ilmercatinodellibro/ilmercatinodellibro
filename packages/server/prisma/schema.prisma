@@ -53,6 +53,7 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   deletedAt     DateTime? @map("deleted_at") @db.Timestamptz()
+  locale        String?
 
   delegate String?
 
@@ -113,6 +114,9 @@ model Event {
   ownerId String @map("owner_id")
   owner   User   @relation(fields: [ownerId], references: [id])
 
+  locationId String         @map("location_id")
+  location   RetailLocation @relation(fields: [locationId], references: [id])
+
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   notifications Notification[]
@@ -164,6 +168,7 @@ model RetailLocation {
   carts    Cart[]
   members  LocationMember[]
   receipts Receipt[]
+  events   Event[]
 }
 
 model LocationMember {

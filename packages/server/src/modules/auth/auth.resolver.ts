@@ -34,10 +34,8 @@ export class AuthResolver {
 
   @Public()
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async register(@Input() registerPayload: RegisterPayload) {
-    const existingUser = await this.userService.findUserByEmail(
-      registerPayload.email,
-    );
+  async register(@Input() payload: RegisterPayload) {
+    const existingUser = await this.userService.findUserByEmail(payload.email);
     // To prevent user enumeration attacks, we don't throw an error
     // TODO: it can still be guessed with the response time difference, add a relevant delay
     if (existingUser) {
@@ -45,22 +43,31 @@ export class AuthResolver {
     }
     // TODO: should we notify the user if they are trying to register while their account is in the deletion grace period?
 
-    if (registerPayload.password !== registerPayload.passwordConfirmation) {
+    if (payload.password !== payload.passwordConfirmation) {
       throw new UnprocessableEntityException(
         "Confirmation password doesn't match with provided password!",
       );
     }
     const user = await this.userService.createUser(
-      omit(registerPayload, ["passwordConfirmation"]),
+      omit(payload, ["passwordConfirmation", "retailLocationId"]),
     );
-    const token = this.authService.createVerificationToken(user.email);
+    const token = this.authService.createVerificationToken(
+      payload.retailLocationId,
+      user.email,
+    );
 
     //TODO: use queues instead of doing await
-    await this.authService.sendVerificationLink(user.email, token);
+    await this.authService.sendVerificationLink(
+      payload.retailLocationId,
+      user,
+      token,
+    );
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async registerWithToken(@Input() registerPayload: RegisterPayload) {
+    // FIXME: VULNERABILITY - verify if this email is the one that was invited
+
     const existingUser = await this.userService.findUserByEmail(
       registerPayload.email,
     );
@@ -76,9 +83,10 @@ export class AuthResolver {
       );
     }
     await this.userService.createUser(
-      omit(registerPayload, ["passwordConfirmation"]),
+      omit(registerPayload, ["passwordConfirmation", "retailLocationId"]),
       true,
     );
+    // TODO: create the location membership with the operator role
   }
 
   @Public()
@@ -102,7 +110,9 @@ export class AuthResolver {
 
   @Public()
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async sendPasswordResetLink(@Input() { email }: PasswordResetLinkPayload) {
+  async sendPasswordResetLink(
+    @Input() { email, retailLocationId }: PasswordResetLinkPayload,
+  ) {
     const user = await this.userService.findUserByEmail(email);
     // To prevent user enumeration attacks, we don't throw an error
     // TODO: it can still be guessed with the response time difference, add a relevant delay
@@ -112,7 +122,7 @@ export class AuthResolver {
     }
 
     const token = this.authService.createAccessToken(user.id);
-    await this.authService.sendPasswordResetLink(email, token);
+    await this.authService.sendPasswordResetLink(retailLocationId, user, token);
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
@@ -172,11 +182,18 @@ export class AuthResolver {
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async sendRegistrationInvite(
-    @Input() { email }: RegistrationInviteLinkPayload,
-    @CurrentUser() { id, firstname }: User,
+    @Input() { email, retailLocationId }: RegistrationInviteLinkPayload,
+    @CurrentUser() operator: User,
   ) {
     // FIXME: VULNERABILITY: we are sending an access token of the current user. The user we are sending to can use that to impersonate the current user.
-    const inviteToken = this.authService.createAccessToken(id);
-    await this.authService.sendInviteLink(email, firstname, inviteToken);
+    const inviteToken = this.authService.createAccessToken(operator.id);
+    await this.authService.sendInviteLink({
+      toEmail: email,
+      invitedBy: operator,
+      token: inviteToken,
+      locationId: retailLocationId,
+      // TODO: allow the operator to specify the locale to invite the user in
+      locale: operator.locale ?? "it",
+    });
   }
 }

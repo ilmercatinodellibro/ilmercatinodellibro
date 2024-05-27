@@ -85,7 +85,6 @@ import { CurrentUserFragment } from "src/services/auth.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { useDownloadUserData } from "src/services/user";
 import {
-  UserFragmentDoc,
   useDeleteUserAccountMutation,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
@@ -149,7 +148,7 @@ function modifyUserData() {
     }
 
     try {
-      const { cache } = await updateUser({
+      const { data: updatedUser } = await updateUser({
         input: {
           ...newUserData,
           email:
@@ -161,31 +160,7 @@ function modifyUserData() {
           retailLocationId: selectedLocation.value.id,
         },
       });
-
-      cache.updateFragment(
-        {
-          fragment: UserFragmentDoc,
-          fragmentName: "UserSummary",
-          id: cache.identify(user.value),
-        },
-        (data) => {
-          if (!data || !user.value) {
-            return;
-          }
-          return {
-            ...data,
-            ...newUserData,
-            email:
-              newUserData.email && newUserData.email !== user.value.email
-                ? newUserData.email
-                : user.value.email,
-            password: newUserData.password ? newUserData.password : undefined,
-            discount: newUserData.discount ?? false,
-          };
-        },
-      );
-
-      updateCurrentUser(newUserData);
+      updateCurrentUser(updatedUser);
     } catch {
       notifyError(t("auth.couldNotUpdate"));
     }

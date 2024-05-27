@@ -4,16 +4,16 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
+import { Event, RetailLocation } from "@prisma/client";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { MailService } from "../mail/mail.service";
 import { PrismaService } from "../prisma/prisma.service";
 
-interface EmailPayload {
-  name: string;
-  description: string;
-  createdAt: Date;
-}
+type EmailPayload = Pick<Event, "name" | "description" | "createdAt"> & {
+  location: RetailLocation;
+  locale: string;
+};
 
 @Injectable()
 export class SendEmailNotificationListener {
@@ -29,12 +29,19 @@ export class SendEmailNotificationListener {
     event,
     notification,
   }: NewNotificationPayload) {
-    const { email: userEmail } = await this.prisma.user.findUniqueOrThrow({
+    const { email: userEmail, locale } =
+      await this.prisma.user.findUniqueOrThrow({
+        where: {
+          id: notification.userId,
+        },
+        select: {
+          email: true,
+          locale: true,
+        },
+      });
+    const location = await this.prisma.retailLocation.findUniqueOrThrow({
       where: {
-        id: notification.userId,
-      },
-      select: {
-        email: true,
+        id: event.locationId,
       },
     });
 
@@ -42,14 +49,16 @@ export class SendEmailNotificationListener {
       name: event.name,
       description: event.description,
       createdAt: event.createdAt,
+      location,
+      locale: locale ?? "it",
     });
   }
 
   async #sendEventEmail(
     email: string,
-    { name, description, createdAt }: EmailPayload,
+    { name, description, createdAt, location, locale }: EmailPayload,
   ) {
-    const reserveUrl = `${this.rootConfig.clientUrl}/reserve-books`;
+    const reserveUrl = `${this.rootConfig.clientUrl}/${location.id}/reserve-books`;
     const date = createdAt.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -58,18 +67,19 @@ export class SendEmailNotificationListener {
       minute: "2-digit",
       hour12: false,
     });
+    const eventName = `${name} - ${location.name}`;
 
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: name,
+        subject: eventName,
         context: {
-          name,
+          name: eventName,
           description,
           date,
           reserveUrl,
         },
-        template: "event-trigger-notification",
+        template: `${locale}/event-trigger-notification`,
       });
     } catch {
       throw new UnprocessableEntityException("Unable to send email");

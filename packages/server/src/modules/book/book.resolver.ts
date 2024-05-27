@@ -338,6 +338,7 @@ export class BookResolver {
       bookRelationQuery("requests", {
         where: {
           bookId: book.id,
+          deletedAt: null,
         },
       }),
       bookRelationQuery("requests", {
@@ -359,7 +360,12 @@ export class BookResolver {
                 {
                   reservations: {
                     every: {
-                      OR: noConnectedSaleFilter,
+                      OR: [
+                        {
+                          deletedAt: null,
+                        },
+                        ...noConnectedSaleFilter,
+                      ],
                     },
                   },
                 },

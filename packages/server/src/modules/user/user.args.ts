@@ -3,7 +3,9 @@ import {
   Field,
   InputType,
   Int,
+  IntersectionType,
   ObjectType,
+  PartialType,
   PickType,
   registerEnumType,
 } from "@nestjs/graphql";
@@ -53,10 +55,13 @@ export class UpdateRolePayload extends LocationBoundInput {
 }
 
 @InputType()
-export class RegisterUserPayload extends PickType(
-  User,
-  ["email", "firstname", "lastname", "notes", "phoneNumber"],
-  InputType,
+export class RegisterUserPayload extends IntersectionType(
+  PickType(
+    User,
+    ["email", "firstname", "lastname", "notes", "phoneNumber"],
+    InputType,
+  ),
+  LocationBoundInput,
 ) {
   @Field(() => Boolean, { nullable: true })
   discount?: boolean;
@@ -66,39 +71,35 @@ export class RegisterUserPayload extends PickType(
 
   @Field()
   passwordConfirmation!: string;
-
-  @Field()
-  retailLocationId!: string;
 }
 
 @InputType()
-export class UpdateUserPayload extends PickType(
-  User,
-  [
-    "firstname",
-    "lastname",
-    "notes",
-    "phoneNumber",
-    "id",
-    "delegate",
-    "dateOfBirth",
-  ],
-  InputType,
+export class UpdateUserPayload extends IntersectionType(
+  PickType(
+    PartialType(User),
+    [
+      "firstname",
+      "lastname",
+      "email",
+      "phoneNumber",
+      "notes",
+      "delegate",
+      "dateOfBirth",
+      "discount",
+      "locale",
+    ],
+    InputType,
+  ),
+  LocationBoundInput,
 ) {
-  @Field(() => Boolean, { nullable: true })
-  discount?: boolean;
+  @Field()
+  id!: string;
 
   @Field(() => String, { nullable: true })
   password?: string;
 
   @Field(() => String, { nullable: true })
   passwordConfirmation?: string;
-
-  @Field()
-  retailLocationId!: string;
-
-  @Field(() => String, { nullable: true })
-  email?: string;
 }
 
 export enum SettleRemainingType {

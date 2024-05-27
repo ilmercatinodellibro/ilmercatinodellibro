@@ -159,17 +159,32 @@ export class BookRequestService {
     request: BookRequest,
     book: Book & { retailLocation: RetailLocation },
   ) {
+    const { id: userId, locale } = await this.prisma.user.findUniqueOrThrow({
+      where: {
+        id: request.userId,
+      },
+      select: {
+        id: true,
+        locale: true,
+      },
+    });
+
     // TODO: Maybe reuse the event (?)
     const { notifications, ...event } = await this.prisma.event.create({
       data: {
-        // name: `Requested Book Available - ${book.retailLocation.name}`,
-        // description: `The requested book "${book.title}" is now available for reservation.`,
-        name: `Libro richiesto disponibile - ${book.retailLocation.name}`,
-        description: `Il libro "${book.title}" che era stato richiesto è adesso disponibile per essere prenotato.`,
+        name:
+          locale === "en-US"
+            ? "Requested Book Available"
+            : "Libro richiesto disponibile",
+        description:
+          locale === "en-US"
+            ? `The requested book "${book.title}" is now available for reservation.`
+            : `Il libro "${book.title}" che era stato richiesto è adesso disponibile per essere prenotato.`,
         ownerId: request.userId,
+        locationId: book.retailLocationId,
         notifications: {
           create: {
-            userId: request.userId,
+            userId,
           },
         },
       },

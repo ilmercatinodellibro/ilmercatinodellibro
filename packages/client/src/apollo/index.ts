@@ -68,6 +68,9 @@ export function getClientOptions() {
         events: {
           merge: mergeIncoming,
         },
+        bookRequests: {
+          merge: mergeIncoming,
+        },
       },
     },
   };

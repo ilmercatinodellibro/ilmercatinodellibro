@@ -19,7 +19,7 @@
               :label="$t('manageUsers.requestedBooksDialog.deleteAll')"
               color="negative"
               no-wrap
-              @click="deleteAllRequested()"
+              @click="deleteAllRequests()"
             />
             <q-btn
               :label="$t('manageUsers.requestedBooksDialog.moveIntoReserved')"
@@ -54,7 +54,7 @@
             <q-btn :icon="mdiDotsVertical" dense flat round>
               <q-menu auto-close>
                 <span v-if="screenWidth === WidthSize.SM">
-                  <q-item clickable @click="deleteAllRequested()">
+                  <q-item clickable @click="deleteAllRequests()">
                     <q-item-section>
                       {{ $t("manageUsers.requestedBooksDialog.deleteAll") }}
                     </q-item-section>
@@ -123,12 +123,14 @@
 </template>
 
 <script setup lang="ts">
+import { ApolloCache } from "@apollo/client";
 import {
   mdiCart,
   mdiCartPlus,
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
+import { useApolloClient } from "@vue/apollo-composable";
 import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -137,7 +139,10 @@ import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
 import { useCartService } from "src/services/cart";
 import { useRequestService } from "src/services/request";
-import { RequestSummaryFragment } from "src/services/request.graphql";
+import {
+  GetRequestsDocument,
+  RequestSummaryFragment,
+} from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
 import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
@@ -156,6 +161,7 @@ const props = defineProps<{
   userData: CustomerFragment;
   retailLocationId: string;
 }>();
+// TODO: Update userData.booksInCart cache and directly use it instead
 const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -187,14 +193,16 @@ async function addBookToRequest(bookIsbn: string) {
   }
 
   try {
-    await createBookRequest({
+    const { data: newRequest, cache } = await createBookRequest({
       input: { bookId: book.id, userId: props.userData.id },
     });
-  } catch (e) {
+
+    updateRequestsCache(cache, (requests) => [...requests, newRequest]);
+  } catch (error) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
         t("reserveBooks.request"),
-        e,
+        error,
       ]),
     );
   } finally {
@@ -202,36 +210,78 @@ async function addBookToRequest(bookIsbn: string) {
   }
 }
 
+const { resolveClient } = useApolloClient();
 const { deleteBookRequest } = useDeleteRequestMutation();
-async function deleteAllRequested() {
-  try {
-    await Promise.all(
-      bookRequests.value.map(({ id }) => {
-        return deleteBookRequest({
-          input: {
-            id,
-          },
-        });
-      }),
-    );
-  } catch {
+async function deleteAllRequests() {
+  const { cache } = resolveClient();
+
+  const results = await Promise.allSettled(
+    bookRequests.value.map(async ({ id }) => {
+      await deleteBookRequest({
+        input: {
+          id,
+        },
+      });
+      return id;
+    }),
+  );
+
+  const failed = results.filter(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
+  if (failed.length > 0) {
     notifyError(t("bookErrors.notAllRequestsDeleted"));
-  } finally {
-    await refetchRequests();
   }
+
+  const removedIds = results
+    .filter(
+      (result): result is PromiseFulfilledResult<string> =>
+        result.status === "fulfilled",
+    )
+    .map(({ value }) => value);
+  updateRequestsCache(cache, (requests) =>
+    requests.filter(({ id }) => !removedIds.includes(id)),
+  );
 }
 async function deleteRequest(request: RequestSummaryFragment) {
   try {
-    await deleteBookRequest({
+    const { cache } = await deleteBookRequest({
       input: {
         id: request.id,
       },
     });
+
+    updateRequestsCache(cache, (requests) =>
+      requests.filter(({ id }) => id !== request.id),
+    );
   } catch {
     notifyError(t("bookErrors.notRequestDeleted"));
-  } finally {
-    await refetchRequests();
   }
+}
+
+function updateRequestsCache<T>(
+  cache: ApolloCache<T>,
+  getRequests: (
+    requests: RequestSummaryFragment[],
+  ) => RequestSummaryFragment[] | undefined,
+) {
+  cache.updateQuery(
+    {
+      query: GetRequestsDocument,
+      variables: {
+        retailLocationId: props.retailLocationId,
+        userId: props.userData.id,
+      },
+    },
+    (data) => {
+      if (!data) {
+        return;
+      }
+
+      const bookRequests = getRequests(data.bookRequests);
+      return bookRequests ? { bookRequests } : data;
+    },
+  );
 }
 
 const { useCreateReservationsMutation } = useReservationService();
@@ -253,6 +303,8 @@ async function reserveAllAvailableRequested() {
         bookIds: availableBookIds,
       },
     });
+    await refetchRequests();
+    // TODO: invalidate reservations cache
 
     Notify.create({
       type: "positive",
@@ -262,8 +314,6 @@ async function reserveAllAvailableRequested() {
     });
   } catch {
     notifyError(t("bookErrors.notAllReserved"));
-  } finally {
-    await refetchRequests();
   }
 }
 async function reserveBook({ book }: RequestSummaryFragment) {
@@ -300,7 +350,7 @@ async function moveAllIntoCart() {
   }
 
   try {
-    const cart = await openCart({
+    const { data: cart } = await openCart({
       input: {
         retailLocationId: props.retailLocationId,
         userId: props.userData.id,
@@ -311,7 +361,7 @@ async function moveAllIntoCart() {
       availableBooksRequestIds.map((id) => {
         return addToCart({
           input: {
-            cartId: cart.data.id,
+            cartId: cart.id,
             fromBookRequestId: id,
           },
         });
@@ -331,7 +381,7 @@ async function putRequestedBookIntoCart(request: RequestSummaryFragment) {
   }
 
   try {
-    const cart = await openCart({
+    const { data: cart } = await openCart({
       input: {
         retailLocationId: props.retailLocationId,
         userId: props.userData.id,
@@ -340,7 +390,7 @@ async function putRequestedBookIntoCart(request: RequestSummaryFragment) {
 
     await addToCart({
       input: {
-        cartId: cart.data.id,
+        cartId: cart.id,
         fromBookRequestId: request.id,
       },
     });

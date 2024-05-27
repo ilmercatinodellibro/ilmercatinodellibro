@@ -41,6 +41,7 @@ import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import { ServerError } from "src/models/server";
 import { useSendPasswordResetLinkMutation } from "src/services/auth.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const { t } = useI18n();
 
@@ -48,12 +49,18 @@ const router = useRouter();
 
 const email = ref("");
 
+const { selectedLocation } = useRetailLocationService();
 const { sendPasswordResetLink, loading: isLoading } =
   useSendPasswordResetLinkMutation();
 
 async function onSubmit() {
   try {
-    await sendPasswordResetLink({ input: { email: email.value } });
+    await sendPasswordResetLink({
+      input: {
+        email: email.value,
+        retailLocationId: selectedLocation.value.id,
+      },
+    });
     void router.push({ name: "reset-password-link-sent" });
   } catch (e) {
     const { message, status } = e as ServerError;
