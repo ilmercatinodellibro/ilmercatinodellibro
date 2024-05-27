@@ -152,21 +152,25 @@ export class UserResolver {
             ...(filters
               ? [
                   {
-                    OR: [
-                      ...(filters.ADMIN
-                        ? [
-                            {
-                              role: Role.ADMIN,
-                            },
-                          ]
-                        : []),
-                      ...(filters.OPERATOR
-                        ? [
-                            {
-                              role: Role.OPERATOR,
-                            },
-                          ]
-                        : []),
+                    AND: [
+                      {
+                        OR: [
+                          ...(filters.ADMIN
+                            ? [
+                                {
+                                  role: Role.ADMIN,
+                                },
+                              ]
+                            : []),
+                          ...(filters.OPERATOR
+                            ? [
+                                {
+                                  role: Role.OPERATOR,
+                                },
+                              ]
+                            : []),
+                        ],
+                      },
 
                       ...(filters.search
                         ? [
