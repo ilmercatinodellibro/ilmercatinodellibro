@@ -20,7 +20,7 @@
           clearable
           hide-dropdown-icon
           lazy-rules
-          new-value-mode="add"
+          new-value-mode="add-unique"
           outlined
           use-input
         />
