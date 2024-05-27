@@ -23,7 +23,7 @@ query getCurrentUser($retailLocationId: String!) {
   }
 }
 
-mutation register($input: RegisterPayload!) {
+mutation register($input: RegisterUserPayload!) {
   register(input: $input)
 }
 

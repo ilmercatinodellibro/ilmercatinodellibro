@@ -5,46 +5,51 @@
         <q-img :src="theme.logo" fit="contain" height="60px" />
 
         <q-form
-          class="column gap-8 items-stretch justify-center no-padding"
+          class="column gap-16 items-stretch justify-center no-padding"
           greedy
           @submit="onSubmit"
         >
           <q-input
-            v-for="{ field, tooltip, ...inputData } in formData"
-            :key="field"
-            v-model="user[field]"
-            v-bind="inputData"
+            v-for="fieldData in formData"
+            :key="fieldData.field"
+            v-model="user[fieldData.field]"
+            v-bind="fieldData.inputData"
             :autocomplete="
               [
                 'password',
                 'passwordConfirmation',
                 'email',
                 'confirmEmail',
-              ].includes(field)
+              ].includes(fieldData.field)
                 ? 'new-password'
                 : 'off'
             "
             bottom-slots
-            class="width-260"
-            lazy-rules
+            class="col"
             outlined
+            reactive-rules
           >
             <template
               v-if="
-                ['password', 'passwordConfirmation', 'delegate'].includes(field)
+                ['password', 'passwordConfirmation', 'delegate'].includes(
+                  fieldData.field,
+                )
               "
               #append
             >
               <q-icon
-                v-if="field === 'password' || field === 'passwordConfirmation'"
+                v-if="
+                  fieldData.field === 'password' ||
+                  fieldData.field === 'passwordConfirmation'
+                "
                 :name="showPassword ? mdiEyeOff : mdiEye"
                 class="cursor-pointer"
                 @click="showPassword = !showPassword"
               />
 
-              <q-icon v-if="tooltip" :name="mdiInformationOutline">
+              <q-icon v-if="fieldData.tooltip" :name="mdiInformationOutline">
                 <q-tooltip>
-                  {{ tooltip }}
+                  {{ fieldData.tooltip }}
                 </q-tooltip>
               </q-icon>
             </template>
@@ -109,7 +114,7 @@ import {
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { QInputProps } from "quasar";
-import { computed, reactive, ref, toRaw } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import SocialAuthButtons from "components/social-auth-buttons.vue";
 import { RegisterUserPayload } from "src/@generated/graphql";
@@ -140,7 +145,7 @@ type UserRegistrationData = Omit<
   dateOfBirth: string;
 };
 
-const user = reactive<UserRegistrationData>({
+const user = ref<UserRegistrationData>({
   email: "",
   firstname: "",
   lastname: "",
@@ -154,73 +159,93 @@ const user = reactive<UserRegistrationData>({
 const { register, loading: isRegistering } = useRegisterMutation();
 
 const emailMatchRule = makeValueMatchRule(
-  () => user.confirmEmail,
+  () => user.value.confirmEmail,
   () => t("auth.emailsDoNotMatch"),
 );
 const passwordMatchRule = makeValueMatchRule(
-  () => user.password,
+  () => user.value.password,
   () => t("auth.passwordDoNotMatch"),
 );
 
 const formData = computed<
-  ({ field: keyof UserRegistrationData; tooltip?: string } & Omit<
-    QInputProps,
-    "modelValue"
-  >)[]
+  {
+    field: keyof UserRegistrationData;
+    tooltip?: string;
+    inputData: Omit<QInputProps, "modelValue">;
+  }[]
 >(() => [
   {
     field: "firstname",
-    label: t("auth.firstName"),
-    rules: [requiredRule],
+    inputData: {
+      label: t("auth.firstName"),
+      rules: [requiredRule],
+    },
   },
   {
     field: "lastname",
-    label: t("auth.lastName"),
-    rules: [requiredRule],
+    inputData: {
+      label: t("auth.lastName"),
+      rules: [requiredRule],
+    },
   },
   {
     field: "dateOfBirth",
-    label: t("auth.birthDate"),
-    type: "date",
+    inputData: {
+      label: t("auth.birthDate"),
+      type: "date",
+      rules: [requiredRule],
+    },
   },
   {
     field: "delegate",
-    label: t("auth.nameOfDelegate"),
-    rules:
-      user.dateOfBirth &&
-      new Date().getUTCFullYear() -
-        new Date(user.dateOfBirth).getUTCFullYear() <
+    inputData: {
+      label: t("auth.nameOfDelegate"),
+      rules: [
+        new Date().getUTCFullYear() -
+          new Date(user.value.dateOfBirth).getUTCFullYear() <
         18
-        ? [requiredRule]
-        : undefined,
-    tooltip: t("auth.delegateLabel"),
+          ? requiredRule
+          : () => true,
+      ],
+      tooltip: t("auth.delegateLabel"),
+    },
   },
   {
     field: "phoneNumber",
-    label: t("auth.phoneNumber"),
-    type: "tel",
+    inputData: {
+      label: t("auth.phoneNumber"),
+      type: "tel",
+    },
   },
   {
     field: "email",
-    label: t("auth.emailAddress"),
-    rules: [requiredRule],
+    inputData: {
+      label: t("auth.emailAddress"),
+      rules: [requiredRule],
+    },
   },
   {
     field: "confirmEmail",
-    label: t("auth.confirmEmail"),
-    rules: [requiredRule, emailMatchRule],
+    inputData: {
+      label: t("auth.confirmEmail"),
+      rules: [requiredRule, emailMatchRule],
+    },
   },
   {
     field: "password",
-    label: t("auth.password"),
-    rules: [requiredRule, validatePasswordRule],
-    type: showPassword.value ? "text" : "password",
+    inputData: {
+      label: t("auth.password"),
+      rules: [requiredRule, validatePasswordRule],
+      type: showPassword.value ? "text" : "password",
+    },
   },
   {
     field: "passwordConfirmation",
-    label: t("auth.confirmPassword"),
-    rules: [requiredRule, passwordMatchRule],
-    type: showPassword.value ? "text" : "password",
+    inputData: {
+      label: t("auth.confirmPassword"),
+      rules: [requiredRule, passwordMatchRule],
+      type: showPassword.value ? "text" : "password",
+    },
   },
 ]);
 
@@ -229,9 +254,15 @@ async function onSubmit() {
   try {
     await register({
       input: {
-        ...toRaw(user),
-        locale: locale.value,
+        email: user.value.email,
+        firstname: user.value.firstname,
+        lastname: user.value.lastname,
+        password: user.value.password,
+        passwordConfirmation: user.value.passwordConfirmation,
         retailLocationId: selectedLocation.value.id,
+        delegate: user.value.delegate,
+        locale: locale.value,
+        dateOfBirth: Date.parse(user.value.dateOfBirth),
       },
     });
   } catch (error) {

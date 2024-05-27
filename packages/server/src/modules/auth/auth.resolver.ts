@@ -5,6 +5,7 @@ import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
 import { User as GraphQLUser } from "src/@generated";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { RegisterUserPayload } from "src/modules/user/user.args";
 import { UserService } from "../user/user.service";
 import {
   LoginPayload,
@@ -36,7 +37,7 @@ export class AuthResolver {
 
   @Public()
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async register(@Input() payload: RegisterPayload) {
+  async register(@Input() payload: RegisterUserPayload) {
     const existingUser = await this.userService.findUserByEmail(payload.email);
     // To prevent user enumeration attacks, we don't throw an error
     // TODO: it can still be guessed with the response time difference, add a relevant delay

@@ -14,7 +14,7 @@ export default {
     atLeastOneUppercase:
       "The password should contain at least one uppercase character",
     atLeastOneSpecialCharacter:
-      "The password should contain at least one of the following special characters",
+      "The password should contain at least one special character",
     atLeast8AndMaximum25Characters:
       "The password should contain at least 8 and maximum 25 characters",
   },

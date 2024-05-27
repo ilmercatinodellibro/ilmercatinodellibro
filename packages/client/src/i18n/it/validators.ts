@@ -13,7 +13,7 @@ export default {
       "La password deve contenere almeno un carattere minuscolo",
     atLeastOneUppercase:
       "La password deve contenere almeno un carattere maiuscolo",
-    atLeastOneSpecialCharacter: `La password deve contenere almeno uno dei seguenti caratteri speciali`,
+    atLeastOneSpecialCharacter: `La password deve contenere almeno un carattere speciale`,
     atLeast8AndMaximum25Characters:
       "La password deve avere almeno 8 e massimo 25 caratteri",
   },

@@ -5,6 +5,7 @@ import { Profile } from "passport";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
 import { RegisterPayload } from "src/modules/auth/auth.args";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { RegisterUserPayload } from "src/modules/user/user.args";
 
 @Injectable()
 export class UserService {
@@ -28,7 +29,7 @@ export class UserService {
 
   async createUser(
     userData: Omit<
-      RegisterPayload,
+      Partial<RegisterUserPayload> & RegisterPayload,
       "passwordConfirmation" | "retailLocationId"
     >,
     emailVerified?: boolean,
