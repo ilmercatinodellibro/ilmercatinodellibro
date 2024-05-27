@@ -80,28 +80,26 @@ export class UpdateUserPayload extends IntersectionType(
     [
       "firstname",
       "lastname",
-      "notes",
+      "email",
       "phoneNumber",
-      "id",
+      "notes",
       "delegate",
       "dateOfBirth",
+      "discount",
       "locale",
     ],
     InputType,
   ),
   LocationBoundInput,
 ) {
-  @Field(() => Boolean, { nullable: true })
-  discount?: boolean;
+  @Field()
+  id!: string;
 
   @Field(() => String, { nullable: true })
   password?: string;
 
   @Field(() => String, { nullable: true })
   passwordConfirmation?: string;
-
-  @Field(() => String, { nullable: true })
-  email?: string;
 }
 
 export enum SettleRemainingType {

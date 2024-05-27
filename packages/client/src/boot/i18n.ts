@@ -1,12 +1,10 @@
 import { until } from "@vueuse/core";
-import { omit } from "lodash-es";
 import { LocalStorage, Quasar, QuasarLanguage } from "quasar";
 import { boot } from "quasar/wrappers";
 import { IntlDateTimeFormat, createI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
 import messages from "src/i18n";
 import { useAuthService } from "src/services/auth";
-import { CurrentUserFragmentDoc } from "src/services/auth.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { useUpdateUserMutation } from "src/services/user.graphql";
 
@@ -123,25 +121,8 @@ async function updateUserLocale(locale: MessageLanguages) {
     locale,
     retailLocationId,
   } satisfies UpdateUserPayload;
-  const { cache } = await updateUser({
+  const { data: updatedUser } = await updateUser({
     input: updateData,
   });
-  cache.updateFragment(
-    {
-      fragment: CurrentUserFragmentDoc,
-      fragmentName: "CurrentUser",
-      id: cache.identify(currentUser),
-    },
-    (data) => {
-      if (!data || !user.value) {
-        return;
-      }
-
-      return {
-        ...data,
-        ...omit(updateData, ["retailLocationId"]),
-      };
-    },
-  );
-  updateCurrentUser(updateData);
+  updateCurrentUser(updatedUser);
 }

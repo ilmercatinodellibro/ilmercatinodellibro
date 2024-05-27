@@ -19,6 +19,15 @@ fragment UserInfo on User {
   lastname
 }
 
+fragment UpdatableUserInfo on User {
+  # If a new field that is updatable through this mutation is added, it should be added here
+  ...User
+  dateOfBirth
+  delegate
+  locale
+  updatedAt
+}
+
 fragment Member on User {
   ...User
   role(retailLocationId: $retailLocationId)
@@ -74,7 +83,8 @@ mutation addUser($input: RegisterUserPayload!) {
 
 mutation updateUser($input: UpdateUserPayload!) {
   updateUser(input: $input) {
-    ...User
+    # Request just enough data so that the cache gets updated automatically
+    ...UpdatableUserInfo
   }
 }
 

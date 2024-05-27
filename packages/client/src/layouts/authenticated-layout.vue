@@ -462,10 +462,7 @@ import {
   RetailLocationSettingsFragment,
   useUpdateRetailLocationSettingsMutation,
 } from "src/services/retail-location.graphql";
-import {
-  UserFragmentDoc,
-  useUpdateUserMutation,
-} from "src/services/user.graphql";
+import { useUpdateUserMutation } from "src/services/user.graphql";
 
 // It would work with :inset-level="1" if we used "avatar" option instead of "side" for the header icon
 // but we only need 16px of margin from the icon, so we defined a value which would align the text accordingly
@@ -552,7 +549,7 @@ function editCurrentUserData() {
     }
 
     try {
-      const { cache } = await updateUser({
+      const { data: updatedUser } = await updateUser({
         input: {
           ...newUserData,
           email:
@@ -565,30 +562,7 @@ function editCurrentUserData() {
         },
       });
 
-      cache.updateFragment(
-        {
-          fragment: UserFragmentDoc,
-          fragmentName: "UserSummary",
-          id: cache.identify(user.value),
-        },
-        (data) => {
-          if (!data || !user.value) {
-            return;
-          }
-          return {
-            ...data,
-            ...newUserData,
-            email:
-              newUserData.email && newUserData.email !== user.value.email
-                ? newUserData.email
-                : user.value.email,
-            password: newUserData.password ? newUserData.password : undefined,
-            discount: newUserData.discount ?? false,
-          };
-        },
-      );
-
-      updateCurrentUser(newUserData);
+      updateCurrentUser(updatedUser);
     } catch {
       notifyError(t("auth.couldNotUpdate"));
     }

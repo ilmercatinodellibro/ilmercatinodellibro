@@ -1,13 +1,14 @@
 import { useApolloClient } from "@vue/apollo-composable";
 import { until } from "@vueuse/core";
 import jwtDecode, { JwtPayload } from "jwt-decode";
+import { merge } from "lodash-es";
 import { LocalStorage } from "quasar";
 import { computed, readonly, ref, watch } from "vue";
 import { NavigationGuard, Router, useRouter } from "vue-router";
-import { UpdateUserPayload } from "src/@generated/graphql";
 import { MessageLanguages, STORAGE_LOCALE_KEY } from "src/boot/i18n";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
+import { UpdatableUserInfoFragment } from "src/services/user.graphql";
 import {
   CurrentUserFragment,
   GetCurrentUserDocument,
@@ -273,27 +274,12 @@ function onLogout(hook: LogoutHook) {
   onLogoutHooks.push(hook);
 }
 
-function updateCurrentUser({
-  email,
-  firstname,
-  lastname,
-  dateOfBirth,
-  delegate,
-  phoneNumber,
-}: UpdateUserPayload) {
+function updateCurrentUser(updatedUserData: UpdatableUserInfoFragment) {
   if (!user.value || !isAuthenticated.value) {
     return;
   }
 
-  user.value = {
-    ...user.value,
-    email: email && email.length > 0 ? email : user.value.email,
-    firstname,
-    lastname,
-    dateOfBirth,
-    delegate,
-    phoneNumber: phoneNumber ?? "",
-  };
+  user.value = merge(user.value, updatedUserData);
 }
 
 function getJwtHeader(authToken = token.value) {
