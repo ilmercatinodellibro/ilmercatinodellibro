@@ -76,6 +76,7 @@ import { MemberFragment, useGetMembersQuery } from "src/services/user.graphql";
 
 const { t } = useI18n();
 
+const { selectedLocation } = useRetailLocationService();
 const { loading, removeUser } = useMembersService();
 const { members, refetch: refetchMembers } = useGetMembersQuery(() => ({
   retailLocationId: selectedLocation.value.id,
@@ -161,7 +162,6 @@ function deleteUser(id: string) {
   });
 }
 
-const { selectedLocation } = useRetailLocationService();
 function addUser() {
   Dialog.create({
     component: AddNewUserDialog,
