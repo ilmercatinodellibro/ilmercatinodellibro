@@ -69,7 +69,7 @@ import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
-import { useSendRegistrationInviteMutation } from "src/services/auth.graphql";
+import { useAddOrInviteOperatorMutation } from "src/services/auth.graphql";
 import { useMembersService } from "src/services/member";
 import { useRetailLocationService } from "src/services/retail-location";
 import { MemberFragment, useGetMembersQuery } from "src/services/user.graphql";
@@ -88,7 +88,7 @@ const pagination = ref({
 const { filterMethod, filterOptions, tableFilter, refetchFilterProxy } =
   useTableFilters("general.rolesAndPermissions.filters");
 
-const { sendRegistrationInvite } = useSendRegistrationInviteMutation();
+const { addOrInviteOperator } = useAddOrInviteOperatorMutation();
 
 const onRequest: QTableProps["onRequest"] = async () => {
   try {
@@ -167,7 +167,7 @@ function addUser() {
     component: AddNewUserDialog,
   }).onOk(async (email: string) => {
     try {
-      await sendRegistrationInvite({
+      await addOrInviteOperator({
         input: {
           email,
           retailLocationId: selectedLocation.value.id,
