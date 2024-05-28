@@ -1,7 +1,7 @@
 export default {
   add: "Aggiungi",
   addNewUser: "Aggiungi nuovo utente",
-  sendInvitation: "Invia invito",
+  sendInvitation: "Invita o aggiungi Operatore",
   removeFilters: "Rimuovi Filtri",
   close: "Chiudi",
   duplicate: "Duplica",
@@ -18,5 +18,5 @@ export default {
   editName: "Modifica Nome",
   selectFeedbackType: "Seleziona il tipo di feedback",
   update: "Aggiorna",
-  removeOperator: "Rimuovi il Ruolo di Operatore",
+  removeOperator: "Rimuovi Operatore",
 };

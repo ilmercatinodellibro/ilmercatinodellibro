@@ -47,7 +47,7 @@ fragment Customer on User {
 }
 
 query getMembers($retailLocationId: String!, $filters: MembersQueryFilter) {
-  members(filters: $filters) {
+  members(filters: $filters, retailLocationId: $retailLocationId) {
     ...Member
   }
 }

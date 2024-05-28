@@ -182,7 +182,7 @@ export class AuthResolver {
     });
   }
 
-  @Mutation(() => GraphQLVoid, { nullable: true })
+  @Mutation(() => GraphQLUser, { nullable: true })
   async addOrInviteOperator(
     @Input() { email, retailLocationId }: RegistrationInviteLinkPayload,
     @CurrentUser() currentUser: User,
@@ -225,14 +225,18 @@ export class AuthResolver {
         );
       }
 
-      await this.prisma.locationMember.create({
-        data: {
-          role: "OPERATOR",
-          retailLocationId,
-          userId: userToUpdate.id,
-        },
-      });
-      return;
+      return (
+        await this.prisma.locationMember.create({
+          data: {
+            role: "OPERATOR",
+            retailLocationId,
+            userId: userToUpdate.id,
+          },
+          include: {
+            user: true,
+          },
+        })
+      ).user;
     }
 
     // FIXME: VULNERABILITY: we are sending an access token of the current user. The user we are sending to can use that to impersonate the current user.

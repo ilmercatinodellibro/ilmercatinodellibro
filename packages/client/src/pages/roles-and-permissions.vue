@@ -62,6 +62,7 @@ import { Dialog, Notify, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Role } from "src/@generated/graphql";
+import { evictQuery } from "src/apollo/cache";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
@@ -72,12 +73,16 @@ import { notifyError } from "src/helpers/error-messages";
 import { useAddOrInviteOperatorMutation } from "src/services/auth.graphql";
 import { useMembersService } from "src/services/member";
 import { useRetailLocationService } from "src/services/retail-location";
-import { MemberFragment, useGetMembersQuery } from "src/services/user.graphql";
+import {
+  GetMembersDocument,
+  MemberFragment,
+  useGetMembersQuery,
+} from "src/services/user.graphql";
 
 const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
-const { loading, removeUser } = useMembersService();
+const { loading, removeMember } = useMembersService();
 const { members, refetch: refetchMembers } = useGetMembersQuery(() => ({
   retailLocationId: selectedLocation.value.id,
 }));
@@ -141,13 +146,14 @@ function deleteUser(id: string) {
   Dialog.create({
     component: ConfirmDialog,
     componentProps: {
-      title: t("actions.removeUser"),
+      title: t("actions.removeOperator"),
       message: t("general.removeUserMessage"),
       ok: t("actions.remove"),
     },
   }).onOk(async () => {
     try {
-      await removeUser(id);
+      await removeMember(id);
+
       Notify.create({
         message: t("general.userRemoved"),
         color: "positive",
@@ -167,16 +173,22 @@ function addUser() {
     component: AddNewUserDialog,
   }).onOk(async (email: string) => {
     try {
-      await addOrInviteOperator({
-        input: {
-          email,
-          retailLocationId: selectedLocation.value.id,
-        },
+      const { cache, data: newUser } = await addOrInviteOperator({
+        email,
+        retailLocationId: selectedLocation.value.id,
       });
+
       Notify.create({
-        message: t("general.inviteSent"),
+        message: newUser
+          ? t("general.rolesAndPermissions.operatorAdded")
+          : t("general.inviteSent"),
         color: "positive",
       });
+
+      if (newUser) {
+        evictQuery(cache, GetMembersDocument);
+        cache.gc();
+      }
     } catch (e) {
       const { message } = e as ApolloError;
 

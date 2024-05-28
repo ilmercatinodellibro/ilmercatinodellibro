@@ -1,6 +1,8 @@
 import { Role } from "@prisma/client";
+import { evictQuery } from "src/apollo/cache";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
+  GetMembersDocument,
   MemberFragmentDoc,
   useGetMembersQuery,
   useRemoveMemberMutation,
@@ -50,9 +52,9 @@ export function useMembersService() {
     );
   }
 
-  const { removeMember: deleteUser } = useRemoveMemberMutation();
-  async function removeUser(id: string) {
-    const { cache } = await deleteUser({
+  const { removeMember: _removeMember } = useRemoveMemberMutation();
+  async function removeMember(id: string) {
+    const { cache } = await _removeMember({
       input: {
         id,
         retailLocationId: selectedLocation.value.id,
@@ -61,13 +63,14 @@ export function useMembersService() {
 
     const cacheId = cache.identify({ id, __typename: "User" });
     cache.evict({ id: cacheId });
+    evictQuery(cache, GetMembersDocument);
     cache.gc();
   }
 
   return {
     members,
     loading,
-    removeUser,
+    removeMember,
     updateRole,
     refetchMembers,
   };

@@ -30,7 +30,7 @@ export default {
   accent: "Accent",
   colorPicker: "Color Picker",
   removeUserMessage:
-    "You are removing this contact from the platform and it won’t be able to access it anymore. Do you want to proceed?",
+    "You are removing this user from the list of Operators for this Retail Location. Do you wish to proceed?",
   language: "Language",
   myData: "My Data",
   warehouse: "Warehouse",
@@ -88,5 +88,6 @@ export default {
       message:
         "Operators have the permissions to access the management pages (Warehouse, Catalog, Users and Movements) and their functionalities.",
     },
+    operatorAdded: "The operator was successfully added.",
   },
 };

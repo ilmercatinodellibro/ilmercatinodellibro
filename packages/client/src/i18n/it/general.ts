@@ -30,7 +30,7 @@ export default {
   accent: "Accento",
   colorPicker: "Selettore colore",
   removeUserMessage:
-    "Stai rimuovendo questo contatto dalla piattaforma e non sarà più in grado di accedervi. Vuoi procedere?",
+    "Stai rimuovendo questo utente dalla lista degli Operatori per questa Sede. Vuoi procedere?",
   language: "Lingua",
   myData: "I Miei Dati",
   warehouse: "Magazzino",
@@ -88,5 +88,6 @@ export default {
       message:
         "Gli operatori hanno i permessi per accedere alle pagine di gestione (Magazzino, Catalogo, Utenti e Movimenti) e alle loro funzionalità.",
     },
+    operatorAdded: "L'operatore è stato aggiunto con successo.",
   },
 };

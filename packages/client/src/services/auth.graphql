@@ -53,6 +53,10 @@ mutation resetForgottenPassword($input: ResetForgottenPasswordPayload!) {
   resetForgottenPassword(input: $input)
 }
 
-mutation addOrInviteOperator($input: RegistrationInviteLinkPayload!) {
-  addOrInviteOperator(input: $input)
+mutation addOrInviteOperator($email: String!, $retailLocationId: String!) {
+  addOrInviteOperator(
+    input: { email: $email, retailLocationId: $retailLocationId }
+  ) {
+    ...Member
+  }
 }

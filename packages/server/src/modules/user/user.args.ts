@@ -11,7 +11,10 @@ import {
 } from "@nestjs/graphql";
 import { User } from "src/@generated";
 import { Role } from "src/@generated/prisma";
-import { LocationBoundInput } from "src/modules/retail-location";
+import {
+  LocationBoundInput,
+  LocationBoundQueryArgs,
+} from "src/modules/retail-location";
 
 @ArgsType()
 export class UsersQueryArgs {
@@ -52,7 +55,7 @@ export class MembersQueryFilter {
 }
 
 @ArgsType()
-export class MembersQueryArgs extends LocationBoundInput {
+export class MembersQueryArgs extends LocationBoundQueryArgs {
   @Field(() => MembersQueryFilter, { nullable: true })
   filters?: MembersQueryFilter;
 }
