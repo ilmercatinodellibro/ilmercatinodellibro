@@ -185,69 +185,66 @@ export class AuthResolver {
   @Mutation(() => GraphQLUser, { nullable: true })
   async addOrInviteOperator(
     @Input() { email, retailLocationId }: RegistrationInviteLinkPayload,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() actor: User,
   ) {
     await this.authService.assertMembership({
-      userId: currentUser.id,
+      userId: actor.id,
       message: "You are not allowed to add a new Operator",
       role: "ADMIN",
       retailLocationId,
     });
 
-    const userToUpdate = await this.userService.findUserByEmail(email);
+    const existingUser = await this.userService.findUserByEmail(email);
 
-    if (userToUpdate) {
-      const currentOperatorMembership =
-        await this.prisma.locationMember.findUnique({
-          where: {
-            userId_retailLocationId: {
-              userId: userToUpdate.id,
-              retailLocationId,
-            },
-          },
-        });
-
-      if (currentOperatorMembership?.role) {
-        if (currentOperatorMembership.role === "OPERATOR") {
-          throw new UnprocessableEntityException(
-            "You cannot promote to operator someone who already is an operator in this location.",
-          );
-        } else {
-          throw new UnprocessableEntityException(
-            "The selected user is already an admin.",
-          );
-        }
-      }
-
-      if (!userToUpdate.emailVerified) {
-        throw new UnprocessableEntityException(
-          "The selected user needs to verify their email first.",
-        );
-      }
-
-      return (
-        await this.prisma.locationMember.create({
-          data: {
-            role: "OPERATOR",
-            retailLocationId,
-            userId: userToUpdate.id,
-          },
-          include: {
-            user: true,
-          },
-        })
-      ).user;
+    if (!existingUser) {
+      // FIXME: VULNERABILITY: we are sending an access token of the current user. The user we are sending to can use that to impersonate the current user.
+      const inviteToken = this.authService.createAccessToken(actor.id);
+      await this.authService.sendInviteLink({
+        toEmail: email,
+        invitedBy: actor,
+        token: inviteToken,
+        locationId: retailLocationId,
+        // TODO: allow the operator to specify the locale to invite the user in
+        locale: actor.locale ?? "it",
+      });
+      return;
     }
 
-    // FIXME: VULNERABILITY: we are sending an access token of the current user. The user we are sending to can use that to impersonate the current user.
-    const inviteToken = this.authService.createAccessToken(currentUser.id);
-    await this.authService.sendInviteLink({
-      toEmail: email,
-      invitedBy: currentUser,
-      token: inviteToken,
-      locationId: retailLocationId,
-      // TODO: allow the operator to specify the locale to invite the user in
-      locale: currentUser.locale ?? "it",
+    const currentOperatorMembership =
+      await this.prisma.locationMember.findUnique({
+        where: {
+          userId_retailLocationId: {
+            userId: existingUser.id,
+            retailLocationId,
+          },
+        },
+      });
+
+    if (currentOperatorMembership?.role) {
+      if (currentOperatorMembership.role === "OPERATOR") {
+        throw new UnprocessableEntityException(
+          "You cannot promote to operator someone who already is an operator in this location.",
+        );
+      } else {
+        throw new UnprocessableEntityException(
+          "The selected user is already an admin.",
+        );
+      }
+    }
+
+    if (!existingUser.emailVerified) {
+      throw new UnprocessableEntityException(
+        "The selected user needs to verify their email first.",
+      );
+    }
+
+    await this.prisma.locationMember.create({
+      data: {
+        role: "OPERATOR",
+        retailLocationId,
+        userId: existingUser.id,
+      },
     });
+    return existingUser;
   }
 }

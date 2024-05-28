@@ -15,7 +15,7 @@ import { Prisma } from "@prisma/client";
 import * as argon2 from "argon2";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
-import { QueryMode, Role } from "src/@generated";
+import { Role } from "src/@generated";
 import { User } from "src/@generated/user";
 import { AuthService } from "src/modules/auth/auth.service";
 import { LocationBoundQueryArgs } from "src/modules/retail-location";
@@ -134,95 +134,83 @@ export class UserResolver {
         "You are not allowed to view the list of members for this location.",
     });
 
-    return (
-      await this.prisma.locationMember.findMany({
-        where: {
-          retailLocationId,
-          AND: [
-            {
-              user: {
-                deletedAt: null,
-                memberships: {
-                  some: {
-                    retailLocationId,
-                  },
-                },
-              },
-            },
-            ...(filters
-              ? [
-                  {
-                    AND: [
-                      {
-                        OR: [
-                          ...(filters.ADMIN
-                            ? [
-                                {
-                                  role: Role.ADMIN,
-                                },
-                              ]
-                            : []),
-                          ...(filters.OPERATOR
-                            ? [
-                                {
-                                  role: Role.OPERATOR,
-                                },
-                              ]
-                            : []),
-                        ],
-                      },
+    // TODO: Use Prisma full-text search
+    // handle spaces by replacing them with % for the search
+    const searchText = filters?.search?.trim().replaceAll(" ", "%");
+    const searchFilter: Prisma.StringFilter<"User"> = {
+      contains: searchText,
+      mode: "insensitive",
+    };
 
-                      ...(filters.search
-                        ? [
-                            {
-                              user: {
-                                OR: [
-                                  {
-                                    firstname: {
-                                      contains: filters.search,
-                                      mode: QueryMode.insensitive,
-                                    },
-                                  },
-                                  {
-                                    lastname: {
-                                      contains: filters.search,
-                                      mode: QueryMode.insensitive,
-                                    },
-                                  },
-                                  {
-                                    email: {
-                                      contains: filters.search,
-                                      mode: QueryMode.insensitive,
-                                    },
-                                  },
-                                  {
-                                    phoneNumber: {
-                                      contains: filters.search,
-                                      mode: QueryMode.insensitive,
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ]
-                        : []),
-                    ],
-                  },
-                ]
-              : []),
-          ],
-        },
-        include: {
-          user: true,
-        },
-        distinct: "userId",
-        orderBy: {
-          user: {
-            firstname: "asc",
+    const rawMembers = await this.prisma.locationMember.findMany({
+      where: {
+        retailLocationId,
+
+        user: {
+          deletedAt: null,
+          memberships: {
+            some: {
+              retailLocationId,
+            },
           },
         },
-      })
-    ).map(({ user }) => user);
+
+        AND: [
+          {
+            OR: [
+              ...(filters?.ADMIN
+                ? [
+                    {
+                      role: Role.ADMIN,
+                    },
+                  ]
+                : []),
+              ...(filters?.OPERATOR
+                ? [
+                    {
+                      role: Role.OPERATOR,
+                    },
+                  ]
+                : []),
+            ],
+          },
+
+          ...(searchText
+            ? [
+                {
+                  user: {
+                    OR: [
+                      {
+                        firstname: searchFilter,
+                      },
+                      {
+                        lastname: searchFilter,
+                      },
+                      {
+                        email: searchFilter,
+                      },
+                      {
+                        phoneNumber: searchFilter,
+                      },
+                    ],
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+      select: {
+        user: true,
+      },
+      distinct: "userId",
+      orderBy: {
+        user: {
+          firstname: "asc",
+        },
+      },
+    });
+
+    return rawMembers.map(({ user }) => user);
   }
 
   @Query(() => [User])
