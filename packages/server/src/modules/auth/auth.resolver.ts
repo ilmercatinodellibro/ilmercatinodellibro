@@ -4,6 +4,7 @@ import { User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
 import { User as GraphQLUser } from "src/@generated";
+import { PrismaService } from "src/modules/prisma/prisma.service";
 import { UserService } from "../user/user.service";
 import {
   LoginPayload,
@@ -25,6 +26,7 @@ export class AuthResolver {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Query(() => GraphQLUser)
@@ -180,20 +182,69 @@ export class AuthResolver {
     });
   }
 
-  @Mutation(() => GraphQLVoid, { nullable: true })
-  async sendRegistrationInvite(
+  @Mutation(() => GraphQLUser, { nullable: true })
+  async addOrInviteOperator(
     @Input() { email, retailLocationId }: RegistrationInviteLinkPayload,
-    @CurrentUser() operator: User,
+    @CurrentUser() actor: User,
   ) {
-    // FIXME: VULNERABILITY: we are sending an access token of the current user. The user we are sending to can use that to impersonate the current user.
-    const inviteToken = this.authService.createAccessToken(operator.id);
-    await this.authService.sendInviteLink({
-      toEmail: email,
-      invitedBy: operator,
-      token: inviteToken,
-      locationId: retailLocationId,
-      // TODO: allow the operator to specify the locale to invite the user in
-      locale: operator.locale ?? "it",
+    await this.authService.assertMembership({
+      userId: actor.id,
+      message: "You are not allowed to add a new Operator",
+      role: "ADMIN",
+      retailLocationId,
     });
+
+    const existingUser = await this.userService.findUserByEmail(email);
+
+    if (!existingUser) {
+      // FIXME: VULNERABILITY: we are sending an access token of the current user. The user we are sending to can use that to impersonate the current user.
+      const inviteToken = this.authService.createAccessToken(actor.id);
+      await this.authService.sendInviteLink({
+        toEmail: email,
+        invitedBy: actor,
+        token: inviteToken,
+        locationId: retailLocationId,
+        // TODO: allow the operator to specify the locale to invite the user in
+        locale: actor.locale ?? "it",
+      });
+      return;
+    }
+
+    const currentOperatorMembership =
+      await this.prisma.locationMember.findUnique({
+        where: {
+          userId_retailLocationId: {
+            userId: existingUser.id,
+            retailLocationId,
+          },
+        },
+      });
+
+    if (currentOperatorMembership?.role) {
+      if (currentOperatorMembership.role === "OPERATOR") {
+        throw new UnprocessableEntityException(
+          "You cannot promote to operator someone who already is an operator in this location.",
+        );
+      } else {
+        throw new UnprocessableEntityException(
+          "The selected user is already an admin.",
+        );
+      }
+    }
+
+    if (!existingUser.emailVerified) {
+      throw new UnprocessableEntityException(
+        "The selected user needs to verify their email first.",
+      );
+    }
+
+    await this.prisma.locationMember.create({
+      data: {
+        role: "OPERATOR",
+        retailLocationId,
+        userId: existingUser.id,
+      },
+    });
+    return existingUser;
   }
 }

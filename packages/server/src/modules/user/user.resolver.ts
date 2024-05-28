@@ -23,6 +23,7 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
+  MembersQueryArgs,
   RegisterUserPayload,
   RemoveMemberPayload,
   SettleRemainingType,
@@ -122,7 +123,7 @@ export class UserResolver {
 
   @Query(() => [User])
   async members(
-    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @Args() { retailLocationId, filters }: MembersQueryArgs,
     @CurrentUser() user: User,
   ) {
     await this.authService.assertMembership({
@@ -133,14 +134,113 @@ export class UserResolver {
         "You are not allowed to view the list of members for this location.",
     });
 
-    return this.prisma.user.findMany({
+    // TODO: Use Prisma full-text search
+    // handle spaces by replacing them with % for the search
+    const searchText = filters?.search?.trim().replaceAll(" ", "%");
+    const searchFilter: Prisma.StringFilter<"User"> = {
+      contains: searchText,
+      mode: "insensitive",
+    };
+
+    const rawMembers = await this.prisma.locationMember.findMany({
       where: {
-        deletedAt: null,
-        memberships: {
-          some: {
-            retailLocationId,
+        retailLocationId,
+
+        user: {
+          deletedAt: null,
+          memberships: {
+            some: {
+              retailLocationId,
+            },
           },
         },
+
+        AND: [
+          {
+            OR: [
+              ...(filters?.ADMIN
+                ? [
+                    {
+                      role: Role.ADMIN,
+                    },
+                  ]
+                : []),
+              ...(filters?.OPERATOR
+                ? [
+                    {
+                      role: Role.OPERATOR,
+                    },
+                  ]
+                : []),
+            ],
+          },
+
+          ...(searchText
+            ? [
+                {
+                  user: {
+                    OR: [
+                      {
+                        firstname: searchFilter,
+                      },
+                      {
+                        lastname: searchFilter,
+                      },
+                      {
+                        email: searchFilter,
+                      },
+                      {
+                        phoneNumber: searchFilter,
+                      },
+                    ],
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+      select: {
+        user: true,
+      },
+      distinct: "userId",
+      orderBy: {
+        user: {
+          firstname: "asc",
+        },
+      },
+    });
+
+    return rawMembers.map(({ user }) => user);
+  }
+
+  @Query(() => [User])
+  async allUsers(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() user: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: user.id,
+      message: "You are not allowed to see the customer list of this location",
+    });
+
+    return await this.prisma.user.findMany({
+      where: {
+        emailVerified: true,
+        memberships: {
+          every: {
+            NOT: {
+              retailLocationId,
+            },
+          },
+        },
+        OR: [
+          {
+            deletedAt: null,
+          },
+          {
+            deletedAt: { gt: new Date() },
+          },
+        ],
       },
     });
   }
