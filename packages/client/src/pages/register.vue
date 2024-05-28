@@ -141,7 +141,7 @@ import { useRetailLocationService } from "src/services/retail-location";
 
 const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const { theme } = useTheme();
 
@@ -268,7 +268,6 @@ async function onSubmit() {
         ...omit(user.value, ["confirmEmail"]),
         retailLocationId: selectedLocation.value.id,
         delegate: user.value.delegate,
-        locale: locale.value,
         dateOfBirth: Date.parse(user.value.dateOfBirth),
       },
     });

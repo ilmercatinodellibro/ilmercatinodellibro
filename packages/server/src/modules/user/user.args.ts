@@ -87,6 +87,7 @@ export class RegisterUserPayload extends IntersectionType(
       "phoneNumber",
       "delegate",
       "dateOfBirth",
+      "locale",
     ],
     InputType,
   ),

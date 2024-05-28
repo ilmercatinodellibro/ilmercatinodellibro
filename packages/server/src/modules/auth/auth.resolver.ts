@@ -51,9 +51,9 @@ export class AuthResolver {
         "Confirmation password doesn't match with provided password!",
       );
     }
-    const user = await this.userService.createUser(
-      omit(payload, ["passwordConfirmation", "retailLocationId"]),
-    );
+    const user = await this.userService.createUser({
+      ...omit(payload, ["passwordConfirmation", "retailLocationId"]),
+    });
     const token = this.authService.createVerificationToken(
       payload.retailLocationId,
       user.email,

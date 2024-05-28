@@ -451,7 +451,6 @@ import {
   RetailLocationSettingsFragment,
   useUpdateRetailLocationSettingsMutation,
 } from "src/services/retail-location.graphql";
-import { useUpdateUserMutation } from "src/services/user.graphql";
 
 // It would work with :inset-level="1" if we used "avatar" option instead of "side" for the header icon
 // but we only need 16px of margin from the icon, so we defined a value which would align the text accordingly
@@ -523,36 +522,6 @@ function openSettings() {
       }
     } else {
       // TODO: perform annual reset
-    }
-  });
-}
-
-const { updateUser } = useUpdateUserMutation();
-function editCurrentUserData() {
-  Dialog.create({
-    component: EditUserDataDialog,
-  }).onOk(async (newUserData: UpdateUserPayload) => {
-    if (!user.value) {
-      return;
-    }
-
-    try {
-      const { data: updatedUser } = await updateUser({
-        input: {
-          ...newUserData,
-          email:
-            newUserData.email && newUserData.email !== user.value.email
-              ? newUserData.email
-              : user.value.email,
-          password: newUserData.password ? newUserData.password : undefined,
-          id: user.value.id,
-          retailLocationId: selectedLocation.value.id,
-        },
-      });
-
-      updateCurrentUser(updatedUser);
-    } catch {
-      notifyError(t("auth.couldNotUpdate"));
     }
   });
 }
