@@ -64,6 +64,10 @@
             </q-td>
           </template>
 
+          <template #body-cell-email="{ col, value }">
+            <table-cell-with-tooltip :class="col.classes" :value="value" />
+          </template>
+
           <!-- Kind of redundant repetition of so much code, can this be reduced? -->
           <template #header-cell-in-stock="{ col }">
             <table-header-with-info
@@ -227,6 +231,7 @@ import PayOffUserDialog from "src/components/manage-users/pay-off-user-dialog.vu
 import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
 import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
@@ -298,6 +303,7 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     field: "email",
     label: t("manageUsers.fields.email"),
     align: "left",
+    classes: "max-width-250 ellipsis",
   },
   {
     name: "first-name",
