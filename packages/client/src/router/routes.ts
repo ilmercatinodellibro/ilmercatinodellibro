@@ -125,7 +125,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: AvailableRouteNames.RegisterWithToken,
         name: AvailableRouteNames.RegisterWithToken,
-        component: () => import("src/pages/register-with-token.vue"),
+        component: () => import("src/pages/register.vue"),
         props: ({ query }) => ({
           token: query.token as string,
           email: query.email as string,

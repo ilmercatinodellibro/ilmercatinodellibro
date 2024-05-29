@@ -85,20 +85,22 @@
         </q-card-section>
       </template>
 
-      <q-separator />
+      <template v-if="!props.token">
+        <q-separator />
 
-      <q-card-section class="column gap-16 items-center no-padding">
-        <span class="text-dark text-subtitle1">
-          {{ t("auth.alreadyRegistered") }}
-        </span>
+        <q-card-section class="column gap-16 items-center no-padding">
+          <span class="text-dark text-subtitle1">
+            {{ t("auth.alreadyRegistered") }}
+          </span>
 
-        <q-btn
-          :label="t('auth.goToLogin')"
-          class="full-width outline-black-12"
-          outline
-          to="login"
-        />
-      </q-card-section>
+          <q-btn
+            :label="t('auth.goToLogin')"
+            class="full-width outline-black-12"
+            outline
+            to="login"
+          />
+        </q-card-section>
+      </template>
 
       <q-separator />
 
@@ -121,9 +123,10 @@ import {
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { omit } from "lodash-es";
-import { QInputProps, uid } from "quasar";
+import { Notify, QInputProps, uid } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import SocialAuthButtons from "components/social-auth-buttons.vue";
 import { RegisterUserPayload } from "src/@generated/graphql";
 import { STRENGTH_BAR_STEPS } from "src/components/models";
@@ -137,8 +140,14 @@ import {
   validatePasswordRule,
 } from "src/helpers/rules";
 import { AvailableRouteNames } from "src/models/routes";
-import { useRegisterMutation } from "src/services/auth";
+import { useAuthService, useRegisterMutation } from "src/services/auth";
+import { useRegisterWithTokenMutation } from "src/services/auth.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
+
+const props = defineProps<{
+  token?: string;
+  email?: string;
+}>();
 
 const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
 
@@ -157,12 +166,11 @@ type UserRegistrationData = Omit<
 };
 
 const user = ref<UserRegistrationData>({
-  email: "",
+  email: props.email ?? "",
   firstname: "",
   lastname: "",
   password: "",
-  confirmEmail: "",
-  phoneNumber: "",
+  confirmEmail: props.email ?? "",
   passwordConfirmation: "",
   dateOfBirth: "",
 });
@@ -178,13 +186,13 @@ const passwordMatchRule = makeValueMatchRule(
   () => t("auth.passwordDoNotMatch"),
 );
 
-const formData = computed<
-  {
-    field: keyof UserRegistrationData;
-    tooltip?: string;
-    inputData: Omit<QInputProps, "modelValue">;
-  }[]
->(() => [
+interface FormField {
+  field: keyof UserRegistrationData;
+  tooltip?: string;
+  inputData: Omit<QInputProps, "modelValue">;
+}
+
+const formData = computed<FormField[]>(() => [
   {
     field: "firstname",
     inputData: {
@@ -228,15 +236,20 @@ const formData = computed<
     inputData: {
       label: t("auth.emailAddress"),
       rules: [requiredRule],
+      readonly: !!props.email,
     },
   },
-  {
-    field: "confirmEmail",
-    inputData: {
-      label: t("auth.confirmEmail"),
-      rules: [requiredRule, emailMatchRule],
-    },
-  },
+  ...(!props.email
+    ? [
+        {
+          field: "confirmEmail",
+          inputData: {
+            label: t("auth.confirmEmail"),
+            rules: [requiredRule, emailMatchRule],
+          },
+        } satisfies FormField,
+      ]
+    : []),
   {
     field: "password",
     inputData: {
@@ -256,15 +269,35 @@ const formData = computed<
 ]);
 
 const { selectedLocation } = useRetailLocationService();
+const { registerWithToken } = useRegisterWithTokenMutation();
+const { getJwtHeader } = useAuthService();
+const router = useRouter();
 async function onSubmit() {
   try {
-    await register({
+    const registrationData = {
       input: {
         ...omit(user.value, ["confirmEmail"]),
-        retailLocationId: selectedLocation.value.id,
-        delegate: user.value.delegate,
         dateOfBirth: Date.parse(user.value.dateOfBirth),
+        retailLocationId: selectedLocation.value.id,
       },
+    };
+
+    if (!props.token) {
+      await register(registrationData);
+    } else {
+      await registerWithToken(
+        registrationData,
+        // We override the request context to add the one-shot JWT token header
+        // See https://www.apollographql.com/docs/react/data/mutations#context
+        { context: { headers: getJwtHeader(props.token) } },
+      );
+    }
+
+    await router.push({ name: "login" });
+
+    Notify.create({
+      message: t("auth.registeredSuccessfully"),
+      color: "positive",
     });
   } catch (error) {
     const { message, graphQLErrors } = error as ApolloError;
