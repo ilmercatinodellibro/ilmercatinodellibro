@@ -74,6 +74,7 @@ import { UpdateUserPayload } from "src/@generated/graphql";
 import {
   emailRule,
   makeValueMatchRule,
+  requireIfUnderage,
   requiredRule,
   validatePasswordRule,
 } from "src/helpers/rules";
@@ -134,13 +135,7 @@ const formData = computed<
     delegate: {
       label: t("auth.nameOfDelegate"),
       infoLabel: t("auth.delegateLabel"),
-      rules:
-        newUserData.value.dateOfBirth &&
-        new Date().getUTCFullYear() -
-          new Date(newUserData.value.dateOfBirth).getUTCFullYear() <
-          18
-          ? [requiredRule]
-          : undefined,
+      rules: [requireIfUnderage(newUserData.value.dateOfBirth)],
     },
     phoneNumber: {
       label: t("auth.phoneNumber"),

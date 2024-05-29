@@ -26,8 +26,8 @@
               "
               bottom-slots
               class="col"
+              lazy-rules
               outlined
-              reactive-rules
             >
               <template
                 v-if="
@@ -132,6 +132,7 @@ import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import {
   makeValueMatchRule,
+  requireIfUnderage,
   requiredRule,
   validatePasswordRule,
 } from "src/helpers/rules";
@@ -210,13 +211,7 @@ const formData = computed<
     field: "delegate",
     inputData: {
       label: t("auth.nameOfDelegate"),
-      rules: [
-        new Date().getUTCFullYear() -
-          new Date(user.value.dateOfBirth).getUTCFullYear() <
-        18
-          ? requiredRule
-          : () => true,
-      ],
+      rules: [requireIfUnderage(user.value.dateOfBirth)],
       tooltip: t("auth.delegateLabel"),
     },
   },
