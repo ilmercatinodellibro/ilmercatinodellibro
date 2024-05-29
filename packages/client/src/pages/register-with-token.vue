@@ -1,3 +1,4 @@
+<!-- TODO: update to match the current mock-ups -->
 <template>
   <q-page class="column justify-center registration-page">
     <div class="items-center justify-center row">
@@ -117,6 +118,7 @@ const user = reactive<Omit<RegisterPayload, "retailLocationId">>({
   lastname: "",
   password: "",
   passwordConfirmation: "",
+  dateOfBirth: Date.now(),
 });
 
 const { registerWithToken, loading: isRegistering } =

@@ -2,7 +2,7 @@
 // IMPORTANT: Every rule should consider a possible "null" type since default cleared q-select returns that.
 
 import { isInteger } from "lodash-es";
-import { ValidationRule } from "quasar";
+import { ValidationRule, date } from "quasar";
 import { MaybeRefOrGetter, toValue } from "vue";
 import { useI18nOutsideSetup } from "src/boot/i18n";
 
@@ -153,6 +153,17 @@ export const allowOnlyIntegerNumbers: ValidationRule<string | number | null> = (
   (!(value === null) &&
     isInteger(typeof value === "string" ? parseFloat(value) : value)) ||
   t("validators.onlyIntegers");
+
+const getAge = (birthDate: string): number =>
+  Math.trunc(date.getDateDiff(new Date(), new Date(birthDate), "days") / 365);
+
+export const emptyRule: ValidationRule<string | null> = (value) =>
+  !value?.length || value.length === 0 || t("validators.noDelegateForAdult");
+
+export const requireIfUnderage = (
+  birthDate: string | null,
+): ValidationRule<string | null> =>
+  birthDate === null || getAge(birthDate) >= 18 ? emptyRule : requiredRule;
 
 // ---------- ---------- ----------
 // Next fields are not imported in other files but we need to leave these so in the future we can abstract these in a package

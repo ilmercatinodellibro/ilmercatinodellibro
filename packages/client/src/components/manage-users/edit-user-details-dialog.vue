@@ -1,3 +1,4 @@
+<!-- TODO: update this to include the missing fields -->
 <template>
   <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
@@ -206,6 +207,7 @@ const newUserData = ref(
         password: "",
         passwordConfirmation: "",
         phoneNumber: "",
+        dateOfBirth: Date.now(),
       } satisfies RegisterUserPayload),
 );
 const hidePassword = ref(true);

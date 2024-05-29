@@ -39,8 +39,6 @@ export default {
   filters: {
     options: {
       isAvailable: "Available",
-      schoolCodes: "School Codes",
-      schoolCourseIds: "School Course Ids",
       hasProblems: "With Problems",
       isSold: "Sold",
       // HIGH_UTILITY: "High Utility",

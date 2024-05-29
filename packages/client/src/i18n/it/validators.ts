@@ -13,7 +13,7 @@ export default {
       "La password deve contenere almeno un carattere minuscolo",
     atLeastOneUppercase:
       "La password deve contenere almeno un carattere maiuscolo",
-    atLeastOneSpecialCharacter: `La password deve contenere almeno uno dei seguenti caratteri speciali`,
+    atLeastOneSpecialCharacter: `La password deve contenere almeno un carattere speciale`,
     atLeast8AndMaximum25Characters:
       "La password deve avere almeno 8 e massimo 25 caratteri",
   },
@@ -22,4 +22,5 @@ export default {
   numberBetweenValues:
     "Il valore deve essere un numero compreso tra {min} e {max}",
   onlyIntegers: "Il valore deve essere un numero intero",
+  noDelegateForAdult: "Un utente maggiorenne non può avere un delegato",
 };

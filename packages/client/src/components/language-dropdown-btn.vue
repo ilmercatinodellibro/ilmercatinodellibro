@@ -1,5 +1,5 @@
 <template>
-  <q-btn-dropdown :label="selectedLanguageLabel" auto-close>
+  <q-btn-dropdown :label="selectedLanguageLabel" auto-close color="accent">
     <q-list>
       <q-item
         v-for="language in languages"

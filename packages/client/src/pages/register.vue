@@ -1,152 +1,269 @@
 <template>
-  <!-- TODO: Adjust the page to the new mockup -->
-  <q-page class="column justify-center registration-page">
-    <div class="items-center justify-center row">
-      <q-card class="form-card full-width text-center">
-        <q-form greedy @submit="onSubmit">
-          <q-card-section class="text-dark text-h4">
-            {{ t("auth.register") }}
-          </q-card-section>
-          <q-card-section>
+  <q-page class="justify-center registration-page row">
+    <q-card class="column form-card gap-24 items-stretch no-wrap q-pa-lg">
+      <q-card-section class="column gap-24 no-padding no-wrap">
+        <q-img :src="theme.logo" fit="contain" height="60px" />
+
+        <q-form
+          :id="`register-form-${uid()}`"
+          class="column gap-16 items-stretch justify-center no-padding"
+          greedy
+          @submit="onSubmit"
+        >
+          <template v-for="fieldData in formData" :key="fieldData.field">
             <q-input
-              v-model="user.firstname"
-              :rules="[requiredRule]"
-              type="text"
-              outlined
+              v-model="user[fieldData.field]"
+              v-bind="fieldData.inputData"
+              :autocomplete="
+                [
+                  'password',
+                  'passwordConfirmation',
+                  'email',
+                  'confirmEmail',
+                ].includes(fieldData.field)
+                  ? 'new-password'
+                  : 'off'
+              "
+              bottom-slots
+              class="col"
               lazy-rules
-              :label="t('auth.firstName')"
-              data-cy="name-field"
-            />
-            <q-input
-              v-model="user.lastname"
-              :rules="[requiredRule]"
-              lazy-rules
-              :label="t('auth.lastName')"
               outlined
-              type="text"
-              data-cy="surname-field"
-            />
-            <q-input
-              v-model="user.email"
-              :rules="[requiredRule, emailRule]"
-              lazy-rules
-              :label="t('auth.email')"
-              outlined
-              type="email"
-              data-cy="email-field"
-            />
-            <k-password-input
-              v-model="user.password"
-              v-model:show="showPassword"
-              :rules="[requiredRule, validatePasswordRule]"
-              :label="t('auth.password')"
-              outlined
-              lazy-rules
-              autocomplete="password"
-              data-cy="password-field"
-            />
+            >
+              <template
+                v-if="
+                  ['password', 'passwordConfirmation', 'delegate'].includes(
+                    fieldData.field,
+                  )
+                "
+                #append
+              >
+                <q-icon
+                  v-if="
+                    fieldData.field === 'password' ||
+                    fieldData.field === 'passwordConfirmation'
+                  "
+                  :name="showPassword ? mdiEyeOff : mdiEye"
+                  class="cursor-pointer"
+                  @click="showPassword = !showPassword"
+                />
+
+                <q-icon v-if="fieldData.tooltip" :name="mdiInformationOutline">
+                  <q-tooltip>
+                    {{ fieldData.tooltip }}
+                  </q-tooltip>
+                </q-icon>
+              </template>
+            </q-input>
+
             <password-strength-bar
-              :password-to-check="user.password"
+              v-if="fieldData.field === 'password'"
+              :password-to-check="user[fieldData.field]"
               :steps="STRENGTH_BAR_STEPS"
             />
-            <k-password-input
-              v-model="user.passwordConfirmation"
-              v-model:show="showPassword"
-              :rules="[requiredRule, passwordMatchRule]"
-              :label="t('auth.confirmPassword')"
-              outlined
-              lazy-rules
-              autocomplete="password"
-              data-cy="password-confirmation-field"
-            />
-          </q-card-section>
-
-          <q-card-section>
-            <q-btn
-              class="full-width"
-              color="accent"
-              :label="t('auth.register')"
-              text-color="black-54"
-              type="submit"
-              :loading="isRegistering"
-              data-cy="submit-button"
-            />
-          </q-card-section>
-
-          <template v-if="SOCIAL_LOGIN_ENABLED">
-            <q-separator inset spaced />
-
-            <q-card-section class="column gap-8">
-              <span class="text-black-87">{{ t("common.or") }}</span>
-
-              <social-auth-buttons type="register" />
-            </q-card-section>
           </template>
 
-          <q-separator inset spaced />
-
-          <q-card-section>
-            <span class="text-dark text-subtitle1">
-              {{ t("common.or") }}&nbsp;
-              <router-link to="login" class="text-dark">
-                {{ t("auth.login") }}
-              </router-link>
-            </span>
-          </q-card-section>
+          <q-btn
+            class="full-width"
+            color="primary"
+            :label="t('auth.register')"
+            type="submit"
+            :loading="isRegistering"
+            data-cy="submit-button"
+          />
         </q-form>
-      </q-card>
-    </div>
+      </q-card-section>
+
+      <template v-if="SOCIAL_LOGIN_ENABLED">
+        <q-separator />
+
+        <q-card-section class="column gap-8 no-padding">
+          <span class="text-black-87 text-center">
+            {{ t("common.or") }}
+          </span>
+
+          <social-auth-buttons type="register" />
+        </q-card-section>
+      </template>
+
+      <q-separator />
+
+      <q-card-section class="column gap-16 items-center no-padding">
+        <span class="text-dark text-subtitle1">
+          {{ t("auth.alreadyRegistered") }}
+        </span>
+
+        <q-btn
+          :label="t('auth.goToLogin')"
+          class="full-width outline-black-12"
+          outline
+          to="login"
+        />
+      </q-card-section>
+
+      <q-separator />
+
+      <router-link
+        :to="{ name: AvailableRouteNames.ForgotPassword }"
+        class="text-black-87 text-center text-subtitle1"
+        data-cy="forgot-password-link"
+      >
+        {{ t("auth.forgotPassword") }}
+      </router-link>
+    </q-card>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client/core";
-import { reactive, ref, toRaw } from "vue";
+import {
+  mdiEye,
+  mdiEyeOff,
+  mdiInformationOutline,
+} from "@quasar/extras/mdi-v7";
+import { omit } from "lodash-es";
+import { QInputProps, uid } from "quasar";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import PasswordStrengthBar from "components/password-strength-bar.vue";
 import SocialAuthButtons from "components/social-auth-buttons.vue";
-import { RegisterPayload } from "src/@generated/graphql";
-import KPasswordInput from "src/components/k-password-input.vue";
+import { RegisterUserPayload } from "src/@generated/graphql";
 import { STRENGTH_BAR_STEPS } from "src/components/models";
+import PasswordStrengthBar from "src/components/password-strength-bar.vue";
+import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import {
-  emailRule,
   makeValueMatchRule,
+  requireIfUnderage,
   requiredRule,
   validatePasswordRule,
 } from "src/helpers/rules";
+import { AvailableRouteNames } from "src/models/routes";
 import { useRegisterMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
+
+const { theme } = useTheme();
 
 const showPassword = ref(false);
 
-const user = reactive<Omit<RegisterPayload, "retailLocationId">>({
+type UserRegistrationData = Omit<
+  RegisterUserPayload,
+  "discount" | "retailLocationId" | "notes" | "dateOfBirth"
+> & {
+  confirmEmail: string;
+  dateOfBirth: string;
+};
+
+const user = ref<UserRegistrationData>({
   email: "",
   firstname: "",
   lastname: "",
   password: "",
+  confirmEmail: "",
+  phoneNumber: "",
   passwordConfirmation: "",
+  dateOfBirth: "",
 });
 
 const { register, loading: isRegistering } = useRegisterMutation();
 
+const emailMatchRule = makeValueMatchRule(
+  () => user.value.confirmEmail,
+  () => t("auth.emailsDoNotMatch"),
+);
 const passwordMatchRule = makeValueMatchRule(
-  () => user.password,
+  () => user.value.password,
   () => t("auth.passwordDoNotMatch"),
 );
+
+const formData = computed<
+  {
+    field: keyof UserRegistrationData;
+    tooltip?: string;
+    inputData: Omit<QInputProps, "modelValue">;
+  }[]
+>(() => [
+  {
+    field: "firstname",
+    inputData: {
+      label: t("auth.firstName"),
+      rules: [requiredRule],
+    },
+  },
+  {
+    field: "lastname",
+    inputData: {
+      label: t("auth.lastName"),
+      rules: [requiredRule],
+    },
+  },
+  {
+    field: "dateOfBirth",
+    inputData: {
+      label: t("auth.birthDate"),
+      type: "date",
+      rules: [requiredRule],
+    },
+  },
+  {
+    field: "delegate",
+    inputData: {
+      label: t("auth.nameOfDelegate"),
+      rules: [requireIfUnderage(user.value.dateOfBirth)],
+      tooltip: t("auth.delegateLabel"),
+    },
+  },
+  {
+    field: "phoneNumber",
+    inputData: {
+      label: t("auth.phoneNumber"),
+      mask: "phone",
+      unmaskedValue: true,
+    },
+  },
+  {
+    field: "email",
+    inputData: {
+      label: t("auth.emailAddress"),
+      rules: [requiredRule],
+    },
+  },
+  {
+    field: "confirmEmail",
+    inputData: {
+      label: t("auth.confirmEmail"),
+      rules: [requiredRule, emailMatchRule],
+    },
+  },
+  {
+    field: "password",
+    inputData: {
+      label: t("auth.password"),
+      rules: [requiredRule, validatePasswordRule],
+      type: showPassword.value ? "text" : "password",
+    },
+  },
+  {
+    field: "passwordConfirmation",
+    inputData: {
+      label: t("auth.confirmPassword"),
+      rules: [requiredRule, passwordMatchRule],
+      type: showPassword.value ? "text" : "password",
+    },
+  },
+]);
 
 const { selectedLocation } = useRetailLocationService();
 async function onSubmit() {
   try {
     await register({
       input: {
-        ...toRaw(user),
-        locale: locale.value,
+        ...omit(user.value, ["confirmEmail"]),
         retailLocationId: selectedLocation.value.id,
+        delegate: user.value.delegate,
+        dateOfBirth: Date.parse(user.value.dateOfBirth),
       },
     });
   } catch (error) {
@@ -193,6 +310,11 @@ $registration-page-padding: 50px 16px;
 .form-card {
   @media screen and (min-width: $breakpoint-medium) {
     max-width: $form-width;
+    width: 100%;
   }
+}
+
+.outline-black-12::before {
+  border-color: rgb(0 0 0 / 12%);
 }
 </style>

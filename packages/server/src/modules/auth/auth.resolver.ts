@@ -5,6 +5,7 @@ import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
 import { User as GraphQLUser } from "src/@generated";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { RegisterUserPayload } from "src/modules/user/user.args";
 import { UserService } from "../user/user.service";
 import {
   LoginPayload,
@@ -36,7 +37,7 @@ export class AuthResolver {
 
   @Public()
   @Mutation(() => GraphQLVoid, { nullable: true })
-  async register(@Input() payload: RegisterPayload) {
+  async register(@Input() payload: RegisterUserPayload) {
     const existingUser = await this.userService.findUserByEmail(payload.email);
     // To prevent user enumeration attacks, we don't throw an error
     // TODO: it can still be guessed with the response time difference, add a relevant delay
@@ -50,9 +51,25 @@ export class AuthResolver {
         "Confirmation password doesn't match with provided password!",
       );
     }
-    const user = await this.userService.createUser(
-      omit(payload, ["passwordConfirmation", "retailLocationId"]),
-    );
+
+    const birthDate = new Date(payload.dateOfBirth);
+    birthDate.setFullYear(birthDate.getFullYear() + 18);
+    const isAdult = Date.now() - birthDate.getTime() >= 0;
+
+    if (isAdult && payload.delegate) {
+      throw new UnprocessableEntityException(
+        "An adult user cannot have a delegate.",
+      );
+    }
+    if (!isAdult && !payload.delegate) {
+      throw new UnprocessableEntityException(
+        "An underaged user must have a delegate.",
+      );
+    }
+
+    const user = await this.userService.createUser({
+      ...omit(payload, ["passwordConfirmation", "retailLocationId"]),
+    });
     const token = this.authService.createVerificationToken(
       payload.retailLocationId,
       user.email,
