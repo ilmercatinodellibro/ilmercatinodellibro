@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex items-center justify-center">
-    <q-card class="column form-card gap-24 q-pa-lg text-center" flat>
+    <q-card class="column form-card gap-24 q-pa-lg text-center">
       <q-img :src="theme.logo" fit="contain" height="60px" />
       <h3 class="no-margin text-primary">{{ t("auth.resetPassword") }}</h3>
       <q-form greedy class="column gap-24" @submit="onSubmit">

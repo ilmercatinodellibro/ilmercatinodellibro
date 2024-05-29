@@ -15,7 +15,7 @@ export default {
   noWorries:
     "No worries, we've all been there. Kindly enter your email address and we will send you and email to reset your password.",
   checkInbox:
-    "If that email address is in our database, you will receive an email to reset your password. You can close this tab now.",
+    "If that email address is in our database, you will receive an email to reset your password.",
   addCurrentPassword: "Add current password",
   addNewPassword: "Add new password",
   confirmPassword: "Confirm password",

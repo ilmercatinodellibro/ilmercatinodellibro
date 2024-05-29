@@ -14,7 +14,7 @@ export default {
   noWorries:
     "Nessun problema, ci siamo passati tutti. Inserisci gentilmente il tuo indirizzo e-mail e ti invieremo una email per reimpostare la password!",
   checkInbox:
-    "Se quell'indirizzo e-mail è nel nostro database, riceverai un'e-mail per reimpostare la password. Puoi chiudere questa scheda ora.",
+    "Se quell'indirizzo e-mail è nel nostro database, riceverai un'e-mail per reimpostare la password.",
   resetPassword: "Reimposta password",
   addCurrentPassword: "Aggiungi password corrente",
   addNewPassword: "Aggiungi nuova password",
