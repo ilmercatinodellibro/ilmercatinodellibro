@@ -39,364 +39,397 @@
             </q-item-section>
           </q-item>
 
-          <q-item
-            v-ripple
-            :to="{ name: AvailableRouteNames.MyData }"
-            active-class="bg-black-activated-light"
-            class="drawer-item"
-            clickable
-            data-cy="my-data"
-          >
-            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-              {{ t("general.myData") }}
-            </q-tooltip>
-            <q-item-section side>
-              <q-icon :name="mdiBadgeAccountHorizontal" color="black-54" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="ellipsis text-size-16">
+          <div class="no-padding q-item q-item-type row">
+            <q-item
+              v-ripple
+              :to="{ name: AvailableRouteNames.MyData }"
+              active-class="bg-black-activated-light"
+              class="drawer-item"
+              clickable
+              data-cy="my-data"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t("general.myData") }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiBadgeAccountHorizontal" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("general.myData") }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </div>
 
           <template v-if="user && hasUserRole">
-            <q-item
-              v-ripple
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              :to="{ name: AvailableRouteNames.Home }"
-              data-cy="home"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t("general.home") }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiHome" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("general.home") }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-ripple
-              :to="{ name: AvailableRouteNames.ReserveBooks }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="reserve-books"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t("general.reserveBooks") }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiBookOpenBlankVariant" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("general.reserveBooks") }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon :name="mdiInformationOutline" color="black-54">
-                  <q-tooltip>
-                    {{ t("general.tooltips.reserveBooks") }}
-                  </q-tooltip>
-                </q-icon>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-ripple
-              :to="{ name: AvailableRouteNames.MyBooks }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="my-books"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t("general.myBooks") }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiCheckDecagram" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("general.myBooks") }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon :name="mdiInformationOutline" color="black-54">
-                  <q-tooltip>
-                    {{ t("general.tooltips.myBooks") }}
-                  </q-tooltip>
-                </q-icon>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-ripple
-              :to="{ name: AvailableRouteNames.SalableBooks }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="salable-books"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t("general.salableBooks") }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiCurrencyEur" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("general.salableBooks") }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon :name="mdiInformationOutline" color="black-54">
-                  <q-tooltip>
-                    {{ t("general.tooltips.salableBooks") }}
-                  </q-tooltip>
-                </q-icon>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-ripple
-              :to="{ name: AvailableRouteNames.FAQ }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="faq"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t("general.faq") }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiHelpCircle" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("general.faq") }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
-
-          <template v-if="user && (hasAdminRole || hasOperatorRole)">
-            <q-item
-              v-ripple
-              :to="{ name: AvailableRouteNames.Warehouse }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="warehouse"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t("general.tooltips.warehouse") }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiBookshelf" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("general.warehouse") }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon :name="mdiInformationOutline" color="black-54">
-                  <q-tooltip>
-                    {{ t("general.tooltips.warehouse") }}
-                  </q-tooltip>
-                </q-icon>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-ripple
-              :to="{ name: AvailableRouteNames.Catalog }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="books-catalog"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t(`routesNames.${AvailableRouteNames.Catalog}`) }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiBookOpenBlankVariant" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("routesNames.catalog") }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon :name="mdiInformationOutline" color="black-54">
-                  <q-tooltip>
-                    {{ t("general.tooltips.catalog") }}
-                  </q-tooltip>
-                </q-icon>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-ripple
-              :to="{ name: AvailableRouteNames.UsersManagement }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="users-management"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiAccountMultiple" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon :name="mdiInformationOutline" color="black-54">
-                  <q-tooltip>
-                    {{ t("general.tooltips.usersAndMovements") }}
-                  </q-tooltip>
-                </q-icon>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-if="hasAdminRole"
-              v-ripple
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              @click="openSettings()"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t(`sidebar.settings`) }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiCog" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("sidebar.settings") }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-if="hasAdminRole"
-              v-ripple
-              :to="{ name: AvailableRouteNames.RolesAndPermissions }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="roles-and-permissions"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{
-                  t(`routesNames.${AvailableRouteNames.RolesAndPermissions}`)
-                }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiKey" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{
-                    t(`routesNames.${AvailableRouteNames.RolesAndPermissions}`)
-                  }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-
-            <q-item
-              v-if="hasAdminRole"
-              v-ripple
-              :to="{ name: AvailableRouteNames.Statistics }"
-              active-class="bg-black-activated-light"
-              class="drawer-item"
-              clickable
-              data-cy="statistics"
-            >
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t(`routesNames.${AvailableRouteNames.Statistics}`) }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiChartLine" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t(`routesNames.${AvailableRouteNames.Statistics}`) }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
-
-          <q-expansion-item :expand-icon="mdiMenuDown" class="drawer-item">
-            <template #header>
-              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                {{ t("general.language") }}
-              </q-tooltip>
-              <q-item-section side>
-                <q-icon :name="mdiWeb" color="black-54" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="ellipsis text-size-16">
-                  {{ t("general.language") }}
-                </q-item-label>
-              </q-item-section>
-            </template>
-
-            <q-list>
+            <div class="no-padding q-item q-item-type row">
               <q-item
-                v-for="language in languages"
-                :key="language.code"
+                v-ripple
+                active-class="bg-black-activated-light"
+                class="drawer-item"
                 clickable
-                :class="
-                  locale === language.code ? 'bg-black-activated-light' : ''
-                "
-                :inset-level="EXPANSION_ITEMS_INSET_LEVEL"
-                @click="setLanguage(language.code)"
+                :to="{ name: AvailableRouteNames.Home }"
+                data-cy="home"
               >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.home") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiHome" color="black-54" />
+                </q-item-section>
                 <q-item-section>
-                  <q-item-label class="ellipsis text-size-14">
-                    {{ language.label }}
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.home") }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
-            </q-list>
-          </q-expansion-item>
+            </div>
 
-          <q-item
-            v-ripple
-            class="drawer-item"
-            clickable
-            data-cy="logout-button"
-            @click="logout"
-          >
-            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-              {{ t("auth.logOut") }}
-            </q-tooltip>
-            <q-item-section side>
-              <q-icon :name="mdiExitToApp" color="black-54" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="ellipsis text-size-16">
+            <div class="no-padding q-item q-item-type row">
+              <q-item
+                v-ripple
+                :to="{ name: AvailableRouteNames.ReserveBooks }"
+                active-class="bg-black-activated-light"
+                class="drawer-item"
+                clickable
+                data-cy="reserve-books"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.reserveBooks") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiBookOpenBlankVariant" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.reserveBooks") }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon :name="mdiInformationOutline" color="black-54">
+                    <q-tooltip>
+                      {{ t("general.tooltips.reserveBooks") }}
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </q-item>
+            </div>
+
+            <div class="no-padding q-item q-item-type row">
+              <q-item
+                v-ripple
+                :to="{ name: AvailableRouteNames.MyBooks }"
+                active-class="bg-black-activated-light"
+                class="drawer-item"
+                clickable
+                data-cy="my-books"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.myBooks") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiCheckDecagram" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.myBooks") }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon :name="mdiInformationOutline" color="black-54">
+                    <q-tooltip>
+                      {{ t("general.tooltips.myBooks") }}
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </q-item>
+            </div>
+
+            <div class="no-padding q-item q-item-type row">
+              <q-item
+                v-ripple
+                :to="{ name: AvailableRouteNames.SalableBooks }"
+                active-class="bg-black-activated-light"
+                class="drawer-item"
+                clickable
+                data-cy="salable-books"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.salableBooks") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiCurrencyEur" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.salableBooks") }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon :name="mdiInformationOutline" color="black-54">
+                    <q-tooltip>
+                      {{ t("general.tooltips.salableBooks") }}
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </q-item>
+            </div>
+
+            <div class="no-padding q-item q-item-type row">
+              <q-item
+                v-ripple
+                :to="{ name: AvailableRouteNames.FAQ }"
+                active-class="bg-black-activated-light"
+                class="drawer-item"
+                clickable
+                data-cy="faq"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.faq") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiHelpCircle" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.faq") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </div>
+          </template>
+
+          <template v-if="user && (hasAdminRole || hasOperatorRole)">
+            <div class="no-padding q-item q-item-type row">
+              <q-item
+                v-ripple
+                :to="{ name: AvailableRouteNames.Warehouse }"
+                active-class="bg-black-activated-light"
+                class="drawer-item"
+                clickable
+                data-cy="warehouse"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.tooltips.warehouse") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiBookshelf" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.warehouse") }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon :name="mdiInformationOutline" color="black-54">
+                    <q-tooltip>
+                      {{ t("general.tooltips.warehouse") }}
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </q-item>
+            </div>
+
+            <div class="no-padding q-item q-item-type row">
+              <q-item
+                v-ripple
+                :to="{ name: AvailableRouteNames.Catalog }"
+                active-class="bg-black-activated-light"
+                class="drawer-item"
+                clickable
+                data-cy="books-catalog"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t(`routesNames.${AvailableRouteNames.Catalog}`) }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiBookOpenBlankVariant" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("routesNames.catalog") }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon :name="mdiInformationOutline" color="black-54">
+                    <q-tooltip>
+                      {{ t("general.tooltips.catalog") }}
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </q-item>
+            </div>
+
+            <div class="no-padding q-item q-item-type row">
+              <q-item
+                v-ripple
+                :to="{ name: AvailableRouteNames.UsersManagement }"
+                active-class="bg-black-activated-light"
+                class="drawer-item"
+                clickable
+                data-cy="users-management"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiAccountMultiple" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{
+                      t(`routesNames.${AvailableRouteNames.UsersManagement}`)
+                    }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon :name="mdiInformationOutline" color="black-54">
+                    <q-tooltip>
+                      {{ t("general.tooltips.usersAndMovements") }}
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </q-item>
+            </div>
+
+            <template v-if="hasAdminRole">
+              <div class="no-padding q-item q-item-type row">
+                <q-item
+                  v-ripple
+                  active-class="bg-black-activated-light"
+                  class="drawer-item"
+                  clickable
+                  @click="openSettings()"
+                >
+                  <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                    {{ t(`sidebar.settings`) }}
+                  </q-tooltip>
+                  <q-item-section side>
+                    <q-icon :name="mdiCog" color="black-54" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="ellipsis text-size-16">
+                      {{ t("sidebar.settings") }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </div>
+
+              <div class="no-padding q-item q-item-type row">
+                <q-item
+                  v-ripple
+                  :to="{ name: AvailableRouteNames.RolesAndPermissions }"
+                  active-class="bg-black-activated-light"
+                  class="drawer-item"
+                  clickable
+                  data-cy="roles-and-permissions"
+                >
+                  <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                    {{
+                      t(
+                        `routesNames.${AvailableRouteNames.RolesAndPermissions}`,
+                      )
+                    }}
+                  </q-tooltip>
+                  <q-item-section side>
+                    <q-icon :name="mdiKey" color="black-54" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="ellipsis text-size-16">
+                      {{
+                        t(
+                          `routesNames.${AvailableRouteNames.RolesAndPermissions}`,
+                        )
+                      }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </div>
+
+              <div class="no-padding q-item q-item-type row">
+                <q-item
+                  v-ripple
+                  :to="{ name: AvailableRouteNames.Statistics }"
+                  active-class="bg-black-activated-light"
+                  class="drawer-item"
+                  clickable
+                  data-cy="statistics"
+                >
+                  <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                    {{ t(`routesNames.${AvailableRouteNames.Statistics}`) }}
+                  </q-tooltip>
+                  <q-item-section side>
+                    <q-icon :name="mdiChartLine" color="black-54" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="ellipsis text-size-16">
+                      {{ t(`routesNames.${AvailableRouteNames.Statistics}`) }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </div>
+            </template>
+          </template>
+
+          <div class="no-padding q-item q-item-type row">
+            <q-expansion-item :expand-icon="mdiMenuDown" class="drawer-item">
+              <template #header>
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.language") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiWeb" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.language") }}
+                  </q-item-label>
+                </q-item-section>
+              </template>
+
+              <q-list>
+                <q-item
+                  v-for="language in languages"
+                  :key="language.code"
+                  clickable
+                  :class="
+                    locale === language.code ? 'bg-black-activated-light' : ''
+                  "
+                  :inset-level="EXPANSION_ITEMS_INSET_LEVEL"
+                  @click="setLanguage(language.code)"
+                >
+                  <q-item-section>
+                    <q-item-label class="ellipsis text-size-14">
+                      {{ language.label }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
+          </div>
+
+          <div class="no-padding q-item q-item-type row">
+            <q-item
+              v-ripple
+              class="drawer-item"
+              clickable
+              data-cy="logout-button"
+              @click="logout"
+            >
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t("auth.logOut") }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiExitToApp" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("auth.logOut") }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </div>
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -538,16 +571,10 @@ function openSettings() {
 .drawer-item {
   border-radius: 4px;
   margin: 2px;
+  flex-grow: 1;
 }
 
 .q-btn--outline::before {
   color: rgba(#fff, 0.12);
-}
-
-.q-item__label--header {
-  padding: {
-    top: 24px;
-    bottom: 8px;
-  }
 }
 </style>
