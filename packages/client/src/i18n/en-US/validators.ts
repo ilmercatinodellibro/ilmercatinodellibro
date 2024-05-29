@@ -22,4 +22,5 @@ export default {
   nonValidISBN: "The ISBN is not valid",
   numberBetweenValues: "The value must be a number between {min} and {max}",
   onlyIntegers: "The value must be a whole number",
+  noDelegateForAdult: "An adult user cannot have a delegate",
 };

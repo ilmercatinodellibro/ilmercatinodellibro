@@ -86,7 +86,6 @@ export class RegisterUserPayload extends IntersectionType(
       "notes",
       "phoneNumber",
       "delegate",
-      "dateOfBirth",
       "locale",
     ],
     InputType,
@@ -101,6 +100,9 @@ export class RegisterUserPayload extends IntersectionType(
 
   @Field()
   passwordConfirmation!: string;
+
+  @Field()
+  dateOfBirth!: Date;
 }
 
 @InputType()

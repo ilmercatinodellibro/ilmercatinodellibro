@@ -51,6 +51,22 @@ export class AuthResolver {
         "Confirmation password doesn't match with provided password!",
       );
     }
+
+    const birthDate = new Date(payload.dateOfBirth);
+    birthDate.setFullYear(birthDate.getFullYear() + 18);
+    const isAdult = Date.now() - birthDate.getTime() >= 0;
+
+    if (isAdult && payload.delegate) {
+      throw new UnprocessableEntityException(
+        "An adult user cannot have a delegate.",
+      );
+    }
+    if (!isAdult && !payload.delegate) {
+      throw new UnprocessableEntityException(
+        "An underaged user must have a delegate.",
+      );
+    }
+
     const user = await this.userService.createUser({
       ...omit(payload, ["passwordConfirmation", "retailLocationId"]),
     });
