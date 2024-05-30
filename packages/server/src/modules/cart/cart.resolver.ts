@@ -149,6 +149,7 @@ export class CartResolver {
 
       book = bookDetails;
 
+      // BD query already returns non-deleted requests
       if (bookDetails.requests.length === 0) {
         ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
           data: {
@@ -190,7 +191,7 @@ export class CartResolver {
       });
       if (
         request.deletedAt !== null ||
-        (request.saleId !== null && request.sale?.refundedAt !== null)
+        (request.saleId !== null && request.sale?.refundedAt === null)
       ) {
         throw new UnprocessableEntityException(
           "The request is no longer valid",
@@ -213,7 +214,7 @@ export class CartResolver {
       });
       if (
         reservation.deletedAt !== null ||
-        (reservation.saleId !== null && reservation.sale?.refundedAt !== null)
+        (reservation.saleId !== null && reservation.sale?.refundedAt === null)
       ) {
         throw new UnprocessableEntityException(
           "The reservation is no longer valid",
@@ -228,6 +229,12 @@ export class CartResolver {
       book = reservation.book;
     } else {
       throw new Error("Unreachable code"); // to satisfy TypeScript
+    }
+
+    if (cart.items.find(({ bookId }) => bookId === book.id)) {
+      throw new UnprocessableEntityException(
+        "The book was already added to the cart",
+      );
     }
 
     await this.prisma.cartItem.create({

@@ -25,6 +25,9 @@ export class CartService {
   async ensureCartNotExpired(cartId: string) {
     const cart = await this.prisma.cart.findUniqueOrThrow({
       where: { id: cartId },
+      include: {
+        items: true,
+      },
     });
     if (!this.isCartExpired(cart)) {
       return cart;
