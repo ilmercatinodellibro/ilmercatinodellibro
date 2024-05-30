@@ -34,6 +34,7 @@ export default {
   passwordDoNotMatch: "Le password non corrispondono",
   emailVerified:
     "La tua email è stata verificata correttamente, ora puoi accedere utilizzando le tue credenziali",
+  emailNotVerified: "L’account di questo utente non è ancora stato verificato",
   backToLogin: "Torna al login",
   backToLocations: "Torna alle sedi",
   registeredSuccessfully: "Registrazione riuscita!",

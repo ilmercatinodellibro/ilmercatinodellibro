@@ -68,7 +68,6 @@ export class UserResolver {
     };
 
     const where: Prisma.UserWhereInput = {
-      emailVerified: true,
       AND: [
         // Also include accounts that are scheduled for deletion so that they can be restored while they are still within the grace period
         {
