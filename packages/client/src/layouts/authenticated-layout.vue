@@ -481,6 +481,7 @@ import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
+  RetailLocationFragmentDoc,
   RetailLocationSettingsFragment,
   useUpdateRetailLocationSettingsMutation,
 } from "src/services/retail-location.graphql";
@@ -544,12 +545,30 @@ function openSettings() {
   }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
       try {
-        await updateRetailLocationSettings({
+        const { cache } = await updateRetailLocationSettings({
           input: {
             ...payload.settings,
             retailLocationId: selectedLocation.value.id,
           },
         });
+
+        cache.updateFragment(
+          {
+            fragment: RetailLocationFragmentDoc,
+            fragmentName: "RetailLocation",
+            id: cache.identify(selectedLocation.value),
+          },
+          (data) => {
+            if (!data) {
+              return;
+            }
+
+            return {
+              ...data,
+              ...payload.settings,
+            };
+          },
+        );
       } catch {
         notifyError(t("common.genericErrorMessage"));
       }
