@@ -212,8 +212,8 @@ export class ReservationResolver {
       books.some(
         ({ requests }) =>
           requests.length > 0 &&
-          requests[0].saleId !== null &&
-          requests[0].sale?.refundedAt === null,
+          requests[0].sale !== null &&
+          requests[0].sale.refundedAt === null,
       )
     ) {
       throw new UnprocessableEntityException(

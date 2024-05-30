@@ -149,10 +149,8 @@ export class CartResolver {
 
       book = bookDetails;
 
-      if (
-        bookDetails.requests.filter(({ deletedAt }) => deletedAt === null)
-          .length === 0
-      ) {
+      // BD query already returns non-deleted requests
+      if (bookDetails.requests.length === 0) {
         ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
           data: {
             userId: cart.userId,
