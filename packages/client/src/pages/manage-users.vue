@@ -18,7 +18,7 @@
       </header-search-bar-filters>
 
       <q-card-section class="col no-wrap q-pa-none row">
-        <dialog-table
+        <q-table
           ref="tableRef"
           v-model:pagination="pagination"
           class="col"
@@ -228,7 +228,7 @@
               </template>
             </q-tr>
           </template>
-        </dialog-table>
+        </q-table>
       </q-card-section>
     </q-card>
   </q-page>
@@ -243,13 +243,12 @@ import {
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, Notify, QTable, QTableColumn, QTableProps } from "quasar";
-import { Ref, computed, ref } from "vue";
+import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
-import DialogTable from "src/components/manage-users/dialog-table.vue";
 import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
 import EditUserDetailsDialog from "src/components/manage-users/edit-user-details-dialog.vue";
 import EditUserRequestedDialog from "src/components/manage-users/edit-user-requested-dialog.vue";
@@ -294,16 +293,18 @@ const pagination = ref({
   rowsNumber: rowsCount.value,
 });
 
-const { filterMethod, filterOptions, tableFilter } = useTableFilters(
-  "manageUsers.filters",
-);
+const { filterMethod, filterOptions, tableFilter, refetchFilterProxy } =
+  useTableFilters("manageUsers.filters");
+
+onMounted(() => {
+  tableRef.value.requestServerInteraction();
+});
 
 const onRequest: QTableProps["onRequest"] = async (requested) => {
   await fetchCustomers({
     page: requested.pagination.page,
     rowsPerPage: requested.pagination.rowsPerPage,
-    searchTerm: tableFilter.searchQuery,
-    // TODO: pass the filters to the server
+    filter: refetchFilterProxy.value,
   });
 
   pagination.value.rowsNumber = rowsCount.value;

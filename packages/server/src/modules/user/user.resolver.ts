@@ -45,7 +45,7 @@ export class UserResolver {
 
   @Query(() => UsersQueryResult)
   async users(
-    @Args() { page, rowsPerPage, searchTerm }: UsersQueryArgs,
+    @Args() { page, rowsPerPage, filter = {} }: UsersQueryArgs,
     @CurrentUser() user: User,
   ) {
     if (rowsPerPage > 200) {
@@ -61,10 +61,32 @@ export class UserResolver {
 
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
-    const searchText = searchTerm?.trim().replaceAll(" ", "%");
+    const searchText = filter.search?.trim().replaceAll(" ", "%");
     const searchFilter: Prisma.StringFilter<"User"> = {
       contains: searchText,
       mode: "insensitive",
+    };
+
+    const activeRequests: Prisma.BookRequestWhereInput = {
+      cartItem: null,
+      deletedAt: null,
+      saleId: null,
+      OR: [
+        {
+          reservations: {
+            every: {
+              deletedAt: {
+                not: null,
+              },
+            },
+          },
+        },
+        {
+          reservations: {
+            none: {},
+          },
+        },
+      ],
     };
 
     const where: Prisma.UserWhereInput = {
@@ -78,6 +100,64 @@ export class UserResolver {
             {
               deletedAt: { gt: new Date() },
             },
+          ],
+        },
+
+        {
+          OR: [
+            ...(filter.withAvailable ?? filter.withRequested
+              ? [
+                  {
+                    requestedBooks: {
+                      some: {
+                        AND: [
+                          activeRequests,
+                          // With Available is subtractive in respect to With Requested
+                          ...(filter.withAvailable
+                            ? [
+                                {
+                                  book: {
+                                    meta: {
+                                      isAvailable: true,
+                                    },
+                                  },
+                                },
+                              ]
+                            : []),
+                        ],
+                      },
+                    },
+                  } satisfies Prisma.UserWhereInput,
+                ]
+              : []),
+
+            ...(filter.withPurchased
+              ? [
+                  {
+                    purchases: {
+                      some: {
+                        refundedAt: null,
+                      },
+                    },
+                  },
+                ]
+              : []),
+
+            ...(filter.withSold
+              ? [
+                  {
+                    bookCopies: {
+                      some: {
+                        sales: {
+                          some: {
+                            refundedAt: null,
+                          },
+                        },
+                      },
+                    },
+                  } satisfies Prisma.UserWhereInput,
+                ]
+              : []),
           ],
         },
 

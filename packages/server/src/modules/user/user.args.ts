@@ -16,6 +16,24 @@ import {
   LocationBoundQueryArgs,
 } from "src/modules/retail-location";
 
+@InputType()
+export class UserQueryFilters {
+  @Field(() => String, { nullable: true })
+  search?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  withAvailable?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  withRequested?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  withPurchased?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  withSold?: boolean;
+}
+
 @ArgsType()
 export class UsersQueryArgs {
   @Field(() => Int)
@@ -24,10 +42,8 @@ export class UsersQueryArgs {
   @Field(() => Int, { defaultValue: 100 })
   rowsPerPage!: number;
 
-  @Field(() => String, { nullable: true })
-  searchTerm?: string;
-
-  // TODO: Add filters (with available, with requested, with purchased, with sold)
+  @Field(() => UserQueryFilters, { nullable: true })
+  filter?: UserQueryFilters;
 }
 
 @ObjectType()
