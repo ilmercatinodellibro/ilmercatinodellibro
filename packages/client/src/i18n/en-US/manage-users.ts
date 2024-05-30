@@ -183,7 +183,7 @@ export default {
     emptyCart: "Empty the cart",
     autoEmptyDisclaimer:
       "Remember: you cannot keep the available books stuck in the cart for too long, therefore it will automatically be emptied in: {0}",
-    sellBooks: "Sell books ({0} €)",
+    sellBooks: "Sell books ({0})",
     totalBooks: "Total books to sell",
     discount: "ISEE/voluntary discount",
     total: "Total",

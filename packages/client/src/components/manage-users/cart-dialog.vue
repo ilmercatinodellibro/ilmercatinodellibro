@@ -24,7 +24,7 @@
             suffix="€"
           />
           <q-input
-            :model-value="totalBooksPrice"
+            :model-value="totalBooksPrice.toFixed(2)"
             :label="$t('manageUsers.cartDialog.total')"
             disable
             outlined
@@ -121,7 +121,11 @@
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn
           :disable="cartBooks.length === 0"
-          :label="$t('manageUsers.cartDialog.sellBooks', [totalBooksPrice])"
+          :label="
+            $t('manageUsers.cartDialog.sellBooks', [
+              formatPrice(totalBooksPrice),
+            ])
+          "
           color="positive"
           @click="sellBooks()"
         />
@@ -449,7 +453,7 @@ function sellBooks() {
     componentProps: {
       title: t("manageUsers.cartDialog.confirm.title"),
       message: t("manageUsers.cartDialog.confirm.message", [
-        totalBooksPrice.value,
+        formatPrice(totalBooksPrice.value),
       ]),
       ok: t("manageUsers.cartDialog.confirm.sell"),
       cancel: t("common.cancel"),
