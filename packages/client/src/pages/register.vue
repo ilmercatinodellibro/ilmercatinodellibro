@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <q-page class="justify-center registration-page row">
     <q-card class="column form-card gap-24 items-stretch no-wrap q-pa-lg">
@@ -72,6 +73,11 @@
           />
         </q-form>
       </q-card-section>
+
+      <span
+        class="privacy-links text-center"
+        v-html="t('auth.privacyAndToSRegister', [selectedLocation.id])"
+      />
 
       <template v-if="SOCIAL_LOGIN_ENABLED">
         <q-separator />
@@ -345,6 +351,10 @@ $registration-page-padding: 50px 16px;
     max-width: $form-width;
     width: 100%;
   }
+}
+
+:deep(.privacy-links > a) {
+  text-decoration: none;
 }
 
 .outline-black-12::before {
