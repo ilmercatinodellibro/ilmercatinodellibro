@@ -443,6 +443,8 @@ function openEdit({
   discount,
   notes,
   phoneNumber,
+  dateOfBirth,
+  delegate,
   scheduledForDeletionAt,
 }: CustomerFragment) {
   Dialog.create({
@@ -457,6 +459,8 @@ function openEdit({
         notes,
         phoneNumber,
         retailLocationId: selectedLocation.value.id,
+        dateOfBirth,
+        delegate,
       } satisfies UpdateUserPayload,
       scheduledForDeletion: !!scheduledForDeletionAt,
     },

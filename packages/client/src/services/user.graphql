@@ -34,7 +34,7 @@ fragment Member on User {
 }
 
 fragment Customer on User {
-  ...User
+  ...UpdatableUserInfo
   createdAt
   scheduledForDeletionAt: deletedAt
   booksInStock
