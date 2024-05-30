@@ -23,55 +23,55 @@ const IT_RE_FAQ = `<section>
   </p>
   <p>&nbsp;</p>
   <p>
-    <strong> Dove vi trovate?&nbsp;</strong> In via Cassoli 1, vicino a dove
+    <strong> Dove vi trovate?&nbsp;</strong>In via Cassoli 1, vicino a dove
     viale Umberto I si immette sulla circonvallazione. Digita "il Mercatino del
     Libro RE" su Google Maps, ci trovi con tanto di giorni e orari di apertura.
     Clicca  <a href="https://goo.gl/maps/82bJmFoHRbnUuKWy9" rel="alternate">qui</a
     > per vedere la mappa!
   </p>
   <p>
-    <strong> A che piano siete?&nbsp</strong> Piano terra, per la vostra comodità :)
+    <strong> A che piano siete?&nbsp</strong>Piano terra, per la vostra comodità :)
   </p>
   <p>
-    <strong> Giorni e orari di apertura?&nbsp;</strong> Martedì, mercoledì,
+    <strong> Giorni e orari di apertura?&nbsp;</strong>Martedì, mercoledì,
     venerdì e sabato dalle 10.00 alle 13.00 e dalle 15.30 alle 18.30
   </p>
   <p>
-    <strong> Come posso contattarvi?&nbsp;</strong> Chiamando il numero 351
+    <strong> Come posso contattarvi?&nbsp;</strong>Chiamando il numero 351
     547&nbsp;2756&nbsp;<span style="text-decoration: underline"
-      >ESCLUSIVAMENTE&nbsp;</span
-    >nei giorni e negli orari di apertura. Per tutto il resto del tempo puoi
+      >ESCLUSIVAMENTE</span
+    > nei giorni e negli orari di apertura. Per tutto il resto del tempo puoi
     scriverci un messaggio whatsapp, un'email a <span
       id="cloak0993b6811ec28c721437850d4375ab4a"
       > <a href="mailto:info@ilmercatinodellibro.com"
         >info@ilmercatinodellibro.com</a
       ></span
-    >&nbsp;o contattarci su  <a
+    >&nbsp;o contattarci su <a
       href="https://www.facebook.com/IlMercatinoDelLibroRE/"
       rel="alternate"
       >Facebook</a
-    >&nbsp;o&nbsp; <a
+    >&nbsp;o&nbsp;<a
       href="https://www.instagram.com/ilmercatinodellibrore/"
       rel="alternate"
       >Instagram</a
     >.
   </p>
   <p>
-    <strong> Cosa posso fare da voi?&nbsp;</strong> Comprare libri scolastici
+    <strong> Cosa posso fare da voi?&nbsp;</strong>Comprare libri scolastici
     usati al 55% del prezzo di copertina e lasciarci in conto deposito i vostri
     libri. Nel caso vengano venduti guadagnerete il 30% del prezzo di copertina.
   </p>
   <p>
-    <strong> Quali libri avete/accettate?&nbsp;</strong> Solo libri scolastici
+    <strong> Quali libri avete/accettate?&nbsp;</strong>Solo libri scolastici
     di medie e, prevalentemente, superiori. Per essere accettati i vostri libri
     devono essere in buone condizioni (copertina intatta, no pagine mancanti, no
     scarabocchi...), essere completi (ad es. contenere in allegato il rispettivo
     CD ROM o altro materiale previsto) ed essere in adozione per l'anno
     prossimo.
   </p>
-  <p><strong> Avete anche libri di nuova adozione?&nbsp;</strong> NO</p>
+  <p><strong> Avete anche libri di nuova adozione?&nbsp;</strong>NO</p>
   <p>
-    <strong> Qual è la prima cosa che devo fare?&nbsp;</strong> Creare un utente
+    <strong> Qual è la prima cosa che devo fare?&nbsp;</strong>Creare un utente
     registrandosi sul nostro sito  <a
       href="https://www.ilmercatinodellibro.com/"
       rel="alternate"
@@ -79,7 +79,7 @@ const IT_RE_FAQ = `<section>
     >, direttamente da casa o in sede.
   </p>
   <p>
-    <strong> Mi conviene creare l'utente da casa?&nbsp;</strong> ASSOLUTAMENTE
+    <strong> Mi conviene creare l'utente da casa?&nbsp;</strong>ASSOLUTAMENTE
     SI'. Si risparmia tempo in sede e già da casa si possono controllare i libri
     che abbiamo in magazzino, mandare le richieste di libri ancora non presenti,
     prenotare libri che abbiamo in magazzino, controllare quali libri accettiamo
@@ -221,7 +221,7 @@ const IT_RE_FAQ = `<section>
             href="https://www.facebook.com/viacassoliuno/"
             rel="alternate"
             > #ViaCassoliUno</a
-          >!&nbsp;<br />Ci trovate in<strong> Via Cassoli 1</strong> ,<strong>
+          >!&nbsp;<br />Ci trovate in<strong> Via Cassoli 1</strong>,<strong>
             sulla</strong
           ><b
             >&nbsp;circonvallazione&nbsp;vicino l'incrocio&nbsp;di&nbsp;viale
@@ -236,9 +236,7 @@ const IT_RE_FAQ = `<section>
           Dal 2023 <strong
             >non viene più richiesta la quota di iscrizione iniziale</strong
           > di 2 euro.<br />Dovrete effettuare la<strong> registrazione</strong>
-          ai nostri servizi direttamente<strong>
-            &nbsp;online da casa</strong
-          ><strong>vostra</strong> , ciò<strong> &nbsp;</strong> vi permetterà
+          ai nostri servizi direttamente <strong>online da casa vostra</strong>, ciò vi permetterà
           di risparmiare tempo ed energie: una volta registrati potrete infatti
           controllare comodamente da casa vostra quali libri abbiamo in
           magazzino e di conseguenza inviarci le vostre richieste, oltre a
