@@ -60,7 +60,7 @@ export default {
     deleteAccount: "Elimina account",
   },
   privacyAndToSRegister:
-    "Cliccando Registrati accetti i <a class='text-accent' href='/tos-privacy/tos-{0}.pdf'>Termini di Servizio</a> e la <a class='text-accent' href='/tos-privacy/privacy-policy.pdf'>Privacy Policy</a> del Mercatino.",
+    "Cliccando Registrati o registrandoti tramite un sistema di terze parti accetti i <a class='text-accent' href='/tos-privacy/tos-{0}.pdf'>Termini di Servizio</a> e la <a class='text-accent' href='/tos-privacy/privacy-policy.pdf'>Privacy Policy</a> del Mercatino.",
   privacyAndToSLogin:
-    "Facendo il login accetti i <a class='text-accent' href='/tos-privacy/tos-{0}.pdf'>Termini di Servizio</a> e la <a class='text-accent' href='/tos-privacy/privacy-policy.pdf'>Privacy Policy</a> del Mercatino.",
+    "Facendo il login tramite il bottone Accedi oppure tramite i sistemi di terze parti accetti i <a class='text-accent' href='/tos-privacy/tos-{0}.pdf'>Termini di Servizio</a> e la <a class='text-accent' href='/tos-privacy/privacy-policy.pdf'>Privacy Policy</a> del Mercatino.",
 };
