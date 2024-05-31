@@ -1,77 +1,77 @@
 import type { Prisma } from "@prisma/client";
 import type { Theme } from "src/modules/retail-location/theme.args";
 
-const RE_WHO_ARE_WE = `Il Mercatino del Libro è un progetto nato nel 2013 e portato avanti negli anni da diverse associazioni di Reggio Emilia. A partire dal 2019 il progetto è promosso dal <b>Comune di Reggio Emilia</b> che ne ha permesso lo svolgimento all'interno dello spazio giovani di <b> <a href="">Via Cassoli 1</a></b>. Attualmente il progetto è portato avanti dall'associazione <b> <a href="">The Spots</a></b>, capofila della rete di associazioni giovanili che abitano lo spazio comunale.<br /><br />
+const IT_WHO_ARE_WE = `Il Mercatino del Libro è un progetto nato nel 2013 e portato avanti negli anni da diverse associazioni di Reggio Emilia. A partire dal 2019 il progetto è promosso dal <b>Comune di Reggio Emilia</b> che ne ha permesso lo svolgimento all'interno dello spazio giovani di <b> <a href="">Via Cassoli 1</a></b>. Attualmente il progetto è portato avanti dall'associazione <b> <a href="">The Spots</a></b>, capofila della rete di associazioni giovanili che abitano lo spazio comunale.<br /><br />
 Il Mercatino del Libro si occupa di compravendita di testi scolastici destinati a istituti superiori di primo e secondo grado. <b>I libri sono ritirati in conto vendita, e venduti al 55% del prezzo di copertina. Alla fine di ogni edizione vengono restituiti agli utenti i libri invenduti e parte dei profitti derivati dalla vendita, pari al 30% del prezzo di copertina.</b> <br /><br />
 Il margine di guadagno del mercatino del libro viene utilizzato per garantire la continuità del progetto negli anni successivi, investendo il surplus in progetti legati all'istruzione e alle politiche giovanili. Negli anni, il progetto è stato realizzato da studenti o giovani lavoratori tra i 16 e i 25 che in forma volontaria hanno condiviso i valori di mutuo soccorso tra studenti e libero accesso all'istruzione.<br /><br />
 A partire dall'edizione 2022, il Mercatino del Libro ha aperto una <b>seconda sede a Modena all'interno dello  <a href="">Spazio Happen</a></b> in via Strada Nazionale Canaletto sud, 43L gestito dalla <b>Cooperativa Sociale Aliante</b>. La cooperativa ha lo scopo di perseguire l'interesse generale della comunità alla promozione umana e all'integrazione sociale dei cittadini attraverso la gestione di servizi di supporto, assistenziali, socio-sanitari ed educativi.`;
 
-const RE_JOIN_US = `<b>Ogni anno nuovi ragazzi e ragazze si avvicinano al mercatino per dare il loro contributo.</b> Il progetto offre un importante aiuto alle famiglie in difficoltà abbassando il più possibile i costi legati all'istruzione. Questa missione è di fatto il comune denominatore tra tutti i ragazzi/e che, negli anni, hanno contribuito alla realizzazione di ogni edizione. <br /><br />
+const IT_JOIN_US = `<b>Ogni anno nuovi ragazzi e ragazze si avvicinano al mercatino per dare il loro contributo.</b> Il progetto offre un importante aiuto alle famiglie in difficoltà abbassando il più possibile i costi legati all'istruzione. Questa missione è di fatto il comune denominatore tra tutti i ragazzi/e che, negli anni, hanno contribuito alla realizzazione di ogni edizione. <br /><br />
 <b>Il Mercatino per molti è un luogo di aggregazione, un crocevia di studenti e studentesse</b> che si sono incontrati nella volontà comune di dare un servizio alla comunità. Questo ci rende un gruppo di amici oltre che associazione.Cerchiamo di includere ogni nuovo volontario nella speranza di vedere il progetto crescere, stando bene insieme. <br /><br />
 Durante tutto l'anno <b>ci impegniamo ad ampliare e migliorare il servizio con progetti satellite</b> che condividono gli obiettivi con quello principale. Inoltre, molti altri progetti abitano lo spazio giovani di Via Cassoli 1. Numerosi sono stati i volontari e le volontarie che hanno conosciuto lo spazio per mezzo delMercatino e sono rimasti per altri progetti e viceversa. <br /><br />
 <b>Qualora tu sia interessato a svolgere una attività costruttiva, formativa e divertente</b> per il riconoscimento di crediti formativi, come alternanza scuola lavoro o semplicemente per dare il tuo contributo <b>ti invitiamo a scriverci a  <a href='mailto:mercatino@thespots-re.it'>mercatino@thespots-re.it</a>.</b>`;
 
 //TODO: add correct link to the Terms & Service page inside the HTMLs
-const RE_FAQ = `<section>
+const IT_RE_FAQ = `<section>
   <p>
     <span style="font-size: 14pt"
       ><strong
-        ><span style="text-decoration: underline"> IMPORTANTE!</span> Per
+        ><span style="text-decoration: underline">IMPORTANTE!</span> Per
         comprare/vendere libri, è consigliato prendere appuntamento. Sarà
         possibile farlo tramite mail, Facebook, Instagram e telefono.<br /></strong
     ></span>
   </p>
   <p>&nbsp;</p>
   <p>
-    <strong> Dove vi trovate?&nbsp;</strong> In via Cassoli 1, vicino a dove
+    <strong> Dove vi trovate?&nbsp;</strong>In via Cassoli 1, vicino a dove
     viale Umberto I si immette sulla circonvallazione. Digita "il Mercatino del
     Libro RE" su Google Maps, ci trovi con tanto di giorni e orari di apertura.
     Clicca  <a href="https://goo.gl/maps/82bJmFoHRbnUuKWy9" rel="alternate">qui</a
     > per vedere la mappa!
   </p>
   <p>
-    <strong> A che piano siete?&nbsp</strong> Piano terra, per la vostra comodità :)
+    <strong> A che piano siete?&nbsp</strong>Piano terra, per la vostra comodità :)
   </p>
   <p>
-    <strong> Giorni e orari di apertura?&nbsp;</strong> Martedì, mercoledì,
+    <strong> Giorni e orari di apertura?&nbsp;</strong>Martedì, mercoledì,
     venerdì e sabato dalle 10.00 alle 13.00 e dalle 15.30 alle 18.30
   </p>
   <p>
-    <strong> Come posso contattarvi?&nbsp;</strong> Chiamando il numero 351
+    <strong> Come posso contattarvi?&nbsp;</strong>Chiamando il numero 351
     547&nbsp;2756&nbsp;<span style="text-decoration: underline"
-      >ESCLUSIVAMENTE&nbsp;</span
-    >nei giorni e negli orari di apertura. Per tutto il resto del tempo puoi
+      >ESCLUSIVAMENTE</span
+    > nei giorni e negli orari di apertura. Per tutto il resto del tempo puoi
     scriverci un messaggio whatsapp, un'email a <span
       id="cloak0993b6811ec28c721437850d4375ab4a"
       > <a href="mailto:info@ilmercatinodellibro.com"
         >info@ilmercatinodellibro.com</a
       ></span
-    >&nbsp;o contattarci su  <a
+    >&nbsp;o contattarci su <a
       href="https://www.facebook.com/IlMercatinoDelLibroRE/"
       rel="alternate"
       >Facebook</a
-    >&nbsp;o&nbsp; <a
+    >&nbsp;o&nbsp;<a
       href="https://www.instagram.com/ilmercatinodellibrore/"
       rel="alternate"
       >Instagram</a
     >.
   </p>
   <p>
-    <strong> Cosa posso fare da voi?&nbsp;</strong> Comprare libri scolastici
+    <strong> Cosa posso fare da voi?&nbsp;</strong>Comprare libri scolastici
     usati al 55% del prezzo di copertina e lasciarci in conto deposito i vostri
     libri. Nel caso vengano venduti guadagnerete il 30% del prezzo di copertina.
   </p>
   <p>
-    <strong> Quali libri avete/accettate?&nbsp;</strong> Solo libri scolastici
+    <strong> Quali libri avete/accettate?&nbsp;</strong>Solo libri scolastici
     di medie e, prevalentemente, superiori. Per essere accettati i vostri libri
     devono essere in buone condizioni (copertina intatta, no pagine mancanti, no
     scarabocchi...), essere completi (ad es. contenere in allegato il rispettivo
     CD ROM o altro materiale previsto) ed essere in adozione per l'anno
     prossimo.
   </p>
-  <p><strong> Avete anche libri di nuova adozione?&nbsp;</strong> NO</p>
+  <p><strong> Avete anche libri di nuova adozione?&nbsp;</strong>NO</p>
   <p>
-    <strong> Qual è la prima cosa che devo fare?&nbsp;</strong> Creare un utente
+    <strong> Qual è la prima cosa che devo fare?&nbsp;</strong>Creare un utente
     registrandosi sul nostro sito  <a
       href="https://www.ilmercatinodellibro.com/"
       rel="alternate"
@@ -79,7 +79,7 @@ const RE_FAQ = `<section>
     >, direttamente da casa o in sede.
   </p>
   <p>
-    <strong> Mi conviene creare l'utente da casa?&nbsp;</strong> ASSOLUTAMENTE
+    <strong> Mi conviene creare l'utente da casa?&nbsp;</strong>ASSOLUTAMENTE
     SI'. Si risparmia tempo in sede e già da casa si possono controllare i libri
     che abbiamo in magazzino, mandare le richieste di libri ancora non presenti,
     prenotare libri che abbiamo in magazzino, controllare quali libri accettiamo
@@ -221,7 +221,7 @@ const RE_FAQ = `<section>
             href="https://www.facebook.com/viacassoliuno/"
             rel="alternate"
             > #ViaCassoliUno</a
-          >!&nbsp;<br />Ci trovate in<strong> Via Cassoli 1</strong> ,<strong>
+          >!&nbsp;<br />Ci trovate in<strong> Via Cassoli 1</strong>,<strong>
             sulla</strong
           ><b
             >&nbsp;circonvallazione&nbsp;vicino l'incrocio&nbsp;di&nbsp;viale
@@ -233,12 +233,10 @@ const RE_FAQ = `<section>
           >.
         </p>
         <p>
-          Dal 2023<strong
+          Dal 2023 <strong
             >non viene più richiesta la quota di iscrizione iniziale</strong
-          >di 2 euro.<br />Dovrete effettuare la<strong> registrazione</strong>
-          &nbsp;ai nostri servizi direttamente<strong>
-            &nbsp;online da casa</strong
-          ><strong> vostra</strong> , ciò<strong> &nbsp;</strong> vi permetterà
+          > di 2 euro.<br />Dovrete effettuare la<strong> registrazione</strong>
+          ai nostri servizi direttamente <strong>online da casa vostra</strong>, ciò vi permetterà
           di risparmiare tempo ed energie: una volta registrati potrete infatti
           controllare comodamente da casa vostra quali libri abbiamo in
           magazzino e di conseguenza inviarci le vostre richieste, oltre a
@@ -259,7 +257,7 @@ const RE_FAQ = `<section>
 </div>
 `;
 
-const MO_FAQ = `<section class="article-intro clearfix">
+const IT_MO_FAQ = `<section class="article-intro clearfix">
   <p>
     <b> Dove vi trovate?</b
     ><span>
@@ -320,7 +318,7 @@ const MO_FAQ = `<section class="article-intro clearfix">
     ><span> Creare un utente registrandosi sul nostro sito</span
     > <a href="https://mo.ilmercatinodellibro.com/"
       ><span> mo.ilmercatinodellibro.com</span></a
-    ><span> , direttamente da casa o in sede.</span>
+    ><span>, direttamente da casa o in sede.</span>
   </p>
   <p>
     <b> Mi conviene creare l'utente da casa?</b
@@ -403,16 +401,37 @@ const MO_FAQ = `<section class="article-intro clearfix">
 </section>
 `;
 
-export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
+interface retailLocationInfo {
+  whoAreWeContent: string;
+  joinUsContent: string;
+  faqContent: string;
+}
+
+type locales = "it" | "en-US";
+
+type translatedRetailLocationCreateInput = Prisma.RetailLocationCreateInput & {
+  infoPagesContent: Record<locales, retailLocationInfo>;
+};
+
+export const RE_RETAIL_POINT: translatedRetailLocationCreateInput = {
   id: "re",
   name: "Reggio Emilia",
   email: "info@ilmercatinodellibro.com",
   facebookLink: "https://www.facebook.com/IlMercatinoDelLibroRE/",
   instagramLink: "https://www.instagram.com/ilmercatinodellibrore/",
   fullAddress: "Via Francesco Cassoli, 1, 42123 Reggio Emilia RE",
-  whoAreWeContent: RE_WHO_ARE_WE,
-  joinUsContent: RE_JOIN_US,
-  faqContent: RE_FAQ,
+  infoPagesContent: {
+    it: {
+      faqContent: IT_RE_FAQ,
+      joinUsContent: IT_JOIN_US,
+      whoAreWeContent: IT_WHO_ARE_WE,
+    },
+    "en-US": {
+      faqContent: IT_RE_FAQ,
+      joinUsContent: IT_JOIN_US,
+      whoAreWeContent: IT_WHO_ARE_WE,
+    },
+  },
   phoneNumber: "3516215189",
   theme: {
     colors: {
@@ -426,16 +445,25 @@ export const RE_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
   } satisfies Theme,
 };
 
-export const MO_RETAIL_POINT: Prisma.RetailLocationCreateInput = {
+export const MO_RETAIL_POINT: translatedRetailLocationCreateInput = {
   id: "mo",
   name: "Modena",
   email: " info-mo@ilmercatinodellibro.com",
   facebookLink: "https://www.facebook.com/IlMercatinoDelLibroMO/",
   instagramLink: "https://www.instagram.com/ilmercatinodellibromo/",
   fullAddress: "Strada Nazionale Canaletto Sud, 43L, 41121 - Modena MO",
-  whoAreWeContent: RE_WHO_ARE_WE,
-  joinUsContent: RE_JOIN_US,
-  faqContent: MO_FAQ,
+  infoPagesContent: {
+    it: {
+      faqContent: IT_MO_FAQ,
+      joinUsContent: IT_JOIN_US,
+      whoAreWeContent: IT_WHO_ARE_WE,
+    },
+    "en-US": {
+      faqContent: IT_MO_FAQ,
+      joinUsContent: IT_JOIN_US,
+      whoAreWeContent: IT_WHO_ARE_WE,
+    },
+  },
   phoneNumber: "3515472756",
   theme: {
     colors: {

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <q-page class="gap-32 items-start justify-evenly q-pa-lg reverse row">
     <q-card class="column form-card gap-24 q-my-xl q-pa-lg text-center">
@@ -37,11 +38,16 @@
         </q-form>
       </q-card-section>
 
+      <span
+        class="privacy-links"
+        v-html="t('auth.privacyAndToSLogin', [selectedLocation.id])"
+      />
+
       <template v-if="SOCIAL_LOGIN_ENABLED">
         <q-separator />
 
         <q-card-section class="column gap-8 no-padding">
-          <span class="text-black-87"> {{ t("common.or") }} </span>
+          <span> {{ t("common.or") }} </span>
 
           <social-auth-buttons type="login" />
         </q-card-section>
@@ -152,5 +158,9 @@ $form-width: 308px;
 
 .outline-black-12::before {
   border-color: rgb(0 0 0 / 12%);
+}
+
+:deep(.privacy-links > a) {
+  text-decoration: none;
 }
 </style>

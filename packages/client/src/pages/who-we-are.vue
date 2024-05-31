@@ -9,7 +9,7 @@
 
       <q-card-section
         class="default-color no-padding"
-        v-html="selectedLocation?.whoAreWeContent"
+        v-html="selectedLocation?.infoPagesContent[locale].whoAreWeContent"
       />
     </span>
   </q-page>
@@ -28,5 +28,5 @@ const HeaderBar = defineAsyncComponent(
 
 const { selectedLocation } = useRetailLocationService();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 </script>

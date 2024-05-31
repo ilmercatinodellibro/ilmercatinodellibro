@@ -2,7 +2,7 @@ export default {
   noData: "No user data was found.",
   email: "Email",
   password: "Password",
-  login: "Log in",
+  login: "Login",
   loginWith: "Login with {provider}",
   register: "Register",
   registerWith: "Register with {provider}",
@@ -57,4 +57,8 @@ export default {
       "The data relative to your requests, reservations, purchases, sales and other activities done on Mercatino del Libro will be utilized to conduct statistical analyses that will improve the service that we offer to the families. Don't worry: to respect your privacy, all this information will be anonymized in accordance with the law.",
     deleteAccount: "Delete account",
   },
+  privacyAndToSRegister:
+    "By clicking Register or registering through a third party you accept the Mercatino's <a class='text-accent' href='/tos-privacy/tos-{0}.pdf'>Terms of Service</a> and <a class='text-accent' href='/tos-privacy/privacy-policy.pdf'>Privacy Policy</a>.",
+  privacyAndToSLogin:
+    "By clicking Login or logging in through a third party you accept the Mercatino's <a class='text-accent' href='/tos-privacy/tos-{0}.pdf'>Terms of Service</a> and <a class='text-accent' href='/tos-privacy/privacy-policy.pdf'>Privacy Policy</a>.",
 };
