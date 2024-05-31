@@ -115,7 +115,7 @@ export class AuthService {
 
     try {
       return await this.mailService.sendMail({
-        to: `${toEmail} <${toEmail}>`,
+        to: toEmail,
         subject:
           locale === "en-US"
             ? "Invitation to join Il Mercatino del Libro"
@@ -137,7 +137,7 @@ export class AuthService {
 
     try {
       return await this.mailService.sendMail({
-        to: `${user.firstname} ${user.lastname} <${user.email}>`,
+        to: user,
         subject: locale === "en-US" ? "Email confirmation" : "Conferma email",
         context: {
           name: `${user.firstname} ${user.lastname}`,
@@ -157,7 +157,7 @@ export class AuthService {
 
     try {
       return await this.mailService.sendMail({
-        to: `${user.firstname} ${user.lastname} <${user.email}>`,
+        to: user,
         subject: locale === "en-US" ? "Reset password" : "Reimposta password",
         context: {
           name: `${user.firstname} ${user.lastname}`,

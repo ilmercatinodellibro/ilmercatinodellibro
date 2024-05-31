@@ -6,7 +6,7 @@ export type EmailConfiguration = ConfigType<typeof emailConfiguration>;
 // RFC 5322 - name-addr
 // Example: John Doe <john@doe.com>
 const emailAddressSchema = z.string().email();
-const nameAddrSchema = z.custom<`${string} <${string}>`>((value) => {
+export const nameAddrSchema = z.custom<`${string} <${string}>`>((value) => {
   if (typeof value !== "string") {
     return false;
   }

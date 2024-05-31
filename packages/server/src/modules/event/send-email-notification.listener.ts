@@ -72,7 +72,7 @@ export class SendEmailNotificationListener {
 
     try {
       await this.mailService.sendMail({
-        to: `${user.firstname} ${user.lastname} <${user.email}>`,
+        to: user,
         subject: eventName,
         context: {
           name: eventName,
