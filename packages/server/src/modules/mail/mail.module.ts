@@ -20,7 +20,7 @@ import { MailService } from "./mail.service";
           },
         },
         defaults: {
-          from: `"Support - No Reply" <${emailConfiguration.fromDefault}>`,
+          from: emailConfiguration.fromDefault,
         },
         template: {
           dir: join(__dirname, "templates"),

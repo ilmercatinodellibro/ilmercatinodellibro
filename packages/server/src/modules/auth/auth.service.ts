@@ -115,11 +115,11 @@ export class AuthService {
 
     try {
       return await this.mailService.sendMail({
+        to: `${toEmail} <${toEmail}>`,
         subject:
           locale === "en-US"
             ? "Invitation to join Il Mercatino del Libro"
             : "Invito a unirsi a Il Mercatino del Libro",
-        to: toEmail,
         context: {
           invitedByName: `${invitedBy.firstname} ${invitedBy.lastname}`,
           url,
@@ -137,7 +137,7 @@ export class AuthService {
 
     try {
       return await this.mailService.sendMail({
-        to: user.email,
+        to: `${user.firstname} ${user.lastname} <${user.email}>`,
         subject: locale === "en-US" ? "Email confirmation" : "Conferma email",
         context: {
           name: `${user.firstname} ${user.lastname}`,
@@ -157,7 +157,7 @@ export class AuthService {
 
     try {
       return await this.mailService.sendMail({
-        to: user.email,
+        to: `${user.firstname} ${user.lastname} <${user.email}>`,
         subject: locale === "en-US" ? "Reset password" : "Reimposta password",
         context: {
           name: `${user.firstname} ${user.lastname}`,

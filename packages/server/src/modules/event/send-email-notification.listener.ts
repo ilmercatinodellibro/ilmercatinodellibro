@@ -4,7 +4,7 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
-import { Event, RetailLocation } from "@prisma/client";
+import { Event, RetailLocation, User } from "@prisma/client";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { MailService } from "../mail/mail.service";
@@ -29,33 +29,34 @@ export class SendEmailNotificationListener {
     event,
     notification,
   }: NewNotificationPayload) {
-    const { email: userEmail, locale } =
-      await this.prisma.user.findUniqueOrThrow({
-        where: {
-          id: notification.userId,
-        },
-        select: {
-          email: true,
-          locale: true,
-        },
-      });
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: {
+        id: notification.userId,
+      },
+      select: {
+        firstname: true,
+        lastname: true,
+        email: true,
+        locale: true,
+      },
+    });
     const location = await this.prisma.retailLocation.findUniqueOrThrow({
       where: {
         id: event.locationId,
       },
     });
 
-    await this.#sendEventEmail(userEmail, {
+    await this.#sendEventEmail(user, {
       name: event.name,
       description: event.description,
       createdAt: event.createdAt,
       location,
-      locale: locale ?? "it",
+      locale: user.locale ?? "it",
     });
   }
 
   async #sendEventEmail(
-    email: string,
+    user: Pick<User, "firstname" | "lastname" | "email">,
     { name, description, createdAt, location, locale }: EmailPayload,
   ) {
     const reserveUrl = `${this.rootConfig.clientUrl}/${location.id}/reserve-books`;
@@ -71,7 +72,7 @@ export class SendEmailNotificationListener {
 
     try {
       await this.mailService.sendMail({
-        to: email,
+        to: `${user.firstname} ${user.lastname} <${user.email}>`,
         subject: eventName,
         context: {
           name: eventName,
