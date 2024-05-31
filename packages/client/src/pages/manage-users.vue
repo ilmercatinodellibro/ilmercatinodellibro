@@ -70,8 +70,7 @@
               v-bind="
                 !props.row.emailVerified
                   ? {
-                      class: 'bg-blue-grey-1 text-black-54 cursor-not-allowed',
-                      noHover: true,
+                      class: 'bg-blue-grey-1 text-black-54',
                     }
                   : undefined
               "
@@ -79,7 +78,6 @@
               <template v-for="col in props.cols" :key="col.name">
                 <q-td v-if="col.name === 'edit'">
                   <q-btn
-                    :disable="!props.row.emailVerified"
                     :icon="mdiPencil"
                     color="primary"
                     flat
@@ -139,9 +137,7 @@
                   :clickable-when-zero="
                     alwaysClickableColsNames.includes(col.name)
                   "
-                  :disable="
-                    willBeDeleted(props.row) || !props.row.emailVerified
-                  "
+                  :disable="willBeDeleted(props.row)"
                   :secondary-value="
                     col.name === 'requested'
                       ? props.row.booksRequestedAndAvailable
@@ -169,9 +165,7 @@
                   :class="col.classes"
                 >
                   <q-btn
-                    :disable="
-                      willBeDeleted(props.row) || !props.row.emailVerified
-                    "
+                    :disable="willBeDeleted(props.row)"
                     :icon="mdiCart"
                     color="primary"
                     flat
@@ -190,7 +184,6 @@
 
                 <q-td v-else-if="col.name === 'receipts'" :class="col.classes">
                   <q-btn
-                    :disable="!props.row.emailVerified"
                     :icon="mdiReceiptText"
                     color="primary"
                     flat
@@ -204,19 +197,13 @@
                   <chip-button
                     :disable="
                       !selectedLocation.payOffEnabled ||
-                      willBeDeleted(props.row) ||
-                      !props.row.emailVerified
+                      willBeDeleted(props.row)
                     "
                     color="primary"
                     :label="$t('manageUsers.payOff')"
                     @click="openPayOff(props.row)"
                   >
-                    <q-tooltip
-                      v-if="
-                        !selectedLocation.payOffEnabled &&
-                        props.row.emailVerified
-                      "
-                    >
+                    <q-tooltip v-if="!selectedLocation.payOffEnabled">
                       {{ t("manageUsers.payOffDisabled") }}
                     </q-tooltip>
                   </chip-button>
