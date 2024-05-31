@@ -13,7 +13,7 @@ export class FeedbackResolver {
   constructor(
     @Inject(emailConfiguration.KEY)
     private readonly emailConfig: EmailConfiguration,
-    private readonly mailerService: MailService,
+    private readonly mailService: MailService,
   ) {}
 
   @Mutation(() => GraphQLVoid, { nullable: true })
@@ -23,7 +23,7 @@ export class FeedbackResolver {
   ) {
     const username = `${firstname} ${lastname}`;
     try {
-      return await this.mailerService.sendMail({
+      return await this.mailService.sendMail({
         to: this.emailConfig.supportEmail,
         subject:
           locale === "en-US"

@@ -1,4 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+
   <body>
     <p><%= name %></p>
 
@@ -6,6 +11,7 @@
 
     <p><em><%= date %></em></p>
 
+    <% /* TODO: Do not use a button as it has poor support */ %>
     <button>
       <a href="<%= reserveUrl %>">Book Now</a>
     </button>

@@ -19,7 +19,7 @@ type EmailPayload = Pick<Event, "name" | "description" | "createdAt"> & {
 export class SendEmailNotificationListener {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mailerService: MailService,
+    private readonly mailService: MailService,
     @Inject(rootConfiguration.KEY)
     private readonly rootConfig: RootConfiguration,
   ) {}
@@ -70,7 +70,7 @@ export class SendEmailNotificationListener {
     const eventName = `${name} - ${location.name}`;
 
     try {
-      await this.mailerService.sendMail({
+      await this.mailService.sendMail({
         to: email,
         subject: eventName,
         context: {
