@@ -1,5 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
+import { htmlToTextPlugin } from "src/modules/mail/html-to-text.plugin";
 
 // We should be using the default but it's any so we need to override it
 // import { SentMessageInfo } from 'nodemailer';
@@ -17,7 +18,10 @@ type SentMessageInfo =
   | false;
 @Injectable()
 export class MailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailerService: MailerService) {
+    const transporters = mailerService.getTransporters();
+    transporters.default.use("compile", htmlToTextPlugin);
+  }
 
   async sendMail(mailDetails: ISendMailOptions): Promise<SentMessageInfo> {
     try {
