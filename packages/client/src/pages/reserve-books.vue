@@ -345,8 +345,6 @@ async function reserveBook(id: string) {
         e,
       ]),
     );
-  } finally {
-    swapView();
   }
 }
 
