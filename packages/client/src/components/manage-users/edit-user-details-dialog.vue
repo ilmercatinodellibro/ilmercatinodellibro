@@ -4,17 +4,13 @@
       :title="$t(`manageUsers.editUser.${userData ? 'title' : 'createUser'}`)"
       size="sm"
       @submit="
-        onDialogOK(
-          'id' in newUserData
-            ? {
-                type: 'update',
-                data: { ...newUserData, dateOfBirth: Date.parse(birthDate) },
-              }
-            : {
-                type: 'create',
-                data: { ...newUserData, dateOfBirth: Date.parse(birthDate) },
-              },
-        )
+        onDialogOK({
+          type: 'id' in newUserData ? 'update' : 'create',
+          data: {
+            ...newUserData,
+            dateOfBirth: Date.parse(birthDate),
+          } as RegisterUserPayload & UpdateUserPayload, // Otherwise TypesScript cannot properly narrow down the object's type
+        })
       "
       @cancel="onDialogCancel"
     >
