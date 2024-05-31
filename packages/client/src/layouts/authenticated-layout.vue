@@ -590,7 +590,11 @@ function openSettings() {
 .drawer-item {
   border-radius: 4px;
   margin: 2px;
-  flex-grow: 1;
+  max-width: calc(
+    v-bind(DRAWER_WIDTH) * 1px - 4px
+  ); // Subtracting the 2px of margin on both left and right
+
+  width: 100%;
 }
 
 .q-btn--outline::before {
