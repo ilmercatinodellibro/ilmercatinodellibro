@@ -1,8 +1,12 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
 import { User } from "@prisma/client";
 import { Address as AddressObject } from "nodemailer/lib/mailer";
-import { nameAddrSchema } from "src/config/email";
+import {
+  EmailConfiguration,
+  emailConfiguration,
+  nameAddrSchema,
+} from "src/config/email";
 import { htmlToTextPlugin } from "src/modules/mail/html-to-text.plugin";
 
 // We should be using the default but it's any so we need to override it
@@ -46,7 +50,11 @@ export type SendMailOptions = Omit<ISendMailOptions, AddressableField> & {
 
 @Injectable()
 export class MailService {
-  constructor(private readonly mailerService: MailerService) {
+  constructor(
+    private readonly mailerService: MailerService,
+    @Inject(emailConfiguration.KEY)
+    private readonly emailConfig: EmailConfiguration,
+  ) {
     const transporters = mailerService.getTransporters();
     transporters.default.use("compile", htmlToTextPlugin);
   }
@@ -70,6 +78,10 @@ export class MailService {
       return (await this.mailerService.sendMail({
         ...(mailDetails as ISendMailOptions),
         ...addressOverrides,
+        context: {
+          privacyPolicyUrl: this.emailConfig.privacyPolicyUrl,
+          ...mailDetails.context,
+        },
       })) as SentMessageInfo;
     } catch (error) {
       Logger.error("Error sending email", "MailService", error);

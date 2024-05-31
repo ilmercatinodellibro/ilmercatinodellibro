@@ -27,6 +27,7 @@ const emailSchema = z.object({
   pass: z.string(),
   fromDefault: mailboxSchema,
   supportEmail: mailboxSchema,
+  privacyPolicyUrl: z.string(),
 });
 
 export const emailConfiguration = registerAs("email", () =>
@@ -37,5 +38,6 @@ export const emailConfiguration = registerAs("email", () =>
     pass: process.env.MAIL_PASS,
     fromDefault: process.env.MAIL_FROM_DEFAULT,
     supportEmail: process.env.MAIL_SUPPORT,
+    privacyPolicyUrl: process.env.MAIL_PRIVACY_POLICY,
   }),
 );
