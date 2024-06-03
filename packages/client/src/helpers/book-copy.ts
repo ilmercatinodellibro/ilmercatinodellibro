@@ -15,7 +15,7 @@ export const getCurrentActiveProblem = ({
 export const isAvailable = (bookCopy: BookCopyDetailsFragment) =>
   (["donated", "reimbursed", "available"] as BookCopyStatus[]).includes(
     getStatus(bookCopy),
-  );
+  ) && !hasProblem(bookCopy);
 
 export type BookCopyStatus =
   | "not-available"
