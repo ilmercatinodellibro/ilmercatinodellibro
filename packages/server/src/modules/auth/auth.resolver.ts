@@ -101,11 +101,18 @@ export class AuthResolver {
         "Confirmation password doesn't match with provided password!",
       );
     }
-    await this.userService.createUser(
+
+    const newUser = await this.userService.createUser(
       omit(registerPayload, ["passwordConfirmation", "retailLocationId"]),
       true,
     );
-    // TODO: create the location membership with the operator role
+    await this.prisma.locationMember.create({
+      data: {
+        role: "OPERATOR",
+        retailLocationId: registerPayload.retailLocationId,
+        userId: newUser.id,
+      },
+    });
   }
 
   @Public()
