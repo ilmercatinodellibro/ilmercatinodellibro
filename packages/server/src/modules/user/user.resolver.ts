@@ -45,7 +45,8 @@ export class UserResolver {
 
   @Query(() => UsersQueryResult)
   async users(
-    @Args() { page, rowsPerPage, filter = {} }: UsersQueryArgs,
+    @Args()
+    { page, rowsPerPage, filter = {}, retailLocationId }: UsersQueryArgs,
     @CurrentUser() user: User,
   ) {
     if (rowsPerPage > 200) {
@@ -68,6 +69,9 @@ export class UserResolver {
     };
 
     const activeRequests: Prisma.BookRequestWhereInput = {
+      book: {
+        retailLocationId,
+      },
       cartItem: null,
       deletedAt: null,
       saleId: null,
@@ -132,15 +136,20 @@ export class UserResolver {
               : []),
 
             ...(filter.withPurchased
-              ? [
+              ? ([
                   {
                     purchases: {
                       some: {
                         refundedAt: null,
+                        bookCopy: {
+                          book: {
+                            retailLocationId,
+                          },
+                        },
                       },
                     },
                   },
-                ]
+                ] satisfies Prisma.UserWhereInput[])
               : []),
 
             ...(filter.withSold
@@ -151,6 +160,11 @@ export class UserResolver {
                         sales: {
                           some: {
                             refundedAt: null,
+                            bookCopy: {
+                              book: {
+                                retailLocationId,
+                              },
+                            },
                           },
                         },
                       },
