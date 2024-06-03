@@ -186,7 +186,7 @@ export default {
     emptyCart: "Svuota carrello",
     autoEmptyDisclaimer:
       "Ricorda: non puoi tenere i libri disponibili bloccati nel carrello per troppo tempo, perciò si svuoterà automaticamente tra: {0}",
-    sellBooks: "Vendi libri ({0} €)",
+    sellBooks: "Vendi libri ({0})",
     totalBooks: "Totale Libri da vendere",
     discount: "Sconto ISEE/volontario",
     total: "Totale",

@@ -33,6 +33,7 @@ export default {
   passwordDoNotMatch: "Passwords do not match",
   emailVerified:
     "Your email has been correctly verified, you can now login using your credentials",
+  emailNotVerified: "This user's account was not verified yet",
   backToLogin: "Back to login",
   backToLocations: "Back to locations",
   registeredSuccessfully: "Registration successful!",

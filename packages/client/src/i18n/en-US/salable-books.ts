@@ -15,4 +15,8 @@ export default {
     rejected: "Not accepted",
   },
   alreadySearched: "This book was already searched for",
+  bringBooksToRetailLocation:
+    "You can bring this book and the other ones marked as accepted to the Mercatino",
+  notAccepted:
+    "You cannot bring this book to the Mercatino because it is not in the list of the accepted books",
 };

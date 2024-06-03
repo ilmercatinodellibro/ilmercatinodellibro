@@ -4,7 +4,11 @@ import { LocationBoundInput } from "src/modules/retail-location";
 
 @InputType()
 export class RegisterPayload extends IntersectionType(
-  PickType(User, ["email", "firstname", "lastname", "locale"], InputType),
+  PickType(
+    User,
+    ["email", "firstname", "lastname", "phoneNumber", "locale"],
+    InputType,
+  ),
 
   LocationBoundInput,
 ) {

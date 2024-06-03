@@ -31,7 +31,7 @@
                   {{ `${user.firstname} ${user.lastname}` }}
                 </span>
                 <span
-                  class="line-height-50 text-black-54 text-subtitle2 text-weight-regular"
+                  class="ellipsis full-width line-height-50 text-black-54 text-subtitle2 text-weight-regular"
                 >
                   {{ user.email }}
                 </span>
@@ -481,6 +481,7 @@ import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
+  RetailLocationFragmentDoc,
   RetailLocationSettingsFragment,
   useUpdateRetailLocationSettingsMutation,
 } from "src/services/retail-location.graphql";
@@ -544,12 +545,30 @@ function openSettings() {
   }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
       try {
-        await updateRetailLocationSettings({
+        const { cache } = await updateRetailLocationSettings({
           input: {
             ...payload.settings,
             retailLocationId: selectedLocation.value.id,
           },
         });
+
+        cache.updateFragment(
+          {
+            fragment: RetailLocationFragmentDoc,
+            fragmentName: "RetailLocation",
+            id: cache.identify(selectedLocation.value),
+          },
+          (data) => {
+            if (!data) {
+              return;
+            }
+
+            return {
+              ...data,
+              ...payload.settings,
+            };
+          },
+        );
       } catch {
         notifyError(t("common.genericErrorMessage"));
       }
@@ -566,12 +585,17 @@ function openSettings() {
   // and using ellipses to truncate words we need to force that width to the content container too
   // Do not use just "width" otherwise you'l break "mini" mode
   max-width: calc(v-bind(DRAWER_WIDTH) * 1px);
+  width: 100%;
 }
 
 .drawer-item {
   border-radius: 4px;
   margin: 2px;
-  flex-grow: 1;
+  max-width: calc(
+    v-bind(DRAWER_WIDTH) * 1px - 4px
+  ); // Subtracting the 2px of margin on both left and right
+
+  width: 100%;
 }
 
 .q-btn--outline::before {

@@ -96,6 +96,7 @@ import { Notify, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { notifyError } from "src/helpers/error-messages";
 import { requiredRule, validISBN } from "src/helpers/rules";
 import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -210,13 +211,22 @@ async function searchBook() {
   const foundBook = await fetchBookByISBN(searchQuery.value);
   loading.value = false;
   if (foundBook) {
+    if (acceptedBooks.value.length === 0) {
+      Notify.create({
+        color: "positive",
+        message: t("salableBooks.bringBooksToRetailLocation"),
+      });
+    }
     acceptedBooks.value.push(foundBook);
   } else {
     rejectedBooks.value.push({
       isbnCode: searchQuery.value,
       status: AcceptanceStatus.REJECTED,
     });
+    notifyError(t("salableBooks.notAccepted"));
   }
+
+  searchQuery.value = "";
 }
 </script>
 

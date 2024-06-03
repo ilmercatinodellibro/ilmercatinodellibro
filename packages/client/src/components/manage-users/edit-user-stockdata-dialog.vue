@@ -123,7 +123,7 @@
             </template>
 
             <template #body-cell-utility="{ value }">
-              <q-td>
+              <q-td class="text-center">
                 <utility-chip :utility="value" />
               </q-td>
             </template>

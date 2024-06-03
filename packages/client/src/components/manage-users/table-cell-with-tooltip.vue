@@ -1,9 +1,13 @@
 <template>
   <q-td>
-    <q-tooltip>
+    <span>
+      <q-tooltip>
+        {{ value }}
+      </q-tooltip>
       {{ value }}
-    </q-tooltip>
-    {{ value }}
+    </span>
+
+    <slot />
   </q-td>
 </template>
 
