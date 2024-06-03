@@ -31,18 +31,18 @@ export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
 
   return bookCopy.returnedAt
     ? "returned"
-    : problemType
-      ? problemType !== "CUSTOM"
-        ? problemType
-        : "not-available"
+    : bookCopy.reimbursedAt
+      ? "reimbursed"
       : bookCopy.purchasedAt &&
           (!bookCopy.returnedAt ||
             bookCopy.sales?.some(({ refundedAt }) => !refundedAt))
         ? "sold"
         : bookCopy.donatedAt
           ? "donated"
-          : bookCopy.reimbursedAt
-            ? "reimbursed"
+          : problemType
+            ? problemType !== "CUSTOM"
+              ? problemType
+              : "not-available"
             : "available";
 }
 
