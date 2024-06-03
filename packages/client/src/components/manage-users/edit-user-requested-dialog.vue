@@ -199,12 +199,7 @@ async function addBookToRequest(bookIsbn: string) {
 
     updateRequestsCache(cache, (requests) => [...requests, newRequest]);
   } catch (error) {
-    Notify.create(
-      t("reserveBooks.reservationOrRequestError", [
-        t("reserveBooks.request"),
-        error,
-      ]),
-    );
+    notifyError(t("bookErrors.notRequested"));
   } finally {
     await refetchRequests();
   }

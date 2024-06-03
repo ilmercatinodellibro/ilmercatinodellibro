@@ -33,4 +33,5 @@ export default {
   notAllDonated: "Could not donate all the selected copies to the Mercatino.",
   notProblem: "Could not report the problem for the selected copy.",
   notSolveProblem: "Could not solve the problem for the selected copy.",
+  notRequested: "Could not request the selected book.",
 };

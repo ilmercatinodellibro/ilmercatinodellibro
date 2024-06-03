@@ -158,6 +158,8 @@ function deleteUser(id: string) {
         message: t("general.userRemoved"),
         color: "positive",
       });
+
+      pagination.value.rowsNumber--;
     } catch (e) {
       const { message } = e as ApolloError;
 
@@ -187,6 +189,7 @@ function addUser() {
 
       if (newUser) {
         evictQuery(cache, GetMembersDocument);
+        pagination.value.rowsNumber++;
         cache.gc();
       }
     } catch (e) {
