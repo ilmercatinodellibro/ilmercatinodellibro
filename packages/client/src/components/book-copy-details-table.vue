@@ -29,9 +29,10 @@
       <q-td auto-width />
 
       <q-td
-        v-for="{ name, field, format } in bodyHeaderCols"
+        v-for="{ align, classes, name, field, format } in bodyHeaderCols"
         :key="name"
         :auto-width="name === 'problems'"
+        :class="[`text-${align ?? 'left'}`, classes]"
         :colspan="getColspan(name)"
       >
         <template v-if="name === 'status'">
@@ -100,8 +101,15 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: "code",
     label: t("book.code"),
   },
+  {
+    name: "original-code",
+    field: "originalCode",
+    label: t("book.originalCode"),
+    format: (field?: string) => field ?? "/",
+  },
   ...props.bookCopyColumns.filter(
-    ({ name }) => !["isbn", "author", "subject", "title"].includes(name),
+    ({ name }) =>
+      !["isbn", "author", "subject", "title", "code"].includes(name),
   ),
 ]);
 

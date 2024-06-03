@@ -109,17 +109,27 @@
         :filter-method="filterMethod"
         :loading="copyLoading"
         :rows="bookCopies.rows"
-        class="flex-delegate-height-management"
+        class="col"
         @request="onCopyRequest"
       >
+        <template #body-cell-author="{ col, value }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+        <template #body-cell-subject="{ col, value }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+        <template #body-cell-owner="{ col, value }">
+          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        </template>
+
         <template #body-cell-status="{ row }">
           <q-td>
             <book-copy-status-chip :book-copy="row" />
           </q-td>
         </template>
 
-        <template #body-cell-problems="{ row }">
-          <q-td>
+        <template #body-cell-problems="{ col, row }">
+          <q-td :class="[`text-${col.align ?? 'left'}`, col.classes]">
             <problems-button :book-copy="row" />
           </q-td>
         </template>
@@ -156,6 +166,7 @@ import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { getFieldValue } from "src/helpers/table-helpers";
@@ -254,6 +265,7 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       name: "problems",
       field: () => undefined,
       label: "",
+      align: "center",
     },
   ],
 );
@@ -272,10 +284,9 @@ const copyPagination = ref({
 const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   () => [
     {
-      name: "original-code",
-      field: "originalCode",
-      label: t("book.originalCode"),
-      format: (field?: string) => field ?? "/",
+      name: "code",
+      field: "code",
+      label: t("book.code"),
       align: "left",
     },
     {
@@ -289,12 +300,14 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       field: ({ book }) => book.authorsFullName,
       label: t("book.fields.author"),
       align: "left",
+      classes: "ellipsis max-width-160",
     },
     {
       name: "subject",
       field: ({ book }) => book.subject,
       label: t("book.fields.subject"),
       align: "left",
+      classes: "ellipsis max-width-160",
     },
     {
       name: "status",
@@ -307,12 +320,14 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       field: ({ book }) => book.title,
       label: t("book.fields.title"),
       align: "left",
+      classes: "text-wrap",
     },
     {
       name: "owner",
       field: ({ owner }) => owner.email,
       label: t("warehouse.owner"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "problems",
