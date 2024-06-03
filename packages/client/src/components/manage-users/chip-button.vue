@@ -7,7 +7,7 @@
     :color="color"
     :icon="showDropdown ? (menu ? mdiMenuUp : mdiMenuDown) : icon"
     :label="label"
-    class="line-height-16 min-height-0 q-chip--dense q-chip--square"
+    class="line-height-normal min-height-0 q-chip--dense q-chip--square"
     dense
     no-wrap
   >
@@ -40,3 +40,9 @@ const menu = ref(false);
 
 const btnSlots = defineSlots<QBtnSlots>();
 </script>
+
+<style scoped lang="scss">
+.line-height-normal {
+  line-height: normal;
+}
+</style>
