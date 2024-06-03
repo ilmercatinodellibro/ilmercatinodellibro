@@ -223,10 +223,7 @@ export class BookCopyResolver {
       isSold = false,
     } = filter;
 
-    const showOnlyAvailable = isAvailable && !isSold;
-    const showOnlySold = isSold && !isAvailable;
-    const includeCopyOrStatement =
-      hasProblem || showOnlySold || showOnlyAvailable;
+    const includeCopyOrStatement = hasProblem || isSold || isAvailable;
 
     const where: Prisma.BookCopyWhereInput = {
       book: {
@@ -272,26 +269,36 @@ export class BookCopyResolver {
       ...(includeCopyOrStatement
         ? {
             OR: [
-              // When both isAvailable and isSold are true at the same time, they are mutually exclusive, so they are not added to the query
-              ...(showOnlyAvailable
-                ? [
+              ...(isAvailable
+                ? ([
                     {
-                      sales: {
-                        none: {},
-                      },
-                    },
-                    {
-                      sales: {
+                      problems: {
                         every: {
-                          refundedAt: {
+                          resolvedAt: {
                             not: null,
                           },
                         },
                       },
+                      OR: [
+                        {
+                          sales: {
+                            none: {},
+                          },
+                        },
+                        {
+                          sales: {
+                            every: {
+                              refundedAt: {
+                                not: null,
+                              },
+                            },
+                          },
+                        },
+                      ],
                     },
-                  ]
+                  ] satisfies Prisma.BookCopyWhereInput[])
                 : []),
-              ...(showOnlySold
+              ...(isSold
                 ? [
                     {
                       sales: {
@@ -307,9 +314,7 @@ export class BookCopyResolver {
                     {
                       problems: {
                         some: {
-                          resolvedAt: {
-                            not: null,
-                          },
+                          resolvedAt: null,
                         },
                       },
                     },
@@ -326,6 +331,9 @@ export class BookCopyResolver {
         skip: page * rowsPerPage,
         take: rowsPerPage,
         where,
+        orderBy: {
+          code: "asc",
+        },
       }),
     ]);
 
