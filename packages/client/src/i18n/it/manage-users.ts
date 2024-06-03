@@ -75,7 +75,7 @@ export default {
   booksMovementsDialog: {
     purchasedTitle: "Libri acquistati da {0}",
     soldTitle: "Libri venduti da {0}",
-    purchasedAt: "Acquistato a",
+    purchasedAt: "Acquistato il",
     soldTo: "Venduto a",
     purchasedBy: "Il venditore",
     reportProblem: "Segnala problema",
