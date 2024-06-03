@@ -82,8 +82,9 @@ const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
 const { selectedLocation } = useRetailLocationService();
 
 const moneyToReimburse = computed(() =>
-  user.discount
+  (user.discount
     ? (bookCopy.book.originalPrice * selectedLocation.value.buyRate) / 100
-    : (bookCopy.book.originalPrice * selectedLocation.value.sellRate) / 100,
+    : (bookCopy.book.originalPrice * selectedLocation.value.sellRate) / 100
+  ).toFixed(2),
 );
 </script>
