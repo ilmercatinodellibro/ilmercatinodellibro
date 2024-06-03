@@ -1,12 +1,12 @@
 <template>
   <q-icon
     v-if="!hideIcon"
-    v-bind="IconData[getStatus()]"
+    v-bind="IconData[displayStatus()]"
     class="q-mr-md"
     size="24px"
   />
   <span>
-    {{ t(`warehouse.bookCopyStatus.${getStatus()}`) }}
+    {{ t(`warehouse.bookCopyStatus.${displayStatus()}`) }}
   </span>
 </template>
 
@@ -22,7 +22,11 @@ import {
 } from "@quasar/extras/mdi-v7";
 import { NamedColor } from "quasar";
 import { useI18n } from "vue-i18n";
-import { BookCopyStatus, getCurrentActiveProblem } from "src/helpers/book-copy";
+import {
+  BookCopyStatus,
+  getCurrentActiveProblem,
+  getStatus,
+} from "src/helpers/book-copy";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 
 const { t } = useI18n();
@@ -32,18 +36,17 @@ const props = defineProps<{
   hideIcon?: boolean;
 }>();
 
-function getStatus(): Exclude<BookCopyStatus, "reimbursed"> {
+function displayStatus(): Exclude<BookCopyStatus, "reimbursed"> {
+  const status = getStatus(props.bookCopy);
   const problemType = getCurrentActiveProblem(props.bookCopy)?.type;
 
-  return props.bookCopy.returnedAt
-    ? "returned"
-    : problemType
-      ? problemType !== "CUSTOM"
-        ? problemType
-        : "not-available"
-      : props.bookCopy.purchasedAt
-        ? "sold"
-        : "available";
+  return status === "reimbursed"
+    ? problemType
+      ? problemType === "CUSTOM"
+        ? "not-available"
+        : problemType
+      : "available"
+    : status;
 }
 
 const IconData: Record<
