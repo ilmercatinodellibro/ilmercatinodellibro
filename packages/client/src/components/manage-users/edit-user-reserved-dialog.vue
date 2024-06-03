@@ -179,7 +179,6 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { lowerCase, startCase } from "lodash-es";
 import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -191,6 +190,7 @@ import { useRequestService } from "src/services/request";
 import {
   GetRequestsDocument,
   RequestSummaryFragment,
+  useCreateRequestMutation,
 } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
@@ -305,33 +305,43 @@ async function reserveBook({ book }: RequestSummaryFragment) {
     await refetchRequests();
   }
 }
+
+const { createBookRequest } = useCreateRequestMutation();
 async function addReservationFromIsbn(isbnCode: string) {
-  try {
-    const book = await fetchBookByISBN(isbnCode);
+  const book = await fetchBookByISBN(isbnCode);
 
-    if (!book) {
-      notifyError(t("bookErrors.noBook"));
-      return;
-    }
-    if (!book.meta.isAvailable) {
-      notifyError(
-        t("bookErrors.notAvailable", [startCase(lowerCase(book.title))]),
-      );
-      return;
-    }
+  if (!book) {
+    notifyError(t("bookErrors.noBook"));
+    return;
+  }
 
-    await createReservations({
-      input: {
-        userId: props.userData.id,
-        retailLocationId: props.retailLocationId,
-        bookIds: [book.id],
-      },
-    });
-  } catch {
-    notifyError(t("bookErrors.notReserved"));
-  } finally {
-    await refetchReservations();
-    await refetchRequests();
+  if (!book.meta.isAvailable) {
+    try {
+      await createBookRequest({
+        input: {
+          bookId: book.id,
+          userId: props.userData.id,
+        },
+      });
+    } catch (e) {
+      notifyError(t("bookErrors.notRequested"));
+    } finally {
+      await refetchRequests();
+    }
+  } else {
+    try {
+      await createReservations({
+        input: {
+          userId: props.userData.id,
+          retailLocationId: props.retailLocationId,
+          bookIds: [book.id],
+        },
+      });
+    } catch {
+      notifyError(t("bookErrors.notReserved"));
+    } finally {
+      await refetchReservations();
+    }
   }
 }
 
