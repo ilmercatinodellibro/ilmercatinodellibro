@@ -34,7 +34,6 @@ export class StatisticsQueryResult {
   @Field(() => Number)
   totalReservedBooks!: number;
 
-  // TODO: not sure what CC here means, we only know that they have problems
   // The number of book copies with problems
   @Field(() => Number)
   totalBooksWithProblems!: number;
