@@ -134,6 +134,7 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { evictQuery } from "src/apollo/cache";
 import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
@@ -144,6 +145,7 @@ import {
   RequestSummaryFragment,
 } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
+import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -291,7 +293,7 @@ async function reserveAllAvailableRequested() {
   }
 
   try {
-    await createReservations({
+    const { cache } = await createReservations({
       input: {
         userId: props.userData.id,
         retailLocationId: props.retailLocationId,
@@ -299,7 +301,8 @@ async function reserveAllAvailableRequested() {
       },
     });
     await refetchRequests();
-    // TODO: invalidate reservations cache
+    evictQuery(cache, GetReservationsDocument);
+    cache.gc();
 
     Notify.create({
       type: "positive",
