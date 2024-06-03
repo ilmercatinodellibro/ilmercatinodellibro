@@ -38,12 +38,15 @@ fragment Customer on User {
   createdAt
   emailVerified
   scheduledForDeletionAt: deletedAt
-  booksInStock
-  booksSold
-  booksReserved
-  booksRequested
-  booksRequestedAndAvailable: booksRequested(onlyAvailable: true)
-  booksBought
+  booksInStock(retailLocationId: $retailLocationId)
+  booksSold(retailLocationId: $retailLocationId)
+  booksReserved(retailLocationId: $retailLocationId)
+  booksRequested(retailLocationId: $retailLocationId)
+  booksRequestedAndAvailable: booksRequested(
+    onlyAvailable: true
+    retailLocationId: $retailLocationId
+  )
+  booksBought(retailLocationId: $retailLocationId)
   booksInCart(retailLocationId: $retailLocationId)
 }
 
