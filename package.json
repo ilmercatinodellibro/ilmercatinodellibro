@@ -28,7 +28,7 @@
     "server:migrate:reset": "pnpm --filter \"./packages/server\" migrate:reset",
     "db:start": "pnpm --filter \"./packages/server\" db:start",
     "db:stop": "pnpm --filter \"./packages/server\" db:stop",
-    "prepare": "husky install && pnpm generate",
+    "prepare": "husky && pnpm generate",
     "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
@@ -36,7 +36,7 @@
     "eslint": "^8.57.0",
     "eslint-config-coralloy": "^0.3.1",
     "graphql-config": "^5.0.3",
-    "husky": "^8.0.3",
+    "husky": "^9.0.1",
     "lint-staged": "^15.2.2",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
