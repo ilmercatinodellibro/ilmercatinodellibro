@@ -31,7 +31,7 @@
                   {{ `${user.firstname} ${user.lastname}` }}
                 </span>
                 <span
-                  class="line-height-50 text-black-54 text-subtitle2 text-weight-regular"
+                  class="ellipsis full-width line-height-50 text-black-54 text-subtitle2 text-weight-regular"
                 >
                   {{ user.email }}
                 </span>
@@ -585,6 +585,7 @@ function openSettings() {
   // and using ellipses to truncate words we need to force that width to the content container too
   // Do not use just "width" otherwise you'l break "mini" mode
   max-width: calc(v-bind(DRAWER_WIDTH) * 1px);
+  width: 100%;
 }
 
 .drawer-item {
