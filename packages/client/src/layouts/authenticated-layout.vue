@@ -354,7 +354,6 @@
                   active-class="bg-black-activated-light"
                   class="drawer-item"
                   clickable
-                  data-cy="statistics"
                 >
                   <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                     {{ t(`routesNames.${AvailableRouteNames.Statistics}`) }}
