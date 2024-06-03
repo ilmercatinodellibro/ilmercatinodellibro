@@ -52,7 +52,7 @@ mutation updateRetailLocationSettings(
   }
 }
 
-fragment StatisticsQueryResult on StatisticsQueryResult {
+fragment Statistics on StatisticsQueryResult {
   totalUsers
   totalSoldBooks
   totalRevenue
@@ -66,6 +66,6 @@ fragment StatisticsQueryResult on StatisticsQueryResult {
 
 query retailLocationStatistics($retailLocationId: String!) {
   retailLocationStatistics(retailLocationId: $retailLocationId) {
-    ...StatisticsQueryResult
+    ...Statistics
   }
 }
