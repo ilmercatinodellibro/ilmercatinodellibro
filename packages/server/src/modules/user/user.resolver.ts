@@ -105,7 +105,7 @@ export class UserResolver {
 
         {
           OR: [
-            ...(filter.withAvailable ?? filter.withRequested
+            ...(filter.withRequested === true || filter.withAvailable === true
               ? [
                   {
                     requestedBooks: {
