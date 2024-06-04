@@ -387,7 +387,7 @@ async function moveAllIntoCart() {
   } catch {
     notifyError(t("bookErrors.notAllReservationsBooks"));
   } finally {
-    await refetchReservations();
+    await Promise.all([refetchRequests(), refetchReservations()]);
   }
 }
 async function moveReservedIntoCart() {
