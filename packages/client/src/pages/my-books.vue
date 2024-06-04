@@ -300,7 +300,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.priceYouPaid"),
         align: "left",
-        format: (val: number) => discountedPrice(val, "sell"),
+        format: (val: number) => discountedPrice(val, "buy"),
       },
     ],
     [BooksTab.REQUESTED]: [
@@ -355,9 +355,11 @@ const selectedTab = ref(
 
 const searchQuery = ref("");
 
-// TODO: update to correct field
 const totalSale = ref(
-  sumBy(tableRowsByTab.value.delivered, ({ book }) => book.originalPrice),
+  sumBy(
+    tableRowsByTab.value.delivered,
+    ({ book }) => (book.originalPrice * selectedLocation.value.buyRate) / 100,
+  ),
 );
 
 enum BookStatus {

@@ -35,7 +35,7 @@ export class UserQueryFilters {
 }
 
 @ArgsType()
-export class UsersQueryArgs {
+export class UsersQueryArgs extends LocationBoundQueryArgs {
   @Field(() => Int)
   page!: number;
 

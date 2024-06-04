@@ -45,7 +45,8 @@ export class UserResolver {
 
   @Query(() => UsersQueryResult)
   async users(
-    @Args() { page, rowsPerPage, filter = {} }: UsersQueryArgs,
+    @Args()
+    { page, rowsPerPage, filter = {}, retailLocationId }: UsersQueryArgs,
     @CurrentUser() user: User,
   ) {
     if (rowsPerPage > 200) {
@@ -68,6 +69,9 @@ export class UserResolver {
     };
 
     const activeRequests: Prisma.BookRequestWhereInput = {
+      book: {
+        retailLocationId,
+      },
       cartItem: null,
       deletedAt: null,
       saleId: null,
@@ -132,15 +136,20 @@ export class UserResolver {
               : []),
 
             ...(filter.withPurchased
-              ? [
+              ? ([
                   {
                     purchases: {
                       some: {
                         refundedAt: null,
+                        bookCopy: {
+                          book: {
+                            retailLocationId,
+                          },
+                        },
                       },
                     },
                   },
-                ]
+                ] satisfies Prisma.UserWhereInput[])
               : []),
 
             ...(filter.withSold
@@ -151,6 +160,11 @@ export class UserResolver {
                         sales: {
                           some: {
                             refundedAt: null,
+                            bookCopy: {
+                              book: {
+                                retailLocationId,
+                              },
+                            },
                           },
                         },
                       },
@@ -345,7 +359,10 @@ export class UserResolver {
   }
 
   @ResolveField(() => Number)
-  async booksInStock(@Root() user: User) {
+  async booksInStock(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @Root() user: User,
+  ) {
     // findUnique still avoids the n+1 problem, even if not using fluent API.
     // Since we only need the count, we use select._count instead of fluent API.
     const { _count } = await this.prisma.user.findUniqueOrThrow({
@@ -357,6 +374,9 @@ export class UserResolver {
           select: {
             bookCopies: {
               where: {
+                book: {
+                  retailLocationId,
+                },
                 returnedAt: null,
                 donatedAt: null,
                 OR: [
@@ -386,7 +406,10 @@ export class UserResolver {
   }
 
   @ResolveField(() => Number)
-  async booksSold(@Root() user: User) {
+  async booksSold(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @Root() user: User,
+  ) {
     const { _count } = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: user.id,
@@ -396,6 +419,9 @@ export class UserResolver {
           select: {
             bookCopies: {
               where: {
+                book: {
+                  retailLocationId,
+                },
                 sales: {
                   some: {
                     refundedAt: null,
@@ -412,7 +438,10 @@ export class UserResolver {
   }
 
   @ResolveField(() => Number)
-  async booksReserved(@Root() user: User) {
+  async booksReserved(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @Root() user: User,
+  ) {
     const { _count } = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: user.id,
@@ -424,6 +453,9 @@ export class UserResolver {
               where: {
                 deletedAt: null,
                 cartItem: null,
+                book: {
+                  retailLocationId,
+                },
               },
             },
           },
@@ -438,6 +470,7 @@ export class UserResolver {
   async booksRequested(
     @Root() user: User,
     @Args("onlyAvailable", { defaultValue: false }) onlyAvailable: boolean,
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
   ) {
     const { _count } = await this.prisma.user.findUniqueOrThrow({
       where: {
@@ -449,6 +482,16 @@ export class UserResolver {
             requestedBooks: {
               // This where statement should be very similar to the one of book-request.resolver
               where: {
+                book: {
+                  retailLocationId,
+                  ...(onlyAvailable
+                    ? {
+                        meta: {
+                          isAvailable: true,
+                        },
+                      }
+                    : {}),
+                },
                 deletedAt: null,
                 cartItem: null,
                 AND: [
@@ -487,15 +530,6 @@ export class UserResolver {
                     ],
                   },
                 ],
-                ...(onlyAvailable
-                  ? {
-                      book: {
-                        meta: {
-                          isAvailable: true,
-                        },
-                      },
-                    }
-                  : {}),
               },
             },
           },
@@ -507,7 +541,10 @@ export class UserResolver {
   }
 
   @ResolveField(() => Number)
-  async booksBought(@Root() user: User) {
+  async booksBought(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @Root() user: User,
+  ) {
     const { _count } = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: user.id,
@@ -517,6 +554,11 @@ export class UserResolver {
           select: {
             purchases: {
               where: {
+                bookCopy: {
+                  book: {
+                    retailLocationId,
+                  },
+                },
                 refundedAt: null,
               },
             },

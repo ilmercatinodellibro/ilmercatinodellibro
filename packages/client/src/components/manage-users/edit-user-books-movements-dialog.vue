@@ -71,6 +71,7 @@
 
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
+import { formatDate } from "@vueuse/core";
 import {
   Dialog,
   QDialog,
@@ -232,7 +233,8 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   // TODO: decide to keep/remove this. This column doesn't exist in the mockups, but might be nice to have the date
   {
     label: t("manageUsers.booksMovementsDialog.purchasedAt"),
-    field: ({ purchasedAt }) => purchasedAt, // TODO: Format the date
+    field: ({ purchasedAt }) => purchasedAt,
+    format: (value: string) => formatDate(new Date(value), "DD/MM/YYYY"),
     name: "purchased-at",
     align: "left",
   },
