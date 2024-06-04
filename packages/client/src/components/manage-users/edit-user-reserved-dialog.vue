@@ -405,7 +405,7 @@ async function moveReservedIntoCart() {
         return addToCart({
           input: {
             cartId: cart.data.id,
-            fromBookRequestId: id,
+            fromReservationId: id,
           },
         });
       }),
