@@ -169,13 +169,16 @@ import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
+import { isAvailable } from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
 import {
   BookCopyDetailsFragment,
   useGetPaginatedBookCopiesQuery,
 } from "src/services/book-copy.graphql";
-import { useGetBooksWithAvailableCopiesQuery } from "src/services/book.graphql";
-import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
+import {
+  BookWithCopiesInStockFragment,
+  useGetBooksWithCopiesInStockQuery,
+} from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { selectedLocation } = useRetailLocationService();
@@ -190,7 +193,7 @@ const {
   books,
   refetch: refetchBooks,
   loading: booksLoading,
-} = useGetBooksWithAvailableCopiesQuery({
+} = useGetBooksWithCopiesInStockQuery({
   page: booksPage.value,
   retailLocationId: selectedLocation.value.id,
   rows: booksPerPage.value,
@@ -220,55 +223,54 @@ const {
   booleanFilters,
 } = useTableFilters("warehouse.filters", true);
 
-const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
-  () => [
-    {
-      name: "isbn",
-      field: "isbnCode",
-      label: t("book.fields.isbn"),
-      align: "left",
-    },
-    {
-      name: "author",
-      field: "authorsFullName",
-      label: t("book.fields.author"),
-      align: "left",
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      name: "subject",
-      field: "subject",
-      label: t("book.fields.subject"),
-      align: "left",
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      name: "status",
-      field: ({ meta }) => meta.isAvailable,
-      label: t("book.fields.status"),
-      align: "left",
-    },
-    {
-      name: "available-copies",
-      field: ({ copies }) => copies?.length ?? 0,
-      label: t("reserveBooks.availableCopies"),
-      align: "center",
-    },
-    {
-      name: "title",
-      field: "title",
-      label: t("book.fields.title"),
-      align: "left",
-      classes: "text-wrap",
-    },
-    {
-      name: "problems",
-      field: () => undefined,
-      label: "",
-      align: "center",
-    },
-  ],
-);
+const columns = computed<QTableColumn<BookWithCopiesInStockFragment>[]>(() => [
+  {
+    name: "isbn",
+    field: "isbnCode",
+    label: t("book.fields.isbn"),
+    align: "left",
+  },
+  {
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "subject",
+    field: "subject",
+    label: t("book.fields.subject"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "status",
+    field: ({ meta }) => meta.isAvailable,
+    label: t("book.fields.status"),
+    align: "left",
+  },
+  {
+    name: "available-copies",
+    field: ({ copies }) =>
+      copies?.filter((copy) => isAvailable(copy)).length ?? 0,
+    label: t("reserveBooks.availableCopies"),
+    align: "center",
+  },
+  {
+    name: "title",
+    field: "title",
+    label: t("book.fields.title"),
+    align: "left",
+    classes: "text-wrap",
+  },
+  {
+    name: "problems",
+    field: () => undefined,
+    label: "",
+    align: "center",
+  },
+]);
 
 const booksPagination = ref({
   rowsPerPage: booksPerPage.value,
@@ -350,7 +352,7 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
-    filter: { ...refetchFilterProxy.value, isAvailable: true },
+    filter: { ...refetchFilterProxy.value },
   });
 
   booksPagination.value.rowsNumber = books.value?.rowsCount;

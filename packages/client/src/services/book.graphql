@@ -42,7 +42,14 @@ query getBooks(
   }
 }
 
-query getBooksWithAvailableCopies(
+fragment BookWithCopiesInStock on Book {
+  ...BookSummary
+  copies {
+    ...BookCopyDetails
+  }
+}
+
+query getBooksWithCopiesInStock(
   $retailLocationId: String!
   $page: Int!
   $rows: Int!
@@ -53,10 +60,11 @@ query getBooksWithAvailableCopies(
     page: $page
     rows: $rows
     filter: $filter
+    copiesInStock: true
   ) {
     page
     rows {
-      ...BookWithAvailableCopies
+      ...BookWithCopiesInStock
     }
     rowsCount
   }
