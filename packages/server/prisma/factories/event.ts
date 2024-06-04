@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Prisma } from "@prisma/client";
 import { random, startCase, times } from "lodash";
+import RETAIL_LOCATIONS from "test/fixtures/retail-locations";
 import { createUser } from "./user";
 
 export async function createEvent(
@@ -13,6 +14,12 @@ export async function createEvent(
     owner: {
       // TODO: Do not create a user, use an existing one
       create: await createUser(),
+    },
+
+    location: {
+      connect: {
+        id: RETAIL_LOCATIONS[random(0, RETAIL_LOCATIONS.length - 1)].id,
+      },
     },
 
     ...overrides,

@@ -16,6 +16,8 @@ declare namespace NodeJS {
     FIREBASE_APP_ID: string;
     FIREBASE_MESSAGING_SENDER_ID: string;
     FIREBASE_PROJECT_ID: string;
-    IS_DEMO: string;
+
+    FACEBOOK_LOGIN_ENABLED: string;
+    GOOGLE_LOGIN_ENABLED: string;
   }
 }

@@ -32,28 +32,45 @@ export default {
       "Il numero di titoli attualmente disponibili tra quelli richiesti dall'utente",
   },
   payOff: "Liquida utente",
-  filters: [
-    "Con Disponibili",
-    "Con Richiesti",
-    "Con Acquistati",
-    "Con Venduti",
-  ],
+  payOffDisabled: "Le liquidazioni al momento sono disabilitate.",
+  filters: {
+    withAvailable: "Con Disponibili",
+    withRequested: "Con Richiesti",
+    withPurchased: "Con Acquistati",
+    withSold: "Con Venduti",
+  },
   editUser: {
     title: "Modifica Dati Utente",
+    createUser: "Crea un Nuovo Utente",
     discount: "Applica sconto ISEE/volontario",
     notes: "Note",
+
+    downloadData: "Scarica Dati",
+    downloadDataSuccess: "I dati dell'account verranno scaricati a breve",
+    downloadDataFailed:
+      "Non è stato possibile scaricare i dati dell'account. Si prega di contattare il supporto.",
+    deleteUser: "Elimina Utente",
+    deleteUserSuccess:
+      "L'utente è stato programmato per l'eliminazione tra 7 giorni",
+    deleteUserFailed: "Non è stato possibile eliminare l'utente",
+    cancelUserDeletion: "Annulla Eliminazione Utente",
+    cancelUserDeletionSuccess: "L'eliminazione dell'utente è stata annullata",
+    cancelUserDeletionFailed:
+      "Non è stato possibile annullare l'eliminazione dell'utente",
   },
   inRetrieval: "In ritiro",
-  retrieved: "Ritirati e restituibili",
+  retrieved: "Ritirati",
   searchHint: "Inserisci un codice ISBN per aggiungere il libro alla lista",
   inStockDialog: {
     title: "Libri di {0} in Magazzino",
     retrievableTooltip:
-      "Include le copie ancora presenti in magazzino, non disperse, non prenotate",
+      "Include le copie ancora presenti in magazzino, quelle disperse e quelle prenotate",
     retrieveBtn: "Ritira tutti i libri nella lista",
     deleteBookBtnTooltip: "Elimina definitivamente questa copia dal database",
-    errorMessage:
-      "Non è possibile accettare più di una copia dello stesso libro",
+    errors: {
+      noBook: "Non è stato trovato nessun libro con ISBN {0}",
+      retrieval: "C'è stato un errore nel ritiro dei libri",
+    },
   },
   booksMovementsDialog: {
     purchasedTitle: "Libri acquistati da {0}",
@@ -85,6 +102,7 @@ export default {
     deleteAll: "Elimina Tutti",
     moveIntoReserved: "Sposta i Disponibili nei Prenotati",
     moveIntoCart: "Metti i Disponibili nel Carrello",
+    booksRequested: "",
   },
   reservedBooksDialog: {
     title: "Libri prenotati da {0}",
@@ -98,6 +116,8 @@ export default {
         'Stai eliminando tutti i libri prenotati da questo cliente. I libri verranno segnalati come "Disponibili". Vuoi procedere?',
       confirmButton: "Elimina Tutti",
     },
+    bookReserved: "Prenotato {0}.",
+    requestsReserved: "{0} copie di libri richiesti prenotate.",
   },
   payOffUserDialog: {
     title: "Liquida Utente {0}",
@@ -119,6 +139,8 @@ export default {
       return: "Restituisci",
       reimburse: "Rimborsa",
     },
+    problemsError:
+      "Non è stato possibile segnalare il problema per tutte le copie.",
     returnAndDonate: "Restituisci contanti e dona libri",
     returnEverything: "Restituisci contanti e libri ({0} €)",
     confirms: {
@@ -149,6 +171,8 @@ export default {
           "I libri nella lista sottostante saranno restituiti al cliente in quanto legittimo proprietario. Non potrai annullare questa azione. Vuoi procedere?",
         tableTitle: "Libri in restituzione",
       },
+      confirmError:
+        "Non è stato possibile terminare la liquidazione del cliente selezionato.",
     },
   },
   goToCart: "Vai al carrello",
@@ -162,10 +186,22 @@ export default {
     emptyCart: "Svuota carrello",
     autoEmptyDisclaimer:
       "Ricorda: non puoi tenere i libri disponibili bloccati nel carrello per troppo tempo, perciò si svuoterà automaticamente tra: {0}",
-    sellBooks: "Vendi libri ({0} €)",
+    sellBooks: "Vendi libri ({0})",
     totalBooks: "Totale Libri da vendere",
     discount: "Sconto ISEE/volontario",
     total: "Totale",
+    empty: {
+      title: "Svuotare il carrello?",
+      message:
+        "Vuoi davvero svuotare il carrello del cliente attuale e ritornare i suoi libri tra le liste dei prenotati e dei richiesti?",
+      emptyCart: "Svuota",
+    },
+    confirm: {
+      title: "Vendi libri?",
+      message:
+        "Confermare la vendita dei libri nel carrello per un totale di {0}?",
+      sell: "Vendi",
+    },
   },
   receiptsDialog: {
     title: "Ricevute",
@@ -177,7 +213,9 @@ export default {
     type: {
       // REQUEST: "Richiesto | Richiesti",
       PURCHASE: "Acquisto | Acquisti",
-      REGISTRATION: "Ritiro | Ritiri",
+      WITHDRAWAL: "Ritiro | Ritiri",
     } satisfies Record<ReceiptType, string>,
+    noRegistration: "Non sono presenti ricevute di ritiro",
+    noPurchase: "Non sono presenti ricevute d'acquisto",
   },
 };

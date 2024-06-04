@@ -1,4 +1,8 @@
-import { UnprocessableEntityException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  NotAcceptableException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import {
   Args,
   Mutation,
@@ -8,7 +12,9 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { Prisma } from "@prisma/client";
+import * as argon2 from "argon2";
 import { GraphQLVoid } from "graphql-scalars";
+import { omit } from "lodash";
 import { Role } from "src/@generated";
 import { User } from "src/@generated/user";
 import { AuthService } from "src/modules/auth/auth.service";
@@ -17,24 +23,29 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
+  MembersQueryArgs,
+  RegisterUserPayload,
   RemoveMemberPayload,
   SettleRemainingType,
   SettleUserInput,
   UpdateRolePayload,
+  UpdateUserPayload,
   UsersQueryArgs,
   UsersQueryResult,
 } from "./user.args";
+import { UserService } from "./user.service";
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    private readonly userService: UserService,
   ) {}
 
   @Query(() => UsersQueryResult)
   async users(
-    @Args() { page, rowsPerPage, searchTerm }: UsersQueryArgs,
+    @Args() { page, rowsPerPage, filter = {} }: UsersQueryArgs,
     @CurrentUser() user: User,
   ) {
     if (rowsPerPage > 200) {
@@ -50,33 +61,127 @@ export class UserResolver {
 
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
-    const searchText = searchTerm?.trim().replaceAll(" ", "%");
+    const searchText = filter.search?.trim().replaceAll(" ", "%");
     const searchFilter: Prisma.StringFilter<"User"> = {
       contains: searchText,
       mode: "insensitive",
     };
 
-    const where: Prisma.UserWhereInput = {
-      emailVerified: true,
+    const activeRequests: Prisma.BookRequestWhereInput = {
+      cartItem: null,
+      deletedAt: null,
+      saleId: null,
+      OR: [
+        {
+          reservations: {
+            every: {
+              deletedAt: {
+                not: null,
+              },
+            },
+          },
+        },
+        {
+          reservations: {
+            none: {},
+          },
+        },
+      ],
+    };
 
-      ...(searchText
-        ? {
-            OR: [
+    const where: Prisma.UserWhereInput = {
+      AND: [
+        // Also include accounts that are scheduled for deletion so that they can be restored while they are still within the grace period
+        {
+          OR: [
+            {
+              deletedAt: null,
+            },
+            {
+              deletedAt: { gt: new Date() },
+            },
+          ],
+        },
+
+        {
+          OR: [
+            ...(filter.withRequested === true || filter.withAvailable === true
+              ? [
+                  {
+                    requestedBooks: {
+                      some: {
+                        AND: [
+                          activeRequests,
+                          // With Available is subtractive in respect to With Requested
+                          ...(filter.withAvailable
+                            ? [
+                                {
+                                  book: {
+                                    meta: {
+                                      isAvailable: true,
+                                    },
+                                  },
+                                },
+                              ]
+                            : []),
+                        ],
+                      },
+                    },
+                  } satisfies Prisma.UserWhereInput,
+                ]
+              : []),
+
+            ...(filter.withPurchased
+              ? [
+                  {
+                    purchases: {
+                      some: {
+                        refundedAt: null,
+                      },
+                    },
+                  },
+                ]
+              : []),
+
+            ...(filter.withSold
+              ? [
+                  {
+                    bookCopies: {
+                      some: {
+                        sales: {
+                          some: {
+                            refundedAt: null,
+                          },
+                        },
+                      },
+                    },
+                  } satisfies Prisma.UserWhereInput,
+                ]
+              : []),
+          ],
+        },
+
+        ...(searchText
+          ? [
               {
-                firstname: searchFilter,
+                OR: [
+                  {
+                    firstname: searchFilter,
+                  },
+                  {
+                    lastname: searchFilter,
+                  },
+                  {
+                    email: searchFilter,
+                  },
+                  {
+                    phoneNumber: searchFilter,
+                  },
+                ],
               },
-              {
-                lastname: searchFilter,
-              },
-              {
-                email: searchFilter,
-              },
-              {
-                phoneNumber: searchFilter,
-              },
-            ],
-          }
-        : {}),
+            ]
+          : []),
+      ],
     };
 
     const [rowsCount, rows] = await this.prisma.$transaction([
@@ -97,7 +202,7 @@ export class UserResolver {
 
   @Query(() => [User])
   async members(
-    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @Args() { retailLocationId, filters }: MembersQueryArgs,
     @CurrentUser() user: User,
   ) {
     await this.authService.assertMembership({
@@ -108,13 +213,113 @@ export class UserResolver {
         "You are not allowed to view the list of members for this location.",
     });
 
-    return this.prisma.user.findMany({
+    // TODO: Use Prisma full-text search
+    // handle spaces by replacing them with % for the search
+    const searchText = filters?.search?.trim().replaceAll(" ", "%");
+    const searchFilter: Prisma.StringFilter<"User"> = {
+      contains: searchText,
+      mode: "insensitive",
+    };
+
+    const rawMembers = await this.prisma.locationMember.findMany({
       where: {
-        memberships: {
-          some: {
-            retailLocationId,
+        retailLocationId,
+
+        user: {
+          deletedAt: null,
+          memberships: {
+            some: {
+              retailLocationId,
+            },
           },
         },
+
+        AND: [
+          {
+            OR: [
+              ...(filters?.ADMIN
+                ? [
+                    {
+                      role: Role.ADMIN,
+                    },
+                  ]
+                : []),
+              ...(filters?.OPERATOR
+                ? [
+                    {
+                      role: Role.OPERATOR,
+                    },
+                  ]
+                : []),
+            ],
+          },
+
+          ...(searchText
+            ? [
+                {
+                  user: {
+                    OR: [
+                      {
+                        firstname: searchFilter,
+                      },
+                      {
+                        lastname: searchFilter,
+                      },
+                      {
+                        email: searchFilter,
+                      },
+                      {
+                        phoneNumber: searchFilter,
+                      },
+                    ],
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+      select: {
+        user: true,
+      },
+      distinct: "userId",
+      orderBy: {
+        user: {
+          firstname: "asc",
+        },
+      },
+    });
+
+    return rawMembers.map(({ user }) => user);
+  }
+
+  @Query(() => [User])
+  async allUsers(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() user: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: user.id,
+      message: "You are not allowed to see the customer list of this location",
+    });
+
+    return await this.prisma.user.findMany({
+      where: {
+        emailVerified: true,
+        memberships: {
+          every: {
+            NOT: {
+              retailLocationId,
+            },
+          },
+        },
+        OR: [
+          {
+            deletedAt: null,
+          },
+          {
+            deletedAt: { gt: new Date() },
+          },
+        ],
       },
     });
   }
@@ -153,6 +358,7 @@ export class UserResolver {
             bookCopies: {
               where: {
                 returnedAt: null,
+                donatedAt: null,
                 OR: [
                   {
                     sales: {
@@ -216,9 +422,7 @@ export class UserResolver {
           select: {
             reservations: {
               where: {
-                deletedAt: {
-                  not: null,
-                },
+                deletedAt: null,
                 cartItem: null,
               },
             },
@@ -243,21 +447,44 @@ export class UserResolver {
         _count: {
           select: {
             requestedBooks: {
+              // This where statement should be very similar to the one of book-request.resolver
               where: {
                 deletedAt: null,
                 cartItem: null,
-                OR: [
+                AND: [
                   {
-                    reservations: {
-                      none: {},
-                    },
-                  },
-                  {
-                    reservations: {
-                      every: {
-                        deletedAt: null,
+                    OR: [
+                      {
+                        saleId: null,
                       },
-                    },
+                      {
+                        // All related sales must have been refunded in order to show the request
+                        sale: {
+                          refundedAt: {
+                            not: null,
+                          },
+                        },
+                      },
+                    ],
+                  },
+
+                  {
+                    OR: [
+                      {
+                        reservations: {
+                          none: {},
+                        },
+                      },
+                      {
+                        reservations: {
+                          every: {
+                            deletedAt: {
+                              not: null,
+                            },
+                          },
+                        },
+                      },
+                    ],
                   },
                 ],
                 ...(onlyAvailable
@@ -290,9 +517,7 @@ export class UserResolver {
           select: {
             purchases: {
               where: {
-                refundedAt: {
-                  not: null,
-                },
+                refundedAt: null,
               },
             },
           },
@@ -330,6 +555,109 @@ export class UserResolver {
 
     // Can only have one cart per retail location, so we can safely check only the first one.
     return ownedCarts[0]?._count.items ?? 0;
+  }
+
+  @Mutation(() => User)
+  async createUser(
+    @Input() payload: RegisterUserPayload,
+    @CurrentUser() actor: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: actor.id,
+      retailLocationId: payload.retailLocationId,
+      message: "You are not allowed to create members.",
+    });
+
+    if (await this.userService.findUserByEmail(payload.email)) {
+      throw new ForbiddenException("A user with this email already exists.");
+    }
+    if (payload.password !== payload.passwordConfirmation) {
+      throw new UnprocessableEntityException(
+        "Confirmation password doesn't match with provided password!",
+      );
+    }
+    // TODO: require delegate full name when the user is a minor
+
+    const actorIsAdmin = await this.authService.userIsAdmin(
+      actor.id,
+      payload.retailLocationId,
+    );
+    return this.userService.createUser({
+      ...omit(payload, [
+        "passwordConfirmation",
+        "retailLocationId",
+        ...(actorIsAdmin ? [] : (["discount"] as const)),
+      ]),
+      // TODO: maybe offer a way to choose the locale when inviting a user
+      locale: actor.locale,
+    });
+  }
+
+  @Mutation(() => User)
+  async updateUser(
+    @Input()
+    {
+      id: userId,
+      retailLocationId,
+      discount,
+      password,
+      passwordConfirmation,
+      ...payloadRest
+    }: UpdateUserPayload,
+    @CurrentUser() actor: User,
+  ) {
+    if (userId !== actor.id) {
+      await this.authService.assertMembership({
+        userId: actor.id,
+        retailLocationId,
+        message: "You do not have permissions to edit user data.",
+      });
+    }
+
+    await this.prisma.user.findFirstOrThrow({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (
+      (!!password || !!passwordConfirmation) &&
+      password !== passwordConfirmation
+    ) {
+      throw new UnprocessableEntityException(
+        "Confirmation password doesn't match with provided password!",
+      );
+    }
+    if (
+      payloadRest.dateOfBirth &&
+      new Date().getUTCFullYear() -
+        new Date(payloadRest.dateOfBirth).getUTCFullYear() <
+        18 &&
+      (!payloadRest.delegate || payloadRest.delegate.length === 0)
+    ) {
+      throw new UnprocessableEntityException(
+        "Trying to register a user which is a minor, but not providing an adult delegate for the user.",
+      );
+    }
+    const userIsAdmin = await this.authService.userIsAdmin(
+      actor.id,
+      retailLocationId,
+    );
+
+    return this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ...payloadRest,
+        ...(userIsAdmin ? { discount } : {}),
+        ...(!!password &&
+        !!passwordConfirmation &&
+        password === passwordConfirmation
+          ? { password: await argon2.hash(password) }
+          : {}),
+      },
+    });
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
@@ -422,6 +750,22 @@ export class UserResolver {
       retailLocationId,
       message: "You are not allowed to settle users.",
     });
+
+    const { payOffEnabled } =
+      await this.prisma.retailLocation.findUniqueOrThrow({
+        where: {
+          id: retailLocationId,
+        },
+        select: {
+          payOffEnabled: true,
+        },
+      });
+
+    if (!payOffEnabled) {
+      throw new NotAcceptableException(
+        "Cannot settle users at the current time: settlement for this retail location is disabled",
+      );
+    }
 
     await this.prisma.$transaction(async (prisma) => {
       const bookCopies = await prisma.bookCopy.findMany({

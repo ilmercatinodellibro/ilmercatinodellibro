@@ -2,12 +2,10 @@ import { until } from "@vueuse/core";
 import { boot } from "quasar/wrappers";
 import { nextTick, watch } from "vue";
 import { useTheme } from "src/composables/use-theme";
-import { AvailableRouteNames } from "src/models/routes";
-import { useAuthService } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 
-export default boot(async ({ router }) => {
-  const { loading, selectedLocationId, selectedLocation } =
+export default boot(({ router }) => {
+  const { loading, selectedLocationId, selectedLocation, retailLocations } =
     useRetailLocationService();
 
   const ensureLocationInitialized = Promise.all([
@@ -25,6 +23,16 @@ export default boot(async ({ router }) => {
 
       await ensureLocationInitialized;
 
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- should not happen, meant to help with debugging
+      if (!selectedLocation.value) {
+        console.error(
+          retailLocations.value.length === 0
+            ? "No retail locations have been found. Make sure the DB is seeded properly."
+            : `Location with id ${locationId} not found`,
+        );
+        return;
+      }
+
       const locationTheme = selectedLocation.value.theme;
       theme.value = {
         colors: {
@@ -40,21 +48,12 @@ export default boot(async ({ router }) => {
     { immediate: true },
   );
 
-  const { isAuthenticated } = useAuthService();
-
   router.beforeEach(async (to) => {
     if (to.params.locationId) {
       selectedLocationId.value = to.params.locationId as string;
       await ensureLocationInitialized;
     }
   });
-
-  if (!isAuthenticated.value) {
-    await router.push({
-      name: AvailableRouteNames.SelectLocation,
-    });
-    return;
-  }
 
   // TODO: Use and enforce the user's preferred location (when implemented)
 });

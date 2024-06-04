@@ -1,35 +1,31 @@
 <template>
   <q-card-section class="full-width gap-16 items-center q-pa-md row">
     <q-input
-      v-model="searchQuery"
-      debounce="200"
-      type="search"
-      class="col max-width-600"
-      outlined
+      :model-value="newFilters.searchQuery"
       :placeholder="t('common.search')"
+      class="col max-width-600"
+      clearable
+      debounce="400"
+      outlined
+      type="search"
+      @update:model-value="(query) => updateSearch(query as string)"
     >
-      <template #append>
+      <template v-if="newFilters.searchQuery.length === 0" #append>
         <q-icon :name="mdiMagnify" />
       </template>
     </q-input>
 
     <q-select
-      v-model="filters"
       :label="t('book.filter')"
-      :options="filterOptions.map(({ key }) => key)"
+      :model-value="newFilters.filters"
+      :options="Object.keys(filterOptions)"
+      :display-value="selectedFiltersDisplay"
       class="width-200"
+      clearable
       multiple
       outlined
+      @update:model-value="updateFilters"
     >
-      <!--
-        This is because the filters are translated and if a user were to switch
-        language they should update, so the key for each filter is an integer ID
-        and the label is what's shown in the filter UI
-      -->
-      <template v-if="filters.length > 0" #selected>
-        {{ selectedFiltersDisplay }}
-      </template>
-
       <template #option="{ itemProps, opt, selected, toggleOption }">
         <q-item v-bind="itemProps">
           <q-item-section side top>
@@ -39,15 +35,28 @@
             />
           </q-item-section>
           <q-item-section>
-            <q-item-label> {{ filterOptions[opt]?.label }} </q-item-label>
+            <q-item-label> {{ filterOptions[opt] }} </q-item-label>
           </q-item-section>
         </q-item>
       </template>
 
-      <template v-if="schoolFilters" #after-options>
-        <q-item clickable @click="openSchoolFilterDialog()">
+      <template v-if="newFilters.schoolFilters" #after-options>
+        <q-item
+          clickable
+          @click="openSchoolFilterDialog(newFilters.schoolFilters)"
+        >
           <q-item-section>
             {{ t("book.filters.school") }}
+          </q-item-section>
+
+          <q-item-section v-if="isSchoolFilterSelected" side>
+            <q-btn
+              dense
+              flat
+              round
+              :icon="mdiCloseCircle"
+              @click.stop="clearSchoolFiltersFilters"
+            />
           </q-item-section>
         </q-item>
       </template>
@@ -60,47 +69,65 @@
 </template>
 
 <script setup lang="ts">
-import { mdiMagnify } from "@quasar/extras/mdi-v7";
+import { mdiCloseCircle, mdiMagnify } from "@quasar/extras/mdi-v7";
 import { Dialog } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTranslatedFilters } from "src/composables/use-filter-translations";
-import { SchoolFilters } from "src/models/book";
+import { SchoolFilters, TableFilters } from "src/models/book";
 import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 
 const { t } = useI18n();
-
-const searchQuery = defineModel<string>("searchQuery", { required: true });
-const filters = defineModel<unknown[]>("filters", { required: true });
-const schoolFilters = defineModel<SchoolFilters | undefined>("schoolFilters");
 
 const props = defineProps<{
   filterOptions: ReturnType<typeof useTranslatedFilters>["value"];
 }>();
 
-const selectedFiltersDisplay = computed(() =>
-  filters.value
-    .map(
-      (filter) => props.filterOptions.find(({ key }) => key === filter)?.label,
-    )
-    .join(", "),
+const newFilters = defineModel<TableFilters>({ required: true });
+
+// We can just check the selection of the school to state that that filter is selected since courses
+// can be only selected after selecting at least a school
+const isSchoolFilterSelected = computed(
+  () =>
+    newFilters.value.schoolFilters &&
+    newFilters.value.schoolFilters.selectedSchoolCodes.length > 0,
 );
 
-// FIXME: Add actual logic with server fetch
-const schoolFilterOptions: SchoolFilters = {
-  schoolCodes: ["SchoolCode0", "SchoolCode1", "SchoolCode2", "SchoolCode3"],
-  courses: ["Address0", "Address1", "Address2", "Address3", "Address4"],
-};
+// "selectedFiltersDisplay" is required because the filters are translated and if a user were to switch
+// language they should update, so the key for each filter is an integer ID
+// and the label is what's shown in the filter UI
+const selectedFiltersDisplay = computed(() =>
+  [
+    ...newFilters.value.filters.map((filter) => props.filterOptions[filter]),
+    ...(isSchoolFilterSelected.value ? [t("book.filters.school")] : []),
+  ].join(", "),
+);
 
-function openSchoolFilterDialog() {
+function updateSearch(newSearchQuery: string | null) {
+  newFilters.value.searchQuery = newSearchQuery ?? "";
+}
+
+function updateFilters(filters: TableFilters["filters"] | null) {
+  newFilters.value.filters = filters ?? [];
+}
+
+function clearSchoolFiltersFilters() {
+  newFilters.value.schoolFilters = {
+    selectedSchoolCodes: [],
+    selectedSchoolCourseIds: [],
+  };
+}
+
+function openSchoolFilterDialog(selectedFilters: SchoolFilters) {
   Dialog.create({
     component: FilterBySchoolDialog,
     componentProps: {
-      filters: schoolFilterOptions,
-      selectedFilters: schoolFilters.value,
+      selectedFilters,
+      title: t("book.filters.school"),
+      submitLabel: t("book.filter"),
     },
-  }).onOk((payload: SchoolFilters) => {
-    schoolFilters.value = payload;
+  }).onOk((schoolFilters: SchoolFilters) => {
+    newFilters.value.schoolFilters = schoolFilters;
   });
 }
 </script>

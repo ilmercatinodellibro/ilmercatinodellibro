@@ -2,8 +2,7 @@
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
       <header-search-bar-filters
-        v-model:filters="filters"
-        v-model:search-query="searchQuery"
+        v-model="tableFilter"
         :filter-options="filterOptions"
       >
         <template #side-actions>
@@ -25,166 +24,196 @@
           class="col"
           flat
           square
-          row-key="name"
+          row-key="id"
           :rows="customers"
           :columns="columns"
           :filter="tableFilter"
+          :filter-method="filterMethod"
           :loading="loading"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
           @request="onRequest"
         >
-          <template #body-cell-edit="{ row, rowIndex }">
-            <q-td class="text-left">
-              <q-btn
-                color="primary"
-                flat
-                :icon="mdiPencil"
-                round
-                size="md"
-                @click="openEdit(row, rowIndex)"
-              />
-            </q-td>
-          </template>
-
-          <template #body-cell-first-name="{ value, row }">
-            <q-td class="text-left">
-              <span class="gap-16 items-center justify-between no-wrap row">
-                {{ value }}
-                <q-icon
-                  v-if="row.notes.length > 0"
-                  :name="mdiInformationOutline"
-                  size="24px"
-                  color="primary"
-                >
-                  <q-tooltip>
-                    {{ row.notes }}
-                  </q-tooltip>
-                </q-icon>
-              </span>
-            </q-td>
-          </template>
-
-          <!-- Kind of redundant repetition of so much code, can this be reduced? -->
           <template #header-cell-in-stock="{ col }">
             <table-header-with-info
               :label="col.label"
               :info="columnTooltip.inStock"
             />
           </template>
-          <template #body-cell-in-stock="{ col, row, value }">
-            <table-cell-with-dialog
-              :value="value"
-              clickable-when-zero
-              @click="openCellEditDialog(row, col, value)"
-            />
-          </template>
-
           <template #header-cell-sold="{ col }">
             <table-header-with-info
               :label="col.label"
               :info="columnTooltip.sold"
             />
           </template>
-          <template #body-cell-sold="{ col, row, value }">
-            <table-cell-with-dialog
-              :value="value"
-              @click="openCellEditDialog(row, col, value)"
-            />
-          </template>
-
           <template #header-cell-reserved="{ col }">
             <table-header-with-info
               :label="col.label"
               :info="columnTooltip.reserved"
             />
           </template>
-          <template #body-cell-reserved="{ col, row, value }">
-            <table-cell-with-dialog
-              :value="value"
-              clickable-when-zero
-              @click="openCellEditDialog(row, col, value)"
-            />
-          </template>
-
           <template #header-cell-requested="{ col }">
             <table-header-with-info
               :label="col.label"
               :info="columnTooltip.requested"
             />
           </template>
-          <template #body-cell-requested="{ col, row, value }">
-            <table-cell-with-dialog
-              :value="value"
-              :secondary-value="row.booksRequestedAndAvailable"
-              clickable-when-zero
-              @click="openCellEditDialog(row, col, value)"
-            >
-              <template #secondary-value="{ value: availableCount }">
-                <round-badge color="positive">
-                  {{ availableCount }}
-
-                  <q-tooltip>
-                    {{ $t("manageUsers.tooltips.available") }}
-                  </q-tooltip>
-                </round-badge>
-              </template>
-            </table-cell-with-dialog>
-          </template>
-
           <template #header-cell-purchased="{ col }">
             <table-header-with-info
               :label="col.label"
               :info="columnTooltip.purchased"
             />
           </template>
-          <template #body-cell-purchased="{ col, row, value }">
-            <table-cell-with-dialog
-              :value="value"
-              @click="openCellEditDialog(row, col, value)"
-            />
-          </template>
 
-          <template #body-cell-shopping-cart="{ row, value }">
-            <q-td class="text-center">
-              <q-btn
-                :icon="mdiCart"
-                color="primary"
-                flat
-                round
-                @click="openCart(row)"
-              >
-                <round-badge
-                  v-if="value > 0"
-                  :label="value"
-                  class="badge-top-left"
-                  color="accent"
-                  float-left
-                />
-              </q-btn>
-            </q-td>
-          </template>
+          <template #body="props">
+            <q-tr
+              :props="props"
+              v-bind="
+                !props.row.emailVerified
+                  ? {
+                      class: 'bg-blue-grey-1 text-black-54',
+                    }
+                  : undefined
+              "
+            >
+              <template v-for="col in props.cols" :key="col.name">
+                <q-td v-if="col.name === 'edit'">
+                  <q-btn
+                    :icon="mdiPencil"
+                    color="primary"
+                    flat
+                    round
+                    size="md"
+                    @click="openEdit(props.row)"
+                  />
+                </q-td>
 
-          <template #body-cell-receipts="{ row }">
-            <q-td class="text-center">
-              <q-btn
-                color="primary"
-                flat
-                :icon="mdiReceiptText"
-                round
-                size="md"
-                @click="openReceipt(row)"
-              />
-            </q-td>
-          </template>
+                <q-td v-else-if="col.name === 'firstname'" :class="col.classes">
+                  <span class="gap-16 items-center justify-between no-wrap row">
+                    {{ col.value }}
+                    <q-icon
+                      v-if="col.row.notes.length > 0"
+                      :name="mdiInformationOutline"
+                      size="24px"
+                      color="primary"
+                    >
+                      <q-tooltip>
+                        {{ col.row.notes }}
+                      </q-tooltip>
+                    </q-icon>
+                  </span>
+                </q-td>
 
-          <template #body-cell-pay-off="{ row }">
-            <q-td>
-              <chip-button
-                color="primary"
-                :label="$t('manageUsers.payOff')"
-                @click="openPayOff(row)"
-              />
-            </q-td>
+                <table-cell-with-tooltip
+                  v-else-if="col.name === 'email'"
+                  :class="col.classes"
+                  :value="col.value"
+                >
+                  <template v-if="!props.row.emailVerified">
+                    <round-badge
+                      class="q-ma-xs"
+                      color="warning"
+                      float-right
+                      text-color="black-87"
+                    >
+                      <q-icon :name="mdiInformationOutline" size="18px">
+                        <q-tooltip>
+                          {{ t("auth.emailNotVerified") }}
+                        </q-tooltip>
+                      </q-icon>
+                    </round-badge>
+                  </template>
+                </table-cell-with-tooltip>
+
+                <table-cell-with-dialog
+                  v-else-if="
+                    [
+                      'in-stock',
+                      'sold',
+                      'reserved',
+                      'requested',
+                      'purchased',
+                    ].includes(col.name)
+                  "
+                  :clickable-when-zero="
+                    alwaysClickableColsNames.includes(col.name)
+                  "
+                  :disable="willBeDeleted(props.row)"
+                  :secondary-value="
+                    col.name === 'requested'
+                      ? props.row.booksRequestedAndAvailable
+                      : undefined
+                  "
+                  :value="col.value"
+                  @click="openCellEditDialog(props.row, col, col.value)"
+                >
+                  <template
+                    v-if="col.name === 'requested'"
+                    #secondary-value="{ value: availableCount }"
+                  >
+                    <round-badge color="positive">
+                      {{ availableCount }}
+
+                      <q-tooltip>
+                        {{ $t("manageUsers.tooltips.available") }}
+                      </q-tooltip>
+                    </round-badge>
+                  </template>
+                </table-cell-with-dialog>
+
+                <q-td
+                  v-else-if="col.name === 'shopping-cart'"
+                  :class="col.classes"
+                >
+                  <q-btn
+                    :disable="willBeDeleted(props.row)"
+                    :icon="mdiCart"
+                    color="primary"
+                    flat
+                    round
+                    @click="openCart(props.row)"
+                  >
+                    <round-badge
+                      v-if="col.value > 0"
+                      :label="col.value"
+                      class="badge-top-left"
+                      color="accent"
+                      float-left
+                    />
+                  </q-btn>
+                </q-td>
+
+                <q-td v-else-if="col.name === 'receipts'" :class="col.classes">
+                  <q-btn
+                    :icon="mdiReceiptText"
+                    color="primary"
+                    flat
+                    round
+                    size="md"
+                    @click="openReceipt(props.row)"
+                  />
+                </q-td>
+
+                <q-td v-else-if="col.name === 'pay-off'">
+                  <chip-button
+                    :disable="
+                      !selectedLocation.payOffEnabled ||
+                      willBeDeleted(props.row)
+                    "
+                    color="primary"
+                    :label="$t('manageUsers.payOff')"
+                    @click="openPayOff(props.row)"
+                  >
+                    <q-tooltip v-if="!selectedLocation.payOffEnabled">
+                      {{ t("manageUsers.payOffDisabled") }}
+                    </q-tooltip>
+                  </chip-button>
+                </q-td>
+
+                <q-td v-else :class="col.classes">
+                  {{ col.value }}
+                </q-td>
+              </template>
+            </q-tr>
           </template>
         </q-table>
       </q-card-section>
@@ -200,10 +229,10 @@ import {
   mdiPlus,
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
+import { Dialog, Notify, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
+import { UpdateUserPayload } from "src/@generated/graphql";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
@@ -216,11 +245,21 @@ import PayOffUserDialog from "src/components/manage-users/pay-off-user-dialog.vu
 import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
 import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
-import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import { useTableFilters } from "src/composables/use-table-filters";
+import { notifyError } from "src/helpers/error-messages";
+import { UserDialogPayload } from "src/models/user";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
-import { CustomerFragment } from "src/services/user.graphql";
+import { useDownloadUserData } from "src/services/user";
+import {
+  CustomerFragment,
+  useAddUserMutation,
+  useCancelUserAccountDeletionMutation,
+  useDeleteUserAccountMutation,
+  useUpdateUserMutation,
+} from "src/services/user.graphql";
 
 const tableRef = ref() as Ref<QTable>;
 
@@ -241,41 +280,24 @@ const pagination = ref({
   rowsNumber: rowsCount.value,
 });
 
+const { filterMethod, filterOptions, tableFilter, refetchFilterProxy } =
+  useTableFilters("manageUsers.filters");
+
+onMounted(() => {
+  tableRef.value.requestServerInteraction();
+});
+
 const onRequest: QTableProps["onRequest"] = async (requested) => {
   await fetchCustomers({
     page: requested.pagination.page,
     rowsPerPage: requested.pagination.rowsPerPage,
-    searchTerm: tableFilter.value?.searchTerm,
-    // TODO: pass the filters to the server
+    filter: refetchFilterProxy.value,
   });
 
   pagination.value.rowsNumber = rowsCount.value;
   pagination.value.page = requested.pagination.page;
   pagination.value.rowsPerPage = requested.pagination.rowsPerPage;
 };
-
-onMounted(() => {
-  tableRef.value.requestServerInteraction();
-});
-
-const searchQuery = ref("");
-const filters = ref<UserFilters[]>([]);
-
-const filterOptions = useTranslatedFilters<UserFilters>("manageUsers.filters");
-
-enum UserFilters {
-  withAvailable,
-  withRequested,
-  withPurchased,
-  withSold,
-}
-
-// TODO: send the filters to the server
-const tableFilter = computed(() =>
-  !searchQuery.value && filters.value.length === 0
-    ? undefined
-    : { searchTerm: searchQuery.value, filters: filters.value },
-);
 
 const columnTooltip = computed(() => ({
   inStock: t("manageUsers.tooltips.inStock"),
@@ -293,23 +315,25 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     field: "email",
     label: t("manageUsers.fields.email"),
     align: "left",
+    classes: "max-width-250 ellipsis",
   },
   {
     name: "first-name",
     field: "firstname",
     label: t("manageUsers.fields.firstName"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "last-name",
     field: "lastname",
     label: t("manageUsers.fields.lastName"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "phone-number",
-    // field: "phoneNumber",
-    field: () => Math.random().toFixed(10).slice(2), // This field is already present but its value is not defined in the db yet
+    field: "phoneNumber",
     label: t("manageUsers.fields.phoneNumber"),
     align: "left",
   },
@@ -369,7 +393,7 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     name: "receipts",
     field: () => undefined,
     label: t("manageUsers.fields.receipts"),
-    align: "left",
+    align: "center",
   },
   {
     name: "pay-off",
@@ -378,12 +402,22 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   },
 ]);
 
+const { createUser } = useAddUserMutation();
 function addNewUser() {
   Dialog.create({
-    component: AddNewUserDialog,
-  }).onOk((payload) => {
-    // FIXME: add new user
-    payload;
+    component: EditUserDetailsDialog,
+  }).onOk(async (payload: Extract<UserDialogPayload, { type: "create" }>) => {
+    try {
+      await createUser({
+        input: payload.data,
+      });
+      await fetchCustomers({
+        page: pagination.value.page,
+        rowsPerPage: pagination.value.rowsPerPage,
+      });
+    } catch {
+      notifyError(t("auth.couldNotRegister"));
+    }
   });
 }
 
@@ -402,21 +436,104 @@ function openPayOff(user: CustomerFragment) {
     componentProps: {
       user,
     },
-  }).onOk((payload) => {
-    // FIXME: add checkout logic
-    payload;
+  }).onDismiss(() => {
+    tableRef.value.requestServerInteraction();
   });
 }
 
-function openEdit(user: CustomerFragment, rowIndex: number) {
+const willBeDeleted = (user: CustomerFragment) => !!user.scheduledForDeletionAt;
+
+const { updateUser } = useUpdateUserMutation();
+const { downloadData } = useDownloadUserData();
+const { deleteUserAccount } = useDeleteUserAccountMutation();
+const { cancelUserAccountDeletion } = useCancelUserAccountDeletionMutation();
+function openEdit({
+  email,
+  firstname,
+  id,
+  lastname,
+  discount,
+  notes,
+  phoneNumber,
+  dateOfBirth,
+  delegate,
+  scheduledForDeletionAt,
+}: CustomerFragment) {
   Dialog.create({
     component: EditUserDetailsDialog,
-    componentProps: { userData: user },
-  }).onOk((payload: { user: CustomerFragment; password?: string }) => {
-    // FIXME: add server call to update user data
-    customers.value[rowIndex] = payload.user;
+    componentProps: {
+      userData: {
+        email,
+        firstname,
+        id,
+        lastname,
+        discount,
+        notes,
+        phoneNumber,
+        retailLocationId: selectedLocation.value.id,
+        dateOfBirth,
+        delegate,
+      } satisfies UpdateUserPayload,
+      scheduledForDeletion: !!scheduledForDeletionAt,
+    },
+  }).onOk(async (payload: Exclude<UserDialogPayload, { type: "create" }>) => {
+    if (payload.type === "toggleDeletion") {
+      const shouldDelete = !scheduledForDeletionAt;
+      try {
+        if (shouldDelete) {
+          await deleteUserAccount({ input: { userId: id } });
+          Notify.create({
+            type: "info",
+            message: t("manageUsers.editUser.deleteUserSuccess"),
+          });
+        } else {
+          await cancelUserAccountDeletion({ input: { userId: id } });
+          Notify.create({
+            type: "info",
+            message: t("manageUsers.editUser.cancelUserDeletionSuccess"),
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        if (shouldDelete) {
+          notifyError(t("manageUsers.editUser.deleteUserFailed"));
+        } else {
+          notifyError(t("manageUsers.editUser.cancelUserDeletionFailed"));
+        }
+      }
+      return;
+    }
+
+    if (payload.type === "downloadData") {
+      await downloadData(id);
+      return;
+    }
+
+    const newUserData = payload.data;
+    try {
+      await updateUser({
+        input: {
+          ...newUserData,
+          email:
+            newUserData.email && newUserData.email !== email
+              ? newUserData.email
+              : email,
+          password: newUserData.password ? newUserData.password : undefined,
+        },
+      });
+
+      await fetchCustomers({
+        page: pagination.value.page,
+        rowsPerPage: pagination.value.rowsPerPage,
+      });
+    } catch {
+      notifyError(t("auth.couldNotUpdate"));
+    }
   });
 }
+
+// cells to always be clickable
+const alwaysClickableColsNames = ["in-stock", "reserved", "requested"];
 
 const { selectedLocation } = useRetailLocationService();
 function openCellEditDialog(
@@ -424,10 +541,9 @@ function openCellEditDialog(
   { name }: QTableColumn,
   value: number,
 ) {
-  // cells to always be clickable
   if (
     !selectedLocation.value.id ||
-    (value <= 0 && !["in-stock", "reserved", "requested"].includes(name))
+    (value <= 0 && !alwaysClickableColsNames.includes(name))
   ) {
     return;
   }
@@ -437,6 +553,8 @@ function openCellEditDialog(
       Dialog.create({
         component: EditUserStockdataDialog,
         componentProps: { userData },
+      }).onDismiss(() => {
+        tableRef.value.requestServerInteraction();
       });
       break;
     case "reserved":
@@ -446,7 +564,13 @@ function openCellEditDialog(
           userData,
           retailLocationId: selectedLocation.value.id,
         },
-      });
+      })
+        .onOk(() => {
+          openCart(userData);
+        })
+        .onDismiss(() => {
+          tableRef.value.requestServerInteraction();
+        });
       break;
     case "requested":
       Dialog.create({
@@ -455,7 +579,13 @@ function openCellEditDialog(
           userData,
           retailLocationId: selectedLocation.value.id,
         },
-      });
+      })
+        .onOk(() => {
+          openCart(userData);
+        })
+        .onDismiss(() => {
+          tableRef.value.requestServerInteraction();
+        });
       break;
     case "sold":
     case "purchased": {
@@ -466,6 +596,8 @@ function openCellEditDialog(
       Dialog.create({
         component: EditUserBooksMovementsDialog,
         componentProps: { userData, type: name },
+      }).onDismiss(() => {
+        tableRef.value.requestServerInteraction();
       });
       break;
     }
@@ -475,7 +607,12 @@ function openCellEditDialog(
 function openCart(user: CustomerFragment) {
   Dialog.create({
     component: CartDialog,
-    componentProps: { user },
+    componentProps: {
+      retailLocationId: selectedLocation.value.id,
+      user,
+    },
+  }).onDismiss(() => {
+    tableRef.value.requestServerInteraction();
   });
 }
 </script>

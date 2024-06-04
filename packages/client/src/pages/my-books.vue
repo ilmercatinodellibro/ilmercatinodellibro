@@ -49,7 +49,6 @@
             :filter="searchQuery"
             :loading="loading"
             :rows="tableRowsByTab[tab]"
-            :rows-per-page-options="[0]"
             class="col q-pt-sm"
           >
             <template v-if="tab === BooksTab.DELIVERED" #header="props">
@@ -69,16 +68,21 @@
               </q-tr>
             </template>
 
+            <template #body-cell-author="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
             <template
               v-if="tab === BooksTab.DELIVERED"
-              #body-cell-status="{ value }"
+              #body-cell-status="{ row }"
             >
               <q-td>
-                <!-- TODO: update to correct book status type -->
                 <q-chip
-                  v-bind="
-                    statusChipData[(value as BookStatus) ?? BookStatus.NOT_SOLD]
-                  "
+                  v-bind="statusChipData[getStatus(row)]"
                   class="no-pointer-events"
                 />
               </q-td>
@@ -155,7 +159,9 @@ import { useRoute, useRouter } from "vue-router";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { BooksTab } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
@@ -254,6 +260,7 @@ const commonColumns = computed<QTableColumn<TablesRowsTypes>[]>(() => [
     field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
 ]);
 
@@ -271,7 +278,6 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
     [BooksTab.DELIVERED]: [
       {
         name: "status",
-        // TODO: add the field
         field: () => undefined,
         label: t("book.fields.status"),
         align: "left",
@@ -283,8 +289,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.receivedAmount"),
         align: "left",
-        // TODO: change price to the right calculation
-        format: formatPrice,
+        format: (val: number) => discountedPrice(val, "buy"),
       },
     ],
     [BooksTab.PURCHASED]: [
@@ -292,11 +297,10 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       coverPriceColumn.value,
       {
         name: "paid-price",
-        // TODO: update to correct field
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.priceYouPaid"),
         align: "left",
-        format: formatPrice,
+        format: (val: number) => discountedPrice(val, "sell"),
       },
     ],
     [BooksTab.REQUESTED]: [
@@ -313,7 +317,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.price"),
         align: "left",
-        format: formatPrice,
+        format: (val: number) => discountedPrice(val, "sell"),
       },
       {
         name: "reserve",
@@ -334,7 +338,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.price"),
         align: "left",
-        format: formatPrice,
+        format: (val: number) => discountedPrice(val, "sell"),
       },
       {
         name: "actions",
@@ -356,7 +360,6 @@ const totalSale = ref(
   sumBy(tableRowsByTab.value.delivered, ({ book }) => book.originalPrice),
 );
 
-// TODO: remove book status once it is implemented on the server
 enum BookStatus {
   SOLD = "sold",
   NOT_SOLD = "not-sold",
@@ -364,11 +367,21 @@ enum BookStatus {
   DONATED = "donated",
 }
 
+function getStatus(bookCopy: BookCopyDetailsFragment) {
+  return bookCopy.returnedAt
+    ? BookStatus.RETURNED
+    : bookCopy.donatedAt
+      ? BookStatus.DONATED
+      : bookCopy.purchasedAt
+        ? BookStatus.SOLD
+        : BookStatus.NOT_SOLD;
+}
+
 const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({
   [BookStatus.SOLD]: {
     color: "positive",
     icon: mdiCurrencyEur,
-    label: t("myBooks.statusLabels.donated"),
+    label: t("myBooks.statusLabels.sold"),
     dark: true,
   },
   [BookStatus.NOT_SOLD]: {
@@ -475,12 +488,11 @@ async function cancelRequest(request: RequestSummaryFragment) {
         };
       },
     );
-    cache.gc();
-  } catch (e) {
+  } catch (error) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
         t("reserveBooks.reservation"),
-        e,
+        error,
       ]),
     );
   }

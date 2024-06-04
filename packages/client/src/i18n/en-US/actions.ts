@@ -1,7 +1,7 @@
 export default {
   add: "Add",
   addNewUser: "Add new user",
-  sendInvitation: "Send invitation",
+  sendInvitation: "Invite or add Operator",
   removeFilters: "Remove filters",
   close: "Close",
   duplicate: "Duplicate",
@@ -17,4 +17,6 @@ export default {
   selectAtLeastOneOption: "Select at least one option",
   editName: "Edit Name",
   selectFeedbackType: "Select feedback type",
+  update: "Update",
+  removeOperator: "Remove Operator",
 };

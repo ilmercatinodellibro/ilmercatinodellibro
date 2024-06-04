@@ -10,14 +10,20 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-const props = defineProps<{ floatLeft?: boolean; floatLeftSquare?: boolean }>();
+const props = defineProps<{
+  floatLeft?: boolean;
+  floatLeftSquare?: boolean;
+  floatRight?: boolean;
+}>();
 
 const positionClass = computed(() =>
   props.floatLeft
     ? "top-left"
     : props.floatLeftSquare
-    ? "top-left--square"
-    : undefined,
+      ? "top-left--square"
+      : props.floatRight
+        ? "top-right"
+        : undefined,
 );
 </script>
 
@@ -33,5 +39,11 @@ const positionClass = computed(() =>
     position: absolute;
     top: -8px;
   }
+}
+
+.top-right {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>

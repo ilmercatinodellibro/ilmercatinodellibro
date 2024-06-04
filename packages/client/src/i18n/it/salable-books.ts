@@ -1,7 +1,8 @@
 export default {
   title:
     "Usa il campo di ricerca qui sotto per verificare quali libri puoi vendere presso il Mercatino del Libro",
-  subtitle: "La tabella sottostante ti dirà se accettiamo il tuo libro.",
+  subtitle:
+    "La tabella sottostante ti dirà solo se i libri vengono accettati, poi devono essere portati al Mercatino per essere controllati prima dell'accettazione.",
   searchHint: "Digita qui il codice ISBN del libro che vuoi vendere",
   alert: "Codice ISBN non valido.",
   tableSectionTitles: {
@@ -14,4 +15,8 @@ export default {
     rejected: "Non accettato",
   },
   alreadySearched: "Libro già cercato",
+  bringBooksToRetailLocation:
+    "Puoi portare questo libro e gli altri segnati come accettati al Mercatino",
+  notAccepted:
+    "Non puoi portare questo libro al Mercatino perché non è nella lista dei libri accettati",
 };

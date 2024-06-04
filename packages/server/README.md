@@ -242,3 +242,28 @@ After this step is done, all the pieces of the puzzle are in their place and the
 
 Another note: for the moment I decided not to connect Schools to a retailLocation, even if the school code already includes the province, thus the retailLocationId.
 This is because at the moment there are no requirements involving such a thing and in this way schools can be still viewed from other retailLocations.
+
+## Social login
+
+We use the `passport` library to handle social login. See [the auth module](./src/modules/auth) for implementation details. All providers are optional and will be enabled only if their related environment variables are set. If you configure a provider, make sure to also enable it in the client app. See the [client README](../client/README.md#social-login) for more information.
+
+### Facebook login
+
+To enable Facebook login, you need to create a Facebook app and set some environment variables.
+See [Create an app - Facebook login use case](https://developers.facebook.com/docs/development/create-an-app/facebook-login-use-case) to create an app.
+After creating the app, add the `email` permission to the app as described in the guide. It's needed in our app to get the user's email address when registering with Facebook.
+After that, see [App dashboard - Basic settings](https://developers.facebook.com/docs/development/create-an-app/app-dashboard/basic-settings) to learn more about the basic settings for the Facebook app. From the settings page, we need the App ID and App Secret to set the following environment variables in the `.env` file:
+
+- `FACEBOOK_CLIENT_ID`: App ID from the basic app settings
+- `FACEBOOK_CLIENT_SECRET`: App Secret from the basic app settings
+
+Follow the instructions in the app dashboard to complete any other necessary steps such as business verification and publishing the app, which are required to use the app in production.
+
+### Google login
+
+To enable Google login, you need to create a Google project and set some environment variables.
+Go to the [Google Cloud Platform Console](https://console.cloud.google.com/) and create a new project.
+See [Create a project - Google Identity Platform](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid) to configure the project. In OAuth consent screen, in the `Scopes` step, add the `.../auth/userinfo.email` and `.../auth/userinfo.profile` scopes. In the `OAuth 2.0 Client IDs` section, create a new OAuth 2.0 Client ID. Add `http://localhost:3000/auth/google/callback` and the related production endpoint to `Authorized redirect URIs`. From the same page, get the Client ID and Client Secret to set the following environment variables in the `.env` file:
+
+- `GOOGLE_CLIENT_ID`: Client ID from the OAuth 2.0 Client ID
+- `GOOGLE_CLIENT_SECRET`: Client Secret from the OAuth 2.0 Client ID

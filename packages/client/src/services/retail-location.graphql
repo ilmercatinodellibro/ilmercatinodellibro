@@ -7,21 +7,24 @@ fragment Theme on Theme {
   }
 }
 
-fragment RetailLocation on RetailLocation {
-  id
-  name
-  fullAddress
-  phoneNumber
-  joinUsContent
-  instagramLink
-  facebookLink
-  whoAreWeContent
-
+fragment RetailLocationSettings on RetailLocation {
   buyRate
   sellRate
   payOffEnabled
   maxBookingDays
   warehouseMaxBlockSize
+}
+
+fragment RetailLocation on RetailLocation {
+  id
+  name
+  fullAddress
+  phoneNumber
+  instagramLink
+  facebookLink
+  infoPagesContent
+
+  ...RetailLocationSettings
 
   theme {
     ...Theme
@@ -37,5 +40,32 @@ query getRetailLocations {
 mutation updateRetailLocationTheme($input: UpdateRetailLocationThemeInput!) {
   updateRetailLocationTheme(input: $input) {
     ...RetailLocation
+  }
+}
+
+mutation updateRetailLocationSettings(
+  $input: UpdateRetailLocationSettingsInput!
+) {
+  updateRetailLocationSettings(input: $input) {
+    id # include the id so that the cache gets updated automatically
+    ...RetailLocationSettings
+  }
+}
+
+fragment StatisticsQueryResult on StatisticsQueryResult {
+  totalUsers
+  totalSoldBooks
+  totalRevenue
+  totalReservedBooks
+  totalRequestedBooks
+  totalPresentBooks
+  totalBooksWithProblems
+  settledTotal
+  settleableTotal
+}
+
+query retailLocationStatistics($retailLocationId: String!) {
+  retailLocationStatistics(retailLocationId: $retailLocationId) {
+    ...StatisticsQueryResult
   }
 }

@@ -25,10 +25,7 @@
       </q-th>
     </q-tr>
 
-    <q-tr
-      v-for="bookCopy in bookCopies as BookCopyDetailsWithStatus[]"
-      :key="bookCopy.id"
-    >
+    <q-tr v-for="bookCopy in filteredBookCopies" :key="bookCopy.id">
       <q-td auto-width />
 
       <q-td
@@ -38,20 +35,13 @@
         :colspan="getColspan(name)"
       >
         <template v-if="name === 'status'">
-          <book-copy-status-chip
-            :value="bookCopy.status ?? BookCopyStatuses.DONATED"
-          />
+          <book-copy-status-chip :book-copy="bookCopy" />
         </template>
 
         <template v-else-if="name === 'problems'">
-          <chip-button
-            :color="hasProblem(bookCopy) ? 'positive' : 'negative'"
-            :label="
-              t(
-                `manageUsers.booksMovementsDialog.${hasProblem(bookCopy) ? 'solveProblem' : 'reportProblem'}`,
-              )
-            "
-            @click="emit('openProblemsDialog', bookCopy)"
+          <problems-button
+            :book-copy="bookCopy"
+            @update-problems="() => emit('updateProblems')"
           />
         </template>
 
@@ -83,42 +73,49 @@ import { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
-import { hasProblem } from "src/helpers/book-copy";
+import { isAvailable } from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
-import { BookCopyDetailsWithStatus, BookCopyStatuses } from "src/models/book";
 import { useBookCopyService } from "src/services/book-copy";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import ProblemsButton from "./problems-button.vue";
 
 const { t } = useI18n();
 
-const { bookId, bookCopyColumns } = defineProps<{
-  bookCopyColumns: QTableColumn<BookCopyDetailsWithStatus>[];
-  tableWidth: number;
+const props = defineProps<{
+  bookCopyColumns: QTableColumn<BookCopyDetailsFragment>[];
   bookId: string;
+  showOnlyAvailable?: boolean | null;
 }>();
 
 const emit = defineEmits<{
-  openProblemsDialog: [bookCopy: BookCopyDetailsFragment];
   openHistory: [bookCopy: BookCopyDetailsFragment];
+  updateProblems: [];
 }>();
 
-const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsWithStatus>[]>(
-  () => [
-    {
-      name: "code",
-      field: "code",
-      label: t("book.code"),
-    },
-    ...bookCopyColumns.filter(({ name }) => name !== "isbn"),
-  ],
-);
+const tableWidth = 9;
+
+const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
+  {
+    name: "code",
+    field: "code",
+    label: t("book.code"),
+  },
+  ...props.bookCopyColumns.filter(
+    ({ name }) => !["isbn", "author", "subject", "title"].includes(name),
+  ),
+]);
 
 const { useGetBookCopiesQuery } = useBookCopyService();
 
-const { bookCopies, loading } = useGetBookCopiesQuery({
-  bookId,
-});
+const { bookCopies, loading } = useGetBookCopiesQuery(() => ({
+  bookId: props.bookId,
+}));
+
+const filteredBookCopies = computed(() =>
+  props.showOnlyAvailable
+    ? bookCopies.value.filter((copy) => isAvailable(copy))
+    : bookCopies.value,
+);
 
 function getColspan(columnName: string) {
   return columnName === "original-code" || columnName === "status" ? 2 : 1;

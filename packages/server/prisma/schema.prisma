@@ -38,36 +38,44 @@ enum Role {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
+  id            String    @id @default(uuid())
+  email         String    @unique
   // Prevents password field to be leaked in the GraphQL API
   /// @HideField()
   password      String
   firstname     String
   lastname      String
-  phoneNumber   String   @default("")
-  notes         String   @default("")
-  discount      Boolean  @default(false)
-  emailVerified Boolean  @default(false)
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  dateOfBirth   DateTime? @db.Timestamptz()
+  phoneNumber   String    @default("")
+  notes         String    @default("")
+  discount      Boolean   @default(false)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz()
+  locale        String?
+
+  delegate String?
 
   events            Event[]
   notifications     Notification[]
   pushSubscriptions PushSubscription[]
 
   // Any type of user
-  bookCopies          BookCopy[]    @relation("BookCopyOwner")
-  purchases           Sale[]        @relation("CopyPurchasedBy")
-  createdReservations Reservation[] @relation("ReservationMadeBy") // reservations can be made also by operators
-  deletedReservations Reservation[] @relation("ReservationDeletedBy")
-  reservations        Reservation[] @relation("ReservationUser") // Keeps track of the user for who the reservation was made
-  requestedBooks      BookRequest[] @relation("BookRequestUser")
-  createdBookRequests BookRequest[] @relation("BookRequestMadeBy") // requests can also, also be made by operators
-  deletedBookRequests BookRequest[] @relation("BookRequestDeletedBy")
-  ownedCarts          Cart[]        @relation("CartOwner")
+  federatedUsers      FederatedUser[]
+  bookCopies          BookCopy[]      @relation("BookCopyOwner")
+  purchases           Sale[]          @relation("CopyPurchasedBy")
+  createdReservations Reservation[]   @relation("ReservationMadeBy") // reservations can be made also by operators
+  deletedReservations Reservation[]   @relation("ReservationDeletedBy")
+  reservations        Reservation[]   @relation("ReservationUser") // Keeps track of the user for who the reservation was made
+  requestedBooks      BookRequest[]   @relation("BookRequestUser")
+  createdBookRequests BookRequest[]   @relation("BookRequestMadeBy") // requests can also, also be made by operators
+  deletedBookRequests BookRequest[]   @relation("BookRequestDeletedBy")
+  ownedCarts          Cart[]          @relation("CartOwner")
+  ownedReceipts       Receipt[]       @relation("ReceiptOwner")
 
   // Operator/admin relations
+  memberships          LocationMember[]
   settledCopies        BookCopy[]       @relation("CopySettledBy")
   returnedBookCopies   BookCopy[]       @relation("CopyReturnedBy")
   reimbursedBookCopies BookCopy[]       @relation("CopyReimbursedBy")
@@ -80,9 +88,22 @@ model User {
   processedSales       Sale[]           @relation("CopySoldBy")
   salesInCreatedCarts  Sale[]           @relation("SaleInCartOpenedBy")
   createdCarts         Cart[]           @relation("CartOperator")
-  memberships          LocationMember[]
-  ownedReceipts        Receipt[]        @relation("ReceiptOwner")
   triggeredReceipts    Receipt[]        @relation("ReceiptCreator")
+}
+
+enum FederationProvider {
+  FACEBOOK
+  GOOGLE
+}
+
+model FederatedUser {
+  provider       FederationProvider
+  providerUserId String             @map("provider_user_id")
+  userId         String             @map("user_id")
+  user           User               @relation(fields: [userId], references: [id])
+
+  @@unique([provider, userId])
+  @@unique([provider, providerUserId])
 }
 
 model Event {
@@ -92,6 +113,9 @@ model Event {
 
   ownerId String @map("owner_id")
   owner   User   @relation(fields: [ownerId], references: [id])
+
+  locationId String         @map("location_id")
+  location   RetailLocation @relation(fields: [locationId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
@@ -103,7 +127,7 @@ model Notification {
   userId  String    @map("user_id")
   user    User      @relation(fields: [userId], references: [id])
   eventId String    @map("event_id")
-  event   Event     @relation(fields: [eventId], references: [id])
+  event   Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
   readAt  DateTime? @map("read_at") @db.Timestamptz()
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
@@ -118,31 +142,32 @@ model PushSubscription {
 }
 
 model RetailLocation {
-  id                    String  @id
-  name                  String
-  registrationEnabled   Boolean @default(false) @map("registration_enabled")
-  payOffEnabled         Boolean @default(false) @map("pay_off_enabled")
-  fullAddress           String  @map("full_address")
-  email                 String  @unique
-  phoneNumber           String  @default("") @map("phone_number")
-  facebookLink          String  @default("") @map("facebook_link")
-  instagramLink         String  @default("") @map("instagram_link")
-  whoAreWeContent       String  @default("") @map("who_are_we_content")
-  joinUsContent         String  @default("") @map("join_us_content")
-  buyRate               Float   @default(30) @map("buy_rate")
-  sellRate              Float   @default(55) @map("sell_rate")
-  maxBookingDays        Int     @default(7) @map("max_booking_days")
-  warehouseMaxBlockSize Int     @default(10) @map("warehouse_max_block_size")
+  id                  String  @id
+  name                String
+  registrationEnabled Boolean @default(false) @map("registration_enabled")
+  payOffEnabled       Boolean @default(false) @map("pay_off_enabled")
+  fullAddress         String  @map("full_address")
+  email               String  @unique
+  phoneNumber         String  @default("") @map("phone_number")
+  facebookLink        String  @default("") @map("facebook_link")
+  instagramLink       String  @default("") @map("instagram_link")
+  infoPagesContent    Json?   @map("info_pages_content")
+
+  buyRate               Float @default(30) @map("buy_rate")
+  sellRate              Float @default(55) @map("sell_rate")
+  maxBookingDays        Int   @default(7) @map("max_booking_days")
+  warehouseMaxBlockSize Int   @default(10) @map("warehouse_max_block_size")
   /// @FieldType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', output: true })
   /// @FieldType({ name: 'ThemeInput', from: 'src/modules/retail-location/theme.args', input: true, match: '*Input' })
   /// @PropertyType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', namedImport: true, output: true, input: true })
   // We can't set the default to a string containing JSON due to prisma-nestjs-graphql limitations, so have to use dbgenerated(), using jsonb_ because Prisma uses jsonb for Json type
-  theme                 Json    @default(dbgenerated("jsonb_build_object('colors', jsonb_build_object('primary', '#798aa8', 'secondary', '#76e1a7', 'accent', '#c2664d'))"))
+  theme                 Json  @default(dbgenerated("jsonb_build_object('colors', jsonb_build_object('primary', '#798aa8', 'secondary', '#76e1a7', 'accent', '#c2664d'))"))
 
   books    Book[]           @relation("RetailLocationBooks")
   carts    Cart[]
   members  LocationMember[]
   receipts Receipt[]
+  events   Event[]
 }
 
 model LocationMember {
@@ -416,7 +441,7 @@ model BooksOnCourses {
 
 enum ReceiptType {
   PURCHASE
-  REGISTRATION
+  WITHDRAWAL
 }
 
 model Receipt {

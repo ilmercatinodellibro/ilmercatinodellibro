@@ -42,7 +42,6 @@
             // prettier-ignore
             rows as readonly BookWithStatus[]
           "
-          :rows-per-page-options="[0]"
           class="flex-delegate-height-management"
         >
           <template #body="{ row, cols }">
@@ -61,9 +60,13 @@
               </q-td>
             </q-tr>
             <q-tr v-else>
-              <q-td v-for="col in cols" :key="col.name">
+              <q-td
+                v-for="{ name, value, classes } in cols"
+                :key="name"
+                :class="classes"
+              >
                 <span
-                  v-if="col.name === 'status'"
+                  v-if="name === 'status'"
                   :class="`text-${
                     row.status === AcceptanceStatus.ACCEPTED
                       ? 'positive'
@@ -73,7 +76,10 @@
                   {{ $t(`salableBooks.acceptanceStatus.${row.status}`) }}
                 </span>
                 <span v-else>
-                  {{ col.value }}
+                  <q-tooltip v-if="['subject', 'author'].includes(name)">
+                    {{ value }}
+                  </q-tooltip>
+                  {{ value }}
                 </span>
               </q-td>
             </q-tr>
@@ -90,6 +96,7 @@ import { Notify, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { notifyError } from "src/helpers/error-messages";
 import { requiredRule, validISBN } from "src/helpers/rules";
 import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -116,18 +123,21 @@ const columns = computed<QTableColumn<BookWithStatus>[]>(() => [
     field: "authorsFullName",
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "subject",
     field: "subject",
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: "title",
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
 ]);
 
@@ -201,13 +211,22 @@ async function searchBook() {
   const foundBook = await fetchBookByISBN(searchQuery.value);
   loading.value = false;
   if (foundBook) {
+    if (acceptedBooks.value.length === 0) {
+      Notify.create({
+        color: "positive",
+        message: t("salableBooks.bringBooksToRetailLocation"),
+      });
+    }
     acceptedBooks.value.push(foundBook);
   } else {
     rejectedBooks.value.push({
       isbnCode: searchQuery.value,
       status: AcceptanceStatus.REJECTED,
     });
+    notifyError(t("salableBooks.notAccepted"));
   }
+
+  searchQuery.value = "";
 }
 </script>
 

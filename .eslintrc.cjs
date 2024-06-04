@@ -27,6 +27,13 @@ module.exports = {
       "error",
       { version: require("vue").version },
     ],
+
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        argsIgnorePattern: "^_",
+      },
+    ],
   },
 
   settings: {

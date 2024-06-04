@@ -1,6 +1,6 @@
 <template>
   <q-form
-    class="gap-16 items-center q-pt-md q-px-md row"
+    class="gap-16 items-center no-wrap q-pt-md q-px-md row"
     @submit="handleSubmit"
   >
     <q-input
@@ -52,5 +52,7 @@ function handleSubmit() {
   }
 
   emit("addBook", toEmit);
+
+  bookISBN.value = "";
 }
 </script>

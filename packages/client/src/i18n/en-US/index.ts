@@ -8,6 +8,7 @@ import { AvailableRouteNames } from "src/models/routes";
 import actions from "./actions";
 import auth from "./auth";
 import book from "./book";
+import bookErrors from "./book-errors";
 import contacts from "./contacts";
 import events from "./events";
 import general from "./general";
@@ -60,6 +61,7 @@ export default {
   feedbackType,
   retailLocation,
   warehouse,
+  bookErrors,
 
   common: {
     or: "Or",
@@ -163,6 +165,10 @@ export default {
     [AvailableRouteNames.SelectLocation]: "Select Location",
     [AvailableRouteNames.MyData]: "My Data",
     [AvailableRouteNames.Warehouse]: "Warehouse",
+    [AvailableRouteNames.Statistics]: "Statistics",
+    [AvailableRouteNames.Registration]: "Registration",
+    [AvailableRouteNames.RegistrationSent]: "Registration sent",
+    [AvailableRouteNames.FAQ]: "FAQ",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",

@@ -4,7 +4,9 @@
       I didn't use k-dialog-card because it didn't
       have any width that satisfies this dialog's
     -->
-    <q-card class="column max-height-600 max-height-fullscreen no-wrap">
+    <q-card
+      class="column max-height-600 max-height-fullscreen min-height-400 min-width-420 no-wrap"
+    >
       <q-card-section class="text-h6 text-primary">
         {{ $t("manageUsers.receiptsDialog.title") }}
       </q-card-section>
@@ -13,8 +15,18 @@
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
         <!-- <receipts-table :receipts="requestReceipts" type="REQUEST" /> -->
-        <receipts-table :receipts="registrationReceipts" type="REGISTRATION" />
-        <receipts-table :receipts="purchaseReceipts" type="PURCHASE" />
+        <receipts-table
+          :no-data-label="$t('manageUsers.receiptsDialog.noRegistration')"
+          :receipts="registrationReceipts"
+          class="flex-grow"
+          type="WITHDRAWAL"
+        />
+        <receipts-table
+          :no-data-label="$t('manageUsers.receiptsDialog.noPurchase')"
+          :receipts="purchaseReceipts"
+          class="flex-grow"
+          type="PURCHASE"
+        />
       </q-card-section>
       <q-separator />
       <q-card-actions align="right">
@@ -50,7 +62,7 @@ const { receipts } = useGetReceiptsQuery(() => ({
 //   receipts.value.filter(({ type }) => type === "REQUEST"),
 // )
 const registrationReceipts = computed(() =>
-  receipts.value.filter(({ type }) => type === "REGISTRATION"),
+  receipts.value.filter(({ type }) => type === "WITHDRAWAL"),
 );
 const purchaseReceipts = computed(() =>
   receipts.value.filter(({ type }) => type === "PURCHASE"),

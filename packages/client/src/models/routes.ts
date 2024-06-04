@@ -18,4 +18,8 @@ export enum AvailableRouteNames {
   WhoWeAre = "who-we-are",
   JoinUs = "join-us",
   Warehouse = "warehouse",
+  Statistics = "statistics",
+  Registration = "registration",
+  RegistrationSent = "registration-sent",
+  FAQ = "faq",
 }

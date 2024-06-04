@@ -13,6 +13,14 @@
     >
       <template #left>
         <q-btn
+          v-if="showBackToLocations"
+          :icon="mdiArrowLeft"
+          color="accent"
+          :label="t('auth.backToLocations')"
+          :to="{ name: AvailableRouteNames.SelectLocation }"
+        />
+
+        <q-btn
           v-if="showBackToLogin"
           :icon="mdiArrowLeft"
           color="accent"
@@ -39,6 +47,14 @@
         :label="t('routesNames.contacts')"
         :to="{ name: AvailableRouteNames.Contacts }"
       />
+      <q-btn
+        v-if="isAuthenticated"
+        flat
+        stretch
+        :label="t('routesNames.faq')"
+        :to="{ name: AvailableRouteNames.FAQ }"
+      />
+      <language-dropdown-btn v-if="!isAuthenticated" />
     </k-toolbar>
   </q-header>
 </template>
@@ -48,7 +64,7 @@ import { mdiArrowLeft } from "@quasar/extras/mdi-v7";
 import { Screen } from "quasar";
 import { computed, provide } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
 import { provideHeaderFilters } from "src/composables/header-features/use-header-filters";
 import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
@@ -57,6 +73,7 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import kToolbar from "./k-toolbar.vue";
+import LanguageDropdownBtn from "./language-dropdown-btn.vue";
 
 const { isDrawerOpen, showLateralDrawer } = useLateralDrawer();
 const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
@@ -67,15 +84,17 @@ const {
   selectedFilter,
 } = provideHeaderFilters();
 const { headerName } = provideHeaderName();
-const { user } = useAuthService();
+const { user, isAuthenticated } = useAuthService();
 const isLayoutHeaderXs = computed(() => Screen.lt.sm);
 provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 const { t } = useI18n();
 
-const router = useRouter();
+const route = useRoute();
+const showBackToLocations = computed(
+  () => route.name === AvailableRouteNames.Login && !user.value,
+);
 const showBackToLogin = computed(
-  () =>
-    router.currentRoute.value.name !== AvailableRouteNames.Login && !user.value,
+  () => route.name !== AvailableRouteNames.Login && !user.value,
 );
 </script>
 

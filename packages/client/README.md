@@ -53,3 +53,15 @@ When enabled, it needs some configuration to work. Here are the steps to follow:
   - `FIREBASE_PROJECT_ID`: `projectId`
 
 Also see [Server README | Push notifications](../server/README.md#push-notifications) for setting up and configuring the server.
+
+## Social login
+
+This feature can be enabled/disabled through some environment variables for related providers in the `.env` file. You can leave some or all of the providers as disabled, for ease of setting up the environment. See the `.env.example` file for the list of available providers and their related environment variables.
+
+When a specific provider is enabled, it needs some configuration on the server app to work. See [Server README | Social login](../server/README.md#social-login) for setting up and configuring the server.
+
+## Adding Operators
+
+When going into the `Roles and Permissions` page, new Operators can be added by pressing onto the **Add new Operator** button on the top-right: a dialog with a text field to insert the e-mail address of the person that the Admin wants to add to the list of Operators for the selected Retail Location will appear.
+
+> **Note:** When clicking onto the text field a list of the addresses of the currently registered Customers (<u>with a verified e-mail</u>) will be shown, <u>but an address that isn't present in this list **can still be set** by typing it in and then pressing enter</u>.

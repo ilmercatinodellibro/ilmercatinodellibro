@@ -9,6 +9,7 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { CloseCode, WebSocket } from "graphql-ws";
+import { authConfiguration } from "src/config/auth";
 import { databaseConfiguration } from "src/config/database";
 import { emailConfiguration } from "src/config/email";
 import { QueueConfiguration, queueConfiguration } from "src/config/queue";
@@ -36,6 +37,7 @@ import { PushNotificationModule } from "./modules/push-notification/push-notific
 import { ReservationModule } from "./modules/reservation/reservation.module";
 import { RetailLocationModule } from "./modules/retail-location/retail-location.module";
 import { SaleModule } from "./modules/sale/sale.module";
+import { SchoolModule } from "./modules/school/school.module";
 import { UserModule } from "./modules/user/user.module";
 
 @Module({
@@ -44,6 +46,7 @@ import { UserModule } from "./modules/user/user.module";
       isGlobal: true,
       load: [
         rootConfiguration,
+        authConfiguration,
         databaseConfiguration,
         emailConfiguration,
         queueConfiguration,
@@ -148,6 +151,7 @@ import { UserModule } from "./modules/user/user.module";
     UserModule,
     ProblemModule,
     ReceiptModule,
+    SchoolModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }, DateScalar],
 })

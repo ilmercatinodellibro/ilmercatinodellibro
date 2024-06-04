@@ -1,3 +1,5 @@
+import { Role } from "src/@generated/graphql";
+
 export default {
   mainNavigation: "Main",
   username: "Username",
@@ -28,7 +30,7 @@ export default {
   accent: "Accent",
   colorPicker: "Color Picker",
   removeUserMessage:
-    "You are removing this contact from the platform and it won’t be able to access it anymore. Do you want to proceed?",
+    "You are removing this user from the list of Operators for this Retail Location. Do you wish to proceed?",
   language: "Language",
   myData: "My Data",
   warehouse: "Warehouse",
@@ -55,6 +57,7 @@ export default {
   },
   joinUs: "Join us",
   whoWeAre: "Who we are",
+  faq: "FAQ",
   loading: "Loading...",
   settings: {
     resetToolTip:
@@ -64,9 +67,27 @@ export default {
     reservationDays: "Number of Days for Reservation",
     maxBooksDimension:
       "Max dimension of the book stacks to allow for fragmentation",
+    payOffEnabled: "Enable the possibility to perform payoffs",
+    updateRatesConfirmTitle: "Update the purchase/sale rate?",
+    updateRatesConfirmMessage:
+      "WARNING: you are updating the purchase and/or sale rate; make sure that this is ONLY done at the beginning or at the end of the Mercatino's activity period.",
     resetMessage:
       "You are performing the reset of all the system data to prepare the software for the following year's activities. Do you wish to proceed?",
     resetButton: "Perform annual reset",
     resetConfirmButton: "Perform reset",
+  },
+  role: "Role",
+  rolesAndPermissions: {
+    filters: {
+      // customer: "Customers",
+      OPERATOR: "Operators",
+      ADMIN: "Administrators",
+    } satisfies Record<Role, string>,
+    addNewOperator: {
+      title: "Add Operator",
+      message:
+        "Operators have the permissions to access the management pages (Warehouse, Catalog, Users and Movements) and their functionalities.",
+    },
+    operatorAdded: "The operator was successfully added.",
   },
 };

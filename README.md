@@ -67,3 +67,53 @@ $ pnpm serve
 # You can now access the app on the URL specified into .env file
 # If you're serving it locally, you can access it at http://localhost:3000 by default
 ```
+
+## Production Setup
+
+This section is meant to describe the setup steps for a production installation of the software or anyway the installation on a machine that needs to be configured from scratch.
+It will list the minimal requirements needed to be able to install the code and make it run in production mode.
+
+1. Install [Node.js](https://nodejs.org/en/download/prebuilt-binaries) version 18.20(LTS) or 20.12(LTS) on the server machine.
+   1. Notice that if you do not have access to a graphical UI but just to a CLI, it is better to follow [these instructions](https://nodejs.org/en/download/package-manager) instead.
+2. Verify Node.js installation by running `node -v` in the terminal. It shall return its version.
+3. From an elevated terminal (or using the `sudo` prefix on Linux/Mac), run `corepack enable`. This will make sure that Node.js can install `pnpm` autonomously.
+4. Install [Docker](https://docs.docker.com/get-docker/) according to the OS the app will run on.
+5. Make sure Docker is up and running properly. In the terminal run `docker -v` and it shall return the installed Docker version.
+6. We recommend to _not_ install Git on the production server in order to minimize installed apps.
+7. Download the code of this repository, then copy and move it into the desired location in the server machine. Use either `ftp` client or a `.zip` file for this.
+8. Once the files have been correctly uploaded to the server, update the server package `.env` file.
+   1. In the terminal run cd `packages/server`.
+   2. Copy and rename the file `.env.example` to `.env`.
+   3. Open the `.env` file in edit mode.
+   4. Replace `NODE_ENV=development` with `NODE_ENV=production`.
+   5. Use a tool like [this one](https://generate-random.org/encryption-key-generator) to generate a 32byte secret string (or also run `openssl rand -base64 32` command if installed in your machine or on the server).
+   6. Replace `APPLICATION_SECRET=secret` with `APPLICATION_SECRET=the_secret_generated_in_previous_step`.
+   7. Increase `TOKEN_EXPIRATION` however you like. Suggest `4h` or `8h`.
+   8. If a Facebook or Google login has been created to be linked to the app, set the correct `SOCIAL_CLIENT_ID` and respective `SOCIAL_CLIENT_SECRET`. To create a social app and get the necessary configurations, please follow the [instructions listed here](./packages/server/README.md#social-login).
+   9. Set the preferred `SERVER_PORT` according to your needs.
+   10. Set `DB_USER` and `DB_PASS` to a more secure value. Remember that if you change these after the database in docker has been created and seeded, the app may no longer be able to connect to the database.
+   11. Be sure to replace the values of all the different `MAIL_*` entries with the values provided you by your email provider.
+   12. Set `PUSH_NOTIFICATIONS_DRIVER=local` to `PUSH_NOTIFICATIONS_DRIVER=void`
+   13. Set `OS_FILESYSTEM_PATH=path` to the folder path that you like.
+   14. Save and close this file.
+9. Now update the client package `.env` file as well.
+   1. Preferably in another terminal, `cd` into `packages/client`.
+   2. Copy and rename the file `.env.example` to `.env`.
+   3. Open the `.env` file in edit mode.
+   4. Replace `DOMAIN="localhost:3000"` with the domain of your application. It should be `https://www.ilmercatinodellibro.com/`.
+   5. If you have configured some options for social login, set `SOCIAL_LOGIN_ENABLED=true` as well as either (or both) `FACEBOOK_LOGIN_ENABLED=true` and `GOOGLE_LOGIN_ENABLED=true` according to your needs.
+   6. Save and close this file.
+10. In the terminal, go back to the root of the code, where this file is located.
+11. From there run `pnpm i` and wait until it completes.
+12. Go back to the server folder `cd packages/server` and in there run:
+    1. `pnpm generate` to create GraphQL types.
+    2. `pnpm db:start` to crate Docker container for PostgreDB.
+    3. `pnpm prisma migrate reset -f` to reset database, run migrations and create the structure of the DB and finally seed the DB. Do not run this command when Mercatino is in production, or all the data will be lost!
+    4. `pnpm build` to prepare the server app
+    5. Now follow instruction inside the [server's README.md](./packages/server/README.md#2-import-books) to import books and schools.
+    6. Now run `pnpm start:prod` to start the application of the server.
+13. Now, while the server is running in the other terminal, in the second opened terminal return to the `packages/client` directory:
+    1. Run `pnpm generate`.
+    2. Run `pnpm build`. This should copy the just built client into the server folder and thus it should already be accessible since the server is running.
+14. Make sure your web server is publishing the app on the correct port.
+15. Bonus tip: in order to be sure that the server is always running or that at least it gets restarted, we suggest to install and configure [PM2](https://www.npmjs.com/package/pm2) in order to restart the server process should it crash.

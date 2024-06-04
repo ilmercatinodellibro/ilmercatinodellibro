@@ -84,6 +84,18 @@ const routes: RouteRecordRaw[] = [
         component: () => import("src/pages/login.vue"),
         props: ({ query }) => ({ emailVerified: !!query.emailVerified }),
       },
+
+      // The server will redirect to this route after dealing with the social provider
+      ...(process.env.SOCIAL_LOGIN_ENABLED === "true"
+        ? [
+            {
+              path: "login/social",
+              name: "social-login",
+              component: () => import("src/pages/social-login-redirect.vue"),
+            },
+          ]
+        : []),
+
       {
         path: "registration",
         name: "registration",
@@ -113,7 +125,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: AvailableRouteNames.RegisterWithToken,
         name: AvailableRouteNames.RegisterWithToken,
-        component: () => import("src/pages/register-with-token.vue"),
+        component: () => import("src/pages/register.vue"),
         props: ({ query }) => ({
           token: query.token as string,
           email: query.email as string,
@@ -130,6 +142,11 @@ const routes: RouteRecordRaw[] = [
       { path: "", redirect: { name: AvailableRouteNames.Home } },
 
       {
+        path: "faq",
+        name: AvailableRouteNames.FAQ,
+        component: () => import("src/pages/faq.vue"),
+      },
+      {
         path: "home",
         name: AvailableRouteNames.Home,
         component: () => import("src/pages/home.vue"),
@@ -143,6 +160,12 @@ const routes: RouteRecordRaw[] = [
         path: "roles-and-permissions",
         name: AvailableRouteNames.RolesAndPermissions,
         component: () => import("src/pages/roles-and-permissions.vue"),
+        beforeEnter: redirectIfNotAdmin,
+      },
+      {
+        path: "statistics",
+        name: AvailableRouteNames.Statistics,
+        component: () => import("src/pages/statistics-page.vue"),
         beforeEnter: redirectIfNotAdmin,
       },
       {
@@ -189,6 +212,7 @@ const routes: RouteRecordRaw[] = [
   // but you can also remove it
   {
     path: "/:catchAll(.*)*",
+    name: "error",
     component: ErrorNotFoundPage,
   },
 ];

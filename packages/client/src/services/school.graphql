@@ -1,0 +1,27 @@
+fragment School on School {
+  code
+  name
+  address
+}
+
+query getSchools($retailLocationId: String!) {
+  schools(retailLocationId: $retailLocationId) {
+    ...School
+  }
+}
+
+fragment SchoolCourse on SchoolCourse {
+  grade
+  id
+  schoolCode
+  section
+  school {
+    ...School
+  }
+}
+
+query getSchoolCourses($schoolCodes: [String!]!) {
+  schoolCourses(schoolCodes: $schoolCodes) {
+    ...SchoolCourse
+  }
+}

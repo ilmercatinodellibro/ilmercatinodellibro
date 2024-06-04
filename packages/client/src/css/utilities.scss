@@ -5,6 +5,8 @@ $additional-colors: (
   event-error: #f44336,
   event-warning: $warning,
   event-info: #2196f3,
+
+  facebook-blue: #1877f2,
 );
 
 @each $color-name, $color in $additional-colors {
@@ -107,7 +109,8 @@ $line-heights-list: 16, 20, 28, 50, 75;
   }
 }
 
-$widths-list: 0, 24, 32, 160, 180, 200, 250, 315, 360, 420, 560, 600, 700, 1024;
+$widths-list: 0, 24, 32, 160, 180, 200, 250, 260, 315, 360, 420, 560, 600, 700,
+  1024;
 
 @each $width in $widths-list {
   .width-#{$width} {
@@ -124,7 +127,7 @@ $widths-list: 0, 24, 32, 160, 180, 200, 250, 315, 360, 420, 560, 600, 700, 1024;
 }
 
 // heights
-$heights-list: 0, 24, 48, 52, 600;
+$heights-list: 0, 24, 48, 52, 130, 400, 600;
 
 @each $height in $heights-list {
   .height-#{$height} {
@@ -174,6 +177,10 @@ $heights-list: 0, 24, 48, 52, 600;
 // Use this class every time you want a string to line break where you want using the special "\n" character
 .white-space-pre-wrap {
   white-space: pre-wrap;
+}
+
+.text-wrap {
+  white-space: wrap !important;
 }
 
 .sticky {

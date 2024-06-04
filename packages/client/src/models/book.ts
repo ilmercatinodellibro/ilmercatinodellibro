@@ -1,4 +1,5 @@
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import { BookQueryFilter } from "src/@generated/graphql";
+import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
 
 export const enum BookCopyStatuses {
   LOST = "lost",
@@ -8,32 +9,29 @@ export const enum BookCopyStatuses {
   NOT_AVAILABLE = "not-available",
 }
 
-export const enum BookCopyFilters {
-  RESERVED = "reserved",
-  AVAILABLE = "available",
-  SOLD = "sold",
-  WITH_PROBLEM = "with-problem",
+enum BookUtilityCategory {
+  LOW_UTILITY,
+  MEDIUM_UTILITY,
+  HIGH_UTILITY,
 }
 
-export type BookCopyStatus =
-  | BookCopyStatuses
-  | Exclude<BookCopyFilters, "with-problem" | "reserved">;
+export type UtilityCategory = keyof typeof BookUtilityCategory;
 
-export type BookCopyDetailsWithStatus = BookCopyDetailsFragment & {
-  status?: BookCopyStatus;
-};
+export type BookCompleteFilters = Exclude<
+  keyof BookQueryFilter,
+  "search" | "schoolCodes" | "schoolCourseIds"
+>;
+/*| UtilityCategory*/
 
 export interface SchoolFilters {
-  schoolCodes: string[];
-  courses: string[];
+  selectedSchoolCodes: string[];
+  selectedSchoolCourseIds: string[];
 }
 
-export const COURSE_YEARS = [1, 2, 3, 4, 5] as const;
-
-export interface CourseDetails {
-  year: (typeof COURSE_YEARS)[number];
-  school: string;
-  course: string;
+export interface TableFilters {
+  filters: string[];
+  searchQuery: string;
+  schoolFilters?: SchoolFilters;
 }
 
 export enum BooksTab {
@@ -43,16 +41,9 @@ export enum BooksTab {
   PURCHASED = "purchased",
 }
 
-interface Settings {
-  maxBooksDimension: number;
-  purchaseRate: number;
-  reservationDays: number;
-  saleRate: number;
-}
-
 export type SettingsUpdate =
   | {
       type: "save";
-      settings: Settings;
+      settings: RetailLocationSettingsFragment;
     }
   | { type: "reset" };

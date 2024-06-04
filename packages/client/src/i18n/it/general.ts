@@ -1,3 +1,5 @@
+import { Role } from "src/@generated/graphql";
+
 export default {
   mainNavigation: "Principale",
   username: "Nome utente",
@@ -28,7 +30,7 @@ export default {
   accent: "Accento",
   colorPicker: "Selettore colore",
   removeUserMessage:
-    "Stai rimuovendo questo contatto dalla piattaforma e non sarà più in grado di accedervi. Vuoi procedere?",
+    "Stai rimuovendo questo utente dalla lista degli Operatori per questa Sede. Vuoi procedere?",
   language: "Lingua",
   myData: "I Miei Dati",
   warehouse: "Magazzino",
@@ -55,6 +57,7 @@ export default {
   },
   joinUs: "Unisciti a noi",
   whoWeAre: "Chi siamo",
+  faq: "FAQ",
   loading: "Caricamento in corso...",
   settings: {
     resetToolTip:
@@ -64,9 +67,27 @@ export default {
     reservationDays: "Numero di Giorni per Prenotazione",
     maxBooksDimension:
       "Dimensione max dei blocchi di libri da inserire per permettere la frammentazione",
+    payOffEnabled: "Abilita la possibilità di effettuare liquidazioni",
+    updateRatesConfirmTitle: "Aggiornare l'aliquota di acquisto/vendita?",
+    updateRatesConfirmMessage:
+      "ATTENZIONE: stai aggiornando le aliquote di acquisto e/o vendita; assicurati che questo sia effettuato solamente all'inizio o alla fine del periodo di attività del Mercatino.",
     resetMessage:
       "Stai effettuando il reset di tutti i dati di sistema per predisporre il software alle attività dell'anno successivo. Vuoi procedere?",
     resetButton: "Effettua reset annuale",
     resetConfirmButton: "Effettua reset",
+  },
+  role: "Ruolo",
+  rolesAndPermissions: {
+    filters: {
+      // customer: "Clienti",
+      OPERATOR: "Operatori",
+      ADMIN: "Amministratori",
+    } satisfies Record<Role, string>,
+    addNewOperator: {
+      title: "Aggiungi Operatore",
+      message:
+        "Gli operatori hanno i permessi per accedere alle pagine di gestione (Magazzino, Catalogo, Utenti e Movimenti) e alle loro funzionalità.",
+    },
+    operatorAdded: "L'operatore è stato aggiunto con successo.",
   },
 };

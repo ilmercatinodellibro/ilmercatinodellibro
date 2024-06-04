@@ -5,7 +5,10 @@ fragment CartSummary on Cart {
 fragment BookWithAvailableCopies on Book {
   ...BookSummary
   copies(isAvailable: true) {
-    ...BookCopySummary
+    ...BookCopyDetails
+    owner {
+      ...UserSummary
+    }
   }
 }
 
@@ -19,6 +22,7 @@ fragment Cart on Cart {
 mutation openCart($input: OpenCartInput!) {
   openCart(input: $input) {
     ...Cart
+    createdAt
   }
 }
 

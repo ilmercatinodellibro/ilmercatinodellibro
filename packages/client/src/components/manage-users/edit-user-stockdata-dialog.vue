@@ -1,5 +1,10 @@
 <template>
-  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    :persistent="tab === 'in-retrieval' && booksToRegister.length > 0"
+    full-width
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :cancel-label="$t('common.close')"
       :title="
@@ -47,8 +52,17 @@
           <dialog-table
             :rows="booksToRegister"
             :columns="booksToRegisterColumns"
+            :loading="loading"
             class="col"
           >
+            <template #body-cell-author="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
             <template #body-cell-status="{ value }">
               <q-td>
                 <status-chip :value="value" />
@@ -89,11 +103,19 @@
           class="column flex-delegate-height-management no-wrap q-pa-none"
         >
           <dialog-table
-            :rows="copiesInStock"
+            :rows="copiesInStock.filter(({ donatedAt }) => donatedAt === null)"
             :columns="copiesInStockColumns"
             :loading="inStockLoading"
             class="col"
           >
+            <template #body-cell-author="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
+            <template #body-cell-subject="{ value, col }">
+              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            </template>
+
             <template #body-cell-status="{ value }">
               <q-td>
                 <status-chip :value="value" />
@@ -101,21 +123,8 @@
             </template>
 
             <template #body-cell-utility="{ value }">
-              <q-td>
+              <q-td class="text-center">
                 <utility-chip :utility="value" />
-              </q-td>
-            </template>
-
-            <template #body-cell-actions="{ row }">
-              <!-- TODO: hide it when the book has been lost -->
-              <q-td>
-                <chip-button
-                  :label="
-                    $t('manageUsers.payOffUserDialog.returnOptions.return')
-                  "
-                  color="primary"
-                  @click="returnBook(row)"
-                />
               </q-td>
             </template>
           </dialog-table>
@@ -132,6 +141,8 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
+import { discountedPrice, isAvailable } from "src/helpers/book-copy";
+import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
   BookCopyDetailsFragment,
@@ -153,6 +164,7 @@ import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
 import RetrieveAllBooksDialog from "./retrieve-all-books-dialog.vue";
 import StatusChip from "./status-chip.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 const props = defineProps<{
   userData: CustomerFragment;
@@ -166,9 +178,13 @@ const { t } = useI18n();
 
 const { createBookCopies } = useCreateBookCopiesMutation();
 
-const tab = ref("in-retrieval");
+type Tab = "in-retrieval" | "retrieved";
+
+const tab = ref<Tab>("in-retrieval");
 
 const booksToRegister = ref<BookSummaryFragment[]>([]);
+
+const loading = ref(false);
 
 const { selectedLocation } = useRetailLocationService();
 const { bookCopiesByOwner: copiesInStock, loading: inStockLoading } =
@@ -197,31 +213,12 @@ function getCommonColumns<
 
   return [
     {
-      label: t("book.fields.author"),
-      field: getField("authorsFullName"),
-      name: "author",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-    },
-    {
-      label: t("book.fields.subject"),
-      field: getField("subject"),
-      name: "subject",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-    },
-    {
-      label: t("book.fields.status"),
-      field: getField(({ meta }) => meta.isAvailable),
-      name: "status",
-      align: "left",
-    },
-    {
       label: t("book.fields.title"),
       field: getField("title"),
       name: "title",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+      classes: "text-wrap",
     },
     {
       label: t("book.fields.publisher"),
@@ -236,7 +233,7 @@ function getCommonColumns<
       name: "price",
       headerClasses: "text-center",
       align: "left",
-      format: (val: number) => `${val.toFixed(2)} €`,
+      format: (val: number) => discountedPrice(val, "sell"),
     },
     {
       label: t("book.fields.utility"),
@@ -255,6 +252,28 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       name: "isbn",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
+    },
+    {
+      label: t("book.fields.author"),
+      field: "authorsFullName",
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
+    },
+    {
+      label: t("book.fields.subject"),
+      field: "subject",
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
+    },
+    {
+      label: t("book.fields.status"),
+      field: ({ meta }) => meta.isAvailable,
+      name: "status",
+      align: "left",
     },
 
     ...getCommonColumns("book"),
@@ -287,6 +306,30 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       field: "originalCode",
       name: "original-code",
       align: "left",
+      format: (code?: string) => code ?? "/",
+    },
+    {
+      label: t("book.fields.author"),
+      field: ({ book }) => book.authorsFullName,
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
+    },
+    {
+      label: t("book.fields.subject"),
+      field: ({ book }) => book.subject,
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
+    },
+    {
+      label: t("book.fields.status"),
+      field: isAvailable,
+      name: "status",
+      align: "left",
+      classes: "max-width-160 ellipsis",
     },
 
     ...getCommonColumns("copy"),
@@ -296,9 +339,7 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
 async function addBookToBeRegistered(bookISBN: string) {
   const book = await fetchBookByISBN(bookISBN);
   if (!book) {
-    Dialog.create({
-      message: t("manageUsers.inStockDialog.errorMessage"),
-    });
+    notifyError(t("manageUsers.inStockDialog.errors.noBook", [bookISBN]));
     return;
   }
 
@@ -309,62 +350,69 @@ function retrieveAllBooks() {
   Dialog.create({
     component: RetrieveAllBooksDialog,
   }).onOk(async (/* shouldPrint */) => {
-    // TODO: Handle shouldPrint
+    try {
+      // TODO: Handle shouldPrint
 
-    const { cache, data: newBookCopies } = await createBookCopies({
-      input: {
-        ownerId: props.userData.id,
-        retailLocationId: selectedLocation.value.id,
-        bookIds: booksToRegister.value.map((book) => book.id),
-      },
-    });
+      loading.value = true;
 
-    cache.updateFragment(
-      {
-        id: cache.identify(props.userData),
-        fragment: CustomerFragmentDoc,
-        fragmentName: "Customer",
-      },
-      (data) => {
-        if (!data) {
-          return;
-        }
-
-        return {
-          ...data,
-          booksInStock: data.booksInStock + booksToRegister.value.length,
-        };
-      },
-    );
-
-    cache.updateQuery(
-      {
-        query: GetBookCopiesByOwnerDocument,
-        variables: {
-          userId: props.userData.id,
+      const { cache, data: newBookCopies } = await createBookCopies({
+        input: {
+          ownerId: props.userData.id,
           retailLocationId: selectedLocation.value.id,
+          bookIds: booksToRegister.value.map((book) => book.id),
         },
-      },
-      (data) => {
-        if (!data) {
-          return;
-        }
+      });
 
-        return {
-          ...data,
-          bookCopiesByOwner: [...data.bookCopiesByOwner, ...newBookCopies],
-        };
-      },
-    );
+      cache.updateFragment(
+        {
+          id: cache.identify(props.userData),
+          fragment: CustomerFragmentDoc,
+          fragmentName: "Customer",
+        },
+        (data) => {
+          if (!data) {
+            return;
+          }
 
-    evictQuery(cache, GetReceiptsDocument, {
-      userId: props.userData.id,
-      retailLocationId: selectedLocation.value.id,
-    });
-    cache.gc();
+          return {
+            ...data,
+            booksInStock: data.booksInStock + booksToRegister.value.length,
+          };
+        },
+      );
 
-    booksToRegister.value = [];
-    tab.value = "retrieved";
+      cache.updateQuery(
+        {
+          query: GetBookCopiesByOwnerDocument,
+          variables: {
+            userId: props.userData.id,
+            retailLocationId: selectedLocation.value.id,
+          },
+        },
+        (data) => {
+          if (!data) {
+            return;
+          }
+
+          return {
+            ...data,
+            bookCopiesByOwner: [...data.bookCopiesByOwner, ...newBookCopies],
+          };
+        },
+      );
+
+      evictQuery(cache, GetReceiptsDocument, {
+        userId: props.userData.id,
+        retailLocationId: selectedLocation.value.id,
+      });
+      cache.gc();
+    } catch {
+      notifyError(t("manageUsers.inStockDialog.errors.retrieval"));
+    } finally {
+      loading.value = false;
+      booksToRegister.value = [];
+      tab.value = "retrieved";
+    }
   });
 }
 
@@ -378,11 +426,6 @@ function openDeleteBookDialog(bookIndex: number) {
   }).onOk(() => {
     booksToRegister.value.splice(bookIndex, 1);
   });
-}
-
-function returnBook(book: BookSummaryFragment) {
-  // FIXME: return the book to the Mercatino
-  book;
 }
 </script>
 

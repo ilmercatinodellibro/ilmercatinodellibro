@@ -9,7 +9,7 @@
     >
       <q-card-section class="gap-16 items-center no-wrap q-pa-md row">
         <q-input
-          v-model="totalSoldBooks"
+          :model-value="soldCopies.length"
           :label="$t('manageUsers.payOffUserDialog.soldBooksCountLabel')"
           outlined
           readonly
@@ -41,11 +41,8 @@
           :loading="bookLoading"
           :rows="
             // We handle the group header in the #body slot, so it's safe to use a type that is different than the columns definition
-            // prettier-ignore
             tableRows as readonly BookCopyDetailsFragment[]
           "
-          :rows-per-page-options="[0]"
-          hide-bottom
         >
           <template #header-cell-buy-price>
             <table-header-with-info
@@ -68,9 +65,10 @@
               class="bg-grey-1"
               no-hover
             >
-              <q-td>
+              <q-td auto-width>
                 <q-checkbox
                   v-if="row.id === Titles.InStock"
+                  :disable="selectableRows.length === 0"
                   :model-value="rowsSelectionStatus"
                   dense
                   @update:model-value="swapAllRows()"
@@ -99,7 +97,9 @@
                     />
                     <q-btn
                       :label="
-                        $t('manageUsers.payOffUserDialog.returnOptions.repay')
+                        $t(
+                          'manageUsers.payOffUserDialog.returnOptions.reimburse',
+                        )
                       "
                       outline
                       @click="reimburseBooks(selectedRows)"
@@ -122,25 +122,35 @@
                 </span>
               </q-td>
             </q-tr>
+
+            <q-tr v-else-if="row.id === 'EMPTY'" no-hover>
+              <q-td auto-width />
+
+              <q-td class="text-left" colspan="11">
+                {{ t("bookErrors.noBookCopy") }}
+              </q-td>
+            </q-tr>
+
             <q-tr v-else>
-              <q-td v-for="col in cols" :key="col.name">
+              <q-td v-for="col in cols" :key="col.name" :class="col.classes">
                 <!--
                   Since we can't use #body-cell-[column-name] because we're using
                   the #body slot, we have to use v-if on the col.name instead
                 -->
                 <q-checkbox
                   v-if="col.name === 'select' && selectableRows.includes(row)"
-                  :model-value="selectedRows.includes(row)"
+                  :model-value="
+                    selectedRows.map(({ id }) => id).includes(row.id)
+                  "
                   dense
                   @update:model-value="swapRow(row)"
                 />
-                <status-chip
-                  v-else-if="col.name === 'status'"
-                  :value="col.value"
-                />
+
                 <q-btn
                   v-else-if="
-                    col.name === 'actions' && ownedCopies.includes(row)
+                    col.name === 'actions' &&
+                    ownedCopies.includes(row) &&
+                    !['donated', 'reimbursed'].includes(getStatus(row))
                   "
                   :icon="mdiDotsVertical"
                   dense
@@ -150,6 +160,7 @@
                 >
                   <q-menu auto-close>
                     <q-item
+                      v-if="selectableRows.includes(row)"
                       class="items-center"
                       clickable
                       @click="returnBooks([row])"
@@ -159,6 +170,7 @@
                       }}
                     </q-item>
                     <q-item
+                      v-if="selectableRows.includes(row)"
                       class="items-center"
                       clickable
                       @click="donateBooks([row])"
@@ -173,10 +185,13 @@
                       @click="reimburseBooks([row])"
                     >
                       {{
-                        $t("manageUsers.payOffUserDialog.returnOptions.repay")
+                        $t(
+                          "manageUsers.payOffUserDialog.returnOptions.reimburse",
+                        )
                       }}
                     </q-item>
                     <q-item
+                      v-if="selectableRows.includes(row)"
                       class="items-center"
                       clickable
                       @click="reportProblems([row])"
@@ -186,6 +201,9 @@
                   </q-menu>
                 </q-btn>
                 <span v-else>
+                  <q-tooltip v-if="['subject', 'author'].includes(col.name)">
+                    {{ col.value }}
+                  </q-tooltip>
                   {{ col.value }}
                 </span>
               </q-td>
@@ -197,18 +215,20 @@
       <template #card-actions>
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
         <q-btn
+          :disable="selectableRows.length === 0"
           outline
           :label="$t('manageUsers.payOffUserDialog.returnAndDonate')"
-          @click="returnAllBooks('return-and-donate')"
+          @click="returnAllBooks('REFUND')"
         />
         <q-btn
           color="green"
+          :disable="selectableRows.length === 0"
           :label="
             $t('manageUsers.payOffUserDialog.returnEverything', [
               totalCheckoutMoney.toFixed(2),
             ])
           "
-          @click="returnAllBooks('return-everything')"
+          @click="returnAllBooks('RETURN')"
         />
       </template>
     </k-dialog-card>
@@ -217,7 +237,7 @@
 
 <script setup lang="ts">
 import { mdiDotsVertical, mdiInformationOutline } from "@quasar/extras/mdi-v7";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, sumBy } from "lodash-es";
 import {
   Dialog,
   QDialog,
@@ -226,38 +246,40 @@ import {
 } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { SettleRemainingType } from "src/@generated/graphql";
 import KDialogCard from "src/components/k-dialog-card.vue";
+import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice, getStatus } from "src/helpers/book-copy";
+import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
   ProblemDetailsFragment,
+  useDonateBookCopyMutation,
   useGetBookCopiesByOwnerQuery,
   useGetReturnedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
+  useReimburseBookCopyMutation,
+  useReportProblemMutation,
+  useReturnBookCopyMutation,
 } from "src/services/book-copy.graphql";
+import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UserSummaryFragment } from "src/services/user.graphql";
+import { UserFragment, useSettleUserMutation } from "src/services/user.graphql";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
-import StatusChip from "./status-chip.vue";
 import TableHeaderWithInfo from "./table-header-with-info.vue";
 
 const { t } = useI18n();
 
 const props = defineProps<{
-  user: UserSummaryFragment;
+  user: UserFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-type ReturnType = "return-and-donate" | "return-everything";
-
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
-  useDialogPluginComponent<ReturnType>();
-
-const totalSoldBooks = ref(0);
-const totalCheckoutMoney = ref(0);
-const totalCheckedOutMoney = ref(0);
+  useDialogPluginComponent<SettleRemainingType>();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
@@ -273,21 +295,26 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "book-code",
-    // FIXME: add field
-    field: () => undefined,
+    field: "code",
     label: t("book.code"),
     align: "left",
   },
   {
     name: "status",
-    field: ({ book }) => book.meta.isAvailable,
+    field: getStatus,
     label: t("book.fields.status"),
+    align: "left",
+    format: (_, row) =>
+      t(
+        `warehouse.bookCopyStatus.${selectableRows.value.includes(row) ? "inStock" : getStatus(row)}`,
+      ),
   },
   {
     name: "author",
     field: ({ book }) => book.authorsFullName,
     label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "publisher",
@@ -300,35 +327,35 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.subject,
     label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
     field: ({ book }) => book.title,
     label: t("book.fields.title"),
     align: "left",
+    classes: "text-wrap",
   },
   {
     name: "cover-price",
     field: ({ book }) => book.originalPrice,
     label: t("book.fields.price"),
     align: "left",
-    format: (val: number) => `${val.toFixed(2)} €`,
+    format: formatPrice,
   },
   {
     name: "buy-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: ({ book }) => book.originalPrice,
     label: t("manageUsers.payOffUserDialog.buyPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "buy"),
   },
   {
     name: "public-price",
-    // FIXME: add field and enable format
-    field: () => undefined,
+    field: ({ book }) => book.originalPrice,
     label: t("manageUsers.payOffUserDialog.publicPrice"),
     align: "left",
-    // format: (val: number) => `${val.toFixed(2)} €`,
+    format: (val: number) => discountedPrice(val, "sell"),
   },
   {
     name: "actions",
@@ -339,17 +366,23 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
 
 const { selectedLocation } = useRetailLocationService();
 
-const { bookCopiesByOwner: ownedCopies, loading: ownedLoading } =
-  useGetBookCopiesByOwnerQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+const {
+  bookCopiesByOwner: ownedCopies,
+  loading: ownedLoading,
+  refetch: refetchBookCopiesByOwner,
+} = useGetBookCopiesByOwnerQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
 
-const { returnedBookCopies: returnedCopies, loading: returnedLoading } =
-  useGetReturnedBookCopiesQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+const {
+  returnedBookCopies: returnedCopies,
+  loading: returnedLoading,
+  refetch: refetchReturnedBookCopes,
+} = useGetReturnedBookCopiesQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
 
 const { soldBookCopies: soldCopies, loading: soldLoading } =
   useGetSoldBookCopiesQuery(() => ({
@@ -357,7 +390,25 @@ const { soldBookCopies: soldCopies, loading: soldLoading } =
     retailLocationId: selectedLocation.value.id,
   }));
 
-const selectedRows = ref<BookCopyDetailsFragment[]>([]);
+const getSettledOrToSettleCopiesPriceSum = (
+  settledAt: number | null | undefined,
+  book: BookSummaryFragment,
+  settled: boolean,
+) =>
+  (settled ? settledAt : !settledAt)
+    ? (book.originalPrice * selectedLocation.value.buyRate) / 100
+    : 0;
+
+const totalCheckoutMoney = computed(() =>
+  sumBy(ownedCopies.value, ({ settledAt, book }) =>
+    getSettledOrToSettleCopiesPriceSum(settledAt, book, false),
+  ),
+);
+const totalCheckedOutMoney = computed(() =>
+  sumBy(returnedCopies.value, ({ settledAt, book }) =>
+    getSettledOrToSettleCopiesPriceSum(settledAt, book, true),
+  ),
+);
 
 const bookLoading = computed(
   () => ownedLoading.value || returnedLoading.value || soldLoading.value,
@@ -371,43 +422,59 @@ enum Titles {
 interface GroupHeaderRow {
   id: Titles;
 }
-// TODO: Handle the case when a group is empty (?)
-const tableRows = computed<(BookCopyDetailsFragment | GroupHeaderRow)[]>(() => [
+interface EmptyRow {
+  id: "EMPTY";
+}
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const getCodeIndex = (code: string) => parseInt(code.split("/")[0]!);
+const sortByCopyCode = (copies: BookCopyDetailsFragment[]) =>
+  [...copies].sort((copyA, copyB) =>
+    getCodeIndex(copyA.code) < getCodeIndex(copyB.code)
+      ? -1
+      : getCodeIndex(copyA.code) === getCodeIndex(copyB.code)
+        ? 0
+        : 1,
+  );
+
+const tableRows = computed<
+  (BookCopyDetailsFragment | GroupHeaderRow | EmptyRow)[]
+>(() => [
   // Adding one empty row for each of the sub-headers, then merging all the
   // separate rows into the same array to display them all in a single table
   {
     id: Titles.InStock,
   },
-  ...ownedCopies.value,
+  ...(ownedCopies.value.length > 0
+    ? sortByCopyCode(ownedCopies.value)
+    : [{ id: "EMPTY" } satisfies EmptyRow]),
 
+  {
+    id: Titles.Returned,
+  },
   ...(returnedCopies.value.length > 0
-    ? [
-        {
-          id: Titles.Returned,
-        },
-        ...returnedCopies.value,
-      ]
-    : []),
+    ? sortByCopyCode(returnedCopies.value)
+    : [{ id: "EMPTY" } satisfies EmptyRow]),
 
   {
     id: Titles.Sold,
   },
-  ...soldCopies.value,
+  ...(soldCopies.value.length > 0
+    ? sortByCopyCode(soldCopies.value)
+    : [{ id: "EMPTY" } satisfies EmptyRow]),
 ]);
 
 const selectableRows = computed(() =>
-  ownedCopies.value.filter(
-    (row) => row.id.endsWith("0") /* FIXME: add real filter logic */,
-  ),
+  ownedCopies.value.filter((row) => getStatus(row) === "available"),
 );
 
-const localizedSectionTitle = (sectionTitle: Titles) => {
-  return sectionTitle === Titles.InStock
+const selectedRows = ref<BookCopyDetailsFragment[]>([]);
+
+const localizedSectionTitle = (sectionTitle: Titles) =>
+  sectionTitle === Titles.InStock
     ? t("manageUsers.payOffUserDialog.booksInStock")
     : sectionTitle === Titles.Returned
       ? t("manageUsers.payOffUserDialog.returnedBooks")
       : t("manageUsers.payOffUserDialog.soldBooks");
-};
 
 const rowsSelectionStatus = computed(() =>
   selectedRows.value.length === 0
@@ -423,18 +490,77 @@ function swapAllRows() {
 }
 
 function swapRow(row: BookCopyDetailsFragment) {
-  if (selectedRows.value.includes(row)) {
+  if (selectedRows.value.map(({ id }) => id).includes(row.id)) {
     selectedRows.value.splice(selectedRows.value.indexOf(row), 1);
   } else {
     selectedRows.value.push(row);
   }
 }
 
-function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
-  // FIXME: add logic
-  bookCopies;
+function removeBookCopiesAfterAction(bookCopies: BookCopyDetailsFragment[]) {
+  if (bookCopies.length > 0) {
+    selectedRows.value = [];
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    selectedRows.value.splice(selectedRows.value.indexOf(bookCopies[0]!));
+  }
 }
 
+const { returnBookCopy } = useReturnBookCopyMutation();
+async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
+  try {
+    await Promise.all(
+      bookCopies.map(({ id: bookCopyId }) =>
+        returnBookCopy({
+          input: {
+            bookCopyId,
+            retailLocationId: selectedLocation.value.id,
+          },
+        }),
+      ),
+    );
+
+    const queryArgs = {
+      retailLocationId: selectedLocation.value.id,
+      userId: props.user.id,
+    };
+    await Promise.all([
+      refetchBookCopiesByOwner(queryArgs),
+      refetchReturnedBookCopes(queryArgs),
+    ]);
+    removeBookCopiesAfterAction(bookCopies);
+  } catch {
+    notifyError(
+      t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Returned`),
+    );
+  }
+}
+
+async function donateBookCopies(bookCopies: BookCopyDetailsFragment[]) {
+  try {
+    await Promise.all(
+      bookCopies.map(({ id: bookCopyId }) =>
+        donateBookCopy({
+          input: {
+            bookCopyId,
+            retailLocationId: selectedLocation.value.id,
+          },
+        }),
+      ),
+    );
+    await refetchBookCopiesByOwner({
+      retailLocationId: selectedLocation.value.id,
+      userId: props.user.id,
+    });
+    removeBookCopiesAfterAction(bookCopies);
+  } catch {
+    notifyError(
+      t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Donated`),
+    );
+  }
+}
+
+const { donateBookCopy } = useDonateBookCopyMutation();
 function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
   Dialog.create({
     title: t(
@@ -451,65 +577,97 @@ function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
     ),
     cancel: t("common.cancel"),
     persistent: true,
-  }).onOk(() => {
-    // FIXME: mark as donated
-    bookCopies;
+  }).onOk(async () => {
+    await donateBookCopies(bookCopies);
   });
 }
 
+const { reimburseBookCopy } = useReimburseBookCopyMutation();
 function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
   Dialog.create({
     title: t(
-      "manageUsers.payOffUserDialog.confirms.repay.title",
+      "manageUsers.payOffUserDialog.confirms.reimburse.title",
       bookCopies.length,
     ),
     message: `${t(
-      "manageUsers.payOffUserDialog.confirms.repay.label",
+      "manageUsers.payOffUserDialog.confirms.reimburse.label",
       bookCopies.length,
     )} ${t("manageUsers.payOffUserDialog.confirms.disclaimer")}`,
     ok: t(
-      "manageUsers.payOffUserDialog.confirms.repay.confirmLabel",
+      "manageUsers.payOffUserDialog.confirms.reimburse.confirmLabel",
       bookCopies.length,
     ),
     cancel: t("common.cancel"),
     persistent: true,
-  }).onOk(() => {
-    // FIXME: mark as repaid
-    bookCopies;
+  }).onOk(async () => {
+    try {
+      await Promise.all(
+        bookCopies.map(({ id: bookCopyId }) =>
+          reimburseBookCopy({
+            input: {
+              bookCopyId,
+              retailLocationId: selectedLocation.value.id,
+            },
+          }),
+        ),
+      );
+      await refetchBookCopiesByOwner({
+        retailLocationId: selectedLocation.value.id,
+        userId: props.user.id,
+      });
+      removeBookCopiesAfterAction(bookCopies);
+    } catch {
+      notifyError(
+        t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}reimbursed`),
+      );
+    }
   });
 }
 
+const { reportProblem } = useReportProblemMutation();
 function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
-  // TODO: add check if any of the book copies' last problem
-  // is unresolved
   Dialog.create({
     component: ProblemsDialog,
-  }).onOk((problems: ProblemDetailsFragment) => {
-    bookCopies.forEach(({ id }) => {
-      const currentBookCopy = ownedCopies.value.find(
-        (bookCopy) => bookCopy.id === id,
+    componentProps: {
+      bookCopy: bookCopies[0],
+    },
+  }).onOk(async ({ details, type }: ProblemDetailsFragment) => {
+    try {
+      await Promise.all(
+        bookCopies.map(({ id: bookCopyId }) =>
+          reportProblem({
+            input: {
+              bookCopyId,
+              details,
+              type,
+            },
+          }),
+        ),
       );
-      if (currentBookCopy) {
-        currentBookCopy.problems?.push(problems);
-      }
-    });
+      await refetchBookCopiesByOwner({
+        retailLocationId: selectedLocation.value.id,
+        userId: props.user.id,
+      });
+      removeBookCopiesAfterAction(bookCopies);
+    } catch {
+      notifyError(t("manageUsers.payOffUserDialog.problemsError"));
+    }
   });
 }
 
-function returnAllBooks(action: ReturnType) {
+const { settleUser } = useSettleUserMutation();
+function returnAllBooks(remainingType: SettleRemainingType) {
   const translationsPath = `manageUsers.payOffUserDialog.confirms.${
-    action === "return-and-donate" ? "returnAndDonate" : "returnEverything"
+    remainingType === "REFUND" ? "returnAndDonate" : "returnEverything"
   }`;
   Dialog.create({
     component: ReturnBooksConfirmDialog,
     componentProps: {
-      bookCopies: ownedCopies.value.filter((copy) =>
-        selectableRows.value.find((row) => row === copy),
-      ),
+      booksToReturn: selectableRows.value,
       disclaimer: t(`${translationsPath}.disclaimer`),
       saveLabel: t(
         `manageUsers.payOffUserDialog.${
-          action === "return-and-donate"
+          remainingType === "REFUND"
             ? "confirms.returnAndDonate.buttonText"
             : "returnEverything"
         }`,
@@ -518,14 +676,30 @@ function returnAllBooks(action: ReturnType) {
       tableTitle: t(`${translationsPath}.tableTitle`),
       title: t(
         `manageUsers.payOffUserDialog.${
-          action === "return-and-donate"
+          remainingType === "RETURN"
             ? "returnAndDonate"
             : "confirms.returnEverything.title"
         }`,
       ),
+      booksSoldToOthers: soldCopies.value.length,
+      totalCheckoutMoney: totalCheckoutMoney.value,
+      totalCheckedOutMoney: totalCheckedOutMoney.value,
     },
-  }).onOk(() => {
-    onDialogOK(action);
+  }).onOk(async () => {
+    try {
+      await settleUser({
+        input: {
+          remainingType,
+          retailLocationId: selectedLocation.value.id,
+          userId: props.user.id,
+        },
+      });
+    } catch {
+      notifyError(t("common.genericErrorMessage"));
+    } finally {
+      await Promise.all([refetchBookCopiesByOwner, refetchReturnedBookCopes]);
+      onDialogOK();
+    }
   });
 }
 </script>

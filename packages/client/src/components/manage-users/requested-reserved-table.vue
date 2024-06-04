@@ -1,13 +1,23 @@
 <template>
   <dialog-table :rows="rows" :columns="columns">
+    <template #body-cell-author="{ value, col }">
+      <table-cell-with-tooltip :class="col.classes" :value="value" />
+    </template>
+
+    <template #body-cell-subject="{ value, col }">
+      <table-cell-with-tooltip :class="col.classes" :value="value" />
+    </template>
+
     <template #body-cell-request-status="{ value }">
       <q-td>
-        <span :class="value ? 'text-positive' : ''">
+        <span :class="value && !isShowingReservations ? 'text-positive' : ''">
           {{
             t(
-              value
-                ? "book.availability.available"
-                : "book.availability.requested",
+              isShowingReservations
+                ? "book.availability.reserved"
+                : value
+                  ? "book.availability.available"
+                  : "book.availability.requested",
             )
           }}
         </span>
@@ -35,15 +45,17 @@ import { startCase, toLower } from "lodash-es";
 import { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { formatPrice } from "src/composables/use-misc-formats";
+import { discountedPrice } from "src/helpers/book-copy";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
+import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 const { t } = useI18n();
 
 defineProps<
   {
+    isShowingReservations?: boolean;
     rows:
       | readonly ReservationSummaryFragment[]
       | readonly RequestSummaryFragment[];
@@ -72,6 +84,7 @@ const columns = computed<
     label: t("book.fields.author"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "subject",
@@ -79,6 +92,7 @@ const columns = computed<
     label: t("book.fields.subject"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
@@ -86,6 +100,7 @@ const columns = computed<
     label: t("book.fields.title"),
     align: "left",
     format: (val: string) => startCase(toLower(val)),
+    classes: "text-wrap",
   },
   {
     name: "publisher",
@@ -99,7 +114,7 @@ const columns = computed<
     field: ({ book: { originalPrice } }) => originalPrice,
     label: t("book.fields.price"),
     align: "left",
-    format: (val: string) => formatPrice(val),
+    format: (val: number) => discountedPrice(val, "sell"),
   },
   {
     name: "utility",

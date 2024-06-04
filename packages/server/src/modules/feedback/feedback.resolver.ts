@@ -18,20 +18,22 @@ export class FeedbackResolver {
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async feedback(
-    @Input()
-    { message, type }: FeedbackRequestPayload,
-    @CurrentUser() { id: userId, firstname, lastname }: User,
+    @Input() { message, type }: FeedbackRequestPayload,
+    @CurrentUser() { id: userId, firstname, lastname, locale = "it" }: User,
   ) {
     const username = `${firstname} ${lastname}`;
     try {
       return await this.mailerService.sendMail({
         to: this.emailConfig.supportEmail,
-        subject: `Feedback request (type: ${type}) from ${username} [${userId}] `,
+        subject:
+          locale === "en-US"
+            ? `Feedback request (type: ${type}) from ${username} [${userId}]`
+            : `Richiesta di feedback (tipo: ${type}) da ${username} [${userId}]`,
         context: {
           name: username,
           message,
         },
-        template: "feedback-request",
+        template: `${locale}/feedback-request`,
       });
     } catch {
       throw new UnprocessableEntityException("Unable to send email");

@@ -1,8 +1,8 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { User } from "src/@generated";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
+import { AuthConfiguration, authConfiguration } from "src/config/auth";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 
 // We return "sub" (subject) claim to align with JWT standard claims, it contains the user id
@@ -21,23 +21,25 @@ export const VERIFICATION_TOKEN_EXPIRATION_TIME = "48h";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, JWT_STRATEGY_NAME) {
   constructor(
-    @Inject(rootConfiguration.KEY)
-    rootConfig: RootConfiguration,
+    @Inject(authConfiguration.KEY)
+    authConfig: AuthConfiguration,
     private readonly prisma: PrismaService,
   ) {
     super({
-      secretOrKey: rootConfig.applicationSecret,
+      secretOrKey: authConfig.applicationSecret,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     });
   }
 
   async validate({ sub: userId }: JwtPayload): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-
     if (!user) {
-      throw new Error(
+      throw new NotFoundException(
         "User related to this token has not been found in our system",
       );
+    }
+    if (user.deletedAt) {
+      throw new Error("User related to this token has been deleted");
     }
 
     return user;

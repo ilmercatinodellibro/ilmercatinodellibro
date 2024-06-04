@@ -46,11 +46,40 @@ fragment BookCopyDetails on BookCopy {
   returnedById
   updatedAt
   updatedById
+  donatedAt
+  donatedById
+  reimbursedAt
+  reimbursedById
+  sales {
+    refundedAt
+  }
+  settledAt
+  settledById
 }
 
 query getBookCopies($bookId: String!) {
   bookCopies(bookId: $bookId) {
     ...BookCopyDetails
+  }
+}
+
+query getPaginatedBookCopies(
+  $retailLocationId: String!
+  $page: Int!
+  $rows: Int!
+  $filter: BookCopyQueryFilter
+) {
+  paginatedBookCopies(
+    retailLocationId: $retailLocationId
+    filter: $filter
+    page: $page
+    rows: $rows
+  ) {
+    page
+    rows {
+      ...BookCopyDetails
+    }
+    rowsCount
   }
 }
 
@@ -98,5 +127,29 @@ mutation resolveProblem($input: ProblemResolveInput!) {
     bookCopyId
     details
     solution
+  }
+}
+
+mutation returnBookCopy($input: ReturnBookCopyInput!) {
+  returnBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation reimburseBookCopy($input: ReimburseBookCopyInput!) {
+  reimburseBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation refundBookCopy($input: RefundBookCopyInput!) {
+  refundBookCopy(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation donateBookCopy($input: DonateBookCopyInput!) {
+  donateBookCopy(input: $input) {
+    ...BookCopySummary
   }
 }

@@ -1,12 +1,12 @@
 fragment CurrentUser on User {
-  id
-  firstname
-  lastname
-  email
+  ...UserSummary
   emailVerified
   createdAt
   updatedAt
   phoneNumber
+  dateOfBirth
+  delegate
+  locale
   role(retailLocationId: $retailLocationId)
 }
 
@@ -17,7 +17,13 @@ fragment AuthSummary on AuthPayload {
   }
 }
 
-mutation register($input: RegisterPayload!) {
+query getCurrentUser($retailLocationId: String!) {
+  currentUser {
+    ...CurrentUser
+  }
+}
+
+mutation register($input: RegisterUserPayload!) {
   register(input: $input)
 }
 
@@ -47,6 +53,10 @@ mutation resetForgottenPassword($input: ResetForgottenPasswordPayload!) {
   resetForgottenPassword(input: $input)
 }
 
-mutation sendRegistrationInvite($input: RegistrationInviteLinkPayload!) {
-  sendRegistrationInvite(input: $input)
+mutation addOrInviteOperator($email: String!, $retailLocationId: String!) {
+  addOrInviteOperator(
+    input: { email: $email, retailLocationId: $retailLocationId }
+  ) {
+    ...Member
+  }
 }

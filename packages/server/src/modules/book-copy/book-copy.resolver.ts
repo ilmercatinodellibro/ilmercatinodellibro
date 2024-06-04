@@ -24,6 +24,7 @@ import {
 import { AuthService } from "src/modules/auth/auth.service";
 import {
   BookCopyCreateInput,
+  DonateBookCopyInput,
   RefundBookCopyInput,
   ReimburseBookCopyInput,
   ReturnBookCopyInput,
@@ -216,7 +217,16 @@ export class BookCopyResolver {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
     const searchText = filter.search?.trim().replaceAll(" ", "%");
-    const { hasProblem, isAvailable, isSold } = filter;
+    const {
+      hasProblems: hasProblem = false,
+      isAvailable = false,
+      isSold = false,
+    } = filter;
+
+    const showOnlyAvailable = isAvailable && !isSold;
+    const showOnlySold = isSold && !isAvailable;
+    const includeCopyOrStatement =
+      hasProblem || showOnlySold || showOnlyAvailable;
 
     const where: Prisma.BookCopyWhereInput = {
       book: {
@@ -259,53 +269,55 @@ export class BookCopyResolver {
           : {}),
       },
       returnedAt: null,
-      OR: [
-        // When both isAvailable and isSold are true at the same time, they are mutually exclusive, so they are not added to the query
-        ...(isAvailable && !isSold
-          ? [
-              {
-                sales: {
-                  none: {},
-                },
-              },
-              {
-                sales: {
-                  every: {
-                    refundedAt: {
-                      not: null,
+      ...(includeCopyOrStatement
+        ? {
+            OR: [
+              // When both isAvailable and isSold are true at the same time, they are mutually exclusive, so they are not added to the query
+              ...(showOnlyAvailable
+                ? [
+                    {
+                      sales: {
+                        none: {},
+                      },
                     },
-                  },
-                },
-              },
-            ]
-          : []),
-        ...(isSold && !isAvailable
-          ? [
-              {
-                sales: {
-                  some: {
-                    refundedAt: {
-                      not: null,
+                    {
+                      sales: {
+                        every: {
+                          refundedAt: {
+                            not: null,
+                          },
+                        },
+                      },
                     },
-                  },
-                },
-              },
-            ]
-          : []),
-        ...(hasProblem
-          ? [
-              {
-                problems: {
-                  some: {
-                    resolvedAt: {
-                      not: null,
+                  ]
+                : []),
+              ...(showOnlySold
+                ? [
+                    {
+                      sales: {
+                        some: {
+                          refundedAt: null,
+                        },
+                      },
                     },
-                  },
-                },
-              },
-            ]
-          : []),
-      ],
+                  ]
+                : []),
+              ...(hasProblem
+                ? [
+                    {
+                      problems: {
+                        some: {
+                          resolvedAt: {
+                            not: null,
+                          },
+                        },
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          }
+        : {}),
     };
 
     const [rowsCount, rows] = await this.prisma.$transaction([
@@ -510,7 +522,7 @@ export class BookCopyResolver {
     });
 
     await this.receiptService.createReceipt({
-      type: ReceiptType.REGISTRATION,
+      type: ReceiptType.WITHDRAWAL,
       userId: ownerId,
       retailLocationId,
       createdById: userId,
@@ -522,11 +534,13 @@ export class BookCopyResolver {
     return bookCopies;
   }
 
+  // Consider checking for donated book copies, as they can technically no longer be reimbursed or returned
+  // Left out for now as donations should only ever occur at the end of the Mercatino's activity period
   @Mutation(() => BookCopy, {
     description: "Refund the book copy to the buyer",
   })
   async refundBookCopy(
-    @Input() { bookCopyId }: RefundBookCopyInput,
+    @Input() { bookCopyId, retailLocationId }: RefundBookCopyInput,
     @CurrentUser() { id: userId }: User,
   ) {
     const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
@@ -564,26 +578,38 @@ export class BookCopyResolver {
       );
     }
 
-    const sale = bookCopy.sales[0];
-    return this.prisma.bookCopy.update({
-      where: {
-        id: bookCopyId,
-      },
-      data: {
-        updatedAt: new Date(),
-        updatedById: userId,
-        sales: {
-          update: {
-            where: {
-              id: sale.id,
-            },
-            data: {
-              refundedAt: new Date(),
-              refundedById: userId,
+    return this.prisma.$transaction(async (prisma) => {
+      const codes = await this.bookService.calculateBookCodes(
+        prisma,
+        [bookCopy.bookId],
+        retailLocationId,
+      );
+
+      const newBookCopyCode = codes[0];
+      const sale = bookCopy.sales[0];
+      return prisma.bookCopy.update({
+        where: {
+          id: bookCopyId,
+        },
+        data: {
+          code: newBookCopyCode,
+          // Original code must be updated only the first time a book is returned, so when there is no original code set.
+          ...(bookCopy.originalCode ? {} : { originalCode: bookCopy.code }),
+          updatedAt: new Date(),
+          updatedById: userId,
+          sales: {
+            update: {
+              where: {
+                id: sale.id,
+              },
+              data: {
+                refundedAt: new Date(),
+                refundedById: userId,
+              },
             },
           },
         },
-      },
+      });
     });
   }
 
@@ -606,7 +632,7 @@ export class BookCopyResolver {
         },
         sales: {
           where: {
-            refundedAt: { not: null },
+            refundedAt: null,
           },
         },
       },
@@ -666,7 +692,7 @@ export class BookCopyResolver {
         },
         sales: {
           where: {
-            refundedAt: { not: null },
+            refundedAt: null,
           },
         },
       },
@@ -702,6 +728,71 @@ export class BookCopyResolver {
         updatedById: userId,
         reimbursedAt: new Date(),
         reimbursedById: userId,
+      },
+    });
+  }
+
+  @Mutation(() => BookCopy, {
+    description: "Donate the book copy to the Mercatino.",
+  })
+  async donateBookCopy(
+    @Input() { bookCopyId }: DonateBookCopyInput,
+    @CurrentUser() { id: userId }: User,
+  ) {
+    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
+      where: {
+        id: bookCopyId,
+      },
+      include: {
+        book: {
+          select: {
+            retailLocationId: true,
+          },
+        },
+        sales: {
+          where: {
+            refundedAt: {
+              not: null,
+            },
+          },
+        },
+      },
+    });
+
+    await this.authService.assertMembership({
+      userId,
+      retailLocationId: bookCopy.book.retailLocationId,
+      message:
+        "You don't have the necessary permissions to donate this book copy.",
+    });
+
+    if (bookCopy.sales.length > 0) {
+      throw new ConflictException(
+        "The book copy has been sold. It must be refunded to the buyer first, before it can be reimbursed to the owner.",
+      );
+    }
+
+    if (bookCopy.returnedAt) {
+      throw new ConflictException("The book copy has already been returned.");
+    }
+
+    if (bookCopy.reimbursedAt) {
+      throw new ConflictException("The book copy has already been reimbursed.");
+    }
+
+    if (bookCopy.donatedAt) {
+      throw new ConflictException("The book copy has already been donated.");
+    }
+
+    return this.prisma.bookCopy.update({
+      where: {
+        id: bookCopy.id,
+      },
+      data: {
+        updatedAt: new Date(),
+        updatedById: userId,
+        donatedAt: new Date(),
+        donatedById: userId,
       },
     });
   }

@@ -1,12 +1,13 @@
+<!-- TODO: update to match the current mock-ups -->
 <template>
   <q-page class="column justify-center registration-page">
     <div class="items-center justify-center row">
-      <q-card class="form-card full-width text-center" flat>
+      <q-card class="form-card full-width text-center">
         <q-form greedy @submit="onSubmit">
-          <q-card-section class="q-px-none text-dark text-h4">
+          <q-card-section class="text-dark text-h4">
             {{ t(`auth.register`) }}
           </q-card-section>
-          <q-card-section class="q-pa-none">
+          <q-card-section>
             <q-input
               v-model="user.firstname"
               :rules="[requiredRule]"
@@ -24,12 +25,12 @@
               type="text"
             />
             <q-input
-              v-model="user.email"
+              :model-value="user.email"
               :rules="[requiredRule, emailRule]"
               lazy-rules
               :label="t(`auth.email`)"
               outlined
-              disable
+              readonly
               type="email"
             />
             <k-password-input
@@ -55,7 +56,7 @@
               autocomplete="password"
             />
           </q-card-section>
-          <q-card-section class="q-px-none">
+          <q-card-section>
             <q-btn
               class="full-width"
               color="accent"
@@ -100,6 +101,7 @@ import {
   useAuthService,
   useRegisterWithTokenMutation,
 } from "src/services/auth";
+import { useRetailLocationService } from "src/services/retail-location";
 
 const { t } = useI18n();
 
@@ -110,12 +112,13 @@ const props = defineProps<{
   email: string;
 }>();
 
-const user = reactive<RegisterPayload>({
+const user = reactive<Omit<RegisterPayload, "retailLocationId">>({
   email: props.email,
   firstname: "",
   lastname: "",
   password: "",
   passwordConfirmation: "",
+  dateOfBirth: Date.now(),
 });
 
 const { registerWithToken, loading: isRegistering } =
@@ -130,19 +133,26 @@ const passwordMatchRule = makeValueMatchRule(
   () => t("auth.passwordDoNotMatch"),
 );
 
+const { selectedLocation } = useRetailLocationService();
+
 async function onSubmit() {
   try {
     if (props.token) {
       await registerWithToken(
-        { input: { ...user } },
+        {
+          input: {
+            ...user,
+            retailLocationId: selectedLocation.value.id,
+          },
+        },
         // We override the request context to add the one-shot JWT token header
         // See https://www.apollographql.com/docs/react/data/mutations#context
         { context: { headers: getJwtHeader(props.token) } },
       );
       void router.push({ name: "login" });
       Notify.create({
+        type: "positive",
         message: t("auth.registeredSuccessfully"),
-        color: "positive",
       });
     }
   } catch (e) {

@@ -2,6 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-page-container class="layout-background">
       <q-page class="column fit flex-center q-pa-xl">
+        <language-dropdown-btn class="fixed-top-right q-ma-md" />
         <q-spinner v-if="loading" />
 
         <h4 class="m-mb-36 q-mt-none readability-max-width text-accent">
@@ -14,6 +15,8 @@
         </p>
 
         <div class="items-center justify-center row">
+          <q-spinner v-if="loading" size="xl" />
+
           <action-box
             v-for="location in retailLocations"
             :key="location.id"
@@ -31,6 +34,7 @@
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import ActionBox from "src/components/action-box.vue";
+import LanguageDropdownBtn from "src/components/language-dropdown-btn.vue";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
 import { RetailLocationFragment } from "src/services/retail-location.graphql";
