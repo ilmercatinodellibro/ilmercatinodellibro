@@ -33,6 +33,9 @@ export class BookQueryArgs extends LocationBoundQueryArgs {
 
   @Field(() => BookQueryFilter, { nullable: true })
   filter?: BookQueryFilter;
+
+  @Field(() => Boolean, { nullable: true })
+  copiesInStock?: boolean;
 }
 
 @ObjectType()
