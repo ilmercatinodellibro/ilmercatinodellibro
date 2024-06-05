@@ -97,29 +97,39 @@ export class RetailLocationService {
   }
 
   async cleanupLocation(locationId: string) {
-    await this.prisma.retailLocation.update({
-      where: {
-        id: locationId,
-      },
-      data: {
-        carts: {
-          deleteMany: {},
+    await this.prisma.$transaction([
+      this.prisma.retailLocation.update({
+        where: {
+          id: locationId,
         },
-        receipts: {
-          deleteMany: {},
-        },
-        books: {
-          deleteMany: {
-            // Deleting books will cascade to the relationships:
-            // - copies
-            // - requests
-            // - reservations
-            // - courses
-            // - requestQueue
+        data: {
+          carts: {
+            deleteMany: {},
+          },
+          receipts: {
+            deleteMany: {},
+          },
+          books: {
+            deleteMany: {
+              // Deleting books will cascade to the relationships:
+              // - copies
+              // - requests
+              // - reservations
+              // - courses
+              // - requestQueue
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.school.deleteMany({
+        where: {
+          provinceCode: {
+            equals: locationId,
+            mode: "insensitive",
+          },
+        },
+      }),
+    ]);
 
     const receiptsDirectory = this.resolveStoragePath(locationId, "./receipts");
     await rmdir(receiptsDirectory, { recursive: true });
