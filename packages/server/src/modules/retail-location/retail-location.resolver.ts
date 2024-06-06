@@ -183,7 +183,7 @@ export class RetailLocationResolver {
       },
     });
 
-    const getTotalPresentBooks = async () =>
+    const getTotalPresentBooks = () =>
       this.prisma.bookCopy.count({
         where: {
           book: {
@@ -201,7 +201,7 @@ export class RetailLocationResolver {
         },
       });
 
-    const getTotalSoldBooks = async () =>
+    const getTotalSoldBooks = () =>
       this.prisma.sale.count({
         where: {
           refundedAt: null,
