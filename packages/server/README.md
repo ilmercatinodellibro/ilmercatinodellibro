@@ -243,6 +243,15 @@ After this step is done, all the pieces of the puzzle are in their place and the
 Another note: for the moment I decided not to connect Schools to a retailLocation, even if the school code already includes the province, thus the retailLocationId.
 This is because at the moment there are no requirements involving such a thing and in this way schools can be still viewed from other retailLocations.
 
+## The default Admin user
+
+Run the `pnpm add-admin` from a terminal within the `/packages/server` folder of the project to set up or repair the Admin user for both retail locations.
+
+When running the command:
+
+- if the default Admin doesn't exist, it and its relative permissions are automatically added inside the database;
+- otherwise, the permissions for the existing Admin are checked and restored automatically if any are missing.
+
 ## Social login
 
 We use the `passport` library to handle social login. See [the auth module](./src/modules/auth) for implementation details. All providers are optional and will be enabled only if their related environment variables are set. If you configure a provider, make sure to also enable it in the client app. See the [client README](../client/README.md#social-login) for more information.
