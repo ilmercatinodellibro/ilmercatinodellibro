@@ -226,7 +226,7 @@ model BookCopy {
   originalCode String? @map("original_code")
 
   bookId String @map("book_id") @db.Uuid
-  book   Book   @relation(fields: [bookId], references: [id])
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   // User/operator/admin relation - Can be any of the three
   ownerId String @map("owner_id")
@@ -313,7 +313,7 @@ model Reservation {
   user   User   @relation("ReservationUser", fields: [userId], references: [id])
   // TODO: bookId may be eliminated in favor of the request relation (reservation.request.bookId)
   bookId String @map("book_id") @db.Uuid
-  book   Book   @relation("BookReservations", fields: [bookId], references: [id])
+  book   Book   @relation("BookReservations", fields: [bookId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
   createdById String   @map("created_by_id")
@@ -342,7 +342,7 @@ model BookRequest {
   userId String @map("user_id")
   user   User   @relation("BookRequestUser", fields: [userId], references: [id])
   bookId String @map("book_id") @db.Uuid
-  book   Book   @relation("BookRequested", fields: [bookId], references: [id])
+  book   Book   @relation("BookRequested", fields: [bookId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
   createdById String   @map("created_by_id")
@@ -366,7 +366,7 @@ model RequestQueue {
   id String @id @default(uuid())
 
   bookId String @unique @map("book_id") @db.Uuid
-  book   Book   @relation(fields: [bookId], references: [id])
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   currentRequestId String      @unique @map("current_request_id")
   currentRequest   BookRequest @relation(fields: [currentRequestId], references: [id])

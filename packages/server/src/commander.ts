@@ -1,12 +1,20 @@
-/* eslint-disable no-console */
+import { ConsoleLogger, Logger } from "@nestjs/common";
 import { CommandFactory } from "nest-commander";
-import { ImportBooksModule } from "./modules/book/import-books.module";
+import { AppModule } from "src/app.module";
 
 async function bootstrap() {
-  console.log("Mercatino del Libro Commands booting...");
-  await CommandFactory.run(ImportBooksModule, {
+  Logger.log("Mercatino del Libro Commands booting...", "Bootstrap");
+  await CommandFactory.run(AppModule, {
     usePlugins: true,
-    logger: console,
+    logger: new (class extends ConsoleLogger {
+      log(message: string, context?: string) {
+        if (context === "NestFactory" || context === "InstanceLoader") {
+          return;
+        }
+
+        super.log(message, context);
+      }
+    })(),
   });
 }
 

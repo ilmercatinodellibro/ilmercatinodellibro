@@ -46,7 +46,7 @@
       </q-card-section>
 
       <template #card-actions="{ uniqueFormId }">
-        <q-btn color="accent" disable @click="confirmReset()">
+        <q-btn v-if="hasAdminRole" color="accent" @click="confirmReset()">
           <q-item-section>
             {{ t("general.settings.resetButton") }}
           </q-item-section>
@@ -85,6 +85,7 @@ import {
   greaterThanZeroRule,
 } from "src/helpers/rules";
 import { SettingsUpdate } from "src/models/book";
+import { useAuthService } from "src/services/auth";
 import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
 
 const props = defineProps<Omit<RetailLocationSettingsFragment, "__typename">>();
@@ -95,6 +96,8 @@ const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<SettingsUpdate>();
 
 const { t } = useI18n();
+
+const { hasAdminRole } = useAuthService();
 
 const newSettings = reactive<RetailLocationSettingsFragment>({
   maxBookingDays: props.maxBookingDays,

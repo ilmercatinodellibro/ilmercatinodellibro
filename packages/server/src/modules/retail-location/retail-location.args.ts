@@ -18,6 +18,9 @@ export class LocationBoundInput {
   retailLocationId!: string;
 }
 
+@InputType()
+export class ResetRetailLocationInput extends LocationBoundInput {}
+
 @ObjectType()
 export class StatisticsQueryResult {
   // The number of all book copies that were sold and not returned back to the retailLocationId.
