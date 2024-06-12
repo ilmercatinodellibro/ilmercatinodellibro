@@ -55,7 +55,9 @@ export class ReservationResolver {
           },
           {
             sale: {
-              refundedAt: null,
+              refundedAt: {
+                not: null,
+              },
             },
           },
         ],

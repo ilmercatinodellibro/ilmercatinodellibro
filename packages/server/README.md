@@ -243,14 +243,41 @@ After this step is done, all the pieces of the puzzle are in their place and the
 Another note: for the moment I decided not to connect Schools to a retailLocation, even if the school code already includes the province, thus the retailLocationId.
 This is because at the moment there are no requirements involving such a thing and in this way schools can be still viewed from other retailLocations.
 
-## The default Admin user
+## Other useful commands
 
-Run the `pnpm add-admin` from a terminal within the `/packages/server` folder of the project to set up or repair the Admin user for both retail locations.
+**Important:** These commands can only be run after the project is fully set up, in other words if the following 2 commands have been run from a terminal:
+
+```bash
+# inside the root folder of the project (not inside any of its subdirectories)
+pnpm i
+```
+
+and
+
+```bash
+# inside the /packages/server folder (not inside any of its subdirectories)
+pnpm build
+```
+
+_Navigating to the `/packages/server` folder inside a terminal at the root folder can be done via the `cd .\packages\server` command_
+
+### Creating or repairing the default Admin user
+
+Run the `pnpm add-admin` command from a terminal within the `/packages/server` folder of the project to set up or repair the Admin user for both retail locations.
 
 When running the command:
 
 - if the default Admin doesn't exist, it and its relative permissions are automatically added inside the database;
 - otherwise, the permissions for the existing Admin are checked and restored automatically if any are missing.
+
+## Seeding users
+
+Run the `pnpm seed-users-with-books` command from a terminal within the `/packages/server` folder of the project to seed the database with some test users.
+
+Available options:
+
+- `-c, --clear`: clears all previously seeded users and their data from the database; **in alternative, the command `pnpm seed-users-with-books:clear` can also be used to perform the same task**.
+- `-r, --random [number]`: specify how much above the base of 10 the range of randomly created copies per user can go; the command only accepts integer numbers greater than zero.
 
 ## Social login
 

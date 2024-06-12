@@ -17,6 +17,8 @@
     "add-admin": "node dist/src/commander add-admin",
     "import:books": "node dist/src/commander import",
     "import:schools": "node dist/src/commander import --school",
+    "seed-users-with-books": "node dist/src/commander seed-users-with-books",
+    "seed-users-with-books:clear": "node dist/src/commander seed-users-with-books --clear",
     "lint": "eslint --ext .js,.ts ./ --fix --report-unused-disable-directives",
     "format": "prettier --write \"**/*.{js,ts,graphql,md,json,yml,prisma}\" --ignore-path .gitignore",
     "start": "nest start",

@@ -591,6 +591,7 @@ export class BookCopyResolver {
         prisma,
         [bookCopy.bookId],
         retailLocationId,
+        true,
       );
 
       const newBookCopyCode = codes[0];
