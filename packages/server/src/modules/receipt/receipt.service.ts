@@ -69,7 +69,7 @@ export class ReceiptService {
     });
 
     await this.mailService.sendMail({
-      to: user.email,
+      to: user,
       subject: `Il Mercatino del Libro - Receipt of ${receipt.type.toLowerCase()}`,
       template: "receipt",
       context: {

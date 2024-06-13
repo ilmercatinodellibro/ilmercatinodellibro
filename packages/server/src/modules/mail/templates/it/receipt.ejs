@@ -1,10 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+
   <body lang="it">
     <p>
-      Ciao <%= user.firstname %> <%= user.lastname %>! Puoi trovare la tua ricevuta di <%= receipt.type.toLowerCase() %> allegata a questa email.
+      Ciao <%= user.firstname %> <%= user.lastname %>! Puoi trovare la tua
+      ricevuta di <%= receipt.type.toLowerCase() %> allegata a questa email.
     </p>
 
     <p>Grazie!</p>
     <p>Il Mercatino del Libro</p>
+    <p>
+      <a href="<%= privacyPolicyUrl %>">
+        Visualizza la nostra politica sulla privacy
+      </a>
+    </p>
   </body>
 </html>

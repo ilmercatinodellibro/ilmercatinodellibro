@@ -34,7 +34,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly mailerService: MailService,
+    private readonly mailService: MailService,
     private readonly userService: UserService,
     @Inject(rootConfiguration.KEY)
     private readonly rootConfig: RootConfiguration,
@@ -114,12 +114,12 @@ export class AuthService {
     const url = `${this.rootConfig.clientUrl}/${locationId}/invite?token=${token}&email=${toEmail}`;
 
     try {
-      return await this.mailerService.sendMail({
+      return await this.mailService.sendMail({
+        to: toEmail,
         subject:
           locale === "en-US"
             ? "Invitation to join Il Mercatino del Libro"
             : "Invito a unirsi a Il Mercatino del Libro",
-        to: toEmail,
         context: {
           invitedByName: `${invitedBy.firstname} ${invitedBy.lastname}`,
           url,
@@ -136,8 +136,8 @@ export class AuthService {
     const locale = user.locale ?? "it";
 
     try {
-      return await this.mailerService.sendMail({
-        to: user.email,
+      return await this.mailService.sendMail({
+        to: user,
         subject: locale === "en-US" ? "Email confirmation" : "Conferma email",
         context: {
           name: `${user.firstname} ${user.lastname}`,
@@ -156,8 +156,8 @@ export class AuthService {
     const locale = user.locale ?? "it";
 
     try {
-      return await this.mailerService.sendMail({
-        to: user.email,
+      return await this.mailService.sendMail({
+        to: user,
         subject: locale === "en-US" ? "Reset password" : "Reimposta password",
         context: {
           name: `${user.firstname} ${user.lastname}`,

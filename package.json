@@ -50,6 +50,9 @@
     "@vitejs/plugin-vue": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077",
     "meow": "We are forced to pin to v9 because vite-plugin-checker breaks with meow@10+ which is full-ESM: https://github.com/fi3ework/vite-plugin-checker/issues/260"
   },
+  "patchesComments": {
+    "@nestjs-modules/mailer": "Allows to use Nodemailer plugins by exposing the transporters. See https://github.com/nest-modules/mailer/issues/1171#issuecomment-2141411992"
+  },
   "pnpm": {
     "overrides": {
       "vite": "^4.0.0",
@@ -57,7 +60,8 @@
       "stylelint@16>meow": "^9.0.0"
     },
     "patchedDependencies": {
-      "prisma-nestjs-graphql@19.2.0": "patches/prisma-nestjs-graphql@19.2.0.patch"
+      "prisma-nestjs-graphql@19.2.0": "patches/prisma-nestjs-graphql@19.2.0.patch",
+      "@nestjs-modules/mailer@1.9.1": "patches/@nestjs-modules__mailer@1.9.1.patch"
     }
   },
   "engines": {
