@@ -196,6 +196,8 @@ pnpm build
 
 If both installation and build were successful you can continue with the next steps. The build step is necessary because it generates the files used to run the commands inside the terminal.
 
+**N.B.** Just to be sure that the logos of the retail locations are correctly displayed, regardless of the way the software is installed, please **copy them over** from their respective folders inside the `packages/client/public/location/${locationCode}/logo/logo-${location}.svg` folder and into `packages/server/storage/location/${locationCode}/logo/` folder.
+
 ### 2. Import Books
 
 The first thing to do here is to import the books dataset from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Adozioni%20libri%20di%20testo) and place it into `./storage/tmp`. The file name should be `ALTEMILIAROMAGNA.csv`, so the location of the file, with respect to where the CLI command to run the server is executed, should be `./storage/tmp/ALTEMILIAROMAGNA.csv`.
