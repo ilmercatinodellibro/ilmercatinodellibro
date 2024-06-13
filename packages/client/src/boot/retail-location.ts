@@ -38,7 +38,9 @@ export default boot(({ router }) => {
         colors: {
           ...locationTheme.colors,
         },
-        logo: locationTheme.logo ? `/${locationTheme.logo}` : theme.value.logo,
+        logo: locationTheme.logo
+          ? `/location/${locationId}/logo/${locationTheme.logo}`
+          : theme.value.logo,
       };
       // to avoid making theme editor seen as dirty
       void nextTick(() => {

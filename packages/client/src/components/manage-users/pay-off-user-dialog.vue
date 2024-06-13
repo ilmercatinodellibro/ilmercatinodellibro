@@ -378,7 +378,7 @@ const {
 const {
   returnedBookCopies: returnedCopies,
   loading: returnedLoading,
-  refetch: refetchReturnedBookCopes,
+  refetch: refetchReturnedBookCopies,
 } = useGetReturnedBookCopiesQuery(() => ({
   userId: props.user.id,
   retailLocationId: selectedLocation.value.id,
@@ -526,7 +526,7 @@ async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
     };
     await Promise.all([
       refetchBookCopiesByOwner(queryArgs),
-      refetchReturnedBookCopes(queryArgs),
+      refetchReturnedBookCopies(queryArgs),
     ]);
     removeBookCopiesAfterAction(bookCopies);
   } catch {
@@ -618,7 +618,7 @@ function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
       removeBookCopiesAfterAction(bookCopies);
     } catch {
       notifyError(
-        t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}reimbursed`),
+        t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Reimbursed`),
       );
     }
   });
@@ -697,7 +697,7 @@ function returnAllBooks(remainingType: SettleRemainingType) {
     } catch {
       notifyError(t("common.genericErrorMessage"));
     } finally {
-      await Promise.all([refetchBookCopiesByOwner, refetchReturnedBookCopes]);
+      await Promise.all([refetchBookCopiesByOwner, refetchReturnedBookCopies]);
       onDialogOK();
     }
   });

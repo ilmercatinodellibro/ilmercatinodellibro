@@ -31,6 +31,7 @@ export class BookResolver {
       rows: rowsPerPage = 100,
       filter = {},
       retailLocationId,
+      copiesInStock,
     }: BookQueryArgs,
   ) {
     // TODO: Use Prisma full-text search
@@ -48,67 +49,50 @@ export class BookResolver {
     const where: Prisma.BookWhereInput = {
       retailLocationId,
 
-      meta: {
-        // This filter will only match either only available or not available if we only leave filter.isAvailable
-        // But we want filter.isAvailable: false to return every book, which means undefined in prisma's where syntax
-        isAvailable: filter.isAvailable ? true : undefined,
-      },
-
-      // Filter for sales
-      ...(filter.isSold === undefined
-        ? {}
-        : {
+      ...(copiesInStock
+        ? {
             copies: {
-              some: {
-                ...(filter.isSold
-                  ? {
-                      sales: {
-                        some: { refundedAt: null },
-                      },
-                    }
-                  : {
-                      OR: [
-                        { sales: {} },
-                        {
-                          sales: {
-                            every: {
-                              refundedAt: { not: null },
-                            },
-                          },
-                        },
-                      ],
-                    }),
-              },
+              some: {},
             },
-          }),
+          }
+        : {}),
 
-      // Filter for problems
-      ...(filter.hasProblems === undefined
-        ? {}
-        : {
-            copies: {
-              some: {
-                ...(filter.hasProblems
-                  ? {
-                      problems: {
-                        some: { resolvedAt: null },
-                      },
-                    }
-                  : {
-                      OR: [
-                        { problems: {} },
-                        {
-                          problems: {
-                            every: {
-                              resolvedAt: { not: null },
-                            },
-                          },
-                        },
-                      ],
-                    }),
+      AND: [
+        // Filter for availability
+        filter.isAvailable
+          ? {
+              meta: {
+                isAvailable: true,
               },
-            },
-          }),
+            }
+          : {},
+
+        // Filter for sales
+        filter.isSold
+          ? {
+              copies: {
+                some: {
+                  sales: {
+                    some: { refundedAt: null },
+                  },
+                },
+              },
+            }
+          : {},
+
+        // Filter for problems
+        filter.hasProblems
+          ? {
+              copies: {
+                some: {
+                  problems: {
+                    some: { resolvedAt: null },
+                  },
+                },
+              },
+            }
+          : {},
+      ],
 
       // Filters for school codes only if defined
       ...(schoolCodes

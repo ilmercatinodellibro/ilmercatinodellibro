@@ -5,7 +5,7 @@ export default {
   notAllRequestsDeleted: "Non tutte le richieste sono state cancellate.",
   notRequestDeleted: "Non è stato possibile cancellare la richiesta.",
   notAllReserved:
-    "NOn è stato possibile convertire tutte le richieste in prenotazioni",
+    "Non è stato possibile convertire tutte le richieste in prenotazioni",
   notReserved: "Non è stato possibile prenotare il libro specificato.",
   notAllIntoCart: "Non è stato possibile aggiungere tutti i libri al carrello.",
   notIntoCart:
@@ -44,4 +44,5 @@ export default {
     "Non è stato possibile segnalare il problema per la copia selezionata.",
   notSolveProblem:
     "Non è stato possibile risolvere il problema per la copia selezionata.",
+  notRequested: "Non è stato possibile richiedere il libro selezionato.",
 };

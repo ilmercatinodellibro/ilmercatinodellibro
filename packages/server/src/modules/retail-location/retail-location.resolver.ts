@@ -1,17 +1,20 @@
 import { BadRequestException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Prisma, User } from "@prisma/client";
+import { GraphQLVoid } from "graphql-scalars";
 import { merge } from "lodash";
 import { RetailLocation } from "src/@generated/retail-location";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Input } from "src/modules/auth/decorators/input.decorator";
 import { UpdateRetailLocationSettingsInput } from "src/modules/retail-location/retail-location.input";
+import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
 import { Public } from "../auth/decorators/public-route.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   LocationBoundQueryArgs,
+  ResetRetailLocationInput,
   RetailLocationQueryArgs,
   StatisticsQueryResult,
 } from "./retail-location.args";
@@ -21,6 +24,7 @@ export class RetailLocationResolver {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    private readonly locationService: RetailLocationService,
   ) {}
 
   @Public()
@@ -118,6 +122,21 @@ export class RetailLocationResolver {
         sellRate,
       },
     });
+  }
+
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async resetRetailLocation(
+    @Input() { retailLocationId }: ResetRetailLocationInput,
+    @CurrentUser() user: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: user.id,
+      retailLocationId,
+      role: "ADMIN",
+    });
+
+    await this.locationService.backupLocation(retailLocationId);
+    await this.locationService.cleanupLocation(retailLocationId);
   }
 
   private readonly notSoldOrRefunded: Prisma.BookCopyWhereInput[] = [

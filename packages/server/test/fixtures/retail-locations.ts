@@ -441,7 +441,7 @@ export const RE_RETAIL_POINT: translatedRetailLocationCreateInput = {
     },
     // TODO: THis image is saved on client side since right now we do not support custom theme
     // in the future consider seeding the images in the DB too
-    logo: "logo/logo-reggio-emilia.svg",
+    logo: "logo-reggio-emilia.svg",
   } satisfies Theme,
 };
 
@@ -473,7 +473,7 @@ export const MO_RETAIL_POINT: translatedRetailLocationCreateInput = {
     },
     // TODO: THis image is saved on client side since right now we do not support custom theme
     // in the future consider seeding the images in the DB too
-    logo: "logo/logo-modena.svg",
+    logo: "logo-modena.svg",
   } satisfies Theme,
 };
 

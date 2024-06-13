@@ -198,7 +198,7 @@ If both installation and build were successful you can continue with the next st
 
 ### 2. Import Books
 
-The first thing to do here is to import the books dataset from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Adozioni%20libri%20di%20testo) and place it into the folder called `tmp-files`. The file name should be `ALTEMILIAROMAGNA.csv`, so the location of the file, with respect to where the CLI command to run the server is executed, should be `./tmp-files/ALTEMILIAROMAGNA.csv`.
+The first thing to do here is to import the books dataset from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Adozioni%20libri%20di%20testo) and place it into `./storage/tmp`. The file name should be `ALTEMILIAROMAGNA.csv`, so the location of the file, with respect to where the CLI command to run the server is executed, should be `./storage/tmp/ALTEMILIAROMAGNA.csv`.
 
 This operation **must** be executed before importing the schools, because this CSV directs how the content of the other CSVs needs to be managed and parsed.
 In particular, it prints out a list of School codes that were found during the analysis of the books, and only the schools with at least a book in the `ALTEMILIAROMAGNA.csv` can be later added to the DB.
@@ -221,9 +221,9 @@ Before being able to actually import School and School Courses, it is necessary 
 
 1. Have run the import of books in step 1.
 2. Download peer schools's CSV for the current year from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Scuole) It is in the section _Informazioni anagrafiche scuole paritarie_.
-3. Rename CSV downloaded in point 2 of this list to `SCUOLE_PARITARIE.csv` and place it into the folder `./tmp-files/`.
+3. Rename CSV downloaded in point 2 of this list to `SCUOLE_PARITARIE.csv` and place it into the folder `./storage/tmp/`.
 4. From the same link in point 2 of this list, download the CSV for the state's schools from the area called _Informazioni anagrafiche scuole statali_ and pay attention to its year.
-5. Rename CSV downloaded in point 4 of this list to `SCUOLE_STATALI.csv` and place it into the folder `./tmp-files/`.
+5. Rename CSV downloaded in point 4 of this list to `SCUOLE_STATALI.csv` and place it into the folder `./storage/tmp/`.
 
 After the setup operations are concluded, you can then run a command similar to the command run for importing books:
 
