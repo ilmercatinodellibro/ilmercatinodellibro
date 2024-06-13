@@ -8,7 +8,7 @@ const adminData: Pick<User, "email" | "password" | "firstname" | "lastname"> = {
   email: "info@ilmercatinodellibro.com",
   password:
     "$argon2id$v=19$m=65536,t=3,p=4$Ae3q36sm3zzXuh9IOFigaA$orXmayUt1IKLZC8TXGPXdb2osyBzZspVToEmeMYgvU8",
-  firstname: "Il Mercatino de Libro",
+  firstname: "Il Mercatino del Libro",
   lastname: "",
 };
 
