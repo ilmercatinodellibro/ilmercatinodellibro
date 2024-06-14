@@ -373,15 +373,16 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       });
 
       // Connect requests and reservations to the sales
-      let i = 0;
-      for (const sale of sales) {
-        await this.#updateReservationsRequestsAndCart(sale, cart);
+      await Promise.all(
+        sales.map(async (sale, i) => {
+          await this.#updateReservationsRequestsAndCart(sale, cart);
 
-        if (i % 3 === 2) {
-          await this.#refundBookCopy(sale, retailLocationId);
-        }
-        i++;
-      }
+          if (i % 3 === 2) {
+            await this.#refundBookCopy(sale, retailLocationId);
+          }
+          i++;
+        }),
+      );
     } catch (error) {
       this.logger.error("Something went wrong: ", error);
     }
