@@ -187,6 +187,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
               lastname: faker.person.lastName(),
               password: PASSWORD_STUB_HASH,
               phoneNumber: faker.string.numeric({ length: 10 }),
+              // TODO: consider making this random, with a strong bias towards true
               emailVerified: true,
             },
           })),
@@ -204,6 +205,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
               lastname: faker.person.lastName(),
               password: PASSWORD_STUB_HASH,
               phoneNumber: faker.string.numeric({ length: 10 }),
+              // TODO: consider making this random, with a strong bias towards true
               emailVerified: true,
             },
           })),
