@@ -458,7 +458,6 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       this.prisma,
       [bookCopy.bookId],
       retailLocationId,
-      true,
     );
 
     return this.prisma.bookCopy.update({
