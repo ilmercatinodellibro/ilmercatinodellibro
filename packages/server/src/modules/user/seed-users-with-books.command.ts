@@ -96,6 +96,26 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     );
 
     for (const id of ["re", "mo"]) {
+      const { _count, name } =
+        await this.prisma.retailLocation.findFirstOrThrow({
+          where: {
+            id,
+          },
+          include: {
+            _count: {
+              select: {
+                books: true,
+              },
+            },
+          },
+        });
+
+      if (_count.books < this.BOOKS_PER_USER_BASE + (options?.random ?? 5)) {
+        this.logger.error(
+          `The random displacement is too high for the amount of books present in the warehouse of ${name}. The maximum is ${_count.books - this.BOOKS_PER_USER_BASE}`,
+        );
+        return;
+      }
       await this.#seedRetailLocation(id, options?.random);
     }
 
