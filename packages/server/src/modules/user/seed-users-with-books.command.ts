@@ -123,13 +123,21 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     this.logger.log(`Creating the users for ${retailLocation.name}`);
 
     // TODO: modify this to make seeding upsert possible
-    for (let i = 0; i < this.USERS_AMOUNT; i++) {
-      try {
-        await this.#createBuyerAndSeller(i, randomDisplacement, retailLocation);
-      } catch (error) {
-        this.logger.error(error);
-        return;
-      }
+    try {
+      await Promise.all(
+        new Array(this.USERS_AMOUNT)
+          .fill(null)
+          .map((_, index) =>
+            this.#createBuyerAndSeller(
+              index,
+              randomDisplacement,
+              retailLocation,
+            ),
+          ),
+      );
+    } catch (error) {
+      this.logger.error(error);
+      return;
     }
 
     this.logger.log(`Users for ${retailLocation.name} created successfully`);
