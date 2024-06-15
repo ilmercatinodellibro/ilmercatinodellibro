@@ -401,19 +401,19 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
 </section>
 `;
 
-interface retailLocationInfo {
+interface RetailLocationInfo {
   whoAreWeContent: string;
   joinUsContent: string;
   faqContent: string;
 }
 
-type locales = "it" | "en-US";
+type Locales = "it" | "en-US";
 
-type translatedRetailLocationCreateInput = Prisma.RetailLocationCreateInput & {
-  infoPagesContent: Record<locales, retailLocationInfo>;
+type TranslatedRetailLocationCreateInput = Prisma.RetailLocationCreateInput & {
+  infoPagesContent: Record<Locales, RetailLocationInfo>;
 };
 
-export const RE_RETAIL_POINT: translatedRetailLocationCreateInput = {
+export const RE_RETAIL_POINT: TranslatedRetailLocationCreateInput = {
   id: "re",
   name: "Reggio Emilia",
   email: "info@ilmercatinodellibro.com",
@@ -445,7 +445,7 @@ export const RE_RETAIL_POINT: translatedRetailLocationCreateInput = {
   } satisfies Theme,
 };
 
-export const MO_RETAIL_POINT: translatedRetailLocationCreateInput = {
+export const MO_RETAIL_POINT: TranslatedRetailLocationCreateInput = {
   id: "mo",
   name: "Modena",
   email: " info-mo@ilmercatinodellibro.com",

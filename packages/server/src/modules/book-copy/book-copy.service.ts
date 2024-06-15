@@ -9,7 +9,7 @@ export class BookCopyService {
     retailLocationId: string,
   ) {
     const { warehouseMaxBlockSize } =
-      await prisma.retailLocation.findFirstOrThrow({
+      await prisma.retailLocation.findUniqueOrThrow({
         where: {
           id: retailLocationId,
         },
@@ -43,13 +43,20 @@ export class BookCopyService {
           // Only book copies that were not sold must be considered. To control this, one these two conditions must be met:
           // 1 - all existing sale records related to that copy must have been refunded -> means the book copy status is currently not sold
           // 2 - or that book copy does not have any sale record at all
-          sales: {
-            every: {
-              refundedAt: {
-                not: null,
+          OR: [
+            {
+              sales: {
+                every: {
+                  refundedAt: {
+                    not: null,
+                  },
+                },
               },
             },
-          },
+            {
+              sales: { none: {} },
+            },
+          ],
           // Book copy was not returned to the original owner during settlement operation
           returnedBy: {
             is: null,

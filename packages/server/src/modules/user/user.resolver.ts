@@ -204,6 +204,9 @@ export class UserResolver {
         skip: page * rowsPerPage,
         take: rowsPerPage,
         where,
+        orderBy: {
+          email: "asc",
+        },
       }),
     ]);
 
@@ -456,6 +459,18 @@ export class UserResolver {
                 book: {
                   retailLocationId,
                 },
+                OR: [
+                  {
+                    sale: {
+                      refundedAt: {
+                        not: null,
+                      },
+                    },
+                  },
+                  {
+                    saleId: null,
+                  },
+                ],
               },
             },
           },
