@@ -1,0 +1,33 @@
+diff --git a/dist/mailer.service.d.ts b/dist/mailer.service.d.ts
+index 1a21cb883bfd0e1fa8dfca0d486a4b74107797a5..54f6768773c6ce84ea86f9922a00fa38bca72a86 100644
+--- a/dist/mailer.service.d.ts
++++ b/dist/mailer.service.d.ts
+@@ -1,4 +1,4 @@
+-import { SentMessageInfo } from 'nodemailer';
++import { SentMessageInfo, Transporter } from 'nodemailer';
+ import * as smtpTransport from 'nodemailer/lib/smtp-transport';
+ import { MailerOptions } from './interfaces/mailer-options.interface';
+ import { ISendMailOptions } from './interfaces/send-mail-options.interface';
+@@ -13,4 +13,5 @@ export declare class MailerService {
+     constructor(mailerOptions: MailerOptions, transportFactory: IMailerTransportFactory);
+     sendMail(sendMailOptions: ISendMailOptions): Promise<SentMessageInfo>;
+     addTransporter(transporterName: string, config: string | smtpTransport | smtpTransport.Options): string;
++    getTransporters(): { default: Transporter; [name: string]: Transporter; };
+ }
+diff --git a/dist/mailer.service.js b/dist/mailer.service.js
+index e531d5719c5465568975e66380af24b7f33d7243..44c759bed37a077e9623bef565b22863a40e37ee 100644
+--- a/dist/mailer.service.js
++++ b/dist/mailer.service.js
+@@ -84,6 +84,12 @@ let MailerService = exports.MailerService = class MailerService {
+         this.initTemplateAdapter(this.templateAdapter, this.transporters.get(transporterName));
+         return transporterName;
+     }
++    getTransporters() {
++        return {
++            default: this.transporter,
++            ...Object.fromEntries(this.transporters),
++        }
++    }
+ };
+ exports.MailerService = MailerService = tslib_1.__decorate([
+     (0, common_1.Injectable)(),

@@ -186,26 +186,24 @@ export class RetailLocationResolver {
       message: "You do not have permission to view these reservations.",
     });
 
-    const getTotalBooksWithProblems = async () => ({
-      totalBooksWithProblems: await this.prisma.bookCopy.count({
-        where: {
-          book: {
-            retailLocationId,
-          },
-          problems: {
-            some: {
-              resolvedAt: null,
-            },
-          },
-          returnedAt: {
-            not: null,
+    const getTotalBooksWithProblems = this.prisma.bookCopy.count({
+      where: {
+        book: {
+          retailLocationId,
+        },
+        problems: {
+          some: {
+            resolvedAt: null,
           },
         },
-      }),
+        returnedAt: {
+          not: null,
+        },
+      },
     });
 
-    const getTotalPresentBooks = async () => ({
-      totalPresentBooks: await this.prisma.bookCopy.count({
+    const getTotalPresentBooks = () =>
+      this.prisma.bookCopy.count({
         where: {
           book: {
             retailLocationId,
@@ -220,11 +218,10 @@ export class RetailLocationResolver {
             },
           ],
         },
-      }),
-    });
+      });
 
-    const getTotalSoldBooks = async () => ({
-      totalSoldBooks: await this.prisma.sale.count({
+    const getTotalSoldBooks = () =>
+      this.prisma.sale.count({
         where: {
           refundedAt: null,
           bookCopy: {
@@ -233,93 +230,83 @@ export class RetailLocationResolver {
             },
           },
         },
-      }),
-    });
+      });
 
-    const getTotalReservedBooks = async () => ({
-      totalReservedBooks: await this.prisma.reservation.count({
-        where: {
-          book: {
-            retailLocationId,
-          },
-          deletedAt: null,
+    const getTotalReservedBooks = this.prisma.reservation.count({
+      where: {
+        book: {
+          retailLocationId,
         },
-      }),
+        deletedAt: null,
+      },
     });
 
-    const getTotalRequestedBooks = async () => ({
-      totalRequestedBooks: await this.prisma.bookRequest.count({
-        where: {
-          book: {
-            retailLocationId,
-          },
-          deletedAt: null,
+    const getTotalRequestedBooks = this.prisma.bookRequest.count({
+      where: {
+        book: {
+          retailLocationId,
         },
-      }),
+        deletedAt: null,
+      },
     });
 
-    const getTotalUsers = async () => ({
-      totalUsers: await this.prisma.user.count({
-        where: {
-          OR: [
-            {
-              requestedBooks: {
-                some: {
-                  book: {
-                    retailLocationId,
-                  },
-                  deletedAt: null,
+    const getTotalUsers = this.prisma.user.count({
+      where: {
+        OR: [
+          {
+            requestedBooks: {
+              some: {
+                book: {
+                  retailLocationId,
+                },
+                deletedAt: null,
+              },
+            },
+          },
+          {
+            bookCopies: {
+              some: {
+                book: {
+                  retailLocationId,
                 },
               },
             },
-            {
-              bookCopies: {
-                some: {
-                  book: {
-                    retailLocationId,
-                  },
-                },
-              },
-            },
-          ],
-        },
-      }),
+          },
+        ],
+      },
     });
 
-    const getActiveSales = async () => ({
-      activeSales: await this.prisma.sale.findMany({
-        where: {
-          refundedAt: null,
-          bookCopy: {
+    const getActiveSales = this.prisma.sale.findMany({
+      where: {
+        refundedAt: null,
+        bookCopy: {
+          book: {
+            retailLocationId,
+          },
+        },
+      },
+      include: {
+        bookCopy: {
+          select: {
+            settledAt: true,
             book: {
-              retailLocationId,
-            },
-          },
-        },
-        include: {
-          bookCopy: {
-            select: {
-              settledAt: true,
-              book: {
-                select: {
-                  originalPrice: true,
-                },
+              select: {
+                originalPrice: true,
               },
             },
           },
         },
-      }),
+      },
     });
 
     const getTotals = async () => {
-      const [{ activeSales }, { sellRate, buyRate }] = await Promise.all([
-        getActiveSales(),
+      const [activeSales, { sellRate, buyRate }] = await Promise.all([
+        getActiveSales,
         this.retailLocation({
           id: retailLocationId,
         }),
       ]);
 
-      // TODO: Include discount
       let totalRevenue = 0;
       let settledTotal = 0;
       let settleableTotal = 0;
@@ -347,20 +334,20 @@ export class RetailLocationResolver {
     };
 
     const [
-      { totalBooksWithProblems },
-      { totalPresentBooks },
-      { totalSoldBooks },
-      { totalReservedBooks },
-      { totalRequestedBooks },
-      { totalUsers },
+      totalBooksWithProblems,
+      totalPresentBooks,
+      totalSoldBooks,
+      totalReservedBooks,
+      totalRequestedBooks,
+      totalUsers,
       { settleableTotal, settledTotal, totalRevenue },
     ] = await Promise.all([
-      getTotalBooksWithProblems(),
-      getTotalPresentBooks(),
-      getTotalSoldBooks(),
-      getTotalReservedBooks(),
-      getTotalRequestedBooks(),
-      getTotalUsers(),
+      getTotalBooksWithProblems,
+      getTotalPresentBooks,
+      getTotalSoldBooks,
+      getTotalReservedBooks,
+      getTotalRequestedBooks,
+      getTotalUsers,
       getTotals(),
     ]);
 
