@@ -402,7 +402,6 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
           if (i % 3 === 2) {
             await this.#refundBookCopy(sale, retailLocationId);
           }
-          i++;
         }),
       );
     } catch (error) {
