@@ -202,35 +202,33 @@ export class RetailLocationResolver {
       },
     });
 
-    const getTotalPresentBooks = () =>
-      this.prisma.bookCopy.count({
-        where: {
+    const getTotalPresentBooks = this.prisma.bookCopy.count({
+      where: {
+        book: {
+          retailLocationId,
+        },
+        returnedAt: null,
+        AND: [
+          {
+            OR: this.noProblemsFilter,
+          },
+          {
+            OR: this.notSoldOrRefunded,
+          },
+        ],
+      },
+    });
+
+    const getTotalSoldBooks = this.prisma.sale.count({
+      where: {
+        refundedAt: null,
+        bookCopy: {
           book: {
             retailLocationId,
           },
-          returnedAt: null,
-          AND: [
-            {
-              OR: this.noProblemsFilter,
-            },
-            {
-              OR: this.notSoldOrRefunded,
-            },
-          ],
         },
-      });
-
-    const getTotalSoldBooks = () =>
-      this.prisma.sale.count({
-        where: {
-          refundedAt: null,
-          bookCopy: {
-            book: {
-              retailLocationId,
-            },
-          },
-        },
-      });
+      },
+    });
 
     const getTotalReservedBooks = this.prisma.reservation.count({
       where: {
