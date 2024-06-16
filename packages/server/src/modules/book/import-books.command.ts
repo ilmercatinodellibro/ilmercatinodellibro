@@ -253,6 +253,12 @@ export class ImportBooksCommand extends CommandRunner {
           return null;
         }
 
+        const price = record[12];
+        // Skip book if no price has been defined
+        if (!price || price === "" || price === "0") {
+          return null;
+        }
+
         const schoolCode = record[0];
         const provinceCode = schoolCode.substring(0, 2);
         if (locationsPrefixes.includes(provinceCode)) {
