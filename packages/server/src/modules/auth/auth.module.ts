@@ -50,10 +50,7 @@ import { LocalStrategy } from "./strategies/local.strategy";
         { facebook }: AuthConfiguration,
         userService: UserService,
       ) {
-        if (
-          facebook.clientId === undefined ||
-          facebook.clientSecret === undefined
-        ) {
+        if (!facebook.clientId || !facebook.clientSecret) {
           return null;
         }
 
@@ -76,10 +73,7 @@ import { LocalStrategy } from "./strategies/local.strategy";
         { google }: AuthConfiguration,
         userService: UserService,
       ) {
-        if (
-          google.clientId === undefined ||
-          google.clientSecret === undefined
-        ) {
+        if (!google.clientId || !google.clientSecret) {
           return null;
         }
 
