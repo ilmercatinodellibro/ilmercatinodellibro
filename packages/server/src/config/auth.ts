@@ -7,14 +7,14 @@ const authSchema = z.object({
 
   facebook: z
     .object({
-      clientId: z.string().nullable(),
-      clientSecret: z.string().nullable(),
+      clientId: z.string(),
+      clientSecret: z.string(),
     })
     .partial(),
   google: z
     .object({
-      clientId: z.string().nullable(),
-      clientSecret: z.string().nullable(),
+      clientId: z.string(),
+      clientSecret: z.string(),
     })
     .partial(),
 });
