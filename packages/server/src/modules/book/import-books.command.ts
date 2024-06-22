@@ -255,7 +255,7 @@ export class ImportBooksCommand extends CommandRunner {
 
         const price = record[12];
         // Skip book if no price has been defined
-        if (!price || price === "" || price === "0") {
+        if (!price || price === "" || price === "0" || price === "ND") {
           return null;
         }
 
