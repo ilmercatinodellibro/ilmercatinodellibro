@@ -55,7 +55,10 @@
 
       <q-separator />
 
-      <q-card-section class="no-padding">
+      <q-card-section
+        v-if="selectedLocation.registrationEnabled"
+        class="no-padding"
+      >
         <p class="text-black-87">{{ t("auth.noAccount") }}</p>
 
         <q-btn
@@ -97,8 +100,6 @@ import { emailRule, requiredRule } from "src/helpers/rules";
 import { useLoginMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 
-const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
-
 const props = defineProps<{
   emailVerified?: boolean;
 }>();
@@ -106,6 +107,11 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const { theme } = useTheme();
+const { selectedLocation } = useRetailLocationService();
+
+const SOCIAL_LOGIN_ENABLED =
+  process.env.SOCIAL_LOGIN_ENABLED === "true" &&
+  selectedLocation.value.registrationEnabled;
 
 if (props.emailVerified) {
   Notify.create({
@@ -124,7 +130,6 @@ const user = ref<LoginPayload>({
 
 const showPassword = ref(false);
 
-const { selectedLocation } = useRetailLocationService();
 const { login, loading: isLoggingIn } = useLoginMutation();
 
 async function onSubmit() {

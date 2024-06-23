@@ -541,6 +541,7 @@ function openSettings() {
       buyRate: selectedLocation.value.buyRate,
       maxBookingDays: selectedLocation.value.maxBookingDays,
       sellRate: selectedLocation.value.sellRate,
+      registrationEnabled: selectedLocation.value.registrationEnabled,
       payOffEnabled: selectedLocation.value.payOffEnabled,
     } satisfies RetailLocationSettingsFragment,
   }).onOk(async (payload: SettingsUpdate) => {

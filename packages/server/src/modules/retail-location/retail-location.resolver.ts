@@ -85,6 +85,7 @@ export class RetailLocationResolver {
     @Input()
     {
       maxBookingDays,
+      registrationEnabled,
       payOffEnabled,
       retailLocationId,
       warehouseMaxBlockSize,
@@ -117,6 +118,7 @@ export class RetailLocationResolver {
       data: {
         maxBookingDays,
         warehouseMaxBlockSize,
+        registrationEnabled,
         payOffEnabled,
         buyRate,
         sellRate,

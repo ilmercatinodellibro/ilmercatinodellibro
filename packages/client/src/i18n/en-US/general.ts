@@ -67,6 +67,7 @@ export default {
     reservationDays: "Number of Days for Reservation",
     maxBooksDimension:
       "Max dimension of the book stacks to allow for fragmentation",
+    registrationEnabled: "Enable the possibility to register",
     payOffEnabled: "Enable the possibility to perform payoffs",
     updateRatesConfirmTitle: "Update the purchase/sale rate?",
     updateRatesConfirmMessage:

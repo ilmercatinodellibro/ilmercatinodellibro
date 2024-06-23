@@ -10,6 +10,7 @@ fragment Theme on Theme {
 fragment RetailLocationSettings on RetailLocation {
   buyRate
   sellRate
+  registrationEnabled
   payOffEnabled
   maxBookingDays
   warehouseMaxBlockSize

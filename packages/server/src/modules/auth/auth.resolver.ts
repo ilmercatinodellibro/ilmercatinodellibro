@@ -1,4 +1,8 @@
-import { UnprocessableEntityException, UseGuards } from "@nestjs/common";
+import {
+  NotAcceptableException,
+  UnprocessableEntityException,
+  UseGuards,
+} from "@nestjs/common";
 import { Mutation, Query, Resolver } from "@nestjs/graphql";
 import { User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
@@ -38,6 +42,22 @@ export class AuthResolver {
   @Public()
   @Mutation(() => GraphQLVoid, { nullable: true })
   async register(@Input() payload: RegisterUserPayload) {
+    const { registrationEnabled } =
+      await this.prisma.retailLocation.findUniqueOrThrow({
+        where: {
+          id: payload.retailLocationId,
+        },
+        select: {
+          registrationEnabled: true,
+        },
+      });
+
+    if (!registrationEnabled) {
+      throw new NotAcceptableException(
+        "Registration is currently disabled for this retail location",
+      );
+    }
+
     const existingUser = await this.userService.findUserByEmail(payload.email);
     // To prevent user enumeration attacks, we don't throw an error
     // TODO: it can still be guessed with the response time difference, add a relevant delay

@@ -40,6 +40,13 @@
           type="number"
         />
         <span class="gap-16 items-center q-pb-sm q-pt-none q-px-none row">
+          <q-checkbox
+            v-model="newSettings.registrationEnabled"
+            color="primary"
+          />
+          {{ t("general.settings.registrationEnabled") }}
+        </span>
+        <span class="gap-16 items-center q-pb-sm q-pt-none q-px-none row">
           <q-checkbox v-model="newSettings.payOffEnabled" color="primary" />
           {{ t("general.settings.payOffEnabled") }}
         </span>
@@ -101,6 +108,7 @@ const { hasAdminRole } = useAuthService();
 
 const newSettings = reactive<RetailLocationSettingsFragment>({
   maxBookingDays: props.maxBookingDays,
+  registrationEnabled: props.registrationEnabled,
   payOffEnabled: props.payOffEnabled,
   warehouseMaxBlockSize: props.warehouseMaxBlockSize,
   buyRate: props.buyRate,

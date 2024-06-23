@@ -10,6 +10,7 @@ export class UpdateRetailLocationSettingsInput extends IntersectionType(
     RetailLocation,
     [
       "maxBookingDays",
+      "registrationEnabled",
       "payOffEnabled",
       "warehouseMaxBlockSize",
       "buyRate",

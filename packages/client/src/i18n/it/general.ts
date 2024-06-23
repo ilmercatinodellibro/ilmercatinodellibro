@@ -67,6 +67,7 @@ export default {
     reservationDays: "Numero di Giorni per Prenotazione",
     maxBooksDimension:
       "Dimensione max dei blocchi di libri da inserire per permettere la frammentazione",
+    registrationEnabled: "Abilita la possibilità di registrarsi",
     payOffEnabled: "Abilita la possibilità di effettuare liquidazioni",
     updateRatesConfirmTitle: "Aggiornare l'aliquota di acquisto/vendita?",
     updateRatesConfirmMessage:
