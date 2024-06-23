@@ -85,7 +85,7 @@ export class MailService {
       })) as SentMessageInfo;
     } catch (error) {
       Logger.error("Error sending email", "MailService", error);
-      return false;
+      throw error;
     }
   }
 
