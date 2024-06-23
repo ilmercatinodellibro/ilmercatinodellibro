@@ -75,12 +75,17 @@ export class AuthResolver {
       user.email,
     );
 
-    //TODO: use queues instead of doing await
-    await this.authService.sendVerificationLink(
-      payload.retailLocationId,
-      user,
-      token,
-    );
+    try {
+      //TODO: use queues instead of doing await
+      await this.authService.sendVerificationLink(
+        payload.retailLocationId,
+        user,
+        token,
+      );
+    } catch (error) {
+      await this.userService.removeUser(user.id);
+      throw error;
+    }
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
