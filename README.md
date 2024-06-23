@@ -100,8 +100,8 @@ It will list the minimal requirements needed to be able to install the code and 
    1. Preferably in another terminal, `cd` into `packages/client`.
    2. Copy and rename the file `.env.example` to `.env`.
    3. Open the `.env` file in edit mode.
-   4. Replace `DOMAIN="localhost:3000"` with the domain of your application. It should be `https://www.ilmercatinodellibro.com/`.
-   5. If you have configured some options for social login, set `SOCIAL_LOGIN_ENABLED=true` as well as either (or both) `FACEBOOK_LOGIN_ENABLED=true` and `GOOGLE_LOGIN_ENABLED=true` according to your needs.
+   4. Replace `DOMAIN="localhost:3000"` with the domain of your application. It should be `www.ilmercatinodellibro.com`.
+   5. If you have configured some options for social login, set either (or both) `FACEBOOK_LOGIN_ENABLED=true` and `GOOGLE_LOGIN_ENABLED=true` according to your needs.
    6. Save and close this file.
 10. In the terminal, go back to the root of the code, where this file is located.
 11. From there run `pnpm i` and wait until it completes.
