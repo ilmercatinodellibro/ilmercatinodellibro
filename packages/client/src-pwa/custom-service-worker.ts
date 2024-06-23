@@ -33,7 +33,16 @@ if (process.env.PROD) {
   registerRoute(
     new NavigationRoute(
       createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
-      { denylist: [/sw\.js$/, /workbox-(.)*\.js$/] },
+      {
+        denylist: [
+          /sw\.js$/,
+          /workbox-(.)*\.js$/,
+          // Had to add this line to prevent Webworker from caching the response
+          /auth\/*/,
+          /receipts\/*/,
+          /location\/*/,
+        ],
+      },
     ),
   );
 }
