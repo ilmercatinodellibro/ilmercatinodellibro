@@ -108,7 +108,7 @@ It will list the minimal requirements needed to be able to install the code and 
 12. Go back to the server folder `cd packages/server` and in there run:
     1. `pnpm generate` to create GraphQL types.
     2. `pnpm db:start` to crate Docker container for PostgreDB.
-    3. `pnpm prisma migrate reset -f` to reset database, run migrations and create the structure of the DB and finally seed the DB. Do not run this command when Mercatino is in production, or all the data will be lost!
+    3. `pnpm migrate:reset` to reset database, run migrations and create the structure of the DB and finally seed the DB. Do not run this command when Mercatino is in production, or all the data will be lost!
     4. `pnpm build` to prepare the server app
     5. Now follow instruction inside the [server's README.md](./packages/server/README.md#2-import-books) to import books and schools.
     6. Now run `pnpm start:prod` to start the application of the server.
