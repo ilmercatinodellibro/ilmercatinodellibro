@@ -146,7 +146,9 @@ export class AuthService {
         template: `${locale}/welcome`,
       });
     } catch {
-      throw new UnprocessableEntityException("Unable to send email");
+      throw new UnprocessableEntityException(
+        "Unable to send verification email",
+      );
     }
   }
 
