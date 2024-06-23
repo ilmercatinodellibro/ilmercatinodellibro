@@ -86,7 +86,7 @@ const IT_RE_FAQ = `<section>
     e quali no.&nbsp;<br />Durante la registrazione è fondamentale
     accettare<span
       > i  <a
-        href="/2-uncategorised/2-termini-e-condizioni-d-utilizzo"
+        href="/tos-privacy/tos-re.pdf"
         rel="alternate"
         >Termini e condizioni di utilizzo</a
       > e i cookies&nbsp;</span
@@ -244,7 +244,7 @@ const IT_RE_FAQ = `<section>
         </p>
         <p>
           Ricordatevi sempre di accettare i <a
-            href="/2-uncategorised/2-termini-e-condizioni-d-utilizzo"
+            href="/tos-privacy/tos-re.pdf"
             rel="alternate"
             >Termini e condizioni di utilizzo</a
           > e i cookies!
@@ -333,7 +333,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
     <span> Durante la registrazione è fondamentale accettare</span
     ><span>
       i <a
-        href="/2-uncategorised/2-termini-e-condizioni-d-utilizzo"
+        href="/tos-privacy/tos-mo.pdf"
         rel="alternate"
       >
         Termini e condizioni di utilizzo</a
