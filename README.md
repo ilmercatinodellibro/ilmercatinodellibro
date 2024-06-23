@@ -90,7 +90,7 @@ It will list the minimal requirements needed to be able to install the code and 
    6. Replace `APPLICATION_SECRET=secret` with `APPLICATION_SECRET=the_secret_generated_in_previous_step`.
    7. Increase `TOKEN_EXPIRATION` however you like. Suggest `4h` or `8h`.
    8. If a Facebook or Google login has been created to be linked to the app, set the correct `SOCIAL_CLIENT_ID` and respective `SOCIAL_CLIENT_SECRET`. To create a social app and get the necessary configurations, please follow the [instructions listed here](./packages/server/README.md#social-login).
-   9. Set the preferred `SERVER_PORT` according to your needs.
+   9. Change `CLIENT_URL` and `SERVER_URL` to your domain. It should be `https://www.ilmercatinodellibro.com`. Note that in this case you need to define the protocol (`https://`) too. If you are using a different endpoint for the server than the client, make sure to replace it with the correct one.
    10. Set `DB_USER` and `DB_PASS` to a more secure value. Remember that if you change these after the database in docker has been created and seeded, the app may no longer be able to connect to the database.
    11. Be sure to replace the values of all the different `MAIL_*` entries with the values provided you by your email provider.
    12. Set `PUSH_NOTIFICATIONS_DRIVER=local` to `PUSH_NOTIFICATIONS_DRIVER=void`
@@ -100,7 +100,7 @@ It will list the minimal requirements needed to be able to install the code and 
    1. Preferably in another terminal, `cd` into `packages/client`.
    2. Copy and rename the file `.env.example` to `.env`.
    3. Open the `.env` file in edit mode.
-   4. Replace `DOMAIN="localhost:3000"` with the domain of your application. It should be `www.ilmercatinodellibro.com`.
+   4. Replace `DOMAIN` with the domain of your application. It should be `www.ilmercatinodellibro.com`. Notice that in this case you shouldn't include the protocol (`https://`) since it will be added automatically.
    5. If you have configured some options for social login, set either (or both) `FACEBOOK_LOGIN_ENABLED=true` and `GOOGLE_LOGIN_ENABLED=true` according to your needs.
    6. Save and close this file.
 10. In the terminal, go back to the root of the code, where this file is located.
