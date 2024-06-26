@@ -84,7 +84,6 @@ const dataToShow = computed<
   {
     label: "Totale Utenti",
     value: retailLocationStatistics.value?.totalUsers.toFixed(2),
-    suffix: "€",
   },
 ]);
 </script>
