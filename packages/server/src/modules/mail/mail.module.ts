@@ -13,7 +13,7 @@ import { MailService } from "./mail.service";
         transport: {
           host: emailConfiguration.host,
           port: emailConfiguration.port,
-          secure: false,
+          secure: emailConfiguration.isSecure,
           auth: {
             user: emailConfiguration.user,
             pass: emailConfiguration.pass,
