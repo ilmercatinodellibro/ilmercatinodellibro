@@ -83,7 +83,7 @@ const dataToShow = computed<
   },
   {
     label: "Totale Utenti",
-    value: retailLocationStatistics.value?.totalUsers.toFixed(2),
+    value: retailLocationStatistics.value?.totalUsers.toString(),
   },
 ]);
 </script>
