@@ -33,7 +33,8 @@ export class FeedbackResolver {
           name: username,
           message,
         },
-        template: `${locale}/feedback-request`,
+        template: "feedback-request",
+        locale,
       });
     } catch {
       throw new UnprocessableEntityException("Unable to send email");

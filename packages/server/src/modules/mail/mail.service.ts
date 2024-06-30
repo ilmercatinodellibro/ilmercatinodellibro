@@ -2,11 +2,8 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
 import { User } from "@prisma/client";
 import { Address as AddressObject } from "nodemailer/lib/mailer";
-import {
-  EmailConfiguration,
-  emailConfiguration,
-  nameAddrSchema,
-} from "src/config/email";
+import { nameAddrSchema } from "src/config/email";
+import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { htmlToTextPlugin } from "src/modules/mail/html-to-text.plugin";
 
 // We should be using the default but it's any so we need to override it
@@ -46,14 +43,16 @@ export type SendMailOptions = Omit<ISendMailOptions, AddressableField> & {
   inReplyTo?: Address;
   from?: Address;
   sender?: Address;
+  // TODO: make this type safe
+  locale?: string | null;
 };
 
 @Injectable()
 export class MailService {
   constructor(
     private readonly mailerService: MailerService,
-    @Inject(emailConfiguration.KEY)
-    private readonly emailConfig: EmailConfiguration,
+    @Inject(rootConfiguration.KEY)
+    private readonly rootConfig: RootConfiguration,
   ) {
     const transporters = mailerService.getTransporters();
     transporters.default.use("compile", htmlToTextPlugin);
@@ -75,12 +74,15 @@ export class MailService {
         }
       }
 
+      const i18nMailDetails = this.applyInternationalization(mailDetails);
+
       return (await this.mailerService.sendMail({
-        ...(mailDetails as ISendMailOptions),
+        ...(i18nMailDetails as ISendMailOptions),
         ...addressOverrides,
         context: {
-          privacyPolicyUrl: this.emailConfig.privacyPolicyUrl,
-          ...mailDetails.context,
+          privacyPolicyUrl: `${this.rootConfig.clientUrl}/tos-privacy/privacy-policy.pdf`,
+          tosUrl: `${this.rootConfig.clientUrl}/tos-privacy/tos-${i18nMailDetails.locale}.pdf`,
+          ...i18nMailDetails.context,
         },
       })) as SentMessageInfo;
     } catch (error) {
@@ -125,5 +127,21 @@ export class MailService {
     }
 
     return value;
+  }
+
+  private applyInternationalization({
+    locale,
+    subject,
+    template,
+    ...mailDetails
+  }: SendMailOptions) {
+    return {
+      locale: locale ?? "it",
+      // TODO: apply i18n here too
+      // Check out https://nestjs-i18n.com/
+      subject: `Il Mercatino del Libro - ${subject}`,
+      template: `${locale}/${template}`,
+      ...mailDetails,
+    };
   }
 }

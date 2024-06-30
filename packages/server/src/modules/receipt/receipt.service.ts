@@ -70,8 +70,8 @@ export class ReceiptService {
 
     await this.mailService.sendMail({
       to: user,
-      subject: `Il Mercatino del Libro - Receipt of ${receipt.type.toLowerCase()}`,
-      template: `${user.locale ?? "it"}/receipt`,
+      subject: `Ricevuta per ${receipt.type.toLowerCase()}`,
+      template: "receipt",
       context: {
         receipt,
         user,
@@ -85,6 +85,7 @@ export class ReceiptService {
             receiptPdf ?? (await readFile(this.getReceiptPath(receipt).file)),
         },
       ],
+      locale: user.locale,
     });
   }
 

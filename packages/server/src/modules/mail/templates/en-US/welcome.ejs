@@ -6,11 +6,18 @@
 
   <body>
     <p>Hi <%= name %>,</p>
-
-    <p>To confirm your email address, <a href="<%= url %>">click here</a>.</p>
+    <p>
+      to verify your email address,
+      <a href="<%= url %>">click here</a>.
+    </p>
 
     <p>Thanks!</p>
     <p>Il Mercatino del Libro</p>
-    <p><a href="<%= privacyPolicyUrl %>">View our privacy policy</a></p>
+    <p>
+      Verifying your email address, you declare to accept our
+      <a href="<%= tosUrl %>">terms and conditions</a>
+      and our
+      <a href="<%= privacyPolicyUrl %>">privacy policy</a>
+    </p>
   </body>
 </html>

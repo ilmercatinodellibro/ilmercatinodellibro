@@ -80,7 +80,8 @@ export class SendEmailNotificationListener {
           date,
           reserveUrl,
         },
-        template: `${locale}/event-trigger-notification`,
+        template: "event-trigger-notification",
+        locale,
       });
     } catch {
       throw new UnprocessableEntityException("Unable to send email");
