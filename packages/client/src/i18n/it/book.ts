@@ -8,7 +8,7 @@ export default {
     title: "Titolo",
     publisher: "Editore",
     subject: "Materia",
-    coverPrice: "Prezzo di Copertina",
+    coverPrice: "Prezzo di copertina",
     status: "Stato",
     utility: "Utilità",
     availability: "Disponibilità",

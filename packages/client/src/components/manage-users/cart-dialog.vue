@@ -17,7 +17,7 @@
             outlined
           />
           <q-input
-            :model-value="discountValue"
+            :model-value="discountValue.toFixed(2)"
             :label="$t('manageUsers.cartDialog.discount')"
             disable
             outlined
@@ -224,16 +224,9 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "cover-price",
     field: "originalPrice",
-    label: t("book.fields.price"),
+    label: t("book.fields.coverPrice"),
     align: "left",
     format: formatPrice,
-  },
-  {
-    name: "buy-price",
-    field: "originalPrice",
-    label: t("manageUsers.payOffUserDialog.buyPrice"),
-    align: "left",
-    format: (val: number) => discountedPrice(val, "buy"),
   },
   {
     name: "public-price",
@@ -492,13 +485,14 @@ function sellBooks() {
       evictRequestsReservationsQueries(cache);
     } catch {
       notifyError(t("bookErrors.notSell"));
-    } finally {
-      loading.value = false;
 
       Notify.create({
         type: "positive",
         message: "Libri venduti con successo.",
       });
+    } finally {
+      loading.value = false;
+
       onDialogHide();
     }
   });

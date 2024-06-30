@@ -4,7 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { GenerateProps } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, readOnlyText, table, text } from "@pdfme/schemas";
-import { Book, BookCopy, Receipt, Sale } from "@prisma/client";
+import { Book, BookCopy, Receipt, RetailLocation, Sale } from "@prisma/client";
 import { sumBy } from "lodash";
 import { ReceiptType } from "src/@generated";
 import { MailService } from "src/modules/mail/mail.service";
@@ -36,7 +36,7 @@ export type ReceiptBook = Pick<
 export interface GenerateReceiptInput {
   creationDate: Date;
   userEmail: string;
-  locationName: string;
+  location: RetailLocation;
   books: ReceiptBook[];
 }
 
@@ -127,7 +127,7 @@ export class ReceiptService {
         : this.generateRegistrationReceipt.bind(this);
     const receiptPdf = await generateReceipt({
       creationDate: receipt.createdAt,
-      locationName: receipt.retailLocation.name,
+      location: receipt.retailLocation,
       userEmail: receipt.user.email,
       books,
     });
@@ -144,7 +144,7 @@ export class ReceiptService {
   async generateRegistrationReceipt({
     creationDate,
     userEmail,
-    locationName,
+    location,
     books,
   }: GenerateReceiptInput) {
     const formattedDate = this.#formatCreationDate(creationDate);
@@ -152,7 +152,7 @@ export class ReceiptService {
       book.isbnCode,
       book.title,
       book.subject,
-      book.originalPrice.toFixed(2),
+      ((book.originalPrice * location.buyRate) / 100).toFixed(2),
       book.code,
     ]);
     const collectionPeriod = this.#getFormattedCollectionPeriod();
@@ -164,7 +164,7 @@ export class ReceiptService {
         {
           headerSubtitle: schema.headerSubtitle.content.replace(
             "{location}",
-            locationName,
+            location.name,
           ),
           headerDate: schema.headerDate.content.replace(
             "{date}",
@@ -195,15 +195,20 @@ export class ReceiptService {
   async generatePurchaseReceipt({
     creationDate,
     userEmail,
-    locationName,
+    location,
     books,
   }: GenerateReceiptInput) {
     const formattedDate = this.#formatCreationDate(creationDate);
-    const bookRows = books.map((book) => [
+    const booksWithSellPrice = books.map((book) => ({
+      ...book,
+      sellPrice: (book.originalPrice * location.sellRate) / 100,
+    }));
+
+    const bookRows = booksWithSellPrice.map((book) => [
       book.isbnCode,
       book.title,
       book.subject,
-      book.originalPrice.toFixed(2),
+      book.sellPrice.toFixed(2),
     ]);
 
     const schema = purchaseTemplate.schemas[0];
@@ -213,7 +218,7 @@ export class ReceiptService {
         {
           headerSubtitle: schema.headerSubtitle.content.replace(
             "{location}",
-            locationName,
+            location.name,
           ),
           headerDate: schema.headerDate.content.replace(
             "{date}",
@@ -223,7 +228,7 @@ export class ReceiptService {
           table: JSON.stringify(bookRows),
           notice: schema.notice.content.replace(
             "{totalPrice}",
-            sumBy(books, "originalPrice").toFixed(2),
+            sumBy(booksWithSellPrice, "sellPrice").toFixed(2),
           ),
         },
       ],
