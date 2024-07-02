@@ -1,6 +1,6 @@
 import { BadRequestException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { Prisma, User } from "@prisma/client";
+import { Prisma, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { merge } from "lodash";
 import { RetailLocation } from "src/@generated/retail-location";
@@ -51,7 +51,7 @@ export class RetailLocationResolver {
     await this.authService.assertMembership({
       userId: user.id,
       retailLocationId,
-      role: "ADMIN",
+      role: Role.ADMIN,
     });
 
     const { theme: _existingTheme } =
@@ -97,7 +97,7 @@ export class RetailLocationResolver {
     await this.authService.assertMembership({
       userId: user.id,
       retailLocationId,
-      role: "ADMIN",
+      role: Role.ADMIN,
     });
 
     if (
@@ -134,7 +134,7 @@ export class RetailLocationResolver {
     await this.authService.assertMembership({
       userId: user.id,
       retailLocationId,
-      role: "ADMIN",
+      role: Role.ADMIN,
     });
 
     await this.locationService.backupLocation(retailLocationId);

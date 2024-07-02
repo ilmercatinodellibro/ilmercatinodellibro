@@ -13,7 +13,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { Prisma, User } from "@prisma/client";
+import { Prisma, Role, User } from "@prisma/client";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Public } from "src/modules/auth/decorators/public-route.decorator";
@@ -78,7 +78,7 @@ export class RetailLocationController {
     await this.authService.assertMembership({
       userId: user.id,
       retailLocationId: location.id,
-      role: "ADMIN",
+      role: Role.ADMIN,
     });
 
     if (!(file.mimetype in this.mimeTypeExtensionMap)) {

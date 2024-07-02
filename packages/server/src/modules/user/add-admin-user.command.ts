@@ -1,5 +1,5 @@
 import { Logger } from "@nestjs/common";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { Command, CommandRunner } from "nest-commander";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import retailLocations from "test/fixtures/retail-locations";
@@ -40,7 +40,7 @@ export class AddAdminUserCommand extends CommandRunner {
         ({ id }) =>
           !currentAdmin.memberships.find(
             ({ retailLocationId, role }) =>
-              retailLocationId === id && role === "ADMIN",
+              retailLocationId === id && role === Role.ADMIN,
           ),
       );
 
@@ -57,14 +57,14 @@ export class AddAdminUserCommand extends CommandRunner {
         where: {
           userId: currentAdmin.id,
           role: {
-            not: "ADMIN",
+            not: Role.ADMIN,
           },
         },
       });
       await this.prisma.locationMember.createMany({
         data: membershipsToAdd.map(({ id }) => ({
           retailLocationId: id,
-          role: "ADMIN",
+          role: Role.ADMIN,
           userId: currentAdmin.id,
         })),
       });
@@ -82,7 +82,7 @@ export class AddAdminUserCommand extends CommandRunner {
           memberships: {
             create: retailLocations.map(({ id }) => ({
               retailLocationId: id,
-              role: "ADMIN",
+              role: Role.ADMIN,
             })),
           },
         },

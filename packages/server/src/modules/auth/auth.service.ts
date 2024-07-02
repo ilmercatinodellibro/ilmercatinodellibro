@@ -94,7 +94,7 @@ export class AuthService {
           role: true,
         },
       });
-      if (role !== "ADMIN") {
+      if (role !== Role.ADMIN) {
         return false;
       }
 

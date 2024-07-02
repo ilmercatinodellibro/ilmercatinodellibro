@@ -4,7 +4,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { Mutation, Query, Resolver } from "@nestjs/graphql";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
 import { User as GraphQLUser } from "src/@generated";
@@ -133,7 +133,7 @@ export class AuthResolver {
     );
     await this.prisma.locationMember.create({
       data: {
-        role: "OPERATOR",
+        role: Role.OPERATOR,
         retailLocationId: registerPayload.retailLocationId,
         userId: newUser.id,
       },
@@ -239,7 +239,7 @@ export class AuthResolver {
     await this.authService.assertMembership({
       userId: actor.id,
       message: "You are not allowed to add a new Operator",
-      role: "ADMIN",
+      role: Role.ADMIN,
       retailLocationId,
     });
 
@@ -270,7 +270,7 @@ export class AuthResolver {
       });
 
     if (currentOperatorMembership?.role) {
-      if (currentOperatorMembership.role === "OPERATOR") {
+      if (currentOperatorMembership.role === Role.OPERATOR) {
         throw new UnprocessableEntityException(
           "You cannot promote to operator someone who already is an operator in this location.",
         );
@@ -289,7 +289,7 @@ export class AuthResolver {
 
     await this.prisma.locationMember.create({
       data: {
-        role: "OPERATOR",
+        role: Role.OPERATOR,
         retailLocationId,
         userId: existingUser.id,
       },
