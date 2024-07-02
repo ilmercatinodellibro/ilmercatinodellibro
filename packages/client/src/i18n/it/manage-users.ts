@@ -88,7 +88,7 @@ export default {
       CUSTOM: "Personalizzato",
     },
     howResolved: "Come è stato risolto il problema?",
-    problemsHistory: "History dei Problemi",
+    problemsHistory: "Cronologia dei problemi",
     noProblems: "Questa copia non ha ancora avuto problemi",
     reportedBy: "Segnalato Da",
     resolutionDate: "Data Risoluzione",
