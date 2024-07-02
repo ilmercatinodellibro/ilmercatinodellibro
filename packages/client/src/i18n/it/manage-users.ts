@@ -211,7 +211,6 @@ export default {
     resendSuccess:
       "Una nuova copia della ricevuta {type} è stata inviata all'indirizzo email dell'utente",
     type: {
-      // REQUEST: "Richiesto | Richiesti",
       PURCHASE: "Acquisto | Acquisti",
       WITHDRAWAL: "Ritiro | Ritiri",
     } satisfies Record<ReceiptType, string>,

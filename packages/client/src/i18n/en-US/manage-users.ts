@@ -208,7 +208,6 @@ export default {
     resendSuccess:
       "A new copy of the receipt of {type} has been sent to the user's email address",
     type: {
-      // REQUEST: "Request | Requests",
       PURCHASE: "Purchase | Purchases",
       WITHDRAWAL: "Withdrawal | Withdrawals",
     } satisfies Record<ReceiptType, string>,

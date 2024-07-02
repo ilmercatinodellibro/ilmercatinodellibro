@@ -68,9 +68,7 @@ const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
     align: "left",
   },
   {
-    label: /* props.type === "REQUEST"
-        ? ""
-        :  */ t("manageUsers.receiptsDialog.createdBy"),
+    label: t("manageUsers.receiptsDialog.createdBy"),
     field: ({ createdBy }) => `${createdBy.firstname} ${createdBy.lastname}`,
     name: "created-by",
     align: "left",

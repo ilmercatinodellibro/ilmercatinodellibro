@@ -14,7 +14,6 @@
       <q-card-section
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
-        <!-- <receipts-table :receipts="requestReceipts" type="REQUEST" /> -->
         <receipts-table
           :no-data-label="$t('manageUsers.receiptsDialog.noRegistration')"
           :receipts="registrationReceipts"
@@ -58,9 +57,6 @@ const { receipts } = useGetReceiptsQuery(() => ({
   retailLocationId: selectedLocation.value.id,
 }));
 
-// const requestReceipts = computed(() =>
-//   receipts.value.filter(({ type }) => type === "REQUEST"),
-// )
 const registrationReceipts = computed(() =>
   receipts.value.filter(({ type }) => type === "WITHDRAWAL"),
 );
