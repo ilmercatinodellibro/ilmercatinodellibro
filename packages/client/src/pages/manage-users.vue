@@ -196,8 +196,9 @@
                 <q-td v-else-if="col.name === 'pay-off'">
                   <chip-button
                     :disable="
-                      !selectedLocation.payOffEnabled ||
-                      willBeDeleted(props.row)
+                      !hasAdminRole &&
+                      (!selectedLocation.payOffEnabled ||
+                        willBeDeleted(props.row))
                     "
                     color="primary"
                     :label="$t('manageUsers.payOff')"
@@ -250,6 +251,7 @@ import TableHeaderWithInfo from "src/components/manage-users/table-header-with-i
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { UserDialogPayload } from "src/models/user";
+import { useAuthService } from "src/services/auth";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
 import { useDownloadUserData } from "src/services/user";
@@ -266,6 +268,8 @@ const tableRef = ref() as Ref<QTable>;
 const { t, locale } = useI18n();
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
+
+const { hasAdminRole } = useAuthService();
 
 const {
   customers,

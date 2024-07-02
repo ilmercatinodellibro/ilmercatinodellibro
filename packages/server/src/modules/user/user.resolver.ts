@@ -1,6 +1,5 @@
 import {
   ForbiddenException,
-  NotAcceptableException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import {
@@ -819,9 +818,13 @@ export class UserResolver {
       });
 
     if (!payOffEnabled) {
-      throw new NotAcceptableException(
-        "Cannot settle users at the current time: settlement for this retail location is disabled",
-      );
+      await this.authService.assertMembership({
+        userId: operator.id,
+        retailLocationId,
+        role: Role.ADMIN,
+        message:
+          "Cannot settle users at the current time: settlement for this retail location is disabled.",
+      });
     }
 
     await this.prisma.$transaction(async (prisma) => {
