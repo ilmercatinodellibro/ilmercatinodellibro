@@ -156,7 +156,7 @@
         />
       </q-card-section>
 
-      <template v-if="'id' in newUserData">
+      <template v-if="hasAdminRole && 'id' in newUserData">
         <q-separator inset spaced />
 
         <q-card-section class="column gap-24 no-wrap q-pb-lg q-px-lg">
