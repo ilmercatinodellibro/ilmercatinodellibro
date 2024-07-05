@@ -157,7 +157,7 @@ const props = defineProps<{
 
 const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const { theme } = useTheme();
 
@@ -285,6 +285,7 @@ async function onSubmit() {
         ...omit(user.value, ["confirmEmail"]),
         dateOfBirth: Date.parse(user.value.dateOfBirth),
         retailLocationId: selectedLocation.value.id,
+        locale: locale.value,
       },
     };
 
