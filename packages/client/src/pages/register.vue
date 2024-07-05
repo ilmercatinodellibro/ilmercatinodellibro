@@ -235,6 +235,7 @@ const formData = computed<FormField[]>(() => [
       label: t("auth.phoneNumber"),
       mask: "phone",
       unmaskedValue: true,
+      rules: [requiredRule],
     },
   },
   {
