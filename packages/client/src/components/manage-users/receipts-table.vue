@@ -4,6 +4,7 @@
     :rows="receipts"
     :hide-bottom="receipts.length > 0"
     :no-data-label="noDataLabel"
+    :rows-per-page-options="[0]"
     square
   >
     <template #header-cell-created-by="{ col }">
