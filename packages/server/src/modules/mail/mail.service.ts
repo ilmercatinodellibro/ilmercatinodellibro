@@ -135,8 +135,10 @@ export class MailService {
     template,
     ...mailDetails
   }: SendMailOptions) {
+    locale = locale ?? "it";
+
     return {
-      locale: locale ?? "it",
+      locale,
       // TODO: apply i18n here too
       // Check out https://nestjs-i18n.com/
       subject: `Il Mercatino del Libro - ${subject}`,
