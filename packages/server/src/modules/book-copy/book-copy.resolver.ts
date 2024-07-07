@@ -525,6 +525,9 @@ export class BookCopyResolver {
           code: {
             in: booksCodes,
           },
+          book: {
+            retailLocationId,
+          },
         },
         include: {
           book: true,
