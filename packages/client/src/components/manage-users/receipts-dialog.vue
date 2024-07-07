@@ -15,8 +15,8 @@
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
         <receipts-table
-          :no-data-label="$t('manageUsers.receiptsDialog.noRegistration')"
-          :receipts="registrationReceipts"
+          :no-data-label="$t('manageUsers.receiptsDialog.noWithdrawal')"
+          :receipts="withdrawalReceipts"
           class="flex-grow"
           type="WITHDRAWAL"
         />
@@ -57,7 +57,7 @@ const { receipts } = useGetReceiptsQuery(() => ({
   retailLocationId: selectedLocation.value.id,
 }));
 
-const registrationReceipts = computed(() =>
+const withdrawalReceipts = computed(() =>
   receipts.value.filter(({ type }) => type === "WITHDRAWAL"),
 );
 const purchaseReceipts = computed(() =>

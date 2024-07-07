@@ -213,7 +213,7 @@ export default {
       PURCHASE: "Acquisto | Acquisti",
       WITHDRAWAL: "Ritiro | Ritiri",
     } satisfies Record<ReceiptType, string>,
-    noRegistration: "Non sono presenti ricevute di ritiro",
+    noWithdrawal: "Non sono presenti ricevute di ritiro",
     noPurchase: "Non sono presenti ricevute d'acquisto",
   },
 };
