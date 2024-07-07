@@ -66,7 +66,7 @@ export default {
     saleRate: "Sale Rate",
     reservationDays: "Number of Days for Reservation",
     maxBooksDimension:
-      "Max dimension of the book stacks to allow for fragmentation",
+      "Max number of withdrawn books past which fragmentation is disabled",
     registrationEnabled: "Enable the possibility to register",
     payOffEnabled: "Enable the possibility to perform payoffs",
     updateRatesConfirmTitle: "Update the purchase/sale rate?",

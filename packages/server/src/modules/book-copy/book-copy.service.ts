@@ -14,7 +14,7 @@ export class BookCopyService {
           id: retailLocationId,
         },
       });
-    const useFragmentation = bookIds.length > warehouseMaxBlockSize;
+    const useFragmentation = bookIds.length <= warehouseMaxBlockSize;
 
     return this.#getMaxAssignedNumber(
       prisma,
@@ -28,7 +28,7 @@ export class BookCopyService {
     prisma: PrismaTransactionClient,
     retailLocationId: string,
     numberOfCodesToGenerate: number,
-    useFragmentation = false,
+    useFragmentation: boolean,
   ) {
     const currentlyAssignedCodes = (
       await prisma.bookCopy.findMany({
@@ -97,10 +97,9 @@ export class BookCopyService {
     }
 
     const foundSlots: string[] = [];
-    for (let i = 0; foundSlots.length < numberOfCodesToGenerate; i++) {
+    for (let i = 1; foundSlots.length < numberOfCodesToGenerate; i++) {
       if (!currentlyAssignedCodes.includes(i)) {
         foundSlots.push(`${i}`.padStart(4, "0"));
-        break;
       }
     }
 
@@ -128,10 +127,10 @@ export class BookCopyService {
         return foundSlots[index] + "/001";
       }
 
-      const codeParts = prismaCode._max.code.split("/");
-      return `${codeParts[0]}/${(parseInt(codeParts[1]) + 1)
-        .toString()
-        .padStart(3, "0")}`;
+      const [slotShelfCode, booksPassedByThisSlotShelf] =
+        prismaCode._max.code.split("/");
+
+      return `${slotShelfCode}/${(parseInt(booksPassedByThisSlotShelf) + 1).toString().padStart(3, "0")}`;
     });
   }
 }
