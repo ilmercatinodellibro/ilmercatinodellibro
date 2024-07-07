@@ -100,6 +100,9 @@ export class BookCopyResolver {
           },
         ],
       },
+      orderBy: {
+        code: "asc",
+      },
     });
   }
 
