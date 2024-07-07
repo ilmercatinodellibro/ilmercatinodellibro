@@ -18,6 +18,7 @@
     "dev:pwa": "pnpm dev -m pwa",
     "build": "quasar build",
     "build:pwa": "pnpm build -m pwa",
+    "build:pwa:hot-swap": "cross-env BUILD_WITH_HOT_SWAP='true' pnpm run build:pwa",
     "serve": "./node_modules/@quasar/cli/bin/quasar.js serve ../server/client-dist/ --history",
     "start": "pnpm build && pnpm serve",
     "start:test": "pnpm start --port 8080 --silent",

@@ -32,6 +32,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
+    "serve": "pnpm run start:prod",
     "db": "docker-compose up",
     "db:start": "docker-compose up -d",
     "db:stop": "docker-compose stop",

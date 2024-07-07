@@ -9,6 +9,7 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
+const { existsSync, rmSync, renameSync } = require("fs");
 const path = require("path");
 
 // Be careful about how/what you expose here, process.env has access to root envs here
@@ -31,7 +32,17 @@ function getVueTscTsconfigPath(isPwa) {
   );
 }
 
+const SERVER_RELATIVE_PATH = "../server";
+// Keep it in sync with "serve" script inside package.json
+const CLIENT_DIST_PATH = `${SERVER_RELATIVE_PATH}/client-dist/`;
+const CLIENT_DIST_HOT_SWAP_PATH = `${SERVER_RELATIVE_PATH}/client-dist-hot-swap/`;
+const CLIENT_DIST_BACKUP_PATH = `${SERVER_RELATIVE_PATH}/client-dist-backup/`;
+
 module.exports = configure(function (ctx) {
+  // Use a hot swap mechanism to avoid a service downtime while deploying a new client bundle
+  const BUILD_WITH_HOT_SWAP =
+    ctx.prod && process.env.BUILD_WITH_HOT_SWAP === "true";
+
   return {
     sourceFiles: {
       rootComponent: "src/app.vue",
@@ -82,8 +93,27 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
-      // Keep it in sync with "serve" script inside package.json
-      distDir: "../server/client-dist/",
+      distDir: BUILD_WITH_HOT_SWAP
+        ? CLIENT_DIST_HOT_SWAP_PATH
+        : CLIENT_DIST_PATH,
+
+      afterBuild() {
+        // Backup the existing dist folder, then perform the hot-swap
+        if (BUILD_WITH_HOT_SWAP && existsSync(CLIENT_DIST_HOT_SWAP_PATH)) {
+          // eslint-disable-next-line no-console
+          console.log("Hot-swapping the dist folder...");
+
+          if (existsSync(CLIENT_DIST_BACKUP_PATH)) {
+            rmSync(CLIENT_DIST_BACKUP_PATH, { recursive: true, force: true });
+          }
+
+          if (existsSync(CLIENT_DIST_PATH)) {
+            renameSync(CLIENT_DIST_PATH, CLIENT_DIST_BACKUP_PATH);
+          }
+
+          renameSync(CLIENT_DIST_HOT_SWAP_PATH, CLIENT_DIST_PATH);
+        }
+      },
 
       target: {
         browser: ["es2019", "edge88", "firefox78", "chrome87", "safari13.1"],
