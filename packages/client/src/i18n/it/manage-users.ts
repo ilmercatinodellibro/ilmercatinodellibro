@@ -207,7 +207,6 @@ export default {
     title: "Ricevute",
     createdBy: "Creata da",
     resend: "Invia di nuovo",
-    downloadSuccess: "Il download della ricevuta inizierà a breve",
     resendSuccess:
       "Una nuova copia della ricevuta {type} è stata inviata all'indirizzo email dell'utente",
     type: {
