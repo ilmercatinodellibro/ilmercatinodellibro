@@ -96,7 +96,7 @@ const IT_RE_FAQ = `<section>
     <strong
       >Ho fatto la registrazione ma non riesco ad accedere, cosa
       succede?&nbsp;</strong
-    >Controllate di avere accettato i cookie.
+    >Controllate di avere cliccato sul link di attivazione che vi abbiamo inviato via mail.
   </p>
   <p>
     <strong> Come so per certo che sono registrato?&nbsp;</strong> Deve arrivare
@@ -119,11 +119,11 @@ const IT_RE_FAQ = `<section>
     <strong
       >Come so che i libri da me richiesti sono
       disponibili/arrivati?&nbsp;</strong
-    >Non riceverai&nbsp;nessuna email, dovrai entrare sul tuo profilo utente e
+    >Dovrai entrare sul tuo profilo utente e
     controllare periodicamente la lista dei libri richiesti. Quando un libro è
-    disponibile nel nostro magazzino la barra del libro sarà&nbsp;completamente
-    verde. Non possiamo prevedere quali libri ci arriveranno nel corso delle
-    settimane e siamo solo a inizio mercatino quindi è possibile che quello che
+    disponibile nel nostro magazzino lo stato del libro sarà&nbsp; "disponibile"
+    con la scritta colorata di verde. Non possiamo prevedere quali libri ci arriveranno nel corso delle
+    settimane. Ad inizio mercatino, è� possibile che quello che
     stai cercando ma che ancora non c'è arrivi fra poco!
   </p>
   <p>
@@ -177,7 +177,7 @@ const IT_RE_FAQ = `<section>
           ><span>.</span>
         </p>
         <p>
-          <span> Nella settimana<strong> dal 19 al 30</strong></span
+          <span> Nella settimana<strong> dal 17 al 28</strong></span
           ><b> settembre</b
           ><span
             >&nbsp;saremo aperti&nbsp;con orario ridotto per le riconsegna dei
@@ -199,8 +199,9 @@ const IT_RE_FAQ = `<section>
         </p>
         <p>
           <span> I periodi d’apertura sono</span
-          ><b> dal 11 luglio al 29 luglio</b><span> &nbsp;e dal</span
-          ><b> 16 agosto al 30 settembre</b><span>.</span>
+          ><b> dal 16 luglio al 3 agosto</b><span> &nbsp;e dal</span
+          ><b> 20 agosto al 14 settembre</b> nelle giornate di <b>martedì, mercoledì, venerdì e sabato, dalle 10:00 alle 13:00 e dalle 15:30 alle 18:30</b><span>.
+          Dal 17 al 28 settembre saremo aperti il martedì e venerdì  pomeriggio, e il mercoledì e il sabato mattina</span>
         </p>
       </section>
     </article>
@@ -271,9 +272,9 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
   <p>
     <b> Giorni e orari di apertura?</b
     ><span>
-      Martedì, giovedì e sabato dalle 10.00 alle 12.00 e dalle 15.00 alle 19.00
-      dall'11 Luglio al 16 settembre, mentre dal 19 al 30 settembre saremo
-      aperti il martedì e sabato mattina e il giovedì pomeriggio.<br
+      Lunedì, mercoledì e venerdì dalle 10.00 alle 12.00 e dalle 15.00 alle 19.00
+      dal 15 luglio al 2 agosto e dal 19 agosto al 13 settembre. Nelle settimane dal 16 al 27 settembre saremo
+      aperti il lunedì e venerdì mattina, mentre il giovedì saremo aperti durante il pomeriggio.<br
     /></span>
   </p>
   <p>
@@ -316,7 +317,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
   <p>
     <b> Qual è la prima cosa che devo fare?</b
     ><span> Creare un utente registrandosi sul nostro sito</span
-    > <a href="https://mo.ilmercatinodellibro.com/"
+    > <a href="https://www.ilmercatinodellibro.com/"
       ><span> mo.ilmercatinodellibro.com</span></a
     ><span>, direttamente da casa o in sede.</span>
   </p>
