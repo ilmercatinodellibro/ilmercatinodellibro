@@ -207,14 +207,13 @@ export default {
     title: "Ricevute",
     createdBy: "Creata da",
     resend: "Invia di nuovo",
-    downloadSuccess: "Il download della ricevuta inizierà a breve",
     resendSuccess:
       "Una nuova copia della ricevuta {type} è stata inviata all'indirizzo email dell'utente",
     type: {
       PURCHASE: "Acquisto | Acquisti",
       WITHDRAWAL: "Ritiro | Ritiri",
     } satisfies Record<ReceiptType, string>,
-    noRegistration: "Non sono presenti ricevute di ritiro",
+    noWithdrawal: "Non sono presenti ricevute di ritiro",
     noPurchase: "Non sono presenti ricevute d'acquisto",
   },
 };

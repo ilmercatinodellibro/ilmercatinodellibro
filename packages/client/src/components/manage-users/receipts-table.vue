@@ -4,6 +4,7 @@
     :rows="receipts"
     :hide-bottom="receipts.length > 0"
     :no-data-label="noDataLabel"
+    :rows-per-page-options="[0]"
     square
   >
     <template #header-cell-created-by="{ col }">
@@ -39,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { Notify, QTableColumn, date, exportFile } from "quasar";
+import { Notify, QTableColumn, date } from "quasar";
 import { computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { ReceiptType } from "src/@generated/graphql";
@@ -106,18 +107,8 @@ async function openReceipt(receipt: ReceiptFragment) {
   const response = await fetch(`/receipts/${receipt.id}`, { headers });
   const blob = await response.blob();
 
-  const success = exportFile(`${receipt.id}.pdf`, blob, {
-    mimeType: "application/pdf",
-  });
-  if (success === true) {
-    Notify.create({
-      type: "positive",
-      message: t("manageUsers.receiptsDialog.downloadSuccess"),
-    });
-  } else {
-    const dataUrl = objectUrls.get(receipt.id) ?? URL.createObjectURL(blob);
-    objectUrls.set(receipt.id, dataUrl);
-    window.open(dataUrl, "_blank");
-  }
+  const dataUrl = objectUrls.get(receipt.id) ?? URL.createObjectURL(blob);
+  objectUrls.set(receipt.id, dataUrl);
+  window.open(dataUrl, "_blank");
 }
 </script>

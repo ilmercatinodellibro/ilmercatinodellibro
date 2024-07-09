@@ -28,7 +28,7 @@ lerna-debug.log*
 .settings/
 *.sublime-workspace
 
-client-dist
+client-dist*
 
 .firebase-service-account.json
 

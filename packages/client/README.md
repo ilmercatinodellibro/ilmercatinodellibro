@@ -15,6 +15,13 @@ The following instructions are meant only for development.
    $ pnpm run dev
    ```
 
+## Building production bundle
+
+Use `pnpm run build:pwa` to build the production bundle.
+On the live server, you can use `pnpm run build:pwa:hot-swap` to build the production bundle without disrupting the service.
+
+It will generate the new bundle and start using it only once the build process is done, leaving a backup of the previous build in case an emergency rollback is needed.
+
 ## Test
 
 ```bash

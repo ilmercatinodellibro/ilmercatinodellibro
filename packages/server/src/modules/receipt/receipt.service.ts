@@ -11,7 +11,7 @@ import { MailService } from "src/modules/mail/mail.service";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import purchaseTemplate from "./templates/purchase.json";
-import registrationTemplate from "./templates/registration.json";
+import withdrawalTemplate from "./templates/withdrawal.json";
 
 type BookCopyWithBook = BookCopy & { book: Book };
 export type CreateReceiptInput = {
@@ -124,7 +124,7 @@ export class ReceiptService {
     const generateReceipt =
       type === ReceiptType.PURCHASE
         ? this.generatePurchaseReceipt.bind(this)
-        : this.generateRegistrationReceipt.bind(this);
+        : this.generateWithdrawalReceipt.bind(this);
     const receiptPdf = await generateReceipt({
       creationDate: receipt.createdAt,
       location: receipt.retailLocation,
@@ -141,7 +141,7 @@ export class ReceiptService {
     return receipt;
   }
 
-  async generateRegistrationReceipt({
+  async generateWithdrawalReceipt({
     creationDate,
     userEmail,
     location,
@@ -157,9 +157,9 @@ export class ReceiptService {
     ]);
     const collectionPeriod = this.#getFormattedCollectionPeriod();
 
-    const schema = registrationTemplate.schemas[0];
+    const schema = withdrawalTemplate.schemas[0];
     return await generate({
-      template: registrationTemplate as unknown as GenerateProps["template"],
+      template: withdrawalTemplate as unknown as GenerateProps["template"],
       inputs: [
         {
           headerSubtitle: schema.headerSubtitle.content.replace(

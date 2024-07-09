@@ -100,6 +100,9 @@ export class BookCopyResolver {
           },
         ],
       },
+      orderBy: {
+        code: "asc",
+      },
     });
   }
 
@@ -521,6 +524,9 @@ export class BookCopyResolver {
           ownerId,
           code: {
             in: booksCodes,
+          },
+          book: {
+            retailLocationId,
           },
         },
         include: {

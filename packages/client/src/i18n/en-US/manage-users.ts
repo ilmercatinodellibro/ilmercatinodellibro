@@ -204,14 +204,13 @@ export default {
     title: "Receipts",
     createdBy: "Created by",
     resend: "Send again",
-    downloadSuccess: "The receipt download will begin shortly",
     resendSuccess:
       "A new copy of the receipt of {type} has been sent to the user's email address",
     type: {
       PURCHASE: "Purchase | Purchases",
       WITHDRAWAL: "Withdrawal | Withdrawals",
     } satisfies Record<ReceiptType, string>,
-    noRegistration: "There are no withdrawal receipts",
+    noWithdrawal: "There are no withdrawal receipts",
     noPurchase: "There are no purchase receipts",
   },
 };
