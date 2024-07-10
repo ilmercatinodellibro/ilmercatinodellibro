@@ -433,7 +433,7 @@ export const RE_RETAIL_POINT: TranslatedRetailLocationCreateInput = {
       whoAreWeContent: IT_WHO_ARE_WE,
     },
   },
-  phoneNumber: "3516215189",
+  phoneNumber: "3515472756",
   theme: {
     colors: {
       primary: "#798aa8",
@@ -465,7 +465,7 @@ export const MO_RETAIL_POINT: TranslatedRetailLocationCreateInput = {
       whoAreWeContent: IT_WHO_ARE_WE,
     },
   },
-  phoneNumber: "3515472756",
+  phoneNumber: "3516215189",
   theme: {
     colors: {
       primary: "#1f7472",
