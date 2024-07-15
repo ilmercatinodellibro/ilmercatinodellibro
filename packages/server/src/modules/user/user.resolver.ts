@@ -621,7 +621,7 @@ export class UserResolver {
     await this.authService.assertMembership({
       userId: actor.id,
       retailLocationId: payload.retailLocationId,
-      message: "You are not allowed to create members.",
+      message: "You are not allowed to create users.",
     });
 
     if (await this.userService.findUserByEmail(payload.email)) {
@@ -638,7 +638,8 @@ export class UserResolver {
       actor.id,
       payload.retailLocationId,
     );
-    return this.userService.createUser({
+
+    const user = await this.userService.createUser({
       ...omit(payload, [
         "passwordConfirmation",
         "retailLocationId",
@@ -647,6 +648,25 @@ export class UserResolver {
       // TODO: maybe offer a way to choose the locale when inviting a user
       locale: actor.locale,
     });
+
+    const token = this.authService.createVerificationToken(
+      payload.retailLocationId,
+      user.email,
+    );
+
+    try {
+      //TODO: use queues instead of doing await
+      await this.authService.sendVerificationLink(
+        payload.retailLocationId,
+        user,
+        token,
+      );
+
+      return user;
+    } catch (error) {
+      await this.userService.removeUser(user.id);
+      throw error;
+    }
   }
 
   @Mutation(() => User)
