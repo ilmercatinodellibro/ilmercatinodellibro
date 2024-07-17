@@ -60,6 +60,7 @@ export class AuthController {
   @UseGuards(FacebookAuthGuard)
   @Get("auth/facebook/callback")
   facebookAuthCallback(@Req() request: Request, @Res() res: Response) {
+    // TODO: not saving the phone number nor birthday
     const user = request.user as User | undefined;
     if (!user) {
       throw new ForbiddenException();
@@ -88,6 +89,8 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Get("auth/google/callback")
   googleAuthCallback(@Req() request: Request, @Res() res: Response) {
+    // TODO: not saving the phone number nor birthday
+
     const user = request.user as User | undefined;
     if (!user) {
       throw new ForbiddenException();

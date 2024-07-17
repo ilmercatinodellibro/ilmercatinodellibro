@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import { readdirSync, unlinkSync } from "fs";
 import { join } from "path";
 import { Injectable, OnModuleInit } from "@nestjs/common";
-import { Cron, CronExpression } from "@nestjs/schedule";
+// import { Cron, CronExpression } from "@nestjs/schedule";
 import { PrismaClient } from "@prisma/client";
 
 @Injectable()
@@ -11,7 +11,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     await this.$connect();
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   dump_database() {
     const currentDate: Date = new Date();
     const year: number = currentDate.getFullYear();
