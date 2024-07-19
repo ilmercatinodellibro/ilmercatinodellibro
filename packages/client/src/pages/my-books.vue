@@ -300,7 +300,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         field: ({ book }) => book.originalPrice,
         label: t("myBooks.priceYouPaid"),
         align: "left",
-        format: (val: number) => discountedPrice(val, "buy"),
+        format: (val: number) => discountedPrice(val, "sell"),
       },
     ],
     [BooksTab.REQUESTED]: [
