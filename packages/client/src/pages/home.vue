@@ -28,6 +28,7 @@
         <div class="q-px-xl text-h4 text-white">
           {{ action.text }}
         </div>
+        <q-space />
       </action-box>
     </div>
   </q-page>

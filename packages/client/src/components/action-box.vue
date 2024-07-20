@@ -8,8 +8,6 @@
       </p>
     </slot>
 
-    <q-space />
-
     <q-btn
       v-if="to"
       color="accent"
