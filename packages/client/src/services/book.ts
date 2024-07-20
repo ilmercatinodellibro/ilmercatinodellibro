@@ -69,6 +69,11 @@ export async function fetchBookByISBN(isbnCode: string) {
       isbnCode,
       retailLocationId: selectedLocation.value.id,
     },
+    // In some cases, e.g. dictionaries, we search for the ISBN and
+    // then insert the book in the catalog if it doesn't exist
+    // When executing again this search, we would get the cached result which is wrong
+    // That's why we always ask the server for the latest data
+    fetchPolicy: "network-only",
   });
 
   return result.data.books.rows[0];
