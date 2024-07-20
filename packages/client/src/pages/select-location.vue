@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container class="layout-background">
-      <q-page class="column fit flex-center q-pt-64 q-px-md">
+      <q-page class="column fit flex-center q-pb-xl q-pt-64 q-px-md">
         <language-dropdown-btn class="fixed-top-right q-ma-md" />
         <q-spinner v-if="loading" />
 
