@@ -1,9 +1,9 @@
 <template>
-  <q-card-section class="column faq-container no-wrap width-700">
+  <div class="column max-width-700 no-wrap">
     <h3 class="text-primary">{{ t("routesNames.faq") }}</h3>
     <!-- eslint-disable-next-line vue/no-v-html -->
     <div v-html="selectedLocation.infoPagesContent[locale]?.faqContent" />
-  </q-card-section>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -15,7 +15,7 @@ const { selectedLocation } = useRetailLocationService();
 </script>
 
 <style lang="scss" scoped>
-.faq-container :deep(a) {
+:deep(a) {
   color: $accent;
   text-decoration: none;
 }

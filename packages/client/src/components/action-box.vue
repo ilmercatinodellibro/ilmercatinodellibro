@@ -1,10 +1,15 @@
 <template>
-  <div class="action-box column items-center justify-center">
+  <div
+    class="action-box bg-primary column items-center justify-center min-height-250 min-width-250 no-wrap q-px-md q-py-xl"
+  >
     <slot>
       <p v-if="actionText" class="q-ma-none q-mb-lg text-h4 text-white">
         {{ actionText }}
       </p>
     </slot>
+
+    <q-space />
+
     <q-btn
       v-if="to"
       color="accent"
@@ -38,15 +43,8 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss" scoped>
+// This class is also used by parent components to define the width and height from outside
 .action-box {
-  background-color: #798aa8;
   border-radius: 60px;
-  box-sizing: border-box;
-  overflow: hidden;
-  margin: 12px;
-  max-width: calc(100vw - 12px);
-  min-height: 400px;
-  padding: 48px 16px;
-  width: 400px;
 }
 </style>

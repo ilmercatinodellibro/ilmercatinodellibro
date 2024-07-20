@@ -1,20 +1,22 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container class="layout-background">
-      <q-page class="column fit flex-center q-pa-xl">
+      <q-page class="column fit flex-center q-pa-md">
         <language-dropdown-btn class="fixed-top-right q-ma-md" />
         <q-spinner v-if="loading" />
 
-        <h4 class="m-mb-36 q-mt-none readability-max-width text-accent">
+        <h4
+          class="q-mb-36 q-mt-none readability-max-width text-accent text-center"
+        >
           {{ t("home.title") }}
         </h4>
         <p
-          class="m-mb-36 q-ma-none readability-max-width text-center text-h5 text-primary"
+          class="q-ma-none q-mb-36 readability-max-width text-center text-h5 text-primary"
         >
           {{ t("home.locationSelectionDescription") }}
         </p>
 
-        <div class="items-center justify-center row">
+        <div class="gap-24 items-center justify-center row">
           <q-spinner v-if="loading" size="xl" />
 
           <action-box
@@ -52,3 +54,14 @@ async function selectLocation(location: RetailLocationFragment) {
   });
 }
 </script>
+
+<style lang="scss" scoped>
+.action-box {
+  aspect-ratio: 1 / 1;
+  width: 300px;
+
+  @media screen and (min-width: $breakpoint-sm-min) {
+    width: 400px;
+  }
+}
+</style>

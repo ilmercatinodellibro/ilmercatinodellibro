@@ -1,6 +1,6 @@
 <template>
   <header-bar v-if="user" />
-  <q-page class="contacts-container">
+  <q-page class="gap-24 items-stretch justify-center q-pa-md row">
     <q-card class="contacts-card">
       <span class="contacts-title text-primary">
         {{ $t("contacts.title") }}
@@ -178,16 +178,6 @@ async function submitFeedback() {
 
 <style scoped lang="scss">
 .contacts {
-  &-container {
-    align-items: stretch;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    height: min-content;
-    justify-content: center;
-    margin: 0 24px;
-  }
-
   &-card {
     align-items: center;
     align-self: center;

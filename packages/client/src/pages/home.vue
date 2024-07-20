@@ -1,26 +1,23 @@
 <!-- eslint-disable vue/no-v-html vue/no-v-text-v-html-on-component -->
 <template>
   <header-bar />
-  <q-page class="column flex-center q-pa-md">
-    <h4 class="m-mb-36 q-mt-none readability-max-width text-accent">
+  <q-page class="column flex-center q-pa-md text-center">
+    <h4 class="q-mb-36 q-mt-none readability-max-width text-accent">
       {{ t("home.title") }}
     </h4>
-    <p
-      class="m-mb-36 q-ma-none readability-max-width text-center text-h5 text-primary"
-    >
+    <p class="q-ma-none q-mb-36 readability-max-width text-h5 text-primary">
       {{ t("home.description") }}
     </p>
-    <h5 class="m-mb-36 q-mt-none readability-max-width text-accent">
+    <h5 class="q-mb-36 q-mt-none readability-max-width text-accent">
       {{ t("home.actionCall") }}
     </h5>
 
-    <div class="items-center justify-center row wrap">
+    <div class="gap-24 items-center justify-center row wrap">
       <action-box
         v-for="action in actionsList"
         :key="action.to.name"
         :button-label="action.label"
         :to="action.to"
-        class="home-action"
       >
         <q-icon
           class="q-mb-lg q-mt-xl"
@@ -28,9 +25,7 @@
           :name="action.icon"
           size="100px"
         />
-        <div
-          class="home-action__text-content pre q-mb-lg text-center text-h4 text-white"
-        >
+        <div class="q-px-xl text-h4 text-white">
           {{ action.text }}
         </div>
       </action-box>
@@ -77,11 +72,9 @@ const actionsList = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-.home-action {
-  &__text-content {
-    min-height: 160px; // Should be like this to respect mockup
-    white-space: pre-wrap;
-  }
+.action-box {
+  aspect-ratio: 3 / 4;
+  width: 400px;
 }
 
 .readability-max-width {

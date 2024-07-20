@@ -127,7 +127,7 @@ $widths-list: 0, 24, 32, 160, 180, 200, 250, 260, 315, 360, 420, 560, 600, 700,
 }
 
 // heights
-$heights-list: 0, 24, 48, 52, 130, 200, 400, 600;
+$heights-list: 0, 24, 48, 52, 130, 160, 200, 250, 400, 600;
 
 @each $height in $heights-list {
   .height-#{$height} {
@@ -197,7 +197,7 @@ $heights-list: 0, 24, 48, 52, 130, 200, 400, 600;
 }
 
 // This is used to remove the blue color applied to links by default
-.default-color a {
+.prevent-links-highlight a {
   color: unset;
 }
 
@@ -205,7 +205,7 @@ $heights-list: 0, 24, 48, 52, 130, 200, 400, 600;
   background-color: #edf2fa;
 }
 
-.m-mb-36 {
+.q-mb-36 {
   margin-bottom: 36px;
 }
 

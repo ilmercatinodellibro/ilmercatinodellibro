@@ -1,17 +1,17 @@
 <!-- eslint-disable vue/no-v-html vue/no-v-text-v-html-on-component -->
 <template>
   <header-bar v-if="user" />
-  <q-page class="flex-center row">
-    <span class="width-700">
+  <q-page class="flex-center q-pa-md row">
+    <div class="max-width-700">
       <h3 class="text-primary">
         {{ t("general.joinUs") }}
       </h3>
 
-      <q-card-section
-        class="default-color no-padding"
+      <div
+        class="prevent-links-highlight"
         v-html="selectedLocation.infoPagesContent[locale].joinUsContent"
       />
-    </span>
+    </div>
   </q-page>
 </template>
 
