@@ -30,7 +30,11 @@ export class RetailLocationResolver {
   @Public()
   @Query(() => [RetailLocation])
   async retailLocations() {
-    return this.prisma.retailLocation.findMany();
+    return this.prisma.retailLocation.findMany({
+      orderBy: {
+        id: "asc",
+      },
+    });
   }
 
   @Public()
