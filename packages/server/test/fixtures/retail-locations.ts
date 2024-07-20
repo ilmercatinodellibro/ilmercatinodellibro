@@ -1,17 +1,16 @@
 import type { Prisma } from "@prisma/client";
 import type { Theme } from "src/modules/retail-location/theme.args";
 
-const IT_WHO_ARE_WE = `Il Mercatino del Libro è un progetto nato nel 2013 e portato avanti negli anni da diverse associazioni di Reggio Emilia. A partire dal 2019 il progetto è promosso dal <b>Comune di Reggio Emilia</b> che ne ha permesso lo svolgimento all'interno dello spazio giovani di <b> <a href="https://maps.app.goo.gl/KhNMGXo12Xci1Pwn8">Via Cassoli 1</a></b>. Attualmente il progetto è portato avanti dall'associazione <b>The Spots</b>, capofila della rete di associazioni giovanili che abitano lo spazio comunale.<br /><br />
+const IT_WHO_ARE_WE = `Il Mercatino del Libro è un progetto nato nel 2013 e portato avanti negli anni da diverse associazioni di Reggio Emilia. A partire dal 2019 il progetto è promosso dal <b>Comune di Reggio Emilia</b> che ne ha permesso lo svolgimento all'interno dello spazio giovani di <b> <a href="https://maps.app.goo.gl/KhNMGXo12Xci1Pwn8" target="_blank">Via Cassoli 1</a></b>. Attualmente il progetto è portato avanti dall'associazione <b>The Spots</b>, capofila della rete di associazioni giovanili che abitano lo spazio comunale.<br /><br />
 Il Mercatino del Libro si occupa di compravendita di testi scolastici destinati a istituti superiori di primo e secondo grado. <b>I libri sono ritirati in conto vendita, e venduti al 55% del prezzo di copertina. Alla fine di ogni edizione vengono restituiti agli utenti i libri invenduti e parte dei profitti derivati dalla vendita, pari al 30% del prezzo di copertina.</b> <br /><br />
 Il margine di guadagno del mercatino del libro viene utilizzato per garantire la continuità del progetto negli anni successivi, investendo il surplus in progetti legati all'istruzione e alle politiche giovanili. Negli anni, il progetto è stato realizzato da studenti o giovani lavoratori tra i 16 e i 25 che in forma volontaria hanno condiviso i valori di mutuo soccorso tra studenti e libero accesso all'istruzione.<br /><br />
-A partire dall'edizione 2022, il Mercatino del Libro ha aperto una <b>seconda sede a Modena all'interno dello  <a href="https://maps.app.goo.gl/VYRVDBk88QmskhDY6">Spazio Happen</a></b> in via Strada Nazionale Canaletto sud, 43L gestito dalla <b>Cooperativa Sociale Aliante</b>. La cooperativa ha lo scopo di perseguire l'interesse generale della comunità alla promozione umana e all'integrazione sociale dei cittadini attraverso la gestione di servizi di supporto, assistenziali, socio-sanitari ed educativi.`;
+A partire dall'edizione 2022, il Mercatino del Libro ha aperto una <b>seconda sede a Modena all'interno dello  <a href="https://maps.app.goo.gl/VYRVDBk88QmskhDY6" target="_blank">Spazio Happen</a></b> in via Strada Nazionale Canaletto sud, 43L gestito dalla <b>Cooperativa Sociale Aliante</b>. La cooperativa ha lo scopo di perseguire l'interesse generale della comunità alla promozione umana e all'integrazione sociale dei cittadini attraverso la gestione di servizi di supporto, assistenziali, socio-sanitari ed educativi.`;
 
 const IT_JOIN_US = `<b>Ogni anno nuovi ragazzi e ragazze si avvicinano al mercatino per dare il loro contributo.</b> Il progetto offre un importante aiuto alle famiglie in difficoltà abbassando il più possibile i costi legati all'istruzione. Questa missione è di fatto il comune denominatore tra tutti i ragazzi/e che, negli anni, hanno contribuito alla realizzazione di ogni edizione. <br /><br />
 <b>Il Mercatino per molti è un luogo di aggregazione, un crocevia di studenti e studentesse</b> che si sono incontrati nella volontà comune di dare un servizio alla comunità. Questo ci rende un gruppo di amici oltre che associazione. Cerchiamo di includere ogni nuovo volontario nella speranza di vedere il progetto crescere, stando bene insieme. <br /><br />
 Durante tutto l'anno <b>ci impegniamo ad ampliare e migliorare il servizio con progetti satellite</b> che condividono gli obiettivi con quello principale. Inoltre, molti altri progetti abitano lo spazio giovani di Via Cassoli 1. Numerosi sono stati i volontari e le volontarie che hanno conosciuto lo spazio per mezzo delMercatino e sono rimasti per altri progetti e viceversa. <br /><br />
-<b>Qualora tu sia interessato a svolgere una attività costruttiva, formativa e divertente</b> per il riconoscimento di crediti formativi, come alternanza scuola lavoro o semplicemente per dare il tuo contributo <b>ti invitiamo a scriverci a  <a href='mailto:mercatino@thespots-re.it'>mercatino@thespots-re.it</a>.</b>`;
+<b>Qualora tu sia interessato a svolgere una attività costruttiva, formativa e divertente</b> per il riconoscimento di crediti formativi, come alternanza scuola lavoro o semplicemente per dare il tuo contributo <b>ti invitiamo a scriverci a  <a href='mailto:mercatino@thespots-re.it' target="_blank">mercatino@thespots-re.it</a>.</b>`;
 
-//TODO: add correct link to the Terms & Service page inside the HTMLs
 const IT_RE_FAQ = `<section>
   <p>
     <span style="font-size: 14pt"
@@ -26,7 +25,7 @@ const IT_RE_FAQ = `<section>
     <strong> Dove vi trovate?&nbsp;</strong>In via Cassoli 1, vicino a dove
     viale Umberto I si immette sulla circonvallazione. Digita "il Mercatino del
     Libro RE" su Google Maps, ci trovi con tanto di giorni e orari di apertura.
-    Clicca  <a href="https://goo.gl/maps/82bJmFoHRbnUuKWy9" rel="alternate">qui</a
+    Clicca  <a href="https://goo.gl/maps/82bJmFoHRbnUuKWy9" rel="alternate" target="_blank">qui</a
     > per vedere la mappa!
   </p>
   <p>
@@ -43,16 +42,18 @@ const IT_RE_FAQ = `<section>
     > nei giorni e negli orari di apertura. Per tutto il resto del tempo puoi
     scriverci un messaggio whatsapp, un'email a <span
       id="cloak0993b6811ec28c721437850d4375ab4a"
-      > <a href="mailto:info@ilmercatinodellibro.com"
+      > <a href="mailto:info@ilmercatinodellibro.com" target="_blank"
         >info@ilmercatinodellibro.com</a
       ></span
     >&nbsp;o contattarci su <a
       href="https://www.facebook.com/IlMercatinoDelLibroRE/"
       rel="alternate"
+      target="_blank"
       >Facebook</a
     >&nbsp;o&nbsp;<a
       href="https://www.instagram.com/ilmercatinodellibrore/"
       rel="alternate"
+      target="_blank"
       >Instagram</a
     >.
   </p>
@@ -75,6 +76,7 @@ const IT_RE_FAQ = `<section>
     registrandosi sul nostro sito  <a
       href="https://www.ilmercatinodellibro.com/"
       rel="alternate"
+      target="_blank"
       >www.ilmercatinodellibro.com</a
     >, direttamente da casa o in sede.
   </p>
@@ -88,6 +90,7 @@ const IT_RE_FAQ = `<section>
       > i  <a
         href="/tos-privacy/tos-re.pdf"
         rel="alternate"
+        target="_blank"
         >Termini e condizioni di utilizzo</a
       > e i cookies&nbsp;</span
     > ("I agree").
@@ -144,8 +147,8 @@ const IT_RE_FAQ = `<section>
     ritirare da noi entro la scadenza.
   </p>
   <p>
-    <strong> Quali sono le scadenze per le prenotazioni?</strong> La
-    prenotazione dura 3&nbsp;giorni (anche non lavorativi).
+    <strong> Quali sono le scadenze per le prenotazioni?</strong>
+    La durata delle prenotazioni varia durante il periodo di apertura del mercatino, solitamente una prenotazione dura 3 giorni (anche non lavorativi).
   </p>
 </section>
 <div class="gap-16 row no-wrap">
@@ -193,6 +196,7 @@ const IT_RE_FAQ = `<section>
             >&nbsp;ci troverete in <a
               href="https://goo.gl/maps/82bJmFoHRbnUuKWy9"
               rel="alternate"
+              target="_blank"
               >Via Francesco Cassoli, 1, 42123 Reggio Emilia RE</a
             >.</span
           >
@@ -221,6 +225,7 @@ const IT_RE_FAQ = `<section>
           Quest'anno la nostra sede continua a essere lo spazio giovanile di <a
             href="https://www.facebook.com/viacassoliuno/"
             rel="alternate"
+            target="_blank"
             > #ViaCassoliUno</a
           >!&nbsp;<br />Ci trovate in<strong> Via Cassoli 1</strong>,<strong>
             sulla</strong
@@ -230,6 +235,7 @@ const IT_RE_FAQ = `<section>
           >.<br />Ancora più precisamente: <a
             href="https://goo.gl/maps/tTbjyUBBRYV2Nh5QA"
             rel="alternate"
+            target="_blank"
             >qua</a
           >.
         </p>
@@ -247,6 +253,7 @@ const IT_RE_FAQ = `<section>
           Ricordatevi sempre di accettare i <a
             href="/tos-privacy/tos-re.pdf"
             rel="alternate"
+            target="_blank"
             >Termini e condizioni di utilizzo</a
           > e i cookies!
         </p>
@@ -265,7 +272,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
       Presso Happen, in Strada Nazionale Canaletto Sud 43L a Modena. Digita
       “Happen Modena” su Google Maps o clicca</span
     > <a
-      href="https://www.google.it/maps/place/HAPPEN/@44.6550707,10.9305737,17z/data=!4m12!1m6!3m5!1s0x477fef1884c0a2af:0xb15bfa095aa59aa6!2sHAPPEN!8m2!3d44.6546804!4d10.9326746!3m4!1s0x477fef1884c0a2af:0xb15bfa095aa59aa6!8m2!3d44.6546804!4d10.9326746"
+      href="https://maps.app.goo.gl/VYRVDBk88QmskhDY6"
       ><span> qui</span></a
     ><span> per vedere la mappa!</span>
   </p>
@@ -284,14 +291,14 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
       nei giorni e negli orari di apertura. Per tutto il resto del tempo puoi
       scriverci un messaggio whatsapp, una mail a</span
     ><span id="cloak4ce7dfb3d815b39ca7e0f71ef60863ec"
-      > <a href="mailto:info-mo@ilmercatinodellibro.com"
+      > <a href="mailto:info-mo@ilmercatinodellibro.com" target="_blank"
         ><span> info-mo@ilmercatinodellibro.com</span></a
       ></span
     ><span> o contattarci su</span
-    > <a href="https://www.facebook.com/IlMercatinoDelLibroMO/"
+    > <a href="https://www.facebook.com/IlMercatinoDelLibroMO/" target="_blank"
       ><span> Facebook</span></a
     ><span> o</span
-    > <a href="https://www.instagram.com/ilmercatinodellibromo/"
+    > <a href="https://www.instagram.com/ilmercatinodellibromo/" target="_blank"
       ><span> Instagram</span></a
     ><span>.</span>
   </p>
@@ -317,7 +324,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
   <p>
     <b> Qual è la prima cosa che devo fare?</b
     ><span> Creare un utente registrandosi sul nostro sito</span
-    > <a href="https://www.ilmercatinodellibro.com/"
+    > <a href="https://www.ilmercatinodellibro.com/" target="_blank"
       ><span> mo.ilmercatinodellibro.com</span></a
     ><span>, direttamente da casa o in sede.</span>
   </p>
@@ -336,6 +343,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
       i <a
         href="/tos-privacy/tos-mo.pdf"
         rel="alternate"
+        target="_blank"
       >
         Termini e condizioni di utilizzo</a
       >
@@ -397,7 +405,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
   </p>
   <p>
     <b> Quali sono le scadenze per le prenotazioni?</b
-    ><span> La prenotazione dura 3 giorni (anche non lavorativi).</span>
+    ><span> La durata delle prenotazioni varia durante il periodo di apertura del mercatino, solitamente una prenotazione dura 3 giorni (anche non lavorativi).</span>
   </p>
 </section>
 `;
