@@ -6,6 +6,7 @@ import {
   redirectIfGuest,
   redirectIfNotAdmin,
   redirectIfNotOperatorOrAdmin,
+  redirectIfNotUser,
   useAuthService,
 } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -142,68 +143,85 @@ const routes: RouteRecordRaw[] = [
       { path: "", redirect: { name: AvailableRouteNames.Home } },
 
       {
-        path: "faq",
-        name: AvailableRouteNames.FAQ,
-        component: () => import("src/pages/faq.vue"),
+        path: "",
+        beforeEnter: redirectIfNotUser,
+        children: [
+          {
+            path: "home",
+            name: AvailableRouteNames.Home,
+            component: () => import("src/pages/home.vue"),
+          },
+          {
+            path: "reserve-books",
+            name: AvailableRouteNames.ReserveBooks,
+            component: () => import("src/pages/reserve-books.vue"),
+          },
+          {
+            path: "my-books",
+            name: AvailableRouteNames.MyBooks,
+            component: () => import("src/pages/my-books.vue"),
+          },
+          {
+            path: "salable-books",
+            name: AvailableRouteNames.SalableBooks,
+            component: () => import("src/pages/salable-books.vue"),
+          },
+          {
+            path: "faq",
+            name: AvailableRouteNames.FAQ,
+            component: () => import("src/pages/faq.vue"),
+          },
+        ],
       },
+
       {
-        path: "home",
-        name: AvailableRouteNames.Home,
-        component: () => import("src/pages/home.vue"),
-      },
-      {
-        path: "reset-password",
-        name: AvailableRouteNames.ResetPassword,
-        component: () => import("src/pages/reset-password.vue"),
-      },
-      {
-        path: "roles-and-permissions",
-        name: AvailableRouteNames.RolesAndPermissions,
-        component: () => import("src/pages/roles-and-permissions.vue"),
-        beforeEnter: redirectIfNotAdmin,
-      },
-      {
-        path: "statistics",
-        name: AvailableRouteNames.Statistics,
-        component: () => import("src/pages/statistics-page.vue"),
-        beforeEnter: redirectIfNotAdmin,
-      },
-      {
-        path: "books-catalog",
-        name: AvailableRouteNames.Catalog,
-        component: () => import("src/pages/catalog.vue"),
-      },
-      {
-        path: "users-management",
-        name: AvailableRouteNames.UsersManagement,
+        path: "",
         beforeEnter: redirectIfNotOperatorOrAdmin,
-        component: () => import("src/pages/manage-users.vue"),
+        children: [
+          {
+            path: "users-management",
+            name: AvailableRouteNames.UsersManagement,
+            component: () => import("src/pages/manage-users.vue"),
+          },
+          {
+            path: "warehouse",
+            name: AvailableRouteNames.Warehouse,
+            component: () => import("src/pages/warehouse.vue"),
+          },
+          {
+            path: "books-catalog",
+            name: AvailableRouteNames.Catalog,
+            component: () => import("src/pages/catalog.vue"),
+          },
+        ],
       },
+
       {
-        path: "salable-books",
-        name: AvailableRouteNames.SalableBooks,
-        component: () => import("src/pages/salable-books.vue"),
+        path: "",
+        beforeEnter: redirectIfNotAdmin,
+        children: [
+          {
+            path: "roles-and-permissions",
+            name: AvailableRouteNames.RolesAndPermissions,
+            component: () => import("src/pages/roles-and-permissions.vue"),
+          },
+          {
+            path: "statistics",
+            name: AvailableRouteNames.Statistics,
+            component: () => import("src/pages/statistics-page.vue"),
+          },
+        ],
       },
-      {
-        path: "my-books",
-        name: AvailableRouteNames.MyBooks,
-        component: () => import("src/pages/my-books.vue"),
-      },
-      {
-        path: "reserve-books",
-        name: AvailableRouteNames.ReserveBooks,
-        component: () => import("src/pages/reserve-books.vue"),
-      },
+
       {
         path: "my-data",
         name: AvailableRouteNames.MyData,
         component: () => import("src/pages/my-data.vue"),
       },
       {
-        path: "warehouse",
-        name: AvailableRouteNames.Warehouse,
-        component: () => import("src/pages/warehouse.vue"),
-        beforeEnter: redirectIfNotOperatorOrAdmin,
+        path: "reset-password",
+        name: AvailableRouteNames.ResetPassword,
+        component: () => import("src/pages/reset-password.vue"),
       },
     ],
   },

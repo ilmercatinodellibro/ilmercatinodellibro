@@ -47,7 +47,8 @@ watch(user, (newUser) => {
   }
 });
 
-const AUTHENTICATED_DEFAULT_ROUTE_NAME = AvailableRouteNames.Home;
+const USER_DEFAULT_ROUTE_NAME = AvailableRouteNames.Home;
+const OPERATOR_DEFAULT_ROUTE_NAME = AvailableRouteNames.UsersManagement;
 const REGISTRATION_SENT_ROUTE_NAME = "registration-sent";
 const GUEST_DEFAULT_ROUTE_NAME = AvailableRouteNames.Login;
 
@@ -69,7 +70,7 @@ export function useLoginMutation() {
     token.value = data.jwt;
     user.value = data.user;
     void router.push({
-      name: AUTHENTICATED_DEFAULT_ROUTE_NAME,
+      name: USER_DEFAULT_ROUTE_NAME,
       params: { locationId: selectedLocation.value.id },
     });
   }
@@ -315,11 +316,17 @@ export const redirectIfAuthenticated: NavigationGuard = (to) => {
   const { selectedLocation } = useRetailLocationService();
   const { isAuthenticated } = useAuthService();
 
-  if (isAuthenticated.value && to.name !== AUTHENTICATED_DEFAULT_ROUTE_NAME) {
-    return {
-      name: AUTHENTICATED_DEFAULT_ROUTE_NAME,
-      params: { locationId: selectedLocation.value.id },
-    };
+  if (isAuthenticated.value) {
+    const defaultRoute = hasUserRole.value
+      ? USER_DEFAULT_ROUTE_NAME
+      : OPERATOR_DEFAULT_ROUTE_NAME;
+
+    if (to.name !== defaultRoute) {
+      return {
+        name: defaultRoute,
+        params: { locationId: selectedLocation.value.id },
+      };
+    }
   }
 };
 
@@ -335,13 +342,25 @@ export const redirectIfGuest: NavigationGuard = (to) => {
   }
 };
 
+export const redirectIfNotUser: NavigationGuard = () => {
+  const { selectedLocation } = useRetailLocationService();
+  const { hasUserRole } = useAuthService();
+
+  if (!hasUserRole.value) {
+    return {
+      name: OPERATOR_DEFAULT_ROUTE_NAME,
+      params: { locationId: selectedLocation.value.id },
+    };
+  }
+};
+
 export const redirectIfNotAdmin: NavigationGuard = () => {
   const { selectedLocation } = useRetailLocationService();
   const { hasAdminRole } = useAuthService();
 
   if (!hasAdminRole.value) {
     return {
-      name: AUTHENTICATED_DEFAULT_ROUTE_NAME,
+      name: OPERATOR_DEFAULT_ROUTE_NAME,
       params: { locationId: selectedLocation.value.id },
     };
   }
@@ -353,7 +372,7 @@ export const redirectIfNotOperatorOrAdmin: NavigationGuard = () => {
 
   if (!hasAdminRole.value && !hasOperatorRole.value) {
     return {
-      name: AUTHENTICATED_DEFAULT_ROUTE_NAME,
+      name: USER_DEFAULT_ROUTE_NAME,
       params: { locationId: selectedLocation.value.id },
     };
   }
