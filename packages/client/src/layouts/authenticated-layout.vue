@@ -204,6 +204,38 @@
             <div class="no-padding q-item q-item-type row">
               <q-item
                 v-ripple
+                :to="{ name: AvailableRouteNames.UsersManagement }"
+                active-class="bg-black-activated-light"
+                class="drawer-item"
+                clickable
+                data-cy="users-management"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiAccountMultiple" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{
+                      t(`routesNames.${AvailableRouteNames.UsersManagement}`)
+                    }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon :name="mdiInformationOutline" color="black-54">
+                    <q-tooltip>
+                      {{ t("general.tooltips.usersAndMovements") }}
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </q-item>
+            </div>
+
+            <div class="no-padding q-item q-item-type row">
+              <q-item
+                v-ripple
                 :to="{ name: AvailableRouteNames.Warehouse }"
                 active-class="bg-black-activated-light"
                 class="drawer-item"
@@ -255,38 +287,6 @@
                   <q-icon :name="mdiInformationOutline" color="black-54">
                     <q-tooltip>
                       {{ t("general.tooltips.catalog") }}
-                    </q-tooltip>
-                  </q-icon>
-                </q-item-section>
-              </q-item>
-            </div>
-
-            <div class="no-padding q-item q-item-type row">
-              <q-item
-                v-ripple
-                :to="{ name: AvailableRouteNames.UsersManagement }"
-                active-class="bg-black-activated-light"
-                class="drawer-item"
-                clickable
-                data-cy="users-management"
-              >
-                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-                  {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
-                </q-tooltip>
-                <q-item-section side>
-                  <q-icon :name="mdiAccountMultiple" color="black-54" />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label class="ellipsis text-size-16">
-                    {{
-                      t(`routesNames.${AvailableRouteNames.UsersManagement}`)
-                    }}
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <q-icon :name="mdiInformationOutline" color="black-54">
-                    <q-tooltip>
-                      {{ t("general.tooltips.usersAndMovements") }}
                     </q-tooltip>
                   </q-icon>
                 </q-item-section>
