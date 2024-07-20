@@ -58,6 +58,7 @@
           :label="$t('book.fields.price')"
           :rules="[requiredRule, greaterThanZeroRule]"
           type="number"
+          step="0.01"
           lazy-rules
           outlined
           hide-bottom-space
