@@ -211,7 +211,7 @@ const {
 
 const { t } = useI18n();
 
-const isSortedByCopyCode = ref(false);
+const isSortedByCopyCode = ref(true);
 
 const tableRef = ref<QTable>();
 
