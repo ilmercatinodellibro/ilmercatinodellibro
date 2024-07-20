@@ -1,21 +1,19 @@
-import { Field, InputType, registerEnumType } from "@nestjs/graphql";
-
-export enum FeedbackType {
-  FEATURE_IMPROVEMENT = "Feature Request",
-  NEW_FEATURE = "New Feature",
-  BUG = "Bug",
-  OTHER = "Other",
-}
-
-registerEnumType(FeedbackType, {
-  name: "FeedbackType",
-  description: undefined,
-});
+import { Field, InputType } from "@nestjs/graphql";
 
 @InputType()
 export class FeedbackRequestPayload {
-  @Field(() => FeedbackType)
-  type!: FeedbackType;
+  @Field()
+  firstname!: string;
+
+  @Field()
+  lastname!: string;
+
+  @Field()
+  email!: string;
+
   @Field()
   message!: string;
+
+  @Field()
+  locale!: string;
 }

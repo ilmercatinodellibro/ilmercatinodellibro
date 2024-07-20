@@ -1,9 +1,8 @@
 import { Inject, UnprocessableEntityException } from "@nestjs/common";
 import { Mutation, Resolver } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { User } from "src/@generated";
 import { EmailConfiguration, emailConfiguration } from "src/config/email";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { Public } from "src/modules/auth/decorators/public-route.decorator";
 import { Input } from "../auth/decorators/input.decorator";
 import { MailService } from "../mail/mail.service";
 import { FeedbackRequestPayload } from "./feedback.args";
@@ -16,21 +15,23 @@ export class FeedbackResolver {
     private readonly mailService: MailService,
   ) {}
 
+  @Public()
   @Mutation(() => GraphQLVoid, { nullable: true })
   async feedback(
-    @Input() { message, type }: FeedbackRequestPayload,
-    @CurrentUser() { id: userId, firstname, lastname, locale = "it" }: User,
+    @Input()
+    { firstname, lastname, email, message, locale }: FeedbackRequestPayload,
   ) {
-    const username = `${firstname} ${lastname}`;
+    const fullName = `${firstname} ${lastname}`;
     try {
       return await this.mailService.sendMail({
         to: this.emailConfig.supportEmail,
+        from: email,
         subject:
           locale === "en-US"
-            ? `Feedback request (type: ${type}) from ${username} [${userId}]`
-            : `Richiesta di feedback (tipo: ${type}) da ${username} [${userId}]`,
+            ? `Contact request from ${fullName}`
+            : `Richiesta di contatto da ${fullName}`,
         context: {
-          name: username,
+          name: fullName,
           message,
         },
         template: "feedback-request",

@@ -16,6 +16,8 @@ export default {
   typeAtLeastNChars: "Inserisci almeno {charCount} caratteri",
   helpAndFeedback: "Chiedi aiuto o fornisci suggerimenti",
   feedbackRequestSent: "Richiesta inviata con successo",
+  feedbackRequestError:
+    "Non siamo riusciti ad inviare la richiesta di contatto, contattaci tramite gli altri canali",
   enterMessage: "Inserisci messaggio",
   userRoleUpdated: "Ruolo utente aggiornato",
   userRemoved: "Utente rimosso",

@@ -19,6 +19,7 @@ fragment RetailLocationSettings on RetailLocation {
 fragment RetailLocation on RetailLocation {
   id
   name
+  email
   fullAddress
   phoneNumber
   instagramLink

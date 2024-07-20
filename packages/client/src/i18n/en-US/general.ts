@@ -16,6 +16,8 @@ export default {
   typeAtLeastNChars: "Type at least {charCount} characters",
   helpAndFeedback: "Help and Feedback",
   feedbackRequestSent: "Request sent successfully",
+  feedbackRequestError:
+    "We weren't able to sent the contact request, contact us via other channels",
   enterMessage: "Enter message",
   userRoleUpdated: "User role updated",
   userRemoved: "User removed",

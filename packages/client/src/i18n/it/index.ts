@@ -1,4 +1,4 @@
-import { FeedbackType, Role } from "src/@generated/graphql";
+import { Role } from "src/@generated/graphql";
 import retailLocation from "src/i18n/it/retailLocation";
 import {
   AdditionalMacroIntervalDurationNames,
@@ -29,13 +29,6 @@ const durationNames = {
   custom: "Personalizzato",
 };
 
-const feedbackType = {
-  FEATURE_IMPROVEMENT: "Miglioramento di una funzionalità",
-  NEW_FEATURE: "Nuova funzionalità",
-  BUG: "Bug",
-  OTHER: "Altro",
-} satisfies Record<FeedbackType, string>;
-
 const durations = {
   year: "Anno",
   month: "Mese",
@@ -58,7 +51,6 @@ export default {
   network,
   salableBooks,
   validators,
-  feedbackType,
   retailLocation,
   warehouse,
   bookErrors,

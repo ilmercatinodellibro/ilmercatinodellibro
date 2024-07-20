@@ -11,12 +11,12 @@
             <template #email>
               <span class="contacts-mail">
                 <a
-                  href="mailto:info@ilmercatinodellibro.com"
+                  :href="`mailto:${selectedLocation.email}`"
                   class="contacts-details text-accent"
                   rel="noopener"
                   target="_blank"
                 >
-                  {{ "info@ilmercatinodellibro.com" }}
+                  {{ selectedLocation.email }}
                 </a>
               </span>
             </template>
@@ -48,68 +48,93 @@
         </div>
       </div>
     </q-card>
-    <q-card class="contacts-card form-card">
-      <span class="form-title">
+    <q-card class="contacts-card gap-16">
+      <p class="text-center text-size-24">
         {{ $t("contacts.form.title") }}
-      </span>
-      <span class="form-content">
+      </p>
+      <q-form
+        class="column flow-grow full-width gap-16"
+        greedy
+        @submit="submitFeedback"
+      >
         <q-input
-          v-for="(key, field) in userParam"
-          :key="field"
-          v-model="userParam[field]"
-          outlined
-          :label="$t('contacts.form.' + field)"
-          class="black-54 form-text"
-          :input-class="field === 'message' ? 'form-textarea' : ''"
-          :type="field === 'message' ? 'textarea' : 'text'"
+          v-model="contactData.firstname"
+          :disable="isAuthenticated"
+          :label="$t('contacts.form.firstname')"
           bottom-slots
-        >
-          <template #hint>
-            <span class="text-hint">
-              {{ userHints[field] }}
-            </span>
-          </template>
-        </q-input>
-        <q-btn
-          color="accent"
-          :label="$t('contacts.form.send')"
-          class="form-button"
+          class="black-54 full-width"
+          outlined
+          type="text"
         />
-      </span>
+
+        <q-input
+          v-model="contactData.lastname"
+          :disable="isAuthenticated"
+          :label="$t('contacts.form.lastname')"
+          bottom-slots
+          class="black-54 full-width"
+          outlined
+          type="text"
+        />
+
+        <q-input
+          v-model="contactData.email"
+          :disable="isAuthenticated"
+          :label="$t('contacts.form.email')"
+          bottom-slots
+          class="black-54 full-width"
+          outlined
+          type="text"
+        />
+
+        <q-input
+          v-model="message"
+          :label="$t('contacts.form.message')"
+          bottom-slots
+          class="black-54 full-width height-200"
+          outlined
+          type="textarea"
+        />
+
+        <q-btn
+          :label="$t('contacts.form.send')"
+          :loading="loading"
+          color="accent"
+          type="submit"
+        />
+      </q-form>
     </q-card>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, ref } from "vue";
+import { Notify } from "quasar";
+import { defineAsyncComponent, reactive, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import SocialButton from "src/components/social-button.vue";
+import { notifyError } from "src/helpers/error-messages";
 import { useAuthService } from "src/services/auth";
+import { useFeedbackMutation } from "src/services/feedback.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const HeaderBar = defineAsyncComponent(
   () => import("src/components/header-bar.vue"),
 );
 
-const userParam = ref({
+const contactData = reactive({
   firstname: "",
   lastname: "",
   email: "",
-  message: "",
 });
+
+const message = ref("");
 
 const { isAuthenticated, user } = useAuthService();
-if (isAuthenticated.value && user.value) {
-  userParam.value.firstname = user.value.firstname;
-  userParam.value.lastname = user.value.lastname;
-  userParam.value.email = user.value.email;
+if (user.value) {
+  contactData.firstname = user.value.firstname;
+  contactData.lastname = user.value.lastname;
+  contactData.email = user.value.email;
 }
-
-const userHints = ref({
-  firstname: "",
-  lastname: "",
-  email: "",
-  message: "",
-});
 
 const { selectedLocation } = useRetailLocationService();
 
@@ -118,11 +143,36 @@ function formatPhone(unformattedNumber: string | undefined) {
     return "";
   }
 
-  const firtPart = unformattedNumber.slice(0, 3);
+  const firstPart = unformattedNumber.slice(0, 3);
   const secondPart = unformattedNumber.slice(3, 6);
   const thirdPart = unformattedNumber.slice(6, 10);
 
-  return `${firtPart} ${secondPart} ${thirdPart}`;
+  return `${firstPart} ${secondPart} ${thirdPart}`;
+}
+
+const { t, locale } = useI18n();
+
+const { feedback, loading } = useFeedbackMutation();
+
+async function submitFeedback() {
+  try {
+    await feedback({
+      input: {
+        ...contactData,
+        message: message.value,
+        locale: locale.value,
+      },
+    });
+
+    Notify.create({
+      message: t("general.feedbackRequestSent"),
+      color: "positive",
+    });
+
+    message.value = "";
+  } catch (e) {
+    notifyError(t("general.feedbackRequestError"));
+  }
 }
 </script>
 
@@ -186,56 +236,16 @@ function formatPhone(unformattedNumber: string | undefined) {
   }
 }
 
-.form {
-  &-card {
-    align-items: stretch;
-    gap: 24px;
-  }
-
-  &-title {
-    font-size: 24px;
-    line-height: 28px;
-    text-align: center;
-  }
-
-  &-content {
-    align-items: stretch;
-    align-self: stretch;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 2;
-    gap: 16px;
-    width: 100%;
-  }
-
-  &-text {
-    width: 100%;
-  }
-
-  &-button {
-    width: 100%;
-  }
-}
-
-.text-hint {
-  height: 16px;
-}
-
-:global(.form-textarea) {
-  height: 190px;
-  resize: none !important;
-}
-
-:global(.q-field__bottom) {
+:deep(.q-field__bottom) {
   height: 16px;
   min-height: 0;
 }
 
-:global(.q-field--with-bottom) {
+:deep(.q-field--with-bottom) {
   padding-bottom: 16px;
 }
 
-:global(.q-field__control) {
+:deep(.q-field__control) {
   border-radius: 8px !important;
 }
 </style>

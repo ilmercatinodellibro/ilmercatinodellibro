@@ -127,7 +127,7 @@ $widths-list: 0, 24, 32, 160, 180, 200, 250, 260, 315, 360, 420, 560, 600, 700,
 }
 
 // heights
-$heights-list: 0, 24, 48, 52, 130, 400, 600;
+$heights-list: 0, 24, 48, 52, 130, 200, 400, 600;
 
 @each $height in $heights-list {
   .height-#{$height} {
