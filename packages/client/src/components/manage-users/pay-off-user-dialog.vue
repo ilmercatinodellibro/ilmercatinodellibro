@@ -160,7 +160,7 @@
                 >
                   <q-menu auto-close>
                     <q-item
-                      v-if="selectableRows.includes(row)"
+                      v-if="returnableRows.includes(row)"
                       class="items-center"
                       clickable
                       @click="returnBooks([row])"
@@ -465,6 +465,12 @@ const tableRows = computed<
 
 const selectableRows = computed(() =>
   ownedCopies.value.filter((row) => getStatus(row) === "available"),
+);
+
+const returnableRows = computed(() =>
+  ownedCopies.value.filter((row) =>
+    ["available", "INCOMPLETE", "not-available"].includes(getStatus(row)),
+  ),
 );
 
 const selectedRows = ref<BookCopyDetailsFragment[]>([]);
