@@ -40,12 +40,23 @@ export interface GenerateReceiptInput {
   books: ReceiptBook[];
 }
 
+interface SettlementPeriod {
+  from: Date;
+  to: Date;
+}
+
 @Injectable()
 export class ReceiptService {
-  // TODO: Make this dynamic
-  readonly #collectionPeriod = {
-    from: new Date(2024, 8, 13),
-    to: new Date(2024, 8, 24),
+  // TODO: Make this dynamic and configurable from the admin panel
+  readonly #settlementPeriod: Record<"re" | "mo", SettlementPeriod> = {
+    re: {
+      from: new Date(2024, 8, 17),
+      to: new Date(2024, 8, 28),
+    },
+    mo: {
+      from: new Date(2024, 8, 16),
+      to: new Date(2024, 8, 27),
+    },
   };
 
   constructor(
@@ -155,7 +166,9 @@ export class ReceiptService {
       ((book.originalPrice * location.buyRate) / 100).toFixed(2),
       book.code,
     ]);
-    const collectionPeriod = this.#getFormattedCollectionPeriod();
+    const settlementPeriod = this.#getFormattedSettlementPeriod(
+      this.#settlementPeriod[location.id as "re" | "mo"],
+    );
 
     const schema = withdrawalTemplate.schemas[0];
     return await generate({
@@ -173,8 +186,8 @@ export class ReceiptService {
           title: schema.title.content.replace("{email}", userEmail),
           table: JSON.stringify(bookRows),
           notice: schema.notice.content
-            .replace("{from}", collectionPeriod.from)
-            .replace("{to}", collectionPeriod.to),
+            .replace("{from}", settlementPeriod.from)
+            .replace("{to}", settlementPeriod.to),
         },
       ],
       options: {
@@ -247,8 +260,7 @@ export class ReceiptService {
     });
   }
 
-  #getFormattedCollectionPeriod() {
-    const { from, to } = this.#collectionPeriod;
+  #getFormattedSettlementPeriod({ from, to }: SettlementPeriod) {
     return {
       from: from.toLocaleDateString("it-IT", {
         day: "numeric",
