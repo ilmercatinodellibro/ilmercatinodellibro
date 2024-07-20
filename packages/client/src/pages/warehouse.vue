@@ -102,13 +102,13 @@
       </dialog-table>
 
       <dialog-table
-        v-else-if="bookCopies"
+        v-else
         v-model:pagination="copyPagination"
         :columns="bookCopyColumns"
         :filter="tableFilter"
         :filter-method="filterMethod"
         :loading="copyLoading"
-        :rows="bookCopies.rows"
+        :rows="bookCopiesRows"
         class="col"
         @request="onCopyRequest"
       >
@@ -130,6 +130,7 @@
 
         <template #body-cell-problems="{ col, row }">
           <q-td :class="[`text-${col.align ?? 'left'}`, col.classes]">
+            <!-- TODO: this throws many calls, one for each row, not sure it's needed -->
             <problems-button :book-copy="row" />
           </q-td>
         </template>
@@ -183,6 +184,8 @@ import { useRetailLocationService } from "src/services/retail-location";
 
 const { selectedLocation } = useRetailLocationService();
 
+const isSortedByCopyCode = ref(true);
+
 const booksPage = ref(0);
 const copyPage = ref(0);
 
@@ -193,25 +196,36 @@ const {
   books,
   refetch: refetchBooks,
   loading: booksLoading,
-} = useGetBooksWithCopiesInStockQuery({
-  page: booksPage.value,
-  retailLocationId: selectedLocation.value.id,
-  rows: booksPerPage.value,
-});
+} = useGetBooksWithCopiesInStockQuery(
+  {
+    page: booksPage.value,
+    retailLocationId: selectedLocation.value.id,
+    rows: booksPerPage.value,
+  },
+  () => ({
+    enabled: !isSortedByCopyCode.value,
+  }),
+);
 
 const {
-  paginatedBookCopies: bookCopies,
+  paginatedBookCopies,
   loading: copyLoading,
   refetch: refetchBookCopies,
-} = useGetPaginatedBookCopiesQuery({
-  page: copyPage.value,
-  retailLocationId: selectedLocation.value.id,
-  rows: bookCopiesPerPage.value,
-});
+} = useGetPaginatedBookCopiesQuery(
+  {
+    page: copyPage.value,
+    retailLocationId: selectedLocation.value.id,
+    rows: bookCopiesPerPage.value,
+  },
+  () => ({
+    enabled: isSortedByCopyCode.value,
+  }),
+);
+
+// Avoids errors in the template while paginatedBookCopies is still loading and thus null
+const bookCopiesRows = computed(() => paginatedBookCopies.value?.rows ?? []);
 
 const { t } = useI18n();
-
-const isSortedByCopyCode = ref(true);
 
 const tableRef = ref<QTable>();
 
@@ -279,7 +293,7 @@ const booksPagination = ref({
 });
 const copyPagination = ref({
   rowsPerPage: bookCopiesPerPage.value,
-  rowsNumber: bookCopies.value?.rowsCount,
+  rowsNumber: paginatedBookCopies.value?.rowsCount,
   page: copyPage.value,
 });
 
@@ -372,11 +386,10 @@ const onCopyRequest: QTableProps["onRequest"] = async ({
     filter: refetchFilterProxy.value,
   });
 
-  copyPagination.value.rowsNumber = bookCopies.value?.rowsCount;
+  copyPagination.value.rowsNumber = paginatedBookCopies.value?.rowsCount;
 
   copyPagination.value.page = page;
   copyPagination.value.rowsPerPage = rowsPerPage;
-  copyLoading.value = false;
 };
 
 function swapView() {
