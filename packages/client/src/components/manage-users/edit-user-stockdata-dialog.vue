@@ -406,12 +406,13 @@ function retrieveAllBooks() {
         retailLocationId: selectedLocation.value.id,
       });
       cache.gc();
+
+      booksToRegister.value = [];
+      tab.value = "retrieved";
     } catch {
       notifyError(t("manageUsers.inStockDialog.errors.retrieval"));
     } finally {
       loading.value = false;
-      booksToRegister.value = [];
-      tab.value = "retrieved";
     }
   });
 }
