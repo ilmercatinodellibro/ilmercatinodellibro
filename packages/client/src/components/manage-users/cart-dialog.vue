@@ -483,17 +483,17 @@ function sellBooks() {
       });
 
       evictRequestsReservationsQueries(cache);
-    } catch {
-      notifyError(t("bookErrors.notSell"));
 
       Notify.create({
         type: "positive",
         message: "Libri venduti con successo.",
       });
-    } finally {
-      loading.value = false;
 
       onDialogHide();
+    } catch {
+      notifyError(t("bookErrors.notSell"));
+    } finally {
+      loading.value = false;
     }
   });
 }
