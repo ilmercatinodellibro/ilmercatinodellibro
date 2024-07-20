@@ -23,7 +23,7 @@ const mailboxSchema = z.union([emailAddressSchema, nameAddrSchema]);
 const emailSchema = z.object({
   host: z.string(),
   port: z.coerce.number(),
-  isSecure: z.coerce.boolean(),
+  isSecure: z.enum(["true", "false"]).transform((value) => value === "true"),
   user: z.string(),
   pass: z.string(),
   fromDefault: mailboxSchema,
