@@ -99,12 +99,12 @@ const routes: RouteRecordRaw[] = [
 
       {
         path: "registration",
-        name: "registration",
+        name: AvailableRouteNames.Registration,
         component: () => import("src/pages/register.vue"),
       },
       {
         path: "registration-sent",
-        name: "registration-sent",
+        name: AvailableRouteNames.RegistrationSent,
         component: () => import("src/pages/registration-sent.vue"),
       },
       {
