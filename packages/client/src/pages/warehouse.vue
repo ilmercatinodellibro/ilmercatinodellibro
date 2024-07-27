@@ -25,13 +25,12 @@
 
       <dialog-table
         v-if="!isSortedByCopyCode"
-        ref="tableRef"
         v-model:pagination="booksPagination"
         :columns="columns"
         :filter="tableFilter"
         :filter-method="filterMethod"
         :loading="booksLoading"
-        :rows="books?.rows ?? []"
+        :rows="bookRows"
         class="flex-delegate-height-management"
         row-key="id"
         @request="onBooksRequest"
@@ -90,7 +89,7 @@
           </q-tr>
 
           <template v-if="props.expand">
-            <book-copy-details-table
+            <book-copy-details-row
               :book-copy-columns="bookCopyColumns"
               :book-id="props.row.id"
               :show-only-available="booleanFilters?.isAvailable"
@@ -158,10 +157,10 @@ import {
   mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QTable, QTableColumn, QTableProps } from "quasar";
+import { Dialog, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import BookCopyDetailsTable from "src/components/book-copy-details-table.vue";
+import BookCopyDetailsRow from "src/components/book-copy-details-row.vue";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
@@ -207,6 +206,9 @@ const {
   }),
 );
 
+// Avoids errors in the template while books is still loading and thus null
+const bookRows = computed(() => books.value?.rows ?? []);
+
 const {
   paginatedBookCopies,
   loading: copyLoading,
@@ -226,8 +228,6 @@ const {
 const bookCopiesRows = computed(() => paginatedBookCopies.value?.rows ?? []);
 
 const { t } = useI18n();
-
-const tableRef = ref<QTable>();
 
 const {
   refetchFilterProxy,
