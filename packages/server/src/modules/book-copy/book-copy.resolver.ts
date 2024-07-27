@@ -229,44 +229,60 @@ export class BookCopyResolver {
     const includeCopyOrStatement = hasProblem || isSold || isAvailable;
 
     const where: Prisma.BookCopyWhereInput = {
-      book: {
-        retailLocationId,
-        ...(searchText
-          ? {
-              OR: [
-                {
+      ...(searchText
+        ? {
+            OR: [
+              {
+                code: {
+                  contains: searchText,
+                  mode: "insensitive",
+                },
+              },
+              {
+                book: {
                   authorsFullName: {
                     contains: searchText,
                     mode: "insensitive",
                   },
                 },
-                {
+              },
+              {
+                book: {
                   isbnCode: {
                     contains: searchText,
                     mode: "insensitive",
                   },
                 },
-                {
+              },
+              {
+                book: {
                   publisherName: {
                     contains: searchText,
                     mode: "insensitive",
                   },
                 },
-                {
+              },
+              {
+                book: {
                   title: {
                     contains: searchText,
                     mode: "insensitive",
                   },
                 },
-                {
+              },
+              {
+                book: {
                   subject: {
                     contains: searchText,
                     mode: "insensitive",
                   },
                 },
-              ],
-            }
-          : {}),
+              },
+            ],
+          }
+        : {}),
+      book: {
+        retailLocationId,
       },
       returnedAt: null,
       ...(includeCopyOrStatement
