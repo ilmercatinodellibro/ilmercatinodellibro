@@ -42,6 +42,9 @@ export class ReceiptResolver {
         userId,
         retailLocationId,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   }
 
