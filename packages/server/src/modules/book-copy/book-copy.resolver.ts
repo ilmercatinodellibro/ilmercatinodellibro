@@ -275,6 +275,27 @@ export class BookCopyResolver {
                 },
               },
               {
+                owner: {
+                  email: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+              },
+              {
+                sales: {
+                  some: {
+                    purchasedBy: {
+                      email: {
+                        contains: searchText,
+                        mode: "insensitive",
+                      },
+                    },
+                    refundedAt: null,
+                  },
+                },
+              },
+              {
                 book: {
                   authorsFullName: {
                     contains: searchText,
