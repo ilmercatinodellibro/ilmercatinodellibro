@@ -75,7 +75,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
   }
 
   @Option({
-    flags: "-u, --users [number]",
+    flags: "-u, --usersCount [number]",
     description:
       "How many users should be generated\nAccepted values: natural numbers (default: 5)",
   })
@@ -201,9 +201,6 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
           ),
           where: {
             retailLocationId: retailLocation.id,
-            copies: {
-              none: {},
-            },
           },
           orderBy: {
             isbnCode: "asc",
@@ -217,31 +214,29 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
         );
       }
 
-      const [seller, buyer] = await Promise.all([
-        await this.prisma.user.create({
-          data: {
-            dateOfBirth: faker.date.past(),
-            email: composeUserEmail(index, "seller", retailLocation.id),
-            firstname: faker.person.firstName(),
-            lastname: faker.person.lastName(),
-            password: PASSWORD_STUB_HASH,
-            phoneNumber: faker.string.numeric({ length: 10 }),
-            emailVerified: true,
-          },
-        }),
+      const seller = await this.prisma.user.create({
+        data: {
+          dateOfBirth: faker.date.past(),
+          email: composeUserEmail(index, "seller", retailLocation.id),
+          firstname: faker.person.firstName(),
+          lastname: faker.person.lastName(),
+          password: PASSWORD_STUB_HASH,
+          phoneNumber: faker.string.numeric({ length: 10 }),
+          emailVerified: true,
+        },
+      });
 
-        await this.prisma.user.create({
-          data: {
-            dateOfBirth: faker.date.past(),
-            email: composeUserEmail(index, "buyer", retailLocation.id),
-            firstname: faker.person.firstName(),
-            lastname: faker.person.lastName(),
-            password: PASSWORD_STUB_HASH,
-            phoneNumber: faker.string.numeric({ length: 10 }),
-            emailVerified: true,
-          },
-        }),
-      ]);
+      const buyer = await this.prisma.user.create({
+        data: {
+          dateOfBirth: faker.date.past(),
+          email: composeUserEmail(index, "buyer", retailLocation.id),
+          firstname: faker.person.firstName(),
+          lastname: faker.person.lastName(),
+          password: PASSWORD_STUB_HASH,
+          phoneNumber: faker.string.numeric({ length: 10 }),
+          emailVerified: true,
+        },
+      });
 
       const retailLocationId = retailLocation.id;
 
@@ -374,15 +369,14 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       });
 
       // Connect requests and reservations to the sales
-      await Promise.all(
-        sales.map(async (sale, i) => {
-          await this.#updateReservationsRequests(sale);
+      for (const [index, sale] of sales.entries()) {
+        await this.#updateReservationsRequests(sale);
 
-          if (i % 3 === 2) {
-            await this.#refundBookCopy(sale, retailLocationId);
-          }
-        }),
-      );
+        if (index % 3 === 2) {
+          // TODO: there's a problem here, the newly generated code apparently doesn't keep into account existing ones
+          await this.#refundBookCopy(sale, retailLocationId);
+        }
+      }
     } catch (error) {
       this.logger.error("Something went wrong: ", error);
     }

@@ -279,7 +279,8 @@ Run the `pnpm seed-users-with-books` command from a terminal within the `/packag
 Available options:
 
 - `-c, --clear`: clears all previously seeded users and their data from the database; **in alternative, the command `pnpm seed-users-with-books:clear` can also be used to perform the same task**.
-- `-r, --random [number]`: specify how much above the base of 10 the range of randomly created copies per user can go; the command only accepts integer numbers greater than zero.
+- `-b, --additionalBooksPerUser [number]`: specify how much above the base of 10 the range of randomly created copies per user can go; the command only accepts integer numbers greater than zero. Use this to increase the number of copies generated within the system.
+- `-u, --usersCount [number]`: specify how many users to generate; the command only accepts integer numbers greater than zero.
 
 ## Social login
 
