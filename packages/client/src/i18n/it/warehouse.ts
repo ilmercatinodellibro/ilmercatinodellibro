@@ -5,6 +5,13 @@ export default {
   sortByCopyCode: "Ordina per codice copia cartacea",
   sortByISBN: "Ordina per ISBN",
   checkOtherWarehouse: "Consulta il magazzino di {0}",
+  availabilityTooltip: [
+    "Totali: {copiesCount}",
+    "Con problemi: {problemsCount}",
+    "Venduti: {soldCount}",
+    "Prenotati: {reservationsCount}",
+    "Nel carrello: {cartItemsCount}",
+  ].join("\n"),
   filters: {
     isAvailable: "Disponibili",
     isSold: "Venduti",

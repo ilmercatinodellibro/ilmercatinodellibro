@@ -215,7 +215,14 @@ view BookMeta {
   id   String @id @map("book_id") @db.Uuid
   book Book?
 
-  isAvailable Boolean @map("is_available")
+  copiesCount       Int @map("copies_count")
+  problemsCount     Int @map("problems_count")
+  soldCount         Int @map("sales_count")
+  reservationsCount Int @map("reservations_count")
+  cartItemsCount    Int @map("cart_items_count")
+
+  isAvailable    Boolean @map("is_available")
+  availableCount Int     @map("available_count")
 }
 
 model BookCopy {

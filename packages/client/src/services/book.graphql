@@ -18,7 +18,16 @@ fragment BookSummary on Book {
   }
 
   meta {
+    id
+
     isAvailable
+    availableCount
+
+    copiesCount
+    problemsCount
+    soldCount
+    reservationsCount
+    cartItemsCount
   }
 }
 
@@ -44,9 +53,6 @@ query getBooks(
 
 fragment BookWithCopiesInStock on Book {
   ...BookSummary
-  copies {
-    ...BookCopyDetails
-  }
 }
 
 query getBooksWithCopiesInStock(

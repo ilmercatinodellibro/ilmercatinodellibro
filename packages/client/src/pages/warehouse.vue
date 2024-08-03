@@ -69,22 +69,36 @@
               :colspan="name === 'title' ? 2 : 1"
               auto-width
             >
-              <template v-if="name === 'status'">
-                <status-chip :value="props.row.meta.isAvailable" />
-              </template>
+              <status-chip
+                v-if="name === 'status'"
+                :value="props.row.meta.isAvailable"
+              />
 
-              <template v-else>
-                <span
-                  :class="{
-                    'text-underline': name === 'available-copies',
-                  }"
-                >
-                  <q-tooltip v-if="['subject', 'author'].includes(name)">
-                    {{ getFieldValue(field, props.row) }}
-                  </q-tooltip>
+              <span
+                v-else-if="name === 'available-copies'"
+                class="cursor-pointer text-underline"
+              >
+                {{ getFieldValue(field, props.row) }}
+
+                <q-tooltip class="white-space-pre-wrap">
+                  {{
+                    $t("warehouse.availabilityTooltip", {
+                      copiesCount: props.row.meta.copiesCount,
+                      problemsCount: props.row.meta.problemsCount,
+                      soldCount: props.row.meta.soldCount,
+                      reservationsCount: props.row.meta.reservationsCount,
+                      cartItemsCount: props.row.meta.cartItemsCount,
+                    })
+                  }}
+                </q-tooltip>
+              </span>
+
+              <span v-else>
+                <q-tooltip v-if="['subject', 'author'].includes(name)">
                   {{ getFieldValue(field, props.row) }}
-                </span>
-              </template>
+                </q-tooltip>
+                {{ getFieldValue(field, props.row) }}
+              </span>
             </q-td>
           </q-tr>
 
@@ -169,7 +183,6 @@ import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
-import { isAvailable } from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
 import {
   BookCopyDetailsFragment,
@@ -266,8 +279,7 @@ const columns = computed<QTableColumn<BookWithCopiesInStockFragment>[]>(() => [
   },
   {
     name: "available-copies",
-    field: ({ copies }) =>
-      copies?.filter((copy) => isAvailable(copy)).length ?? 0,
+    field: ({ meta }) => meta.availableCount,
     label: t("reserveBooks.availableCopies"),
     align: "center",
   },
@@ -366,7 +378,7 @@ const onBooksRequest: QTableProps["onRequest"] = async ({
     retailLocationId: selectedLocation.value.id,
     page: page - 1,
     rows: rowsPerPage,
-    filter: { ...refetchFilterProxy.value },
+    filter: refetchFilterProxy.value,
   });
 
   booksPagination.value.rowsNumber = books.value?.rowsCount;

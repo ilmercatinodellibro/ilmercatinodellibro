@@ -5,6 +5,13 @@ export default {
   sortByCopyCode: "Sort by book copy code",
   sortByISBN: "Sort by ISBN",
   checkOtherWarehouse: "Check the warehouse of {0}",
+  availabilityTooltip: [
+    "Total: {copiesCount}",
+    "With problems: {problemsCount}",
+    "Sold: {soldCount}",
+    "Reserved: {reservationsCount}",
+    "In cart: {cartItemsCount}",
+  ].join("\n"),
   filters: {
     isAvailable: "Available",
     isSold: "Sold",
