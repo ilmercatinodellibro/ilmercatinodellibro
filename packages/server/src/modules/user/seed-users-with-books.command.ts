@@ -5,20 +5,34 @@ import {
   Book,
   BookCopy,
   BookRequest,
-  Cart,
   Prisma,
   Reservation,
   RetailLocation,
   Sale,
 } from "@prisma/client";
+import { cloneDeep, find, remove, toInteger } from "lodash";
 import { Command, CommandRunner, Option } from "nest-commander";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
 import { BookCopyService } from "src/modules/book-copy/book-copy.service";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 
 interface SeedUsersWithBooksCommandOptions {
-  random?: number;
-  clear?: boolean;
+  additionalBooksPerUser: number;
+  clear: boolean;
+  usersCount: number;
+}
+
+const BOOKS_PER_USER_BASE = 10;
+const EMAIL_SEEDING_SUFFIX = "@example-generated.com";
+// For each step in generation, we leave 2 items to not be processed in that step so that we have records for all of them
+const ITEMS_TO_NOT_PROCESS_COUNT = 2;
+
+const DEFAULT_USERS_COUNT = 5;
+// How many copies above the base when generating user book copies
+const DEFAULT_ADDITIONAL_BOOKS_PER_USER = 5;
+
+function composeUserEmail(index: number, role: string, location: string) {
+  return `${location}-user-${role}-${index + 1}${EMAIL_SEEDING_SUFFIX}`;
 }
 
 @Command({
@@ -30,49 +44,64 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
   private readonly logger = new Logger(SeedUsersWithBooksCommand.name);
   private readonly bookService = new BookCopyService();
 
-  private readonly USERS_AMOUNT = 5;
-  private readonly BOOKS_PER_USER_BASE = 10;
-  // Displacement for the actual generated random number of books per user, above the base
-  private readonly DEFAULT_RANDOM_DISPLACEMENT = 5;
-  // Some character combination that is not valid in an email, to avoid matching with real data
-  private readonly EMAIL_SEEDING_SUFFIX = "@@";
-
   constructor(private readonly prisma: PrismaService) {
     super();
   }
 
   @Option({
-    flags: "-r, --random [number]",
+    flags: "-b, --additionalBooksPerUser [number]",
     description:
-      "The amount of displacement of the random number of copies between every generated user\nAccepted values: natural numbers (default: 5)",
+      "The amount of book copies which could be generated per user\nAccepted values: natural numbers (default: 5)",
   })
-  parseRandomDisplacement(val?: string) {
-    if (
-      val !== undefined &&
-      (parseInt(val) <= 0 ||
-        parseInt(val) !== parseFloat(val) ||
-        isNaN(parseInt(val)))
-    ) {
-      throw new Error(
-        "Invalid displacement, must be an integer greater than zero",
-      );
+  parseAdditionalBooksPerUsers(val?: string) {
+    const parsedInteger = toInteger(val);
+
+    if (parsedInteger > 0) {
+      return parsedInteger;
     }
-    return val !== undefined ? parseInt(val) : val;
+
+    throw new Error(
+      "Invalid value for `additionalBooksPerUser` option, must be an integer greater than zero",
+    );
   }
 
   @Option({
     flags: "-c, --clear",
     description:
-      "Makes the command stop after clearing the previous seeded data",
+      "Makes the command stop after clearing the previously seeded data",
   })
   parseNothing(_?: string) {
     return true;
   }
 
+  @Option({
+    flags: "-u, --users [number]",
+    description:
+      "How many users should be generated\nAccepted values: natural numbers (default: 5)",
+  })
+  parseUsers(val?: string) {
+    const parsedInteger = toInteger(val);
+
+    if (parsedInteger > 0) {
+      return parsedInteger;
+    }
+
+    throw new Error(
+      "Invalid value for `users` option, must be an integer greater than zero",
+    );
+  }
+
   async run(
     _: string[],
-    options?: SeedUsersWithBooksCommandOptions,
+    userOptions: Partial<SeedUsersWithBooksCommandOptions> = {},
   ): Promise<void> {
+    const options: SeedUsersWithBooksCommandOptions = {
+      additionalBooksPerUser:
+        userOptions.additionalBooksPerUser ?? DEFAULT_ADDITIONAL_BOOKS_PER_USER,
+      clear: userOptions.clear ?? false,
+      usersCount: userOptions.usersCount ?? DEFAULT_USERS_COUNT,
+    };
+
     // TODO: make the clear of the seeded users optional once seeding upsert is allowed
     try {
       await this.#clearRetailLocationSeededUsers();
@@ -86,13 +115,13 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
 
     this.logger.log("Seed data erased successfully");
 
-    if (options?.clear) {
+    if (options.clear) {
       // Option to only clear the current seeded data
       return;
     }
 
     this.logger.verbose(
-      `Range of copies created per user: ${this.BOOKS_PER_USER_BASE} - ${this.BOOKS_PER_USER_BASE + (options?.random ?? this.DEFAULT_RANDOM_DISPLACEMENT)}`,
+      `Range of copies created per user: ${BOOKS_PER_USER_BASE} - ${BOOKS_PER_USER_BASE + options.additionalBooksPerUser}`,
     );
 
     for (const id of ["re", "mo"]) {
@@ -110,13 +139,13 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
           },
         });
 
-      if (_count.books < this.BOOKS_PER_USER_BASE + (options?.random ?? 5)) {
+      if (_count.books < BOOKS_PER_USER_BASE + options.additionalBooksPerUser) {
         this.logger.error(
-          `The random displacement is too high for the amount of books present in the warehouse of ${name}. The maximum is ${_count.books - this.BOOKS_PER_USER_BASE}`,
+          `The number of additional books per user is too high for the amount of books present in the warehouse of ${name}. The maximum is ${_count.books - BOOKS_PER_USER_BASE}`,
         );
         return;
       }
-      await this.#seedRetailLocation(id, options?.random);
+      await this.#seedRetailLocation(id, options);
     }
 
     this.logger.log("Seeding complete");
@@ -124,16 +153,15 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
 
   async #seedRetailLocation(
     retailLocationId: string,
-    randomDisplacement = this.DEFAULT_RANDOM_DISPLACEMENT,
+    options: Required<SeedUsersWithBooksCommandOptions>,
   ) {
-    let retailLocation: RetailLocation | undefined;
-    try {
-      retailLocation = await this.prisma.retailLocation.findUniqueOrThrow({
-        where: {
-          id: retailLocationId,
-        },
-      });
-    } catch {
+    const retailLocation = await this.prisma.retailLocation.findUnique({
+      where: {
+        id: retailLocationId,
+      },
+    });
+
+    if (!retailLocation) {
       this.logger.error(
         "Something went wrong while fetching the current location",
       );
@@ -144,17 +172,13 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
 
     // TODO: modify this to make seeding upsert possible
     try {
-      await Promise.all(
-        new Array(this.USERS_AMOUNT)
-          .fill(null)
-          .map((_, index) =>
-            this.#createBuyerAndSeller(
-              index,
-              randomDisplacement,
-              retailLocation,
-            ),
-          ),
-      );
+      for (let index = 0; index < options.usersCount; index++) {
+        await this.#createBuyerAndSeller(
+          index,
+          options.additionalBooksPerUser,
+          retailLocation,
+        );
+      }
     } catch (error) {
       this.logger.error(error);
       return;
@@ -165,15 +189,15 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
 
   async #createBuyerAndSeller(
     index: number,
-    randomDisplacement: number,
+    additionalBooksPerUser: number,
     retailLocation: RetailLocation,
   ) {
     try {
       const bookIds = (
         await this.prisma.book.findMany({
           take: randomInt(
-            this.BOOKS_PER_USER_BASE,
-            this.BOOKS_PER_USER_BASE + randomDisplacement,
+            BOOKS_PER_USER_BASE,
+            BOOKS_PER_USER_BASE + additionalBooksPerUser,
           ),
           where: {
             retailLocationId: retailLocation.id,
@@ -194,41 +218,29 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       }
 
       const [seller, buyer] = await Promise.all([
-        (await this.prisma.user.findUnique({
-          where: {
-            email: `${index + 1}-user-seller${this.EMAIL_SEEDING_SUFFIX}`,
+        await this.prisma.user.create({
+          data: {
+            dateOfBirth: faker.date.past(),
+            email: composeUserEmail(index, "seller", retailLocation.id),
+            firstname: faker.person.firstName(),
+            lastname: faker.person.lastName(),
+            password: PASSWORD_STUB_HASH,
+            phoneNumber: faker.string.numeric({ length: 10 }),
+            emailVerified: true,
           },
-        })) ??
-          (await this.prisma.user.create({
-            data: {
-              dateOfBirth: faker.date.past(),
-              email: `${index + 1}-user-seller${this.EMAIL_SEEDING_SUFFIX}`,
-              firstname: faker.person.firstName(),
-              lastname: faker.person.lastName(),
-              password: PASSWORD_STUB_HASH,
-              phoneNumber: faker.string.numeric({ length: 10 }),
-              // TODO: consider making this random, with a strong bias towards true
-              emailVerified: true,
-            },
-          })),
+        }),
 
-        (await this.prisma.user.findUnique({
-          where: {
-            email: `${index + 1}-user-buyer${this.EMAIL_SEEDING_SUFFIX}`,
+        await this.prisma.user.create({
+          data: {
+            dateOfBirth: faker.date.past(),
+            email: composeUserEmail(index, "buyer", retailLocation.id),
+            firstname: faker.person.firstName(),
+            lastname: faker.person.lastName(),
+            password: PASSWORD_STUB_HASH,
+            phoneNumber: faker.string.numeric({ length: 10 }),
+            emailVerified: true,
           },
-        })) ??
-          (await this.prisma.user.create({
-            data: {
-              dateOfBirth: faker.date.past(),
-              email: `${index + 1}-user-buyer${this.EMAIL_SEEDING_SUFFIX}`,
-              firstname: faker.person.firstName(),
-              lastname: faker.person.lastName(),
-              password: PASSWORD_STUB_HASH,
-              phoneNumber: faker.string.numeric({ length: 10 }),
-              // TODO: consider making this random, with a strong bias towards true
-              emailVerified: true,
-            },
-          })),
+        }),
       ]);
 
       const retailLocationId = retailLocation.id;
@@ -262,7 +274,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       });
 
       await this.prisma.bookRequest.createMany({
-        data: availableCopies.slice(0, availableCopies.length - 2).map(
+        data: availableCopies.slice(0, -ITEMS_TO_NOT_PROCESS_COUNT).map(
           ({ bookId }) =>
             ({
               bookId,
@@ -284,7 +296,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
 
       await this.prisma.reservation.createMany({
         data: availableRequests
-          .slice(0, availableRequests.length - 2)
+          .slice(0, -ITEMS_TO_NOT_PROCESS_COUNT)
           .map(({ bookId, id }) => ({
             requestId: id,
             bookId,
@@ -309,62 +321,29 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
         },
       });
 
-      const cart = await this.prisma.cart.create({
-        data: {
-          items: {
-            create: reservations
-              .slice(0, reservations.length - 2)
-              .map(({ id, bookId }) => ({
-                fromReservationId: id,
-                bookId,
-              })),
-          },
-          userId: buyer.id,
-          createdById: buyer.id,
-          retailLocationId,
-        },
-        include: {
-          items: {
-            include: {
-              book: {
-                include: {
-                  copies: {
-                    where: {
-                      OR: [
-                        {
-                          sales: {
-                            none: {},
-                          },
-                        },
-                        {
-                          sales: {
-                            every: {
-                              refundedAt: {
-                                not: null,
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const itemsToSell = cart.items.slice(0, cart.items.length - 2);
+      const sellableCopies = cloneDeep(availableCopies);
+      const soldCopiesIds: string[] = [];
 
       await this.prisma.sale.createMany({
-        data: itemsToSell.map((item) => ({
-          bookCopyId: item.book.copies[0].id,
-          cartCreatedById: buyer.id,
-          createdById: buyer.id,
-          purchasedAt: new Date(),
-          purchasedById: buyer.id,
-        })),
+        data: reservations
+          .slice(0, -ITEMS_TO_NOT_PROCESS_COUNT)
+          .map((reservation) => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const bookCopy = find(
+              sellableCopies,
+              ({ bookId }) => bookId === reservation.bookId,
+            )!;
+            remove(availableCopies, bookCopy);
+            soldCopiesIds.push(bookCopy.id);
+
+            return {
+              bookCopyId: bookCopy.id,
+              cartCreatedById: buyer.id,
+              createdById: buyer.id,
+              purchasedAt: new Date(),
+              purchasedById: buyer.id,
+            };
+          }),
       });
 
       const sales = await this.prisma.sale.findMany({
@@ -376,7 +355,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
           },
           purchasedById: buyer.id,
           bookCopyId: {
-            in: itemsToSell.map(({ book }) => book.copies[0].id),
+            in: soldCopiesIds,
           },
         },
         include: {
@@ -397,7 +376,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       // Connect requests and reservations to the sales
       await Promise.all(
         sales.map(async (sale, i) => {
-          await this.#updateReservationsRequestsAndCart(sale, cart);
+          await this.#updateReservationsRequests(sale);
 
           if (i % 3 === 2) {
             await this.#refundBookCopy(sale, retailLocationId);
@@ -409,7 +388,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     }
   }
 
-  async #updateReservationsRequestsAndCart(
+  async #updateReservationsRequests(
     sale: {
       bookCopy: {
         book: {
@@ -418,17 +397,8 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
         } & Book;
       };
     } & Sale,
-    cart: Cart,
   ) {
     const book = sale.bookCopy.book;
-    await this.prisma.cartItem.delete({
-      where: {
-        cartId_bookId: {
-          bookId: book.id,
-          cartId: cart.id,
-        },
-      },
-    });
 
     if (book.requests.length > 0) {
       const request = book.requests.find(
@@ -506,7 +476,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     // For filtering for the seeded users
     const seedUserFilter = {
       email: {
-        contains: this.EMAIL_SEEDING_SUFFIX,
+        contains: EMAIL_SEEDING_SUFFIX,
       },
     };
 
