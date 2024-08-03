@@ -61,9 +61,39 @@ export class BookCopyResolver {
   }
 
   @Query(() => [BookCopy], {
-    description: "Book copies that are owned by the user and is in stock",
+    description: "Book copies that are owned by the user",
   })
   async bookCopiesByOwner(
+    @Args() { userId: ownerId, retailLocationId }: BookCopyByUserQueryArgs,
+    @CurrentUser() { id: userId }: User,
+  ) {
+    if (ownerId !== userId) {
+      await this.authService.assertMembership({
+        userId,
+        retailLocationId,
+        message:
+          "You don't have the necessary permissions to view the book copies of another user.",
+      });
+    }
+
+    return this.prisma.bookCopy.findMany({
+      where: {
+        ownerId,
+        book: {
+          retailLocationId,
+        },
+        returnedAt: null,
+      },
+      orderBy: {
+        code: "asc",
+      },
+    });
+  }
+
+  @Query(() => [BookCopy], {
+    description: "Book copies that are owned by the user and are in stock",
+  })
+  async bookCopiesInStock(
     @Args() { userId: ownerId, retailLocationId }: BookCopyByUserQueryArgs,
     @CurrentUser() { id: userId }: User,
   ) {

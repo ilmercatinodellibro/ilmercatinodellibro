@@ -17,7 +17,7 @@
     >
       <q-tabs v-model="tab" align="justify" active-color="accent" inline-label>
         <q-tab name="in-retrieval" :label="$t('manageUsers.inRetrieval')" />
-        <q-tab name="retrieved" :label="$t('manageUsers.retrieved')">
+        <q-tab name="in-stock" :label="$t('manageUsers.inStock')">
           <template #default>
             <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
               <q-tooltip>
@@ -99,7 +99,7 @@
         </q-tab-panel>
 
         <q-tab-panel
-          name="retrieved"
+          name="in-stock"
           class="column flex-delegate-height-management no-wrap q-pa-none"
         >
           <dialog-table
@@ -148,7 +148,7 @@ import {
   BookCopyDetailsFragment,
   GetBookCopiesByOwnerDocument,
   useCreateBookCopiesMutation,
-  useGetBookCopiesByOwnerQuery,
+  useGetBookCopiesInStockQuery,
 } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { GetReceiptsDocument } from "src/services/receipt.graphql";
@@ -178,7 +178,7 @@ const { t } = useI18n();
 
 const { createBookCopies } = useCreateBookCopiesMutation();
 
-type Tab = "in-retrieval" | "retrieved";
+type Tab = "in-retrieval" | "in-stock";
 
 const tab = ref<Tab>("in-retrieval");
 
@@ -187,8 +187,8 @@ const booksToRegister = ref<BookSummaryFragment[]>([]);
 const loading = ref(false);
 
 const { selectedLocation } = useRetailLocationService();
-const { bookCopiesByOwner: copiesInStock, loading: inStockLoading } =
-  useGetBookCopiesByOwnerQuery(() => ({
+const { bookCopiesInStock: copiesInStock, loading: inStockLoading } =
+  useGetBookCopiesInStockQuery(() => ({
     userId: props.userData.id,
     retailLocationId: selectedLocation.value.id,
   }));
@@ -408,7 +408,7 @@ function retrieveAllBooks() {
       cache.gc();
 
       booksToRegister.value = [];
-      tab.value = "retrieved";
+      tab.value = "in-stock";
     } catch {
       notifyError(t("manageUsers.inStockDialog.errors.retrieval"));
     } finally {

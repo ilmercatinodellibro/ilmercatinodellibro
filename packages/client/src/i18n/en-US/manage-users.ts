@@ -57,12 +57,12 @@ export default {
     cancelUserDeletionFailed: "Could not cancel the user's deletion",
   },
   inRetrieval: "In retrieval",
-  retrieved: "Retrieved",
+  inStock: "In magazzino",
   searchHint: "Insert an ISBN code to add the book to the list",
   inStockDialog: {
     title: "Books of {0} in Stock",
     retrievableTooltip:
-      "Includes the copies that are still present in stock, lost or requested",
+      "Includes the copies that are still present in stock, even if with problems or reserved",
     retrieveBtn: "Retrieve all the books in the list",
     deleteBookBtnTooltip: "Delete permanently this copy from the database",
     errors: {

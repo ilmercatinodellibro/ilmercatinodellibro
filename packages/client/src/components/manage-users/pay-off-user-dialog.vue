@@ -255,7 +255,7 @@ import {
   BookCopyDetailsFragment,
   ProblemDetailsFragment,
   useDonateBookCopyMutation,
-  useGetBookCopiesByOwnerQuery,
+  useGetBookCopiesInStockQuery,
   useGetReturnedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
   useReimburseBookCopyMutation,
@@ -367,10 +367,10 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
 const { selectedLocation } = useRetailLocationService();
 
 const {
-  bookCopiesByOwner: ownedCopies,
+  bookCopiesInStock: ownedCopies,
   loading: ownedLoading,
-  refetch: refetchBookCopiesByOwner,
-} = useGetBookCopiesByOwnerQuery(() => ({
+  refetch: refetchBookCopiesInStock,
+} = useGetBookCopiesInStockQuery(() => ({
   userId: props.user.id,
   retailLocationId: selectedLocation.value.id,
 }));
@@ -531,7 +531,7 @@ async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
       userId: props.user.id,
     };
     await Promise.all([
-      refetchBookCopiesByOwner(queryArgs),
+      refetchBookCopiesInStock(queryArgs),
       refetchReturnedBookCopies(queryArgs),
     ]);
     removeBookCopiesAfterAction(bookCopies);
@@ -554,7 +554,7 @@ async function donateBookCopies(bookCopies: BookCopyDetailsFragment[]) {
         }),
       ),
     );
-    await refetchBookCopiesByOwner({
+    await refetchBookCopiesInStock({
       retailLocationId: selectedLocation.value.id,
       userId: props.user.id,
     });
@@ -617,7 +617,7 @@ function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
           }),
         ),
       );
-      await refetchBookCopiesByOwner({
+      await refetchBookCopiesInStock({
         retailLocationId: selectedLocation.value.id,
         userId: props.user.id,
       });
@@ -650,7 +650,7 @@ function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
           }),
         ),
       );
-      await refetchBookCopiesByOwner({
+      await refetchBookCopiesInStock({
         retailLocationId: selectedLocation.value.id,
         userId: props.user.id,
       });
@@ -703,7 +703,7 @@ function returnAllBooks(remainingType: SettleRemainingType) {
     } catch {
       notifyError(t("common.genericErrorMessage"));
     } finally {
-      await Promise.all([refetchBookCopiesByOwner, refetchReturnedBookCopies]);
+      await Promise.all([refetchBookCopiesInStock, refetchReturnedBookCopies]);
       onDialogOK();
     }
   });

@@ -89,6 +89,12 @@ query getBookCopiesByOwner($retailLocationId: String!, $userId: String!) {
   }
 }
 
+query getBookCopiesInStock($retailLocationId: String!, $userId: String!) {
+  bookCopiesInStock(retailLocationId: $retailLocationId, userId: $userId) {
+    ...BookCopyDetails
+  }
+}
+
 query getPurchasedBookCopies($retailLocationId: String!, $userId: String!) {
   purchasedBookCopies(retailLocationId: $retailLocationId, userId: $userId) {
     ...BookCopyDetails
