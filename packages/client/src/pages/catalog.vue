@@ -59,19 +59,14 @@ import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { BookCreateInput } from "src/@generated/graphql";
 import AddBookDialog from "src/components/add-book-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
-import { notifyError } from "src/helpers/error-messages";
 import { useBookService } from "src/services/book";
-import {
-  BookSummaryFragment,
-  useCreateNewBookMutation,
-} from "src/services/book.graphql";
+import { BookSummaryFragment } from "src/services/book.graphql";
 import { formatPrice } from "../composables/use-misc-formats";
 
 const { t } = useI18n();
@@ -186,23 +181,14 @@ const onRequest: QTable["onRequest"] = async function (requestProps) {
   }
 };
 
-const { createBook } = useCreateNewBookMutation();
 function openBookDialog() {
   Dialog.create({
     component: AddBookDialog,
-  }).onOk(async (input: BookCreateInput) => {
-    try {
-      await createBook({
-        input,
-      });
-
-      await refetchBooks({
-        page: currentPage.value,
-        rows: numberOfRows.value,
-      });
-    } catch {
-      notifyError(t("bookErrors.addBookToCatalog"));
-    }
+  }).onOk(async () => {
+    await refetchBooks({
+      page: currentPage.value,
+      rows: numberOfRows.value,
+    });
   });
 }
 </script>
