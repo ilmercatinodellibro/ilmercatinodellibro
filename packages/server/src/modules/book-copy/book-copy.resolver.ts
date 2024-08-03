@@ -269,6 +269,12 @@ export class BookCopyResolver {
                 },
               },
               {
+                originalCode: {
+                  contains: searchText,
+                  mode: "insensitive",
+                },
+              },
+              {
                 book: {
                   authorsFullName: {
                     contains: searchText,
