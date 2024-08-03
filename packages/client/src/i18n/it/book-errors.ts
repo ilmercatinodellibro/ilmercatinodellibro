@@ -1,5 +1,6 @@
 export default {
-  addBook: "Non è stato possibile aggiungere il libro al carrello.",
+  addBookToCart: "Non è stato possibile aggiungere il libro al carrello.",
+  addBookToCatalog: "Non è stato possibile aggiungere il libro al catalogo.",
   noBook: "Non è stato trovato a catalogo nessun libro con l'ISBN specificato.",
   notInStock: "Il libro richiesto non è disponibile a magazzino al momento.",
   notAllRequestsDeleted: "Non tutte le richieste sono state cancellate.",

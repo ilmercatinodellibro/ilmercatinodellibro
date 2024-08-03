@@ -201,7 +201,7 @@ function openBookDialog() {
         rows: numberOfRows.value,
       });
     } catch {
-      notifyError(t("bookErrors.addBook"));
+      notifyError(t("bookErrors.addBookToCatalog"));
     }
   });
 }

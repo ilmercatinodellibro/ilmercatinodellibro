@@ -336,7 +336,7 @@ async function addBookToCart(fromBookIsbn?: string) {
   } catch (_error) {
     const error = _error as Error;
     if (!isApolloError(error)) {
-      notifyError(t("bookErrors.addBook"));
+      notifyError(t("bookErrors.addBookToCart"));
       return;
     }
 
@@ -349,7 +349,7 @@ async function addBookToCart(fromBookIsbn?: string) {
           notifyError(t("bookErrors.notInStock"));
           break;
         default:
-          notifyError(t("bookErrors.addBook"));
+          notifyError(t("bookErrors.addBookToCart"));
       }
     });
   }

@@ -1,5 +1,6 @@
 export default {
-  addBook: "Could not add the book to the cart.",
+  addBookToCart: "Could not add the book in the cart.",
+  addBookToCatalog: "Could not add the book in the catalog.",
   noBook: "No book with the specified ISBN was found in the catalog.",
   notInStock: "The requested book is not available in stock at the moment.",
   notAllRequestsDeleted: "Not all the requests have been deleted.",
