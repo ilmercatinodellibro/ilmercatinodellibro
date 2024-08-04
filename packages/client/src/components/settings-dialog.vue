@@ -28,14 +28,14 @@
         <q-input
           v-model.number="newSettings.maxBookingDays"
           :label="t('general.settings.reservationDays')"
-          :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
+          :rules="[allowOnlyIntegerNumbers, nonNegativeNumberRule]"
           outlined
           type="number"
         />
         <q-input
           v-model.number="newSettings.warehouseMaxBlockSize"
           :label="t('general.settings.maxBooksDimension')"
-          :rules="[allowOnlyIntegerNumbers, greaterThanZeroRule]"
+          :rules="[allowOnlyIntegerNumbers, nonNegativeNumberRule]"
           outlined
           type="number"
         />
@@ -89,7 +89,7 @@ import { useI18n } from "vue-i18n";
 import KDialogFormCard from "src/components/k-dialog-form-card.vue";
 import {
   allowOnlyIntegerNumbers,
-  greaterThanZeroRule,
+  nonNegativeNumberRule,
 } from "src/helpers/rules";
 import { SettingsUpdate } from "src/models/book";
 import { useAuthService } from "src/services/auth";

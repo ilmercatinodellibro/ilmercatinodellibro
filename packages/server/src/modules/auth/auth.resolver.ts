@@ -1,8 +1,4 @@
-import {
-  NotAcceptableException,
-  UnprocessableEntityException,
-  UseGuards,
-} from "@nestjs/common";
+import { UnprocessableEntityException, UseGuards } from "@nestjs/common";
 import { Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
@@ -53,7 +49,7 @@ export class AuthResolver {
       });
 
     if (!registrationEnabled) {
-      throw new NotAcceptableException(
+      throw new UnprocessableEntityException(
         "Registration is currently disabled for this retail location",
       );
     }

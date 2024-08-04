@@ -1,4 +1,4 @@
-import { BadRequestException } from "@nestjs/common";
+import { UnprocessableEntityException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Prisma, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
@@ -105,14 +105,19 @@ export class RetailLocationResolver {
     });
 
     if (
-      Object.values({
-        maxBookingDays,
-        warehouseMaxBlockSize,
-        buyRate,
-        sellRate,
-      }).some((value) => !value || value < 0)
+      buyRate > 100 ||
+      sellRate > 100 ||
+      buyRate <= 0 ||
+      sellRate <= 0 ||
+      buyRate > sellRate
     ) {
-      throw new BadRequestException("Invalid settings values");
+      throw new UnprocessableEntityException("Invalid buy/sell rates");
+    }
+
+    if (warehouseMaxBlockSize < 0 || maxBookingDays < 0) {
+      throw new UnprocessableEntityException(
+        "Invalid values for warehouseMaxBlockSize or maxBookingDays",
+      );
     }
 
     return await this.prisma.retailLocation.update({
