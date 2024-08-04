@@ -113,7 +113,6 @@ import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
-import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
 import { GetRequestsDocument } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
@@ -146,69 +145,67 @@ const { t } = useI18n();
 
 const router = useRouter();
 
-const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
-  () => [
-    {
-      name: "isbn",
-      field: "isbnCode",
-      label: t("book.fields.isbn"),
-      align: "left",
-    },
-    {
-      name: "author",
-      field: "authorsFullName",
-      label: t("book.fields.author"),
-      align: "left",
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      name: "subject",
-      field: "subject",
-      label: t("book.fields.subject"),
-      align: "left",
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      name: "title",
-      field: "title",
-      label: t("book.fields.title"),
-      align: "left",
-      classes: "text-wrap",
-    },
-    {
-      name: "availability",
-      field: ({ meta }) => meta.isAvailable,
-      label: t("book.fields.availability"),
-      align: "left",
-    },
-    {
-      name: "cover-price",
-      field: "originalPrice",
-      label: t("book.fields.coverPrice"),
-      align: "left",
-      format: formatPrice,
-      classes: "text-strike text-black-54",
-    },
-    {
-      name: "price",
-      field: "originalPrice",
-      label: t("book.fields.price"),
-      align: "left",
-      format: (val: number) => discountedPrice(val, "sell"),
-    },
-    {
-      name: "available-copies",
-      field: ({ copies }) => copies?.length ?? 0,
-      label: t("reserveBooks.availableCopies"),
-      align: "center",
-    },
-    {
-      name: "actions",
-      field: () => undefined,
-      label: "",
-    },
-  ],
-);
+const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+  {
+    name: "isbn",
+    field: "isbnCode",
+    label: t("book.fields.isbn"),
+    align: "left",
+  },
+  {
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "subject",
+    field: "subject",
+    label: t("book.fields.subject"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "title",
+    field: "title",
+    label: t("book.fields.title"),
+    align: "left",
+    classes: "text-wrap",
+  },
+  {
+    name: "availability",
+    field: ({ meta }) => meta.isAvailable,
+    label: t("book.fields.availability"),
+    align: "left",
+  },
+  {
+    name: "cover-price",
+    field: "originalPrice",
+    label: t("book.fields.coverPrice"),
+    align: "left",
+    format: formatPrice,
+    classes: "text-strike text-black-54",
+  },
+  {
+    name: "price",
+    field: "originalPrice",
+    label: t("book.fields.price"),
+    align: "left",
+    format: (val: number) => discountedPrice(val, "sell"),
+  },
+  {
+    name: "available-copies",
+    field: ({ meta }) => meta.availableCount,
+    label: t("reserveBooks.availableCopies"),
+    align: "center",
+  },
+  {
+    name: "actions",
+    field: () => undefined,
+    label: "",
+  },
+]);
 
 const currentPage = ref(0);
 const rowsPerPage = ref(100);

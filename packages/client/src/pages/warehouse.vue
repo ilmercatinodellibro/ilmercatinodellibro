@@ -189,7 +189,7 @@ import {
   useGetPaginatedBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 import {
-  BookWithCopiesInStockFragment,
+  BookSummaryFragment,
   useGetBooksWithCopiesInStockQuery,
 } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -250,7 +250,7 @@ const {
   booleanFilters,
 } = useTableFilters("warehouse.filters", true);
 
-const columns = computed<QTableColumn<BookWithCopiesInStockFragment>[]>(() => [
+const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "isbn",
     field: "isbnCode",
