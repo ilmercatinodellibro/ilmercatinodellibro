@@ -22,6 +22,7 @@
               @click="deleteAllRequests()"
             />
             <q-btn
+              v-if="selectedLocation.maxBookingDays > 0"
               :label="$t('manageUsers.requestedBooksDialog.moveIntoReserved')"
               no-wrap
               outline
@@ -146,6 +147,7 @@ import {
 } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -169,6 +171,8 @@ const booksCartCount = ref(props.userData.booksInCart);
 defineEmits(useDialogPluginComponent.emitsObject);
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+
+const { selectedLocation } = useRetailLocationService();
 
 const {
   useGetRequestsQuery,

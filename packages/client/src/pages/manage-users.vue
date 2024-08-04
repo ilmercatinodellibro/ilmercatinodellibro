@@ -353,12 +353,16 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: t("manageUsers.fields.sold"),
     align: "left",
   },
-  {
-    name: "reserved",
-    field: "booksReserved",
-    label: t("manageUsers.fields.reserved"),
-    align: "left",
-  },
+  ...(selectedLocation.value.maxBookingDays > 0
+    ? [
+        {
+          name: "reserved",
+          field: "booksReserved",
+          label: t("manageUsers.fields.reserved"),
+          align: "left",
+        } satisfies QTableColumn<CustomerFragment>,
+      ]
+    : []),
   {
     name: "requested",
     field: "booksRequested",

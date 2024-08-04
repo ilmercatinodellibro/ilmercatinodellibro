@@ -160,6 +160,22 @@ export class ReservationResolver {
       });
     }
 
+    const { maxBookingDays } =
+      await this.prisma.retailLocation.findUniqueOrThrow({
+        where: {
+          id: retailLocationId,
+        },
+        select: {
+          maxBookingDays: true,
+        },
+      });
+
+    if (maxBookingDays === 0) {
+      throw new UnprocessableEntityException(
+        "Reservations are currently disabled for this retail location",
+      );
+    }
+
     const books = await this.prisma.book.findMany({
       where: { id: { in: bookIds } },
       include: {

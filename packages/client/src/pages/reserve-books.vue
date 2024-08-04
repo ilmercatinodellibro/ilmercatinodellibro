@@ -248,6 +248,7 @@ function getButtonData(book: BookSummaryFragment): QBtnProps {
       },
     };
   }
+
   if (bookRequests.value.find(({ book: { id } }) => id === book.id)) {
     return {
       color: "grey-9",
@@ -262,7 +263,8 @@ function getButtonData(book: BookSummaryFragment): QBtnProps {
       },
     };
   }
-  if (book.meta.isAvailable) {
+
+  if (book.meta.isAvailable && selectedLocation.value.maxBookingDays > 0) {
     return {
       color: "primary",
       label: t("reserveBooks.reserveCopy"),
@@ -271,6 +273,7 @@ function getButtonData(book: BookSummaryFragment): QBtnProps {
       },
     };
   }
+
   return {
     color: "accent",
     label: t("reserveBooks.requestCopy"),

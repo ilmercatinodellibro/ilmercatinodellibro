@@ -41,6 +41,13 @@ export class BookRequestService {
 
   @OnEvent("booksBecameAvailable")
   async handleBooksBecameAvailable({ bookIds }: { bookIds: string[] }) {
+    const retailLocations = await this.prisma.retailLocation.findMany({
+      select: {
+        id: true,
+        maxBookingDays: true,
+      },
+    });
+
     const books = await this.prisma.book.findMany({
       where: {
         id: { in: bookIds },
@@ -60,6 +67,15 @@ export class BookRequestService {
     });
 
     for (const book of books) {
+      const bookRetailLocation = retailLocations.find(
+        (location) => location.id === book.retailLocationId,
+      );
+
+      // Avoid sending emails if reservations are disabled
+      if (!bookRetailLocation || bookRetailLocation.maxBookingDays === 0) {
+        continue;
+      }
+
       if (
         book.requests.length === 0 ||
         // check for availability just in case

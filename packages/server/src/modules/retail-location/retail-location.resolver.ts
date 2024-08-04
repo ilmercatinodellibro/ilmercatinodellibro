@@ -120,6 +120,25 @@ export class RetailLocationResolver {
       );
     }
 
+    // Cleanup reservations and request queues when reservations are disabled
+    if (maxBookingDays === 0) {
+      await this.prisma.requestQueue.deleteMany({
+        where: {
+          book: {
+            retailLocationId,
+          },
+        },
+      });
+
+      await this.prisma.reservation.deleteMany({
+        where: {
+          book: {
+            retailLocationId,
+          },
+        },
+      });
+    }
+
     return await this.prisma.retailLocation.update({
       where: {
         id: retailLocationId,
