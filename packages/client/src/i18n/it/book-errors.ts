@@ -46,4 +46,6 @@ export default {
   notSolveProblem:
     "Non è stato possibile risolvere il problema per la copia selezionata.",
   notRequested: "Non è stato possibile richiedere il libro selezionato.",
+  warehouseFetchFailed:
+    "Non è stato possibile recuperare i libri in magazzino.",
 };

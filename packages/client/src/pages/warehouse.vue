@@ -4,6 +4,7 @@
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
+        :search-input-placeholder="t('warehouse.searchPlaceholder')"
       >
         <template #side-actions>
           <q-btn color="black-12" no-wrap outline @click="swapView()">
@@ -25,15 +26,14 @@
 
       <dialog-table
         v-if="!isSortedByCopyCode"
-        v-model:pagination="booksPagination"
-        :columns="columns"
+        v-model:pagination="pagination"
+        :columns="booksColumns"
         :filter="tableFilter"
-        :filter-method="filterMethod"
-        :loading="booksLoading"
+        :loading="isLoading"
         :rows="bookRows"
         class="flex-delegate-height-management"
         row-key="id"
-        @request="onBooksRequest"
+        @request="fetchBooksPage"
       >
         <template #header="props">
           <q-tr :props="props">
@@ -63,7 +63,7 @@
             </q-td>
 
             <q-td
-              v-for="{ name, field, align, classes } in columns"
+              v-for="{ name, field, align, classes } in booksColumns"
               :key="name"
               :class="[align ? `text-${align}` : 'text-left', classes]"
               :colspan="name === 'title' ? 2 : 1"
@@ -108,7 +108,7 @@
               :book-id="props.row.id"
               :show-only-available="booleanFilters?.isAvailable"
               @open-history="(bookCopy) => openHistory(bookCopy)"
-              @update-problems="refetchBooks()"
+              @update-problems="fetchBooks(pagination)"
             />
           </template>
         </template>
@@ -116,14 +116,13 @@
 
       <dialog-table
         v-else
-        v-model:pagination="copyPagination"
+        v-model:pagination="pagination"
         :columns="bookCopyColumns"
         :filter="tableFilter"
-        :filter-method="filterMethod"
-        :loading="copyLoading"
+        :loading="isLoading"
         :rows="bookCopiesRows"
         class="col"
-        @request="onCopyRequest"
+        @request="fetchBooksPage"
       >
         <template #body-cell-author="{ col, value }">
           <table-cell-with-tooltip :class="col.classes" :value="value" />
@@ -143,8 +142,10 @@
 
         <template #body-cell-problems="{ col, row }">
           <q-td :class="[`text-${col.align ?? 'left'}`, col.classes]">
-            <!-- TODO: this throws many calls, one for each row, not sure it's needed -->
-            <problems-button :book-copy="row" />
+            <problems-button
+              :book-copy="row"
+              @update-problems="fetchBooks(pagination)"
+            />
           </q-td>
         </template>
 
@@ -183,74 +184,114 @@ import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
 import { useTableFilters } from "src/composables/use-table-filters";
+import { notifyError } from "src/helpers/error-messages";
 import { getFieldValue } from "src/helpers/table-helpers";
+import { fetchBooksWithCopies } from "src/services/book";
+import { fetchBooksCopies } from "src/services/book-copy";
 import {
   BookCopyDetailsFragment,
-  useGetPaginatedBookCopiesQuery,
+  PaginatedBookCopyResultFragment,
 } from "src/services/book-copy.graphql";
 import {
   BookSummaryFragment,
-  useGetBooksWithCopiesInStockQuery,
+  PaginatedBookResultFragment,
 } from "src/services/book.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
 
-const { selectedLocation } = useRetailLocationService();
+interface WarehousePagination {
+  page: number;
+  rowsPerPage: number;
+  // This must be set, even if with just value 0, to enable server side
+  // pagination and automatic requests via @request event when the filter changes
+  rowsNumber: number;
+}
 
 const isSortedByCopyCode = ref(true);
 
-const booksPage = ref(0);
-const copyPage = ref(0);
+const { refetchFilterProxy, filterOptions, tableFilter, booleanFilters } =
+  useTableFilters("warehouse.filters", true);
 
-const booksPerPage = ref(100);
-const bookCopiesPerPage = ref(100);
+const paginatedBooksWithCopies = ref<PaginatedBookResultFragment>();
+// Avoids errors in the template while books haven't been fetched yet or are loading
+const bookRows = computed(() => paginatedBooksWithCopies.value?.rows ?? []);
 
-const {
-  books,
-  refetch: refetchBooks,
-  loading: booksLoading,
-} = useGetBooksWithCopiesInStockQuery(
-  {
-    page: booksPage.value,
-    retailLocationId: selectedLocation.value.id,
-    rows: booksPerPage.value,
-  },
-  () => ({
-    enabled: !isSortedByCopyCode.value,
-  }),
-);
-
-// Avoids errors in the template while books is still loading and thus null
-const bookRows = computed(() => books.value?.rows ?? []);
-
-const {
-  paginatedBookCopies,
-  loading: copyLoading,
-  refetch: refetchBookCopies,
-} = useGetPaginatedBookCopiesQuery(
-  {
-    page: copyPage.value,
-    retailLocationId: selectedLocation.value.id,
-    rows: bookCopiesPerPage.value,
-  },
-  () => ({
-    enabled: isSortedByCopyCode.value,
-  }),
-);
-
-// Avoids errors in the template while paginatedBookCopies is still loading and thus null
+const paginatedBookCopies = ref<PaginatedBookCopyResultFragment>();
+// Avoids errors in the template while books copies haven't been fetched yet or are loading
 const bookCopiesRows = computed(() => paginatedBookCopies.value?.rows ?? []);
+
+const pagination = ref<WarehousePagination>({
+  page: 1,
+  rowsPerPage: 30,
+  rowsNumber: 0,
+});
+
+const isLoading = ref(false);
+
+async function fetchBooks({
+  page,
+  rowsPerPage,
+}: Omit<WarehousePagination, "rowsNumber">) {
+  if (refetchFilterProxy.value.search.length < 3) {
+    paginatedBooksWithCopies.value = undefined;
+    paginatedBookCopies.value = undefined;
+
+    pagination.value.rowsNumber = 0;
+    return;
+  }
+
+  const fetchBooks = isSortedByCopyCode.value
+    ? fetchBooksCopies
+    : fetchBooksWithCopies;
+
+  isLoading.value = true;
+
+  try {
+    // TODO: implement aborting requests on subsequent calls
+    const result = await fetchBooks({
+      page: page - 1,
+      rows: rowsPerPage,
+      filter: refetchFilterProxy.value,
+    });
+
+    switch (result.__typename) {
+      case "BookQueryResult":
+        paginatedBooksWithCopies.value = result;
+        break;
+      case "PaginatedBookCopyQueryResult":
+        paginatedBookCopies.value = result;
+        break;
+    }
+
+    pagination.value.rowsNumber = result.rowsCount;
+  } catch (error) {
+    notifyError(t("bookErrors.warehouseFetchFailed"));
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+const fetchBooksPage: Exclude<QTableProps["onRequest"], undefined> = async ({
+  pagination: { page, rowsPerPage },
+}) => {
+  await fetchBooks({ page, rowsPerPage });
+
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+};
+
+async function swapView() {
+  isSortedByCopyCode.value = !isSortedByCopyCode.value;
+  pagination.value.page = 1;
+
+  paginatedBooksWithCopies.value = undefined;
+  paginatedBookCopies.value = undefined;
+
+  await fetchBooks(pagination.value);
+}
 
 const { t } = useI18n();
 
-const {
-  refetchFilterProxy,
-  filterOptions,
-  tableFilter,
-  filterMethod,
-  booleanFilters,
-} = useTableFilters("warehouse.filters", true);
-
-const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
+const booksColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "isbn",
     field: "isbnCode",
@@ -297,17 +338,6 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "center",
   },
 ]);
-
-const booksPagination = ref({
-  rowsPerPage: booksPerPage.value,
-  rowsNumber: books.value?.rowsCount,
-  page: booksPage.value,
-});
-const copyPagination = ref({
-  rowsPerPage: bookCopiesPerPage.value,
-  rowsNumber: paginatedBookCopies.value?.rowsCount,
-  page: copyPage.value,
-});
 
 const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
   () => [
@@ -370,56 +400,6 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
     },
   ],
 );
-
-const onBooksRequest: QTableProps["onRequest"] = async ({
-  pagination: { page, rowsPerPage },
-}) => {
-  await refetchBooks({
-    retailLocationId: selectedLocation.value.id,
-    page: page - 1,
-    rows: rowsPerPage,
-    filter: refetchFilterProxy.value,
-  });
-
-  booksPagination.value.rowsNumber = books.value?.rowsCount;
-
-  booksPagination.value.page = page;
-  booksPagination.value.rowsPerPage = rowsPerPage;
-  booksLoading.value = false;
-};
-
-const onCopyRequest: QTableProps["onRequest"] = async ({
-  pagination: { page, rowsPerPage },
-}) => {
-  await refetchBookCopies({
-    retailLocationId: selectedLocation.value.id,
-    page: page - 1,
-    rows: rowsPerPage,
-    filter: refetchFilterProxy.value,
-  });
-
-  copyPagination.value.rowsNumber = paginatedBookCopies.value?.rowsCount;
-
-  copyPagination.value.page = page;
-  copyPagination.value.rowsPerPage = rowsPerPage;
-};
-
-function swapView() {
-  isSortedByCopyCode.value = !isSortedByCopyCode.value;
-
-  tableFilter.searchQuery = "";
-  tableFilter.filters = [];
-  tableFilter.schoolFilters = {
-    selectedSchoolCourseIds: [],
-    selectedSchoolCodes: [],
-  };
-
-  if (isSortedByCopyCode.value) {
-    copyPage.value = 0;
-  } else {
-    booksPage.value = 0;
-  }
-}
 
 function openHistory(bookCopy: BookCopyDetailsFragment) {
   Dialog.create({

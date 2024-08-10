@@ -57,6 +57,14 @@ fragment BookCopyDetails on BookCopy {
   settledById
 }
 
+fragment PaginatedBookCopyResult on PaginatedBookCopyQueryResult {
+  page
+  rows {
+    ...BookCopyDetails
+  }
+  rowsCount
+}
+
 query getBookCopies($bookId: String!) {
   bookCopies(bookId: $bookId) {
     ...BookCopyDetails
@@ -75,11 +83,7 @@ query getPaginatedBookCopies(
     page: $page
     rows: $rows
   ) {
-    page
-    rows {
-      ...BookCopyDetails
-    }
-    rowsCount
+    ...PaginatedBookCopyResult
   }
 }
 

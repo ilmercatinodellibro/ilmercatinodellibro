@@ -1,27 +1,27 @@
+import { useApolloClient } from "@vue/apollo-composable";
 import {
-  useCreateBookCopiesMutation,
-  useGetBookCopiesByOwnerQuery,
-  useGetBookCopiesQuery,
-  useGetPurchasedBookCopiesQuery,
-  useGetReturnedBookCopiesQuery,
-  useGetSoldBookCopiesQuery,
-  useReportProblemMutation,
-  useResolveProblemMutation,
+  GetPaginatedBookCopiesDocument,
+  GetPaginatedBookCopiesQueryVariables,
 } from "src/services/book-copy.graphql";
+import { useRetailLocationService } from "src/services/retail-location";
 
-export function useBookCopyService() {
-  const createBookCopiesComposable = useCreateBookCopiesMutation();
-  const createReportProblemComposable = useReportProblemMutation();
-  const createResolveProblemComposable = useResolveProblemMutation();
+export async function fetchBooksCopies(
+  options: Omit<GetPaginatedBookCopiesQueryVariables, "retailLocationId">,
+) {
+  const { selectedLocation } = useRetailLocationService();
 
-  return {
-    useGetBookCopiesByOwnerQuery,
-    useGetBookCopiesQuery,
-    useGetPurchasedBookCopiesQuery,
-    useGetReturnedBookCopiesQuery,
-    useGetSoldBookCopiesQuery,
-    createBookCopiesComposable,
-    createReportProblemComposable,
-    createResolveProblemComposable,
-  };
+  const { resolveClient } = useApolloClient();
+  const client = resolveClient();
+
+  const result = await client.query({
+    query: GetPaginatedBookCopiesDocument,
+    variables: {
+      retailLocationId: selectedLocation.value.id,
+      ...options,
+    },
+    // Books availability changes frequently, we always need the latest data when fetching books
+    fetchPolicy: "network-only",
+  });
+
+  return result.data.paginatedBookCopies;
 }

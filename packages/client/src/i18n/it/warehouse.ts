@@ -2,6 +2,7 @@ import { BookCopyQueryFilter } from "src/@generated/graphql";
 import { BookCopyStatus } from "src/helpers/book-copy";
 
 export default {
+  searchPlaceholder: "Digita almeno 3 caratteri per cercare",
   sortByCopyCode: "Ordina per codice copia cartacea",
   sortByISBN: "Ordina per ISBN",
   checkOtherWarehouse: "Consulta il magazzino di {0}",

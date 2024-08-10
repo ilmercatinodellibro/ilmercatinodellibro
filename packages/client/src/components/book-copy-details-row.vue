@@ -76,8 +76,10 @@ import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import { isAvailable } from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
-import { useBookCopyService } from "src/services/book-copy";
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import {
+  BookCopyDetailsFragment,
+  useGetBookCopiesQuery,
+} from "src/services/book-copy.graphql";
 import ProblemsButton from "./problems-button.vue";
 
 const { t } = useI18n();
@@ -112,8 +114,6 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
       !["isbn", "author", "subject", "title", "code"].includes(name),
   ),
 ]);
-
-const { useGetBookCopiesQuery } = useBookCopyService();
 
 const { bookCopies, loading } = useGetBookCopiesQuery(() => ({
   bookId: props.bookId,

@@ -2,10 +2,10 @@
   <q-card-section class="full-width gap-16 items-center q-pa-md row">
     <q-input
       :model-value="newFilters.searchQuery"
-      :placeholder="t('common.search')"
+      :placeholder="searchInputPlaceholder ?? t('common.search')"
       class="col max-width-600"
       clearable
-      debounce="400"
+      debounce="1000"
       outlined
       type="search"
       @update:model-value="(query) => updateSearch(query as string)"
@@ -80,6 +80,7 @@ import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 const { t } = useI18n();
 
 const props = defineProps<{
+  searchInputPlaceholder?: string;
   filterOptions: ReturnType<typeof useTranslatedFilters>["value"];
 }>();
 

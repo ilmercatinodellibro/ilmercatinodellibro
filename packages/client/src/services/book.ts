@@ -4,6 +4,8 @@ import { BookQueryFilter } from "src/@generated/graphql";
 import {
   GetBookByIsbnDocument,
   GetBooksQueryVariables,
+  GetBooksWithCopiesDocument,
+  GetBooksWithCopiesQueryVariables,
   useGetBooksQuery,
 } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -55,6 +57,27 @@ export function useBookService(
     loading,
     refetchBooks,
   };
+}
+
+export async function fetchBooksWithCopies(
+  options: Omit<GetBooksWithCopiesQueryVariables, "retailLocationId">,
+) {
+  const { selectedLocation } = useRetailLocationService();
+
+  const { resolveClient } = useApolloClient();
+  const client = resolveClient();
+
+  const result = await client.query({
+    query: GetBooksWithCopiesDocument,
+    variables: {
+      retailLocationId: selectedLocation.value.id,
+      ...options,
+    },
+    // Books availability changes frequently, we always need the latest data when fetching books
+    fetchPolicy: "network-only",
+  });
+
+  return result.data.books;
 }
 
 export async function fetchBookByISBN(isbnCode: string) {

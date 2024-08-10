@@ -31,7 +31,7 @@ export class BookResolver {
       rows: rowsPerPage = 100,
       filter = {},
       retailLocationId,
-      copiesInStock,
+      withCopies,
     }: BookQueryArgs,
   ) {
     // TODO: Use Prisma full-text search
@@ -49,7 +49,7 @@ export class BookResolver {
     const where: Prisma.BookWhereInput = {
       retailLocationId,
 
-      ...(copiesInStock
+      ...(withCopies
         ? {
             copies: {
               some: {},

@@ -3,7 +3,6 @@
     ref="tableRef"
     :rows="rows"
     :columns="columns"
-    :filter="searchQuery"
     :hide-pagination="hidePagination"
     :pagination="pagination"
     :row-key="rowKey as string"
@@ -37,7 +36,6 @@ const hidePagination = computed(() =>
 const props = withDefaults(
   defineProps<
     {
-      searchQuery?: string;
       rows: readonly T[];
       columns?: QTableColumn<T>[];
       rowKey?: Extract<keyof T, string>;
@@ -48,7 +46,6 @@ const props = withDefaults(
     >
   >(),
   {
-    searchQuery: undefined,
     columns: undefined,
     rowKey: undefined,
     rowsPerPageOptions: () => [0],

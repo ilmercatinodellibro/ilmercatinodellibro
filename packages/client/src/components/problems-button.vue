@@ -1,9 +1,9 @@
 <template>
   <chip-button
-    :color="hasProblem(bookCopy) ? 'positive' : 'negative'"
+    :color="hasProblem ? 'positive' : 'negative'"
     :label="
       t(
-        `manageUsers.booksMovementsDialog.${hasProblem(bookCopy) ? 'solveProblem' : 'reportProblem'}`,
+        `manageUsers.booksMovementsDialog.${hasProblem ? 'solveProblem' : 'reportProblem'}`,
       )
     "
     @click="openProblemsDialog"
@@ -12,13 +12,16 @@
 
 <script setup lang="ts">
 import { Dialog } from "quasar";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { getCurrentActiveProblem, hasProblem } from "src/helpers/book-copy";
+import {
+  getCurrentActiveProblem,
+  hasProblem as hasProblemFn,
+} from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
   ProblemSummaryFragment,
-  useGetBookCopiesQuery,
   useReportProblemMutation,
   useResolveProblemMutation,
 } from "src/services/book-copy.graphql";
@@ -35,10 +38,9 @@ const emit = defineEmits<{
   updateProblems: [];
 }>();
 
+const hasProblem = computed(() => hasProblemFn(props.bookCopy));
+
 const { resolveProblem } = useResolveProblemMutation();
-const { refetch: refetchBookCopies } = useGetBookCopiesQuery({
-  bookId: props.bookCopy.book.id,
-});
 const { reportProblem } = useReportProblemMutation();
 function openProblemsDialog() {
   Dialog.create({
@@ -47,14 +49,12 @@ function openProblemsDialog() {
       bookCopy: props.bookCopy,
     },
   }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
-    if (hasProblem(props.bookCopy)) {
+    if (hasProblem.value) {
       try {
         await resolveProblem({
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           input: { id: getCurrentActiveProblem(props.bookCopy)!.id, solution },
         });
-
-        await refetchBookCopies();
 
         emit("updateProblems");
       } catch (e) {
@@ -70,10 +70,6 @@ function openProblemsDialog() {
           details,
           type,
         },
-      });
-
-      await refetchBookCopies({
-        bookId: props.bookCopy.book.id,
       });
 
       emit("updateProblems");

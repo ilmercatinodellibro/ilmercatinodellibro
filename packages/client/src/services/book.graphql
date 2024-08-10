@@ -31,6 +31,14 @@ fragment BookSummary on Book {
   }
 }
 
+fragment PaginatedBookResult on BookQueryResult {
+  page
+  rows {
+    ...BookSummary
+  }
+  rowsCount
+}
+
 query getBooks(
   $retailLocationId: String!
   $page: Int!
@@ -43,15 +51,11 @@ query getBooks(
     rows: $rows
     filter: $filter
   ) {
-    page
-    rows {
-      ...BookSummary
-    }
-    rowsCount
+    ...PaginatedBookResult
   }
 }
 
-query getBooksWithCopiesInStock(
+query getBooksWithCopies(
   $retailLocationId: String!
   $page: Int!
   $rows: Int!
@@ -62,13 +66,9 @@ query getBooksWithCopiesInStock(
     page: $page
     rows: $rows
     filter: $filter
-    copiesInStock: true
+    withCopies: true
   ) {
-    page
-    rows {
-      ...BookSummary
-    }
-    rowsCount
+    ...PaginatedBookResult
   }
 }
 

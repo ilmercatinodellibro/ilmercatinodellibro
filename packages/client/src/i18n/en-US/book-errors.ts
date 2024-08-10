@@ -35,4 +35,5 @@ export default {
   notProblem: "Could not report the problem for the selected copy.",
   notSolveProblem: "Could not solve the problem for the selected copy.",
   notRequested: "Could not request the selected book.",
+  warehouseFetchFailed: "Could not fetch the books in the warehouse.",
 };
