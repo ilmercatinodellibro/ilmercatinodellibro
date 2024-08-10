@@ -209,6 +209,8 @@ model Book {
   cartItems    CartItem[]
   courses      BooksOnCourses[] @relation("CourseBook")
   requestQueue RequestQueue?
+
+  @@unique([isbnCode, retailLocationId])
 }
 
 view BookMeta {
@@ -261,6 +263,9 @@ model BookCopy {
 
   problems Problem[] @relation("BookCopyProblem")
   sales    Sale[]    @relation("BookCopySale")
+
+  // Optimizes queries selecting book copies given the book id
+  @@index([bookId], type: Hash)
 }
 
 enum ProblemType {
