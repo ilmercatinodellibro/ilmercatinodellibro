@@ -74,7 +74,7 @@ const { t } = useI18n();
 const tableRef = ref<QTable>();
 
 const currentPage = ref(0);
-const numberOfRows = ref(100);
+const numberOfRows = ref(50);
 
 const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
   useTableFilters("book.filters.options", true);

@@ -28,7 +28,7 @@ export class BookResolver {
     @Args()
     {
       page,
-      rows: rowsPerPage = 100,
+      rows: rowsPerPage = 50,
       filter = {},
       retailLocationId,
       withCopies,
@@ -40,7 +40,7 @@ export class BookResolver {
     const schoolCodes = filter.schoolCodes;
     const schoolCourseIds = filter.schoolCourseIds;
 
-    if (rowsPerPage > 200) {
+    if (rowsPerPage > 100) {
       throw new UnprocessableEntityException(
         "The maximum number of rows per page is 200.",
       );
@@ -125,31 +125,13 @@ export class BookResolver {
       OR: searchText
         ? [
             {
-              authorsFullName: {
-                contains: searchText,
-                mode: "insensitive",
-              },
-            },
-            {
               isbnCode: {
                 contains: searchText,
                 mode: "insensitive",
               },
             },
             {
-              publisherName: {
-                contains: searchText,
-                mode: "insensitive",
-              },
-            },
-            {
               title: {
-                contains: searchText,
-                mode: "insensitive",
-              },
-            },
-            {
-              subject: {
                 contains: searchText,
                 mode: "insensitive",
               },

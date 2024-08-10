@@ -297,14 +297,6 @@ export class BookCopyResolver {
               },
               {
                 book: {
-                  authorsFullName: {
-                    contains: searchText,
-                    mode: "insensitive",
-                  },
-                },
-              },
-              {
-                book: {
                   isbnCode: {
                     contains: searchText,
                     mode: "insensitive",
@@ -313,23 +305,7 @@ export class BookCopyResolver {
               },
               {
                 book: {
-                  publisherName: {
-                    contains: searchText,
-                    mode: "insensitive",
-                  },
-                },
-              },
-              {
-                book: {
                   title: {
-                    contains: searchText,
-                    mode: "insensitive",
-                  },
-                },
-              },
-              {
-                book: {
-                  subject: {
                     contains: searchText,
                     mode: "insensitive",
                   },
