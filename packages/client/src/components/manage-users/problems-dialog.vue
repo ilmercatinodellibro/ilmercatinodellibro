@@ -6,7 +6,7 @@
       @cancel="onDialogCancel"
       @submit="onDialogOK(problemsData)"
     >
-      <q-card-section v-if="!hasProblem(bookCopy)" class="column gap-16">
+      <q-card-section v-if="!hasProblem" class="column gap-16">
         <q-select
           v-model="problemsData.type"
           :label="$t('manageUsers.booksMovementsDialog.problemType')"
@@ -55,15 +55,15 @@ import { useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { ProblemType } from "src/@generated/graphql";
-import { hasProblem } from "src/helpers/book-copy";
+import KDialogFormCard from "src/components/k-dialog-form-card.vue";
+import { hasProblem as hasProblemFn } from "src/helpers/book-copy";
 import { requiredRule } from "src/helpers/rules";
 import {
   BookCopyDetailsFragment,
   ProblemSummaryFragment,
 } from "src/services/book-copy.graphql";
-import KDialogFormCard from "../k-dialog-form-card.vue";
 
-const { bookCopy } = defineProps<{
+const props = defineProps<{
   bookCopy: BookCopyDetailsFragment;
 }>();
 
@@ -76,21 +76,18 @@ const options: ProblemType[] = ["LOST", "INCOMPLETE", "CUSTOM"];
 
 const { t } = useI18n();
 
+const hasProblem = computed(() => hasProblemFn(props.bookCopy));
+
 const title = computed(() =>
   t(
     `manageUsers.booksMovementsDialog.${
-      hasProblem(bookCopy) ? "solveProblem" : "reportProblem"
+      hasProblem.value ? "solveProblem" : "reportProblem"
     }`,
   ),
 );
 
-const latestProblem = bookCopy.problems
-  ? bookCopy.problems[bookCopy.problems.length - 1]
-  : undefined;
-
 const problemsData = ref<ProblemSummaryFragment>({
-  type: latestProblem?.type ?? "LOST",
-  details: latestProblem?.details ?? "",
-  solution: latestProblem?.solution,
+  type: "LOST",
+  details: "",
 });
 </script>
