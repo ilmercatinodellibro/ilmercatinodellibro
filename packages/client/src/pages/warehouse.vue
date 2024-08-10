@@ -104,7 +104,6 @@
 
           <template v-if="props.expand">
             <book-copy-details-row
-              :book-copy-columns="bookCopyColumns"
               :book-id="props.row.id"
               :show-only-available="booleanFilters?.isAvailable"
               @open-history="(bookCopy) => openHistory(bookCopy)"
@@ -299,11 +298,16 @@ const booksColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
   },
   {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
+    name: "available-copies",
+    field: ({ meta }) => meta.availableCount,
+    label: t("reserveBooks.availableCopies"),
+    align: "center",
+  },
+  {
+    name: "status",
+    field: ({ meta }) => meta.isAvailable,
+    label: t("book.fields.status"),
     align: "left",
-    classes: "max-width-160 ellipsis",
   },
   {
     name: "subject",
@@ -313,16 +317,11 @@ const booksColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     classes: "max-width-160 ellipsis",
   },
   {
-    name: "status",
-    field: ({ meta }) => meta.isAvailable,
-    label: t("book.fields.status"),
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
     align: "left",
-  },
-  {
-    name: "available-copies",
-    field: ({ meta }) => meta.availableCount,
-    label: t("reserveBooks.availableCopies"),
-    align: "center",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "title",
@@ -330,12 +329,6 @@ const booksColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.title"),
     align: "left",
     classes: "text-wrap",
-  },
-  {
-    name: "problems",
-    field: () => undefined,
-    label: "",
-    align: "center",
   },
 ]);
 
@@ -354,11 +347,10 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       align: "left",
     },
     {
-      name: "author",
-      field: ({ book }) => book.authorsFullName,
-      label: t("book.fields.author"),
+      name: "status",
+      field: () => undefined,
+      label: t("book.fields.status"),
       align: "left",
-      classes: "ellipsis max-width-160",
     },
     {
       name: "subject",
@@ -368,10 +360,11 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       classes: "ellipsis max-width-160",
     },
     {
-      name: "status",
-      field: () => undefined,
-      label: t("book.fields.status"),
+      name: "author",
+      field: ({ book }) => book.authorsFullName,
+      label: t("book.fields.author"),
       align: "left",
+      classes: "ellipsis max-width-160",
     },
     {
       name: "title",

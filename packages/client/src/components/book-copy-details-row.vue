@@ -13,6 +13,7 @@
 
   <template v-else>
     <q-tr no-hover>
+      <!-- Fills in the chevron column -->
       <q-th auto-width />
 
       <q-th
@@ -26,6 +27,7 @@
     </q-tr>
 
     <q-tr v-for="bookCopy in filteredBookCopies" :key="bookCopy.id">
+      <!-- Fills in the chevron column -->
       <q-td auto-width />
 
       <q-td
@@ -42,7 +44,7 @@
         <template v-else-if="name === 'problems'">
           <problems-button
             :book-copy="bookCopy"
-            @update-problems="() => emit('updateProblems')"
+            @update-problems="emit('updateProblems')"
           />
         </template>
 
@@ -74,18 +76,17 @@ import { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
+import ProblemsButton from "src/components/problems-button.vue";
 import { isAvailable } from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
 import {
   BookCopyDetailsFragment,
   useGetBookCopiesQuery,
 } from "src/services/book-copy.graphql";
-import ProblemsButton from "./problems-button.vue";
 
 const { t } = useI18n();
 
 const props = defineProps<{
-  bookCopyColumns: QTableColumn<BookCopyDetailsFragment>[];
   bookId: string;
   showOnlyAvailable?: boolean | null;
 }>();
@@ -109,10 +110,29 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     label: t("book.originalCode"),
     format: (field?: string) => field ?? "/",
   },
-  ...props.bookCopyColumns.filter(
-    ({ name }) =>
-      !["isbn", "author", "subject", "title", "code"].includes(name),
-  ),
+  {
+    name: "status",
+    field: () => undefined,
+    label: t("book.fields.status"),
+    align: "left",
+  },
+  {
+    name: "owner",
+    field: ({ owner }) => owner.email,
+    label: t("warehouse.owner"),
+    align: "left",
+  },
+  {
+    name: "problems",
+    field: "problems",
+    label: "",
+    align: "center",
+  },
+  {
+    name: "history",
+    field: () => undefined,
+    label: "",
+  },
 ]);
 
 const { bookCopies, loading } = useGetBookCopiesQuery(() => ({
@@ -126,6 +146,6 @@ const filteredBookCopies = computed(() =>
 );
 
 function getColspan(columnName: string) {
-  return columnName === "original-code" || columnName === "status" ? 2 : 1;
+  return columnName === "owner" ? 2 : 1;
 }
 </script>
