@@ -504,6 +504,18 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       },
     });
 
+    await this.prisma.receipt.deleteMany({
+      where: {
+        user: seedUserFilter,
+      },
+    });
+
+    await this.prisma.event.deleteMany({
+      where: {
+        owner: seedUserFilter,
+      },
+    });
+
     await this.prisma.user.deleteMany({
       where: seedUserFilter,
     });
