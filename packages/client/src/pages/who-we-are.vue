@@ -9,7 +9,7 @@
 
       <div
         class="prevent-links-highlight"
-        v-html="selectedLocation?.infoPagesContent[locale].whoAreWeContent"
+        v-html="selectedLocation.infoPagesContent?.[locale].whoAreWeContent"
       />
     </div>
   </q-page>

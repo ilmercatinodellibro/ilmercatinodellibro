@@ -9,7 +9,7 @@
 
       <div
         class="prevent-links-highlight"
-        v-html="selectedLocation.infoPagesContent[locale].joinUsContent"
+        v-html="selectedLocation.infoPagesContent?.[locale].joinUsContent"
       />
     </div>
   </q-page>

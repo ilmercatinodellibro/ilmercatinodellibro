@@ -16,7 +16,6 @@ const config: CodegenConfig = {
       Timestamp: "number",
       DateTime: "string",
       Void: "undefined",
-      ISBN: "string",
       HexColorCode: "string",
     },
   },

@@ -1,8 +1,8 @@
+<!-- eslint-disable vue/no-v-html vue/no-v-text-v-html-on-component -->
 <template>
   <div class="column max-width-700 no-wrap">
     <h3 class="text-primary">{{ t("routesNames.faq") }}</h3>
-    <!-- eslint-disable-next-line vue/no-v-html -->
-    <div v-html="selectedLocation.infoPagesContent[locale]?.faqContent" />
+    <div v-html="selectedLocation.infoPagesContent?.[locale].faqContent" />
   </div>
 </template>
 
