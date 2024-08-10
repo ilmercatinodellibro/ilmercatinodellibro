@@ -202,6 +202,14 @@ If both installation and build were successful you can continue with the next st
 
 The first thing to do here is to import the books dataset from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Adozioni%20libri%20di%20testo) and place it into `./storage/tmp`. The file name should be `ALTEMILIAROMAGNA.csv`, so the location of the file, with respect to where the CLI command to run the server is executed, should be `./storage/tmp/ALTEMILIAROMAGNA.csv`.
 
+The following command could be handy to download the file directly on the production server, when located within the `packages/server` folder.
+Remember to replace the download link with the actual CSV link taken from the ministry website.
+This won't probably work from local machines, because the ministry website will refuse the connection unless a valid SSL certificate is provided.
+
+```bash
+wget https://dati.istruzione.it/opendata/opendata/catalogo/elements1/ALTEMILIAROMAGNA0000XXXXXXXX.csv -O ./storage/tmp/ALTEMILIAROMAGNA.csv
+```
+
 This operation **must** be executed before importing the schools, because this CSV directs how the content of the other CSVs needs to be managed and parsed.
 In particular, it prints out a list of School codes that were found during the analysis of the books, and only the schools with at least a book in the `ALTEMILIAROMAGNA.csv` can be later added to the DB.
 
