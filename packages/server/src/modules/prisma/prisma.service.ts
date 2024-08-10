@@ -1,17 +1,28 @@
 import { exec } from "child_process";
-import { readdirSync, unlinkSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, unlinkSync } from "fs";
 import { join } from "path";
-import { Injectable, OnModuleInit } from "@nestjs/common";
-// import { Cron, CronExpression } from "@nestjs/schedule";
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import { PrismaClient } from "@prisma/client";
+import {
+  DatabaseConfiguration,
+  databaseConfiguration,
+} from "src/config/database";
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
+  constructor(
+    @Inject(databaseConfiguration.KEY)
+    private readonly databaseConfig: DatabaseConfiguration,
+  ) {
+    super();
+  }
+
   async onModuleInit() {
     await this.$connect();
   }
 
-  // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   dump_database() {
     const currentDate: Date = new Date();
     const year: number = currentDate.getFullYear();
@@ -22,14 +33,23 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
     const formattedDate = `${year}-${month}-${day}`;
 
-    const backupDir = ``;
-    const files = readdirSync(backupDir); //TODO: change dir
+    const backupDir = `./backup`;
+
+    /*
+    we know that /var/lib/postgres/ exists
+    we check if backup/ exists. If not, we create it
+    */
+
+    if (!existsSync(backupDir)) {
+      mkdirSync(backupDir);
+    }
+    const files = readdirSync(backupDir);
 
     files.forEach((file) => {
       const match = file.match(/^backup-(\d{4})-(\d{2})-(\d{2})\.sql$/);
       if (match) {
         if (Number(match[1]) <= year - 2) {
-          const filePath = join(backupDir, file); //TODO: change dir
+          const filePath = join(backupDir, file);
           try {
             unlinkSync(filePath);
           } catch (error) {
@@ -40,8 +60,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     });
 
     const filename = `${backupDir}/backup-${formattedDate}.sql`;
-    const pgDumpCommand = `pg_dump -U ${process.env.DB_USER} -d ${process.env.DB_NAME} -f ${filename}`;
+    const pgDumpCommand = `PGPASSWORD="${this.databaseConfig.password}" pg_dump -h localhost -U ${this.databaseConfig.user} -d ${this.databaseConfig.name} -p ${this.databaseConfig.port} -f ${filename}`;
 
-    exec(pgDumpCommand);
+    exec(pgDumpCommand, (error, stdout, stderr) => {
+      if (error) {
+        //console.error(`Error executing pg_dump: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        //console.error(`pg_dump stderr: ${stderr}`);
+        return;
+      }
+      //console.log(`Database dumped successfully to ${filename}`);
+    });
   }
 }
