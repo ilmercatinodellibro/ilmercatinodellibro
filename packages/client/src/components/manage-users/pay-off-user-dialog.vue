@@ -215,14 +215,14 @@
       <template #card-actions>
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
         <q-btn
-          :disable="selectableRows.length === 0"
+          :disable="selectableRows.length === 0 && totalCheckoutMoney === 0"
           outline
           :label="$t('manageUsers.payOffUserDialog.returnAndDonate')"
           @click="returnAllBooks('REFUND')"
         />
         <q-btn
           color="green"
-          :disable="selectableRows.length === 0"
+          :disable="selectableRows.length === 0 && totalCheckoutMoney === 0"
           :label="
             $t('manageUsers.payOffUserDialog.returnEverything', [
               totalCheckoutMoney.toFixed(2),
@@ -400,12 +400,12 @@ const getSettledOrToSettleCopiesPriceSum = (
     : 0;
 
 const totalCheckoutMoney = computed(() =>
-  sumBy(ownedCopies.value, ({ settledAt, book }) =>
+  sumBy(soldCopies.value, ({ settledAt, book }) =>
     getSettledOrToSettleCopiesPriceSum(settledAt, book, false),
   ),
 );
 const totalCheckedOutMoney = computed(() =>
-  sumBy(returnedCopies.value, ({ settledAt, book }) =>
+  sumBy(soldCopies.value, ({ settledAt, book }) =>
     getSettledOrToSettleCopiesPriceSum(settledAt, book, true),
   ),
 );
