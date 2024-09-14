@@ -39,9 +39,12 @@ import { useRetailLocationStatisticsQuery } from "src/services/retail-location.g
 const { selectedLocation } = useRetailLocationService();
 
 const { retailLocationStatistics, loading: statisticsLoading } =
-  useRetailLocationStatisticsQuery({
-    retailLocationId: selectedLocation.value.id,
-  });
+  useRetailLocationStatisticsQuery(
+    {
+      retailLocationId: selectedLocation.value.id,
+    },
+    { fetchPolicy: "network-only" },
+  );
 
 const dataToShow = computed<
   { label: string; value?: string; suffix?: string }[]
