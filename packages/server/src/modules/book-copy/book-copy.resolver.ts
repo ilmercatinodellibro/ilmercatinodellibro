@@ -258,6 +258,10 @@ export class BookCopyResolver {
 
     const includeCopyOrStatement = hasProblem || isSold || isAvailable;
 
+    // TODO: full text search query optimization resources to try out
+    // https://stackoverflow.com/questions/1566717/postgresql-like-query-performance-variations
+    // https://www.cybertec-postgresql.com/en/postgresql-more-performance-for-like-and-ilike-statements/
+    // https://stackoverflow.com/a/69223762/14897369
     const where: Prisma.BookCopyWhereInput = {
       ...(searchText
         ? {
@@ -318,6 +322,7 @@ export class BookCopyResolver {
         retailLocationId,
       },
       returnedAt: null,
+      // TODO: it includes all available books, instead of adding this as and additional filter
       ...(includeCopyOrStatement
         ? {
             OR: [
