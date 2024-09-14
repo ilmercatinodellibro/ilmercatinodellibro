@@ -700,6 +700,16 @@ function returnAllBooks(remainingType: SettleRemainingType) {
           userId: props.user.id,
         },
       });
+
+      const queryArgs = {
+        retailLocationId: selectedLocation.value.id,
+        userId: props.user.id,
+      };
+      await Promise.all([
+        refetchBookCopiesInStock(queryArgs),
+        refetchReturnedBookCopies(queryArgs),
+      ]);
+      selectedRows.value = [];
     } catch {
       notifyError(t("common.genericErrorMessage"));
     } finally {

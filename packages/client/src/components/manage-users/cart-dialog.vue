@@ -481,6 +481,7 @@ function sellBooks() {
           });
         }
       });
+      cache.gc();
 
       evictRequestsReservationsQueries(cache);
 

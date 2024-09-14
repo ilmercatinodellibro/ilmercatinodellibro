@@ -366,6 +366,7 @@ function requestBook(bookId: string) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         userId: user.value!.id,
       });
+      cache.gc();
     } catch (e) {
       Notify.create(
         t("reserveBooks.reservationOrRequestError", [
