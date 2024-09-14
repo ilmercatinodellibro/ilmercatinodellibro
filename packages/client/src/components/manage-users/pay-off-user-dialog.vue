@@ -384,11 +384,14 @@ const {
   retailLocationId: selectedLocation.value.id,
 }));
 
-const { soldBookCopies: soldCopies, loading: soldLoading } =
-  useGetSoldBookCopiesQuery(() => ({
-    userId: props.user.id,
-    retailLocationId: selectedLocation.value.id,
-  }));
+const {
+  soldBookCopies: soldCopies,
+  loading: soldLoading,
+  refetch: refetchSoldBookCopies,
+} = useGetSoldBookCopiesQuery(() => ({
+  userId: props.user.id,
+  retailLocationId: selectedLocation.value.id,
+}));
 
 const getSettledOrToSettleCopiesPriceSum = (
   settledAt: number | null | undefined,
@@ -526,13 +529,9 @@ async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
       ),
     );
 
-    const queryArgs = {
-      retailLocationId: selectedLocation.value.id,
-      userId: props.user.id,
-    };
     await Promise.all([
-      refetchBookCopiesInStock(queryArgs),
-      refetchReturnedBookCopies(queryArgs),
+      refetchBookCopiesInStock(),
+      refetchReturnedBookCopies(),
     ]);
     removeBookCopiesAfterAction(bookCopies);
   } catch {
@@ -554,10 +553,7 @@ async function donateBookCopies(bookCopies: BookCopyDetailsFragment[]) {
         }),
       ),
     );
-    await refetchBookCopiesInStock({
-      retailLocationId: selectedLocation.value.id,
-      userId: props.user.id,
-    });
+    await refetchBookCopiesInStock();
     removeBookCopiesAfterAction(bookCopies);
   } catch {
     notifyError(
@@ -617,10 +613,7 @@ function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
           }),
         ),
       );
-      await refetchBookCopiesInStock({
-        retailLocationId: selectedLocation.value.id,
-        userId: props.user.id,
-      });
+      await refetchBookCopiesInStock();
       removeBookCopiesAfterAction(bookCopies);
     } catch {
       notifyError(
@@ -650,10 +643,7 @@ function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
           }),
         ),
       );
-      await refetchBookCopiesInStock({
-        retailLocationId: selectedLocation.value.id,
-        userId: props.user.id,
-      });
+      await refetchBookCopiesInStock();
       removeBookCopiesAfterAction(bookCopies);
     } catch {
       notifyError(t("manageUsers.payOffUserDialog.problemsError"));
@@ -701,20 +691,18 @@ function returnAllBooks(remainingType: SettleRemainingType) {
         },
       });
 
-      const queryArgs = {
-        retailLocationId: selectedLocation.value.id,
-        userId: props.user.id,
-      };
       await Promise.all([
-        refetchBookCopiesInStock(queryArgs),
-        refetchReturnedBookCopies(queryArgs),
+        // These are needed to update the book copies lists
+        refetchBookCopiesInStock(),
+        refetchReturnedBookCopies(),
+        // This is needed to update the sold books settled status and thus the settleable amount
+        refetchSoldBookCopies(),
       ]);
       selectedRows.value = [];
+
+      onDialogOK();
     } catch {
       notifyError(t("common.genericErrorMessage"));
-    } finally {
-      await Promise.all([refetchBookCopiesInStock, refetchReturnedBookCopies]);
-      onDialogOK();
     }
   });
 }
