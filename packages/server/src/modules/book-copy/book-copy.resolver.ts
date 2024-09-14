@@ -298,7 +298,7 @@ export class BookCopyResolver {
               {
                 book: {
                   isbnCode: {
-                    contains: searchText,
+                    startsWith: searchText,
                     mode: "insensitive",
                   },
                 },

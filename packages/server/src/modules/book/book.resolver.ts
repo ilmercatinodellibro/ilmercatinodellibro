@@ -126,7 +126,7 @@ export class BookResolver {
         ? [
             {
               isbnCode: {
-                contains: searchText,
+                startsWith: searchText,
                 mode: "insensitive",
               },
             },
