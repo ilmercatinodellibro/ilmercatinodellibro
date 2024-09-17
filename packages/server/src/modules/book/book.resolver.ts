@@ -226,6 +226,9 @@ export class BookResolver {
       })
       .copies({
         where: isAvailable ? this.availableCopyFilter : undefined,
+        orderBy: {
+          code: "asc",
+        },
       });
   }
 

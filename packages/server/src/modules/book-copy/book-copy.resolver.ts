@@ -57,6 +57,9 @@ export class BookCopyResolver {
       where: {
         bookId,
       },
+      orderBy: {
+        code: "asc",
+      },
     });
   }
 
@@ -165,6 +168,9 @@ export class BookCopyResolver {
           retailLocationId,
         },
       },
+      orderBy: {
+        code: "asc",
+      },
     });
   }
 
@@ -196,6 +202,9 @@ export class BookCopyResolver {
           retailLocationId,
         },
       },
+      orderBy: {
+        code: "asc",
+      },
     });
   }
 
@@ -225,6 +234,9 @@ export class BookCopyResolver {
         book: {
           retailLocationId,
         },
+      },
+      orderBy: {
+        code: "asc",
       },
     });
   }
