@@ -193,7 +193,7 @@ async function addBookToRequest(bookIsbn: string) {
   const book = await fetchBookByISBN(bookIsbn);
   if (!book) {
     Dialog.create({
-      message: t("manageUsers.inStockDialog.errorMessage"),
+      message: t("bookErrors.noBook"),
     });
     return;
   }
