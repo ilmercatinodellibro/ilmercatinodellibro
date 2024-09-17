@@ -28,6 +28,7 @@ fragment BookSummary on Book {
     soldCount
     reservationsCount
     cartItemsCount
+    donatedCount
   }
 }
 

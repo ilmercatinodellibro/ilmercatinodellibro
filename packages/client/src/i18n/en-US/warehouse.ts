@@ -12,6 +12,7 @@ export default {
     "Sold: {soldCount}",
     "Reserved: {reservationsCount}",
     "In cart: {cartItemsCount}",
+    "Donated: {donatedCount}",
   ].join("\n"),
   filters: {
     isAvailable: "Available",

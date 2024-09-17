@@ -88,6 +88,7 @@
                       soldCount: props.row.meta.soldCount,
                       reservationsCount: props.row.meta.reservationsCount,
                       cartItemsCount: props.row.meta.cartItemsCount,
+                      donatedCount: props.row.meta.donatedCount,
                     })
                   }}
                 </q-tooltip>

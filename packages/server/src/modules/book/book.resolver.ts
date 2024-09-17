@@ -204,6 +204,7 @@ export class BookResolver {
   ];
   private readonly availableCopyFilter: Prisma.BookCopyWhereInput = {
     returnedAt: null,
+    donatedAt: null,
     AND: [
       {
         OR: this.noSalesFilter,

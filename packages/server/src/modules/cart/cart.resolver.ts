@@ -149,7 +149,7 @@ export class CartResolver {
 
       book = bookDetails;
 
-      // BD query already returns non-deleted requests
+      // DB query already returns non-deleted requests
       if (bookDetails.requests.length === 0) {
         ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
           data: {

@@ -12,6 +12,7 @@ export default {
     "Venduti: {soldCount}",
     "Prenotati: {reservationsCount}",
     "Nel carrello: {cartItemsCount}",
+    "Donati: {donatedCount}",
   ].join("\n"),
   filters: {
     isAvailable: "Disponibili",

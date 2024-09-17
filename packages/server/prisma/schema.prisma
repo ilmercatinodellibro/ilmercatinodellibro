@@ -222,6 +222,7 @@ view BookMeta {
   soldCount         Int @map("sales_count")
   reservationsCount Int @map("reservations_count")
   cartItemsCount    Int @map("cart_items_count")
+  donatedCount      Int @map("donated_count")
 
   isAvailable    Boolean @map("is_available")
   availableCount Int     @map("available_count")
