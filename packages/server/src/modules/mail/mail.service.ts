@@ -81,6 +81,7 @@ export class MailService {
         ...addressOverrides,
         context: {
           privacyPolicyUrl: `${this.rootConfig.clientUrl}/tos-privacy/privacy-policy.pdf`,
+          // TODO: right now we don't have unified TOS for Modena and Reggio, and we don't have them in english version
           tosUrl: `${this.rootConfig.clientUrl}/tos-privacy/tos-${i18nMailDetails.locale}.pdf`,
           ...i18nMailDetails.context,
         },
