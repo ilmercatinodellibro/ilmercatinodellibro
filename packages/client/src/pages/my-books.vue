@@ -146,6 +146,7 @@
 <script setup lang="ts">
 import {
   mdiBookArrowLeft,
+  mdiCash,
   mdiCurrencyEur,
   mdiCurrencyEurOff,
   mdiGift,
@@ -186,6 +187,13 @@ const { user } = useAuthService();
 const route = useRoute();
 const router = useRouter();
 
+// TODO: this doesn't include returned book copies, while it should
+// Before updating it, we need to check if changing it would affect other parts of the app
+// using this query
+// From a quick research, that's not the case, since we changed the usage of this query
+// in other parts of the app time ago
+// We should also check for "evictQuery" usages, which we didn't update for
+// previous changes in the operator area and should be updated now
 const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
@@ -225,7 +233,14 @@ type TablesRowsTypes =
   | ReservationSummaryFragment
   | RequestSummaryFragment;
 
-const tableRowsByTab = computed<Record<BooksTab, TablesRowsTypes[]>>(() => ({
+interface TableRowsByTab {
+  [BooksTab.DELIVERED]: BookCopyDetailsFragment[];
+  [BooksTab.PURCHASED]: BookCopyDetailsFragment[];
+  [BooksTab.REQUESTED]: RequestSummaryFragment[];
+  [BooksTab.RESERVED]: ReservationSummaryFragment[];
+}
+
+const tableRowsByTab = computed<TableRowsByTab>(() => ({
   [BooksTab.DELIVERED]: bookCopiesByOwner.value,
   [BooksTab.PURCHASED]: purchasedBookCopies.value,
   [BooksTab.REQUESTED]: bookRequests.value,
@@ -355,9 +370,11 @@ const selectedTab = ref(
 
 const searchQuery = ref("");
 
-const totalSale = ref(
+const totalSale = computed(() =>
   sumBy(
-    tableRowsByTab.value.delivered,
+    tableRowsByTab.value.delivered.filter(
+      (bookCopy) => getStatus(bookCopy) === BookStatus.SOLD,
+    ),
     ({ book }) => (book.originalPrice * selectedLocation.value.buyRate) / 100,
   ),
 );
@@ -367,6 +384,7 @@ enum BookStatus {
   NOT_SOLD = "not-sold",
   RETURNED = "returned",
   DONATED = "donated",
+  SETTLED = "settled",
 }
 
 function getStatus(bookCopy: BookCopyDetailsFragment) {
@@ -374,14 +392,16 @@ function getStatus(bookCopy: BookCopyDetailsFragment) {
     ? BookStatus.RETURNED
     : bookCopy.donatedAt
       ? BookStatus.DONATED
-      : bookCopy.purchasedAt
-        ? BookStatus.SOLD
-        : BookStatus.NOT_SOLD;
+      : bookCopy.settledAt
+        ? BookStatus.SETTLED
+        : bookCopy.purchasedAt
+          ? BookStatus.SOLD
+          : BookStatus.NOT_SOLD;
 }
 
 const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({
   [BookStatus.SOLD]: {
-    color: "positive",
+    color: "green-6",
     icon: mdiCurrencyEur,
     label: t("myBooks.statusLabels.sold"),
     dark: true,
@@ -398,9 +418,14 @@ const statusChipData = computed<Record<BookStatus, QChipProps>>(() => ({
     label: t("myBooks.statusLabels.returned"),
   },
   [BookStatus.DONATED]: {
-    color: "amber",
+    color: "amber-6",
     icon: mdiGift,
     label: t("myBooks.statusLabels.donated"),
+  },
+  [BookStatus.SETTLED]: {
+    color: "light-green-5",
+    icon: mdiCash,
+    label: t("myBooks.statusLabels.settled"),
   },
 }));
 

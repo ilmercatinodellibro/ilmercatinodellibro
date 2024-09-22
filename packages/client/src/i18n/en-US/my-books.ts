@@ -12,6 +12,7 @@ export default {
     notSold: "Not yet sold",
     returned: "Returned",
     donated: "Donated to the mercatino",
+    settled: "Settled",
   },
   cancelReservation: "Cancel reservation",
   cancelRequest: "Cancel request",
