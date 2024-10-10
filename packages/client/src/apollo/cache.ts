@@ -27,12 +27,13 @@ export function evictQuery<
   if (!definition) {
     throw new Error("Document does not contain a query operation");
   }
-  if (!definition.name) {
-    throw new Error("Query operation does not have a name");
+  const selection = definition.selectionSet.selections[0];
+  if (!selection || selection.kind !== Kind.FIELD) {
+    throw new Error("Query must select a field");
   }
 
   cache.evict({
-    id: cache.identify({ __typename: "Query", id: definition.name.value }),
+    fieldName: selection.name.value,
     args,
   });
 }
