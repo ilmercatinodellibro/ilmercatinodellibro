@@ -11,7 +11,7 @@ export default {
   requestBookDisclaimer: {
     title: "Request a copy of this book",
     message:
-      "This book is currently unavailable and you are asking to Mercatino del Libro to retrieve a copy of it for you. Do you wish to proceed?",
+      "This book is currently unavailable, you are making Mercatino del Libro aware you want a copy of it. Do you wish to proceed?",
   },
   confirmReserveByClassDialog: {
     title: "Reserve all the books",
