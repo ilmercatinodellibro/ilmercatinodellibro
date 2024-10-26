@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+
+  <body>
+    <p>
+      Hi <%= user.firstname %> <%= user.lastname %>! You can find your purchase
+      receipt attached to this email.
+    </p>
+
+    <p>Thanks!</p>
+    <p>Il Mercatino del Libro</p>
+    <p>
+      View our
+      <a href="<%= tosUrl %>">terms and conditions</a>
+      and our
+      <a href="<%= privacyPolicyUrl %>">privacy policy</a>
+    </p>
+  </body>
+</html>

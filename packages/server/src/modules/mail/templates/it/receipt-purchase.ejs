@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+
+  <body lang="it">
+    <!-- receipt.type.toLowerCase() ritorna il tipo in inglese, farsi passare direttamente la versione tradotta -->
+    <p>
+      Ciao <%= user.firstname %> <%= user.lastname %>! Puoi trovare la tua
+      ricevuta di acquisto allegata a questa email.
+    </p>
+
+    <p>Grazie!</p>
+    <p>Il Mercatino del Libro</p>
+    <p>
+      Visualizza i nostri
+      <a href="<%= tosUrl %>">termini di servizio</a>
+      e la nostra
+      <a href="<%= privacyPolicyUrl %>">privacy policy</a>
+    </p>
+  </body>
+</html>

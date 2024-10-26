@@ -45,6 +45,20 @@ interface SettlementPeriod {
   to: Date;
 }
 
+const RECEIPT_SUBJECT_TRANSLATIONS: Record<
+  string,
+  Record<ReceiptType, string>
+> = {
+  it: {
+    [ReceiptType.PURCHASE]: "Ricevuta per acquisto libri",
+    [ReceiptType.WITHDRAWAL]: "Ricevuta per consegna libri",
+  },
+  "en-US": {
+    [ReceiptType.PURCHASE]: "Book purchase receipt",
+    [ReceiptType.WITHDRAWAL]: "Book consignment receipt",
+  },
+};
+
 @Injectable()
 export class ReceiptService {
   // TODO: Make this dynamic and configurable from the admin panel
@@ -81,8 +95,8 @@ export class ReceiptService {
 
     await this.mailService.sendMail({
       to: user,
-      subject: `Ricevuta per ${receipt.type.toLowerCase()}`,
-      template: "receipt",
+      subject: RECEIPT_SUBJECT_TRANSLATIONS[user.locale ?? "it"][receipt.type],
+      template: `receipt-${receipt.type.toLowerCase()}`,
       context: {
         receipt,
         user,
