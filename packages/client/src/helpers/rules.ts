@@ -55,6 +55,12 @@ export const createBetweenLengthRule =
       value.length <= maxLength) ||
     t("validators.betweenLength", { minLength, maxLength });
 
+export const createExactLengthRule =
+  (exactLength: number): ValidationRule<string | unknown[] | null> =>
+  (value) =>
+    (value !== null && value.length === exactLength) ||
+    t("validators.exactLength", { exactLength });
+
 export const makeValueMatchRule =
   (
     valueToBeMatched: MaybeRefOrGetter<string | number | null>,
@@ -79,6 +85,15 @@ const SPECIAL_CHARACTERS = ["_", ".", ",", "-", "+", "*", "!", "#", "@", "\\"];
 const SPECIAL_CHARACTERS_PATTERN = new RegExp(
   `^(?=.*[${SPECIAL_CHARACTERS.toString()}?])`,
 );
+
+export const onlyDigitsRule: ValidationRule<string | null> = (value) =>
+  !value || /^\d*$/.test(value) || t("validators.onlyDigits");
+
+export const phoneNumberRules = [
+  requiredRule,
+  onlyDigitsRule,
+  createExactLengthRule(10),
+];
 
 export const validatePasswordRule: ValidationRule<string | null> = (
   password,

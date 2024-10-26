@@ -17,6 +17,7 @@
       <!-- bottom-slots prop is used when there are no rules/hint/etc. to unify bottom padding with the ones that do have -->
       <!-- The listeners on @clear are to make the model an empty string instead of null when cleared -->
       <q-card-section class="column gap-16 no-wrap q-pb-xs q-pt-lg q-px-lg">
+        <!-- TODO: unify with edit-user-data-dialog and register page -->
         <q-input
           v-model="newUserData.firstname"
           :label="$t('manageUsers.fields.firstName')"
@@ -84,20 +85,22 @@
           v-model="newUserData.phoneNumber"
           :disable="scheduledForDeletion"
           :label="$t('manageUsers.fields.phoneNumber')"
-          autocomplete="new-password"
+          :rules="phoneNumberRules"
+          autocomplete="off"
           bottom-slots
           clearable
-          mask="phone"
           outlined
+          type="tel"
           @clear="newUserData.phoneNumber = ''"
         />
+
         <q-input
           v-model="newUserData.password"
           :disable="scheduledForDeletion"
           :label="$t('auth.password')"
           :rules="newUserData.password ? [validatePasswordRule] : [() => true]"
           :type="hidePassword ? 'password' : 'text'"
-          autocomplete="new-password"
+          autocomplete="off"
           bottom-slots
           outlined
         >
@@ -220,6 +223,7 @@ import { RegisterUserPayload, UpdateUserPayload } from "src/@generated/graphql";
 import {
   emailRule,
   makeValueMatchRule,
+  phoneNumberRules,
   requireIfUnderage,
   requiredRule,
   validatePasswordRule,

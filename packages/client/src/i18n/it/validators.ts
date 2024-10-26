@@ -5,6 +5,8 @@ export default {
   maxLength: "Il valore deve essere lungo al massimo {maxLength} caratteri",
   betweenLength:
     "Il valore deve essere lungo tra {minLength} e {maxLength} caratteri",
+  exactLength:
+    "Il valore deve essere lungo esattamente {exactLength} caratteri",
   nonValidEmail: "La mail inserita non è valida",
   nonValidDomain: "Il dominio inserito non è valido",
   password: {
@@ -17,6 +19,7 @@ export default {
     atLeast8AndMaximum25Characters:
       "La password deve avere almeno 8 e massimo 25 caratteri",
   },
+  onlyDigits: "Il valore deve contenere solo numeri",
   greaterThanZero: "Il valore deve essere un numero maggiore di 0",
   nonValidISBN: "L'ISBN inserito non è valido",
   numberBetweenValues:

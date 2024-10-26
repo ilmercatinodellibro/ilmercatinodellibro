@@ -141,6 +141,7 @@ import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import {
   makeValueMatchRule,
+  phoneNumberRules,
   requireIfUnderage,
   requiredRule,
   validatePasswordRule,
@@ -198,6 +199,7 @@ interface FormField {
   inputData: Omit<QInputProps, "modelValue">;
 }
 
+// TODO: unify with edit-user-details-dialog and edit-user-data-dialog
 const formData = computed<FormField[]>(() => [
   {
     field: "firstname",
@@ -233,9 +235,8 @@ const formData = computed<FormField[]>(() => [
     field: "phoneNumber",
     inputData: {
       label: t("auth.phoneNumber"),
-      mask: "phone",
-      unmaskedValue: true,
-      rules: [requiredRule],
+      type: "tel",
+      rules: phoneNumberRules,
     },
   },
   {

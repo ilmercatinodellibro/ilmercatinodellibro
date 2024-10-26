@@ -74,6 +74,7 @@ import { UpdateUserPayload } from "src/@generated/graphql";
 import {
   emailRule,
   makeValueMatchRule,
+  phoneNumberRules,
   requireIfUnderage,
   requiredRule,
   validatePasswordRule,
@@ -111,6 +112,7 @@ const newUserData = ref<
 
 const hidePassword = ref(true);
 
+// TODO: unify with edit-user-details-dialog and register page
 const formData = computed<
   Record<
     Exclude<keyof UserData, "locale">,
@@ -139,8 +141,8 @@ const formData = computed<
     },
     phoneNumber: {
       label: t("auth.phoneNumber"),
-      mask: "phone",
-      unmaskedValue: true,
+      type: "tel",
+      rules: phoneNumberRules,
     },
     email: {
       label: t("auth.emailAddress"),
