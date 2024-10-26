@@ -280,7 +280,9 @@ function updateCurrentUser(updatedUserData: UpdatableUserInfoFragment) {
     return;
   }
 
-  user.value = merge(user.value, updatedUserData);
+  // We need to create a new object to make sure the user update is detected by the
+  // watch function keeping it in sync with the local storage copy
+  user.value = merge({}, user.value, updatedUserData);
 }
 
 function getJwtHeader(authToken = token.value) {
