@@ -232,6 +232,18 @@ export class RetailLocationResolver {
       where: retailLocationFilter,
     });
 
+    const getBooksInWarehouseCount = this.prisma.bookCopy.count({
+      where: {
+        ...retailLocationFilter,
+        ...this.presentInWarehouseFilter,
+        AND: [
+          {
+            OR: this.notSoldFilter,
+          },
+        ],
+      },
+    });
+
     const getBooksWithProblemsCount = this.prisma.bookCopy.count({
       where: {
         ...retailLocationFilter,
@@ -244,10 +256,15 @@ export class RetailLocationResolver {
       },
     });
 
-    const getBooksInWarehouseCount = this.prisma.bookCopy.count({
+    const getBooksWithProblemsInWarehouseCount = this.prisma.bookCopy.count({
       where: {
         ...retailLocationFilter,
         ...this.presentInWarehouseFilter,
+        problems: {
+          some: {
+            resolvedAt: null,
+          },
+        },
         AND: [
           {
             OR: this.notSoldFilter,
@@ -449,8 +466,9 @@ export class RetailLocationResolver {
 
     const [
       bookCopiesCount,
-      booksWithProblemsCount,
       booksInWarehouseCount,
+      booksWithProblemsCount,
+      booksWithProblemsInWarehouseCount,
       salableBooksCount,
       returnedBooksCount,
       donatedBooksCount,
@@ -464,8 +482,9 @@ export class RetailLocationResolver {
       { settleableTotal, settledTotal, reimbursedTotal, revenueTotal },
     ] = await Promise.all([
       getBooksCopiesCount,
-      getBooksWithProblemsCount,
       getBooksInWarehouseCount,
+      getBooksWithProblemsCount,
+      getBooksWithProblemsInWarehouseCount,
       getSalableBooksCount,
       getReturnedBooksCount,
       getDonatedBooksCount,
@@ -481,8 +500,9 @@ export class RetailLocationResolver {
 
     return {
       bookCopiesCount,
-      booksWithProblemsCount,
       booksInWarehouseCount,
+      booksWithProblemsCount,
+      booksWithProblemsInWarehouseCount,
       salableBooksCount,
       returnedBooksCount,
       donatedBooksCount,

@@ -34,13 +34,17 @@ export class StatisticsQueryResult {
   @Field(() => Int)
   bookCopiesCount!: number;
 
+  // Count of book copies currently in the warehouse.
+  @Field(() => Int)
+  booksInWarehouseCount!: number;
+
   // Count of book copies with problems and still in the warehouse.
   @Field(() => Int)
   booksWithProblemsCount!: number;
 
-  // Count of book copies currently in the warehouse.
+  // Count of book copies with problems, regardless of where they are now.
   @Field(() => Int)
-  booksInWarehouseCount!: number;
+  booksWithProblemsInWarehouseCount!: number;
 
   // Count of book copies currently in the warehouse that can be sold.
   @Field(() => Int)

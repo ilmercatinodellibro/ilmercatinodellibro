@@ -50,40 +50,29 @@ const dataToShow = computed<
   { label: string; value?: string; suffix?: string }[]
 >(() => [
   {
+    label: "Utenti attivi",
+    value: retailLocationStatistics.value?.activeUsersCount.toString(),
+  },
+  {
     label: "Libri movimentati",
     value: retailLocationStatistics.value?.bookCopiesCount.toString(),
-  },
-  {
-    label: "Vendite",
-    value: retailLocationStatistics.value?.salesCount.toString(),
-  },
-  {
-    label: "Vendite andate a buon fine",
-    value: retailLocationStatistics.value?.activeSalesCount.toString(),
-  },
-  {
-    label: "Vendite con reso",
-    value: retailLocationStatistics.value?.refundedSalesCount.toString(),
   },
   {
     label: "Libri in magazzino",
     value: retailLocationStatistics.value?.booksInWarehouseCount.toString(),
   },
   {
-    label: "Libri in magazzino con problemi",
-    value: retailLocationStatistics.value?.booksWithProblemsCount.toString(),
-  },
-  {
     label: "Libri in magazzino vendibili",
     value: retailLocationStatistics.value?.salableBooksCount.toString(),
   },
   {
-    label: "Prenotazioni attive",
-    value: retailLocationStatistics.value?.activeReservationsCount.toString(),
+    label: "Libri in magazzino con problemi",
+    value:
+      retailLocationStatistics.value?.booksWithProblemsInWarehouseCount.toString(),
   },
   {
-    label: "Richieste",
-    value: retailLocationStatistics.value?.activeRequestsCount.toString(),
+    label: "Libri con problemi",
+    value: retailLocationStatistics.value?.booksWithProblemsCount.toString(),
   },
   {
     label: "Libri restituiti",
@@ -96,6 +85,31 @@ const dataToShow = computed<
   {
     label: "Libri rimborsati",
     value: retailLocationStatistics.value?.reimbursedBooksCount.toString(),
+  },
+  {
+    label: "Totale rimborsato",
+    value: retailLocationStatistics.value?.reimbursedTotal.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Richieste",
+    value: retailLocationStatistics.value?.activeRequestsCount.toString(),
+  },
+  {
+    label: "Prenotazioni attive",
+    value: retailLocationStatistics.value?.activeReservationsCount.toString(),
+  },
+  {
+    label: "Vendite",
+    value: retailLocationStatistics.value?.salesCount.toString(),
+  },
+  {
+    label: "Vendite andate a buon fine",
+    value: retailLocationStatistics.value?.activeSalesCount.toString(),
+  },
+  {
+    label: "Vendite con reso",
+    value: retailLocationStatistics.value?.refundedSalesCount.toString(),
   },
   {
     label: "Totale incassato",
@@ -111,15 +125,6 @@ const dataToShow = computed<
     label: "Totale da liquidare",
     value: retailLocationStatistics.value?.settleableTotal.toFixed(2),
     suffix: "€",
-  },
-  {
-    label: "Totale rimborsato",
-    value: retailLocationStatistics.value?.reimbursedTotal.toFixed(2),
-    suffix: "€",
-  },
-  {
-    label: "Utenti attivi",
-    value: retailLocationStatistics.value?.activeUsersCount.toString(),
   },
 ]);
 </script>
