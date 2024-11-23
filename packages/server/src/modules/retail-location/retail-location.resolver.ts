@@ -442,8 +442,9 @@ export class RetailLocationResolver {
 
       let grossRevenue = 0;
       let adminAccountsRevenue = 0;
-      let settledAmount = 0;
       let settleableAmount = 0;
+      let settledAmount = 0;
+      let toSettleAmount = 0;
 
       for (const sale of activeSales) {
         const {
@@ -466,10 +467,14 @@ export class RetailLocationResolver {
           continue;
         }
 
+        const buyPrice = (originalPrice * buyRate) / 100;
+
+        settleableAmount += buyPrice;
+
         if (settledAt === null) {
-          settleableAmount += (originalPrice * buyRate) / 100;
+          toSettleAmount += buyPrice;
         } else {
-          settledAmount += (originalPrice * buyRate) / 100;
+          settledAmount += buyPrice;
         }
       }
 
@@ -480,7 +485,9 @@ export class RetailLocationResolver {
           book: { originalPrice },
         } = reimbursedBook;
 
-        reimbursedAmount += (originalPrice * buyRate) / 100;
+        const buyPrice = (originalPrice * buyRate) / 100;
+
+        reimbursedAmount += buyPrice;
       }
 
       const netRevenue = grossRevenue - settledAmount - reimbursedAmount;
@@ -488,6 +495,7 @@ export class RetailLocationResolver {
       return {
         settleableAmount,
         settledAmount,
+        toSettleAmount,
         reimbursedAmount,
         grossRevenue,
         netRevenue,
@@ -513,6 +521,7 @@ export class RetailLocationResolver {
       {
         settleableAmount,
         settledAmount,
+        toSettleAmount,
         reimbursedAmount,
         adminAccountsRevenue,
         grossRevenue,
@@ -553,6 +562,7 @@ export class RetailLocationResolver {
       activeUsersCount,
       settleableAmount,
       settledAmount,
+      toSettleAmount,
       reimbursedAmount,
       adminAccountsRevenue,
       grossRevenue,

@@ -86,13 +86,17 @@ export class StatisticsQueryResult {
   @Field(() => Int)
   activeUsersCount!: number;
 
+  // Amount that could be settled, doesn't take into consideration if it has been settled or not.
+  @Field(() => Float)
+  settleableAmount!: number;
+
   // Money returned to the users for which Mercatino was able to sell their books.
   @Field(() => Float)
   settledAmount!: number;
 
-  // Amount that still needs to be settled.
+  // Money which should be returned to the users for which Mercatino was able to sell their books.
   @Field(() => Float)
-  settleableAmount!: number;
+  toSettleAmount!: number;
 
   // Amount that had been spent on reimbursing books, e.g. because they were lost or damaged.
   @Field(() => Float)

@@ -112,12 +112,17 @@ const dataToShow = computed<
     value: retailLocationStatistics.value?.refundedSalesCount.toString(),
   },
   {
-    label: "Totale da liquidare",
+    label: "Liquidabile",
     value: retailLocationStatistics.value?.settleableAmount.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Totale liquidato",
+    label: "Da liquidare",
+    value: retailLocationStatistics.value?.toSettleAmount.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Liquidato",
     value: retailLocationStatistics.value?.settledAmount.toFixed(2),
     suffix: "€",
   },
