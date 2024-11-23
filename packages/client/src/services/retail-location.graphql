@@ -55,15 +55,24 @@ mutation updateRetailLocationSettings(
 }
 
 fragment Statistics on StatisticsQueryResult {
-  totalUsers
-  totalSoldBooks
-  totalRevenue
-  totalReservedBooks
-  totalRequestedBooks
-  totalPresentBooks
-  totalBooksWithProblems
+  bookCopiesCount
+  booksWithProblemsCount
+  booksInWarehouseCount
+  salableBooksCount
+  returnedBooksCount
+  donatedBooksCount
+  returnedBooksCount
+  reimbursedBooksCount
+  salesCount
+  activeSalesCount
+  refundedSalesCount
+  activeReservationsCount
+  activeRequestsCount
+  activeUsersCount
   settledTotal
   settleableTotal
+  reimbursedTotal
+  revenueTotal
 }
 
 query retailLocationStatistics($retailLocationId: String!) {

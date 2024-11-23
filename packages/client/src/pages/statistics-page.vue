@@ -50,43 +50,76 @@ const dataToShow = computed<
   { label: string; value?: string; suffix?: string }[]
 >(() => [
   {
-    label: "Totale Libri Venduti",
-    value: retailLocationStatistics.value?.totalSoldBooks.toString(),
+    label: "Libri movimentati",
+    value: retailLocationStatistics.value?.bookCopiesCount.toString(),
   },
   {
-    label: "Totale Libri Presenti",
-    value: retailLocationStatistics.value?.totalPresentBooks.toString(),
+    label: "Vendite",
+    value: retailLocationStatistics.value?.salesCount.toString(),
   },
   {
-    label: "Totale Libri Prenotati",
-    value: retailLocationStatistics.value?.totalReservedBooks.toString(),
+    label: "Vendite andate a buon fine",
+    value: retailLocationStatistics.value?.activeSalesCount.toString(),
   },
   {
-    label: "Totale Libri con Problemi",
-    value: retailLocationStatistics.value?.totalBooksWithProblems.toString(),
+    label: "Vendite con reso",
+    value: retailLocationStatistics.value?.refundedSalesCount.toString(),
   },
   {
-    label: "Totale Libri Richiesti",
-    value: retailLocationStatistics.value?.totalRequestedBooks.toString(),
+    label: "Libri in magazzino",
+    value: retailLocationStatistics.value?.booksInWarehouseCount.toString(),
   },
   {
-    label: "Totale Incassato",
-    value: retailLocationStatistics.value?.totalRevenue.toFixed(2),
+    label: "Libri in magazzino con problemi",
+    value: retailLocationStatistics.value?.booksWithProblemsCount.toString(),
+  },
+  {
+    label: "Libri in magazzino vendibili",
+    value: retailLocationStatistics.value?.salableBooksCount.toString(),
+  },
+  {
+    label: "Prenotazioni attive",
+    value: retailLocationStatistics.value?.activeReservationsCount.toString(),
+  },
+  {
+    label: "Richieste",
+    value: retailLocationStatistics.value?.activeRequestsCount.toString(),
+  },
+  {
+    label: "Libri restituiti",
+    value: retailLocationStatistics.value?.returnedBooksCount.toString(),
+  },
+  {
+    label: "Libri donati",
+    value: retailLocationStatistics.value?.donatedBooksCount.toString(),
+  },
+  {
+    label: "Libri rimborsati",
+    value: retailLocationStatistics.value?.reimbursedBooksCount.toString(),
+  },
+  {
+    label: "Totale incassato",
+    value: retailLocationStatistics.value?.revenueTotal.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Totale Liquidato",
+    label: "Totale liquidato",
     value: retailLocationStatistics.value?.settledTotal.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Totale da Liquidare",
+    label: "Totale da liquidare",
     value: retailLocationStatistics.value?.settleableTotal.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Totale Utenti",
-    value: retailLocationStatistics.value?.totalUsers.toString(),
+    label: "Totale rimborsato",
+    value: retailLocationStatistics.value?.reimbursedTotal.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Utenti attivi",
+    value: retailLocationStatistics.value?.activeUsersCount.toString(),
   },
 ]);
 </script>

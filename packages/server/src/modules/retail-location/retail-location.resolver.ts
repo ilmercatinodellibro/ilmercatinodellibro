@@ -169,9 +169,9 @@ export class RetailLocationResolver {
     await this.locationService.cleanupLocation(retailLocationId);
   }
 
-  private readonly notSoldOrRefunded: Prisma.BookCopyWhereInput[] = [
+  private readonly notSoldFilter: Prisma.BookCopyWhereInput[] = [
     {
-      // Sold but refunded (if at least one of the sales has a null "refundedAt")
+      // Sold, even multiple times, but always ended up with a refund
       sales: {
         every: {
           refundedAt: {
@@ -189,11 +189,13 @@ export class RetailLocationResolver {
   ];
 
   private readonly noProblemsFilter: Prisma.BookCopyWhereInput[] = [
+    // No problems whatsoever (what a lucky guy)
     {
       problems: {
         none: {},
       },
     },
+    // Had problems, but all of them are now resolved (slightly less lucky guy)
     {
       problems: {
         every: {
@@ -204,6 +206,10 @@ export class RetailLocationResolver {
       },
     },
   ];
+
+  private readonly presentInWarehouseFilter: Prisma.BookCopyWhereInput = {
+    returnedAt: null,
+  };
 
   @Query(() => StatisticsQueryResult)
   async retailLocationStatistics(
@@ -216,87 +222,141 @@ export class RetailLocationResolver {
       message: "You do not have permission to view these reservations.",
     });
 
-    const getTotalBooksWithProblems = this.prisma.bookCopy.count({
+    const retailLocationFilter = {
+      book: {
+        retailLocationId,
+      },
+    };
+
+    const getBooksCopiesCount = this.prisma.bookCopy.count({
+      where: retailLocationFilter,
+    });
+
+    const getBooksWithProblemsCount = this.prisma.bookCopy.count({
       where: {
-        book: {
-          retailLocationId,
-        },
+        ...retailLocationFilter,
+        ...this.presentInWarehouseFilter,
         problems: {
           some: {
             resolvedAt: null,
           },
         },
+      },
+    });
+
+    const getBooksInWarehouseCount = this.prisma.bookCopy.count({
+      where: {
+        ...retailLocationFilter,
+        ...this.presentInWarehouseFilter,
+        AND: [
+          {
+            OR: this.notSoldFilter,
+          },
+        ],
+      },
+    });
+
+    const getSalableBooksCount = this.prisma.bookCopy.count({
+      where: {
+        ...retailLocationFilter,
+        ...this.presentInWarehouseFilter,
+        AND: [
+          {
+            OR: this.noProblemsFilter,
+          },
+          {
+            OR: this.notSoldFilter,
+          },
+        ],
+      },
+    });
+
+    const getReturnedBooksCount = this.prisma.bookCopy.count({
+      where: {
+        ...retailLocationFilter,
         returnedAt: {
           not: null,
         },
       },
     });
 
-    const getTotalPresentBooks = this.prisma.bookCopy.count({
+    const getDonatedBooksCount = this.prisma.bookCopy.count({
       where: {
-        book: {
-          retailLocationId,
+        ...retailLocationFilter,
+        donatedAt: {
+          not: null,
         },
-        returnedAt: null,
-        AND: [
-          {
-            OR: this.noProblemsFilter,
-          },
-          {
-            OR: this.notSoldOrRefunded,
-          },
-        ],
       },
     });
 
-    const getTotalSoldBooks = this.prisma.sale.count({
+    const getReimbursedBooksCount = this.prisma.bookCopy.count({
+      where: {
+        ...retailLocationFilter,
+        reimbursedAt: {
+          not: null,
+        },
+      },
+    });
+
+    const getSalesCount = this.prisma.sale.count({
+      where: {
+        bookCopy: {
+          ...retailLocationFilter,
+        },
+      },
+    });
+
+    const getActiveSalesCount = this.prisma.sale.count({
       where: {
         refundedAt: null,
         bookCopy: {
-          book: {
-            retailLocationId,
-          },
+          ...retailLocationFilter,
         },
       },
     });
 
-    const getTotalReservedBooks = this.prisma.reservation.count({
+    const getRefundedSalesCount = this.prisma.sale.count({
       where: {
-        book: {
-          retailLocationId,
+        refundedAt: {
+          not: null,
         },
+        bookCopy: {
+          ...retailLocationFilter,
+        },
+      },
+    });
+
+    const getActiveReservationsCount = this.prisma.reservation.count({
+      where: {
+        ...retailLocationFilter,
         deletedAt: null,
       },
     });
 
-    const getTotalRequestedBooks = this.prisma.bookRequest.count({
+    const getActiveRequestsCount = this.prisma.bookRequest.count({
       where: {
-        book: {
-          retailLocationId,
-        },
+        ...retailLocationFilter,
         deletedAt: null,
       },
     });
 
-    const getTotalUsers = this.prisma.user.count({
+    const getActiveUsersCount = this.prisma.user.count({
       where: {
         OR: [
+          // Requested at least one book
           {
             requestedBooks: {
               some: {
-                book: {
-                  retailLocationId,
-                },
+                ...retailLocationFilter,
                 deletedAt: null,
               },
             },
           },
+          // Gave in at least one book
           {
             bookCopies: {
               some: {
-                book: {
-                  retailLocationId,
-                },
+                ...retailLocationFilter,
               },
             },
           },
@@ -308,9 +368,7 @@ export class RetailLocationResolver {
       where: {
         refundedAt: null,
         bookCopy: {
-          book: {
-            retailLocationId,
-          },
+          ...retailLocationFilter,
         },
       },
       include: {
@@ -327,68 +385,118 @@ export class RetailLocationResolver {
       },
     });
 
-    const getTotals = async () => {
-      const [activeSales, { sellRate, buyRate }] = await Promise.all([
-        getActiveSales,
-        this.retailLocation({
-          id: retailLocationId,
-        }),
-      ]);
+    const getReimbursedBooks = this.prisma.bookCopy.findMany({
+      where: {
+        ...retailLocationFilter,
+        reimbursedAt: {
+          not: null,
+        },
+      },
+      select: {
+        book: {
+          select: {
+            originalPrice: true,
+          },
+        },
+      },
+    });
 
-      let totalRevenue = 0;
+    const getMoneyTotals = async () => {
+      const [activeSales, reimbursedBooks, { sellRate, buyRate }] =
+        await Promise.all([
+          getActiveSales,
+          getReimbursedBooks,
+          this.retailLocation({
+            id: retailLocationId,
+          }),
+        ]);
+
+      let revenueTotal = 0;
       let settledTotal = 0;
       let settleableTotal = 0;
 
-      activeSales.forEach(
-        ({
+      for (const sale of activeSales) {
+        const {
           iseeDiscountApplied,
           bookCopy: {
             book: { originalPrice },
             settledAt,
           },
-        }) => {
-          totalRevenue +=
-            (originalPrice * (iseeDiscountApplied ? buyRate : sellRate)) / 100;
+        } = sale;
 
-          if (settledAt === null) {
-            settleableTotal += (originalPrice * buyRate) / 100;
-          } else {
-            settledTotal += (originalPrice * buyRate) / 100;
-          }
-        },
-      );
+        revenueTotal +=
+          (originalPrice * (iseeDiscountApplied ? buyRate : sellRate)) / 100;
 
-      return { totalRevenue, settledTotal, settleableTotal };
+        if (settledAt === null) {
+          settleableTotal += (originalPrice * buyRate) / 100;
+        } else {
+          settledTotal += (originalPrice * buyRate) / 100;
+        }
+      }
+
+      let reimbursedTotal = 0;
+
+      for (const reimbursedBook of reimbursedBooks) {
+        const {
+          book: { originalPrice },
+        } = reimbursedBook;
+
+        reimbursedTotal += (originalPrice * buyRate) / 100;
+      }
+
+      return { settleableTotal, settledTotal, reimbursedTotal, revenueTotal };
     };
 
     const [
-      totalBooksWithProblems,
-      totalPresentBooks,
-      totalSoldBooks,
-      totalReservedBooks,
-      totalRequestedBooks,
-      totalUsers,
-      { settleableTotal, settledTotal, totalRevenue },
+      bookCopiesCount,
+      booksWithProblemsCount,
+      booksInWarehouseCount,
+      salableBooksCount,
+      returnedBooksCount,
+      donatedBooksCount,
+      reimbursedBooksCount,
+      salesCount,
+      activeSalesCount,
+      refundedSalesCount,
+      activeReservationsCount,
+      activeRequestsCount,
+      activeUsersCount,
+      { settleableTotal, settledTotal, reimbursedTotal, revenueTotal },
     ] = await Promise.all([
-      getTotalBooksWithProblems,
-      getTotalPresentBooks,
-      getTotalSoldBooks,
-      getTotalReservedBooks,
-      getTotalRequestedBooks,
-      getTotalUsers,
-      getTotals(),
+      getBooksCopiesCount,
+      getBooksWithProblemsCount,
+      getBooksInWarehouseCount,
+      getSalableBooksCount,
+      getReturnedBooksCount,
+      getDonatedBooksCount,
+      getReimbursedBooksCount,
+      getSalesCount,
+      getActiveSalesCount,
+      getRefundedSalesCount,
+      getActiveReservationsCount,
+      getActiveRequestsCount,
+      getActiveUsersCount,
+      getMoneyTotals(),
     ]);
 
     return {
-      totalBooksWithProblems,
-      totalPresentBooks,
-      totalSoldBooks,
-      totalReservedBooks,
-      totalRequestedBooks,
-      totalUsers,
+      bookCopiesCount,
+      booksWithProblemsCount,
+      booksInWarehouseCount,
+      salableBooksCount,
+      returnedBooksCount,
+      donatedBooksCount,
+      reimbursedBooksCount,
+      salesCount,
+      activeSalesCount,
+      refundedSalesCount,
+      activeReservationsCount,
+      activeRequestsCount,
+      activeUsersCount,
       settleableTotal,
       settledTotal,
-      totalRevenue,
+      reimbursedTotal,
+      revenueTotal,
     };
   }
 }

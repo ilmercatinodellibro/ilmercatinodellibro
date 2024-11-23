@@ -4,6 +4,7 @@ import {
 } from "@nestjs/common";
 import {
   Args,
+  Int,
   Mutation,
   Query,
   ResolveField,
@@ -360,7 +361,7 @@ export class UserResolver {
     return memberships[0]?.role;
   }
 
-  @ResolveField(() => Number)
+  @ResolveField(() => Int)
   async booksInStock(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
     @Root() user: User,
@@ -407,7 +408,7 @@ export class UserResolver {
     return _count.bookCopies;
   }
 
-  @ResolveField(() => Number)
+  @ResolveField(() => Int)
   async booksSold(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
     @Root() user: User,
@@ -439,7 +440,7 @@ export class UserResolver {
     return _count.bookCopies;
   }
 
-  @ResolveField(() => Number)
+  @ResolveField(() => Int)
   async booksReserved(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
     @Root() user: User,
@@ -480,7 +481,7 @@ export class UserResolver {
     return _count.reservations;
   }
 
-  @ResolveField(() => Number)
+  @ResolveField(() => Int)
   async booksRequested(
     @Root() user: User,
     @Args("onlyAvailable", { defaultValue: false }) onlyAvailable: boolean,
@@ -554,7 +555,7 @@ export class UserResolver {
     return _count.requestedBooks;
   }
 
-  @ResolveField(() => Number)
+  @ResolveField(() => Int)
   async booksBought(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
     @Root() user: User,
@@ -584,7 +585,7 @@ export class UserResolver {
     return _count.purchases;
   }
 
-  @ResolveField(() => Number)
+  @ResolveField(() => Int)
   async booksInCart(
     @Root() user: User,
     @Args("retailLocationId") retailLocationId: string,
