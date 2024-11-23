@@ -70,10 +70,12 @@ fragment Statistics on StatisticsQueryResult {
   activeReservationsCount
   activeRequestsCount
   activeUsersCount
-  settledTotal
-  settleableTotal
-  reimbursedTotal
-  revenueTotal
+  settledAmount
+  settleableAmount
+  reimbursedAmount
+  adminAccountsRevenue
+  grossRevenue
+  netRevenue
 }
 
 query retailLocationStatistics($retailLocationId: String!) {

@@ -397,6 +397,18 @@ export class RetailLocationResolver {
                 originalPrice: true,
               },
             },
+            owner: {
+              select: {
+                memberships: {
+                  where: {
+                    retailLocationId,
+                  },
+                  select: {
+                    role: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -418,7 +430,7 @@ export class RetailLocationResolver {
       },
     });
 
-    const getMoneyTotals = async () => {
+    const getMoneyAmounts = async () => {
       const [activeSales, reimbursedBooks, { sellRate, buyRate }] =
         await Promise.all([
           getActiveSales,
@@ -428,40 +440,59 @@ export class RetailLocationResolver {
           }),
         ]);
 
-      let revenueTotal = 0;
-      let settledTotal = 0;
-      let settleableTotal = 0;
+      let grossRevenue = 0;
+      let adminAccountsRevenue = 0;
+      let settledAmount = 0;
+      let settleableAmount = 0;
 
       for (const sale of activeSales) {
         const {
           iseeDiscountApplied,
           bookCopy: {
             book: { originalPrice },
+            owner: { memberships },
             settledAt,
           },
         } = sale;
 
-        revenueTotal +=
+        const saleRevenue =
           (originalPrice * (iseeDiscountApplied ? buyRate : sellRate)) / 100;
+        grossRevenue += saleRevenue;
+
+        // Save admin accounts revenue aside and avoid taking it into account while calculating settleable and settled amounts
+        const isAdminSale = memberships.some(({ role }) => role === Role.ADMIN);
+        if (isAdminSale) {
+          adminAccountsRevenue += saleRevenue;
+          continue;
+        }
 
         if (settledAt === null) {
-          settleableTotal += (originalPrice * buyRate) / 100;
+          settleableAmount += (originalPrice * buyRate) / 100;
         } else {
-          settledTotal += (originalPrice * buyRate) / 100;
+          settledAmount += (originalPrice * buyRate) / 100;
         }
       }
 
-      let reimbursedTotal = 0;
+      let reimbursedAmount = 0;
 
       for (const reimbursedBook of reimbursedBooks) {
         const {
           book: { originalPrice },
         } = reimbursedBook;
 
-        reimbursedTotal += (originalPrice * buyRate) / 100;
+        reimbursedAmount += (originalPrice * buyRate) / 100;
       }
 
-      return { settleableTotal, settledTotal, reimbursedTotal, revenueTotal };
+      const netRevenue = grossRevenue - settledAmount - reimbursedAmount;
+
+      return {
+        settleableAmount,
+        settledAmount,
+        reimbursedAmount,
+        grossRevenue,
+        netRevenue,
+        adminAccountsRevenue,
+      };
     };
 
     const [
@@ -479,7 +510,14 @@ export class RetailLocationResolver {
       activeReservationsCount,
       activeRequestsCount,
       activeUsersCount,
-      { settleableTotal, settledTotal, reimbursedTotal, revenueTotal },
+      {
+        settleableAmount,
+        settledAmount,
+        reimbursedAmount,
+        adminAccountsRevenue,
+        grossRevenue,
+        netRevenue,
+      },
     ] = await Promise.all([
       getBooksCopiesCount,
       getBooksInWarehouseCount,
@@ -495,7 +533,7 @@ export class RetailLocationResolver {
       getActiveReservationsCount,
       getActiveRequestsCount,
       getActiveUsersCount,
-      getMoneyTotals(),
+      getMoneyAmounts(),
     ]);
 
     return {
@@ -513,10 +551,12 @@ export class RetailLocationResolver {
       activeReservationsCount,
       activeRequestsCount,
       activeUsersCount,
-      settleableTotal,
-      settledTotal,
-      reimbursedTotal,
-      revenueTotal,
+      settleableAmount,
+      settledAmount,
+      reimbursedAmount,
+      adminAccountsRevenue,
+      grossRevenue,
+      netRevenue,
     };
   }
 }

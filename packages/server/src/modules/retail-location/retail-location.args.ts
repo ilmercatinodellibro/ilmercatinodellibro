@@ -88,18 +88,25 @@ export class StatisticsQueryResult {
 
   // Money returned to the users for which Mercatino was able to sell their books.
   @Field(() => Float)
-  settledTotal!: number;
+  settledAmount!: number;
 
-  // Total money that still needs to be settled.
+  // Amount that still needs to be settled.
   @Field(() => Float)
-  settleableTotal!: number;
+  settleableAmount!: number;
 
-  // Total money that had been spent on reimbursing books, e.g. because they were lost or damaged.
+  // Amount that had been spent on reimbursing books, e.g. because they were lost or damaged.
   @Field(() => Float)
-  reimbursedTotal!: number;
+  reimbursedAmount!: number;
 
-  // Total money collected from sales.
-  // This exclude refunds and reimbursements.
+  // Revenue generated from admin accounts, for which no settlement is needed.
   @Field(() => Float)
-  revenueTotal!: number;
+  adminAccountsRevenue!: number;
+
+  // Gross revenue from sales, which doesn't take into account reimbursements and settlements.
+  @Field(() => Float)
+  grossRevenue!: number;
+
+  // Net revenue from sales, which takes into account reimbursements and settlements.
+  @Field(() => Float)
+  netRevenue!: number;
 }

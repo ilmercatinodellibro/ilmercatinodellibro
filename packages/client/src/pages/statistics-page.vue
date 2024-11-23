@@ -88,7 +88,7 @@ const dataToShow = computed<
   },
   {
     label: "Totale rimborsato",
-    value: retailLocationStatistics.value?.reimbursedTotal.toFixed(2),
+    value: retailLocationStatistics.value?.reimbursedAmount.toFixed(2),
     suffix: "€",
   },
   {
@@ -112,18 +112,28 @@ const dataToShow = computed<
     value: retailLocationStatistics.value?.refundedSalesCount.toString(),
   },
   {
-    label: "Totale incassato",
-    value: retailLocationStatistics.value?.revenueTotal.toFixed(2),
+    label: "Totale da liquidare",
+    value: retailLocationStatistics.value?.settleableAmount.toFixed(2),
     suffix: "€",
   },
   {
     label: "Totale liquidato",
-    value: retailLocationStatistics.value?.settledTotal.toFixed(2),
+    value: retailLocationStatistics.value?.settledAmount.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Totale da liquidare",
-    value: retailLocationStatistics.value?.settleableTotal.toFixed(2),
+    label: "Guadagno lordo",
+    value: retailLocationStatistics.value?.grossRevenue.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Guadagno netto",
+    value: retailLocationStatistics.value?.netRevenue.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Guadagno da utente admin",
+    value: retailLocationStatistics.value?.adminAccountsRevenue.toFixed(2),
     suffix: "€",
   },
 ]);
