@@ -4,7 +4,14 @@ import { Injectable } from "@nestjs/common";
 import { GenerateProps } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, readOnlyText, table, text } from "@pdfme/schemas";
-import { Book, BookCopy, Receipt, RetailLocation, Sale } from "@prisma/client";
+import {
+  Book,
+  BookCopy,
+  Receipt,
+  RetailLocation,
+  Sale,
+  User,
+} from "@prisma/client";
 import { sumBy } from "lodash";
 import { ReceiptType } from "src/@generated";
 import { MailService } from "src/modules/mail/mail.service";
@@ -35,7 +42,7 @@ export type ReceiptBook = Pick<
 > & { code: string };
 export interface GenerateReceiptInput {
   creationDate: Date;
-  userEmail: string;
+  user: User;
   location: RetailLocation;
   books: ReceiptBook[];
 }
@@ -153,7 +160,7 @@ export class ReceiptService {
     const receiptPdf = await generateReceipt({
       creationDate: receipt.createdAt,
       location: receipt.retailLocation,
-      userEmail: receipt.user.email,
+      user: receipt.user,
       books,
     });
 
@@ -168,7 +175,7 @@ export class ReceiptService {
 
   async generateWithdrawalReceipt({
     creationDate,
-    userEmail,
+    user,
     location,
     books,
   }: GenerateReceiptInput) {
@@ -197,7 +204,7 @@ export class ReceiptService {
             "{date}",
             formattedDate,
           ),
-          title: schema.title.content.replace("{email}", userEmail),
+          title: schema.title.content.replace("{email}", user.email),
           table: JSON.stringify(bookRows),
           notice: schema.notice.content
             .replace("{from}", settlementPeriod.from)
@@ -221,14 +228,17 @@ export class ReceiptService {
 
   async generatePurchaseReceipt({
     creationDate,
-    userEmail,
+    user,
     location,
     books,
   }: GenerateReceiptInput) {
     const formattedDate = this.#formatCreationDate(creationDate);
     const booksWithSellPrice = books.map((book) => ({
       ...book,
-      sellPrice: (book.originalPrice * location.sellRate) / 100,
+      sellPrice:
+        (book.originalPrice *
+          (user.discount ? location.buyRate : location.sellRate)) /
+        100,
     }));
 
     const bookRows = booksWithSellPrice.map((book) => [
@@ -251,7 +261,7 @@ export class ReceiptService {
             "{date}",
             formattedDate,
           ),
-          title: schema.title.content.replace("{email}", userEmail),
+          title: schema.title.content.replace("{email}", user.email),
           table: JSON.stringify(bookRows),
           notice: schema.notice.content.replace(
             "{totalPrice}",
