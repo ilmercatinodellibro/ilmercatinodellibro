@@ -220,7 +220,7 @@ export function useLogoutMutation(router = useRouter()) {
     if (locale) {
       LocalStorage.set(STORAGE_LOCALE_KEY, locale);
     }
-    void client.clearStore();
+    void client.resetStore();
     if (selectedLocationId.value) {
       void router.push({
         name: GUEST_DEFAULT_ROUTE_NAME,
