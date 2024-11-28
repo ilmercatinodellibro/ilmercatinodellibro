@@ -102,6 +102,7 @@ mutation updateUser($input: UpdateUserPayload!) {
   updateUser(input: $input) {
     # Request just enough data so that the cache gets updated automatically
     ...UpdatableUserInfo
+    emailVerified
   }
 }
 
