@@ -528,7 +528,7 @@ function openEdit({
           email:
             newUserData.email && newUserData.email !== email
               ? newUserData.email
-              : email,
+              : undefined,
           password: newUserData.password ? newUserData.password : undefined,
         },
       });
