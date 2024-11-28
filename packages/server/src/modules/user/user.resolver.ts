@@ -679,6 +679,7 @@ export class UserResolver {
       discount,
       password,
       passwordConfirmation,
+      email: newEmail,
       ...payloadRest
     }: UpdateUserPayload,
     @CurrentUser() actor: User,
@@ -691,9 +692,12 @@ export class UserResolver {
       });
     }
 
-    await this.prisma.user.findFirstOrThrow({
+    const { email: oldEmail } = await this.prisma.user.findFirstOrThrow({
       where: {
         id: userId,
+      },
+      select: {
+        email: true,
       },
     });
 
@@ -721,11 +725,14 @@ export class UserResolver {
       retailLocationId,
     );
 
-    return this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: {
         id: userId,
       },
       data: {
+        ...(newEmail && newEmail !== oldEmail
+          ? { email: newEmail, emailVerified: false }
+          : {}),
         ...payloadRest,
         ...(userIsAdmin ? { discount } : {}),
         ...(!!password &&
@@ -735,6 +742,21 @@ export class UserResolver {
           : {}),
       },
     });
+
+    if (oldEmail !== newEmail) {
+      const token = this.authService.createVerificationToken(
+        retailLocationId,
+        newEmail ?? oldEmail,
+      );
+
+      await this.authService.sendVerificationLink(
+        retailLocationId,
+        updatedUser,
+        token,
+      );
+    }
+
+    return updatedUser;
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
