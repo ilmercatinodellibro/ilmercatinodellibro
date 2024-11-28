@@ -73,7 +73,7 @@ import {
   mdiMail,
   mdiPhone,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, date } from "quasar";
+import { Dialog, Notify, date } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
@@ -161,6 +161,15 @@ function modifyUserData() {
         },
       });
       updateCurrentUser(updatedUser);
+
+      if (!updatedUser.emailVerified) {
+        logout();
+
+        Notify.create({
+          type: "warning",
+          message: t("auth.pleaseCheckYourInboxForVerificationEmail"),
+        });
+      }
     } catch {
       notifyError(t("auth.couldNotUpdate"));
     }
