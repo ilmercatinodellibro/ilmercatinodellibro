@@ -1,4 +1,4 @@
-import { ReceiptType } from "src/@generated/graphql";
+import { ReceiptType, UserQueryFilters } from "src/@generated/graphql";
 
 export default {
   createUser: "Crea nuovo utente",
@@ -38,7 +38,8 @@ export default {
     withRequested: "Con Richiesti",
     withPurchased: "Con Acquistati",
     withSold: "Con Venduti",
-  },
+    unverified: "Non verificati",
+  } satisfies Record<Exclude<keyof UserQueryFilters, "search">, string>,
   editUser: {
     title: "Modifica Dati Utente",
     createUser: "Crea un Nuovo Utente",

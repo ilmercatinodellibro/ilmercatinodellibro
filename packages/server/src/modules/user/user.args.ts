@@ -32,6 +32,9 @@ export class UserQueryFilters {
 
   @Field(() => Boolean, { nullable: true })
   withSold?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  unverified?: boolean;
 }
 
 @ArgsType()
