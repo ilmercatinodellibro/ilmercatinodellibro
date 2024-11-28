@@ -107,6 +107,10 @@ export class UserResolver {
           ],
         },
 
+        ...(filter.unverified
+          ? [{ emailVerified: false } satisfies Prisma.UserWhereInput]
+          : []),
+
         {
           OR: [
             ...(filter.withRequested === true || filter.withAvailable === true
