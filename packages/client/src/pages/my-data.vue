@@ -154,7 +154,7 @@ function modifyUserData() {
           email:
             newUserData.email && newUserData.email !== user.value.email
               ? newUserData.email
-              : user.value.email,
+              : undefined,
           password: newUserData.password ? newUserData.password : undefined,
           id: user.value.id,
           retailLocationId: selectedLocation.value.id,
