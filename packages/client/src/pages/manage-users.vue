@@ -233,7 +233,6 @@ import {
 import { Dialog, Notify, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { UpdateUserPayload } from "src/@generated/graphql";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
@@ -466,6 +465,7 @@ function openEdit({
   dateOfBirth,
   delegate,
   scheduledForDeletionAt,
+  emailVerified,
 }: CustomerFragment) {
   Dialog.create({
     component: EditUserDetailsDialog,
@@ -481,9 +481,10 @@ function openEdit({
         retailLocationId: selectedLocation.value.id,
         dateOfBirth,
         delegate,
-      } satisfies UpdateUserPayload,
+        emailVerified,
+      },
       scheduledForDeletion: !!scheduledForDeletionAt,
-    },
+    } satisfies InstanceType<typeof EditUserDetailsDialog>["$props"],
   }).onOk(async (payload: Exclude<UserDialogPayload, { type: "create" }>) => {
     if (payload.type === "toggleDeletion") {
       const shouldDelete = !scheduledForDeletionAt;

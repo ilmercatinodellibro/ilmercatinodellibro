@@ -31,6 +31,8 @@ export default {
   logOut: "Log out",
   passwordChangedSuccessfully: "Your password has been changed successfully",
   passwordDoNotMatch: "Passwords do not match",
+  resendVerificationEmail: "Send a new verification email",
+  couldNotSendVerificationEmail: "Could not send the verification email",
   emailVerified:
     "Your email has been correctly verified, you can now login using your credentials",
   emailNotVerified: "This user's account was not verified yet",

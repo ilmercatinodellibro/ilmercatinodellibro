@@ -42,6 +42,10 @@ mutation refreshToken {
   refreshToken
 }
 
+mutation sendVerificationLink($input: EmailVerificationPayload!) {
+  sendVerificationLink(input: $input)
+}
+
 mutation resetPassword($input: PasswordResetPayload!) {
   resetPassword(input: $input)
 }

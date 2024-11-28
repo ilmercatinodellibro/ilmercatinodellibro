@@ -51,6 +51,12 @@ export class RegistrationInviteLinkPayload extends LocationBoundInput {
 }
 
 @InputType()
+export class EmailVerificationPayload extends LocationBoundInput {
+  @Field()
+  userId!: string;
+}
+
+@InputType()
 export class ResetForgottenPasswordPayload {
   @Field()
   newPassword!: string;

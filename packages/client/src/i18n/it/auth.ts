@@ -32,6 +32,9 @@ export default {
   passwordChangedSuccessfully:
     "La tua password è stata modificata correttamente",
   passwordDoNotMatch: "Le password non corrispondono",
+  resendVerificationEmail: "Manda una nuova e-mail di verifica",
+  couldNotSendVerificationEmail:
+    "Non è stato possibile mandare l'e-mail di verifica",
   emailVerified:
     "La tua email è stata verificata correttamente, ora puoi accedere utilizzando le tue credenziali",
   emailNotVerified: "L’account di questo utente non è ancora stato verificato",
