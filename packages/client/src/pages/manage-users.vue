@@ -522,6 +522,9 @@ function openEdit({
       await updateUser({
         input: {
           ...newUserData,
+
+          // TODO: Add a way to log out the corresponding user if their email gets updated (and now unverified)
+          // This is unlikely to happen so it's left to a future implementation for now
           email:
             newUserData.email && newUserData.email !== email
               ? newUserData.email
