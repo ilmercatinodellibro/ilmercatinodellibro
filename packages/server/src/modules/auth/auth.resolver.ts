@@ -8,6 +8,7 @@ import { PrismaService } from "src/modules/prisma/prisma.service";
 import { RegisterUserPayload } from "src/modules/user/user.args";
 import { UserService } from "../user/user.service";
 import {
+  EmailVerificationPayload,
   LoginPayload,
   PasswordResetLinkPayload,
   PasswordResetPayload,
@@ -196,6 +197,38 @@ export class AuthResolver {
   @Mutation(() => String)
   refreshToken(@CurrentUser() user: User) {
     return this.authService.createAccessToken(user.id);
+  }
+
+  @Mutation(() => GraphQLVoid, { nullable: true })
+  async sendVerificationLink(
+    @Input() { userId, retailLocationId }: EmailVerificationPayload,
+    @CurrentUser() currentUser: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: currentUser.id,
+      role: "ADMIN",
+      message: "Operation not allowed",
+    });
+
+    const userToVerify = await this.prisma.user.findUniqueOrThrow({
+      where: {
+        id: userId,
+      },
+      include: {
+        memberships: true,
+      },
+    });
+
+    const token = this.authService.createVerificationToken(
+      retailLocationId,
+      userToVerify.email,
+    );
+
+    await this.authService.sendVerificationLink(
+      retailLocationId,
+      userToVerify,
+      token,
+    );
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })

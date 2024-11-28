@@ -80,7 +80,26 @@
           clearable
           outlined
           @clear="newUserData.email = ''"
-        />
+        >
+          <template
+            v-if="hasAdminRole && userData && !userData.emailVerified"
+            #after
+          >
+            <q-btn
+              :icon="mdiEmailArrowRight"
+              :loading="sendingEmail"
+              color="primary"
+              flat
+              round
+              @click="sendVerificationEmail"
+            >
+              <q-tooltip>
+                {{ t("auth.resendVerificationEmail") }}
+              </q-tooltip>
+            </q-btn>
+          </template>
+        </q-input>
+
         <q-input
           v-model="newUserData.phoneNumber"
           :disable="scheduledForDeletion"
@@ -211,15 +230,17 @@ import {
   mdiAccountReactivate,
   mdiAccountRemove,
   mdiDownload,
+  mdiEmailArrowRight,
   mdiEye,
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { formatDate } from "@vueuse/core";
-import { useDialogPluginComponent } from "quasar";
+import { Notify, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { RegisterUserPayload, UpdateUserPayload } from "src/@generated/graphql";
+import { notifyError } from "src/helpers/error-messages";
 import {
   emailRule,
   makeValueMatchRule,
@@ -230,12 +251,14 @@ import {
 } from "src/helpers/rules";
 import { UserDialogPayload } from "src/models/user";
 import { useAuthService } from "src/services/auth";
+import { useSendVerificationLinkMutation } from "src/services/auth.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
+import { CustomerFragment } from "src/services/user.graphql";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
 // We don't need reactivity on the props as this is used through the Dialog plugin
 const { userData, scheduledForDeletion } = defineProps<{
-  userData?: UpdateUserPayload;
+  userData?: UpdateUserPayload & Pick<CustomerFragment, "emailVerified">;
   scheduledForDeletion?: boolean;
 }>();
 
@@ -274,4 +297,33 @@ const newUserData = ref(
 );
 const hidePassword = ref(true);
 const hideConfirm = ref(true);
+
+const { sendVerificationLink } = useSendVerificationLinkMutation();
+const sendingEmail = ref(false);
+async function sendVerificationEmail() {
+  if (!userData) {
+    return;
+  }
+
+  try {
+    sendingEmail.value = true;
+
+    await sendVerificationLink({
+      input: {
+        retailLocationId: selectedLocation.value.id,
+        userId: userData.id,
+      },
+    });
+
+    sendingEmail.value = false;
+
+    Notify.create({
+      type: "positive",
+      message: t("auth.verificationEmailSent"),
+    });
+  } catch {
+    sendingEmail.value = false;
+    notifyError(t("auth.couldNotSendVerificationEmail"));
+  }
+}
 </script>
