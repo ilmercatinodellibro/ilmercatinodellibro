@@ -30,5 +30,6 @@ export default {
     sold: "Sold",
     inStock: "In Stock",
     reimbursed: "Reimbursed",
+    settled: "Sold and Settled",
   } satisfies Record<BookCopyStatus | "inStock", string>,
 };

@@ -405,10 +405,6 @@ const {
   retailLocationId: selectedLocation.value.id,
 }));
 
-const unsettledSoldBookCopies = computed(() =>
-  soldCopies.value.filter(({ settledAt }) => settledAt === null),
-);
-
 const getSettledOrToSettleCopiesPriceSum = (
   settledAt: number | null | undefined,
   book: BookSummaryFragment,
@@ -477,8 +473,8 @@ const tableRows = computed<
   {
     id: Titles.Sold,
   },
-  ...(unsettledSoldBookCopies.value.length > 0
-    ? sortByCopyCode(unsettledSoldBookCopies.value)
+  ...(soldCopies.value.length > 0
+    ? sortByCopyCode(soldCopies.value)
     : [{ id: "EMPTY" } satisfies EmptyRow]),
 ]);
 

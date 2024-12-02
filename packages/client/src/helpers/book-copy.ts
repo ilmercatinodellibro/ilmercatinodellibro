@@ -24,6 +24,7 @@ export type BookCopyStatus =
   | "returned"
   | "sold"
   | "reimbursed"
+  | "settled"
   | Exclude<ProblemType, "CUSTOM">;
 
 export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
@@ -36,7 +37,9 @@ export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
       : bookCopy.purchasedAt &&
           (!bookCopy.returnedAt ||
             bookCopy.sales?.some(({ refundedAt }) => !refundedAt))
-        ? "sold"
+        ? bookCopy.settledAt
+          ? "settled"
+          : "sold"
         : bookCopy.donatedAt
           ? "donated"
           : problemType
