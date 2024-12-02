@@ -36,7 +36,7 @@ const props = defineProps<{
   hideIcon?: boolean;
 }>();
 
-function displayStatus(): Exclude<BookCopyStatus, "reimbursed"> {
+function displayStatus(): Exclude<BookCopyStatus, "reimbursed" | "settled"> {
   const status = getStatus(props.bookCopy);
   const problemType = getCurrentActiveProblem(props.bookCopy)?.type;
 
@@ -46,11 +46,13 @@ function displayStatus(): Exclude<BookCopyStatus, "reimbursed"> {
         ? "not-available"
         : problemType
       : "available"
-    : status;
+    : status === "settled"
+      ? "sold"
+      : status;
 }
 
 const IconData: Record<
-  Exclude<BookCopyStatus, "reimbursed">,
+  Exclude<BookCopyStatus, "reimbursed" | "settled">,
   { color: NamedColor; name: string }
 > = {
   "not-available": {
