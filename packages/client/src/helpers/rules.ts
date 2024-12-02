@@ -172,13 +172,10 @@ export const allowOnlyIntegerNumbers: ValidationRule<string | number | null> = (
 const getAge = (birthDate: string): number =>
   Math.trunc(date.getDateDiff(new Date(), new Date(birthDate), "days") / 365);
 
-export const emptyRule: ValidationRule<string | null> = (value) =>
-  !value?.length || value.length === 0 || t("validators.noDelegateForAdult");
-
 export const requireIfUnderage = (
   birthDate?: string | null,
 ): ValidationRule<string | null> =>
-  !birthDate || getAge(birthDate) >= 18 ? emptyRule : requiredRule;
+  !birthDate || getAge(birthDate) >= 18 ? () => true : requiredRule;
 
 // ---------- ---------- ----------
 // Next fields are not imported in other files but we need to leave these so in the future we can abstract these in a package
