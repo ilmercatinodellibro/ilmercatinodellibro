@@ -1,4 +1,8 @@
-import { ReceiptType, UserQueryFilters } from "src/@generated/graphql";
+import {
+  ReceiptType,
+  SettleRemainingType,
+  UserQueryFilters,
+} from "src/@generated/graphql";
 
 export default {
   createUser: "Create new user",
@@ -141,6 +145,7 @@ export default {
     problemsError: "Could not report problems for all the copies.",
     returnAndDonate: "Return money and donate books",
     returnEverything: "Return money and books ({0} €)",
+    cashOnly: "Return cash only ({0} €)",
     confirms: {
       disclaimer:
         "You won't be able to cancel this action from the pay-off dialog. Do you wish to proceed?",
@@ -158,18 +163,36 @@ export default {
           "You are repaying this copy of the book to its owner customer. | You are repaying these copies of the book(s) to their owner customer.",
         confirmLabel: "Reimburse book | Reimburse books",
       },
-      returnAndDonate: {
-        disclaimer:
-          "The books in the list below will be donated by the customer to Mercatino del Libro. You will not be able to cancel this action. Do you wish to proceed?",
-        tableTitle: "Books Donated to the Mercatino",
-        buttonText: "Return money and donate books ({0} €)",
+      cashOnly: {
+        title: "Return cash only",
+        message:
+          "The sold books will be marked as settled, but the copies in stock that are owned by the selected customer will remain available for purchase. You will not be able to cancel this action. Do you wish to proceed?",
+        saveLabel: "Return cash ({0} €)",
       },
-      returnEverything: {
-        title: "Return money and books",
-        disclaimer:
-          "The books in the list below will be returned to the customer as they are the legitimate owner. You will not be able to cancel this action. Do you wish to proceed?",
-        tableTitle: "Books in return",
-      },
+      bulk: {
+        DONATE: {
+          title: "Return money and donate books",
+          disclaimer:
+            "The books in the list below will be donated by the customer to Mercatino del Libro. You will not be able to cancel this action. Do you wish to proceed?",
+          tableTitle: "Books Donated to the Mercatino",
+          saveLabel: "Return money and donate books ({0} €)",
+        },
+        RETURN: {
+          title: "Return money and books",
+          disclaimer:
+            "The books in the list below will be returned to the customer as they are the legitimate owner. You will not be able to cancel this action. Do you wish to proceed?",
+          tableTitle: "Books in return",
+          saveLabel: "Return money and books ({0} €)",
+        },
+      } satisfies Record<
+        Exclude<SettleRemainingType, "CASH_ONLY">,
+        {
+          title: string;
+          disclaimer: string;
+          tableTitle: string;
+          saveLabel: string;
+        }
+      >,
       confirmError: "Could not finish the settlement of the selected customer.",
     },
   },

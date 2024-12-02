@@ -1,4 +1,8 @@
-import { ReceiptType, UserQueryFilters } from "src/@generated/graphql";
+import {
+  ReceiptType,
+  SettleRemainingType,
+  UserQueryFilters,
+} from "src/@generated/graphql";
 
 export default {
   createUser: "Crea nuovo utente",
@@ -144,6 +148,7 @@ export default {
       "Non è stato possibile segnalare il problema per tutte le copie.",
     returnAndDonate: "Restituisci contanti e dona libri",
     returnEverything: "Restituisci contanti e libri ({0} €)",
+    cashOnly: "Restituisci solo contanti ({0} €)",
     confirms: {
       disclaimer:
         "Non potrai annullare questa azione dal dialog di liquidazione. Vuoi procedere?",
@@ -160,18 +165,36 @@ export default {
           "Stai rimborsando questa copia del libro al cliente proprietario. | Stai rimborsando queste copie del/i libro/i al cliente proprietario.",
         confirmLabel: "Rimborsa libro | Rimborsa libri",
       },
-      returnAndDonate: {
-        disclaimer:
-          "I libri nella lista sottostante saranno donati dal cliente al Mercatino del Libro. Non potrai annullare questa azione. Vuoi procedere?",
-        tableTitle: "Libri Donati al Mercatino",
-        buttonText: "Restituisci contanti e dona libri ({0} €)",
+      cashOnly: {
+        title: "Restituisci solo contanti",
+        message:
+          "I libri venduti verranno contrassegnati come liquidati, ma le copie in magazzino che sono di proprietà del cliente selezionato rimarranno disponibili per l'acquisto. Non potrai annullare questa azione. Vuoi procedere?",
+        saveLabel: "Restituisci contanti ({0} €)",
       },
-      returnEverything: {
-        title: "Restituisci contanti e libri",
-        disclaimer:
-          "I libri nella lista sottostante saranno restituiti al cliente in quanto legittimo proprietario. Non potrai annullare questa azione. Vuoi procedere?",
-        tableTitle: "Libri in restituzione",
-      },
+      bulk: {
+        DONATE: {
+          title: "Restituisci contanti e dona libri",
+          disclaimer:
+            "I libri nella lista sottostante saranno donati dal cliente al Mercatino del Libro. Non potrai annullare questa azione. Vuoi procedere?",
+          tableTitle: "Libri Donati al Mercatino",
+          saveLabel: "Restituisci contanti e dona libri ({0} €)",
+        },
+        RETURN: {
+          title: "Restituisci contanti e libri",
+          disclaimer:
+            "I libri nella lista sottostante saranno restituiti al cliente in quanto legittimo proprietario. Non potrai annullare questa azione. Vuoi procedere?",
+          tableTitle: "Libri in restituzione",
+          saveLabel: "Restituisci contanti e libri ({0} €)",
+        },
+      } satisfies Record<
+        Exclude<SettleRemainingType, "CASH_ONLY">,
+        {
+          title: string;
+          disclaimer: string;
+          tableTitle: string;
+          saveLabel: string;
+        }
+      >,
       confirmError:
         "Non è stato possibile terminare la liquidazione del cliente selezionato.",
     },

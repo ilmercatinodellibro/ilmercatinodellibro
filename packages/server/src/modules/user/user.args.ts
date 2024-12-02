@@ -155,7 +155,8 @@ export class UpdateUserPayload extends IntersectionType(
 
 export enum SettleRemainingType {
   RETURN = "RETURN",
-  REFUND = "REFUND",
+  DONATE = "DONATE",
+  CASH_ONLY = "CASH ONLY",
 }
 registerEnumType(SettleRemainingType, {
   name: "SettleRemainingType",
