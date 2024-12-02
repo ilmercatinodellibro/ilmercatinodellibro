@@ -889,39 +889,45 @@ export class UserResolver {
         },
       });
 
-      const returnableCopies = bookCopies.filter(
-        ({ sales, returnedAt, donatedAt, reimbursedAt }) =>
-          returnedAt === null &&
-          donatedAt === null &&
-          reimbursedAt === null &&
-          sales.every(({ refundedAt }) => refundedAt !== null),
-      );
-      if (returnableCopies.length > 0) {
-        await prisma.bookCopy.updateMany({
-          where: {
-            id: {
-              in: returnableCopies.map(({ id }) => id),
+      if (remainingType !== SettleRemainingType.CASH_ONLY) {
+        const returnableCopies = bookCopies.filter(
+          ({ sales, returnedAt, donatedAt, reimbursedAt }) =>
+            returnedAt === null &&
+            donatedAt === null &&
+            reimbursedAt === null &&
+            sales.every(({ refundedAt }) => refundedAt !== null),
+        );
+        if (returnableCopies.length > 0) {
+          await prisma.bookCopy.updateMany({
+            where: {
+              id: {
+                in: returnableCopies.map(({ id }) => id),
+              },
             },
-          },
-          data: {
-            ...(remainingType === SettleRemainingType.RETURN
-              ? {
-                  returnedAt: new Date(),
-                  returnedById: operator.id,
-                }
-              : {
-                  donatedAt: new Date(),
-                  donatedById: operator.id,
-                }),
-          },
-        });
+            data: {
+              ...(remainingType === SettleRemainingType.RETURN
+                ? {
+                    returnedAt: new Date(),
+                    returnedById: operator.id,
+                  }
+                : {
+                    donatedAt: new Date(),
+                    donatedById: operator.id,
+                  }),
+            },
+          });
+        }
       }
 
       // Settle all non-settled book copies
       await prisma.bookCopy.updateMany({
         where: {
           id: {
-            in: bookCopies.map(({ id }) => id),
+            in: bookCopies
+              .filter(({ sales }) =>
+                sales.some(({ refundedAt }) => refundedAt === null),
+              )
+              .map(({ id }) => id),
           },
         },
         data: {

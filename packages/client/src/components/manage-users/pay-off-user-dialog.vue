@@ -215,10 +215,20 @@
       <template #card-actions>
         <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
         <q-btn
+          :disable="totalCheckoutMoney === 0"
+          :label="
+            t('manageUsers.payOffUserDialog.cashOnly', [
+              totalCheckoutMoney.toFixed(2),
+            ])
+          "
+          outline
+          @click="performCashOnlyCheckout()"
+        />
+        <q-btn
           :disable="selectableRows.length === 0 && totalCheckoutMoney === 0"
           outline
           :label="$t('manageUsers.payOffUserDialog.returnAndDonate')"
-          @click="returnAllBooks('REFUND')"
+          @click="returnAllBooks('DONATE')"
         />
         <q-btn
           color="green"
@@ -247,12 +257,14 @@ import {
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { SettleRemainingType } from "src/@generated/graphql";
+import { evictQuery } from "src/apollo/cache";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice, getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
+  GetSoldBookCopiesDocument,
   ProblemDetailsFragment,
   useDonateBookCopyMutation,
   useGetBookCopiesInStockQuery,
@@ -393,6 +405,10 @@ const {
   retailLocationId: selectedLocation.value.id,
 }));
 
+const unsettledSoldBookCopies = computed(() =>
+  soldCopies.value.filter(({ settledAt }) => settledAt === null),
+);
+
 const getSettledOrToSettleCopiesPriceSum = (
   settledAt: number | null | undefined,
   book: BookSummaryFragment,
@@ -461,8 +477,8 @@ const tableRows = computed<
   {
     id: Titles.Sold,
   },
-  ...(soldCopies.value.length > 0
-    ? sortByCopyCode(soldCopies.value)
+  ...(unsettledSoldBookCopies.value.length > 0
+    ? sortByCopyCode(unsettledSoldBookCopies.value)
     : [{ id: "EMPTY" } satisfies EmptyRow]),
 ]);
 
@@ -652,31 +668,21 @@ function reportProblems(bookCopies: BookCopyDetailsFragment[]) {
 }
 
 const { settleUser } = useSettleUserMutation();
-function returnAllBooks(remainingType: SettleRemainingType) {
-  const translationsPath = `manageUsers.payOffUserDialog.confirms.${
-    remainingType === "REFUND" ? "returnAndDonate" : "returnEverything"
-  }`;
+function returnAllBooks(
+  remainingType: Exclude<SettleRemainingType, "CASH_ONLY">,
+) {
+  const translationsPath = `manageUsers.payOffUserDialog.confirms.bulk.${remainingType}`;
+
   Dialog.create({
     component: ReturnBooksConfirmDialog,
     componentProps: {
       booksToReturn: selectableRows.value,
       disclaimer: t(`${translationsPath}.disclaimer`),
-      saveLabel: t(
-        `manageUsers.payOffUserDialog.${
-          remainingType === "REFUND"
-            ? "confirms.returnAndDonate.buttonText"
-            : "returnEverything"
-        }`,
-        [totalCheckoutMoney.value.toFixed(2)],
-      ),
+      saveLabel: t(`${translationsPath}.saveLabel`, [
+        totalCheckoutMoney.value.toFixed(2),
+      ]),
       tableTitle: t(`${translationsPath}.tableTitle`),
-      title: t(
-        `manageUsers.payOffUserDialog.${
-          remainingType === "RETURN"
-            ? "returnAndDonate"
-            : "confirms.returnEverything.title"
-        }`,
-      ),
+      title: t(`${translationsPath}.title`),
       booksSoldToOthers: soldCopies.value.length,
       totalCheckoutMoney: totalCheckoutMoney.value,
       totalCheckedOutMoney: totalCheckedOutMoney.value,
@@ -703,6 +709,31 @@ function returnAllBooks(remainingType: SettleRemainingType) {
       onDialogOK();
     } catch {
       notifyError(t("common.genericErrorMessage"));
+    }
+  });
+}
+
+function performCashOnlyCheckout() {
+  Dialog.create({
+    title: t("manageUsers.payOffUserDialog.confirms.cashOnly.title"),
+    message: t("manageUsers.payOffUserDialog.confirms.cashOnly.message"),
+    ok: t("manageUsers.payOffUserDialog.confirms.cashOnly.saveLabel", [
+      totalCheckoutMoney.value.toFixed(2),
+    ]),
+    cancel: t("common.cancel"),
+  }).onOk(async () => {
+    try {
+      const { cache } = await settleUser({
+        input: {
+          remainingType: "CASH_ONLY",
+          retailLocationId: selectedLocation.value.id,
+          userId: props.user.id,
+        },
+      });
+
+      evictQuery(cache, GetSoldBookCopiesDocument);
+    } catch {
+      notifyError(t("manageUsers.payOffUserDialog.confirms.confirmError"));
     }
   });
 }
