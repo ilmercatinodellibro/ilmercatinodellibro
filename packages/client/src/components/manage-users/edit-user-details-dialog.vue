@@ -298,16 +298,14 @@ const newUserData = ref(
 const hidePassword = ref(true);
 const hideConfirm = ref(true);
 
-const { sendVerificationLink } = useSendVerificationLinkMutation();
-const sendingEmail = ref(false);
+const { loading: sendingEmail, sendVerificationLink } =
+  useSendVerificationLinkMutation();
 async function sendVerificationEmail() {
   if (!userData) {
     return;
   }
 
   try {
-    sendingEmail.value = true;
-
     await sendVerificationLink({
       input: {
         retailLocationId: selectedLocation.value.id,
@@ -315,14 +313,11 @@ async function sendVerificationEmail() {
       },
     });
 
-    sendingEmail.value = false;
-
     Notify.create({
       type: "positive",
       message: t("auth.verificationEmailSent"),
     });
   } catch {
-    sendingEmail.value = false;
     notifyError(t("auth.couldNotSendVerificationEmail"));
   }
 }
