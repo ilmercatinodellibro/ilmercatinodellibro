@@ -43,6 +43,8 @@ export default {
     withPurchased: "Con Acquistati",
     withSold: "Con Venduti",
     unverified: "Non verificati",
+    alreadySettled: "Già Liquidati",
+    withSettleable: "Con Liquidabili",
   } satisfies Record<Exclude<keyof UserQueryFilters, "search">, string>,
   editUser: {
     title: "Modifica Dati Utente",

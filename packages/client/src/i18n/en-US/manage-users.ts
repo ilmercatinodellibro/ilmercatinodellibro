@@ -43,6 +43,8 @@ export default {
     withPurchased: "With Purchased",
     withSold: "With Sold",
     unverified: "Unverified",
+    alreadySettled: "Already Settled",
+    withSettleable: "With Settleable",
   } satisfies Record<Exclude<keyof UserQueryFilters, "search">, string>,
   editUser: {
     title: "Edit User Data",

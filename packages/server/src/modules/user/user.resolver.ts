@@ -113,6 +113,46 @@ export class UserResolver {
 
         {
           OR: [
+            ...(filter.alreadySettled
+              ? [
+                  {
+                    bookCopies: {
+                      some: {
+                        sales: {
+                          some: {
+                            refundedAt: null,
+                          },
+                        },
+                        settledAt: {
+                          not: null,
+                        },
+                      },
+                    },
+                  } satisfies Prisma.UserWhereInput,
+                ]
+              : []),
+
+            ...(filter.withSettleable
+              ? [
+                  {
+                    bookCopies: {
+                      some: {
+                        settledAt: null,
+                        sales: {
+                          some: {
+                            refundedAt: null,
+                          },
+                        },
+                      },
+                    },
+                  } satisfies Prisma.UserWhereInput,
+                ]
+              : []),
+          ],
+        },
+
+        {
+          OR: [
             ...(filter.withRequested === true || filter.withAvailable === true
               ? [
                   {
