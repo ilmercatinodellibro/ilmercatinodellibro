@@ -725,14 +725,14 @@ export class UserResolver {
       retailLocationId,
     );
 
+    const shouldUpdateEmail = !!newEmail && newEmail !== oldEmail;
+
     const updatedUser = await this.prisma.user.update({
       where: {
         id: userId,
       },
       data: {
-        ...(newEmail && newEmail !== oldEmail
-          ? { email: newEmail, emailVerified: false }
-          : {}),
+        ...(shouldUpdateEmail ? { email: newEmail, emailVerified: false } : {}),
         ...payloadRest,
         ...(userIsAdmin ? { discount } : {}),
         ...(!!password &&
@@ -743,10 +743,10 @@ export class UserResolver {
       },
     });
 
-    if (oldEmail !== newEmail) {
+    if (shouldUpdateEmail) {
       const token = this.authService.createVerificationToken(
         retailLocationId,
-        newEmail ?? oldEmail,
+        newEmail,
       );
 
       await this.authService.sendVerificationLink(
