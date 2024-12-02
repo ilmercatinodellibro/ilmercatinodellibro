@@ -35,6 +35,12 @@ export class UserQueryFilters {
 
   @Field(() => Boolean, { nullable: true })
   unverified?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  withSettleable?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  alreadySettled?: boolean;
 }
 
 @ArgsType()
