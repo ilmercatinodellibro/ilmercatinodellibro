@@ -27,7 +27,7 @@ export default {
   goToLogin: "Effettua il log in",
   verificationEmailSent: "Email di verifica inviata!",
   pleaseCheckYourInboxForVerificationEmail:
-    "Controlla la tua casella di posta per un'e-mail di verifica.",
+    "Controlla la tua casella di posta per l'e-mail di verifica.",
   logOut: "Esci",
   passwordChangedSuccessfully:
     "La tua password è stata modificata correttamente",

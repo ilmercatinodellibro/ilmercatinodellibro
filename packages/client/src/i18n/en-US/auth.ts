@@ -27,7 +27,7 @@ export default {
   goToLogin: "Go to the login",
   verificationEmailSent: "Verification email sent.",
   pleaseCheckYourInboxForVerificationEmail:
-    "Check your inbox for a verification email.",
+    "Check your inbox for the verification email.",
   logOut: "Log out",
   passwordChangedSuccessfully: "Your password has been changed successfully",
   passwordDoNotMatch: "Passwords do not match",
