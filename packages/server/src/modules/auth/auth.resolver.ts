@@ -206,16 +206,13 @@ export class AuthResolver {
   ) {
     await this.authService.assertMembership({
       userId: currentUser.id,
-      role: "ADMIN",
+      role: Role.ADMIN,
       message: "Operation not allowed",
     });
 
     const userToVerify = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: userId,
-      },
-      include: {
-        memberships: true,
       },
     });
 
