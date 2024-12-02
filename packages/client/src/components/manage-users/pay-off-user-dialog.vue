@@ -728,6 +728,8 @@ function performCashOnlyCheckout() {
       });
 
       evictQuery(cache, GetSoldBookCopiesDocument);
+
+      onDialogOK();
     } catch {
       notifyError(t("manageUsers.payOffUserDialog.confirms.confirmError"));
     }
