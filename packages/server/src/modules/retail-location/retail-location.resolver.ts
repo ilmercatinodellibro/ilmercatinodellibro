@@ -2,7 +2,7 @@ import { UnprocessableEntityException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Prisma, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
-import { merge } from "lodash";
+import { merge, sumBy } from "lodash";
 import { RetailLocation } from "src/@generated/retail-location";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
@@ -10,6 +10,7 @@ import { Input } from "src/modules/auth/decorators/input.decorator";
 import { UpdateRetailLocationSettingsInput } from "src/modules/retail-location/retail-location.input";
 import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
+import { languageLocales } from "test/fixtures/retail-locations";
 import { Public } from "../auth/decorators/public-route.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
@@ -430,21 +431,22 @@ export class RetailLocationResolver {
       },
     });
 
-    const getMoneyAmounts = async () => {
-      const [activeSales, reimbursedBooks, { sellRate, buyRate }] =
-        await Promise.all([
-          getActiveSales,
-          getReimbursedBooks,
-          this.retailLocation({
-            id: retailLocationId,
-          }),
-        ]);
+    const [activeSales, reimbursedBooks, { sellRate, buyRate }] =
+      await Promise.all([
+        getActiveSales,
+        getReimbursedBooks,
+        this.retailLocation({
+          id: retailLocationId,
+        }),
+      ]);
 
+    const getMoneyAmounts = () => {
       let grossRevenue = 0;
       let adminAccountsRevenue = 0;
       let settleableAmount = 0;
       let settledAmount = 0;
       let toSettleAmount = 0;
+      let quotaMoneyTotal = 0;
 
       for (const sale of activeSales) {
         const {
@@ -476,6 +478,10 @@ export class RetailLocationResolver {
         } else {
           settledAmount += buyPrice;
         }
+
+        if (iseeDiscountApplied) {
+          quotaMoneyTotal += (originalPrice * sellRate) / 100;
+        }
       }
 
       let reimbursedAmount = 0;
@@ -500,8 +506,129 @@ export class RetailLocationResolver {
         grossRevenue,
         netRevenue,
         adminAccountsRevenue,
+        quotaMoneyTotal,
       };
     };
+
+    const buyingCustomersFilter = {
+      purchases: {
+        some: {},
+      },
+    } satisfies Prisma.UserWhereInput;
+    const sellingCustomersFilter = {
+      bookCopies: {
+        some: {
+          sales: {
+            some: {
+              refundedAt: null,
+            },
+          },
+        },
+      },
+    } satisfies Prisma.UserWhereInput;
+
+    const getBuyingCustomersCount = this.prisma.user.count({
+      where: buyingCustomersFilter,
+    });
+    const getSellingCustomersCount = this.prisma.user.count({
+      where: sellingCustomersFilter,
+    });
+    const getCustomersCount = this.prisma.user.count({
+      where: {
+        OR: [sellingCustomersFilter, buyingCustomersFilter],
+      },
+    });
+    const getISEEUsersCount = this.prisma.user.count({
+      where: {
+        discount: true,
+      },
+    });
+    const getRequestingUsersCount = this.prisma.user.count({
+      where: {
+        requestedBooks: {
+          some: {},
+        },
+      },
+    });
+
+    const getPurchasedOrSoldBooksAverage = getActiveUsersCount.then(
+      (customers) => activeSales.length / customers,
+    );
+
+    const getSoldBooksFromSellersAverage = getSellingCustomersCount.then(
+      (sellers) => activeSales.length / sellers,
+    );
+    const getPurchasedBooksFromBuyersAverage = getBuyingCustomersCount.then(
+      (buyers) => activeSales.length / buyers,
+    );
+    const getSettleableMoneyAverage = getActiveUsersCount.then(
+      (customers) => getMoneyAmounts().settleableAmount / customers,
+    );
+
+    const getUsersPerLanguage = Promise.all(
+      languageLocales.map((locale) =>
+        this.prisma.user.count({ where: { locale } }).then((count) => ({
+          locale,
+          count,
+        })),
+      ),
+    );
+
+    const getSoldBooksOriginalPriceTotal = this.prisma.bookCopy
+      .findMany({
+        select: { book: { select: { originalPrice: true } } },
+        where: { sales: { some: { refundedAt: null } } },
+      })
+      .then((copies) =>
+        sumBy(copies, ({ book: { originalPrice } }) => originalPrice),
+      );
+
+    const getSellingCustomersIncomeAverage = this.prisma.sale
+      .findMany({
+        where: {
+          refundedAt: null,
+        },
+        select: {
+          bookCopy: {
+            select: { book: { select: { originalPrice: true } } },
+          },
+          iseeDiscountApplied: true,
+        },
+      })
+      .then((sales) =>
+        getSellingCustomersCount.then(
+          (sellersCount) =>
+            sumBy(
+              sales,
+              ({
+                bookCopy: {
+                  book: { originalPrice },
+                },
+                iseeDiscountApplied,
+              }) =>
+                (originalPrice * (iseeDiscountApplied ? sellRate : buyRate)) /
+                100,
+            ) / sellersCount,
+        ),
+      );
+
+    const getBuyingCustomersFullExpenseAverage = this.prisma.sale
+      .findMany({
+        where: { purchasedBy: buyingCustomersFilter },
+        select: {
+          bookCopy: { select: { book: { select: { originalPrice: true } } } },
+        },
+      })
+      .then((sales) =>
+        sumBy(
+          sales,
+          ({
+            bookCopy: {
+              book: { originalPrice },
+            },
+          }) => originalPrice,
+        ),
+      );
 
     const [
       bookCopiesCount,
@@ -526,7 +653,21 @@ export class RetailLocationResolver {
         adminAccountsRevenue,
         grossRevenue,
         netRevenue,
+        quotaMoneyTotal,
       },
+      buyingCustomersCount,
+      sellingCustomersCount,
+      customersCount,
+      iseeUsersCount,
+      requestingUsersCount,
+      purchasedOrSoldBooksAverage,
+      soldBooksFromSellersAverage,
+      purchasedBooksFromBuyersAverage,
+      settleableMoneyAverage,
+      usersPerLanguage,
+      soldBooksOriginalPriceTotal,
+      sellingCustomersIncomeAverage,
+      buyingCustomersFullExpenseAverage,
     ] = await Promise.all([
       getBooksCopiesCount,
       getBooksInWarehouseCount,
@@ -543,7 +684,26 @@ export class RetailLocationResolver {
       getActiveRequestsCount,
       getActiveUsersCount,
       getMoneyAmounts(),
+      getBuyingCustomersCount,
+      getSellingCustomersCount,
+      getCustomersCount,
+      getISEEUsersCount,
+      getRequestingUsersCount,
+      getPurchasedOrSoldBooksAverage,
+      getSoldBooksFromSellersAverage,
+      getPurchasedBooksFromBuyersAverage,
+      getSettleableMoneyAverage,
+      getUsersPerLanguage,
+      getSoldBooksOriginalPriceTotal,
+      getSellingCustomersIncomeAverage,
+      getBuyingCustomersFullExpenseAverage,
     ]);
+
+    // Not making new db queries for the discounted and saving averages as both are derived results
+    const buyingCustomersDiscountedExpenseAverage =
+      (buyingCustomersFullExpenseAverage * sellRate) / 100;
+    const buyingCustomersSavingAverage =
+      ((100 - sellRate) * buyingCustomersFullExpenseAverage) / 100;
 
     return {
       bookCopiesCount,
@@ -567,6 +727,22 @@ export class RetailLocationResolver {
       adminAccountsRevenue,
       grossRevenue,
       netRevenue,
-    };
+      buyingCustomersCount,
+      sellingCustomersCount,
+      customersCount,
+      iseeUsersCount,
+      requestingUsersCount,
+      purchasedOrSoldBooksAverage,
+      soldBooksFromSellersAverage,
+      purchasedBooksFromBuyersAverage,
+      settleableMoneyAverage,
+      usersPerLanguage,
+      quotaMoneyTotal,
+      soldBooksOriginalPriceTotal,
+      sellingCustomersIncomeAverage,
+      buyingCustomersFullExpenseAverage,
+      buyingCustomersDiscountedExpenseAverage,
+      buyingCustomersSavingAverage,
+    } satisfies StatisticsQueryResult;
   }
 }

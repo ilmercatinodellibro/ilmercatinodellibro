@@ -6,6 +6,7 @@ import {
   Int,
   ObjectType,
 } from "@nestjs/graphql";
+import { Locales } from "test/fixtures/retail-locations";
 
 @ArgsType()
 export class RetailLocationQueryArgs {
@@ -27,6 +28,15 @@ export class LocationBoundInput {
 
 @InputType()
 export class ResetRetailLocationInput extends LocationBoundInput {}
+
+@ObjectType()
+export class UsersPerLanguageData {
+  @Field(() => String)
+  locale!: Locales;
+
+  @Field(() => Int)
+  count!: number;
+}
 
 @ObjectType()
 export class StatisticsQueryResult {
@@ -113,4 +123,68 @@ export class StatisticsQueryResult {
   // Net revenue from sales, which takes into account reimbursements and settlements.
   @Field(() => Float)
   netRevenue!: number;
+
+  // Count of users who bought at least one book
+  @Field(() => Int)
+  buyingCustomersCount!: number;
+
+  // Count of users who sold at least one book
+  @Field(() => Int)
+  sellingCustomersCount!: number;
+
+  // Count of users who sold or bought at least one book
+  @Field(() => Int)
+  customersCount!: number;
+
+  // Count of users who have the ISEE discount
+  @Field(() => Int)
+  iseeUsersCount!: number;
+
+  // Count of users who have requested at least one book
+  @Field(() => Int)
+  requestingUsersCount!: number;
+
+  // Average purchased or sold books by user
+  @Field(() => Float)
+  purchasedOrSoldBooksAverage!: number;
+
+  // Average books sold by users who sold at least a book
+  @Field(() => Float)
+  soldBooksFromSellersAverage!: number;
+
+  // Average books bought by users who bought at least a book
+  @Field(() => Float)
+  purchasedBooksFromBuyersAverage!: number;
+
+  // Average sellable money per user
+  @Field(() => Float)
+  settleableMoneyAverage!: number;
+
+  // Users that use a certain language
+  @Field(() => [UsersPerLanguageData])
+  usersPerLanguage!: UsersPerLanguageData[];
+
+  // Total money from the ISEE quota
+  @Field(() => Float)
+  quotaMoneyTotal!: number;
+
+  // Total of the cover prices of sold books
+  @Field(() => Float)
+  soldBooksOriginalPriceTotal!: number;
+
+  // Average income of who sold at least one book
+  @Field(() => Float)
+  sellingCustomersIncomeAverage!: number;
+
+  // Average expense at 100% of who bought at least one book
+  @Field(() => Float)
+  buyingCustomersFullExpenseAverage!: number;
+
+  // Average expense at 55% of who bought at least one book
+  @Field(() => Float)
+  buyingCustomersDiscountedExpenseAverage!: number;
+
+  // Average saving for who bought at least one book
+  @Field(() => Float)
+  buyingCustomersSavingAverage!: number;
 }

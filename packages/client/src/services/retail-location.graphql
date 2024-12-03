@@ -77,6 +77,25 @@ fragment Statistics on StatisticsQueryResult {
   adminAccountsRevenue
   grossRevenue
   netRevenue
+  buyingCustomersCount
+  sellingCustomersCount
+  customersCount
+  iseeUsersCount
+  requestingUsersCount
+  purchasedOrSoldBooksAverage
+  soldBooksFromSellersAverage
+  purchasedBooksFromBuyersAverage
+  settleableMoneyAverage
+  usersPerLanguage {
+    count
+    locale
+  }
+  quotaMoneyTotal
+  soldBooksOriginalPriceTotal
+  sellingCustomersIncomeAverage
+  buyingCustomersFullExpenseAverage
+  buyingCustomersDiscountedExpenseAverage
+  buyingCustomersSavingAverage
 }
 
 query retailLocationStatistics($retailLocationId: String!) {

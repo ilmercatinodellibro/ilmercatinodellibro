@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { languages } from "src/models/language";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
 import { useRetailLocationStatisticsQuery } from "src/services/retail-location.graphql";
@@ -139,6 +140,91 @@ const dataToShow = computed<
   {
     label: "Guadagno da utente admin",
     value: retailLocationStatistics.value?.adminAccountsRevenue.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Utenti che hanno comprato almeno un libro",
+    value: retailLocationStatistics.value?.buyingCustomersCount.toString(),
+  },
+  {
+    label: "Utenti che hanno venduto almeno un libro",
+    value: retailLocationStatistics.value?.sellingCustomersCount.toString(),
+  },
+  {
+    label: "Utenti che hanno comprato o venduto almeno un libro",
+    value: retailLocationStatistics.value?.customersCount.toString(),
+  },
+  {
+    label: "Utenti che hanno pagato la quota",
+    value: retailLocationStatistics.value?.iseeUsersCount.toString(),
+  },
+  {
+    label: "Utenti che hanno richiesto libri",
+    value: retailLocationStatistics.value?.requestingUsersCount.toString(),
+  },
+  {
+    label: "Media dei libri venduti o comprati per utente",
+    value:
+      retailLocationStatistics.value?.purchasedOrSoldBooksAverage.toString(),
+  },
+  {
+    label: "Media dei libri venduti da chi ha venduto almeno un libro",
+    value:
+      retailLocationStatistics.value?.soldBooksFromSellersAverage.toString(),
+  },
+  {
+    label: "Media dei libri comprati da chi ha comprato almeno un libro",
+    value:
+      retailLocationStatistics.value?.purchasedBooksFromBuyersAverage.toString(),
+  },
+  {
+    label: "Media del denaro liquidabile per utente",
+    value: retailLocationStatistics.value?.settleableMoneyAverage.toFixed(2),
+    suffix: "€",
+  },
+  ...(retailLocationStatistics.value?.usersPerLanguage ?? []).map(
+    ({ count, locale }) => ({
+      label: `Utenti che hanno selezionato la lingua ${languages.find(({ code }) => code === locale)?.label}`,
+      value: count.toString(),
+    }),
+  ),
+  {
+    label: "Totale soldi quota",
+    value: retailLocationStatistics.value?.quotaMoneyTotal.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Totale prezzo di copertina libri venduti",
+    value:
+      retailLocationStatistics.value?.soldBooksOriginalPriceTotal.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Guadagno medio tra chi ha venduto almeno un libro",
+    value:
+      retailLocationStatistics.value?.sellingCustomersIncomeAverage.toFixed(2),
+    suffix: "€",
+  },
+  {
+    label: "Spesa media al 100% per chi ha comprato almeno un libro",
+    value:
+      retailLocationStatistics.value?.buyingCustomersFullExpenseAverage.toFixed(
+        2,
+      ),
+    suffix: "€",
+  },
+  {
+    label: `Spesa media al ${selectedLocation.value.sellRate}% per chi ha comprato almeno un libro`,
+    value:
+      retailLocationStatistics.value?.buyingCustomersDiscountedExpenseAverage.toFixed(
+        2,
+      ),
+    suffix: "€",
+  },
+  {
+    label: "Risparmio medio per chi ha comprato almeno un libro",
+    value:
+      retailLocationStatistics.value?.buyingCustomersSavingAverage.toFixed(2),
     suffix: "€",
   },
 ]);

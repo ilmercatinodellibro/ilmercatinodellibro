@@ -416,7 +416,8 @@ interface RetailLocationInfo {
   faqContent: string;
 }
 
-type Locales = "it" | "en-US";
+export const languageLocales = ["it", "en-US"] as const;
+export type Locales = (typeof languageLocales)[number];
 
 type TranslatedRetailLocationCreateInput = Prisma.RetailLocationCreateInput & {
   infoPagesContent: Record<Locales, RetailLocationInfo>;
