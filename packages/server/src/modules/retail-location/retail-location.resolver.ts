@@ -14,6 +14,7 @@ import { languageLocales } from "test/fixtures/retail-locations";
 import { Public } from "../auth/decorators/public-route.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
+  ChartElement,
   LocationBoundQueryArgs,
   ResetRetailLocationInput,
   RetailLocationQueryArgs,
@@ -744,5 +745,31 @@ export class RetailLocationResolver {
       buyingCustomersDiscountedExpenseAverage,
       buyingCustomersSavingAverage,
     } satisfies StatisticsQueryResult;
+  }
+
+  @Query(() => [ChartElement])
+  async deliveryChartData(): Promise<ChartElement[]> {
+    const bookCopies = await this.prisma.bookCopy.findMany({
+      select: { createdAt: true },
+    });
+
+    const deliveries: ChartElement[] = [];
+
+    for (const { createdAt } of bookCopies) {
+      const dayIndex = deliveries.findIndex(
+        ({ timestamp }) =>
+          timestamp === createdAt.setHours(0, 0, 0, 0).toString(),
+      );
+      if (dayIndex === -1) {
+        deliveries.push({
+          amount: 1,
+          timestamp: createdAt.setHours(0, 0, 0, 0).toString(),
+        });
+      } else {
+        deliveries[dayIndex].amount++;
+      }
+    }
+
+    return deliveries;
   }
 }

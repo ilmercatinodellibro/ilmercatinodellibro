@@ -188,3 +188,12 @@ export class StatisticsQueryResult {
   @Field(() => Float)
   buyingCustomersSavingAverage!: number;
 }
+
+@ObjectType()
+export class ChartElement {
+  @Field(() => String)
+  timestamp!: string;
+
+  @Field(() => Int)
+  amount!: number;
+}

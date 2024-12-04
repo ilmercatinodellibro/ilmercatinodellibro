@@ -107,3 +107,10 @@ query retailLocationStatistics($retailLocationId: String!) {
 mutation resetRetailLocation($input: ResetRetailLocationInput!) {
   resetRetailLocation(input: $input)
 }
+
+query getDeliveryChartData {
+  deliveryChartData {
+    amount
+    timestamp
+  }
+}

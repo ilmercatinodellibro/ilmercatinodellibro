@@ -1,41 +1,75 @@
 <template>
-  <q-page class="q-pa-md">
-    <q-card>
+  <q-page class="column full-height q-pa-md">
+    <q-card class="col column">
       <q-card-section class="text-h5 text-primary">
         {{ $t(`routesNames.${AvailableRouteNames.Statistics}`) }}
       </q-card-section>
+
       <q-separator />
-      <q-card-section class="items-container row">
-        <q-field
-          v-for="(item, index) in dataToShow"
-          :key="index"
-          :label="item.label"
-          outlined
-          readonly
-          stack-label
+
+      <q-tabs
+        :model-value="activeTab"
+        active-color="accent"
+        @update:model-value="(value) => changeTab(value as Tabs)"
+      >
+        <q-tab v-for="tab in Tabs" :key="tab" :name="tab" class="col">
+          {{ t(`retailLocation.stats.${tab}`) }}
+        </q-tab>
+      </q-tabs>
+
+      <q-tab-panels v-model="activeTab" class="flex-delegate-height-management">
+        <q-tab-panel
+          :name="Tabs.NUMERIC"
+          class="full-height gap-24 justify-between row"
         >
-          <template #control>
-            <span class="full-width no-outline self-center" tabindex="0">
-              {{
-                statisticsLoading || item.value === undefined
-                  ? "---"
-                  : item.value
-              }}
-              {{ item.suffix }}
-            </span>
-          </template>
-        </q-field>
-      </q-card-section>
+          <q-field
+            v-for="(item, index) in dataToShow"
+            :key="index"
+            :label="item.label"
+            class="min-width-360"
+            outlined
+            readonly
+            stack-label
+          >
+            <template #control>
+              <span class="full-width no-outline self-center" tabindex="0">
+                {{
+                  statisticsLoading || item.value === undefined
+                    ? "---"
+                    : item.value
+                }}
+                {{ item.suffix }}
+              </span>
+            </template>
+          </q-field>
+        </q-tab-panel>
+
+        <q-tab-panel :name="Tabs.DELIVERY">
+          <stats-chart
+            v-if="deliveryEnabled"
+            :data="deliveryChartData"
+            :loading="deliveryLoading"
+            class="col"
+          />
+        </q-tab-panel>
+      </q-tab-panels>
     </q-card>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import StatsChart from "src/components/stats-chart.vue";
 import { languages } from "src/models/language";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
-import { useRetailLocationStatisticsQuery } from "src/services/retail-location.graphql";
+import {
+  useGetDeliveryChartDataQuery,
+  useRetailLocationStatisticsQuery,
+} from "src/services/retail-location.graphql";
+
+const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
 
@@ -228,13 +262,27 @@ const dataToShow = computed<
     suffix: "€",
   },
 ]);
-</script>
 
-<style scoped lang="scss">
-.items-container {
-  display: grid;
-  gap: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 500px));
-  justify-content: space-evenly;
+enum Tabs {
+  NUMERIC = "numeric",
+  DELIVERY = "delivery",
 }
-</style>
+const activeTab = ref<Tabs>(Tabs.NUMERIC);
+
+const deliveryEnabled = ref(false);
+
+const { deliveryChartData, loading: deliveryLoading } =
+  useGetDeliveryChartDataQuery(undefined, () => ({
+    enabled: deliveryEnabled.value,
+  }));
+
+function changeTab(tab: Tabs) {
+  switch (tab) {
+    case Tabs.DELIVERY:
+      deliveryEnabled.value = true;
+      break;
+  }
+
+  activeTab.value = tab;
+}
+</script>
