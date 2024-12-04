@@ -1,21 +1,39 @@
 <template>
-  <div ref="divRef" class="absolute-full flex-delegate-height-management" />
+  <v-chart
+    :init-options="initOptions"
+    :loading="loading"
+    :option="option"
+    autoresize
+  />
 </template>
 
 <script setup lang="ts">
+import { EChartsInitOpts, EChartsOption } from "echarts";
+import { LineChart } from "echarts/charts";
 import {
-  ComposeOption,
-  DatasetComponentOption,
-  ECharts,
-  GridComponentOption,
-  init as initEchart,
-  LineSeriesOption,
-  TooltipComponentOption,
-} from "echarts";
-import { useQuasar } from "quasar";
-import { onMounted, onUnmounted, ref, watch } from "vue";
+  DatasetComponent,
+  GridComponent,
+  TooltipComponent,
+} from "echarts/components";
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { computed } from "vue";
+import VChart from "vue-echarts";
 import { useI18n } from "vue-i18n";
 import { ChartElement } from "src/@generated/graphql";
+import type {
+  DatasetComponentOption,
+  TooltipComponentOption,
+} from "echarts/components";
+import type { ComposeOption } from "echarts/core";
+
+use([
+  DatasetComponent,
+  GridComponent,
+  TooltipComponent,
+  LineChart,
+  CanvasRenderer,
+]);
 
 const props = defineProps<{
   data: ChartElement[];
@@ -24,93 +42,53 @@ const props = defineProps<{
 
 const { locale } = useI18n();
 
-const { dark } = useQuasar();
+use([CanvasRenderer, LineChart]);
 
-const divRef = ref<HTMLDivElement>();
-const chart = ref<ECharts>();
-let resizeEventListener: EventListener;
-onMounted(() => {
-  if (!chart.value) {
-    chart.value = initEchart(divRef.value, dark.isActive ? "dark" : "light", {
-      locale: locale.value,
-      renderer: "canvas",
-      width: "auto",
-      height: "auto",
-    });
-  }
+const initOptions: EChartsInitOpts = {
+  locale: locale.value,
+  renderer: "canvas",
+  width: "auto",
+  height: "auto",
+};
 
-  // To keep chart render in sync with the container's dimensions
-  resizeEventListener = () => {
-    chart.value?.resize();
-  };
-  divRef.value?.addEventListener("resize", resizeEventListener);
-
-  if (!props.loading) {
-    loadChartData();
-  }
-});
-
-onUnmounted(() => {
-  divRef.value?.removeEventListener("resize", resizeEventListener);
-});
-
-function loadChartData() {
-  const datasetSource = props.data.map(({ amount, timestamp }) => [
-    new Date(timestamp),
-    amount,
-  ]);
-  chart.value?.setOption({
-    dataset: [
-      {
-        source: [["timestamp", "amount"], ...datasetSource],
-      },
-    ],
-    xAxis: {
-      type: "time",
+const option = computed<
+  ComposeOption<DatasetComponentOption | TooltipComponentOption> & EChartsOption
+>(() => ({
+  dataset: [
+    {
+      source: [
+        ["timestamp", "amount"],
+        ...props.data.map(({ amount, timestamp }) => [
+          new Date(timestamp),
+          amount,
+        ]),
+      ],
     },
-    yAxis: {},
-    series: [
-      {
-        type: "line",
-      },
-    ],
-    tooltip: [
-      {
-        trigger: "item",
-        triggerOn: "mousemove",
-        formatter(value) {
-          const [timestamp, amount] = (
-            value as unknown as { data: [Date, number] }
-          ).data;
-
-          return `${Intl.DateTimeFormat([locale.value], {
-            dateStyle: "medium",
-          }).format(timestamp)}: <b>${amount}</b>`;
-        },
-      },
-    ],
-    animationDuration: 300,
-  } satisfies ComposeOption<
-    | DatasetComponentOption
-    | TooltipComponentOption
-    | GridComponentOption
-    | LineSeriesOption
-  >);
-}
-
-watch(
-  () => props.loading,
-  (loading) => {
-    if (!chart.value) {
-      return;
-    }
-    if (loading) {
-      chart.value.showLoading();
-      return;
-    }
-
-    loadChartData();
-    chart.value.hideLoading();
+  ],
+  xAxis: {
+    type: "time",
   },
-);
+  yAxis: {},
+  series: [
+    {
+      type: "line",
+    },
+  ],
+  tooltip: [
+    {
+      trigger: "axis",
+      triggerOn: "mousemove",
+      formatter(value) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const [timestamp, amount] = (
+          value as unknown as { data: [Date, number] }[]
+        )[0]!.data;
+
+        return `${Intl.DateTimeFormat([locale.value], {
+          dateStyle: "medium",
+        }).format(timestamp)}: <b>${amount}</b>`;
+      },
+    },
+  ],
+}));
 </script>

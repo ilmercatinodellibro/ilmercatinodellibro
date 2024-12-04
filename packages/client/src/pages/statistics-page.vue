@@ -46,7 +46,6 @@
 
         <q-tab-panel :name="Tabs.DELIVERY" class="column flex-center">
           <stats-chart
-            v-if="deliveriesEnabled"
             :data="deliveriesChartData"
             :loading="deliveriesLoading"
             class="col"
@@ -55,7 +54,6 @@
 
         <q-tab-panel :name="Tabs.SALE" class="column">
           <stats-chart
-            v-if="salesEnabled"
             :data="salesChartData"
             :loading="salesLoading"
             class="col"
@@ -64,7 +62,6 @@
 
         <q-tab-panel :name="Tabs.SETTLE" class="column">
           <stats-chart
-            v-if="settlementsEnabled"
             :data="settlementsChartData"
             :loading="settlementsLoading"
             class="col"
@@ -73,7 +70,6 @@
 
         <q-tab-panel :name="Tabs.RETURN" class="column">
           <stats-chart
-            v-if="returningsEnabled"
             :data="returningsChartData"
             :loading="returningsLoading"
             class="col"
