@@ -7,11 +7,7 @@
 
       <q-separator />
 
-      <q-tabs
-        :model-value="activeTab"
-        active-color="accent"
-        @update:model-value="(value) => changeTab(value as Tabs)"
-      >
+      <q-tabs v-model="activeTab" active-color="accent">
         <q-tab v-for="tab in Tabs" :key="tab" :name="tab" class="col">
           {{ t(`retailLocation.stats.${tab}`) }}
         </q-tab>
@@ -298,15 +294,15 @@ enum Tabs {
   SETTLE = "settle",
   RETURN = "return",
 }
-const activeTab = ref<Tabs>(Tabs.NUMERIC);
+const activeTab = ref(Tabs.NUMERIC);
 
-const deliveriesEnabled = ref(false);
+const deliveriesEnabled = computed(() => activeTab.value === Tabs.DELIVERY);
 const { deliveriesChartData, loading: deliveriesLoading } =
   useGetDeliveriesChartDataQuery(undefined, () => ({
     enabled: deliveriesEnabled.value,
   }));
 
-const salesEnabled = ref(false);
+const salesEnabled = computed(() => activeTab.value === Tabs.SALE);
 const { salesChartData, loading: salesLoading } = useGetSalesChartDataQuery(
   undefined,
   () => ({
@@ -314,36 +310,15 @@ const { salesChartData, loading: salesLoading } = useGetSalesChartDataQuery(
   }),
 );
 
-const settlementsEnabled = ref(false);
+const settlementsEnabled = computed(() => activeTab.value === Tabs.SETTLE);
 const { settlementsChartData, loading: settlementsLoading } =
   useGetSettlementsChartDataQuery(undefined, () => ({
     enabled: settlementsEnabled.value,
   }));
 
-const returningsEnabled = ref(false);
+const returningsEnabled = computed(() => activeTab.value === Tabs.RETURN);
 const { returningsChartData, loading: returningsLoading } =
   useGetReturningsChartDataQuery(undefined, () => ({
     enabled: returningsEnabled.value,
   }));
-
-function changeTab(tab: Tabs) {
-  switch (tab) {
-    case Tabs.DELIVERY:
-      deliveriesEnabled.value = true;
-      break;
-
-    case Tabs.SALE:
-      salesEnabled.value = true;
-      break;
-
-    case Tabs.SETTLE:
-      settlementsEnabled.value = true;
-      break;
-
-    case Tabs.RETURN:
-      returningsEnabled.value = true;
-  }
-
-  activeTab.value = tab;
-}
 </script>
