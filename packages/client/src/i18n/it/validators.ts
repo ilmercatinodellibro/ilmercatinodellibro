@@ -25,5 +25,4 @@ export default {
   numberBetweenValues:
     "Il valore deve essere un numero compreso tra {min} e {max}",
   onlyIntegers: "Il valore deve essere un numero intero",
-  noDelegateForAdult: "Un utente maggiorenne non può avere un delegato",
 };
