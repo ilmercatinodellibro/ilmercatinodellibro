@@ -229,17 +229,19 @@ const dataToShow = computed<
   {
     label: "Media dei libri venduti o comprati per utente",
     value:
-      retailLocationStatistics.value?.purchasedOrSoldBooksAverage.toString(),
+      retailLocationStatistics.value?.purchasedOrSoldBooksAverage.toFixed(3),
   },
   {
     label: "Media dei libri venduti da chi ha venduto almeno un libro",
     value:
-      retailLocationStatistics.value?.soldBooksFromSellersAverage.toString(),
+      retailLocationStatistics.value?.soldBooksFromSellersAverage.toFixed(3),
   },
   {
     label: "Media dei libri comprati da chi ha comprato almeno un libro",
     value:
-      retailLocationStatistics.value?.purchasedBooksFromBuyersAverage.toString(),
+      retailLocationStatistics.value?.purchasedBooksFromBuyersAverage.toFixed(
+        3,
+      ),
   },
   {
     label: "Media del denaro liquidabile per utente",
