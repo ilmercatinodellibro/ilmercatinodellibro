@@ -748,28 +748,87 @@ export class RetailLocationResolver {
   }
 
   @Query(() => [ChartElement])
-  async deliveryChartData(): Promise<ChartElement[]> {
+  async deliveriesChartData(): Promise<ChartElement[]> {
     const bookCopies = await this.prisma.bookCopy.findMany({
       select: { createdAt: true },
     });
 
-    const deliveries: ChartElement[] = [];
+    return this.#transformToChartData(
+      bookCopies.map(({ createdAt }) => createdAt),
+    );
+  }
 
-    for (const { createdAt } of bookCopies) {
-      const dayIndex = deliveries.findIndex(
+  @Query(() => [ChartElement])
+  async salesChartData(): Promise<ChartElement[]> {
+    const activeSales = await this.prisma.sale.findMany({
+      where: { refundedAt: null },
+      select: { purchasedAt: true },
+    });
+
+    return this.#transformToChartData(
+      activeSales.map(({ purchasedAt }) => purchasedAt),
+    );
+  }
+
+  @Query(() => [ChartElement])
+  async settlementsChartData(): Promise<ChartElement[]> {
+    const settlements = await this.prisma.bookCopy.findMany({
+      where: {
+        settledAt: {
+          not: null,
+        },
+      },
+      select: {
+        settledAt: true,
+      },
+    });
+
+    return this.#transformToChartData(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      settlements.map(({ settledAt }) => settledAt!),
+    );
+  }
+
+  @Query(() => [ChartElement])
+  async returningsChartData(): Promise<ChartElement[]> {
+    const returnings = await this.prisma.bookCopy.findMany({
+      where: {
+        returnedAt: {
+          not: null,
+        },
+      },
+      select: {
+        returnedAt: true,
+      },
+    });
+    return this.#transformToChartData(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      returnings.map(({ returnedAt }) => returnedAt!),
+    );
+  }
+
+  #transformToChartData(data: Date[]) {
+    const transformedData: ChartElement[] = [];
+
+    for (const element of data) {
+      const elementDayAtMidnight = new Date(element.setHours(0, 0, 0, 0));
+      const dayIndex = transformedData.findIndex(
         ({ timestamp }) =>
-          timestamp === createdAt.setHours(0, 0, 0, 0).toString(),
+          timestamp.valueOf() === elementDayAtMidnight.valueOf(),
       );
       if (dayIndex === -1) {
-        deliveries.push({
+        transformedData.push({
           amount: 1,
-          timestamp: createdAt.setHours(0, 0, 0, 0).toString(),
+          timestamp: elementDayAtMidnight,
         });
       } else {
-        deliveries[dayIndex].amount++;
+        transformedData[dayIndex].amount++;
       }
     }
 
-    return deliveries;
+    return transformedData.sort(
+      ({ timestamp: timestampA }, { timestamp: timestampB }) =>
+        timestampA.valueOf() - timestampB.valueOf(),
+    );
   }
 }

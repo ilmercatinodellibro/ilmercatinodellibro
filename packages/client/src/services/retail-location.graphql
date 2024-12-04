@@ -108,9 +108,31 @@ mutation resetRetailLocation($input: ResetRetailLocationInput!) {
   resetRetailLocation(input: $input)
 }
 
-query getDeliveryChartData {
-  deliveryChartData {
-    amount
-    timestamp
+fragment chartData on ChartElement {
+  amount
+  timestamp
+}
+
+query getDeliveriesChartData {
+  deliveriesChartData {
+    ...chartData
+  }
+}
+
+query getSalesChartData {
+  salesChartData {
+    ...chartData
+  }
+}
+
+query getSettlementsChartData {
+  settlementsChartData {
+    ...chartData
+  }
+}
+
+query getReturningsChartData {
+  returningsChartData {
+    ...chartData
   }
 }

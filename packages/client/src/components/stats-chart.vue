@@ -1,9 +1,18 @@
 <template>
-  <div ref="divRef" class="full-height full-width" />
+  <div ref="divRef" class="absolute-full flex-delegate-height-management" />
 </template>
 
 <script setup lang="ts">
-import { ECharts, init as initEchart } from "echarts";
+import {
+  ComposeOption,
+  DatasetComponentOption,
+  ECharts,
+  GridComponentOption,
+  init as initEchart,
+  LineSeriesOption,
+  TooltipComponentOption,
+} from "echarts";
+import { useQuasar } from "quasar";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { ChartElement } from "src/@generated/graphql";
@@ -15,14 +24,18 @@ const props = defineProps<{
 
 const { locale } = useI18n();
 
+const { dark } = useQuasar();
+
 const divRef = ref<HTMLDivElement>();
 const chart = ref<ECharts>();
 let resizeEventListener: EventListener;
 onMounted(() => {
   if (!chart.value) {
-    chart.value = initEchart(divRef.value, undefined, {
+    chart.value = initEchart(divRef.value, dark.isActive ? "dark" : "light", {
       locale: locale.value,
       renderer: "canvas",
+      width: "auto",
+      height: "auto",
     });
   }
 
@@ -42,16 +55,47 @@ onUnmounted(() => {
 });
 
 function loadChartData() {
+  const datasetSource = props.data.map(({ amount, timestamp }) => [
+    new Date(timestamp),
+    amount,
+  ]);
   chart.value?.setOption({
+    dataset: [
+      {
+        source: [["timestamp", "amount"], ...datasetSource],
+      },
+    ],
     xAxis: {
       type: "time",
-      data: props.data.map(({ timestamp }) => timestamp),
     },
-    yAxis: {
-      type: "value",
-    },
-    series: [{ data: props.data.map(({ amount }) => amount), type: "line" }],
-  });
+    yAxis: {},
+    series: [
+      {
+        type: "line",
+      },
+    ],
+    tooltip: [
+      {
+        trigger: "item",
+        triggerOn: "mousemove",
+        formatter(value) {
+          const [timestamp, amount] = (
+            value as unknown as { data: [Date, number] }
+          ).data;
+
+          return `${Intl.DateTimeFormat([locale.value], {
+            dateStyle: "medium",
+          }).format(timestamp)}: <b>${amount}</b>`;
+        },
+      },
+    ],
+    animationDuration: 300,
+  } satisfies ComposeOption<
+    | DatasetComponentOption
+    | TooltipComponentOption
+    | GridComponentOption
+    | LineSeriesOption
+  >);
 }
 
 watch(

@@ -44,11 +44,38 @@
           </q-field>
         </q-tab-panel>
 
-        <q-tab-panel :name="Tabs.DELIVERY">
+        <q-tab-panel :name="Tabs.DELIVERY" class="column flex-center">
           <stats-chart
-            v-if="deliveryEnabled"
-            :data="deliveryChartData"
-            :loading="deliveryLoading"
+            v-if="deliveriesEnabled"
+            :data="deliveriesChartData"
+            :loading="deliveriesLoading"
+            class="col"
+          />
+        </q-tab-panel>
+
+        <q-tab-panel :name="Tabs.SALE" class="column">
+          <stats-chart
+            v-if="salesEnabled"
+            :data="salesChartData"
+            :loading="salesLoading"
+            class="col"
+          />
+        </q-tab-panel>
+
+        <q-tab-panel :name="Tabs.SETTLE" class="column">
+          <stats-chart
+            v-if="settlementsEnabled"
+            :data="settlementsChartData"
+            :loading="settlementsLoading"
+            class="col"
+          />
+        </q-tab-panel>
+
+        <q-tab-panel :name="Tabs.RETURN" class="column">
+          <stats-chart
+            v-if="returningsEnabled"
+            :data="returningsChartData"
+            :loading="returningsLoading"
             class="col"
           />
         </q-tab-panel>
@@ -65,7 +92,10 @@ import { languages } from "src/models/language";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
-  useGetDeliveryChartDataQuery,
+  useGetDeliveriesChartDataQuery,
+  useGetReturningsChartDataQuery,
+  useGetSalesChartDataQuery,
+  useGetSettlementsChartDataQuery,
   useRetailLocationStatisticsQuery,
 } from "src/services/retail-location.graphql";
 
@@ -266,21 +296,54 @@ const dataToShow = computed<
 enum Tabs {
   NUMERIC = "numeric",
   DELIVERY = "delivery",
+  SALE = "sale",
+  SETTLE = "settle",
+  RETURN = "return",
 }
 const activeTab = ref<Tabs>(Tabs.NUMERIC);
 
-const deliveryEnabled = ref(false);
+const deliveriesEnabled = ref(false);
+const { deliveriesChartData, loading: deliveriesLoading } =
+  useGetDeliveriesChartDataQuery(undefined, () => ({
+    enabled: deliveriesEnabled.value,
+  }));
 
-const { deliveryChartData, loading: deliveryLoading } =
-  useGetDeliveryChartDataQuery(undefined, () => ({
-    enabled: deliveryEnabled.value,
+const salesEnabled = ref(false);
+const { salesChartData, loading: salesLoading } = useGetSalesChartDataQuery(
+  undefined,
+  () => ({
+    enabled: salesEnabled.value,
+  }),
+);
+
+const settlementsEnabled = ref(false);
+const { settlementsChartData, loading: settlementsLoading } =
+  useGetSettlementsChartDataQuery(undefined, () => ({
+    enabled: settlementsEnabled.value,
+  }));
+
+const returningsEnabled = ref(false);
+const { returningsChartData, loading: returningsLoading } =
+  useGetReturningsChartDataQuery(undefined, () => ({
+    enabled: returningsEnabled.value,
   }));
 
 function changeTab(tab: Tabs) {
   switch (tab) {
     case Tabs.DELIVERY:
-      deliveryEnabled.value = true;
+      deliveriesEnabled.value = true;
       break;
+
+    case Tabs.SALE:
+      salesEnabled.value = true;
+      break;
+
+    case Tabs.SETTLE:
+      settlementsEnabled.value = true;
+      break;
+
+    case Tabs.RETURN:
+      returningsEnabled.value = true;
   }
 
   activeTab.value = tab;

@@ -191,8 +191,8 @@ export class StatisticsQueryResult {
 
 @ObjectType()
 export class ChartElement {
-  @Field(() => String)
-  timestamp!: string;
+  @Field(() => Date)
+  timestamp!: Date;
 
   @Field(() => Int)
   amount!: number;
