@@ -146,7 +146,7 @@ export default {
     },
     problemsError:
       "Non è stato possibile segnalare il problema per tutte le copie.",
-    returnAndDonate: "Restituisci contanti e dona libri",
+    returnAndDonate: "Restituisci contanti e dona libri ({0} €)",
     returnEverything: "Restituisci contanti e libri ({0} €)",
     cashOnly: "Restituisci solo contanti ({0} €)",
     confirms: {
