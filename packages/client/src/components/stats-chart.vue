@@ -49,8 +49,6 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 
-use([CanvasRenderer, LineChart]);
-
 const initOptions: EChartsInitOpts = {
   locale: locale.value,
   renderer: "canvas",
