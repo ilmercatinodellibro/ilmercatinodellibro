@@ -118,6 +118,9 @@ export class UserResolver {
                   {
                     bookCopies: {
                       some: {
+                        book: {
+                          retailLocationId,
+                        },
                         sales: {
                           some: {
                             refundedAt: null,
@@ -137,12 +140,15 @@ export class UserResolver {
                   {
                     bookCopies: {
                       some: {
-                        settledAt: null,
+                        book: {
+                          retailLocationId,
+                        },
                         sales: {
                           some: {
                             refundedAt: null,
                           },
                         },
+                        settledAt: null,
                       },
                     },
                   } satisfies Prisma.UserWhereInput,
