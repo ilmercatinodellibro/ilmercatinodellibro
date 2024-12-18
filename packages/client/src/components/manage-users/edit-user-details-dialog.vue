@@ -236,6 +236,7 @@ import {
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { formatDate } from "@vueuse/core";
+import { omit } from "lodash-es";
 import { Notify, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -280,7 +281,9 @@ const birthDate = ref(
 );
 const newUserData = ref(
   userData
-    ? ({ ...userData } satisfies UpdateUserPayload)
+    ? // Avoid sending "emailVerified" when updating user data
+      // That field can only be updated on the server and won't be accepted by the user update call
+      ({ ...omit(userData, ["emailVerified"]) } satisfies UpdateUserPayload)
     : ({
         retailLocationId: selectedLocation.value.id,
         email: "",
