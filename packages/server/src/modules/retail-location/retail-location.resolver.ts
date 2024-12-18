@@ -432,16 +432,16 @@ export class RetailLocationResolver {
       },
     });
 
-    const [activeSales, reimbursedBooks, { sellRate, buyRate }] =
-      await Promise.all([
-        getActiveSales,
-        getReimbursedBooks,
-        this.retailLocation({
-          id: retailLocationId,
-        }),
-      ]);
+    const getMoneyAmounts = async () => {
+      const [activeSales, reimbursedBooks, { sellRate, buyRate }] =
+        await Promise.all([
+          getActiveSales,
+          getReimbursedBooks,
+          this.retailLocation({
+            id: retailLocationId,
+          }),
+        ]);
 
-    const getMoneyAmounts = () => {
       let grossRevenue = 0;
       let adminAccountsRevenue = 0;
       let settleableAmount = 0;
@@ -508,6 +508,9 @@ export class RetailLocationResolver {
         netRevenue,
         adminAccountsRevenue,
         quotaMoneyTotal,
+        activeSales,
+        sellRate,
+        buyRate,
       };
     };
 
@@ -553,17 +556,36 @@ export class RetailLocationResolver {
     });
 
     const getPurchasedOrSoldBooksAverage = getActiveUsersCount.then(
-      (customers) => (customers === 0 ? 0 : activeSales.length / customers),
+      (customers) =>
+        customers === 0
+          ? 0
+          : getMoneyAmounts().then(
+              ({ activeSales }) => activeSales.length / customers,
+            ),
     );
 
     const getSoldBooksFromSellersAverage = getSellingCustomersCount.then(
-      (sellers) => (sellers === 0 ? 0 : activeSales.length / sellers),
+      (sellers) =>
+        sellers === 0
+          ? 0
+          : getMoneyAmounts().then(
+              ({ activeSales }) => activeSales.length / sellers,
+            ),
     );
     const getPurchasedBooksFromBuyersAverage = getBuyingCustomersCount.then(
-      (buyers) => (buyers === 0 ? 0 : activeSales.length / buyers),
+      (buyers) =>
+        buyers === 0
+          ? 0
+          : getMoneyAmounts().then(
+              ({ activeSales }) => activeSales.length / buyers,
+            ),
     );
     const getSettleableMoneyAverage = getActiveUsersCount.then((customers) =>
-      customers === 0 ? 0 : getMoneyAmounts().settleableAmount / customers,
+      customers === 0
+        ? 0
+        : getMoneyAmounts().then(
+            ({ settleableAmount }) => settleableAmount / customers,
+          ),
     );
 
     const getUsersPerLanguage = Promise.all(
@@ -600,17 +622,21 @@ export class RetailLocationResolver {
         getSellingCustomersCount.then((sellersCount) =>
           sellersCount === 0
             ? 0
-            : sumBy(
-                sales,
-                ({
-                  bookCopy: {
-                    book: { originalPrice },
-                  },
-                  iseeDiscountApplied,
-                }) =>
-                  (originalPrice * (iseeDiscountApplied ? sellRate : buyRate)) /
-                  100,
-              ) / sellersCount,
+            : getMoneyAmounts().then(
+                ({ sellRate, buyRate }) =>
+                  sumBy(
+                    sales,
+                    ({
+                      bookCopy: {
+                        book: { originalPrice },
+                      },
+                      iseeDiscountApplied,
+                    }) =>
+                      (originalPrice *
+                        (iseeDiscountApplied ? sellRate : buyRate)) /
+                      100,
+                  ) / sellersCount,
+              ),
         ),
       );
 
@@ -660,6 +686,7 @@ export class RetailLocationResolver {
         grossRevenue,
         netRevenue,
         quotaMoneyTotal,
+        sellRate,
       },
       buyingCustomersCount,
       sellingCustomersCount,
