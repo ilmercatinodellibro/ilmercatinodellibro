@@ -553,17 +553,17 @@ export class RetailLocationResolver {
     });
 
     const getPurchasedOrSoldBooksAverage = getActiveUsersCount.then(
-      (customers) => activeSales.length / customers,
+      (customers) => (customers === 0 ? 0 : activeSales.length / customers),
     );
 
     const getSoldBooksFromSellersAverage = getSellingCustomersCount.then(
-      (sellers) => activeSales.length / sellers,
+      (sellers) => (sellers === 0 ? 0 : activeSales.length / sellers),
     );
     const getPurchasedBooksFromBuyersAverage = getBuyingCustomersCount.then(
-      (buyers) => activeSales.length / buyers,
+      (buyers) => (buyers === 0 ? 0 : activeSales.length / buyers),
     );
-    const getSettleableMoneyAverage = getActiveUsersCount.then(
-      (customers) => getMoneyAmounts().settleableAmount / customers,
+    const getSettleableMoneyAverage = getActiveUsersCount.then((customers) =>
+      customers === 0 ? 0 : getMoneyAmounts().settleableAmount / customers,
     );
 
     const getUsersPerLanguage = Promise.all(
@@ -597,19 +597,20 @@ export class RetailLocationResolver {
         },
       })
       .then((sales) =>
-        getSellingCustomersCount.then(
-          (sellersCount) =>
-            sumBy(
-              sales,
-              ({
-                bookCopy: {
-                  book: { originalPrice },
-                },
-                iseeDiscountApplied,
-              }) =>
-                (originalPrice * (iseeDiscountApplied ? sellRate : buyRate)) /
-                100,
-            ) / sellersCount,
+        getSellingCustomersCount.then((sellersCount) =>
+          sellersCount === 0
+            ? 0
+            : sumBy(
+                sales,
+                ({
+                  bookCopy: {
+                    book: { originalPrice },
+                  },
+                  iseeDiscountApplied,
+                }) =>
+                  (originalPrice * (iseeDiscountApplied ? sellRate : buyRate)) /
+                  100,
+              ) / sellersCount,
         ),
       );
 
@@ -621,13 +622,17 @@ export class RetailLocationResolver {
         },
       })
       .then((sales) =>
-        sumBy(
-          sales,
-          ({
-            bookCopy: {
-              book: { originalPrice },
-            },
-          }) => originalPrice,
+        getBuyingCustomersCount.then((buyers) =>
+          buyers === 0
+            ? 0
+            : sumBy(
+                sales,
+                ({
+                  bookCopy: {
+                    book: { originalPrice },
+                  },
+                }) => originalPrice,
+              ) / buyers,
         ),
       );
 
