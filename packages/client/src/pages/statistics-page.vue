@@ -48,7 +48,7 @@
           />
         </q-tab-panel>
 
-        <q-tab-panel :name="Tabs.SALE" class="column">
+        <q-tab-panel :name="Tabs.SALE" class="column flex-center">
           <stats-chart
             :data="salesChartData"
             :loading="salesLoading"
@@ -56,7 +56,7 @@
           />
         </q-tab-panel>
 
-        <q-tab-panel :name="Tabs.SETTLE" class="column">
+        <q-tab-panel :name="Tabs.SETTLE" class="column flex-center">
           <stats-chart
             :data="settlementsChartData"
             :loading="settlementsLoading"
@@ -64,7 +64,7 @@
           />
         </q-tab-panel>
 
-        <q-tab-panel :name="Tabs.RETURN" class="column">
+        <q-tab-panel :name="Tabs.RETURN" class="column flex-center">
           <stats-chart
             :data="returningsChartData"
             :loading="returningsLoading"

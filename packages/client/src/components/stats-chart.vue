@@ -1,5 +1,12 @@
 <template>
+  <div
+    v-if="data.length === 0 && !loading"
+    class="column full-height justify-center text-h6 text-primary"
+  >
+    {{ t("common.noData") }}
+  </div>
   <v-chart
+    v-else
     :init-options="initOptions"
     :loading="loading"
     :option="option"
@@ -40,7 +47,7 @@ const props = defineProps<{
   loading: boolean;
 }>();
 
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 
 use([CanvasRenderer, LineChart]);
 
