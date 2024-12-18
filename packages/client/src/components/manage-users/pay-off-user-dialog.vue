@@ -227,7 +227,11 @@
         <q-btn
           :disable="selectableRows.length === 0 && totalCheckoutMoney === 0"
           outline
-          :label="$t('manageUsers.payOffUserDialog.returnAndDonate')"
+          :label="
+            $t('manageUsers.payOffUserDialog.returnAndDonate', [
+              totalCheckoutMoney.toFixed(2),
+            ])
+          "
           @click="returnAllBooks('DONATE')"
         />
         <q-btn

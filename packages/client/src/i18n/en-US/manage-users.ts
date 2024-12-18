@@ -143,7 +143,7 @@ export default {
       reimburse: "Reimburse",
     },
     problemsError: "Could not report problems for all the copies.",
-    returnAndDonate: "Return money and donate books",
+    returnAndDonate: "Return money and donate books ({0} €)",
     returnEverything: "Return money and books ({0} €)",
     cashOnly: "Return cash only ({0} €)",
     confirms: {
