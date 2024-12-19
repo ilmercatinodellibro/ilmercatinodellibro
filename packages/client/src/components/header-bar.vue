@@ -11,7 +11,7 @@
       :show-search-bar="isHeaderSearchEnabled"
       :title="headerName"
     >
-      <template #left>
+      <template v-if="!isMobile" #left>
         <q-btn
           v-if="showBackToLocations"
           :icon="mdiArrowLeft"
@@ -29,31 +29,33 @@
         />
       </template>
 
-      <q-btn
-        flat
-        stretch
-        :label="t('routesNames.who-we-are')"
-        :to="{ name: AvailableRouteNames.WhoWeAre }"
-      />
-      <q-btn
-        flat
-        stretch
-        :label="t('routesNames.join-us')"
-        :to="{ name: AvailableRouteNames.JoinUs }"
-      />
-      <q-btn
-        flat
-        stretch
-        :label="t('routesNames.contacts')"
-        :to="{ name: AvailableRouteNames.Contacts }"
-      />
-      <q-btn
-        v-if="isAuthenticated"
-        flat
-        stretch
-        :label="t('routesNames.faq')"
-        :to="{ name: AvailableRouteNames.FAQ }"
-      />
+      <div v-if="!isMobile" class="full-height q-px-md row">
+        <q-btn
+          flat
+          stretch
+          :label="t('routesNames.who-we-are')"
+          :to="{ name: AvailableRouteNames.WhoWeAre }"
+        />
+        <q-btn
+          flat
+          stretch
+          :label="t('routesNames.join-us')"
+          :to="{ name: AvailableRouteNames.JoinUs }"
+        />
+        <q-btn
+          flat
+          stretch
+          :label="t('routesNames.contacts')"
+          :to="{ name: AvailableRouteNames.Contacts }"
+        />
+        <q-btn
+          v-if="isAuthenticated"
+          flat
+          stretch
+          :label="t('routesNames.faq')"
+          :to="{ name: AvailableRouteNames.FAQ }"
+        />
+      </div>
       <language-dropdown-btn v-if="!isAuthenticated" />
     </k-toolbar>
   </q-header>
@@ -75,7 +77,7 @@ import { useAuthService } from "src/services/auth";
 import kToolbar from "./k-toolbar.vue";
 import LanguageDropdownBtn from "./language-dropdown-btn.vue";
 
-const { isDrawerOpen, showLateralDrawer } = useLateralDrawer();
+const { isDrawerOpen, showLateralDrawer, isMobile } = useLateralDrawer();
 const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
 const {
   compareFunction,
