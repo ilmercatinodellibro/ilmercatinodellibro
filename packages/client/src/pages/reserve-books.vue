@@ -1,7 +1,10 @@
 <template>
   <q-page>
     <q-card class="absolute-full column no-wrap q-ma-md">
-      <q-card-section class="gap-16 row">
+      <q-card-section
+        :class="{ 'column reverse': isMobile }"
+        class="gap-16 row"
+      >
         <q-input
           :model-value="tableFilter.searchQuery"
           :placeholder="t('common.search')"
@@ -19,11 +22,15 @@
           </template>
         </q-input>
 
-        <q-space />
+        <q-space v-if="!isMobile" />
 
-        <div class="flex-center gap-16 no-padding no-wrap row">
+        <div
+          :class="{ 'column items-stretch': isMobile }"
+          class="flex-center gap-16 no-padding no-wrap row"
+        >
           <q-btn
             v-if="!showByClass"
+            :class="{ col: isMobile }"
             :icon="mdiFilter"
             :label="$t('reserveBooks.filterButton')"
             class="text-transform-none"
@@ -41,6 +48,7 @@
             />
 
             <q-btn
+              :class="{ col: isMobile }"
               :icon="mdiPlus"
               :label="t('reserveBooks.reserveAll')"
               color="positive"
@@ -105,6 +113,7 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { discountedPrice } from "src/helpers/book-copy";
@@ -121,6 +130,8 @@ import { useRetailLocationService } from "src/services/retail-location";
 
 const { user } = useAuthService();
 const { selectedLocation } = useRetailLocationService();
+
+const { isMobile } = useLateralDrawer();
 
 const { useCreateReservationsMutation, useGetReservationsQuery } =
   useReservationService();

@@ -12,17 +12,24 @@
 
     <q-separator />
 
-    <q-card-actions v-if="!noActions" align="right">
+    <q-card-actions
+      v-if="!noActions"
+      :class="{ 'column items-stretch gap-8': isMobile }"
+      align="right"
+    >
       <slot name="card-actions">
         <q-btn
           :label="cancelLabel ?? t('common.cancel')"
-          flat
+          :outline="isMobile"
+          :flat="!isMobile"
           @click="emit('cancel')"
         />
         <q-btn
           v-if="showSaveButton"
-          flat
+          :class="{ 'no-margin': isMobile }"
           :label="saveLabel ?? t('common.confirm')"
+          :outline="isMobile"
+          :flat="!isMobile"
           @click="emit('save')"
         />
       </slot>
@@ -33,6 +40,7 @@
 <script setup lang="ts">
 import { QCard } from "quasar";
 import { useI18n } from "vue-i18n";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { CommonDialogProps } from "./dialog-models";
 
 const { t } = useI18n();
@@ -57,6 +65,8 @@ const emit = defineEmits<{
   save: [];
   cancel: [];
 }>();
+
+const { isMobile } = useLateralDrawer();
 </script>
 
 <style lang="scss" scoped>
