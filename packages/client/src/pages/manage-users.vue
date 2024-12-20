@@ -10,7 +10,7 @@
       >
         <template #side-actions>
           <q-btn
-            class="q-ma-sm"
+            :class="{ col: isMobile, 'q-ma-sm': !isMobile }"
             color="accent"
             no-wrap
             :icon="mdiPlus"

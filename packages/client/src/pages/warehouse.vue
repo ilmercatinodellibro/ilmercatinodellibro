@@ -10,7 +10,13 @@
         :search-input-placeholder="t('warehouse.searchPlaceholder')"
       >
         <template #side-actions>
-          <q-btn color="black-12" no-wrap outline @click="swapView()">
+          <q-btn
+            :class="{ col: isMobile }"
+            color="black-12"
+            no-wrap
+            outline
+            @click="swapView()"
+          >
             <q-item-section class="q-pl-none q-pr-sm text-black-87" side>
               <q-icon :name="mdiSort" />
             </q-item-section>

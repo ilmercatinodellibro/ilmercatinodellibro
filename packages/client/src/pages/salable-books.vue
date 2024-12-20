@@ -14,7 +14,11 @@
       </q-card-section>
 
       <q-card-section class="col column gap-4 no-padding no-wrap">
-        <q-form class="flex-center gap-16 q-px-sm row" @submit="searchBook()">
+        <q-form
+          :class="{ 'column items-stretch': isMobile }"
+          class="flex-center gap-16 q-px-sm row"
+          @submit="searchBook()"
+        >
           <q-input
             v-model="searchQuery"
             :placeholder="$t('salableBooks.searchHint')"
@@ -30,6 +34,7 @@
           </q-input>
 
           <q-btn
+            :class="{ col: isMobile }"
             :label="$t('common.search')"
             class="bottom-separator-20"
             color="accent"

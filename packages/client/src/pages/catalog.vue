@@ -10,8 +10,8 @@
       >
         <template #side-actions>
           <q-btn
+            :class="{ col: isMobile, 'q-ma-sm': !isMobile }"
             :label="$t('book.addBook')"
-            class="q-ma-sm"
             color="accent"
             no-wrap
             :icon="mdiPlus"
