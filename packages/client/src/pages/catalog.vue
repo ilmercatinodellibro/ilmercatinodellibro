@@ -1,6 +1,9 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="{ 'q-ma-md': !isMobile }"
+      class="absolute-full column no-wrap"
+    >
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
@@ -64,10 +67,12 @@ import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { formatPrice } from "../composables/use-misc-formats";
+const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 

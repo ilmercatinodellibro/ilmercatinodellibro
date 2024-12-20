@@ -1,6 +1,9 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="{ 'q-ma-md': !isMobile }"
+      class="absolute-full column no-wrap"
+    >
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
@@ -247,6 +250,7 @@ import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { UserDialogPayload } from "src/models/user";
@@ -261,6 +265,7 @@ import {
   useDeleteUserAccountMutation,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
+const { isMobile } = useLateralDrawer();
 
 const tableRef = ref() as Ref<QTable>;
 

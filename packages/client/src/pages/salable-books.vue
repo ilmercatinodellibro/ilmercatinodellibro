@@ -1,6 +1,9 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="{ 'q-ma-md': !isMobile }"
+      class="absolute-full column no-wrap"
+    >
       <q-card-section class="text-center title-section">
         <h6 class="q-ma-none text-primary text-weight-regular">
           {{ $t("salableBooks.title") }}
@@ -96,10 +99,12 @@ import { Notify, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
 import { requiredRule, validISBN } from "src/helpers/rules";
 import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
+const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 

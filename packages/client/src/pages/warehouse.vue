@@ -1,6 +1,9 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="{ 'q-ma-md': !isMobile }"
+      class="absolute-full column no-wrap"
+    >
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
@@ -183,6 +186,7 @@ import ProblemsHistoryDialog from "src/components/manage-users/problems-history-
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { getFieldValue } from "src/helpers/table-helpers";
@@ -196,6 +200,7 @@ import {
   BookSummaryFragment,
   PaginatedBookResultFragment,
 } from "src/services/book.graphql";
+const { isMobile } = useLateralDrawer();
 
 interface WarehousePagination {
   page: number;

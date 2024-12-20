@@ -1,6 +1,9 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="{ 'q-ma-md': !isMobile }"
+      class="absolute-full column no-wrap"
+    >
       <q-card-section
         :class="{ 'column reverse': isMobile }"
         class="gap-16 row"

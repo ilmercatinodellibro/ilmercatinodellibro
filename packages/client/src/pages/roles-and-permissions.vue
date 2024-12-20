@@ -1,6 +1,6 @@
 <template>
   <q-page class="justify-center row">
-    <q-card class="absolute-full column q-ma-md">
+    <q-card :class="{ 'q-ma-md': !isMobile }" class="absolute-full column">
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
@@ -68,6 +68,7 @@ import ConfirmDialog from "src/components/confirm-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { useAddOrInviteOperatorMutation } from "src/services/auth.graphql";
@@ -78,6 +79,7 @@ import {
   MemberFragment,
   useGetMembersQuery,
 } from "src/services/user.graphql";
+const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 

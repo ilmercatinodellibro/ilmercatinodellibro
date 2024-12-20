@@ -1,6 +1,9 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column items-stretch no-wrap q-ma-md">
+    <q-card
+      :class="{ 'q-ma-md': !isMobile }"
+      class="absolute-full column items-stretch no-wrap"
+    >
       <q-card-section class="q-pa-md">
         <q-input
           v-model="searchQuery"
@@ -161,6 +164,7 @@ import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
 import { BooksTab } from "src/models/book";
@@ -180,6 +184,7 @@ import {
 import { useReservationService } from "src/services/reservation";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
+const { isMobile } = useLateralDrawer();
 
 const { selectedLocation } = useRetailLocationService();
 const { user } = useAuthService();
