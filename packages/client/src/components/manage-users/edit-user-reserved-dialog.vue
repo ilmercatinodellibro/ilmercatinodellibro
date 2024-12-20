@@ -13,8 +13,13 @@
       <card-table-header @add-book="addReservationFromIsbn">
         <template #side-actions>
           <!-- TODO: consider extracting this into a separate component -->
-          <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
+          <span
+            v-if="screenWidth >= WidthSize.MD || isMobile"
+            :class="{ 'col column items-stretch': isMobile }"
+            class="gap-16 no-wrap row"
+          >
             <q-btn
+              :class="{ col: isMobile }"
               :icon="mdiDelete"
               :label="$t('manageUsers.reservedBooksDialog.deleteAllReserved')"
               color="negative"
@@ -22,6 +27,7 @@
               @click="deleteAllReserved()"
             />
             <q-btn
+              :class="{ col: isMobile }"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.reservedBooksDialog.moveAllIntoCart')"
               color="primary"
@@ -29,8 +35,13 @@
               @click="moveAllIntoCart()"
             />
           </span>
-          <span v-if="screenWidth === WidthSize.LG" class="gap-16 row">
+          <span
+            v-if="screenWidth === WidthSize.LG || isMobile"
+            :class="{ 'col column items-stretch': isMobile }"
+            class="gap-16 no-wrap row"
+          >
             <q-btn
+              :class="{ col: isMobile }"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.reservedBooksDialog.reservedIntoCart')"
               no-wrap
@@ -38,6 +49,7 @@
               @click="moveReservedIntoCart()"
             />
             <q-btn
+              :class="{ col: isMobile }"
               :icon="mdiCart"
               :label="$t('manageUsers.goToCart')"
               no-wrap
@@ -182,6 +194,7 @@ import {
 import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
@@ -206,6 +219,7 @@ const { t } = useI18n();
 const largeBreakpoint = 1920;
 const smallBreakpoint = 1440;
 const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
+const { isMobile } = useLateralDrawer();
 
 const props = defineProps<{
   userData: CustomerFragment;

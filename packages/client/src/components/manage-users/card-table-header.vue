@@ -1,29 +1,34 @@
 <template>
   <q-form
+    :class="{ 'column items-stretch': isMobile }"
     class="gap-16 items-center no-wrap q-pt-md q-px-md row"
     @submit="handleSubmit"
   >
     <q-input
       v-model="bookISBN"
+      :class="{ 'max-width-420': !isMobile }"
       :placeholder="searchLabel ?? $t('manageUsers.searchHint')"
       :rules="[validISBN]"
-      class="width-420"
+      class="full-width"
       lazy-rules="ondemand"
       outlined
     />
 
     <q-btn
+      :class="{ 'bottom-separator-20': !isMobile }"
       :icon="mdiPlus"
       :label="$t('book.addBookDialog')"
-      class="bottom-separator-20"
       color="accent"
       no-wrap
       type="submit"
     />
 
-    <q-space />
+    <q-space v-if="!isMobile" />
 
-    <div class="bottom-separator-20 gap-16 no-padding row">
+    <div
+      :class="{ 'col column': isMobile, 'bottom-separator-20': !isMobile }"
+      class="gap-16 no-padding no-wrap row"
+    >
       <slot name="side-actions" />
     </div>
   </q-form>
@@ -32,6 +37,7 @@
 <script setup lang="ts">
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { ref } from "vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { validISBN } from "src/helpers/rules";
 
 defineProps<{
@@ -41,6 +47,8 @@ defineProps<{
 const emit = defineEmits<{
   addBook: [bookISBN: string];
 }>();
+
+const { isMobile } = useLateralDrawer();
 
 const bookISBN = ref("");
 

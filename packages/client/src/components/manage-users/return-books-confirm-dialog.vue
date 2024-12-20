@@ -6,30 +6,36 @@
       @save="onDialogOK"
       @cancel="onDialogCancel"
     >
-      <q-card-section class="gap-16 items-center no-wrap q-pa-md row">
+      <q-card-section
+        :class="{ 'column items-stretch': isMobile }"
+        class="gap-16 items-center no-wrap q-pa-md row"
+      >
         <q-input
           :model-value="booksSoldToOthers"
+          :dense="isMobile"
           :label="$t('manageUsers.payOffUserDialog.soldBooksCountLabel')"
           outlined
           readonly
         />
         <q-input
-          :label="$t('manageUsers.payOffUserDialog.totalPayOffLabel')"
           :model-value="totalCheckoutMoney.toFixed(2)"
+          :dense="isMobile"
+          :label="$t('manageUsers.payOffUserDialog.totalPayOffLabel')"
           outlined
           readonly
           suffix="€"
         />
         <q-input
-          :label="$t('manageUsers.payOffUserDialog.totalCheckedOutLabel')"
           :model-value="totalCheckedOutMoney.toFixed(2)"
+          :dense="isMobile"
+          :label="$t('manageUsers.payOffUserDialog.totalCheckedOutLabel')"
           outlined
           readonly
           suffix="€"
         />
       </q-card-section>
 
-      <span class="q-pa-md text-h6 text-negative">
+      <span class="line-height-20 q-pa-md text-h6 text-negative">
         {{ disclaimer }}
       </span>
 
@@ -65,6 +71,7 @@
 import { QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
@@ -85,6 +92,7 @@ defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 

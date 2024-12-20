@@ -7,32 +7,40 @@
         ])
       "
     >
-      <q-card-section class="gap-16 items-center no-wrap q-pa-md row">
+      <q-card-section
+        :class="{ 'column items-stretch': isMobile }"
+        class="gap-16 items-center no-wrap q-pa-md row"
+      >
         <q-input
           :model-value="soldCopies.length"
+          :dense="isMobile"
           :label="$t('manageUsers.payOffUserDialog.soldBooksCountLabel')"
           outlined
           readonly
         />
         <q-input
-          :label="$t('manageUsers.payOffUserDialog.totalPayOffLabel')"
           :model-value="totalCheckoutMoney.toFixed(2)"
+          :dense="isMobile"
+          :label="$t('manageUsers.payOffUserDialog.totalPayOffLabel')"
           outlined
           readonly
           suffix="€"
         />
         <q-input
-          :label="$t('manageUsers.payOffUserDialog.totalCheckedOutLabel')"
           :model-value="totalCheckedOutMoney.toFixed(2)"
+          :dense="isMobile"
+          :label="$t('manageUsers.payOffUserDialog.totalCheckedOutLabel')"
           outlined
           readonly
           suffix="€"
         />
 
-        <q-space />
+        <q-space v-if="!isMobile" />
 
-        <q-icon :name="mdiInformationOutline" color="black-54" size="24px" />
-        {{ $t("manageUsers.payOffUserDialog.info") }}
+        <span class="gap-8 no-wrap row">
+          <q-icon :name="mdiInformationOutline" color="black-54" size="24px" />
+          {{ $t("manageUsers.payOffUserDialog.info") }}
+        </span>
       </q-card-section>
 
       <q-card-section class="col-grow column height-0 no-wrap q-pa-none">
@@ -88,36 +96,110 @@
                     "
                     class="gap-16 items-center row sticky-button-group"
                   >
-                    <q-btn
-                      :label="
-                        $t('manageUsers.payOffUserDialog.returnOptions.donate')
-                      "
-                      outline
-                      @click="donateBooks(selectedRows)"
-                    />
-                    <q-btn
-                      :label="
-                        $t(
-                          'manageUsers.payOffUserDialog.returnOptions.reimburse',
-                        )
-                      "
-                      outline
-                      @click="reimburseBooks(selectedRows)"
-                    />
-                    <q-btn
-                      :label="
-                        $t('manageUsers.payOffUserDialog.returnOptions.return')
-                      "
-                      color="positive"
-                      @click="returnBooks(selectedRows)"
-                    />
-                    <q-btn
-                      :label="
-                        $t('manageUsers.booksMovementsDialog.reportProblem')
-                      "
-                      color="negative"
-                      @click="reportProblems(selectedRows)"
-                    />
+                    <q-btn-dropdown
+                      v-if="isMobile"
+                      :label="t('manageUsers.actions')"
+                      color="accent"
+                    >
+                      <q-list>
+                        <q-item
+                          v-close-popup
+                          clickable
+                          @click="donateBooks(selectedRows)"
+                        >
+                          <q-item-section>
+                            <q-item-label>
+                              {{
+                                t(
+                                  "manageUsers.payOffUserDialog.returnOptions.donate",
+                                )
+                              }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                        <q-item
+                          v-close-popup
+                          clickable
+                          @click="reimburseBooks(selectedRows)"
+                        >
+                          <q-item-section>
+                            <q-item-label>
+                              {{
+                                t(
+                                  "manageUsers.payOffUserDialog.returnOptions.reimburse",
+                                )
+                              }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                        <q-item
+                          v-close-popup
+                          clickable
+                          @click="returnBooks(selectedRows)"
+                        >
+                          <q-item-section>
+                            <q-item-label>
+                              {{
+                                t(
+                                  "manageUsers.payOffUserDialog.returnOptions.return",
+                                )
+                              }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                        <q-item
+                          v-close-popup
+                          clickable
+                          @click="reportProblems(selectedRows)"
+                        >
+                          <q-item-section>
+                            <q-item-label>
+                              {{
+                                t(
+                                  "manageUsers.booksMovementsDialog.reportProblem",
+                                )
+                              }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-btn-dropdown>
+                    <template v-else>
+                      <q-btn
+                        :label="
+                          $t(
+                            'manageUsers.payOffUserDialog.returnOptions.donate',
+                          )
+                        "
+                        outline
+                        @click="donateBooks(selectedRows)"
+                      />
+                      <q-btn
+                        :label="
+                          $t(
+                            'manageUsers.payOffUserDialog.returnOptions.reimburse',
+                          )
+                        "
+                        outline
+                        @click="reimburseBooks(selectedRows)"
+                      />
+                      <q-btn
+                        :label="
+                          $t(
+                            'manageUsers.payOffUserDialog.returnOptions.return',
+                          )
+                        "
+                        color="positive"
+                        @click="returnBooks(selectedRows)"
+                      />
+                      <q-btn
+                        :label="
+                          $t('manageUsers.booksMovementsDialog.reportProblem')
+                        "
+                        color="negative"
+                        @click="reportProblems(selectedRows)"
+                      />
+                    </template>
                   </span>
                 </span>
               </q-td>
@@ -263,6 +345,7 @@ import { useI18n } from "vue-i18n";
 import { SettleRemainingType } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
 import KDialogCard from "src/components/k-dialog-card.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice, getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
@@ -296,6 +379,7 @@ defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<SettleRemainingType>();
+const { isMobile } = useLateralDrawer();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {

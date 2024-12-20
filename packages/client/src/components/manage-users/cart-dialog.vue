@@ -12,12 +12,14 @@
         <template #side-actions>
           <q-input
             :model-value="cartBooks.length"
+            :dense="isMobile"
             :label="$t('manageUsers.cartDialog.totalBooks')"
             disable
             outlined
           />
           <q-input
             :model-value="discountValue.toFixed(2)"
+            :dense="isMobile"
             :label="$t('manageUsers.cartDialog.discount')"
             disable
             outlined
@@ -25,6 +27,7 @@
           />
           <q-input
             :model-value="totalBooksPrice.toFixed(2)"
+            :dense="isMobile"
             :label="$t('manageUsers.cartDialog.total')"
             disable
             outlined
@@ -110,14 +113,20 @@
           color="negative"
           @click="emptyAndDestroyCart()"
         />
-        <q-icon
-          :name="mdiInformationOutline"
-          class="q-pl-md q-pr-sm"
-          color="black-87"
-          size="24px"
-        />
-        {{ $t("manageUsers.cartDialog.autoEmptyDisclaimer", [timeUntilEmpty]) }}
-        <q-space />
+
+        <template v-if="!isMobile">
+          <q-icon
+            :name="mdiInformationOutline"
+            class="q-pl-md q-pr-sm"
+            color="black-87"
+            size="24px"
+          />
+          {{
+            $t("manageUsers.cartDialog.autoEmptyDisclaimer", [timeUntilEmpty])
+          }}
+          <q-space />
+        </template>
+
         <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn
           :disable="cartBooks.length === 0"
@@ -155,6 +164,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
@@ -179,6 +189,7 @@ const { selectedLocation: retailLocation } = useRetailLocationService();
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 
