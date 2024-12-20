@@ -2,7 +2,7 @@
   <q-page>
     <q-card
       :class="{ 'q-ma-md': !isMobile }"
-      class="absolute-full flex-center row"
+      class="absolute-full flex-center q-pa-md row"
     >
       <q-card-section class="column no-padding width-min-360">
         <template v-if="user">
