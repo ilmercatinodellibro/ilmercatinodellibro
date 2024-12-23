@@ -1,12 +1,19 @@
 <template>
-  <q-dialog ref="dialogRef" :persistent="loading" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    :persistent="loading"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
+      :class="{ 'card-actions-shadow': isMobile }"
       :title="
         $t('manageUsers.cartDialog.title', [
           `${user.firstname} ${user.lastname}`,
         ])
       "
       size="fullscreen"
+      @cancel="onDialogCancel"
     >
       <card-table-header @add-book="addBookToCart">
         <template #side-actions>
@@ -514,5 +521,12 @@ function sellBooks() {
 <style scoped lang="scss">
 .border-bottom-width-0 > td {
   border-bottom-width: 0 !important;
+}
+
+.card-actions-shadow > :deep(.q-card__actions) {
+  box-shadow:
+    0 -24px 24px 0 rgba(0 0 0 / 24%),
+    0 0 24px 0 rgba(0 0 0 / 12%);
+  z-index: 1;
 }
 </style>

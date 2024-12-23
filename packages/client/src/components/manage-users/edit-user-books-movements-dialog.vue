@@ -1,8 +1,13 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       size="fullscreen"
       :cancel-label="$t('common.close')"
+      :no-actions="isMobile"
       :title="title"
       @cancel="onDialogCancel()"
     >
@@ -81,6 +86,7 @@ import {
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -111,6 +117,7 @@ const props = defineProps<{
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 

@@ -1,7 +1,12 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :cancel-label="$t('common.close')"
+      :no-actions="isMobile"
       :title="
         $t('manageUsers.requestedBooksDialog.title', [
           `${userData.firstname} ${userData.lastname}`,

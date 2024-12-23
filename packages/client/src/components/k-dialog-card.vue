@@ -1,6 +1,15 @@
 <template>
   <q-card :class="`size--${size}`" class="mobile-responsive-dialog">
-    <q-card-section class="bg-white text-h6 text-primary">
+    <q-card-section class="bg-white gap-16 no-wrap row text-h6 text-primary">
+      <q-btn
+        v-if="isMobile"
+        :icon="mdiClose"
+        color="dark"
+        dense
+        flat
+        round
+        @click="emit('cancel')"
+      />
       <slot name="title">
         {{ title }}
       </slot>
@@ -38,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiClose } from "@quasar/extras/mdi-v7";
 import { QCard } from "quasar";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";

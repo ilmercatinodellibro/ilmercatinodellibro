@@ -1,12 +1,14 @@
 <template>
   <q-dialog
     ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
     :persistent="tab === 'in-retrieval' && booksToRegister.length > 0"
     full-width
     @hide="onDialogHide"
   >
     <k-dialog-card
       :cancel-label="$t('common.close')"
+      :no-actions="isMobile"
       :title="
         $t('manageUsers.inStockDialog.title', [
           `${userData.firstname} ${userData.lastname}`,
@@ -141,6 +143,7 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { discountedPrice, isAvailable } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
@@ -173,6 +176,7 @@ const props = defineProps<{
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 
@@ -439,6 +443,5 @@ function openDeleteBookDialog(bookIndex: number) {
 .dialog-panels > * > .q-tab-panel[role="tabpanel"] {
   display: flex;
   overflow: auto;
-  height: auto;
 }
 </style>

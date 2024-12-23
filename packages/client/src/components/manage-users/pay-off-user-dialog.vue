@@ -1,11 +1,18 @@
 <template>
-  <q-dialog ref="dialogRef" full-width full-height @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    full-width
+    full-height
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :title="
         $t('manageUsers.payOffUserDialog.title', [
           `${user.firstname} ${user.lastname}`,
         ])
       "
+      @cancel="onDialogCancel"
     >
       <q-card-section
         :class="{ 'column items-stretch': isMobile }"
