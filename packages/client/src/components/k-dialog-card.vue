@@ -23,7 +23,9 @@
 
     <q-card-actions
       v-if="!noActions"
-      :class="{ 'column items-stretch gap-8': isMobile }"
+      :class="
+        isMobile ? 'column items-stretch gap-8 card-actions-mobile' : undefined
+      "
       align="right"
     >
       <slot name="card-actions">
@@ -156,5 +158,11 @@ $dialog-fullscreen-max-height: calc(100vh - #{$dialog-margin} * 2);
   &--fullscreen {
     @extend %fullscreen;
   }
+}
+
+// Remove the default horizontal separator to card actions on mobile
+// since they are stacked vertically instead of aligned horizontally
+.card-actions-mobile :deep(> *) {
+  margin-left: 0 !important;
 }
 </style>
