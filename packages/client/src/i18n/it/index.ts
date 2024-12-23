@@ -154,7 +154,7 @@ export default {
     [AvailableRouteNames.ChangePassword]: "Cambia password",
     [AvailableRouteNames.RolesAndPermissions]: "Ruoli e Permessi",
     [AvailableRouteNames.RegisterWithToken]: "Invitare",
-    [AvailableRouteNames.Login]: "Login",
+    [AvailableRouteNames.Login]: "Home",
     [AvailableRouteNames.SalableBooks]: "Libri vendibili",
     [AvailableRouteNames.UsersManagement]: "Utenti e Movimenti",
     [AvailableRouteNames.MyBooks]: "I Miei Libri",

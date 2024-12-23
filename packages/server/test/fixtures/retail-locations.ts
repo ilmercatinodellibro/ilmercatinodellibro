@@ -151,7 +151,7 @@ const IT_RE_FAQ = `<section>
     La durata delle prenotazioni varia durante il periodo di apertura del mercatino, solitamente una prenotazione dura 3 giorni (anche non lavorativi).
   </p>
 </section>
-<div class="gap-16 row no-wrap">
+<div class="gap-16 row">
   <div class="col">
     <article>
       <header>
@@ -230,7 +230,7 @@ const IT_RE_FAQ = `<section>
           >!&nbsp;<br />Ci trovate in<strong> Via Cassoli 1</strong>,<strong>
             sulla</strong
           ><b
-            >&nbsp;circonvallazione&nbsp;vicino l'incrocio&nbsp;di&nbsp;viale
+            > circonvallazione vicino l'incrocio di viale
             Umberto I</b
           >.<br />Ancora più precisamente: <a
             href="https://goo.gl/maps/tTbjyUBBRYV2Nh5QA"

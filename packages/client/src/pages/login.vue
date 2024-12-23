@@ -1,7 +1,13 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-  <q-page class="gap-32 items-start justify-evenly q-pa-lg reverse row">
-    <q-card class="column form-card gap-24 q-my-xl q-pa-lg text-center">
+  <q-page
+    :class="{ 'column items-stretch': isMobile }"
+    class="gap-32 items-start justify-evenly q-pa-lg reverse row"
+  >
+    <q-card
+      ref="loginCard"
+      class="column form-card gap-24 q-my-xl q-pa-lg text-center"
+    >
       <q-img :src="theme.logo" fit="contain" height="60px" />
 
       <q-card-section class="no-padding">
@@ -82,24 +88,33 @@
     </q-card>
 
     <faq-info />
+
+    <q-btn
+      v-if="isMobile"
+      :icon="mdiArrowDown"
+      :label="t('auth.goToLogin')"
+      color="accent"
+      @click="scrollToLogin()"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client/core";
-import { Notify } from "quasar";
+import { mdiArrowDown } from "@quasar/extras/mdi-v7";
+import { Notify, QCard } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { LoginPayload } from "src/@generated/graphql";
 import FaqInfo from "src/components/faq-info.vue";
 import KPasswordInput from "src/components/k-password-input.vue";
 import SocialAuthButtons from "src/components/social-auth-buttons.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import { useLoginMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
-
 const props = defineProps<{
   emailVerified?: boolean;
 }>();
@@ -129,6 +144,17 @@ const user = ref<LoginPayload>({
 });
 
 const showPassword = ref(false);
+
+const loginCard = ref<QCard>();
+
+const { isMobile } = useLateralDrawer();
+function scrollToLogin() {
+  if (!loginCard.value) {
+    return;
+  }
+  const loginCardElement = loginCard.value.$el as Element;
+  loginCardElement.scrollIntoView({ behavior: "smooth" });
+}
 
 const { login, loading: isLoggingIn } = useLoginMutation();
 
