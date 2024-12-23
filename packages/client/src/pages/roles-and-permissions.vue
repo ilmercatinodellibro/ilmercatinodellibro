@@ -1,13 +1,16 @@
 <template>
   <q-page class="justify-center row">
-    <q-card :class="{ 'q-ma-md': !isMobile }" class="absolute-full column">
+    <q-card
+      :class="!isMobile ? 'q-ma-md' : undefined"
+      class="absolute-full column"
+    >
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
       >
         <template #side-actions>
           <q-btn
-            :class="{ col: isMobile }"
+            :class="isMobile ? 'col' : undefined"
             :icon="mdiPlus"
             :label="t('general.rolesAndPermissions.addNewOperator.title')"
             color="accent"

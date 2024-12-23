@@ -15,8 +15,8 @@
       @cancel="onDialogCancel"
     >
       <q-card-section
-        :class="{ 'column items-stretch': isMobile }"
-        class="gap-16 items-center no-wrap q-pa-md row"
+        :class="isMobile ? 'column items-stretch' : 'row items-center'"
+        class="gap-16 no-wrap q-pa-md"
       >
         <q-input
           :model-value="soldCopies.length"

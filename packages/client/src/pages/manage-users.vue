@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="{ 'q-ma-md': !isMobile }"
+      :class="!isMobile ? 'q-ma-md' : undefined"
       class="absolute-full column no-wrap"
     >
       <header-search-bar-filters
@@ -10,7 +10,7 @@
       >
         <template #side-actions>
           <q-btn
-            :class="{ col: isMobile, 'q-ma-sm': !isMobile }"
+            :class="isMobile ? 'col' : 'q-ma-sm'"
             color="accent"
             no-wrap
             :icon="mdiPlus"

@@ -1,12 +1,12 @@
 <template>
   <q-page>
     <q-card
-      :class="{ 'q-ma-md': !isMobile }"
+      :class="!isMobile ? 'q-ma-md' : undefined"
       class="absolute-full column no-wrap"
     >
       <q-card-section
-        :class="{ 'column reverse': isMobile }"
-        class="gap-16 row"
+        :class="isMobile ? 'column reverse' : 'row'"
+        class="gap-16"
       >
         <q-input
           :model-value="tableFilter.searchQuery"
@@ -28,12 +28,12 @@
         <q-space v-if="!isMobile" />
 
         <div
-          :class="{ 'column items-stretch': isMobile }"
-          class="flex-center gap-16 no-padding no-wrap row"
+          :class="isMobile ? 'column items-stretch' : 'row flex-center'"
+          class="gap-16 no-padding no-wrap"
         >
           <q-btn
             v-if="!showByClass"
-            :class="{ col: isMobile }"
+            :class="isMobile ? 'col' : undefined"
             :icon="mdiFilter"
             :label="$t('reserveBooks.filterButton')"
             class="text-transform-none"
@@ -51,7 +51,7 @@
             />
 
             <q-btn
-              :class="{ col: isMobile }"
+              :class="isMobile ? 'col' : undefined"
               :icon="mdiPlus"
               :label="t('reserveBooks.reserveAll')"
               color="positive"

@@ -1,7 +1,7 @@
 <template>
   <q-card-section
-    :class="{ 'column items-stretch': isMobile }"
-    class="full-width gap-16 items-center q-pa-md row"
+    :class="isMobile ? 'column items-stretch' : 'row items-center'"
+    class="full-width gap-16 q-pa-md"
   >
     <div class="col gap-16 row">
       <q-input
@@ -20,7 +20,7 @@
       </q-input>
 
       <q-select
-        :class="{ col: isMobile }"
+        :class="isMobile ? 'col' : undefined"
         :label="t('book.filter')"
         :model-value="newFilters.filters"
         :options="Object.keys(filterOptions)"

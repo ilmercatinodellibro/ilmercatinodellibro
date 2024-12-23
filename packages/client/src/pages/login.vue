@@ -1,8 +1,8 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <q-page
-    :class="{ 'column items-stretch': isMobile }"
-    class="gap-32 items-start justify-evenly q-pa-lg reverse row"
+    :class="isMobile ? 'column items-stretch' : 'items-start row'"
+    class="gap-32 justify-evenly q-pa-lg reverse"
   >
     <q-card
       ref="loginCard"

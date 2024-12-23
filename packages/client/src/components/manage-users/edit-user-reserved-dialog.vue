@@ -21,11 +21,11 @@
           <!-- TODO: consider extracting this into a separate component -->
           <span
             v-if="screenWidth >= WidthSize.MD || isMobile"
-            :class="{ 'col column items-stretch': isMobile }"
-            class="gap-16 no-wrap row"
+            :class="isMobile ? 'col column items-stretch' : 'row'"
+            class="gap-16 no-wrap"
           >
             <q-btn
-              :class="{ col: isMobile }"
+              :class="isMobile ? 'col' : undefined"
               :icon="mdiDelete"
               :label="$t('manageUsers.reservedBooksDialog.deleteAllReserved')"
               color="negative"
@@ -33,7 +33,7 @@
               @click="deleteAllReserved()"
             />
             <q-btn
-              :class="{ col: isMobile }"
+              :class="isMobile ? 'col' : undefined"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.reservedBooksDialog.moveAllIntoCart')"
               color="primary"
@@ -43,11 +43,11 @@
           </span>
           <span
             v-if="screenWidth === WidthSize.LG || isMobile"
-            :class="{ 'col column items-stretch': isMobile }"
-            class="gap-16 no-wrap row"
+            :class="isMobile ? 'col column items-stretch' : 'row'"
+            class="gap-16 no-wrap"
           >
             <q-btn
-              :class="{ col: isMobile }"
+              :class="isMobile ? 'col' : undefined"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.reservedBooksDialog.reservedIntoCart')"
               no-wrap
@@ -55,7 +55,7 @@
               @click="moveReservedIntoCart()"
             />
             <q-btn
-              :class="{ col: isMobile }"
+              :class="isMobile ? 'col' : undefined"
               :icon="mdiCart"
               :label="$t('manageUsers.goToCart')"
               no-wrap

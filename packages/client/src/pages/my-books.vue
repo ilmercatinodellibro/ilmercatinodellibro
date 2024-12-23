@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="{ 'q-ma-md': !isMobile }"
+      :class="!isMobile ? 'q-ma-md' : undefined"
       class="absolute-full column items-stretch no-wrap"
     >
       <q-card-section class="q-pa-md">

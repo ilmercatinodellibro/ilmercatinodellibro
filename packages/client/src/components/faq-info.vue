@@ -3,7 +3,7 @@
   <div class="column max-width-700 no-wrap">
     <h3 class="text-primary">{{ t("routesNames.faq") }}</h3>
     <div
-      :class="{ 'min-width-auto': isMobile }"
+      :class="isMobile ? 'min-width-auto' : undefined"
       v-html="selectedLocation.infoPagesContent?.[locale].faqContent"
     />
   </div>

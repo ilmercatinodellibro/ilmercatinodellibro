@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="{ 'q-ma-md': !isMobile }"
+      :class="!isMobile ? 'q-ma-md' : undefined"
       class="absolute-full column no-wrap"
     >
       <q-card-section class="text-center title-section">
@@ -15,8 +15,8 @@
 
       <q-card-section class="col column gap-4 no-padding no-wrap">
         <q-form
-          :class="{ 'column items-stretch': isMobile }"
-          class="flex-center gap-16 q-px-sm row"
+          :class="isMobile ? 'column items-stretch' : 'flex-center row'"
+          class="gap-16 q-px-sm"
           @submit="searchBook()"
         >
           <q-input
@@ -34,7 +34,7 @@
           </q-input>
 
           <q-btn
-            :class="{ col: isMobile }"
+            :class="isMobile ? 'col' : undefined"
             :label="$t('common.search')"
             class="bottom-separator-20"
             color="accent"

@@ -1,21 +1,20 @@
 <template>
   <q-form
-    :class="{ 'column items-stretch': isMobile }"
+    :class="isMobile ? 'column items-stretch' : 'row items-center'"
     class="gap-16 items-center no-wrap q-pt-md q-px-md row"
     @submit="handleSubmit"
   >
     <q-input
       v-model="bookISBN"
-      :class="{ 'max-width-420': !isMobile }"
       :placeholder="searchLabel ?? $t('manageUsers.searchHint')"
       :rules="[validISBN]"
-      class="full-width"
+      class="full-width max-width-420"
       lazy-rules="ondemand"
       outlined
     />
 
     <q-btn
-      :class="{ 'bottom-separator-20': !isMobile }"
+      :class="isMobile ? '' : 'bottom-separator-20'"
       :icon="mdiPlus"
       :label="$t('book.addBookDialog')"
       color="accent"
@@ -26,7 +25,7 @@
     <q-space v-if="!isMobile" />
 
     <div
-      :class="{ 'col column': isMobile, 'bottom-separator-20': !isMobile }"
+      :class="isMobile ? 'col column' : 'bottom-separator-20'"
       class="gap-16 no-padding no-wrap row"
     >
       <slot name="side-actions" />

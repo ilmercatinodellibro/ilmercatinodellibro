@@ -6,7 +6,7 @@
     @hide="onDialogHide"
   >
     <k-dialog-card
-      :class="{ 'card-actions-shadow': isMobile }"
+      :class="isMobile ? 'card-actions-shadow' : undefined"
       :title="
         $t('manageUsers.cartDialog.title', [
           `${user.firstname} ${user.lastname}`,

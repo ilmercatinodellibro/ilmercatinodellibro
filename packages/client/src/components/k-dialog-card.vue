@@ -37,7 +37,7 @@
         />
         <q-btn
           v-if="showSaveButton"
-          :class="{ 'no-margin': isMobile }"
+          :class="isMobile ? 'no-margin' : undefined"
           :label="saveLabel ?? t('common.confirm')"
           :outline="isMobile"
           :flat="!isMobile"
