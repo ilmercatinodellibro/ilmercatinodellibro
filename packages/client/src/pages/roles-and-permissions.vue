@@ -1,8 +1,8 @@
 <template>
-  <q-page class="justify-center row">
+  <q-page>
     <q-card
       :class="!isMobile ? 'q-ma-md' : undefined"
-      class="absolute-full column"
+      class="absolute-full column no-wrap"
     >
       <header-search-bar-filters
         v-model="tableFilter"
@@ -21,7 +21,7 @@
 
       <q-separator color="black-12" />
 
-      <q-card-section v-if="!loading" class="col column no-padding">
+      <q-card-section v-if="!loading" class="col column no-padding no-wrap">
         <dialog-table
           v-model:pagination="pagination"
           :columns="columns"
