@@ -1,5 +1,10 @@
 <template>
-  <k-dialog-card :title="title" :size="size" no-actions>
+  <k-dialog-card
+    :title="title"
+    :size="size"
+    no-actions
+    @cancel="emit('cancel')"
+  >
     <template #title>
       <slot name="title" />
     </template>
