@@ -1,5 +1,9 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :title="$t('reserveBooks.confirmReserveByClassDialog.title')"
       :save-label="$t('reserveBooks.reserveAll')"
@@ -12,7 +16,7 @@
         <p class="text-subtitle1">
           {{ $t("reserveBooks.confirmReserveByClassDialog.message") }}
         </p>
-        <p class="text-h6 text-weight-medium">
+        <p class="line-height-20 text-size-20 text-weight-medium">
           {{ $t("reserveBooks.confirmReserveByClassDialog.disclaimer") }}
         </p>
       </q-card-section>
@@ -50,6 +54,7 @@ import { cloneDeep, remove } from "lodash-es";
 import { QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
 import { BookSummaryFragment } from "src/services/book.graphql";
@@ -67,6 +72,8 @@ defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
   useDialogPluginComponent<BookSummaryFragment[]>();
+
+const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 
