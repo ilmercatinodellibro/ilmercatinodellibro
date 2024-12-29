@@ -8,14 +8,14 @@
       <q-separator />
 
       <q-tabs v-model="activeTab" active-color="accent">
-        <q-tab v-for="tab in Tabs" :key="tab" :name="tab" class="col">
-          {{ t(`retailLocation.stats.${tab}`) }}
+        <q-tab v-for="tab in StatisticsTab" :key="tab" :name="tab">
+          {{ t(`retailLocation.statistics.${tab}`) }}
         </q-tab>
       </q-tabs>
 
       <q-tab-panels v-model="activeTab" class="flex-delegate-height-management">
         <q-tab-panel
-          :name="Tabs.NUMERIC"
+          :name="StatisticsTab.GENERAL"
           class="full-height gap-24 justify-between row"
         >
           <q-field
@@ -40,7 +40,7 @@
           </q-field>
         </q-tab-panel>
 
-        <q-tab-panel :name="Tabs.DELIVERY" class="column flex-center">
+        <q-tab-panel :name="StatisticsTab.DELIVERY" class="column flex-center">
           <stats-chart
             :data="deliveriesChartData"
             :loading="deliveriesLoading"
@@ -48,7 +48,7 @@
           />
         </q-tab-panel>
 
-        <q-tab-panel :name="Tabs.SALE" class="column flex-center">
+        <q-tab-panel :name="StatisticsTab.SALE" class="column flex-center">
           <stats-chart
             :data="salesChartData"
             :loading="salesLoading"
@@ -56,7 +56,7 @@
           />
         </q-tab-panel>
 
-        <q-tab-panel :name="Tabs.SETTLE" class="column flex-center">
+        <q-tab-panel :name="StatisticsTab.SETTLE" class="column flex-center">
           <stats-chart
             :data="settlementsChartData"
             :loading="settlementsLoading"
@@ -64,7 +64,7 @@
           />
         </q-tab-panel>
 
-        <q-tab-panel :name="Tabs.RETURN" class="column flex-center">
+        <q-tab-panel :name="StatisticsTab.RETURN" class="column flex-center">
           <stats-chart
             :data="returningsChartData"
             :loading="returningsLoading"
@@ -82,6 +82,7 @@ import { useI18n } from "vue-i18n";
 import StatsChart from "src/components/stats-chart.vue";
 import { languages } from "src/models/language";
 import { AvailableRouteNames } from "src/models/routes";
+import { StatisticsTab } from "src/pages/statistics-page";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
   useGetDeliveriesChartDataQuery,
@@ -287,22 +288,17 @@ const dataToShow = computed<
   },
 ]);
 
-enum Tabs {
-  NUMERIC = "numeric",
-  DELIVERY = "delivery",
-  SALE = "sale",
-  SETTLE = "settle",
-  RETURN = "return",
-}
-const activeTab = ref(Tabs.NUMERIC);
+const activeTab = ref(StatisticsTab.GENERAL);
 
-const deliveriesEnabled = computed(() => activeTab.value === Tabs.DELIVERY);
+const deliveriesEnabled = computed(
+  () => activeTab.value === StatisticsTab.DELIVERY,
+);
 const { deliveriesChartData, loading: deliveriesLoading } =
   useGetDeliveriesChartDataQuery(undefined, () => ({
     enabled: deliveriesEnabled.value,
   }));
 
-const salesEnabled = computed(() => activeTab.value === Tabs.SALE);
+const salesEnabled = computed(() => activeTab.value === StatisticsTab.SALE);
 const { salesChartData, loading: salesLoading } = useGetSalesChartDataQuery(
   undefined,
   () => ({
@@ -310,13 +306,17 @@ const { salesChartData, loading: salesLoading } = useGetSalesChartDataQuery(
   }),
 );
 
-const settlementsEnabled = computed(() => activeTab.value === Tabs.SETTLE);
+const settlementsEnabled = computed(
+  () => activeTab.value === StatisticsTab.SETTLE,
+);
 const { settlementsChartData, loading: settlementsLoading } =
   useGetSettlementsChartDataQuery(undefined, () => ({
     enabled: settlementsEnabled.value,
   }));
 
-const returningsEnabled = computed(() => activeTab.value === Tabs.RETURN);
+const returningsEnabled = computed(
+  () => activeTab.value === StatisticsTab.RETURN,
+);
 const { returningsChartData, loading: returningsLoading } =
   useGetReturningsChartDataQuery(undefined, () => ({
     enabled: returningsEnabled.value,
