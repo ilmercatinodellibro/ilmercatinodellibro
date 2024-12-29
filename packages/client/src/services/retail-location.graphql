@@ -112,26 +112,26 @@ fragment chartData on ChartElement {
   timestamp
 }
 
-query getDeliveriesChartData {
-  deliveriesChartData {
+query getDeliveriesChartData($retailLocationId: String!) {
+  deliveriesChartData(retailLocationId: $retailLocationId) {
     ...chartData
   }
 }
 
-query getSalesChartData {
-  salesChartData {
+query getSalesChartData($retailLocationId: String!) {
+  salesChartData(retailLocationId: $retailLocationId) {
     ...chartData
   }
 }
 
-query getSettlementsChartData {
-  settlementsChartData {
+query getSettlementsChartData($retailLocationId: String!) {
+  settlementsChartData(retailLocationId: $retailLocationId) {
     ...chartData
   }
 }
 
-query getReturningsChartData {
-  returningsChartData {
+query getReturningsChartData($retailLocationId: String!) {
+  returningsChartData(retailLocationId: $retailLocationId) {
     ...chartData
   }
 }

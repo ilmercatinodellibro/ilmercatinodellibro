@@ -295,15 +295,24 @@ const deliveriesEnabled = computed(
   () => activeTab.value === StatisticsTab.DELIVERY,
 );
 const { deliveriesChartData, loading: deliveriesLoading } =
-  useGetDeliveriesChartDataQuery(undefined, () => ({
-    enabled: deliveriesEnabled.value,
-  }));
+  useGetDeliveriesChartDataQuery(
+    {
+      retailLocationId: selectedLocation.value.id,
+    },
+    () => ({
+      enabled: deliveriesEnabled.value,
+      fetchPolicy: "network-only",
+    }),
+  );
 
 const salesEnabled = computed(() => activeTab.value === StatisticsTab.SALE);
 const { salesChartData, loading: salesLoading } = useGetSalesChartDataQuery(
-  undefined,
+  {
+    retailLocationId: selectedLocation.value.id,
+  },
   () => ({
     enabled: salesEnabled.value,
+    fetchPolicy: "network-only",
   }),
 );
 
@@ -311,17 +320,29 @@ const settlementsEnabled = computed(
   () => activeTab.value === StatisticsTab.SETTLE,
 );
 const { settlementsChartData, loading: settlementsLoading } =
-  useGetSettlementsChartDataQuery(undefined, () => ({
-    enabled: settlementsEnabled.value,
-  }));
+  useGetSettlementsChartDataQuery(
+    {
+      retailLocationId: selectedLocation.value.id,
+    },
+    () => ({
+      enabled: settlementsEnabled.value,
+      fetchPolicy: "network-only",
+    }),
+  );
 
 const returningsEnabled = computed(
   () => activeTab.value === StatisticsTab.RETURN,
 );
 const { returningsChartData, loading: returningsLoading } =
-  useGetReturningsChartDataQuery(undefined, () => ({
-    enabled: returningsEnabled.value,
-  }));
+  useGetReturningsChartDataQuery(
+    {
+      retailLocationId: selectedLocation.value.id,
+    },
+    () => ({
+      enabled: returningsEnabled.value,
+      fetchPolicy: "network-only",
+    }),
+  );
 </script>
 
 <style lang="scss" scoped>

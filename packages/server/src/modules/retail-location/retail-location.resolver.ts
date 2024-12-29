@@ -21,6 +21,9 @@ import {
   StatisticsQueryResult,
 } from "./retail-location.args";
 
+const STATISTICS_FORBIDDEN_MESSAGE =
+  "You do not have permission to view retail location statistics.";
+
 @Resolver()
 export class RetailLocationResolver {
   constructor(
@@ -221,7 +224,7 @@ export class RetailLocationResolver {
     await this.authService.assertMembership({
       userId: currentUserId,
       retailLocationId,
-      message: "You do not have permission to view these reservations.",
+      message: STATISTICS_FORBIDDEN_MESSAGE,
     });
 
     const retailLocationFilter = {
@@ -383,6 +386,55 @@ export class RetailLocationResolver {
       },
     });
 
+    const buyingCustomersFilter = {
+      purchases: {
+        some: {
+          bookCopy: {
+            ...retailLocationFilter,
+          },
+        },
+      },
+    } satisfies Prisma.UserWhereInput;
+
+    const sellingCustomersFilter = {
+      bookCopies: {
+        some: {
+          ...retailLocationFilter,
+          sales: {
+            some: {
+              refundedAt: null,
+            },
+          },
+        },
+      },
+    } satisfies Prisma.UserWhereInput;
+
+    const getBuyingCustomersCount = this.prisma.user.count({
+      where: buyingCustomersFilter,
+    });
+    const getSellingCustomersCount = this.prisma.user.count({
+      where: sellingCustomersFilter,
+    });
+    const getCustomersCount = this.prisma.user.count({
+      where: {
+        OR: [sellingCustomersFilter, buyingCustomersFilter],
+      },
+    });
+    const getISEEUsersCount = this.prisma.user.count({
+      where: {
+        discount: true,
+      },
+    });
+    const getRequestingUsersCount = this.prisma.user.count({
+      where: {
+        requestedBooks: {
+          some: {
+            ...retailLocationFilter,
+          },
+        },
+      },
+    });
+
     const getActiveSales = this.prisma.sale.findMany({
       where: {
         refundedAt: null,
@@ -508,47 +560,6 @@ export class RetailLocationResolver {
       };
     };
 
-    const buyingCustomersFilter = {
-      purchases: {
-        some: {},
-      },
-    } satisfies Prisma.UserWhereInput;
-    const sellingCustomersFilter = {
-      bookCopies: {
-        some: {
-          sales: {
-            some: {
-              refundedAt: null,
-            },
-          },
-        },
-      },
-    } satisfies Prisma.UserWhereInput;
-
-    const getBuyingCustomersCount = this.prisma.user.count({
-      where: buyingCustomersFilter,
-    });
-    const getSellingCustomersCount = this.prisma.user.count({
-      where: sellingCustomersFilter,
-    });
-    const getCustomersCount = this.prisma.user.count({
-      where: {
-        OR: [sellingCustomersFilter, buyingCustomersFilter],
-      },
-    });
-    const getISEEUsersCount = this.prisma.user.count({
-      where: {
-        discount: true,
-      },
-    });
-    const getRequestingUsersCount = this.prisma.user.count({
-      where: {
-        requestedBooks: {
-          some: {},
-        },
-      },
-    });
-
     const getPurchasedOrSoldBooksAverage = getActiveUsersCount.then(
       (customers) =>
         customers === 0
@@ -593,8 +604,11 @@ export class RetailLocationResolver {
 
     const getSoldBooksOriginalPriceTotal = this.prisma.bookCopy
       .findMany({
+        where: {
+          ...retailLocationFilter,
+          sales: { some: { refundedAt: null } },
+        },
         select: { book: { select: { originalPrice: true } } },
-        where: { sales: { some: { refundedAt: null } } },
       })
       .then((copies) =>
         sumBy(copies, ({ book: { originalPrice } }) => originalPrice),
@@ -636,7 +650,10 @@ export class RetailLocationResolver {
 
     const getBuyingCustomersFullExpenseAverage = this.prisma.sale
       .findMany({
-        where: { purchasedBy: buyingCustomersFilter },
+        where: {
+          bookCopy: { ...retailLocationFilter },
+          purchasedBy: buyingCustomersFilter,
+        },
         select: {
           bookCopy: { select: { book: { select: { originalPrice: true } } } },
         },
@@ -772,8 +789,22 @@ export class RetailLocationResolver {
   }
 
   @Query(() => [ChartElement])
-  async deliveriesChartData(): Promise<ChartElement[]> {
+  async deliveriesChartData(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() { id: currentUserId }: User,
+  ): Promise<ChartElement[]> {
+    await this.authService.assertMembership({
+      userId: currentUserId,
+      retailLocationId,
+      message: STATISTICS_FORBIDDEN_MESSAGE,
+    });
+
     const bookCopies = await this.prisma.bookCopy.findMany({
+      where: {
+        book: {
+          retailLocationId,
+        },
+      },
       select: { createdAt: true },
     });
 
@@ -783,9 +814,25 @@ export class RetailLocationResolver {
   }
 
   @Query(() => [ChartElement])
-  async salesChartData(): Promise<ChartElement[]> {
+  async salesChartData(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() { id: currentUserId }: User,
+  ): Promise<ChartElement[]> {
+    await this.authService.assertMembership({
+      userId: currentUserId,
+      retailLocationId,
+      message: STATISTICS_FORBIDDEN_MESSAGE,
+    });
+
     const activeSales = await this.prisma.sale.findMany({
-      where: { refundedAt: null },
+      where: {
+        bookCopy: {
+          book: {
+            retailLocationId,
+          },
+        },
+        refundedAt: null,
+      },
       select: { purchasedAt: true },
     });
 
@@ -795,9 +842,21 @@ export class RetailLocationResolver {
   }
 
   @Query(() => [ChartElement])
-  async settlementsChartData(): Promise<ChartElement[]> {
+  async settlementsChartData(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() { id: currentUserId }: User,
+  ): Promise<ChartElement[]> {
+    await this.authService.assertMembership({
+      userId: currentUserId,
+      retailLocationId,
+      message: STATISTICS_FORBIDDEN_MESSAGE,
+    });
+
     const settlements = await this.prisma.bookCopy.findMany({
       where: {
+        book: {
+          retailLocationId,
+        },
         settledAt: {
           not: null,
         },
@@ -814,9 +873,21 @@ export class RetailLocationResolver {
   }
 
   @Query(() => [ChartElement])
-  async returningsChartData(): Promise<ChartElement[]> {
+  async returningsChartData(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() { id: currentUserId }: User,
+  ): Promise<ChartElement[]> {
+    await this.authService.assertMembership({
+      userId: currentUserId,
+      retailLocationId,
+      message: STATISTICS_FORBIDDEN_MESSAGE,
+    });
+
     const returnings = await this.prisma.bookCopy.findMany({
       where: {
+        book: {
+          retailLocationId,
+        },
         returnedAt: {
           not: null,
         },
