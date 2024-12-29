@@ -54,25 +54,25 @@
         </q-tab-panel>
 
         <q-tab-panel :name="StatisticsTab.DELIVERY" class="column flex-center">
-          <stats-chart
+          <statistics-chart
             :data="deliveriesChartData"
             :loading="deliveriesLoading"
           />
         </q-tab-panel>
 
         <q-tab-panel :name="StatisticsTab.SALE" class="column flex-center">
-          <stats-chart :data="salesChartData" :loading="salesLoading" />
+          <statistics-chart :data="salesChartData" :loading="salesLoading" />
         </q-tab-panel>
 
         <q-tab-panel :name="StatisticsTab.SETTLE" class="column flex-center">
-          <stats-chart
+          <statistics-chart
             :data="settlementsChartData"
             :loading="settlementsLoading"
           />
         </q-tab-panel>
 
         <q-tab-panel :name="StatisticsTab.RETURN" class="column flex-center">
-          <stats-chart
+          <statistics-chart
             :data="returningsChartData"
             :loading="returningsLoading"
           />
@@ -85,7 +85,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import StatsChart from "src/components/stats-chart.vue";
+import StatisticsChart from "src/components/statistics-chart.vue";
 import { languages } from "src/models/language";
 import { AvailableRouteNames } from "src/models/routes";
 import { StatisticsTab } from "src/pages/statistics-page";

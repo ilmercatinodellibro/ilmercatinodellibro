@@ -73,6 +73,7 @@ const option = computed<
   xAxis: {
     type: "time",
   },
+  // Even if the type marks this as optional, if not specified a runtime error is generated
   yAxis: {},
   series: [
     {
