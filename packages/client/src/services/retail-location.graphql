@@ -90,7 +90,6 @@ fragment Statistics on StatisticsQueryResult {
     count
     locale
   }
-  quotaMoneyTotal
   soldBooksOriginalPriceTotal
   sellingCustomersIncomeAverage
   buyingCustomersFullExpenseAverage

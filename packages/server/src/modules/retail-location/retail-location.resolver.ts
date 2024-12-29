@@ -447,7 +447,6 @@ export class RetailLocationResolver {
       let settleableAmount = 0;
       let settledAmount = 0;
       let toSettleAmount = 0;
-      let quotaMoneyTotal = 0;
 
       for (const sale of activeSales) {
         const {
@@ -479,10 +478,6 @@ export class RetailLocationResolver {
         } else {
           settledAmount += buyPrice;
         }
-
-        if (iseeDiscountApplied) {
-          quotaMoneyTotal += (originalPrice * sellRate) / 100;
-        }
       }
 
       let reimbursedAmount = 0;
@@ -507,7 +502,6 @@ export class RetailLocationResolver {
         grossRevenue,
         netRevenue,
         adminAccountsRevenue,
-        quotaMoneyTotal,
         activeSales,
         sellRate,
         buyRate,
@@ -685,7 +679,6 @@ export class RetailLocationResolver {
         adminAccountsRevenue,
         grossRevenue,
         netRevenue,
-        quotaMoneyTotal,
         sellRate,
       },
       buyingCustomersCount,
@@ -770,7 +763,6 @@ export class RetailLocationResolver {
       purchasedBooksFromBuyersAverage,
       settleableMoneyAverage,
       usersPerLanguage,
-      quotaMoneyTotal,
       soldBooksOriginalPriceTotal,
       sellingCustomersIncomeAverage,
       buyingCustomersFullExpenseAverage,

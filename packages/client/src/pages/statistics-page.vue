@@ -114,10 +114,6 @@ const dataToShow = computed<
   { label: string; value?: string; suffix?: string }[]
 >(() => [
   {
-    label: "Utenti attivi",
-    value: retailLocationStatistics.value?.activeUsersCount.toString(),
-  },
-  {
     label: "Libri movimentati",
     value: retailLocationStatistics.value?.bookCopiesCount.toString(),
   },
@@ -206,6 +202,10 @@ const dataToShow = computed<
     suffix: "€",
   },
   {
+    label: "Utenti attivi",
+    value: retailLocationStatistics.value?.activeUsersCount.toString(),
+  },
+  {
     label: "Utenti che hanno comprato almeno un libro",
     value: retailLocationStatistics.value?.buyingCustomersCount.toString(),
   },
@@ -218,7 +218,7 @@ const dataToShow = computed<
     value: retailLocationStatistics.value?.customersCount.toString(),
   },
   {
-    label: "Utenti che hanno pagato la quota",
+    label: "Utenti che sconto ISEE",
     value: retailLocationStatistics.value?.iseeUsersCount.toString(),
   },
   {
@@ -228,12 +228,12 @@ const dataToShow = computed<
   {
     label: "Media dei libri venduti o comprati per utente",
     value:
-      retailLocationStatistics.value?.purchasedOrSoldBooksAverage.toFixed(3),
+      retailLocationStatistics.value?.purchasedOrSoldBooksAverage.toFixed(2),
   },
   {
     label: "Media dei libri venduti da chi ha venduto almeno un libro",
     value:
-      retailLocationStatistics.value?.soldBooksFromSellersAverage.toFixed(3),
+      retailLocationStatistics.value?.soldBooksFromSellersAverage.toFixed(2),
   },
   {
     label: "Media dei libri comprati da chi ha comprato almeno un libro",
@@ -253,11 +253,6 @@ const dataToShow = computed<
       value: count.toString(),
     }),
   ),
-  {
-    label: "Totale soldi quota",
-    value: retailLocationStatistics.value?.quotaMoneyTotal.toFixed(2),
-    suffix: "€",
-  },
   {
     label: "Totale prezzo di copertina libri venduti",
     value:

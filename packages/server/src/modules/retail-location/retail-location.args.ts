@@ -156,17 +156,13 @@ export class StatisticsQueryResult {
   @Field(() => Float)
   purchasedBooksFromBuyersAverage!: number;
 
-  // Average sellable money per user
+  // Average settleable money per user
   @Field(() => Float)
   settleableMoneyAverage!: number;
 
   // Users that use a certain language
   @Field(() => [UsersPerLanguageData])
   usersPerLanguage!: UsersPerLanguageData[];
-
-  // Total money from the ISEE quota
-  @Field(() => Float)
-  quotaMoneyTotal!: number;
 
   // Total of the cover prices of sold books
   @Field(() => Float)
