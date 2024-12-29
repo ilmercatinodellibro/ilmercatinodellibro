@@ -1,5 +1,9 @@
 <template>
-  <q-page class="column full-height q-pa-md">
+  <!--
+    col, column, full-height, row classes at each level are needed
+    to allow for scroll delegation, provided by flex-delegate-height-management class, to work
+  -->
+  <q-page class="full-height q-pa-md row">
     <q-card class="col column">
       <q-card-section class="text-h5 text-primary">
         {{ $t(`routesNames.${AvailableRouteNames.Statistics}`) }}
@@ -7,22 +11,31 @@
 
       <q-separator />
 
-      <q-tabs v-model="activeTab" active-color="accent">
+      <!-- Without "full-width" class setting a fixed width for tabs, its length would cause a visible overflow when in mobile viewports -->
+      <q-tabs
+        v-model="activeTab"
+        active-color="accent"
+        align="justify"
+        class="full-width"
+        mobile-arrows
+      >
         <q-tab v-for="tab in StatisticsTab" :key="tab" :name="tab">
           {{ t(`retailLocation.statistics.${tab}`) }}
         </q-tab>
       </q-tabs>
 
-      <q-tab-panels v-model="activeTab" class="flex-delegate-height-management">
+      <q-tab-panels
+        v-model="activeTab"
+        class="flex-delegate-height-management q-pa-md"
+      >
         <q-tab-panel
           :name="StatisticsTab.GENERAL"
-          class="full-height gap-24 justify-between row"
+          class="full-height gap-24 grid"
         >
           <q-field
             v-for="(item, index) in dataToShow"
             :key="index"
             :label="item.label"
-            class="min-width-360"
             outlined
             readonly
             stack-label
@@ -44,23 +57,17 @@
           <stats-chart
             :data="deliveriesChartData"
             :loading="deliveriesLoading"
-            class="col"
           />
         </q-tab-panel>
 
         <q-tab-panel :name="StatisticsTab.SALE" class="column flex-center">
-          <stats-chart
-            :data="salesChartData"
-            :loading="salesLoading"
-            class="col"
-          />
+          <stats-chart :data="salesChartData" :loading="salesLoading" />
         </q-tab-panel>
 
         <q-tab-panel :name="StatisticsTab.SETTLE" class="column flex-center">
           <stats-chart
             :data="settlementsChartData"
             :loading="settlementsLoading"
-            class="col"
           />
         </q-tab-panel>
 
@@ -68,7 +75,6 @@
           <stats-chart
             :data="returningsChartData"
             :loading="returningsLoading"
-            class="col"
           />
         </q-tab-panel>
       </q-tab-panels>
@@ -322,3 +328,10 @@ const { returningsChartData, loading: returningsLoading } =
     enabled: returningsEnabled.value,
   }));
 </script>
+
+<style lang="scss" scoped>
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+</style>
