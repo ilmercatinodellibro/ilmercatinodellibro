@@ -64,6 +64,7 @@
 
       <dialog-table
         v-model:pagination="tablePagination"
+        :class="isMobile ? 'sticky-last-column' : undefined"
         :columns="columns"
         :filter="tableFilter"
         :filter-method="filterMethod"
@@ -87,9 +88,36 @@
           </q-td>
         </template>
 
-        <template #body-cell-actions="{ row }">
-          <q-td auto-width class="text-center">
-            <chip-button v-bind="getButtonData(row)" />
+        <template #body-cell-actions="props">
+          <q-td
+            :class="isMobile ? 'no-padding' : undefined"
+            auto-width
+            class="text-center"
+          >
+            <chip-button v-if="!isMobile" v-bind="getButtonData(props.row)" />
+            <q-btn
+              v-else
+              :icon="mdiDotsVertical"
+              class="full-height"
+              color="primary"
+              flat
+            >
+              <q-menu>
+                <q-list>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="getButtonData(props.row).onClick"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ getButtonData(props.row).label }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </q-td>
         </template>
       </dialog-table>
@@ -100,6 +128,7 @@
 <script setup lang="ts">
 import {
   mdiArrowLeft,
+  mdiDotsVertical,
   mdiFilter,
   mdiMagnify,
   mdiPlus,
@@ -167,13 +196,6 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
   },
   {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
     name: "subject",
     field: "subject",
     label: t("book.fields.subject"),
@@ -188,10 +210,11 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     classes: "text-wrap",
   },
   {
-    name: "availability",
-    field: ({ meta }) => meta.isAvailable,
-    label: t("book.fields.availability"),
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "cover-price",
@@ -207,6 +230,12 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.price"),
     align: "left",
     format: (val: number) => discountedPrice(val, "sell"),
+  },
+  {
+    name: "availability",
+    field: ({ meta }) => meta.isAvailable,
+    label: t("book.fields.availability"),
+    align: "left",
   },
   {
     name: "available-copies",
