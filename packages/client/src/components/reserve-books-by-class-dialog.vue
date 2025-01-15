@@ -5,6 +5,7 @@
     @hide="onDialogHide"
   >
     <k-dialog-card
+      :class="isMobile ? 'sticky-last-column' : undefined"
       :title="$t('reserveBooks.confirmReserveByClassDialog.title')"
       :save-label="$t('reserveBooks.reserveAll')"
       size="fullscreen"
@@ -33,15 +34,51 @@
         <template #body-cell-subject="{ value, col }">
           <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
+
+        <template #body-cell-availability="cellProps">
+          <q-td :props="cellProps">
+            <status-chip :value="cellProps.value" />
+          </q-td>
+        </template>
+
         <template #body-cell-actions="{ row }">
-          <q-td>
+          <q-td :class="isMobile ? 'no-padding' : undefined">
             <chip-button
+              v-if="!isMobile"
               :label="
                 $t('reserveBooks.confirmReserveByClassDialog.removeFromList')
               "
               color="negative"
               @click="remove(booksToReserve, row)"
             />
+
+            <q-btn
+              v-else
+              :icon="mdiDotsVertical"
+              class="full-height"
+              color="primary"
+              flat
+            >
+              <q-menu>
+                <q-list>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="remove(booksToReserve, row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{
+                          t(
+                            "reserveBooks.confirmReserveByClassDialog.removeFromList",
+                          )
+                        }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </q-td>
         </template>
       </dialog-table>
@@ -50,6 +87,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiDotsVertical } from "@quasar/extras/mdi-v7";
 import { cloneDeep, remove } from "lodash-es";
 import { QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
@@ -57,21 +95,21 @@ import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
-import { BookSummaryFragment } from "src/services/book.graphql";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import KDialogCard from "./k-dialog-card.vue";
 import chipButton from "./manage-users/chip-button.vue";
 import dialogTable from "./manage-users/dialog-table.vue";
+import StatusChip from "./manage-users/status-chip.vue";
 import TableCellWithTooltip from "./manage-users/table-cell-with-tooltip.vue";
 
 const props = defineProps<{
-  classBooks: BookSummaryFragment[];
+  classBooks: BookWithAvailableCopiesFragment[];
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
-  useDialogPluginComponent<BookSummaryFragment[]>();
+  useDialogPluginComponent<BookWithAvailableCopiesFragment[]>();
 
 const { isMobile } = useLateralDrawer();
 
@@ -84,13 +122,6 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       field: "isbnCode",
       label: t("book.fields.isbn"),
       align: "left",
-    },
-    {
-      name: "author",
-      field: "authorsFullName",
-      label: t("book.fields.author"),
-      align: "left",
-      classes: "max-width-160 ellipsis",
     },
     {
       name: "subject",
@@ -107,10 +138,11 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       classes: "text-wrap",
     },
     {
-      name: "availability",
-      field: ({ meta }) => meta.isAvailable,
-      label: t("book.fields.availability"),
+      name: "author",
+      field: "authorsFullName",
+      label: t("book.fields.author"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "cover-price",
@@ -128,10 +160,16 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       format: (val: number) => discountedPrice(val, "sell"),
     },
     {
+      name: "availability",
+      field: ({ meta }) => meta.isAvailable,
+      label: t("book.fields.availability"),
+      align: "left",
+    },
+    {
       name: "available-copies",
       field: ({ copies }) => copies?.length ?? 0,
       label: t("reserveBooks.availableCopies"),
-      align: "left",
+      align: "center",
     },
     {
       name: "actions",

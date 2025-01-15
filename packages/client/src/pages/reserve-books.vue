@@ -154,6 +154,7 @@ import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
 import { GetRequestsDocument } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
@@ -427,7 +428,7 @@ function openReserveAllDialog() {
     componentProps: {
       classBooks: rows.value,
     },
-  }).onOk(async (books: BookSummaryFragment[]) => {
+  }).onOk(async (books: BookWithAvailableCopiesFragment[]) => {
     try {
       const { cache } = await createReservations({
         input: {
