@@ -6,7 +6,7 @@
     >
       <q-card-section class="column no-padding width-min-360">
         <template v-if="user">
-          <q-list>
+          <q-list :separator="isMobile">
             <q-item
               v-for="{ icon, label, field, showInfo, infoLabel } in userData"
               :key="label"
