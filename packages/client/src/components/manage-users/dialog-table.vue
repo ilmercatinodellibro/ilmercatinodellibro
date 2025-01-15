@@ -62,6 +62,7 @@ onMounted(() => {
   tr:last-child th:last-child,
   td:last-child {
     background-color: #fff;
+    border-left: 1px solid rgba(0 0 0 / 12%);
     position: sticky;
     right: 0;
     z-index: 1;

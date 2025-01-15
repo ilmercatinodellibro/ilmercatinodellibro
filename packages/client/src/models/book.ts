@@ -35,9 +35,9 @@ export interface TableFilters {
 }
 
 export enum BooksTab {
-  DELIVERED = "delivered",
-  RESERVED = "reserved",
   REQUESTED = "requested",
+  RESERVED = "reserved",
+  DELIVERED = "delivered",
   PURCHASED = "purchased",
 }
 

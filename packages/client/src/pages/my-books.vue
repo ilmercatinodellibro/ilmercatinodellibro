@@ -21,10 +21,10 @@
 
       <q-tabs v-model="selectedTab" align="justify" active-color="accent">
         <q-tab
-          v-for="tab in Object.values(BooksTab)"
+          v-for="tab in BooksTab"
           :key="tab"
           :name="tab"
-          class="col text-black-54 text-weight-medium"
+          class="col text-black-54 text-weight-medium text-wrap"
           @click="
             router.replace({
               path: AvailableRouteNames.MyBooks,
@@ -42,12 +42,17 @@
         class="column dialog-panels flex-delegate-height-management hide-scrollbar no-wrap"
       >
         <q-tab-panel
-          v-for="tab in Object.values(BooksTab)"
+          v-for="tab in BooksTab"
           :key="tab"
           :name="tab"
           class="column flex-delegate-height-management no-padding no-wrap"
         >
           <dialog-table
+            :class="
+              isMobile && [BooksTab.REQUESTED, BooksTab.RESERVED].includes(tab)
+                ? 'sticky-last-column'
+                : undefined
+            "
             :columns="columns[tab]"
             :filter="searchQuery"
             :loading="loading"
@@ -95,12 +100,40 @@
               v-if="tab === BooksTab.RESERVED"
               #body-cell-actions="{ row }"
             >
-              <q-td class="text-center">
+              <q-td
+                :class="isMobile ? 'no-padding' : undefined"
+                class="text-center"
+              >
                 <chip-button
+                  v-if="!isMobile"
                   :label="$t('myBooks.cancelReservation')"
                   color="primary"
                   @click="cancelReservation(row)"
                 />
+
+                <q-btn
+                  v-else
+                  :icon="mdiDotsVertical"
+                  class="full-height"
+                  color="primary"
+                  flat
+                >
+                  <q-menu>
+                    <q-list>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="cancelReservation(row)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("myBooks.cancelReservation") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
               </q-td>
             </template>
 
@@ -117,18 +150,55 @@
               v-if="tab === BooksTab.REQUESTED"
               #body-cell-reserve="{ value, row }"
             >
-              <q-td>
+              <q-td :class="isMobile ? 'no-padding' : undefined">
                 <chip-button
-                  v-if="value"
+                  v-if="value && !isMobile"
                   :label="t('myBooks.reserve')"
                   color="primary"
                   @click="reserveBook(row)"
                 />
+
+                <q-btn
+                  v-else-if="isMobile"
+                  :icon="mdiDotsVertical"
+                  class="full-height"
+                  color="primary"
+                  flat
+                >
+                  <q-menu>
+                    <q-list>
+                      <q-item
+                        v-if="value"
+                        v-close-popup
+                        clickable
+                        @click="reserveBook(row)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("myBooks.reserve") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="cancelRequest(row)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("myBooks.cancelRequest") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
               </q-td>
             </template>
 
             <template
-              v-if="tab === BooksTab.REQUESTED"
+              v-if="tab === BooksTab.REQUESTED && !isMobile"
               #body-cell-cancel-request="{ row }"
             >
               <q-td>
@@ -152,6 +222,7 @@ import {
   mdiCash,
   mdiCurrencyEur,
   mdiCurrencyEurOff,
+  mdiDotsVertical,
   mdiGift,
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
@@ -255,13 +326,6 @@ const commonColumns = computed<QTableColumn<TablesRowsTypes>[]>(() => [
     align: "left",
   },
   {
-    name: "author",
-    field: ({ book }) => book.authorsFullName,
-    label: t("book.fields.author"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
     name: "subject",
     field: ({ book }) => book.subject,
     label: t("book.fields.subject"),
@@ -274,6 +338,13 @@ const commonColumns = computed<QTableColumn<TablesRowsTypes>[]>(() => [
     label: t("book.fields.title"),
     align: "left",
     classes: "text-wrap",
+  },
+  {
+    name: "author",
+    field: ({ book }) => book.authorsFullName,
+    label: t("book.fields.author"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
   },
 ]);
 
@@ -318,12 +389,6 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
     ],
     [BooksTab.REQUESTED]: [
       ...commonColumns.value,
-      {
-        name: "availability",
-        field: ({ book: { meta } }) => meta.isAvailable,
-        label: t("myBooks.availability"),
-        align: "left",
-      },
       coverPriceColumn.value,
       {
         name: "price",
@@ -333,15 +398,25 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         format: (val: number) => discountedPrice(val, "sell"),
       },
       {
+        name: "availability",
+        field: ({ book: { meta } }) => meta.isAvailable,
+        label: t("myBooks.availability"),
+        align: "left",
+      },
+      {
         name: "reserve",
         field: ({ book: { meta } }) => meta.isAvailable,
         label: "",
       },
-      {
-        name: "cancel-request",
-        field: () => undefined,
-        label: "",
-      },
+      ...(!isMobile.value
+        ? [
+            {
+              name: "cancel-request",
+              field: () => undefined,
+              label: "",
+            } satisfies QTableColumn<TablesRowsTypes>,
+          ]
+        : []),
     ],
     [BooksTab.RESERVED]: [
       ...commonColumns.value,
@@ -363,7 +438,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
 );
 
 const selectedTab = ref(
-  (route.query.tab as BooksTab | undefined) ?? BooksTab.DELIVERED,
+  (route.query.tab as BooksTab | undefined) ?? BooksTab.REQUESTED,
 );
 
 const searchQuery = ref("");
