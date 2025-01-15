@@ -1,6 +1,6 @@
 <template>
   <div
-    class="action-box bg-primary column items-center justify-center min-height-250 min-width-250 no-wrap q-px-md q-py-xl"
+    class="action-box bg-primary column items-center justify-center min-height-200 min-width-250 no-wrap q-px-md q-py-xl"
   >
     <slot>
       <p v-if="actionText" class="q-ma-none q-mb-lg text-h4 text-white">

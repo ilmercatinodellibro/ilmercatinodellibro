@@ -57,10 +57,11 @@ async function selectLocation(location: RetailLocationFragment) {
 
 <style lang="scss" scoped>
 .action-box {
-  aspect-ratio: 1 / 1;
-  width: 300px;
+  width: 100%;
 
   @media screen and (min-width: $breakpoint-sm-min) {
+    aspect-ratio: 1 / 1;
+    max-width: unset;
     width: 400px;
   }
 }
