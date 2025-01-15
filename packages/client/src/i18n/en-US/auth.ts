@@ -24,7 +24,7 @@ export default {
   vulnerablePasswordWarning: "Warning: Insecure password.",
   dangerousPassword: "WARNING: Password is very insecure.",
   alreadyRegistered: "Already got a profile?",
-  goToLogin: "Go to the login",
+  goToLogin: "Go to the Login",
   verificationEmailSent: "Verification email sent.",
   pleaseCheckYourInboxForVerificationEmail:
     "Check your inbox for the verification email.",

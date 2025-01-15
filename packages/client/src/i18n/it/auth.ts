@@ -24,7 +24,7 @@ export default {
   vulnerablePasswordWarning: "Attenzione: Password non sicura.",
   dangerousPassword: "ATTENZIONE: Password non sicura!",
   alreadyRegistered: "Hai già un profilo?",
-  goToLogin: "Effettua il log in",
+  goToLogin: "Vai al Login",
   verificationEmailSent: "Email di verifica inviata!",
   pleaseCheckYourInboxForVerificationEmail:
     "Controlla la tua casella di posta per l'e-mail di verifica.",

@@ -94,6 +94,7 @@
       :icon="mdiArrowDown"
       :label="t('auth.goToLogin')"
       color="accent"
+      no-caps
       @click="scrollToLogin()"
     />
   </q-page>
