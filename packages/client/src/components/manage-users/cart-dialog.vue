@@ -51,11 +51,14 @@
         row-key="id"
       >
         <template #body="bodyProps">
-          <q-tr>
+          <q-tr :class="isMobile ? 'sticky-last-column' : undefined">
             <q-td
               v-for="{ name, value, classes } in bodyProps.cols"
               :key="name"
-              :class="classes"
+              :class="[
+                classes,
+                isMobile && name === 'delete' ? 'no-padding' : '',
+              ]"
             >
               <q-btn
                 v-if="name === 'selection'"
@@ -64,14 +67,39 @@
                 round
                 @click="bodyProps.expand = !bodyProps.expand"
               />
-              <q-btn
-                v-if="name === 'delete'"
-                :icon="mdiDelete"
-                color="negative"
-                flat
-                round
-                @click="removeBook(bodyProps.row)"
-              />
+              <template v-if="name === 'delete'">
+                <q-btn
+                  v-if="!isMobile"
+                  :icon="mdiDelete"
+                  color="negative"
+                  flat
+                  round
+                  @click="removeBook(bodyProps.row)"
+                />
+                <q-btn
+                  v-else
+                  :icon="mdiDotsVertical"
+                  class="fit"
+                  color="primary"
+                  flat
+                >
+                  <q-menu>
+                    <q-list>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="removeBook(bodyProps.row)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("actions.remove") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
+              </template>
               <span v-else>
                 <q-tooltip v-if="['subject', 'author'].includes(name)">
                   {{ value }}
@@ -156,6 +184,7 @@ import {
   mdiChevronDown,
   mdiChevronUp,
   mdiDelete,
+  mdiDotsVertical,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { sumBy } from "lodash-es";
