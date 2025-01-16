@@ -62,3 +62,10 @@ body {
   background-color: $primary;
   color: #fff;
 }
+
+// All buttons need to have lowercase labels on small viewports to avoid overflows
+.q-btn__content * {
+  @media screen and (max-width: $breakpoint-sm) {
+    text-transform: none;
+  }
+}
