@@ -173,7 +173,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { discountedPrice, isAvailable } from "src/helpers/book-copy";
+import { formatPrice } from "src/composables/use-misc-formats";
 import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
@@ -246,12 +246,28 @@ function getCommonColumns<
 
   return [
     {
+      label: t("book.fields.subject"),
+      field: getField("subject"),
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
+    },
+    {
       label: t("book.fields.title"),
       field: getField("title"),
       name: "title",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
       classes: "text-wrap",
+    },
+    {
+      label: t("book.fields.author"),
+      field: getField("authorsFullName"),
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.publisher"),
@@ -261,12 +277,18 @@ function getCommonColumns<
       format: (val: string) => startCase(toLower(val)),
     },
     {
-      label: t("book.fields.price"),
+      label: t("book.fields.coverPrice"),
       field: getField("originalPrice"),
       name: "price",
       headerClasses: "text-center",
       align: "left",
-      format: (val: number) => discountedPrice(val, "sell"),
+      format: formatPrice,
+    },
+    {
+      label: t("book.fields.status"),
+      field: getField(({ meta }) => meta.isAvailable),
+      name: "status",
+      align: "left",
     },
     {
       label: t("book.fields.utility"),
@@ -285,28 +307,6 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       name: "isbn",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
-    },
-    {
-      label: t("book.fields.author"),
-      field: "authorsFullName",
-      name: "author",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      label: t("book.fields.subject"),
-      field: "subject",
-      name: "subject",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      label: t("book.fields.status"),
-      field: ({ meta }) => meta.isAvailable,
-      name: "status",
-      align: "left",
     },
 
     ...getCommonColumns("book"),
@@ -340,29 +340,6 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       name: "original-code",
       align: "left",
       format: (code?: string) => code ?? "/",
-    },
-    {
-      label: t("book.fields.author"),
-      field: ({ book }) => book.authorsFullName,
-      name: "author",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      label: t("book.fields.subject"),
-      field: ({ book }) => book.subject,
-      name: "subject",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      label: t("book.fields.status"),
-      field: isAvailable,
-      name: "status",
-      align: "left",
-      classes: "max-width-160 ellipsis",
     },
 
     ...getCommonColumns("copy"),

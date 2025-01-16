@@ -421,20 +421,18 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     align: "left",
   },
   {
-    name: "book-code",
-    field: "code",
-    label: t("book.code"),
+    name: "subject",
+    field: ({ book }) => book.subject,
+    label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
-    name: "status",
-    field: getStatus,
-    label: t("book.fields.status"),
+    name: "title",
+    field: ({ book }) => book.title,
+    label: t("book.fields.title"),
     align: "left",
-    format: (_, row) =>
-      t(
-        `warehouse.bookCopyStatus.${selectableRows.value.includes(row) ? "inStock" : getStatus(row)}`,
-      ),
+    classes: "text-wrap",
   },
   {
     name: "author",
@@ -448,20 +446,6 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     field: ({ book }) => book.publisherName,
     label: t("book.fields.publisher"),
     align: "left",
-  },
-  {
-    name: "subject",
-    field: ({ book }) => book.subject,
-    label: t("book.fields.subject"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
-    name: "title",
-    field: ({ book }) => book.title,
-    label: t("book.fields.title"),
-    align: "left",
-    classes: "text-wrap",
   },
   {
     name: "cover-price",
@@ -483,6 +467,22 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     label: t("manageUsers.payOffUserDialog.publicPrice"),
     align: "left",
     format: (val: number) => discountedPrice(val, "sell"),
+  },
+  {
+    name: "book-code",
+    field: "code",
+    label: t("book.code"),
+    align: "left",
+  },
+  {
+    name: "status",
+    field: getStatus,
+    label: t("book.fields.status"),
+    align: "left",
+    format: (_, row) =>
+      t(
+        `warehouse.bookCopyStatus.${selectableRows.value.includes(row) ? "inStock" : getStatus(row)}`,
+      ),
   },
   {
     name: "actions",

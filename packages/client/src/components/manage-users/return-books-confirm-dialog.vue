@@ -110,10 +110,18 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     align: "left",
   },
   {
-    name: "book-code",
-    field: "code",
-    label: t("book.code"),
+    name: "subject",
+    field: ({ book }) => book.subject,
+    label: t("book.fields.subject"),
     align: "left",
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "title",
+    field: ({ book }) => book.title,
+    label: t("book.fields.title"),
+    align: "left",
+    classes: "text-wrap",
   },
   {
     name: "author",
@@ -129,18 +137,10 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     align: "left",
   },
   {
-    name: "subject",
-    field: ({ book }) => book.subject,
-    label: t("book.fields.subject"),
+    name: "book-code",
+    field: "code",
+    label: t("book.code"),
     align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
-    name: "title",
-    field: ({ book }) => book.title,
-    label: t("book.fields.title"),
-    align: "left",
-    classes: "text-wrap",
   },
 ]);
 </script>

@@ -132,10 +132,10 @@ export default {
     totalPayOffLabel: "Totale Liquidabile all'Utente",
     totalCheckedOutLabel: "Totale Liquidato all'Utente",
     info: "Utilizza le checkbox delle righe per attivare le azioni di gruppo",
-    buyPrice: "Prezzo d'acquisto",
+    buyPrice: "Prezzo d'acquisizione",
     buyPriceTooltip:
       "È il prezzo concordato con il proprietario originale del libro e corrisponde alla somma che gli viene garantita in caso di vendita",
-    publicPrice: "Prezzo al pubblico",
+    publicPrice: "Prezzo al Pubblico",
     publicPriceTooltip:
       "È il prezzo al quale il libro viene venduto dal Mercatino e corrisponde al prezzo d'acquisto maggiorato della percentuale trattenuta dal Mercatino",
     booksInStock: "Libri in Magazzino",

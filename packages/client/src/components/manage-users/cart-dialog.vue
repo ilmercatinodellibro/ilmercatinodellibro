@@ -50,6 +50,19 @@
         class="flex-delegate-height-management"
         row-key="id"
       >
+        <template #header-cell-buy-price="{ col }">
+          <table-header-with-info
+            :info="t('manageUsers.payOffUserDialog.buyPriceTooltip')"
+            :label="col.label"
+          />
+        </template>
+        <template #header-cell-public-price="{ col }">
+          <table-header-with-info
+            :info="t('manageUsers.payOffUserDialog.publicPriceTooltip')"
+            :label="col.label"
+          />
+        </template>
+
         <template #body="bodyProps">
           <q-tr :class="isMobile ? 'sticky-last-column' : undefined">
             <q-td
@@ -134,7 +147,7 @@
                 @click="bodyProps.expand = true"
               />
             </q-td>
-            <q-td colspan="11">
+            <q-td colspan="9">
               {{ bookCopy.code }}
             </q-td>
           </q-tr>
@@ -215,6 +228,7 @@ import { CustomerFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import DialogTable from "./dialog-table.vue";
+import TableHeaderWithInfo from "./table-header-with-info.vue";
 
 const props = defineProps<{
   user: CustomerFragment;
@@ -242,19 +256,6 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
   },
   {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
-    name: "publisher",
-    field: "publisherName",
-    label: t("book.fields.publisher"),
-    align: "left",
-  },
-  {
     name: "subject",
     field: "subject",
     label: t("book.fields.subject"),
@@ -269,11 +270,31 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     classes: "text-wrap",
   },
   {
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "publisher",
+    field: "publisherName",
+    label: t("book.fields.publisher"),
+    align: "left",
+  },
+  {
     name: "cover-price",
     field: "originalPrice",
     label: t("book.fields.coverPrice"),
     align: "left",
     format: formatPrice,
+  },
+  {
+    name: "buy-price",
+    field: "originalPrice",
+    label: t("manageUsers.payOffUserDialog.buyPrice"),
+    align: "left",
+    format: (value: number) => discountedPrice(value, "buy"),
   },
   {
     name: "public-price",

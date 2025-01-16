@@ -232,13 +232,6 @@ const { purchasedBookCopies, loading: purchasedLoading } =
 
 const bookMiddleInfoColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   {
-    label: t("book.fields.author"),
-    field: ({ book }) => book.authorsFullName,
-    name: "author",
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
     label: t("book.fields.subject"),
     field: ({ book }) => book.subject,
     name: "subject",
@@ -251,6 +244,13 @@ const bookMiddleInfoColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     name: "title",
     align: "left",
     classes: "text-wrap",
+  },
+  {
+    label: t("book.fields.author"),
+    field: ({ book }) => book.authorsFullName,
+    name: "author",
+    align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     label: t("book.fields.publisher"),

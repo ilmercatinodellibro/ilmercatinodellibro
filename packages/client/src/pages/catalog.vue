@@ -104,21 +104,6 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
   },
   {
-    name: "author",
-    label: t("book.fields.author"),
-    field: "authorsFullName",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-    classes: "max-width-160 ellipsis",
-  },
-  {
-    name: "publisher",
-    label: t("book.fields.publisher"),
-    field: "publisherName",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-  },
-  {
     name: "subject",
     label: t("book.fields.subject"),
     field: "subject",
@@ -133,6 +118,21 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
     format: (val: string) => startCase(toLower(val)),
     classes: "text-wrap",
+  },
+  {
+    name: "author",
+    label: t("book.fields.author"),
+    field: "authorsFullName",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "publisher",
+    label: t("book.fields.publisher"),
+    field: "publisherName",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
   },
   {
     name: "price",

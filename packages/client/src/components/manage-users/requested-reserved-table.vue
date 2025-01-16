@@ -50,7 +50,7 @@ import { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { discountedPrice } from "src/helpers/book-copy";
+import { formatPrice } from "src/composables/use-misc-formats";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import UtilityChip from "../utility-chip.vue";
@@ -86,14 +86,6 @@ const columns = computed<
     align: "left",
   },
   {
-    name: "author",
-    field: ({ book: { authorsFullName } }) => authorsFullName,
-    label: t("book.fields.author"),
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-    classes: "max-width-160 ellipsis",
-  },
-  {
     name: "subject",
     field: ({ book: { subject } }) => subject,
     label: t("book.fields.subject"),
@@ -110,6 +102,14 @@ const columns = computed<
     classes: "text-wrap",
   },
   {
+    name: "author",
+    field: ({ book: { authorsFullName } }) => authorsFullName,
+    label: t("book.fields.author"),
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+    classes: "max-width-160 ellipsis",
+  },
+  {
     name: "publisher",
     field: ({ book: { publisherName } }) => publisherName,
     label: t("book.fields.publisher"),
@@ -119,9 +119,9 @@ const columns = computed<
   {
     name: "price",
     field: ({ book: { originalPrice } }) => originalPrice,
-    label: t("book.fields.price"),
+    label: t("book.fields.coverPrice"),
     align: "left",
-    format: (val: number) => discountedPrice(val, "sell"),
+    format: formatPrice,
   },
   {
     name: "utility",
