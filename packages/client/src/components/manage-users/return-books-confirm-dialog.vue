@@ -1,5 +1,11 @@
 <template>
-  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    :full-height="isMobile"
+    :maximized="isMobile"
+    persistent
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :title="title"
       size="fullscreen"
