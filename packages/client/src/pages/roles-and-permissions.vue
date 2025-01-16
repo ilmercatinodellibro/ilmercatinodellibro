@@ -24,6 +24,7 @@
       <q-card-section v-if="!loading" class="col column no-padding no-wrap">
         <dialog-table
           v-model:pagination="pagination"
+          :class="isMobile ? 'sticky-last-column' : undefined"
           :columns="columns"
           :filter="tableFilter"
           :filter-method="filterMethod"
@@ -33,13 +34,42 @@
           @request="onRequest"
         >
           <template #body-cell-actions="{ row, col }">
-            <q-td :class="col.classes" auto-width>
-              <chip-button
-                v-if="row.role !== 'ADMIN'"
-                :label="t('actions.removeOperator')"
-                color="negative"
-                @click="deleteUser(row.id)"
-              />
+            <q-td
+              :class="[col.classes, isMobile ? 'no-padding' : undefined]"
+              auto-width
+            >
+              <template v-if="row.role !== 'ADMIN'">
+                <chip-button
+                  v-if="!isMobile"
+                  :label="t('actions.removeOperator')"
+                  color="negative"
+                  @click="deleteUser(row.id)"
+                />
+
+                <q-btn
+                  v-else
+                  :icon="mdiDotsVertical"
+                  class="fit"
+                  color="primary"
+                  flat
+                >
+                  <q-menu>
+                    <q-list>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="deleteUser(row.id)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("actions.removeOperator") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
+              </template>
             </q-td>
           </template>
         </dialog-table>
@@ -61,7 +91,7 @@
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client";
-import { mdiPlus } from "@quasar/extras/mdi-v7";
+import { mdiDotsVertical, mdiPlus } from "@quasar/extras/mdi-v7";
 import { Dialog, Notify, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
