@@ -4,6 +4,7 @@
       <q-btn
         v-if="isMobile"
         :icon="mdiClose"
+        class="height-24 width-24"
         color="dark"
         dense
         flat
