@@ -52,6 +52,7 @@
           </card-table-header>
 
           <dialog-table
+            :class="isMobile ? 'sticky-last-column' : undefined"
             :rows="booksToRegister"
             :columns="booksToRegisterColumns"
             :loading="loading"
@@ -78,8 +79,12 @@
             </template>
 
             <template #body-cell-actions="{ rowIndex }">
-              <q-td class="text-center">
+              <q-td
+                :class="isMobile ? 'no-padding' : undefined"
+                class="text-center"
+              >
                 <chip-button
+                  v-if="!isMobile"
                   color="primary"
                   no-wrap
                   @click="openDeleteBookDialog(rowIndex)"
@@ -95,6 +100,30 @@
                     </q-tooltip>
                   </q-icon>
                 </chip-button>
+
+                <q-btn
+                  v-else
+                  :icon="mdiDotsVertical"
+                  class="fit"
+                  color="primary"
+                  flat
+                >
+                  <q-menu>
+                    <q-list>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="openDeleteBookDialog(rowIndex)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("common.delete") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
               </q-td>
             </template>
           </dialog-table>
@@ -137,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
+import { mdiDotsVertical, mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
 import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
