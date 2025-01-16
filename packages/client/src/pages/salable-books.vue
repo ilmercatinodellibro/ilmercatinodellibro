@@ -129,13 +129,6 @@ const columns = computed<QTableColumn<BookWithStatus>[]>(() => [
     align: "left",
   },
   {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
     name: "subject",
     field: "subject",
     label: t("book.fields.subject"),
@@ -148,6 +141,13 @@ const columns = computed<QTableColumn<BookWithStatus>[]>(() => [
     label: t("book.fields.title"),
     align: "left",
     classes: "text-wrap",
+  },
+  {
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
   },
 ]);
 
