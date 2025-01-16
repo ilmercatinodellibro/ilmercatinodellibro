@@ -5,6 +5,7 @@
       actions-padding
       size="fullscreen"
       @submit="validateSettings()"
+      @cancel="onDialogCancel()"
     >
       <q-card-section
         class="column gap-4 no-wrap q-pb-xs q-pt-lg q-px-lg width-700"

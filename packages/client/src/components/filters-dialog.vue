@@ -4,6 +4,7 @@
       :title="title"
       size="sm"
       @submit="onSubmit(selectedFilters)"
+      @cancel="onDialogCancel()"
     >
       <q-item v-for="(option, index) in options" :key="index" tag="label">
         <q-item-section side>
