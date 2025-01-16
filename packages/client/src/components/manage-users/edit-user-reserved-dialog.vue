@@ -108,14 +108,15 @@
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
         <requested-reserved-table
+          :loading="reservedLoading"
           :rows="userReservations"
           class="col"
-          :loading="reservedLoading"
           is-showing-reservations
         >
           <template #book-actions="{ requestOrReservation: reservation }">
             <chip-button
-              :label="$t('manageUsers.actions')"
+              v-if="!isMobile"
+              :label="t('manageUsers.actions')"
               color="primary"
               show-dropdown
             >
@@ -138,6 +139,42 @@
                 </q-item-section>
               </q-item>
             </chip-button>
+
+            <q-btn
+              v-else
+              :icon="mdiDotsVertical"
+              class="fit"
+              color="primary"
+              flat
+            >
+              <q-menu>
+                <q-list>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="putBooksIntoCart(reservation)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("book.reservedBooksDialog.options.cart") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="removeFromReserved(reservation)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("common.delete") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </template>
         </requested-reserved-table>
 
@@ -150,12 +187,13 @@
         </span>
 
         <requested-reserved-table
-          :rows="bookRequests"
           :loading="requestLoading"
+          :rows="bookRequests"
           class="col"
         >
           <template #book-actions="{ requestOrReservation: request }">
             <chip-button
+              v-if="!isMobile"
               :label="$t('manageUsers.actions')"
               color="primary"
               show-dropdown
@@ -183,6 +221,54 @@
                 </q-item-section>
               </q-item>
             </chip-button>
+
+            <q-btn
+              v-else
+              :icon="mdiDotsVertical"
+              class="fit"
+              color="primary"
+              flat
+            >
+              <q-menu>
+                <q-list>
+                  <template v-if="request.book.meta.isAvailable">
+                    <q-item
+                      v-close-popup
+                      clickable
+                      @click="reserveBook(request)"
+                    >
+                      <q-item-section>
+                        {{ $t("book.reservedBooksDialog.options.reserved") }}
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item
+                      v-close-popup
+                      clickable
+                      @click="putBooksIntoCart(request)"
+                    >
+                      <q-item-section>
+                        <q-item-label>
+                          {{ t("book.reservedBooksDialog.options.cart") }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="deleteRequest(request)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("common.delete") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </template>
         </requested-reserved-table>
       </q-card-section>
@@ -197,7 +283,7 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
+import { Dialog, QBtn, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";

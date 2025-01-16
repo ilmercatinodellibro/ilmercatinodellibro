@@ -1,5 +1,9 @@
 <template>
-  <dialog-table :rows="rows" :columns="columns">
+  <dialog-table
+    :class="isMobile ? 'sticky-last-column' : undefined"
+    :rows="rows"
+    :columns="columns"
+  >
     <template #body-cell-author="{ value, col }">
       <table-cell-with-tooltip :class="col.classes" :value="value" />
     </template>
@@ -29,7 +33,7 @@
       </q-td>
     </template>
     <template #body-cell-actions="{ row }">
-      <q-td>
+      <q-td :class="isMobile ? 'no-padding' : undefined">
         <!--
           Slot here so every usage of this component can define the
           options available inside the menu and their behavior
@@ -45,6 +49,7 @@ import { startCase, toLower } from "lodash-es";
 import { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { discountedPrice } from "src/helpers/book-copy";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
@@ -62,6 +67,8 @@ defineProps<
     // eslint-disable-next-line vue/no-unused-properties
   } & Pick<QTableProps, "loading">
 >();
+
+const { isMobile } = useLateralDrawer();
 
 const columns = computed<
   QTableColumn<ReservationSummaryFragment | RequestSummaryFragment>[]

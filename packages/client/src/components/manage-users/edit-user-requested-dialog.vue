@@ -108,6 +108,7 @@
       >
         <template #book-actions="{ requestOrReservation: request }">
           <chip-button
+            v-if="!isMobile"
             :label="$t('manageUsers.actions')"
             color="primary"
             show-dropdown
@@ -118,6 +119,7 @@
                   {{ $t("book.reservedBooksDialog.options.reserved") }}
                 </q-item-section>
               </q-item>
+
               <q-item
                 v-close-popup
                 clickable
@@ -135,6 +137,48 @@
               </q-item-section>
             </q-item>
           </chip-button>
+
+          <q-btn
+            v-else
+            :icon="mdiDotsVertical"
+            class="fit"
+            color="primary"
+            flat
+          >
+            <q-menu>
+              <q-list>
+                <template v-if="request.book.meta.isAvailable">
+                  <q-item v-close-popup clickable @click="reserveBook(request)">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("book.reservedBooksDialog.options.reserved") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="putRequestedBookIntoCart(request)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("book.reservedBooksDialog.options.cart") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+
+                <q-item v-close-popup clickable @click="deleteRequest(request)">
+                  <q-item-section>
+                    <q-item-label>
+                      {{ t("common.delete") }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </template>
       </requested-reserved-table>
     </k-dialog-card>
