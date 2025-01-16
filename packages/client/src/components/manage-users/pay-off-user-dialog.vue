@@ -77,6 +77,11 @@
           <template #body="{ row, cols }">
             <q-tr
               v-if="Object.values(Titles).includes(row.id)"
+              :class="
+                isMobile && row.id === Titles.InStock
+                  ? 'sticky-last-column'
+                  : undefined
+              "
               class="bg-grey-1"
               no-hover
             >
@@ -93,84 +98,92 @@
                 This <td> takes all the remaining columns of the table's worth of width
                 so the colspan is set to take up the space of all the other columns
               -->
-              <q-td class="non-selectable text-weight-medium" colspan="11">
-                <span class="items-center row">
+              <q-td
+                :class="isMobile ? 'mobile-in-stock-title-bar' : undefined"
+                class="non-selectable text-weight-medium"
+                colspan="11"
+              >
+                <span class="fit items-center row">
                   {{ localizedSectionTitle(row.id) }}
                   <q-space />
                   <span
                     v-if="
                       rowsSelectionStatus !== false && row.id === Titles.InStock
                     "
-                    class="gap-16 items-center row sticky-button-group"
+                    class="full-height gap-16 items-center row sticky-button-group"
                   >
-                    <q-btn-dropdown
+                    <q-btn
                       v-if="isMobile"
-                      :label="t('manageUsers.actions')"
-                      color="accent"
+                      :icon="mdiDotsVertical"
+                      class="fit"
+                      color="primary"
+                      flat
                     >
-                      <q-list>
-                        <q-item
-                          v-close-popup
-                          clickable
-                          @click="donateBooks(selectedRows)"
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{
-                                t(
-                                  "manageUsers.payOffUserDialog.returnOptions.donate",
-                                )
-                              }}
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
-                        <q-item
-                          v-close-popup
-                          clickable
-                          @click="reimburseBooks(selectedRows)"
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{
-                                t(
-                                  "manageUsers.payOffUserDialog.returnOptions.reimburse",
-                                )
-                              }}
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
-                        <q-item
-                          v-close-popup
-                          clickable
-                          @click="returnBooks(selectedRows)"
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{
-                                t(
-                                  "manageUsers.payOffUserDialog.returnOptions.return",
-                                )
-                              }}
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
-                        <q-item
-                          v-close-popup
-                          clickable
-                          @click="reportProblems(selectedRows)"
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{
-                                t(
-                                  "manageUsers.booksMovementsDialog.reportProblem",
-                                )
-                              }}
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
-                      </q-list>
-                    </q-btn-dropdown>
+                      <q-menu>
+                        <q-list>
+                          <q-item
+                            v-close-popup
+                            clickable
+                            @click="donateBooks(selectedRows)"
+                          >
+                            <q-item-section>
+                              <q-item-label>
+                                {{
+                                  t(
+                                    "manageUsers.payOffUserDialog.returnOptions.donate",
+                                  )
+                                }}
+                              </q-item-label>
+                            </q-item-section>
+                          </q-item>
+                          <q-item
+                            v-close-popup
+                            clickable
+                            @click="reimburseBooks(selectedRows)"
+                          >
+                            <q-item-section>
+                              <q-item-label>
+                                {{
+                                  t(
+                                    "manageUsers.payOffUserDialog.returnOptions.reimburse",
+                                  )
+                                }}
+                              </q-item-label>
+                            </q-item-section>
+                          </q-item>
+                          <q-item
+                            v-close-popup
+                            clickable
+                            @click="returnBooks(selectedRows)"
+                          >
+                            <q-item-section>
+                              <q-item-label>
+                                {{
+                                  t(
+                                    "manageUsers.payOffUserDialog.returnOptions.return",
+                                  )
+                                }}
+                              </q-item-label>
+                            </q-item-section>
+                          </q-item>
+                          <q-item
+                            v-close-popup
+                            clickable
+                            @click="reportProblems(selectedRows)"
+                          >
+                            <q-item-section>
+                              <q-item-label>
+                                {{
+                                  t(
+                                    "manageUsers.booksMovementsDialog.reportProblem",
+                                  )
+                                }}
+                              </q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </q-list>
+                      </q-menu>
+                    </q-btn>
                     <template v-else>
                       <q-btn
                         :label="
@@ -220,7 +233,14 @@
               </q-td>
             </q-tr>
 
-            <q-tr v-else>
+            <q-tr
+              v-else
+              :class="
+                isMobile && selectableRows.includes(row)
+                  ? 'sticky-last-column'
+                  : undefined
+              "
+            >
               <q-td v-for="col in cols" :key="col.name" :class="col.classes">
                 <!--
                   Since we can't use #body-cell-[column-name] because we're using
@@ -833,10 +853,21 @@ function performCashOnlyCheckout() {
 </script>
 
 <style scoped lang="scss">
+.mobile-in-stock-title-bar {
+  padding-bottom: 0 !important;
+  padding-right: 0;
+  padding-top: 0;
+}
+
 // This class is used so that the bulk action buttons
 // can be seen without scrolling the table to the right
 .sticky-button-group {
   position: sticky;
   right: 16px;
+
+  @media screen and (max-width: $breakpoint-sm) {
+    right: 0;
+    border-left: 1px solid rgba(0 0 0 / 12%);
+  }
 }
 </style>
