@@ -265,6 +265,7 @@
                         </q-item>
 
                         <q-item
+                          v-if="props.row.booksSold > 0"
                           v-close-popup
                           :disable="willBeDeleted(props.row)"
                           clickable
@@ -343,6 +344,7 @@
                         </q-item>
 
                         <q-item
+                          v-if="props.row.booksBought > 0"
                           v-close-popup
                           :disable="willBeDeleted(props.row)"
                           clickable
@@ -391,11 +393,7 @@
                         </q-item>
 
                         <q-item
-                          v-close-popup="
-                            hasAdminRole ||
-                            (selectedLocation.payOffEnabled &&
-                              !willBeDeleted(props.row))
-                          "
+                          v-close-popup
                           :disable="
                             !hasAdminRole &&
                             (!selectedLocation.payOffEnabled ||

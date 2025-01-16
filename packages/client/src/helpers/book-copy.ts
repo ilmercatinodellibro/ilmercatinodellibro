@@ -1,6 +1,16 @@
+import { Dialog } from "quasar";
 import { ProblemType } from "src/@generated/graphql";
+import { useI18nOutsideSetup } from "src/boot/i18n";
+import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import { notifyError } from "src/helpers/error-messages";
+import {
+  BookCopyDetailsFragment,
+  BookCopyDetailsFragmentDoc,
+  ProblemSummaryFragment,
+  useReportProblemMutation,
+  useResolveProblemMutation,
+} from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { selectedLocation } = useRetailLocationService();
@@ -57,3 +67,79 @@ export const discountedPrice = (originalPrice: number, kind: "sell" | "buy") =>
         : selectedLocation.value.sellRate)) /
       100,
   );
+
+const { resolveProblem } = useResolveProblemMutation();
+const { reportProblem } = useReportProblemMutation();
+const { t } = useI18nOutsideSetup();
+export function reportOrSolveProblem(bookCopy: BookCopyDetailsFragment) {
+  Dialog.create({
+    component: ProblemsDialog,
+    componentProps: {
+      bookCopy,
+    },
+  }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
+    const activeProblem = getCurrentActiveProblem(bookCopy);
+    if (activeProblem) {
+      try {
+        const { cache, data } = await resolveProblem({
+          input: { id: activeProblem.id, solution },
+        });
+        cache.updateFragment(
+          {
+            fragment: BookCopyDetailsFragmentDoc,
+            fragmentName: "BookCopyDetails",
+            id: cache.identify(bookCopy),
+          },
+          (book) => {
+            if (!book) {
+              return;
+            }
+
+            return {
+              ...book,
+              problems: book.problems?.map((problem) =>
+                !problem.resolvedAt ? data : problem,
+              ),
+            };
+          },
+        );
+      } catch (e) {
+        const error = e as Error;
+        notifyError(t("bookErrors.notSolveProblem"));
+        console.error(error);
+      }
+      return;
+    }
+
+    try {
+      const { cache, data } = await reportProblem({
+        input: {
+          bookCopyId: bookCopy.id,
+          details,
+          type,
+        },
+      });
+
+      cache.updateFragment(
+        {
+          fragment: BookCopyDetailsFragmentDoc,
+          fragmentName: "BookCopyDetails",
+          id: cache.identify(bookCopy),
+        },
+        (book) => {
+          if (!book) {
+            return;
+          }
+
+          return {
+            ...book,
+            problems: [...(book.problems ?? []), data],
+          };
+        },
+      );
+    } catch (e) {
+      notifyError(t("bookErrors.notProblem"));
+      console.error(e);
+    }
+  });
+}

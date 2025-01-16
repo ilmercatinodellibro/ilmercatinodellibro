@@ -13,9 +13,13 @@
     >
       <dialog-table
         v-if="type === 'sold'"
+        :class="isMobile ? 'sticky-last-column' : undefined"
         :columns="soldColumns"
         :loading="soldLoading"
-        :rows="soldBookCopies as readonly SoldBookCopy[]"
+        :rows="
+          // prettier-ignore
+          soldBookCopies as readonly SoldBookCopy[]
+        "
         class="flex-delegate-height-management"
       >
         <template #body-cell-author="{ value, col }">
@@ -26,30 +30,77 @@
           <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
-        <template #body-cell-problems="{ row }">
+        <template v-if="!isMobile" #body-cell-problems="{ row }">
           <q-td class="text-center">
             <problems-button :book-copy="row" />
           </q-td>
         </template>
 
-        <template #body-cell-history="{ row }">
-          <q-td class="text-center">
+        <template #body-cell-history="{ row, col }">
+          <q-td :class="[col.__trClass, ...(isMobile ? ['no-padding'] : [])]">
             <q-btn
+              v-if="!isMobile"
               round
               flat
               color="primary"
               :icon="mdiHistory"
               @click="openHistoryDialog(row)"
             />
+
+            <q-btn
+              v-else
+              :icon="mdiDotsVertical"
+              class="fit"
+              color="primary"
+              flat
+            >
+              <q-menu>
+                <q-list>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="reportOrSolveProblem(row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{
+                          t(
+                            `manageUsers.booksMovementsDialog.${hasProblem(row) ? "solveProblem" : "reportProblem"}`,
+                          )
+                        }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="openHistoryDialog(row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{
+                          t("manageUsers.booksMovementsDialog.problemsHistory")
+                        }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </q-td>
         </template>
       </dialog-table>
 
       <dialog-table
         v-else
+        :class="isMobile ? 'sticky-last-column' : undefined"
         :columns="purchasedColumns"
         :loading="purchasedLoading"
-        :rows="purchasedBookCopies as readonly SoldBookCopy[]"
+        :rows="
+          // prettier-ignore
+          purchasedBookCopies as readonly SoldBookCopy[]
+        "
         class="flex-delegate-height-management"
       >
         <template #body-cell-author="{ value, col }">
@@ -60,13 +111,38 @@
           <table-cell-with-tooltip :class="col.classes" :value="value" />
         </template>
 
-        <template #body-cell-return="{ row }">
-          <q-td class="text-center">
+        <template #body-cell-return="{ row, col }">
+          <q-td :class="[col.__trClass, ...(isMobile ? ['no-padding'] : [])]">
             <chip-button
-              :label="$t('book.return')"
+              v-if="!isMobile"
+              :label="t('book.return')"
               color="primary"
               @click="openReturnDialog(row)"
             />
+
+            <q-btn
+              v-else
+              :icon="mdiDotsVertical"
+              class="fit"
+              color="primary"
+              flat
+            >
+              <q-menu>
+                <q-list>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="openReturnDialog(row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("book.return") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </q-td>
         </template>
       </dialog-table>
@@ -75,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiHistory } from "@quasar/extras/mdi-v7";
+import { mdiDotsVertical, mdiHistory } from "@quasar/extras/mdi-v7";
 import { formatDate } from "@vueuse/core";
 import {
   Dialog,
@@ -87,6 +163,10 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import {
+  reportOrSolveProblem as _reportOrSolveProblem,
+  hasProblem,
+} from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -289,5 +369,9 @@ function openReturnDialog(bookCopy: BookCopyDetailsFragment) {
     }
     onDialogHide();
   });
+}
+
+function reportOrSolveProblem(bookCopy: BookCopyDetailsFragment) {
+  _reportOrSolveProblem(bookCopy);
 }
 </script>
