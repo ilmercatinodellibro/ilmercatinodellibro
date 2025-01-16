@@ -71,19 +71,28 @@ export const discountedPrice = (originalPrice: number, kind: "sell" | "buy") =>
 const { resolveProblem } = useResolveProblemMutation();
 const { reportProblem } = useReportProblemMutation();
 const { t } = useI18nOutsideSetup();
-export function reportOrSolveProblem(bookCopy: BookCopyDetailsFragment) {
-  Dialog.create({
-    component: ProblemsDialog,
-    componentProps: {
-      bookCopy,
-    },
-  }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
-    const activeProblem = getCurrentActiveProblem(bookCopy);
-    if (activeProblem) {
+export const reportOrSolveProblem = (bookCopy: BookCopyDetailsFragment) =>
+  new Promise<void>((resolve) => {
+    Dialog.create({
+      component: ProblemsDialog,
+      componentProps: {
+        bookCopy,
+      },
+    }).onOk(async ({ solution, details, type }: ProblemSummaryFragment) => {
+      const activeProblem = getCurrentActiveProblem(bookCopy);
+
       try {
-        const { cache, data } = await resolveProblem({
-          input: { id: activeProblem.id, solution },
-        });
+        const { cache, data } = activeProblem
+          ? await resolveProblem({
+              input: { id: activeProblem.id, solution },
+            })
+          : await reportProblem({
+              input: {
+                bookCopyId: bookCopy.id,
+                details,
+                type,
+              },
+            });
         cache.updateFragment(
           {
             fragment: BookCopyDetailsFragmentDoc,
@@ -97,49 +106,26 @@ export function reportOrSolveProblem(bookCopy: BookCopyDetailsFragment) {
 
             return {
               ...book,
-              problems: book.problems?.map((problem) =>
-                !problem.resolvedAt ? data : problem,
-              ),
+              problems: activeProblem
+                ? book.problems?.map((problem) =>
+                    !problem.resolvedAt ? data : problem,
+                  )
+                : [...(book.problems ?? []), data],
             };
           },
         );
       } catch (e) {
         const error = e as Error;
-        notifyError(t("bookErrors.notSolveProblem"));
-        console.error(error);
+        notifyError(
+          t(
+            activeProblem
+              ? "bookErrors.notSolveProblem"
+              : "bookErrors.notProblem",
+          ),
+        );
+        console.error(error.message);
+      } finally {
+        resolve();
       }
-      return;
-    }
-
-    try {
-      const { cache, data } = await reportProblem({
-        input: {
-          bookCopyId: bookCopy.id,
-          details,
-          type,
-        },
-      });
-
-      cache.updateFragment(
-        {
-          fragment: BookCopyDetailsFragmentDoc,
-          fragmentName: "BookCopyDetails",
-          id: cache.identify(bookCopy),
-        },
-        (book) => {
-          if (!book) {
-            return;
-          }
-
-          return {
-            ...book,
-            problems: [...(book.problems ?? []), data],
-          };
-        },
-      );
-    } catch (e) {
-      notifyError(t("bookErrors.notProblem"));
-      console.error(e);
-    }
+    });
   });
-}

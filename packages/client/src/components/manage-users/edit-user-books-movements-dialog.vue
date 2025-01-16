@@ -163,10 +163,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import {
-  reportOrSolveProblem as _reportOrSolveProblem,
-  hasProblem,
-} from "src/helpers/book-copy";
+import { hasProblem, reportOrSolveProblem } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -369,9 +366,5 @@ function openReturnDialog(bookCopy: BookCopyDetailsFragment) {
     }
     onDialogHide();
   });
-}
-
-function reportOrSolveProblem(bookCopy: BookCopyDetailsFragment) {
-  _reportOrSolveProblem(bookCopy);
 }
 </script>

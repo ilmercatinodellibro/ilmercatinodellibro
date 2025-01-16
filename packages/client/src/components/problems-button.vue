@@ -32,8 +32,8 @@ const emit = defineEmits<{
 
 const hasProblem = computed(() => hasProblemFn(props.bookCopy));
 
-function reportOrSolveProblem() {
-  _reportOrSolveProblem(props.bookCopy);
+async function reportOrSolveProblem() {
+  await _reportOrSolveProblem(props.bookCopy);
   emit("updateProblems");
 }
 </script>

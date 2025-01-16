@@ -26,7 +26,11 @@
       </q-th>
     </q-tr>
 
-    <q-tr v-for="bookCopy in filteredBookCopies" :key="bookCopy.id">
+    <q-tr
+      v-for="bookCopy in filteredBookCopies"
+      :key="bookCopy.id"
+      :class="isMobile ? 'sticky-last-column' : undefined"
+    >
       <!-- Fills in the chevron column -->
       <q-td auto-width />
 
@@ -34,7 +38,11 @@
         v-for="{ align, classes, name, field, format } in bodyHeaderCols"
         :key="name"
         :auto-width="name === 'problems'"
-        :class="[`text-${align ?? 'left'}`, classes]"
+        :class="[
+          `text-${align ?? 'left'}`,
+          classes,
+          isMobile && name === 'history' ? 'no-padding' : '',
+        ]"
         :colspan="getColspan(name)"
       >
         <template v-if="name === 'status'">
@@ -43,6 +51,7 @@
 
         <template v-else-if="name === 'problems'">
           <problems-button
+            v-if="!isMobile"
             :book-copy="bookCopy"
             @update-problems="emit('updateProblems')"
           />
@@ -50,12 +59,41 @@
 
         <template v-else-if="name === 'history'">
           <q-btn
+            v-if="!isMobile"
             :icon="mdiHistory"
             color="primary"
             flat
             round
             @click="emit('openHistory', bookCopy)"
           />
+
+          <q-btn
+            v-else
+            :icon="mdiDotsVertical"
+            class="full-height"
+            color="primary"
+            flat
+          >
+            <q-menu>
+              <q-list>
+                <q-item
+                  v-close-popup
+                  clickable
+                  @click="reportOrSolveProblem(bookCopy)"
+                >
+                  <q-item-section>
+                    <q-item-label>
+                      {{
+                        t(
+                          `manageUsers.booksMovementsDialog.${hasProblem(bookCopy) ? "solveProblem" : "reportProblem"}`,
+                        )
+                      }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </template>
 
         <template v-else>
@@ -71,13 +109,18 @@
 </template>
 
 <script setup lang="ts">
-import { mdiHistory } from "@quasar/extras/mdi-v7";
+import { mdiDotsVertical, mdiHistory } from "@quasar/extras/mdi-v7";
 import { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
-import { isAvailable } from "src/helpers/book-copy";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import {
+  reportOrSolveProblem as _reportOrSolveProblem,
+  hasProblem,
+  isAvailable,
+} from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
 import {
   BookCopyDetailsFragment,
@@ -85,6 +128,8 @@ import {
 } from "src/services/book-copy.graphql";
 
 const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 const props = defineProps<{
   bookId: string;
@@ -111,15 +156,15 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     format: (field?: string) => field ?? "/",
   },
   {
-    name: "status",
-    field: () => undefined,
-    label: t("book.fields.status"),
-    align: "left",
-  },
-  {
     name: "owner",
     field: ({ owner }) => owner.email,
     label: t("warehouse.owner"),
+    align: "left",
+  },
+  {
+    name: "status",
+    field: () => undefined,
+    label: t("book.fields.status"),
     align: "left",
   },
   {
@@ -146,6 +191,11 @@ const filteredBookCopies = computed(() =>
 );
 
 function getColspan(columnName: string) {
-  return columnName === "owner" ? 2 : 1;
+  return ["owner", "status"].includes(columnName) ? 2 : 1;
+}
+
+async function reportOrSolveProblem(bookCopy: BookCopyDetailsFragment) {
+  await _reportOrSolveProblem(bookCopy);
+  emit("updateProblems");
 }
 </script>
