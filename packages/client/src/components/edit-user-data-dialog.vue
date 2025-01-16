@@ -3,7 +3,8 @@
     <k-dialog-form-card
       :title="t('auth.editMyData')"
       :submit-label="t('common.save')"
-      size="sm"
+      class="full-width max-width-360"
+      size="fullscreen"
       @cancel="onDialogCancel()"
       @submit="
         onDialogOK({

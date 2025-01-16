@@ -3,7 +3,8 @@
     <k-dialog-form-card
       :title="title"
       :submit-label="submitLabel"
-      size="sm"
+      class="full-width max-width-360"
+      size="fullscreen"
       @submit="
         onDialogOK({
           selectedSchoolCodes,

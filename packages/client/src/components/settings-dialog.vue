@@ -3,13 +3,12 @@
     <k-dialog-form-card
       :title="t('sidebar.settings')"
       actions-padding
+      class="full-width max-width-700"
       size="fullscreen"
       @submit="validateSettings()"
       @cancel="onDialogCancel()"
     >
-      <q-card-section
-        class="column gap-4 no-wrap q-pb-xs q-pt-lg q-px-lg width-700"
-      >
+      <q-card-section class="column gap-4 no-wrap q-pb-xs q-pt-lg q-px-lg">
         <q-input
           v-model.number="newSettings.buyRate"
           :label="t('general.settings.purchaseRate')"
@@ -47,7 +46,9 @@
           />
           {{ t("general.settings.registrationEnabled") }}
         </span>
-        <span class="gap-16 items-center q-pb-sm q-pt-none q-px-none row">
+        <span
+          class="gap-16 items-center no-wrap q-pb-sm q-pt-none q-px-none row"
+        >
           <q-checkbox v-model="newSettings.payOffEnabled" color="primary" />
           {{ t("general.settings.payOffEnabled") }}
         </span>

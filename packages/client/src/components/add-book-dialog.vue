@@ -3,7 +3,8 @@
     <k-dialog-form-card
       :title="$t('book.addBookDialog')"
       :submit-label="$t('common.add')"
-      size="sm"
+      class="full-width max-width-360"
+      size="fullscreen"
       @submit="addBookToCatalog(book)"
       @cancel="onDialogCancel"
     >

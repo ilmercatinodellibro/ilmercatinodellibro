@@ -2,7 +2,8 @@
   <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
       :title="$t(`manageUsers.editUser.${userData ? 'title' : 'createUser'}`)"
-      size="sm"
+      class="full-width max-width-360"
+      size="fullscreen"
       @submit="
         onDialogOK({
           type: 'id' in newUserData ? 'update' : 'create',

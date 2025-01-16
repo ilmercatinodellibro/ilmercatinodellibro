@@ -59,13 +59,19 @@ body {
 }
 
 .q-dialog__title {
-  background-color: $primary;
-  color: #fff;
+  color: $primary;
 }
 
 // All buttons need to have lowercase labels on small viewports to avoid overflows
 .q-btn__content * {
   @media screen and (max-width: $breakpoint-sm) {
     text-transform: none;
+  }
+}
+
+// Every non-fullscreen dialog needs to have a reduced padding on mobile view
+.q-dialog__inner--minimized {
+  @media screen and (max-width: $breakpoint-sm) {
+    padding: 16px;
   }
 }
