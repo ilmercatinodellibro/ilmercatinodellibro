@@ -132,7 +132,7 @@ export default {
     totalPayOffLabel: "Totale Liquidabile all'Utente",
     totalCheckedOutLabel: "Totale Liquidato all'Utente",
     info: "Utilizza le checkbox delle righe per attivare le azioni di gruppo",
-    buyPrice: "Prezzo d'acquisizione",
+    buyPrice: "Prezzo d'acquisto",
     buyPriceTooltip:
       "È il prezzo concordato con il proprietario originale del libro e corrisponde alla somma che gli viene garantita in caso di vendita",
     publicPrice: "Prezzo al Pubblico",

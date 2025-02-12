@@ -2,8 +2,7 @@
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-form-card
       :title="title"
-      class="full-width max-width-360"
-      size="fullscreen"
+      size="sm"
       @cancel="onDialogCancel"
       @submit="onDialogOK(problemsData)"
     >

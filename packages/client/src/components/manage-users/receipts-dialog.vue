@@ -1,18 +1,12 @@
 <template>
-  <q-dialog
-    ref="dialogRef"
-    :full-height="isMobile"
-    :maximized="isMobile"
-    @hide="onDialogHide"
-  >
+  <q-dialog ref="dialogRef" @hide="onDialogHide">
     <!--
       I didn't use k-dialog-card because it didn't
       have any width that satisfies this dialog's
     -->
     <k-dialog-card
       :title="t('manageUsers.receiptsDialog.title')"
-      class="full-width max-width-560"
-      size="fullscreen"
+      size="md"
       @cancel="onDialogCancel"
     >
       <q-card-section
@@ -39,7 +33,6 @@
 import { useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useGetReceiptsQuery } from "src/services/receipt.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserFragment } from "src/services/user.graphql";
@@ -53,7 +46,6 @@ const props = defineProps<{
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { t } = useI18n();
-const { isMobile } = useLateralDrawer();
 
 const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
 

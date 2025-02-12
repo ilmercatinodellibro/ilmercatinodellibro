@@ -77,11 +77,6 @@
           <template #body="{ row, cols }">
             <q-tr
               v-if="Object.values(Titles).includes(row.id)"
-              :class="
-                isMobile && row.id === Titles.InStock
-                  ? 'sticky-last-column'
-                  : undefined
-              "
               class="bg-grey-1"
               no-hover
             >
@@ -99,7 +94,10 @@
                 so the colspan is set to take up the space of all the other columns
               -->
               <q-td
-                :class="isMobile ? 'mobile-in-stock-title-bar' : undefined"
+                :class="{
+                  'mobile-in-stock-title-bar': isMobile,
+                  'sticky-last-column': isMobile && row.id === Titles.InStock,
+                }"
                 class="non-selectable text-weight-medium"
                 colspan="11"
               >
@@ -238,7 +236,7 @@
               :class="
                 isMobile && selectableRows.includes(row)
                   ? 'sticky-last-column'
-                  : undefined
+                  : ''
               "
             >
               <q-td v-for="col in cols" :key="col.name" :class="col.classes">
@@ -322,7 +320,12 @@
       </q-card-section>
 
       <template #card-actions>
-        <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
+        <q-btn
+          :flat="!isMobile"
+          :outline="isMobile"
+          :label="$t('common.cancel')"
+          @click="onDialogCancel"
+        />
         <q-btn
           :disable="totalCheckoutMoney === 0"
           :label="
@@ -853,6 +856,10 @@ function performCashOnlyCheckout() {
 </script>
 
 <style scoped lang="scss">
+// Prevents the sticky bulk actions button in title bar to have weird GUI.
+// It's only present when in mobile viewport and when a row is selected
+// It isn't implemented using as a proper q-td and thus we need to manage padding
+// at the title bar level
 .mobile-in-stock-title-bar {
   padding-bottom: 0 !important;
   padding-right: 0;

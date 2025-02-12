@@ -99,7 +99,8 @@ $dialog-fullscreen-max-height: calc(100vh - #{$dialog-margin} * 2);
   &--sm {
     max-width: 360px;
     max-height: $dialog-fullscreen-max-height;
-    min-width: 360px;
+    min-width: 320px;
+    width: 100%;
 
     @media screen and (height >= $complex-dialog-breakpoint) {
       max-height: $complex-dialog-max-height;

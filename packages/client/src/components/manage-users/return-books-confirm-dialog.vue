@@ -66,7 +66,12 @@
       </dialog-table>
 
       <template #card-actions>
-        <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
+        <q-btn
+          :label="$t('common.cancel')"
+          :flat="!isMobile"
+          :outline="isMobile"
+          @click="onDialogCancel()"
+        />
         <q-btn :label="saveLabel" color="positive" @click="onDialogOK()" />
       </template>
     </k-dialog-card>

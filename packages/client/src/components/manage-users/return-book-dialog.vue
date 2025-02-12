@@ -3,8 +3,7 @@
     <k-dialog-form-card
       :submit-label="$t('manageUsers.returnBook')"
       :title="$t('manageUsers.returnBookTitle')"
-      class="full-width max-width-360"
-      size="fullscreen"
+      size="sm"
       @submit="onDialogOK(bookCopy.id)"
       @cancel="onDialogCancel"
     >
