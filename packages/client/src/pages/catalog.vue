@@ -69,9 +69,9 @@ import TableCellWithTooltip from "src/components/manage-users/table-cell-with-to
 import UtilityChip from "src/components/utility-chip.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
+import { formatPrice } from "src/helpers/formatting";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
-import { formatPrice } from "../composables/use-misc-formats";
 const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();

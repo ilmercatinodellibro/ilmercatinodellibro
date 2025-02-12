@@ -52,7 +52,7 @@
           </card-table-header>
 
           <dialog-table
-            :class="isMobile ? 'sticky-last-column' : undefined"
+            :class="isMobile ? 'sticky-last-column' : ''"
             :rows="booksToRegister"
             :columns="booksToRegisterColumns"
             :loading="loading"
@@ -173,8 +173,8 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { formatPrice } from "src/composables/use-misc-formats";
 import { notifyError } from "src/helpers/error-messages";
+import { formatPrice } from "src/helpers/formatting";
 import { fetchBookByISBN } from "src/services/book";
 import {
   BookCopyDetailsFragment,

@@ -2,8 +2,8 @@ import { Dialog } from "quasar";
 import { ProblemType } from "src/@generated/graphql";
 import { useI18nOutsideSetup } from "src/boot/i18n";
 import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
-import { formatPrice } from "src/composables/use-misc-formats";
 import { notifyError } from "src/helpers/error-messages";
+import { formatPrice } from "src/helpers/formatting";
 import {
   BookCopyDetailsFragment,
   BookCopyDetailsFragmentDoc,

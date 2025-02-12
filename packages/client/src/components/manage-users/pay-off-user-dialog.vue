@@ -373,9 +373,9 @@ import { SettleRemainingType } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice, getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
+import { formatPrice } from "src/helpers/formatting";
 import {
   BookCopyDetailsFragment,
   GetSoldBookCopiesDocument,

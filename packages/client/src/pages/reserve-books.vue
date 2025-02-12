@@ -51,7 +51,7 @@
             />
 
             <q-btn
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :icon="mdiPlus"
               :label="t('reserveBooks.reserveAll')"
               color="positive"
@@ -64,7 +64,7 @@
 
       <dialog-table
         v-model:pagination="tablePagination"
-        :class="isMobile ? 'sticky-last-column' : undefined"
+        :class="isMobile ? 'sticky-last-column' : ''"
         :columns="columns"
         :filter="tableFilter"
         :filter-method="filterMethod"
@@ -146,9 +146,9 @@ import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { formatPrice } from "src/composables/use-misc-formats";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { discountedPrice } from "src/helpers/book-copy";
+import { formatPrice } from "src/helpers/formatting";
 import { BooksTab, SchoolFilters } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
