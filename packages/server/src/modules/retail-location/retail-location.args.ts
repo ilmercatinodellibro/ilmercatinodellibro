@@ -30,7 +30,7 @@ export class LocationBoundInput {
 export class ResetRetailLocationInput extends LocationBoundInput {}
 
 @ObjectType()
-export class UsersPerLanguageData {
+export class UsersPerLocalePayload {
   @Field(() => String)
   locale!: Locales;
 
@@ -160,9 +160,9 @@ export class StatisticsQueryResult {
   @Field(() => Float)
   settleableMoneyAverage!: number;
 
-  // Users that use a certain language
-  @Field(() => [UsersPerLanguageData])
-  usersPerLanguage!: UsersPerLanguageData[];
+  // Users that use a certain locale
+  @Field(() => [UsersPerLocalePayload])
+  activeUsersPerLocaleCount!: UsersPerLocalePayload[];
 
   // Total of the cover prices of sold books
   @Field(() => Float)

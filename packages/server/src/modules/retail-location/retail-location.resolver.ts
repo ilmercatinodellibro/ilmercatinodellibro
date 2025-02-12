@@ -2,7 +2,7 @@ import { UnprocessableEntityException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Prisma, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
-import { merge, sumBy } from "lodash";
+import { merge } from "lodash";
 import { RetailLocation } from "src/@generated/retail-location";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
@@ -233,6 +233,16 @@ export class RetailLocationResolver {
       },
     };
 
+    const notAdminUser = {
+      memberships: {
+        none: {
+          // An admin in a retail location could possibly be a normal user in another one
+          retailLocationId,
+          role: Role.ADMIN,
+        },
+      },
+    } satisfies Prisma.UserWhereInput;
+
     const getBooksCopiesCount = this.prisma.bookCopy.count({
       where: retailLocationFilter,
     });
@@ -362,29 +372,42 @@ export class RetailLocationResolver {
       },
     });
 
+    const activeUsersFilter = {
+      OR: [
+        // Requested at least one book
+        {
+          requestedBooks: {
+            some: {
+              ...retailLocationFilter,
+              deletedAt: null,
+            },
+          },
+        },
+        // Gave in at least one book
+        {
+          bookCopies: {
+            some: {
+              ...retailLocationFilter,
+            },
+          },
+        },
+      ],
+      ...notAdminUser,
+    } satisfies Prisma.UserWhereInput;
+
     const getActiveUsersCount = this.prisma.user.count({
-      where: {
-        OR: [
-          // Requested at least one book
-          {
-            requestedBooks: {
-              some: {
-                ...retailLocationFilter,
-                deletedAt: null,
-              },
-            },
-          },
-          // Gave in at least one book
-          {
-            bookCopies: {
-              some: {
-                ...retailLocationFilter,
-              },
-            },
-          },
-        ],
-      },
+      where: activeUsersFilter,
     });
+
+    const getActiveUsersPerLocaleCount = Promise.all(
+      languageLocales.map(async (locale) => {
+        const localeActiveUsersCount = await this.prisma.user.count({
+          where: { locale, ...activeUsersFilter },
+        });
+
+        return { locale, count: localeActiveUsersCount };
+      }),
+    );
 
     const buyingCustomersFilter = {
       purchases: {
@@ -392,6 +415,7 @@ export class RetailLocationResolver {
           bookCopy: {
             ...retailLocationFilter,
           },
+          purchasedBy: notAdminUser,
         },
       },
     } satisfies Prisma.UserWhereInput;
@@ -407,6 +431,7 @@ export class RetailLocationResolver {
           },
         },
       },
+      ...notAdminUser,
     } satisfies Prisma.UserWhereInput;
 
     const getBuyingCustomersCount = this.prisma.user.count({
@@ -432,6 +457,7 @@ export class RetailLocationResolver {
             ...retailLocationFilter,
           },
         },
+        ...notAdminUser,
       },
     });
 
@@ -499,6 +525,10 @@ export class RetailLocationResolver {
       let settleableAmount = 0;
       let settledAmount = 0;
       let toSettleAmount = 0;
+      let soldBooksOriginalPriceTotal = 0;
+
+      const adminsActiveSales = [];
+      const customersActiveSales = [];
 
       for (const sale of activeSales) {
         const {
@@ -513,13 +543,17 @@ export class RetailLocationResolver {
         const saleRevenue =
           (originalPrice * (iseeDiscountApplied ? buyRate : sellRate)) / 100;
         grossRevenue += saleRevenue;
+        soldBooksOriginalPriceTotal += originalPrice;
 
         // Save admin accounts revenue aside and avoid taking it into account while calculating settleable and settled amounts
         const isAdminSale = memberships.some(({ role }) => role === Role.ADMIN);
         if (isAdminSale) {
+          adminsActiveSales.push(sale);
           adminAccountsRevenue += saleRevenue;
           continue;
         }
+
+        customersActiveSales.push(sale);
 
         const buyPrice = (originalPrice * buyRate) / 100;
 
@@ -553,125 +587,15 @@ export class RetailLocationResolver {
         reimbursedAmount,
         grossRevenue,
         netRevenue,
+        soldBooksOriginalPriceTotal,
         adminAccountsRevenue,
         activeSales,
+        adminsActiveSales,
+        customersActiveSales,
         sellRate,
         buyRate,
       };
     };
-
-    const getPurchasedOrSoldBooksAverage = getActiveUsersCount.then(
-      (customers) =>
-        customers === 0
-          ? 0
-          : getMoneyAmounts().then(
-              ({ activeSales }) => activeSales.length / customers,
-            ),
-    );
-
-    const getSoldBooksFromSellersAverage = getSellingCustomersCount.then(
-      (sellers) =>
-        sellers === 0
-          ? 0
-          : getMoneyAmounts().then(
-              ({ activeSales }) => activeSales.length / sellers,
-            ),
-    );
-    const getPurchasedBooksFromBuyersAverage = getBuyingCustomersCount.then(
-      (buyers) =>
-        buyers === 0
-          ? 0
-          : getMoneyAmounts().then(
-              ({ activeSales }) => activeSales.length / buyers,
-            ),
-    );
-    const getSettleableMoneyAverage = getActiveUsersCount.then((customers) =>
-      customers === 0
-        ? 0
-        : getMoneyAmounts().then(
-            ({ settleableAmount }) => settleableAmount / customers,
-          ),
-    );
-
-    const getUsersPerLanguage = Promise.all(
-      languageLocales.map((locale) =>
-        this.prisma.user.count({ where: { locale } }).then((count) => ({
-          locale,
-          count,
-        })),
-      ),
-    );
-
-    const getSoldBooksOriginalPriceTotal = this.prisma.bookCopy
-      .findMany({
-        where: {
-          ...retailLocationFilter,
-          sales: { some: { refundedAt: null } },
-        },
-        select: { book: { select: { originalPrice: true } } },
-      })
-      .then((copies) =>
-        sumBy(copies, ({ book: { originalPrice } }) => originalPrice),
-      );
-
-    const getSellingCustomersIncomeAverage = this.prisma.sale
-      .findMany({
-        where: {
-          refundedAt: null,
-        },
-        select: {
-          bookCopy: {
-            select: { book: { select: { originalPrice: true } } },
-          },
-          iseeDiscountApplied: true,
-        },
-      })
-      .then((sales) =>
-        getSellingCustomersCount.then((sellersCount) =>
-          sellersCount === 0
-            ? 0
-            : getMoneyAmounts().then(
-                ({ sellRate, buyRate }) =>
-                  sumBy(
-                    sales,
-                    ({
-                      bookCopy: {
-                        book: { originalPrice },
-                      },
-                      iseeDiscountApplied,
-                    }) =>
-                      (originalPrice *
-                        (iseeDiscountApplied ? sellRate : buyRate)) /
-                      100,
-                  ) / sellersCount,
-              ),
-        ),
-      );
-
-    const getBuyingCustomersFullExpenseAverage = this.prisma.sale
-      .findMany({
-        where: {
-          bookCopy: { ...retailLocationFilter },
-          purchasedBy: buyingCustomersFilter,
-        },
-        select: {
-          bookCopy: { select: { book: { select: { originalPrice: true } } } },
-        },
-      })
-      .then((sales) =>
-        getBuyingCustomersCount.then((buyers) =>
-          buyers === 0
-            ? 0
-            : sumBy(
-                sales,
-                ({
-                  bookCopy: {
-                    book: { originalPrice },
-                  },
-                }) => originalPrice,
-              ) / buyers,
-        ),
-      );
 
     const [
       bookCopiesCount,
@@ -688,29 +612,25 @@ export class RetailLocationResolver {
       activeReservationsCount,
       activeRequestsCount,
       activeUsersCount,
-      {
-        settleableAmount,
-        settledAmount,
-        toSettleAmount,
-        reimbursedAmount,
-        adminAccountsRevenue,
-        grossRevenue,
-        netRevenue,
-        sellRate,
-      },
       buyingCustomersCount,
       sellingCustomersCount,
       customersCount,
       iseeUsersCount,
       requestingUsersCount,
-      purchasedOrSoldBooksAverage,
-      soldBooksFromSellersAverage,
-      purchasedBooksFromBuyersAverage,
-      settleableMoneyAverage,
-      usersPerLanguage,
-      soldBooksOriginalPriceTotal,
-      sellingCustomersIncomeAverage,
-      buyingCustomersFullExpenseAverage,
+      activeUsersPerLocaleCount,
+      {
+        settleableAmount,
+        settledAmount,
+        toSettleAmount,
+        reimbursedAmount,
+        grossRevenue,
+        netRevenue,
+        soldBooksOriginalPriceTotal,
+        adminAccountsRevenue,
+        adminsActiveSales,
+        customersActiveSales,
+        sellRate,
+      },
     ] = await Promise.all([
       getBooksCopiesCount,
       getBooksInWarehouseCount,
@@ -726,23 +646,53 @@ export class RetailLocationResolver {
       getActiveReservationsCount,
       getActiveRequestsCount,
       getActiveUsersCount,
-      getMoneyAmounts(),
       getBuyingCustomersCount,
       getSellingCustomersCount,
       getCustomersCount,
       getISEEUsersCount,
       getRequestingUsersCount,
-      getPurchasedOrSoldBooksAverage,
-      getSoldBooksFromSellersAverage,
-      getPurchasedBooksFromBuyersAverage,
-      getSettleableMoneyAverage,
-      getUsersPerLanguage,
-      getSoldBooksOriginalPriceTotal,
-      getSellingCustomersIncomeAverage,
-      getBuyingCustomersFullExpenseAverage,
+      getActiveUsersPerLocaleCount,
+      getMoneyAmounts(),
     ]);
 
-    // Not making new db queries for the discounted and saving averages as both are derived results
+    // Values which can be derived from data previously fetched from the DB
+
+    // Admins shouldn't ever have purchases from customers
+    // Customers purchases come from both admins' and customers' owned books
+    const booksPurchasedByCustomersCount =
+      adminsActiveSales.length + customersActiveSales.length;
+    // Customers sales only come from customers' owned books
+    const booksSoldByCustomersCount = customersActiveSales.length;
+
+    const purchasedOrSoldBooksAverage =
+      activeUsersCount === 0
+        ? 0
+        : (booksPurchasedByCustomersCount + booksSoldByCustomersCount) /
+          activeUsersCount;
+
+    const soldBooksFromSellersAverage =
+      sellingCustomersCount === 0
+        ? 0
+        : booksSoldByCustomersCount / sellingCustomersCount;
+
+    const purchasedBooksFromBuyersAverage =
+      buyingCustomersCount === 0
+        ? 0
+        : booksPurchasedByCustomersCount / buyingCustomersCount;
+
+    const settleableMoneyAverage =
+      activeUsersCount === 0 ? 0 : settleableAmount / activeUsersCount;
+
+    const sellingCustomersIncomeAverage =
+      sellingCustomersCount === 0
+        ? 0
+        : (grossRevenue - adminAccountsRevenue) / sellingCustomersCount;
+
+    const buyingCustomersFullExpenseAverage =
+      buyingCustomersCount === 0
+        ? 0
+        : soldBooksOriginalPriceTotal / buyingCustomersCount;
+
     const buyingCustomersDiscountedExpenseAverage =
       (buyingCustomersFullExpenseAverage * sellRate) / 100;
     const buyingCustomersSavingAverage =
@@ -779,7 +729,7 @@ export class RetailLocationResolver {
       soldBooksFromSellersAverage,
       purchasedBooksFromBuyersAverage,
       settleableMoneyAverage,
-      usersPerLanguage,
+      activeUsersPerLocaleCount,
       soldBooksOriginalPriceTotal,
       sellingCustomersIncomeAverage,
       buyingCustomersFullExpenseAverage,

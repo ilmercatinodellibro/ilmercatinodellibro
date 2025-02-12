@@ -218,7 +218,7 @@ const dataToShow = computed<
     value: retailLocationStatistics.value?.customersCount.toString(),
   },
   {
-    label: "Utenti che sconto ISEE",
+    label: "Utenti con sconto ISEE",
     value: retailLocationStatistics.value?.iseeUsersCount.toString(),
   },
   {
@@ -239,7 +239,7 @@ const dataToShow = computed<
     label: "Media dei libri comprati da chi ha comprato almeno un libro",
     value:
       retailLocationStatistics.value?.purchasedBooksFromBuyersAverage.toFixed(
-        3,
+        2,
       ),
   },
   {
@@ -247,7 +247,7 @@ const dataToShow = computed<
     value: retailLocationStatistics.value?.settleableMoneyAverage.toFixed(2),
     suffix: "€",
   },
-  ...(retailLocationStatistics.value?.usersPerLanguage ?? []).map(
+  ...(retailLocationStatistics.value?.activeUsersPerLocaleCount ?? []).map(
     ({ count, locale }) => ({
       label: `Utenti che hanno selezionato la lingua ${languages.find(({ code }) => code === locale)?.label}`,
       value: count.toString(),

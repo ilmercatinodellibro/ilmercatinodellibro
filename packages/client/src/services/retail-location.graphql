@@ -86,7 +86,7 @@ fragment Statistics on StatisticsQueryResult {
   soldBooksFromSellersAverage
   purchasedBooksFromBuyersAverage
   settleableMoneyAverage
-  usersPerLanguage {
+  activeUsersPerLocaleCount {
     count
     locale
   }
