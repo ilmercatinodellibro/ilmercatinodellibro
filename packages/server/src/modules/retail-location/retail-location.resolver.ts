@@ -10,14 +10,19 @@ import { Input } from "src/modules/auth/decorators/input.decorator";
 import { UpdateRetailLocationSettingsInput } from "src/modules/retail-location/retail-location.input";
 import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
+import { languageLocales } from "test/fixtures/retail-locations";
 import { Public } from "../auth/decorators/public-route.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
+  ChartElement,
   LocationBoundQueryArgs,
   ResetRetailLocationInput,
   RetailLocationQueryArgs,
   StatisticsQueryResult,
 } from "./retail-location.args";
+
+const STATISTICS_FORBIDDEN_MESSAGE =
+  "You do not have permission to view retail location statistics.";
 
 @Resolver()
 export class RetailLocationResolver {
@@ -219,7 +224,7 @@ export class RetailLocationResolver {
     await this.authService.assertMembership({
       userId: currentUserId,
       retailLocationId,
-      message: "You do not have permission to view these reservations.",
+      message: STATISTICS_FORBIDDEN_MESSAGE,
     });
 
     const retailLocationFilter = {
@@ -227,6 +232,16 @@ export class RetailLocationResolver {
         retailLocationId,
       },
     };
+
+    const notAdminUser = {
+      memberships: {
+        none: {
+          // An admin in a retail location could possibly be a normal user in another one
+          retailLocationId,
+          role: Role.ADMIN,
+        },
+      },
+    } satisfies Prisma.UserWhereInput;
 
     const getBooksCopiesCount = this.prisma.bookCopy.count({
       where: retailLocationFilter,
@@ -357,27 +372,92 @@ export class RetailLocationResolver {
       },
     });
 
+    const activeUsersFilter = {
+      OR: [
+        // Requested at least one book
+        {
+          requestedBooks: {
+            some: {
+              ...retailLocationFilter,
+              deletedAt: null,
+            },
+          },
+        },
+        // Gave in at least one book
+        {
+          bookCopies: {
+            some: {
+              ...retailLocationFilter,
+            },
+          },
+        },
+      ],
+      ...notAdminUser,
+    } satisfies Prisma.UserWhereInput;
+
     const getActiveUsersCount = this.prisma.user.count({
+      where: activeUsersFilter,
+    });
+
+    const getActiveUsersPerLocaleCount = Promise.all(
+      languageLocales.map(async (locale) => {
+        const localeActiveUsersCount = await this.prisma.user.count({
+          where: { locale, ...activeUsersFilter },
+        });
+
+        return { locale, count: localeActiveUsersCount };
+      }),
+    );
+
+    const buyingCustomersFilter = {
+      purchases: {
+        some: {
+          bookCopy: {
+            ...retailLocationFilter,
+          },
+          purchasedBy: notAdminUser,
+        },
+      },
+    } satisfies Prisma.UserWhereInput;
+
+    const sellingCustomersFilter = {
+      bookCopies: {
+        some: {
+          ...retailLocationFilter,
+          sales: {
+            some: {
+              refundedAt: null,
+            },
+          },
+        },
+      },
+      ...notAdminUser,
+    } satisfies Prisma.UserWhereInput;
+
+    const getBuyingCustomersCount = this.prisma.user.count({
+      where: buyingCustomersFilter,
+    });
+    const getSellingCustomersCount = this.prisma.user.count({
+      where: sellingCustomersFilter,
+    });
+    const getCustomersCount = this.prisma.user.count({
       where: {
-        OR: [
-          // Requested at least one book
-          {
-            requestedBooks: {
-              some: {
-                ...retailLocationFilter,
-                deletedAt: null,
-              },
-            },
+        OR: [sellingCustomersFilter, buyingCustomersFilter],
+      },
+    });
+    const getISEEUsersCount = this.prisma.user.count({
+      where: {
+        discount: true,
+      },
+    });
+    const getRequestingUsersCount = this.prisma.user.count({
+      where: {
+        requestedBooks: {
+          some: {
+            ...retailLocationFilter,
           },
-          // Gave in at least one book
-          {
-            bookCopies: {
-              some: {
-                ...retailLocationFilter,
-              },
-            },
-          },
-        ],
+        },
+        ...notAdminUser,
       },
     });
 
@@ -445,6 +525,10 @@ export class RetailLocationResolver {
       let settleableAmount = 0;
       let settledAmount = 0;
       let toSettleAmount = 0;
+      let soldBooksOriginalPriceTotal = 0;
+
+      const adminsActiveSales = [];
+      const customersActiveSales = [];
 
       for (const sale of activeSales) {
         const {
@@ -459,13 +543,17 @@ export class RetailLocationResolver {
         const saleRevenue =
           (originalPrice * (iseeDiscountApplied ? buyRate : sellRate)) / 100;
         grossRevenue += saleRevenue;
+        soldBooksOriginalPriceTotal += originalPrice;
 
         // Save admin accounts revenue aside and avoid taking it into account while calculating settleable and settled amounts
         const isAdminSale = memberships.some(({ role }) => role === Role.ADMIN);
         if (isAdminSale) {
+          adminsActiveSales.push(sale);
           adminAccountsRevenue += saleRevenue;
           continue;
         }
+
+        customersActiveSales.push(sale);
 
         const buyPrice = (originalPrice * buyRate) / 100;
 
@@ -499,7 +587,13 @@ export class RetailLocationResolver {
         reimbursedAmount,
         grossRevenue,
         netRevenue,
+        soldBooksOriginalPriceTotal,
         adminAccountsRevenue,
+        activeSales,
+        adminsActiveSales,
+        customersActiveSales,
+        sellRate,
+        buyRate,
       };
     };
 
@@ -518,14 +612,24 @@ export class RetailLocationResolver {
       activeReservationsCount,
       activeRequestsCount,
       activeUsersCount,
+      buyingCustomersCount,
+      sellingCustomersCount,
+      customersCount,
+      iseeUsersCount,
+      requestingUsersCount,
+      activeUsersPerLocaleCount,
       {
         settleableAmount,
         settledAmount,
         toSettleAmount,
         reimbursedAmount,
-        adminAccountsRevenue,
         grossRevenue,
         netRevenue,
+        soldBooksOriginalPriceTotal,
+        adminAccountsRevenue,
+        adminsActiveSales,
+        customersActiveSales,
+        sellRate,
       },
     ] = await Promise.all([
       getBooksCopiesCount,
@@ -542,8 +646,57 @@ export class RetailLocationResolver {
       getActiveReservationsCount,
       getActiveRequestsCount,
       getActiveUsersCount,
+      getBuyingCustomersCount,
+      getSellingCustomersCount,
+      getCustomersCount,
+      getISEEUsersCount,
+      getRequestingUsersCount,
+      getActiveUsersPerLocaleCount,
       getMoneyAmounts(),
     ]);
+
+    // Values which can be derived from data previously fetched from the DB
+
+    // Admins shouldn't ever have purchases from customers
+    // Customers purchases come from both admins' and customers' owned books
+    const booksPurchasedByCustomersCount =
+      adminsActiveSales.length + customersActiveSales.length;
+    // Customers sales only come from customers' owned books
+    const booksSoldByCustomersCount = customersActiveSales.length;
+
+    const purchasedOrSoldBooksAverage =
+      activeUsersCount === 0
+        ? 0
+        : (booksPurchasedByCustomersCount + booksSoldByCustomersCount) /
+          activeUsersCount;
+
+    const soldBooksFromSellersAverage =
+      sellingCustomersCount === 0
+        ? 0
+        : booksSoldByCustomersCount / sellingCustomersCount;
+
+    const purchasedBooksFromBuyersAverage =
+      buyingCustomersCount === 0
+        ? 0
+        : booksPurchasedByCustomersCount / buyingCustomersCount;
+
+    const settleableMoneyAverage =
+      activeUsersCount === 0 ? 0 : settleableAmount / activeUsersCount;
+
+    const sellingCustomersIncomeAverage =
+      sellingCustomersCount === 0
+        ? 0
+        : (grossRevenue - adminAccountsRevenue) / sellingCustomersCount;
+
+    const buyingCustomersFullExpenseAverage =
+      buyingCustomersCount === 0
+        ? 0
+        : soldBooksOriginalPriceTotal / buyingCustomersCount;
+
+    const buyingCustomersDiscountedExpenseAverage =
+      (buyingCustomersFullExpenseAverage * sellRate) / 100;
+    const buyingCustomersSavingAverage =
+      ((100 - sellRate) * buyingCustomersFullExpenseAverage) / 100;
 
     return {
       bookCopiesCount,
@@ -567,6 +720,160 @@ export class RetailLocationResolver {
       adminAccountsRevenue,
       grossRevenue,
       netRevenue,
-    };
+      buyingCustomersCount,
+      sellingCustomersCount,
+      customersCount,
+      iseeUsersCount,
+      requestingUsersCount,
+      purchasedOrSoldBooksAverage,
+      soldBooksFromSellersAverage,
+      purchasedBooksFromBuyersAverage,
+      settleableMoneyAverage,
+      activeUsersPerLocaleCount,
+      soldBooksOriginalPriceTotal,
+      sellingCustomersIncomeAverage,
+      buyingCustomersFullExpenseAverage,
+      buyingCustomersDiscountedExpenseAverage,
+      buyingCustomersSavingAverage,
+    } satisfies StatisticsQueryResult;
+  }
+
+  @Query(() => [ChartElement])
+  async deliveriesChartData(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() { id: currentUserId }: User,
+  ): Promise<ChartElement[]> {
+    await this.authService.assertMembership({
+      userId: currentUserId,
+      retailLocationId,
+      message: STATISTICS_FORBIDDEN_MESSAGE,
+    });
+
+    const bookCopies = await this.prisma.bookCopy.findMany({
+      where: {
+        book: {
+          retailLocationId,
+        },
+      },
+      select: { createdAt: true },
+    });
+
+    return this.#transformToChartData(
+      bookCopies.map(({ createdAt }) => createdAt),
+    );
+  }
+
+  @Query(() => [ChartElement])
+  async salesChartData(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() { id: currentUserId }: User,
+  ): Promise<ChartElement[]> {
+    await this.authService.assertMembership({
+      userId: currentUserId,
+      retailLocationId,
+      message: STATISTICS_FORBIDDEN_MESSAGE,
+    });
+
+    const activeSales = await this.prisma.sale.findMany({
+      where: {
+        bookCopy: {
+          book: {
+            retailLocationId,
+          },
+        },
+        refundedAt: null,
+      },
+      select: { purchasedAt: true },
+    });
+
+    return this.#transformToChartData(
+      activeSales.map(({ purchasedAt }) => purchasedAt),
+    );
+  }
+
+  @Query(() => [ChartElement])
+  async settlementsChartData(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() { id: currentUserId }: User,
+  ): Promise<ChartElement[]> {
+    await this.authService.assertMembership({
+      userId: currentUserId,
+      retailLocationId,
+      message: STATISTICS_FORBIDDEN_MESSAGE,
+    });
+
+    const settlements = await this.prisma.bookCopy.findMany({
+      where: {
+        book: {
+          retailLocationId,
+        },
+        settledAt: {
+          not: null,
+        },
+      },
+      select: {
+        settledAt: true,
+      },
+    });
+
+    return this.#transformToChartData(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      settlements.map(({ settledAt }) => settledAt!),
+    );
+  }
+
+  @Query(() => [ChartElement])
+  async returningsChartData(
+    @Args() { retailLocationId }: LocationBoundQueryArgs,
+    @CurrentUser() { id: currentUserId }: User,
+  ): Promise<ChartElement[]> {
+    await this.authService.assertMembership({
+      userId: currentUserId,
+      retailLocationId,
+      message: STATISTICS_FORBIDDEN_MESSAGE,
+    });
+
+    const returnings = await this.prisma.bookCopy.findMany({
+      where: {
+        book: {
+          retailLocationId,
+        },
+        returnedAt: {
+          not: null,
+        },
+      },
+      select: {
+        returnedAt: true,
+      },
+    });
+    return this.#transformToChartData(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      returnings.map(({ returnedAt }) => returnedAt!),
+    );
+  }
+
+  #transformToChartData(data: Date[]) {
+    const transformedData: ChartElement[] = [];
+
+    for (const element of data) {
+      const elementDayAtMidnight = new Date(element.setHours(0, 0, 0, 0));
+      const dayIndex = transformedData.findIndex(
+        ({ timestamp }) =>
+          timestamp.valueOf() === elementDayAtMidnight.valueOf(),
+      );
+      if (dayIndex === -1) {
+        transformedData.push({
+          amount: 1,
+          timestamp: elementDayAtMidnight,
+        });
+      } else {
+        transformedData[dayIndex].amount++;
+      }
+    }
+
+    return transformedData.sort(
+      ({ timestamp: timestampA }, { timestamp: timestampB }) =>
+        timestampA.valueOf() - timestampB.valueOf(),
+    );
   }
 }

@@ -82,6 +82,8 @@ export default {
     date: "Data",
     connected: "Connesso",
     notConnected: "Non Connesso",
+
+    noData: "Nessun dato disponibile",
   },
 
   roleMap: {
