@@ -5,7 +5,7 @@
     @hide="onDialogHide"
   >
     <k-dialog-card
-      :class="isMobile ? 'sticky-last-column' : undefined"
+      :class="isMobile ? 'sticky-last-column' : ''"
       :title="$t('reserveBooks.confirmReserveByClassDialog.title')"
       :save-label="$t('reserveBooks.reserveAll')"
       size="fullscreen"
@@ -27,12 +27,18 @@
         :rows="booksToReserve"
         class="flex-delegate-height-management"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
         <template #body-cell-availability="cellProps">
@@ -41,15 +47,15 @@
           </q-td>
         </template>
 
-        <template #body-cell-actions="{ row }">
-          <q-td :class="isMobile ? 'no-padding' : undefined">
+        <template #body-cell-actions="cellProps">
+          <q-td :props="cellProps">
             <chip-button
               v-if="!isMobile"
               :label="
                 $t('reserveBooks.confirmReserveByClassDialog.removeFromList')
               "
               color="negative"
-              @click="remove(booksToReserve, row)"
+              @click="remove(booksToReserve, cellProps.row)"
             />
 
             <q-btn
@@ -64,7 +70,7 @@
                   <q-item
                     v-close-popup
                     clickable
-                    @click="remove(booksToReserve, row)"
+                    @click="remove(booksToReserve, cellProps.row)"
                   >
                     <q-item-section>
                       <q-item-label>
@@ -175,6 +181,7 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       name: "actions",
       field: () => undefined,
       label: "",
+      classes: isMobile.value ? "no-padding" : "",
     },
   ],
 );

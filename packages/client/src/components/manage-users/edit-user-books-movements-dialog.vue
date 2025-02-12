@@ -13,7 +13,7 @@
     >
       <dialog-table
         v-if="type === 'sold'"
-        :class="isMobile ? 'sticky-last-column' : undefined"
+        :class="isMobile ? 'sticky-last-column' : ''"
         :columns="soldColumns"
         :loading="soldLoading"
         :rows="
@@ -22,29 +22,35 @@
         "
         class="flex-delegate-height-management"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template v-if="!isMobile" #body-cell-problems="{ row }">
-          <q-td class="text-center">
-            <problems-button :book-copy="row" />
+        <template v-if="!isMobile" #body-cell-problems="cellProps">
+          <q-td :props="cellProps">
+            <problems-button :book-copy="cellProps.row" />
           </q-td>
         </template>
 
-        <template #body-cell-history="{ row, col }">
-          <q-td :class="[col.__trClass, ...(isMobile ? ['no-padding'] : [])]">
+        <template #body-cell-history="cellProps">
+          <q-td :props="cellProps">
             <q-btn
               v-if="!isMobile"
               round
               flat
               color="primary"
               :icon="mdiHistory"
-              @click="openHistoryDialog(row)"
+              @click="openHistoryDialog(cellProps.row)"
             />
 
             <q-btn
@@ -59,13 +65,13 @@
                   <q-item
                     v-close-popup
                     clickable
-                    @click="reportOrSolveProblem(row)"
+                    @click="reportOrSolveProblem(cellProps.row)"
                   >
                     <q-item-section>
                       <q-item-label>
                         {{
                           t(
-                            `manageUsers.booksMovementsDialog.${hasProblem(row) ? "solveProblem" : "reportProblem"}`,
+                            `manageUsers.booksMovementsDialog.${hasProblem(cellProps.row) ? "solveProblem" : "reportProblem"}`,
                           )
                         }}
                       </q-item-label>
@@ -75,7 +81,7 @@
                   <q-item
                     v-close-popup
                     clickable
-                    @click="openHistoryDialog(row)"
+                    @click="openHistoryDialog(cellProps.row)"
                   >
                     <q-item-section>
                       <q-item-label>
@@ -94,7 +100,7 @@
 
       <dialog-table
         v-else
-        :class="isMobile ? 'sticky-last-column' : undefined"
+        :class="isMobile ? 'sticky-last-column' : ''"
         :columns="purchasedColumns"
         :loading="purchasedLoading"
         :rows="
@@ -103,21 +109,27 @@
         "
         class="flex-delegate-height-management"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-return="{ row, col }">
-          <q-td :class="[col.__trClass, ...(isMobile ? ['no-padding'] : [])]">
+        <template #body-cell-return="cellProps">
+          <q-td :props="cellProps">
             <chip-button
               v-if="!isMobile"
               :label="t('book.return')"
               color="primary"
-              @click="openReturnDialog(row)"
+              @click="openReturnDialog(cellProps.row)"
             />
 
             <q-btn
@@ -132,7 +144,7 @@
                   <q-item
                     v-close-popup
                     clickable
-                    @click="openReturnDialog(row)"
+                    @click="openReturnDialog(cellProps.row)"
                   >
                     <q-item-section>
                       <q-item-label>
@@ -292,11 +304,13 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     label: "",
     field: () => undefined,
     name: "problems",
+    align: "center",
   },
   {
     label: "",
     field: () => undefined,
     name: "history",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 
@@ -333,6 +347,7 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     field: () => undefined,
     name: "return",
     align: "center",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 

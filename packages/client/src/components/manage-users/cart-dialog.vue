@@ -6,7 +6,7 @@
     @hide="onDialogHide"
   >
     <k-dialog-card
-      :class="isMobile ? 'card-actions-shadow' : undefined"
+      :class="isMobile ? 'card-actions-shadow' : ''"
       :title="
         $t('manageUsers.cartDialog.title', [
           `${user.firstname} ${user.lastname}`,
@@ -50,28 +50,31 @@
         class="flex-delegate-height-management"
         row-key="id"
       >
-        <template #header-cell-buy-price="{ col }">
+        <template #header-cell-buy-price="cellProps">
           <table-header-with-info
+            :props="cellProps"
             :info="t('manageUsers.payOffUserDialog.buyPriceTooltip')"
-            :label="col.label"
+            :label="cellProps.col.label"
           />
         </template>
-        <template #header-cell-public-price="{ col }">
+
+        <template #header-cell-public-price="cellProps">
           <table-header-with-info
+            :props="cellProps"
             :info="t('manageUsers.payOffUserDialog.publicPriceTooltip')"
-            :label="col.label"
+            :label="cellProps.col.label"
           />
         </template>
 
         <template #body="bodyProps">
-          <q-tr :class="isMobile ? 'sticky-last-column' : undefined">
+          <q-tr
+            :class="isMobile ? 'sticky-last-column' : ''"
+            :props="bodyProps"
+          >
             <q-td
-              v-for="{ name, value, classes } in bodyProps.cols"
+              v-for="{ name, value } in bodyProps.cols"
               :key="name"
-              :class="[
-                classes,
-                isMobile && name === 'delete' ? 'no-padding' : '',
-              ]"
+              :props="bodyProps"
             >
               <q-btn
                 v-if="name === 'selection'"
@@ -175,7 +178,12 @@
           <q-space />
         </template>
 
-        <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
+        <q-btn
+          :label="$t('common.cancel')"
+          :flat="!isMobile"
+          :outline="isMobile"
+          @click="onDialogCancel()"
+        />
         <q-btn
           :disable="cartBooks.length === 0"
           :label="
@@ -307,6 +315,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     name: "delete",
     field: () => undefined,
     label: "",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 
@@ -574,9 +583,7 @@ function sellBooks() {
 }
 
 .card-actions-shadow > :deep(.q-card__actions) {
-  box-shadow:
-    0 -24px 24px 0 rgba(0 0 0 / 24%),
-    0 0 24px 0 rgba(0 0 0 / 12%);
+  box-shadow: $shadow-up-15;
   z-index: 1;
 }
 </style>
