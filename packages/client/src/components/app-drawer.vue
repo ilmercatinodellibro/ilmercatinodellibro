@@ -13,22 +13,21 @@
     data-cy="page-drawer"
     :aria-label="t('general.mainNavigation')"
   >
-    <div v-if="isMobile" class="q-pa-sm row">
-      <q-space />
+    <q-icon
+      v-if="isMobile"
+      :name="mdiClose"
+      class="q-pa-sm self-end"
+      size="sm"
+      @click="isDrawerOpen = false"
+    />
 
-      <q-icon
-        :name="mdiClose"
-        class="height-24 width-24"
-        @click="isDrawerOpen = false"
-      />
-    </div>
     <div class="full-width q-pa-md">
       <q-img :src="theme.logo" />
     </div>
 
     <q-scroll-area class="col-grow">
-      <q-list class="drawer-list" separator>
-        <slot name="items" />
+      <q-list class="drawer-list">
+        <slot />
       </q-list>
     </q-scroll-area>
   </q-drawer>
@@ -52,13 +51,13 @@ const { t } = useI18n();
 
 <style scoped lang="scss">
 .drawer-list {
-  // QScrollArea both handles x andd y overflow but since we want the drawer to have a fixed width
+  // QScrollArea both handles x and y overflow but since we want the drawer to have a fixed width
   // and using ellipses to truncate words we need to force that width to the content container too
   // Do not use just "width" otherwise you'l break "mini" mode
   max-width: calc(v-bind(DRAWER_WIDTH) * 1px);
   width: 100%;
 
-  :deep(.drawer-item) {
+  :deep(.q-item) {
     border-radius: 4px;
     margin: 2px;
     max-width: calc(
@@ -66,10 +65,6 @@ const { t } = useI18n();
     ); // Subtracting the 2px of margin on both left and right
 
     width: 100%;
-  }
-
-  :deep(.q-btn--outline::before) {
-    color: rgba(#fff, 0.12);
   }
 }
 </style>

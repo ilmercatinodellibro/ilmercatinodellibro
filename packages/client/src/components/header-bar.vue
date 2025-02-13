@@ -63,11 +63,9 @@
 
 <script setup lang="ts">
 import { mdiArrowLeft } from "@quasar/extras/mdi-v7";
-import { Screen } from "quasar";
-import { computed, provide } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
 import { provideHeaderFilters } from "src/composables/header-features/use-header-filters";
 import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
 import { provideHeaderSearch } from "src/composables/header-features/use-header-search";
@@ -87,8 +85,6 @@ const {
 } = provideHeaderFilters();
 const { headerName } = provideHeaderName();
 const { user, isAuthenticated } = useAuthService();
-const isLayoutHeaderXs = computed(() => Screen.lt.sm);
-provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
 const { t } = useI18n();
 
 const route = useRoute();

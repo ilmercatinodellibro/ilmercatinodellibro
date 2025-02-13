@@ -2,11 +2,23 @@
 <template>
   <q-page
     :class="isMobile ? 'column items-stretch' : 'items-start row'"
-    class="gap-32 justify-evenly q-pa-lg reverse"
+    class="gap-32 justify-evenly q-pa-lg"
   >
+    <q-btn
+      v-if="isMobile"
+      :icon="mdiArrowDown"
+      :label="t('auth.goToLogin')"
+      color="accent"
+      no-caps
+      @click="scrollToLogin()"
+    />
+
+    <faq-info />
+
     <q-card
       ref="loginCard"
-      class="column form-card gap-24 q-my-xl q-pa-lg text-center"
+      :class="isMobile ? 'self-center' : ''"
+      class="column full-width gap-24 max-width-300 q-my-xl q-pa-lg text-center"
     >
       <q-img :src="theme.logo" fit="contain" height="60px" />
 
@@ -86,17 +98,6 @@
         {{ t("auth.forgotPassword") }}
       </router-link>
     </q-card>
-
-    <faq-info />
-
-    <q-btn
-      v-if="isMobile"
-      :icon="mdiArrowDown"
-      :label="t('auth.goToLogin')"
-      color="accent"
-      no-caps
-      @click="scrollToLogin()"
-    />
   </q-page>
 </template>
 
@@ -181,13 +182,6 @@ async function onSubmit() {
 </script>
 
 <style lang="scss" scoped>
-$form-width: 308px;
-
-.form-card {
-  max-width: $form-width;
-  width: 100%;
-}
-
 .outline-black-12::before {
   border-color: rgb(0 0 0 / 12%);
 }

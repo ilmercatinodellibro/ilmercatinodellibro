@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="!isMobile ? 'q-ma-md' : undefined"
+      :class="!isMobile ? 'q-ma-md' : ''"
       class="absolute-full column no-wrap"
     >
       <header-search-bar-filters
@@ -10,7 +10,7 @@
       >
         <template #side-actions>
           <q-btn
-            :class="isMobile ? 'col' : 'q-ma-sm'"
+            :class="isMobile ? 'full-width' : 'q-ma-sm'"
             :label="$t('book.addBook')"
             color="accent"
             no-wrap
@@ -72,8 +72,8 @@ import { useTableFilters } from "src/composables/use-table-filters";
 import { formatPrice } from "src/helpers/formatting";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
-const { isMobile } = useLateralDrawer();
 
+const { isMobile } = useLateralDrawer();
 const { t } = useI18n();
 
 const tableRef = ref<QTable>();

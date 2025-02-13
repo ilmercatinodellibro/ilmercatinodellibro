@@ -170,7 +170,7 @@
             :name="mdiInformationOutline"
             class="q-pl-md q-pr-sm"
             color="black-87"
-            size="24px"
+            size="sm"
           />
           {{
             $t("manageUsers.cartDialog.autoEmptyDisclaimer", [timeUntilEmpty])

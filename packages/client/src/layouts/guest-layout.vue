@@ -3,91 +3,67 @@
     <header-bar />
 
     <app-drawer v-if="isMobile">
-      <template #items>
-        <div class="no-padding q-item q-item-type row">
-          <q-item
-            v-ripple
-            class="drawer-item"
-            clickable
-            :to="{ name: AvailableRouteNames.Login }"
-          >
-            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-              {{ t("routesNames.login") }}
-            </q-tooltip>
-            <q-item-section side>
-              <q-icon :name="mdiAccount" color="black-54" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="ellipsis text-size-16">
-                {{ t("routesNames.login") }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </div>
+      <q-item v-ripple clickable :to="{ name: AvailableRouteNames.Login }">
+        <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+          {{ t("routesNames.login") }}
+        </q-tooltip>
+        <q-item-section side>
+          <q-icon :name="mdiAccount" color="black-54" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label class="ellipsis text-size-16">
+            {{ t("routesNames.login") }}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
 
-        <div class="no-padding q-item q-item-type row">
-          <q-item
-            v-ripple
-            class="drawer-item"
-            clickable
-            :to="{ name: AvailableRouteNames.Contacts }"
-          >
-            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-              {{ t("routesNames.contacts") }}
-            </q-tooltip>
-            <q-item-section side>
-              <q-icon :name="mdiPhone" color="black-54" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="ellipsis text-size-16">
-                {{ t("routesNames.contacts") }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </div>
+      <q-separator />
 
-        <div class="no-padding q-item q-item-type row">
-          <q-item
-            v-ripple
-            class="drawer-item"
-            clickable
-            :to="{ name: AvailableRouteNames.WhoWeAre }"
-          >
-            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-              {{ t("routesNames.who-we-are") }}
-            </q-tooltip>
-            <q-item-section side>
-              <q-icon :name="mdiHelpCircle" color="black-54" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="ellipsis text-size-16">
-                {{ t("routesNames.who-we-are") }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </div>
+      <q-item v-ripple clickable :to="{ name: AvailableRouteNames.Contacts }">
+        <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+          {{ t("routesNames.contacts") }}
+        </q-tooltip>
+        <q-item-section side>
+          <q-icon :name="mdiPhone" color="black-54" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label class="ellipsis text-size-16">
+            {{ t("routesNames.contacts") }}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
 
-        <div class="no-padding q-item q-item-type row">
-          <q-item
-            v-ripple
-            class="drawer-item"
-            clickable
-            :to="{ name: AvailableRouteNames.JoinUs }"
-          >
-            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-              {{ t("routesNames.join-us") }}
-            </q-tooltip>
-            <q-item-section side>
-              <q-icon :name="mdiHandshake" color="black-54" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="ellipsis text-size-16">
-                {{ t("routesNames.join-us") }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </div>
-      </template>
+      <q-separator />
+
+      <q-item v-ripple clickable :to="{ name: AvailableRouteNames.WhoWeAre }">
+        <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+          {{ t("routesNames.who-we-are") }}
+        </q-tooltip>
+        <q-item-section side>
+          <q-icon :name="mdiHelpCircle" color="black-54" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label class="ellipsis text-size-16">
+            {{ t("routesNames.who-we-are") }}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <q-separator />
+
+      <q-item v-ripple clickable :to="{ name: AvailableRouteNames.JoinUs }">
+        <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+          {{ t("routesNames.join-us") }}
+        </q-tooltip>
+        <q-item-section side>
+          <q-icon :name="mdiHandshake" color="black-54" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label class="ellipsis text-size-16">
+            {{ t("routesNames.join-us") }}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
     </app-drawer>
 
     <q-page-container class="layout-background">

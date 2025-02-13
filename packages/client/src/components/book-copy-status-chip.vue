@@ -3,7 +3,7 @@
     v-if="!hideIcon"
     v-bind="IconData[displayStatus()]"
     class="q-mr-md"
-    size="24px"
+    size="sm"
   />
   <span>
     {{ t(`warehouse.bookCopyStatus.${displayStatus()}`) }}
