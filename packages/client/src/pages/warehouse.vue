@@ -11,7 +11,7 @@
       >
         <template #side-actions>
           <q-btn
-            :class="isMobile ? 'col' : undefined"
+            :class="isMobile ? 'col' : ''"
             color="black-12"
             no-wrap
             outline

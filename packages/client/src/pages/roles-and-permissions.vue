@@ -10,7 +10,7 @@
       >
         <template #side-actions>
           <q-btn
-            :class="isMobile ? 'col' : undefined"
+            :class="isMobile ? 'col' : ''"
             :icon="mdiPlus"
             :label="t('general.rolesAndPermissions.addNewOperator.title')"
             color="accent"

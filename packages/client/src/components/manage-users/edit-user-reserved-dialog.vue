@@ -25,7 +25,7 @@
             class="gap-16 no-wrap"
           >
             <q-btn
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :icon="mdiDelete"
               :label="$t('manageUsers.reservedBooksDialog.deleteAllReserved')"
               color="negative"
@@ -33,7 +33,7 @@
               @click="deleteAllReserved()"
             />
             <q-btn
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.reservedBooksDialog.moveAllIntoCart')"
               color="primary"
@@ -47,7 +47,7 @@
             class="gap-16 no-wrap"
           >
             <q-btn
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.reservedBooksDialog.reservedIntoCart')"
               no-wrap
@@ -55,7 +55,7 @@
               @click="moveReservedIntoCart()"
             />
             <q-btn
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :icon="mdiCart"
               :label="$t('manageUsers.goToCart')"
               no-wrap

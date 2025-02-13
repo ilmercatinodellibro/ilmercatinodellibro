@@ -20,7 +20,7 @@
       </q-input>
 
       <q-select
-        :class="isMobile ? 'col' : undefined"
+        :class="isMobile ? 'col' : ''"
         :label="t('book.filter')"
         :model-value="newFilters.filters"
         :options="Object.keys(filterOptions)"

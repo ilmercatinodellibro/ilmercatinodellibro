@@ -33,7 +33,7 @@
         >
           <q-btn
             v-if="!showByClass"
-            :class="isMobile ? 'col' : undefined"
+            :class="isMobile ? 'col' : ''"
             :icon="mdiFilter"
             :label="$t('reserveBooks.filterButton')"
             class="text-transform-none"

@@ -34,7 +34,7 @@
           </q-input>
 
           <q-btn
-            :class="isMobile ? 'col' : undefined"
+            :class="isMobile ? 'col' : ''"
             :label="$t('common.search')"
             class="bottom-separator-20"
             color="accent"

@@ -25,7 +25,7 @@
             class="gap-16"
           >
             <q-btn
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :icon="mdiDelete"
               :label="$t('manageUsers.requestedBooksDialog.deleteAll')"
               color="negative"
@@ -34,7 +34,7 @@
             />
             <q-btn
               v-if="selectedLocation.maxBookingDays > 0"
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :label="$t('manageUsers.requestedBooksDialog.moveIntoReserved')"
               no-wrap
               outline
@@ -47,7 +47,7 @@
             class="gap-16"
           >
             <q-btn
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.requestedBooksDialog.moveIntoCart')"
               color="primary"
@@ -55,7 +55,7 @@
               @click="moveAllIntoCart()"
             />
             <q-btn
-              :class="isMobile ? 'col' : undefined"
+              :class="isMobile ? 'col' : ''"
               :icon="mdiCart"
               :label="$t('manageUsers.goToCart')"
               no-wrap
