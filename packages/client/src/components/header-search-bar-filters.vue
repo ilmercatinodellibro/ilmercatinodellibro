@@ -84,16 +84,16 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { SchoolFilters, TableFilters } from "src/models/book";
 import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 
-const { t } = useI18n();
-
 const props = defineProps<{
   searchInputPlaceholder?: string;
   filterOptions: ReturnType<typeof useTranslatedFilters>["value"];
 }>();
 
-const { isMobile } = useLateralDrawer();
-
 const newFilters = defineModel<TableFilters>({ required: true });
+
+const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 // We can just check the selection of the school to state that that filter is selected since courses
 // can be only selected after selecting at least a school

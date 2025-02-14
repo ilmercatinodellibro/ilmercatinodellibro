@@ -56,7 +56,6 @@ import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
 import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
-const { t } = useI18n();
 
 defineProps<
   {
@@ -67,6 +66,8 @@ defineProps<
     // eslint-disable-next-line vue/no-unused-properties
   } & Pick<QTableProps, "loading">
 >();
+
+const { t } = useI18n();
 
 const { isMobile } = useLateralDrawer();
 

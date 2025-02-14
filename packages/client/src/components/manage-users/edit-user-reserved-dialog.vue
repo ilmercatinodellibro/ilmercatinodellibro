@@ -283,7 +283,7 @@ import {
   mdiDelete,
   mdiDotsVertical,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QBtn, QDialog, useDialogPluginComponent } from "quasar";
+import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
@@ -306,23 +306,27 @@ import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
 
-const { t } = useI18n();
-
-const largeBreakpoint = 1920;
-const smallBreakpoint = 1440;
-const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
-const { isMobile } = useLateralDrawer();
-
 const props = defineProps<{
   userData: CustomerFragment;
   retailLocationId: string;
 }>();
-const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { t } = useI18n();
+
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
+
+const SMALL_CUSTOM_BREAKPOINT = 1440;
+const LARGE_CUSTOM_BREAKPOINT = 1920;
+const screenWidth = useScreenWidth(
+  SMALL_CUSTOM_BREAKPOINT,
+  LARGE_CUSTOM_BREAKPOINT,
+);
+
+const booksCartCount = ref(props.userData.booksInCart);
 
 const {
   useCreateReservationsMutation,

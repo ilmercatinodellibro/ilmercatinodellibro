@@ -507,6 +507,11 @@ const TOOLTIP_SHARED_PROPS: QTooltipProps = {
 
 const { t, locale } = useI18n();
 
+const { user, hasAdminRole, hasOperatorRole, hasUserRole } = useAuthService();
+const { selectedLocation } = useRetailLocationService();
+
+const { isDrawerMini, isDrawerOpen, isMobile } = useLateralDrawer();
+
 const isOnline = useOnline();
 watch(isOnline, (becomeOnline) => {
   if (becomeOnline) {
@@ -531,10 +536,6 @@ function logout() {
   isDrawerOpen.value = false;
   logoutMutation();
 }
-const { user, hasAdminRole, hasOperatorRole, hasUserRole } = useAuthService();
-const { isDrawerMini, isDrawerOpen, isMobile } = useLateralDrawer();
-
-const { selectedLocation } = useRetailLocationService();
 
 const { updateRetailLocationSettings } =
   useUpdateRetailLocationSettingsMutation();

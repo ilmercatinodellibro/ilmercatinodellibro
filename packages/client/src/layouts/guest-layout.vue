@@ -92,6 +92,7 @@ const TOOLTIP_SHARED_PROPS: QTooltipProps = {
   self: "center left",
 };
 
-const { isMobile, isDrawerMini } = useLateralDrawer();
 const { t } = useI18n();
+
+const { isMobile, isDrawerMini } = useLateralDrawer();
 </script>

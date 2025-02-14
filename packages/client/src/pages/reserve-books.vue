@@ -161,6 +161,9 @@ import { useReservationService } from "src/services/reservation";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
+const { t } = useI18n();
+const router = useRouter();
+
 const { user } = useAuthService();
 const { selectedLocation } = useRetailLocationService();
 
@@ -184,10 +187,6 @@ const { bookRequests } = useGetRequestsQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
 });
-
-const { t } = useI18n();
-
-const router = useRouter();
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {

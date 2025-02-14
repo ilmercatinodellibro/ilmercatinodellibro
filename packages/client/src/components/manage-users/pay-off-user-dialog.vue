@@ -399,13 +399,13 @@ import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
 import TableHeaderWithInfo from "./table-header-with-info.vue";
 
-const { t } = useI18n();
-
 const props = defineProps<{
   user: UserFragment;
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
+
+const { t } = useI18n();
 
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<SettleRemainingType>();

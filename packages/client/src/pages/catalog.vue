@@ -73,8 +73,11 @@ import { formatPrice } from "src/helpers/formatting";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 
-const { isMobile } = useLateralDrawer();
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
+
 const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 const tableRef = ref<QTable>();
 
@@ -83,8 +86,6 @@ const numberOfRows = ref(50);
 
 const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
   useTableFilters("book.filters.options", true);
-
-const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
 // We add "refetchFilterProxy" as param here because otherwise we would get a double initial fetch
 // when the component is mounted, one without "filter" variable and one with a "filter" variable

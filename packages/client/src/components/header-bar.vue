@@ -75,7 +75,13 @@ import { useAuthService } from "src/services/auth";
 import kToolbar from "./k-toolbar.vue";
 import LanguageDropdownBtn from "./language-dropdown-btn.vue";
 
+const { t } = useI18n();
+const route = useRoute();
+
+const { user, isAuthenticated } = useAuthService();
+
 const { isDrawerOpen, showLateralDrawer, isMobile } = useLateralDrawer();
+
 const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
 const {
   compareFunction,
@@ -84,10 +90,7 @@ const {
   selectedFilter,
 } = provideHeaderFilters();
 const { headerName } = provideHeaderName();
-const { user, isAuthenticated } = useAuthService();
-const { t } = useI18n();
 
-const route = useRoute();
 const showBackToLocations = computed(
   () => route.name === AvailableRouteNames.Login && !user.value,
 );

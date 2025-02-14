@@ -56,8 +56,6 @@ import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { CommonDialogProps } from "./dialog-models";
 
-const { t } = useI18n();
-
 withDefaults(
   defineProps<
     CommonDialogProps & {
@@ -78,6 +76,8 @@ const emit = defineEmits<{
   save: [];
   cancel: [];
 }>();
+
+const { t } = useI18n();
 
 const { isMobile } = useLateralDrawer();
 </script>

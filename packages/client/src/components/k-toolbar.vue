@@ -87,13 +87,13 @@ const searchTextProxy = defineModel<string>("searchText", { default: "" });
 
 const drawerProxy = defineModel<boolean>("drawer");
 
+const { isMobile } = useLateralDrawer();
+
 const showHeaderFilters = ref(true);
 
 function updateSearchBarActiveState(newState: boolean) {
   showHeaderFilters.value = newState;
 }
-
-const { isMobile } = useLateralDrawer();
 </script>
 
 <style scoped lang="scss">

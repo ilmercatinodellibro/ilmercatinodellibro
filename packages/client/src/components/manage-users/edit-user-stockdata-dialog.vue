@@ -204,10 +204,10 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { t } = useI18n();
+
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
-
-const { t } = useI18n();
 
 const { createBookCopies } = useCreateBookCopiesMutation();
 

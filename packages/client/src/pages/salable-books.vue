@@ -109,9 +109,10 @@ import { notifyError } from "src/helpers/error-messages";
 import { requiredRule, validISBN } from "src/helpers/rules";
 import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
-const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 const searchQuery = ref("");
 

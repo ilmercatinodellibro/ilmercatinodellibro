@@ -126,14 +126,17 @@ import { emailRule, requiredRule } from "src/helpers/rules";
 import { AvailableRouteNames } from "src/models/routes";
 import { useLoginMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
+
 const props = defineProps<{
   emailVerified?: boolean;
 }>();
 
 const { t } = useI18n();
 
-const { theme } = useTheme();
 const { selectedLocation } = useRetailLocationService();
+
+const { isMobile } = useLateralDrawer();
+const { theme } = useTheme();
 
 const SOCIAL_LOGIN_ENABLED =
   process.env.SOCIAL_LOGIN_ENABLED === "true" &&
@@ -158,7 +161,6 @@ const showPassword = ref(false);
 
 const loginCard = ref<QCard>();
 
-const { isMobile } = useLateralDrawer();
 function scrollToLogin() {
   if (!loginCard.value) {
     return;

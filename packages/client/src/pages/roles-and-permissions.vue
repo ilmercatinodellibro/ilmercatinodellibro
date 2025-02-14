@@ -113,7 +113,6 @@ import {
   MemberFragment,
   useGetMembersQuery,
 } from "src/services/user.graphql";
-const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 
@@ -122,6 +121,8 @@ const { loading, removeMember } = useMembersService();
 const { members, refetch: refetchMembers } = useGetMembersQuery(() => ({
   retailLocationId: selectedLocation.value.id,
 }));
+
+const { isMobile } = useLateralDrawer();
 
 const pagination = ref({
   rowsNumber: members.value.length,

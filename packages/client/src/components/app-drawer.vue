@@ -43,10 +43,11 @@ import {
 } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
 
+const { t } = useI18n();
+
 const { isDrawerMini, isDrawerOpen, isMobile } = useLateralDrawer();
 
 const { theme } = useTheme();
-const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

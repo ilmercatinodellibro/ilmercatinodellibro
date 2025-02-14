@@ -205,10 +205,12 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { t } = useI18n();
+
+const { selectedLocation } = useRetailLocationService();
+
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
-
-const { t } = useI18n();
 
 const title = computed(() =>
   t(
@@ -218,8 +220,6 @@ const title = computed(() =>
     [`${props.userData.firstname} ${props.userData.lastname}`],
   ),
 );
-
-const { selectedLocation } = useRetailLocationService();
 
 const { soldBookCopies, loading: soldLoading } = useGetSoldBookCopiesQuery(
   () => ({

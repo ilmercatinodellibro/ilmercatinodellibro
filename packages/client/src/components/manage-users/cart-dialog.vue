@@ -242,14 +242,14 @@ const props = defineProps<{
   user: CustomerFragment;
 }>();
 
-const { selectedLocation: retailLocation } = useRetailLocationService();
-
 defineEmits(useDialogPluginComponent.emitsObject);
+
+const { t } = useI18n();
+
+const { selectedLocation: retailLocation } = useRetailLocationService();
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
-
-const { t } = useI18n();
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {

@@ -255,13 +255,15 @@ import {
 import { useReservationService } from "src/services/reservation";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-const { isMobile } = useLateralDrawer();
 
-const { selectedLocation } = useRetailLocationService();
-const { user } = useAuthService();
-
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+
+const { user } = useAuthService();
+const { selectedLocation } = useRetailLocationService();
+
+const { isMobile } = useLateralDrawer();
 
 const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -315,8 +317,6 @@ const tableRowsByTab = computed<TableRowsByTab>(() => ({
   [BooksTab.REQUESTED]: bookRequests.value,
   [BooksTab.RESERVED]: userReservations.value,
 }));
-
-const { t } = useI18n();
 
 const commonColumns = computed<QTableColumn<TablesRowsTypes>[]>(() => [
   {

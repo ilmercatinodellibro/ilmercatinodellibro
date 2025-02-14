@@ -92,11 +92,12 @@ import {
   useDeleteUserAccountMutation,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
-const { isMobile } = useLateralDrawer();
 
 const { t } = useI18n();
 
 const { user, updateCurrentUser } = useAuthService();
+
+const { isMobile } = useLateralDrawer();
 
 interface ItemData {
   icon: string;

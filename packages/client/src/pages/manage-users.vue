@@ -467,14 +467,15 @@ import {
   useUpdateUserMutation,
 } from "src/services/user.graphql";
 
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
+
 const { t, locale } = useI18n();
+
+const { hasAdminRole } = useAuthService();
+
 const { isMobile } = useLateralDrawer();
 
 const tableRef = ref() as Ref<QTable>;
-
-const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
-
-const { hasAdminRole } = useAuthService();
 
 const {
   customers,

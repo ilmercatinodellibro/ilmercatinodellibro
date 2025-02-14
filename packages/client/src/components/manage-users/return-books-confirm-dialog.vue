@@ -101,11 +101,11 @@ defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { t } = useI18n();
+
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
-
-const { t } = useI18n();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {

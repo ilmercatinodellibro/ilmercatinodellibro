@@ -127,10 +127,6 @@ import {
   useGetBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 
-const { t } = useI18n();
-
-const { isMobile } = useLateralDrawer();
-
 const props = defineProps<{
   bookId: string;
   showOnlyAvailable?: boolean | null;
@@ -140,6 +136,10 @@ const emit = defineEmits<{
   openHistory: [bookCopy: BookCopyDetailsFragment];
   updateProblems: [];
 }>();
+
+const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 const tableWidth = 9;
 

@@ -114,12 +114,12 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { t } = useI18n();
+
 const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
   useDialogPluginComponent<BookWithAvailableCopiesFragment[]>();
 
 const { isMobile } = useLateralDrawer();
-
-const { t } = useI18n();
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [

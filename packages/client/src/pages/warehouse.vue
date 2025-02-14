@@ -257,6 +257,9 @@ import {
   BookSummaryFragment,
   PaginatedBookResultFragment,
 } from "src/services/book.graphql";
+
+const { t } = useI18n();
+
 const { isMobile } = useLateralDrawer();
 
 interface WarehousePagination {
@@ -350,8 +353,6 @@ async function swapView() {
 
   await fetchBooks(pagination.value);
 }
-
-const { t } = useI18n();
 
 const booksColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {

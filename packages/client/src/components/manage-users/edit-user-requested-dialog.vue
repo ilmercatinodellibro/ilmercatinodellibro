@@ -218,25 +218,30 @@ import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
 
-const { t } = useI18n();
-
-const smallBreakpoint = 1230;
-const largeBreakpoint = 1695;
-const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
-const { isMobile } = useLateralDrawer();
-
 const props = defineProps<{
   userData: CustomerFragment;
   retailLocationId: string;
 }>();
-// TODO: Update userData.booksInCart cache and directly use it instead
-const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
-const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
-  useDialogPluginComponent();
+
+const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
+
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
+  useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
+
+const SMALL_CUSTOM_BREAKPOINT = 1230;
+const LARGE_CUSTOM_BREAKPOINT = 1695;
+const screenWidth = useScreenWidth(
+  SMALL_CUSTOM_BREAKPOINT,
+  LARGE_CUSTOM_BREAKPOINT,
+);
+
+// TODO: Update userData.booksInCart cache and directly use it instead
+const booksCartCount = ref(props.userData.booksInCart);
 
 const {
   useGetRequestsQuery,
