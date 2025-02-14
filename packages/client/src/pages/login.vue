@@ -4,14 +4,22 @@
     :class="isMobile ? 'column items-stretch' : 'items-start row'"
     class="gap-32 justify-evenly q-pa-lg"
   >
-    <q-btn
-      v-if="isMobile"
-      :icon="mdiArrowDown"
-      :label="t('auth.goToLogin')"
-      color="accent"
-      no-caps
-      @click="scrollToLogin()"
-    />
+    <template v-if="isMobile">
+      <q-btn
+        :icon="mdiArrowLeft"
+        color="accent"
+        :label="t('auth.backToLocations')"
+        :to="{ name: AvailableRouteNames.SelectLocation }"
+      />
+
+      <q-btn
+        :icon="mdiArrowDown"
+        :label="t('auth.goToLogin')"
+        color="accent"
+        no-caps
+        @click="scrollToLogin()"
+      />
+    </template>
 
     <faq-info />
 
@@ -103,7 +111,7 @@
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client/core";
-import { mdiArrowDown } from "@quasar/extras/mdi-v7";
+import { mdiArrowDown, mdiArrowLeft } from "@quasar/extras/mdi-v7";
 import { Notify, QCard } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -115,6 +123,7 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
+import { AvailableRouteNames } from "src/models/routes";
 import { useLoginMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 const props = defineProps<{
