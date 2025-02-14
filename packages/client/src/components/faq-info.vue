@@ -3,7 +3,7 @@
   <div class="column max-width-700 no-wrap">
     <h3 class="text-primary">{{ t("routesNames.faq") }}</h3>
     <div
-      :class="isMobile ? 'min-width-auto' : undefined"
+      :class="isMobile ? 'force-on-column' : ''"
       v-html="selectedLocation.infoPagesContent?.[locale].faqContent"
     />
   </div>
@@ -25,8 +25,9 @@ const { isMobile } = useLateralDrawer();
   text-decoration: none;
 }
 
-// To display Reggio's bottom FAQ sections correctly on mobile
-.min-width-auto :deep(.row > *) {
-  min-width: auto;
+// Hacked fix to display Reggio's bottom FAQ sections correctly on mobile
+// Must be removed when the new FAQ system is implemented
+.force-on-column :deep(.row) {
+  flex-direction: column;
 }
 </style>

@@ -39,7 +39,9 @@
           outlined
           type="number"
         />
-        <span class="gap-16 items-center q-pb-sm q-pt-none q-px-none row">
+        <span
+          class="gap-16 items-center no-wrap q-pb-sm q-pt-none q-px-none row"
+        >
           <q-checkbox
             v-model="newSettings.registrationEnabled"
             color="primary"
