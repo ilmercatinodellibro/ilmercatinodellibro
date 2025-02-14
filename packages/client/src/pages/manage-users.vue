@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="!isMobile ? 'q-ma-md' : undefined"
+      :class="!isMobile ? 'q-ma-md' : ''"
       class="absolute-full column no-wrap"
     >
       <header-search-bar-filters
@@ -10,7 +10,7 @@
       >
         <template #side-actions>
           <q-btn
-            :class="isMobile ? 'col' : 'q-ma-sm'"
+            :class="isMobile ? 'full-width' : 'q-ma-sm'"
             color="accent"
             no-wrap
             :icon="mdiPlus"
@@ -24,7 +24,7 @@
         <q-table
           ref="tableRef"
           v-model:pagination="pagination"
-          :class="isMobile ? 'sticky-last-column' : undefined"
+          :class="isMobile ? 'sticky-last-column' : ''"
           :columns="columns"
           :filter="tableFilter"
           :filter-method="filterMethod"
@@ -72,351 +72,351 @@
             <q-tr
               :props="props"
               :class="
-                !props.row.emailVerified
-                  ? 'bg-blue-grey-1 text-black-54'
-                  : undefined
+                !props.row.emailVerified ? 'bg-blue-grey-1 text-black-54' : ''
               "
             >
-              <template v-for="col in props.cols" :key="col.name">
-                <q-td v-if="col.name === 'edit'">
-                  <q-btn
-                    :icon="mdiPencil"
-                    color="primary"
-                    flat
-                    round
-                    size="md"
-                    @click="openEdit(props.row)"
-                  />
-                </q-td>
+              <q-td key="edit" :props="props">
+                <q-btn
+                  :icon="mdiPencil"
+                  color="primary"
+                  flat
+                  round
+                  size="md"
+                  @click="openEdit(props.row)"
+                />
+              </q-td>
 
-                <q-td v-else-if="col.name === 'firstname'" :class="col.classes">
-                  <span class="gap-16 items-center justify-between no-wrap row">
-                    {{ col.value }}
-                    <q-icon
-                      v-if="col.row.notes.length > 0"
-                      :name="mdiInformationOutline"
-                      size="24px"
-                      color="primary"
-                    >
+              <table-cell-with-tooltip
+                key-td="email"
+                :props="props"
+                :value="getColValue(props.cols, 'email')"
+              >
+                <template v-if="!props.row.emailVerified">
+                  <round-badge
+                    class="q-ma-xs"
+                    color="warning"
+                    float-right
+                    text-color="black-87"
+                  >
+                    <q-icon :name="mdiInformationOutline" size="18px">
                       <q-tooltip>
-                        {{ col.row.notes }}
+                        {{ t("auth.emailNotVerified") }}
                       </q-tooltip>
                     </q-icon>
-                  </span>
-                </q-td>
+                  </round-badge>
+                </template>
+              </table-cell-with-tooltip>
 
-                <table-cell-with-tooltip
-                  v-else-if="col.name === 'email'"
-                  :class="col.classes"
-                  :value="col.value"
-                >
-                  <template v-if="!props.row.emailVerified">
-                    <round-badge
-                      class="q-ma-xs"
-                      color="warning"
-                      float-right
-                      text-color="black-87"
-                    >
-                      <q-icon :name="mdiInformationOutline" size="18px">
-                        <q-tooltip>
-                          {{ t("auth.emailNotVerified") }}
-                        </q-tooltip>
-                      </q-icon>
-                    </round-badge>
-                  </template>
-                </table-cell-with-tooltip>
-
-                <table-cell-with-dialog
-                  v-else-if="
-                    [
-                      'in-stock',
-                      'sold',
-                      'reserved',
-                      'requested',
-                      'purchased',
-                    ].includes(col.name) && !isMobile
-                  "
-                  :clickable-when-zero="
-                    alwaysClickableColsNames.includes(col.name)
-                  "
-                  :disable="willBeDeleted(props.row)"
-                  :secondary-value="
-                    col.name === 'requested'
-                      ? props.row.booksRequestedAndAvailable
-                      : undefined
-                  "
-                  :value="col.value"
-                  @click="openCellEditDialog(props.row, col, col.value)"
-                >
-                  <template
-                    v-if="col.name === 'requested'"
-                    #secondary-value="{ value: availableCount }"
-                  >
-                    <round-badge color="positive">
-                      {{ availableCount }}
-
-                      <q-tooltip>
-                        {{ t("manageUsers.tooltips.available") }}
-                      </q-tooltip>
-                    </round-badge>
-                  </template>
-                </table-cell-with-dialog>
-
-                <q-td
-                  v-else-if="col.name === 'shopping-cart'"
-                  :class="col.classes"
-                >
-                  <q-btn
-                    :disable="willBeDeleted(props.row)"
-                    :icon="mdiCart"
+              <q-td key="first-name" :props="props">
+                <span class="gap-16 items-center justify-between no-wrap row">
+                  {{ getColValue(props.cols, "first-name") }}
+                  <q-icon
+                    v-if="props.row.notes.length > 0"
+                    :name="mdiInformationOutline"
+                    size="sm"
                     color="primary"
-                    flat
-                    round
-                    @click="openCart(props.row)"
                   >
-                    <round-badge
-                      v-if="col.value > 0"
-                      :label="col.value"
-                      class="badge-top-left"
-                      color="accent"
-                      float-left
-                    />
-                  </q-btn>
-                </q-td>
-
-                <q-td v-else-if="col.name === 'receipts'" :class="col.classes">
-                  <q-btn
-                    :icon="mdiReceiptText"
-                    color="primary"
-                    flat
-                    round
-                    size="md"
-                    @click="openReceipt(props.row)"
-                  />
-                </q-td>
-
-                <q-td v-else-if="col.name === 'pay-off'">
-                  <chip-button
-                    :disable="
-                      !hasAdminRole &&
-                      (!selectedLocation.payOffEnabled ||
-                        willBeDeleted(props.row))
-                    "
-                    color="primary"
-                    :label="t('manageUsers.payOff')"
-                    @click="openPayOff(props.row)"
-                  >
-                    <q-tooltip v-if="!selectedLocation.payOffEnabled">
-                      {{ t("manageUsers.payOffDisabled") }}
+                    <q-tooltip>
+                      {{ props.row.notes }}
                     </q-tooltip>
-                  </chip-button>
-                </q-td>
+                  </q-icon>
+                </span>
+              </q-td>
 
-                <!-- Mobile actions button -->
-                <q-td
-                  v-else-if="col.name === 'actions'"
-                  :class="[
-                    col.__trClass,
-                    ...(!props.row.emailVerified
-                      ? ['bg-blue-grey-1 text-black-54']
-                      : []),
-                  ]"
-                  class="no-padding"
+              <q-td key="last-name" :props="props">
+                {{ getColValue(props.cols, "last-name") }}
+              </q-td>
+
+              <q-td key="phone-number" :props="props">
+                {{ getColValue(props.cols, "phone-number") }}
+              </q-td>
+
+              <!-- `key` is needed for the v-for, `key-td` is needed for `QTable` -->
+              <table-cell-with-dialog
+                v-for="colName in [
+                  'in-stock',
+                  'sold',
+                  'reserved',
+                  'requested',
+                  'purchased',
+                ]"
+                :key="colName"
+                :key-td="colName"
+                :props="props"
+                :clickable-when-zero="
+                  alwaysClickableColsNames.includes(colName)
+                "
+                :disable="willBeDeleted(props.row)"
+                :secondary-value="
+                  colName === 'requested'
+                    ? props.row.booksRequestedAndAvailable
+                    : undefined
+                "
+                :value="getColValue(props.cols, colName)"
+                @click="
+                  openCellEditDialog(
+                    props.row,
+                    colName,
+                    getColValue(props.cols, colName),
+                  )
+                "
+              >
+                <template
+                  v-if="colName === 'requested'"
+                  #secondary-value="{ value: availableCount }"
                 >
-                  <q-btn
-                    :icon="mdiDotsVertical"
-                    class="full-height"
-                    color="primary"
-                    flat
-                  >
-                    <q-menu>
-                      <q-list>
-                        <q-item
-                          v-close-popup
-                          clickable
-                          @click="openEdit(props.row)"
+                  <round-badge color="positive">
+                    {{ availableCount }}
+
+                    <q-tooltip>
+                      {{ t("manageUsers.tooltips.available") }}
+                    </q-tooltip>
+                  </round-badge>
+                </template>
+              </table-cell-with-dialog>
+
+              <q-td key="shopping-cart" :props="props">
+                <q-btn
+                  :disable="willBeDeleted(props.row)"
+                  :icon="mdiCart"
+                  color="primary"
+                  flat
+                  round
+                  @click="openCart(props.row)"
+                >
+                  <round-badge
+                    v-if="getColValue(props.cols, 'shopping-cart') > 0"
+                    :label="getColValue(props.cols, 'shopping-cart')"
+                    class="badge-top-left"
+                    color="accent"
+                    float-left
+                  />
+                </q-btn>
+              </q-td>
+
+              <q-td key="creation-date" :props="props">
+                {{ getColValue(props.cols, "creation-date") }}
+              </q-td>
+
+              <q-td key="receipts" :props="props">
+                <q-btn
+                  :icon="mdiReceiptText"
+                  color="primary"
+                  flat
+                  round
+                  size="md"
+                  @click="openReceipt(props.row)"
+                />
+              </q-td>
+
+              <q-td key="pay-off" :props="props">
+                <chip-button
+                  :disable="
+                    !hasAdminRole &&
+                    (!selectedLocation.payOffEnabled ||
+                      willBeDeleted(props.row))
+                  "
+                  color="primary"
+                  :label="t('manageUsers.payOff')"
+                  @click="openPayOff(props.row)"
+                >
+                  <q-tooltip v-if="!selectedLocation.payOffEnabled">
+                    {{ t("manageUsers.payOffDisabled") }}
+                  </q-tooltip>
+                </chip-button>
+              </q-td>
+
+              <!-- Mobile actions button -->
+              <q-td key="actions" :props="props">
+                <q-btn
+                  :icon="mdiDotsVertical"
+                  class="full-height"
+                  color="primary"
+                  flat
+                >
+                  <q-menu>
+                    <q-list>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="openEdit(props.row)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.editUser.title") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+
+                      <q-item
+                        v-close-popup
+                        :disable="willBeDeleted(props.row)"
+                        clickable
+                        @click="
+                          openCellEditDialog(
+                            props.row,
+                            'in-stock',
+                            props.row.booksInStock,
+                          )
+                        "
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.fields.inStock") }} ({{
+                              props.row.booksInStock
+                            }})
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+
+                      <q-item
+                        v-if="props.row.booksSold > 0"
+                        v-close-popup
+                        :disable="willBeDeleted(props.row)"
+                        clickable
+                        @click="
+                          openCellEditDialog(
+                            props.row,
+                            'sold',
+                            props.row.booksSold,
+                          )
+                        "
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.fields.sold") }} ({{
+                              props.row.booksSold
+                            }})
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+
+                      <q-item
+                        v-close-popup
+                        :disable="willBeDeleted(props.row)"
+                        clickable
+                        @click="
+                          openCellEditDialog(
+                            props.row,
+                            'reserved',
+                            props.row.booksReserved,
+                          )
+                        "
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.fields.reserved") }} ({{
+                              props.row.booksReserved
+                            }})
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+
+                      <q-item
+                        v-close-popup
+                        :disable="willBeDeleted(props.row)"
+                        clickable
+                        @click="
+                          openCellEditDialog(
+                            props.row,
+                            'requested',
+                            props.row.booksRequested,
+                          )
+                        "
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.fields.requested") }} ({{
+                              props.row.booksRequested
+                            }})
+                          </q-item-label>
+                        </q-item-section>
+
+                        <q-item-section
+                          v-if="props.row.booksRequestedAndAvailable > 0"
+                          side
                         >
-                          <q-item-section>
+                          <round-badge color="positive">
                             <q-item-label>
-                              {{ t("manageUsers.editUser.title") }}
+                              {{ props.row.booksRequestedAndAvailable }}
                             </q-item-label>
-                          </q-item-section>
-                        </q-item>
 
-                        <q-item
-                          v-close-popup
-                          :disable="willBeDeleted(props.row)"
-                          clickable
-                          @click="
-                            openCellEditDialog(
-                              props.row,
-                              { name: 'in-stock' },
-                              props.row.booksInStock,
-                            )
-                          "
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{ t("manageUsers.fields.inStock") }} ({{
-                                props.row.booksInStock
-                              }})
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
+                            <q-tooltip>
+                              {{ t("manageUsers.tooltips.available") }}
+                            </q-tooltip>
+                          </round-badge>
+                        </q-item-section>
+                      </q-item>
 
-                        <q-item
-                          v-if="props.row.booksSold > 0"
-                          v-close-popup
-                          :disable="willBeDeleted(props.row)"
-                          clickable
-                          @click="
-                            openCellEditDialog(
-                              props.row,
-                              { name: 'sold' },
-                              props.row.booksSold,
-                            )
-                          "
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{ t("manageUsers.fields.sold") }} ({{
-                                props.row.booksSold
-                              }})
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
+                      <q-item
+                        v-if="props.row.booksBought > 0"
+                        v-close-popup
+                        :disable="willBeDeleted(props.row)"
+                        clickable
+                        @click="
+                          openCellEditDialog(
+                            props.row,
+                            'purchased',
+                            props.row.booksBought,
+                          )
+                        "
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.fields.purchased") }} ({{
+                              props.row.booksBought
+                            }})
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
 
-                        <q-item
-                          v-close-popup
-                          :disable="willBeDeleted(props.row)"
-                          clickable
-                          @click="
-                            openCellEditDialog(
-                              props.row,
-                              { name: 'reserved' },
-                              props.row.booksReserved,
-                            )
-                          "
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{ t("manageUsers.fields.reserved") }} ({{
-                                props.row.booksReserved
-                              }})
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
+                      <q-item
+                        v-close-popup
+                        :disable="willBeDeleted(props.row)"
+                        clickable
+                        @click="openCart(props.row)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.fields.cart") }} ({{
+                              props.row.booksInCart
+                            }})
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
 
-                        <q-item
-                          v-close-popup
-                          :disable="willBeDeleted(props.row)"
-                          clickable
-                          @click="
-                            openCellEditDialog(
-                              props.row,
-                              { name: 'requested' },
-                              props.row.booksRequested,
-                            )
-                          "
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{ t("manageUsers.fields.requested") }} ({{
-                                props.row.booksRequested
-                              }})
-                            </q-item-label>
-                          </q-item-section>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="openReceipt(props.row)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.fields.receipts") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
 
-                          <q-item-section
-                            v-if="props.row.booksRequestedAndAvailable > 0"
-                            side
-                          >
-                            <round-badge color="positive">
-                              <q-item-label>
-                                {{ props.row.booksRequestedAndAvailable }}
-                              </q-item-label>
-
-                              <q-tooltip>
-                                {{ t("manageUsers.tooltips.available") }}
-                              </q-tooltip>
-                            </round-badge>
-                          </q-item-section>
-                        </q-item>
-
-                        <q-item
-                          v-if="props.row.booksBought > 0"
-                          v-close-popup
-                          :disable="willBeDeleted(props.row)"
-                          clickable
-                          @click="
-                            openCellEditDialog(
-                              props.row,
-                              { name: 'purchased' },
-                              props.row.booksBought,
-                            )
-                          "
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{ t("manageUsers.fields.purchased") }} ({{
-                                props.row.booksBought
-                              }})
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
-
-                        <q-item
-                          v-close-popup
-                          :disable="willBeDeleted(props.row)"
-                          clickable
-                          @click="openCart(props.row)"
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{ t("manageUsers.fields.cart") }} ({{
-                                props.row.booksInCart
-                              }})
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
-
-                        <q-item
-                          v-close-popup
-                          clickable
-                          @click="openReceipt(props.row)"
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{ t("manageUsers.fields.receipts") }}
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
-
-                        <q-item
-                          v-close-popup
-                          :disable="
-                            !hasAdminRole &&
-                            (!selectedLocation.payOffEnabled ||
-                              willBeDeleted(props.row))
-                          "
-                          clickable
-                          @click="openPayOff(props.row)"
-                        >
-                          <q-item-section>
-                            <q-item-label>
-                              {{ t("manageUsers.payOff") }}
-                            </q-item-label>
-                          </q-item-section>
-                        </q-item>
-                      </q-list>
-                    </q-menu>
-                  </q-btn>
-                </q-td>
-
-                <q-td v-else :class="col.classes">
-                  {{ col.value }}
-                </q-td>
-              </template>
+                      <q-item
+                        v-close-popup
+                        :disable="
+                          !hasAdminRole &&
+                          (!selectedLocation.payOffEnabled ||
+                            willBeDeleted(props.row))
+                        "
+                        clickable
+                        @click="openPayOff(props.row)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{ t("manageUsers.payOff") }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-btn>
+              </q-td>
             </q-tr>
           </template>
         </q-table>
@@ -466,11 +466,11 @@ import {
   useDeleteUserAccountMutation,
   useUpdateUserMutation,
 } from "src/services/user.graphql";
+
+const { t, locale } = useI18n();
 const { isMobile } = useLateralDrawer();
 
 const tableRef = ref() as Ref<QTable>;
-
-const { t, locale } = useI18n();
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
 
@@ -517,6 +517,7 @@ const columnTooltip = computed(() => ({
   available: t("manageUsers.tooltips.available"),
 }));
 
+// The "satisfies QTableColumn<...>" is needed to avoid a TS mismatch caused by `computed` type
 const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   ...((!isMobile.value
     ? [{ name: "edit", field: () => undefined, label: "" }]
@@ -627,6 +628,10 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
           name: "actions",
           field: () => undefined,
           label: "",
+          classes: ({ emailVerified }) =>
+            `no-padding ${
+              !emailVerified ? "bg-blue-grey-1 text-black-54" : ""
+            }`,
         },
       ]) satisfies QTableColumn<CustomerFragment>[]),
 ]);
@@ -772,17 +777,17 @@ const alwaysClickableColsNames = ["in-stock", "reserved", "requested"];
 const { selectedLocation } = useRetailLocationService();
 function openCellEditDialog(
   userData: CustomerFragment,
-  { name }: { name: string },
+  colName: string,
   value: number,
 ) {
   if (
     !selectedLocation.value.id ||
-    (value <= 0 && !alwaysClickableColsNames.includes(name))
+    (value <= 0 && !alwaysClickableColsNames.includes(colName))
   ) {
     return;
   }
 
-  switch (name) {
+  switch (colName) {
     case "in-stock":
       Dialog.create({
         component: EditUserStockdataDialog,
@@ -829,7 +834,7 @@ function openCellEditDialog(
 
       Dialog.create({
         component: EditUserBooksMovementsDialog,
-        componentProps: { userData, type: name },
+        componentProps: { userData, type: colName },
       }).onDismiss(() => {
         tableRef.value.requestServerInteraction();
       });
@@ -848,6 +853,15 @@ function openCart(user: CustomerFragment) {
   }).onDismiss(() => {
     tableRef.value.requestServerInteraction();
   });
+}
+
+function getColValue(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cols: { name: string; value: any }[],
+  colName: string,
+) {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-unsafe-return
+  return cols.find(({ name }) => name === colName)!.value;
 }
 </script>
 

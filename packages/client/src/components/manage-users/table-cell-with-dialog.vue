@@ -1,5 +1,6 @@
 <template>
   <q-td
+    :key="keyTd"
     :class="{ 'cursor-not-allowed': disable }"
     @click="!disable ? emit('click', $event) : undefined"
   >
@@ -35,13 +36,16 @@
 
 <script setup lang="ts">
 import RoundBadge from "./round-badge.vue";
+import { QTdKeyProp } from "./table-cell-key-prop";
 
-defineProps<{
-  value: number;
-  secondaryValue?: number;
-  clickableWhenZero?: boolean;
-  disable?: boolean;
-}>();
+defineProps<
+  QTdKeyProp & {
+    value: number;
+    secondaryValue?: number;
+    clickableWhenZero?: boolean;
+    disable?: boolean;
+  }
+>();
 
 const emit = defineEmits<{
   click: [MouseEvent];

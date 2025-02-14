@@ -1,5 +1,5 @@
 <template>
-  <q-td>
+  <q-td :key="keyTd">
     <span>
       <q-tooltip>
         {{ value }}
@@ -12,5 +12,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ value: string }>();
+import { QTdKeyProp } from "./table-cell-key-prop";
+
+defineProps<QTdKeyProp & { value: string }>();
 </script>
