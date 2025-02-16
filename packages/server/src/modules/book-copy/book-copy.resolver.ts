@@ -85,7 +85,6 @@ export class BookCopyResolver {
         book: {
           retailLocationId,
         },
-        returnedAt: null,
       },
       orderBy: {
         code: "asc",

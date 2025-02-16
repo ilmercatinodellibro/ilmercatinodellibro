@@ -146,7 +146,7 @@ import { notifyError } from "src/helpers/error-messages";
 import { fetchBookByISBN } from "src/services/book";
 import {
   BookCopyDetailsFragment,
-  GetBookCopiesByOwnerDocument,
+  GetBookCopiesInStockDocument,
   useCreateBookCopiesMutation,
   useGetBookCopiesInStockQuery,
 } from "src/services/book-copy.graphql";
@@ -383,7 +383,7 @@ function retrieveAllBooks() {
 
       cache.updateQuery(
         {
-          query: GetBookCopiesByOwnerDocument,
+          query: GetBookCopiesInStockDocument,
           variables: {
             userId: props.userData.id,
             retailLocationId: selectedLocation.value.id,
@@ -396,7 +396,7 @@ function retrieveAllBooks() {
 
           return {
             ...data,
-            bookCopiesByOwner: [...data.bookCopiesByOwner, ...newBookCopies],
+            bookCopiesInStock: [...data.bookCopiesInStock, ...newBookCopies],
           };
         },
       );

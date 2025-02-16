@@ -158,7 +158,7 @@ import ConfirmDialog from "src/components/confirm-dialog.vue";
 import { formatPrice } from "src/composables/use-misc-formats";
 import { discountedPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
-import { GetBookCopiesByOwnerDocument } from "src/services/book-copy.graphql";
+import { GetBookCopiesInStockDocument } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
@@ -475,7 +475,7 @@ function sellBooks() {
       );
       ownersToUpdate.forEach((user) => {
         if (user) {
-          evictQuery(cache, GetBookCopiesByOwnerDocument, {
+          evictQuery(cache, GetBookCopiesInStockDocument, {
             retailLocationId: retailLocation.value.id,
             userId: user.id,
           });

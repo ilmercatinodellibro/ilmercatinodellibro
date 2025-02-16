@@ -187,13 +187,6 @@ const { user } = useAuthService();
 const route = useRoute();
 const router = useRouter();
 
-// TODO: this doesn't include returned book copies, while it should
-// Before updating it, we need to check if changing it would affect other parts of the app
-// using this query
-// From a quick research, that's not the case, since we changed the usage of this query
-// in other parts of the app time ago
-// We should also check for "evictQuery" usages, which we didn't update for
-// previous changes in the operator area and should be updated now
 const { bookCopiesByOwner, loading } = useGetBookCopiesByOwnerQuery({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   userId: user.value!.id,
