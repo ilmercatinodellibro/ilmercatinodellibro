@@ -281,7 +281,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
     ><span>
       Lunedì, mercoledì e venerdì dalle 10.00 alle 12.00 e dalle 15.00 alle 19.00
       dal 15 luglio al 2 agosto e dal 19 agosto al 13 settembre. Nelle settimane dal 16 al 27 settembre saremo
-      aperti il lunedì e venerdì mattina, mentre il giovedì saremo aperti durante il pomeriggio.<br
+      aperti il lunedì e venerdì mattina, mentre il mercoledì saremo aperti durante il pomeriggio.<br
     /></span>
   </p>
   <p>
