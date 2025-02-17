@@ -34,7 +34,7 @@
           </q-input>
 
           <q-btn
-            :class="isMobile ? 'col' : ''"
+            :class="isMobile ? 'full-width' : ''"
             :label="$t('common.search')"
             class="bottom-separator-20"
             color="accent"
@@ -54,7 +54,7 @@
         >
           <template #body="props">
             <q-tr
-              v-if="props.row.id in AcceptanceStatus"
+              v-if="Object.values(AcceptanceStatus).includes(props.row.id)"
               class="bg-grey-1"
               no-hover
             >
@@ -67,7 +67,7 @@
                 {{ $t("salableBooks.emptyRowMessage") }}
               </q-td>
             </q-tr>
-            <q-tr v-else>
+            <q-tr v-else :props>
               <q-td v-for="{ name, value } in props.cols" :key="name" :props>
                 <span
                   v-if="name === 'status'"

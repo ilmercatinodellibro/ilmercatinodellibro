@@ -21,11 +21,11 @@
           <!-- TODO: consider extracting this into a separate component -->
           <span
             v-if="screenWidth >= WidthSize.MD || isMobile"
-            :class="isMobile ? 'col column items-stretch' : 'row'"
+            :class="isMobile ? 'full-width column items-stretch' : 'row'"
             class="gap-16"
           >
             <q-btn
-              :class="isMobile ? 'col' : ''"
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiDelete"
               :label="$t('manageUsers.requestedBooksDialog.deleteAll')"
               color="negative"
@@ -34,7 +34,7 @@
             />
             <q-btn
               v-if="selectedLocation.maxBookingDays > 0"
-              :class="isMobile ? 'col' : ''"
+              :class="isMobile ? 'full-width' : ''"
               :label="$t('manageUsers.requestedBooksDialog.moveIntoReserved')"
               no-wrap
               outline
@@ -43,11 +43,11 @@
           </span>
           <span
             v-if="screenWidth === WidthSize.LG || isMobile"
-            :class="isMobile ? 'col column items-stretch' : 'row'"
+            :class="isMobile ? 'full-width column items-stretch' : 'row'"
             class="gap-16"
           >
             <q-btn
-              :class="isMobile ? 'col' : ''"
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.requestedBooksDialog.moveIntoCart')"
               color="primary"
@@ -55,7 +55,7 @@
               @click="moveAllIntoCart()"
             />
             <q-btn
-              :class="isMobile ? 'col' : ''"
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiCart"
               :label="$t('manageUsers.goToCart')"
               no-wrap

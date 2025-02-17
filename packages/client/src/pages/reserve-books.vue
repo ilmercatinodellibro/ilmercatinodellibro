@@ -11,7 +11,7 @@
         <q-input
           :model-value="tableFilter.searchQuery"
           :placeholder="t('common.search')"
-          class="col max-width-600"
+          class="full-width max-width-600"
           clearable
           debounce="400"
           outlined
@@ -33,7 +33,7 @@
         >
           <q-btn
             v-if="!showByClass"
-            :class="isMobile ? 'col' : ''"
+            :class="isMobile ? 'full-width' : ''"
             :icon="mdiFilter"
             :label="$t('reserveBooks.filterButton')"
             class="text-transform-none"
@@ -51,7 +51,7 @@
             />
 
             <q-btn
-              :class="isMobile ? 'col' : ''"
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiPlus"
               :label="t('reserveBooks.reserveAll')"
               color="positive"

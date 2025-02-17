@@ -26,7 +26,7 @@
                   : 'off'
               "
               bottom-slots
-              class="col"
+              class="full-width"
               lazy-rules
               outlined
             >
