@@ -90,7 +90,7 @@
                   <q-icon
                     class="q-ml-sm"
                     :name="mdiInformationOutline"
-                    size="18px"
+                    size="xs"
                   >
                     <q-tooltip>
                       {{ $t("manageUsers.inStockDialog.deleteBookBtnTooltip") }}

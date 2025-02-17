@@ -43,7 +43,7 @@
             <span class="q-px-sm text-black-87">
               {{ $t("manageUsers.editUser.discount") }}
             </span>
-            <q-icon :name="mdiInformationOutline" size="24px">
+            <q-icon :name="mdiInformationOutline" size="sm">
               <q-tooltip> {{ $t("manageUsers.iseeInfoTooltip") }}</q-tooltip>
             </q-icon>
           </template>

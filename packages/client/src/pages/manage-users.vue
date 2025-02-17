@@ -98,7 +98,7 @@
                     float-right
                     text-color="black-87"
                   >
-                    <q-icon :name="mdiInformationOutline" size="18px">
+                    <q-icon :name="mdiInformationOutline" size="xs">
                       <q-tooltip>
                         {{ t("auth.emailNotVerified") }}
                       </q-tooltip>

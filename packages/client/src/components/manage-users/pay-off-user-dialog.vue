@@ -45,7 +45,7 @@
         <q-space v-if="!isMobile" />
 
         <span class="gap-8 no-wrap row">
-          <q-icon :name="mdiInformationOutline" color="black-54" size="24px" />
+          <q-icon :name="mdiInformationOutline" color="black-54" size="sm" />
           {{ $t("manageUsers.payOffUserDialog.info") }}
         </span>
       </q-card-section>
