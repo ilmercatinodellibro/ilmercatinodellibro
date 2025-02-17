@@ -1,9 +1,5 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <!--
-      I didn't use k-dialog-card because it didn't
-      have any width that satisfies this dialog's
-    -->
     <k-dialog-card
       :title="t('manageUsers.receiptsDialog.title')"
       size="md"
