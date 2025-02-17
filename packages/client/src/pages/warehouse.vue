@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="!isMobile ? 'q-ma-md' : undefined"
+      :class="!isMobile ? 'q-ma-md' : ''"
       class="absolute-full column no-wrap"
     >
       <header-search-bar-filters
@@ -131,7 +131,7 @@
       <dialog-table
         v-else
         v-model:pagination="pagination"
-        :class="isMobile ? 'sticky-last-column' : undefined"
+        :class="isMobile ? 'sticky-last-column' : ''"
         :columns="bookCopyColumns"
         :filter="tableFilter"
         :loading="isLoading"
@@ -166,7 +166,7 @@
         </template>
 
         <template #body-cell-history="{ row }">
-          <q-td :class="isMobile ? 'no-padding' : undefined">
+          <q-td :class="isMobile ? 'no-padding' : ''">
             <q-btn
               v-if="!isMobile"
               :icon="mdiHistory"

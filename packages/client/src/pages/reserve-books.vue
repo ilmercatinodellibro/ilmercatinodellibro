@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="!isMobile ? 'q-ma-md' : undefined"
+      :class="!isMobile ? 'q-ma-md' : ''"
       class="absolute-full column no-wrap"
     >
       <q-card-section
@@ -90,7 +90,7 @@
 
         <template #body-cell-actions="props">
           <q-td
-            :class="isMobile ? 'no-padding' : undefined"
+            :class="isMobile ? 'no-padding' : ''"
             auto-width
             class="text-center"
           >

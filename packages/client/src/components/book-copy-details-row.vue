@@ -29,7 +29,7 @@
     <q-tr
       v-for="bookCopy in filteredBookCopies"
       :key="bookCopy.id"
-      :class="isMobile ? 'sticky-last-column' : undefined"
+      :class="isMobile ? 'sticky-last-column' : ''"
     >
       <!-- Fills in the chevron column -->
       <q-td auto-width />

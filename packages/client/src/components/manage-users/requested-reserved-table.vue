@@ -33,7 +33,7 @@
       </q-td>
     </template>
     <template #body-cell-actions="{ row }">
-      <q-td :class="isMobile ? 'no-padding' : undefined">
+      <q-td :class="isMobile ? 'no-padding' : ''">
         <!--
           Slot here so every usage of this component can define the
           options available inside the menu and their behavior

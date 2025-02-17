@@ -79,10 +79,7 @@
             </template>
 
             <template #body-cell-actions="{ rowIndex }">
-              <q-td
-                :class="isMobile ? 'no-padding' : undefined"
-                class="text-center"
-              >
+              <q-td :class="isMobile ? 'no-padding' : ''" class="text-center">
                 <chip-button
                   v-if="!isMobile"
                   color="primary"

@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="!isMobile ? 'q-ma-md' : undefined"
+      :class="!isMobile ? 'q-ma-md' : ''"
       class="absolute-full column items-stretch no-wrap"
     >
       <q-card-section class="q-pa-md">
@@ -100,10 +100,7 @@
               v-if="tab === BooksTab.RESERVED"
               #body-cell-actions="{ row }"
             >
-              <q-td
-                :class="isMobile ? 'no-padding' : undefined"
-                class="text-center"
-              >
+              <q-td :class="isMobile ? 'no-padding' : ''" class="text-center">
                 <chip-button
                   v-if="!isMobile"
                   :label="$t('myBooks.cancelReservation')"
@@ -150,7 +147,7 @@
               v-if="tab === BooksTab.REQUESTED"
               #body-cell-reserve="{ value, row }"
             >
-              <q-td :class="isMobile ? 'no-padding' : undefined">
+              <q-td :class="isMobile ? 'no-padding' : ''">
                 <chip-button
                   v-if="value && !isMobile"
                   :label="t('myBooks.reserve')"

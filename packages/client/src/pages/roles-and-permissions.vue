@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card
-      :class="!isMobile ? 'q-ma-md' : undefined"
+      :class="!isMobile ? 'q-ma-md' : ''"
       class="absolute-full column no-wrap"
     >
       <header-search-bar-filters
@@ -24,7 +24,7 @@
       <q-card-section v-if="!loading" class="col column no-padding no-wrap">
         <dialog-table
           v-model:pagination="pagination"
-          :class="isMobile ? 'sticky-last-column' : undefined"
+          :class="isMobile ? 'sticky-last-column' : ''"
           :columns="columns"
           :filter="tableFilter"
           :filter-method="filterMethod"
