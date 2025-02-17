@@ -63,7 +63,7 @@
         </template>
 
         <template #body="props">
-          <q-tr :props="props">
+          <q-tr :props>
             <q-td auto-width>
               <q-btn
                 :icon="props.expand ? mdiChevronUp : mdiChevronDown"
@@ -75,9 +75,9 @@
             </q-td>
 
             <q-td
-              v-for="{ name, field, align, classes } in booksColumns"
+              v-for="{ name, field } in booksColumns"
               :key="name"
-              :class="[align ? `text-${align}` : 'text-left', classes]"
+              :props
               auto-width
             >
               <status-chip
@@ -139,41 +139,53 @@
         class="col"
         @request="fetchBooksPage"
       >
-        <template #body-cell-author="{ col, value }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="props">
+          <table-cell-with-tooltip
+            :key-td="props.key"
+            :props
+            :value="props.value"
+          />
         </template>
-        <template #body-cell-subject="{ col, value }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="props">
+          <table-cell-with-tooltip
+            :key-td="props.key"
+            :props
+            :value="props.value"
+          />
         </template>
-        <template #body-cell-owner="{ col, value }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-owner="props">
+          <table-cell-with-tooltip
+            :key-td="props.key"
+            :props
+            :value="props.value"
+          />
         </template>
 
-        <template #body-cell-status="{ row }">
-          <q-td>
-            <book-copy-status-chip :book-copy="row" />
+        <template #body-cell-status="props">
+          <q-td :props>
+            <book-copy-status-chip :book-copy="props.row" />
           </q-td>
         </template>
 
-        <template #body-cell-problems="{ col, row }">
-          <q-td :class="[`text-${col.align ?? 'left'}`, col.classes]">
+        <template #body-cell-problems="props">
+          <q-td :props>
             <problems-button
               v-if="!isMobile"
-              :book-copy="row"
+              :book-copy="props.row"
               @update-problems="fetchBooks(pagination)"
             />
           </q-td>
         </template>
 
-        <template #body-cell-history="{ row }">
-          <q-td :class="isMobile ? 'no-padding' : ''">
+        <template #body-cell-history="props">
+          <q-td :props>
             <q-btn
               v-if="!isMobile"
               :icon="mdiHistory"
               color="primary"
               flat
               round
-              @click="openHistory(row)"
+              @click="openHistory(props.row)"
             />
 
             <q-btn
@@ -188,20 +200,24 @@
                   <q-item
                     v-close-popup
                     clickable
-                    @click="reportOrSolveProblem(row)"
+                    @click="reportOrSolveProblem(props.row)"
                   >
                     <q-item-section>
                       <q-item-label>
                         {{
                           t(
-                            `manageUsers.booksMovementsDialog.${hasProblem(row) ? "solveProblem" : "reportProblem"}`,
+                            `manageUsers.booksMovementsDialog.${hasProblem(props.row) ? "solveProblem" : "reportProblem"}`,
                           )
                         }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
 
-                  <q-item v-close-popup clickable @click="openHistory(row)">
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="openHistory(props.row)"
+                  >
                     <q-item-section>
                       <q-item-label>
                         {{
@@ -454,6 +470,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       name: "history",
       field: () => undefined,
       label: "",
+      classes: isMobile.value ? "no-padding" : "",
     },
   ],
 );
