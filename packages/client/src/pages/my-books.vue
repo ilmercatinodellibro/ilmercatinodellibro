@@ -100,7 +100,7 @@
               v-if="tab === BooksTab.RESERVED"
               #body-cell-actions="props"
             >
-              <q-td :props :class="isMobile ? 'no-padding' : ''">
+              <q-td :props>
                 <chip-button
                   v-if="!isMobile"
                   :label="$t('myBooks.cancelReservation')"
@@ -147,7 +147,7 @@
               v-if="tab === BooksTab.REQUESTED"
               #body-cell-reserve="props"
             >
-              <q-td :props :class="isMobile ? 'no-padding' : ''">
+              <q-td :props>
                 <chip-button
                   v-if="props.value && !isMobile"
                   :label="t('myBooks.reserve')"
@@ -404,6 +404,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         name: "reserve",
         field: ({ book: { meta } }) => meta.isAvailable,
         label: "",
+        classes: isMobile.value ? "no-padding" : "",
       },
       ...(!isMobile.value
         ? [
@@ -429,6 +430,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         name: "actions",
         field: () => undefined,
         label: "",
+        classes: isMobile.value ? "no-padding" : "",
       },
     ],
   }),

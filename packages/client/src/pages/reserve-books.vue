@@ -74,26 +74,22 @@
         class="col"
         @request="onRequest"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="props">
+          <table-cell-with-tooltip :props="props" :value="props.value" />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="props">
+          <table-cell-with-tooltip :props :value="props.value" />
         </template>
 
-        <template #body-cell-availability="{ value }">
-          <q-td>
-            <status-chip :value="value" />
+        <template #body-cell-availability="props">
+          <q-td :props>
+            <status-chip :value="props.value" />
           </q-td>
         </template>
 
         <template #body-cell-actions="props">
-          <q-td
-            :class="isMobile ? 'no-padding' : ''"
-            auto-width
-            class="text-center"
-          >
+          <q-td :props auto-width>
             <chip-button v-if="!isMobile" v-bind="getButtonData(props.row)" />
             <q-btn
               v-else
@@ -247,6 +243,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     name: "actions",
     field: () => undefined,
     label: "",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 

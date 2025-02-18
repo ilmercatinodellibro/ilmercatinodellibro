@@ -10,7 +10,7 @@
       >
         <template #side-actions>
           <q-btn
-            :class="isMobile ? 'col' : ''"
+            :class="isMobile ? 'full-width' : ''"
             :icon="mdiPlus"
             :label="t('general.rolesAndPermissions.addNewOperator.title')"
             color="accent"
@@ -33,17 +33,14 @@
           class="col flex-delegate-height-management"
           @request="onRequest"
         >
-          <template #body-cell-actions="{ row, col }">
-            <q-td
-              :class="[col.classes, isMobile ? 'no-padding' : undefined]"
-              auto-width
-            >
-              <template v-if="row.role !== 'ADMIN'">
+          <template #body-cell-actions="props">
+            <q-td auto-width>
+              <template v-if="props.row.role !== 'ADMIN'">
                 <chip-button
                   v-if="!isMobile"
                   :label="t('actions.removeOperator')"
                   color="negative"
-                  @click="deleteUser(row.id)"
+                  @click="deleteUser(props.row.id)"
                 />
 
                 <q-btn
@@ -58,7 +55,7 @@
                       <q-item
                         v-close-popup
                         clickable
-                        @click="deleteUser(row.id)"
+                        @click="deleteUser(props.row.id)"
                       >
                         <q-item-section>
                           <q-item-label>
@@ -176,6 +173,7 @@ const columns = computed<QTableColumn<MemberFragment>[]>(() => [
     label: "",
     name: "actions",
     align: "center",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 

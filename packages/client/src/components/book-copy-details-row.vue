@@ -91,6 +91,19 @@
                     </q-item-label>
                   </q-item-section>
                 </q-item>
+                <q-item
+                  v-close-popup
+                  clickable
+                  @click="emit('openHistory', bookCopy)"
+                >
+                  <q-item-section>
+                    <q-item-label>
+                      {{
+                        t("manageUsers.booksMovementsDialog.problemsHistory")
+                      }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
               </q-list>
             </q-menu>
           </q-btn>
@@ -167,12 +180,16 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     label: t("book.fields.status"),
     align: "left",
   },
-  {
-    name: "problems",
-    field: "problems",
-    label: "",
-    align: "center",
-  },
+  ...((!isMobile.value
+    ? [
+        {
+          name: "problems",
+          field: "problems",
+          label: "",
+          align: "center",
+        },
+      ]
+    : []) satisfies QTableColumn<BookCopyDetailsFragment>[]),
   {
     name: "history",
     field: () => undefined,

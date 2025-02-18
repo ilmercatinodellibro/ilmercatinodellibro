@@ -4,41 +4,44 @@
     :rows="rows"
     :columns="columns"
   >
-    <template #body-cell-author="{ value, col }">
-      <table-cell-with-tooltip :class="col.classes" :value="value" />
+    <template #body-cell-author="cellProps">
+      <table-cell-with-tooltip :peops="cellProps" :value="cellProps.value" />
     </template>
 
-    <template #body-cell-subject="{ value, col }">
-      <table-cell-with-tooltip :class="col.classes" :value="value" />
+    <template #body-cell-subject="cellProps">
+      <table-cell-with-tooltip :props="cellProps" :value="cellProps.value" />
     </template>
 
-    <template #body-cell-request-status="{ value }">
-      <q-td>
-        <span :class="value && !isShowingReservations ? 'text-positive' : ''">
-          {{
-            t(
-              isShowingReservations
-                ? "book.availability.reserved"
-                : value
-                  ? "book.availability.available"
-                  : "book.availability.requested",
-            )
-          }}
-        </span>
+    <template #body-cell-request-status="cellProps">
+      <q-td
+        :props="cellProps"
+        :class="
+          cellProps.value && !isShowingReservations ? 'text-positive' : ''
+        "
+      >
+        {{
+          t(
+            isShowingReservations
+              ? "book.availability.reserved"
+              : cellProps.value
+                ? "book.availability.available"
+                : "book.availability.requested",
+          )
+        }}
       </q-td>
     </template>
-    <template #body-cell-utility="{ value }">
-      <q-td>
-        <utility-chip :utility="value" />
+    <template #body-cell-utility="cellProps">
+      <q-td :props="cellProps">
+        <utility-chip :utility="cellProps.value" />
       </q-td>
     </template>
-    <template #body-cell-actions="{ row }">
-      <q-td :class="isMobile ? 'no-padding' : ''">
-        <!--
-          Slot here so every usage of this component can define the
-          options available inside the menu and their behavior
-        -->
-        <slot name="book-actions" v-bind="{ requestOrReservation: row }" />
+    <template #body-cell-actions="cellProps">
+      <q-td :props="cellProps">
+        <!-- To define the options available inside the menu and their behavior -->
+        <slot
+          name="book-actions"
+          v-bind="{ requestOrReservation: cellProps.row }"
+        />
       </q-td>
     </template>
   </dialog-table>
@@ -135,6 +138,7 @@ const columns = computed<
     field: () => undefined,
     label: t("manageUsers.actions"),
     align: "center",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 </script>

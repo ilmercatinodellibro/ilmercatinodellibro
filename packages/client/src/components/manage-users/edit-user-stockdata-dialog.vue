@@ -83,7 +83,7 @@
             </template>
 
             <template #body-cell-actions="cellProps">
-              <q-td :props="cellProps" :class="isMobile ? 'no-padding' : ''">
+              <q-td :props="cellProps">
                 <chip-button
                   v-if="!isMobile"
                   color="primary"
@@ -323,6 +323,7 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       field: () => undefined,
       name: "actions",
       align: "center",
+      classes: isMobile.value ? "no-padding" : "",
     },
   ],
 );

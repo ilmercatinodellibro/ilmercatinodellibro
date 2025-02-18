@@ -48,12 +48,7 @@
           <q-tr :props>
             <q-th auto-width />
 
-            <q-th
-              v-for="{ name, label } in props.cols"
-              :key="name"
-              :colspan="name === 'title' ? 2 : 1"
-              :props
-            >
+            <q-th v-for="{ name, label } in props.cols" :key="name" :props>
               {{ label }}
             </q-th>
 
@@ -74,12 +69,7 @@
               />
             </q-td>
 
-            <q-td
-              v-for="{ name, field } in booksColumns"
-              :key="name"
-              :props
-              auto-width
-            >
+            <q-td v-for="{ name, field } in booksColumns" :key="name" :props>
               <status-chip
                 v-if="name === 'status'"
                 :value="props.row.meta.isAvailable"
@@ -113,18 +103,17 @@
               </span>
             </q-td>
 
-            <!-- To occupy all the remaining cells space -->
-            <q-td colspan="2" />
+            <!-- To occupy all the remaining cells' space; on mobile one of the columns is hidden -->
+            <q-td :colspan="isMobile ? 1 : 2" />
           </q-tr>
 
-          <template v-if="props.expand">
-            <book-copy-details-row
-              :book-id="props.row.id"
-              :show-only-available="booleanFilters?.isAvailable"
-              @open-history="(bookCopy) => openHistory(bookCopy)"
-              @update-problems="fetchBooks(pagination)"
-            />
-          </template>
+          <book-copy-details-row
+            v-if="props.expand"
+            :book-id="props.row.id"
+            :show-only-available="booleanFilters?.isAvailable"
+            @open-history="(bookCopy) => openHistory(bookCopy)"
+            @update-problems="fetchBooks(pagination)"
+          />
         </template>
       </dialog-table>
 

@@ -32,23 +32,23 @@
         class="col"
         @request="onRequest"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="props">
+          <table-cell-with-tooltip :value="props.value" />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="props">
+          <table-cell-with-tooltip :value="props.value" />
         </template>
 
-        <template #body-cell-status="{ value }">
+        <template #body-cell-status="props">
           <q-td>
-            <status-chip :value="value" />
+            <status-chip :value="props.value" />
           </q-td>
         </template>
 
-        <template #body-cell-utility="{ value }">
-          <q-td class="text-center">
-            <utility-chip :utility="value" />
+        <template #body-cell-utility="props">
+          <q-td>
+            <utility-chip :utility="props.value" />
           </q-td>
         </template>
       </q-table>

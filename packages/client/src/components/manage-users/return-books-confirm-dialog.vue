@@ -56,12 +56,18 @@
         :rows="booksToReturn"
         class="flex-delegate-height-management"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
       </dialog-table>
 
