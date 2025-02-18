@@ -52,8 +52,8 @@
               {{ label }}
             </q-th>
 
-            <!-- To occupy all the remaining cells space -->
-            <q-th colspan="2" />
+            <!-- To occupy all the remaining cells' space; on mobile one of the columns is hidden -->
+            <q-th :colspan="isMobile ? 1 : 2" />
           </q-tr>
         </template>
 
@@ -449,12 +449,16 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       align: "left",
       classes: "max-width-160 ellipsis",
     },
-    {
-      name: "problems",
-      field: "problems",
-      label: "",
-      align: "center",
-    },
+    ...((!isMobile.value
+      ? [
+          {
+            name: "problems",
+            field: "problems",
+            label: "",
+            align: "center",
+          },
+        ]
+      : []) satisfies QTableColumn<BookCopyDetailsFragment>[]),
     {
       name: "history",
       field: () => undefined,
