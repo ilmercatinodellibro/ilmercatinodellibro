@@ -74,15 +74,15 @@
           </template>
 
           <!-- Body slot is used because we need to split the table into 3 parts -->
-          <template #body="{ row, cols }">
+          <template #body="bodyProps">
             <q-tr
-              v-if="Object.values(Titles).includes(row.id)"
+              v-if="Object.values(Titles).includes(bodyProps.row.id)"
               class="bg-grey-1"
               no-hover
             >
               <q-td auto-width>
                 <q-checkbox
-                  v-if="row.id === Titles.InStock"
+                  v-if="bodyProps.row.id === Titles.InStock"
                   :disable="selectableRows.length === 0"
                   :model-value="rowsSelectionStatus"
                   dense
@@ -96,17 +96,19 @@
               <q-td
                 :class="{
                   'mobile-in-stock-title-bar': isMobile,
-                  'sticky-last-column': isMobile && row.id === Titles.InStock,
+                  'sticky-last-column':
+                    isMobile && bodyProps.row.id === Titles.InStock,
                 }"
                 class="non-selectable text-weight-medium"
                 colspan="11"
               >
                 <span class="fit items-center row">
-                  {{ localizedSectionTitle(row.id) }}
+                  {{ localizedSectionTitle(bodyProps.row.id) }}
                   <q-space />
                   <span
                     v-if="
-                      rowsSelectionStatus !== false && row.id === Titles.InStock
+                      rowsSelectionStatus !== false &&
+                      bodyProps.row.id === Titles.InStock
                     "
                     class="full-height gap-16 items-center row sticky-button-group"
                   >
@@ -223,7 +225,7 @@
               </q-td>
             </q-tr>
 
-            <q-tr v-else-if="row.id === 'EMPTY'" no-hover>
+            <q-tr v-else-if="bodyProps.row.id === 'EMPTY'" no-hover>
               <q-td auto-width />
 
               <q-td class="text-left" colspan="11">
@@ -233,31 +235,46 @@
 
             <q-tr
               v-else
+              :props="bodyProps"
               :class="
-                isMobile && selectableRows.includes(row)
+                isMobile && selectableRows.includes(bodyProps.row)
                   ? 'sticky-last-column'
                   : ''
               "
             >
-              <q-td v-for="col in cols" :key="col.name" :class="col.classes">
+              <q-td key="select" :props="bodyProps">
                 <!--
                   Since we can't use #body-cell-[column-name] because we're using
                   the #body slot, we have to use v-if on the col.name instead
                 -->
                 <q-checkbox
-                  v-if="col.name === 'select' && selectableRows.includes(row)"
+                  v-if="selectableRows.includes(bodyProps.row)"
                   :model-value="
-                    selectedRows.map(({ id }) => id).includes(row.id)
+                    selectedRows.map(({ id }) => id).includes(bodyProps.row.id)
                   "
                   dense
-                  @update:model-value="swapRow(row)"
+                  @update:model-value="swapRow(bodyProps.row)"
                 />
+              </q-td>
 
+              <q-td
+                v-for="columnKey in textColumns"
+                :key="columnKey"
+                :props="bodyProps"
+              >
+                <q-tooltip v-if="['subject', 'author'].includes(columnKey)">
+                  {{ getColValue(bodyProps.cols, columnKey) }}
+                </q-tooltip>
+                {{ getColValue(bodyProps.cols, columnKey) }}
+              </q-td>
+
+              <q-td key="actions" :props="bodyProps">
                 <q-btn
-                  v-else-if="
-                    col.name === 'actions' &&
-                    ownedCopies.includes(row) &&
-                    !['donated', 'reimbursed'].includes(getStatus(row))
+                  v-if="
+                    ownedCopies.includes(bodyProps.row) &&
+                    !['donated', 'reimbursed'].includes(
+                      getStatus(bodyProps.row),
+                    )
                   "
                   :icon="mdiDotsVertical"
                   dense
@@ -267,20 +284,20 @@
                 >
                   <q-menu auto-close>
                     <q-item
-                      v-if="returnableRows.includes(row)"
+                      v-if="returnableRows.includes(bodyProps.row)"
                       class="items-center"
                       clickable
-                      @click="returnBooks([row])"
+                      @click="returnBooks([bodyProps.row])"
                     >
                       {{
                         $t("manageUsers.payOffUserDialog.returnOptions.return")
                       }}
                     </q-item>
                     <q-item
-                      v-if="selectableRows.includes(row)"
+                      v-if="selectableRows.includes(bodyProps.row)"
                       class="items-center"
                       clickable
-                      @click="donateBooks([row])"
+                      @click="donateBooks([bodyProps.row])"
                     >
                       {{
                         $t("manageUsers.payOffUserDialog.returnOptions.donate")
@@ -289,7 +306,7 @@
                     <q-item
                       class="items-center"
                       clickable
-                      @click="reimburseBooks([row])"
+                      @click="reimburseBooks([bodyProps.row])"
                     >
                       {{
                         $t(
@@ -298,21 +315,15 @@
                       }}
                     </q-item>
                     <q-item
-                      v-if="selectableRows.includes(row)"
+                      v-if="selectableRows.includes(bodyProps.row)"
                       class="items-center"
                       clickable
-                      @click="reportProblems([row])"
+                      @click="reportProblems([bodyProps.row])"
                     >
                       {{ $t("manageUsers.booksMovementsDialog.reportProblem") }}
                     </q-item>
                   </q-menu>
                 </q-btn>
-                <span v-else>
-                  <q-tooltip v-if="['subject', 'author'].includes(col.name)">
-                    {{ col.value }}
-                  </q-tooltip>
-                  {{ col.value }}
-                </span>
               </q-td>
             </q-tr>
           </template>
@@ -379,6 +390,7 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { discountedPrice, getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { formatPrice } from "src/helpers/formatting";
+import { getColValue } from "src/helpers/table-helpers";
 import {
   BookCopyDetailsFragment,
   GetSoldBookCopiesDocument,
@@ -493,6 +505,18 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     label: "",
   },
 ]);
+
+const textColumns = [
+  "isbn-code",
+  "subject",
+  "title",
+  "author",
+  "publisher",
+  "cover-price",
+  "buy-price",
+  "public-price",
+  "book-code",
+];
 
 const { selectedLocation } = useRetailLocationService();
 

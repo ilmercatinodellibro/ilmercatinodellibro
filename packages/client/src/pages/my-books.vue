@@ -69,28 +69,28 @@
                   {{ `${totalSale.toFixed(2)} €` }}
                 </q-th>
               </q-tr>
-              <q-tr :props="props">
-                <q-th v-for="col in props.cols" :key="col.name" :props="props">
+              <q-tr :props>
+                <q-th v-for="col in props.cols" :key="col.name" :props>
                   {{ col.label }}
                 </q-th>
               </q-tr>
             </template>
 
-            <template #body-cell-author="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-author="props">
+              <table-cell-with-tooltip :props :value="props.value" />
             </template>
 
-            <template #body-cell-subject="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-subject="props">
+              <table-cell-with-tooltip :props :value="props.value" />
             </template>
 
             <template
               v-if="tab === BooksTab.DELIVERED"
-              #body-cell-status="{ row }"
+              #body-cell-status="props"
             >
-              <q-td>
+              <q-td :props>
                 <q-chip
-                  v-bind="statusChipData[getStatus(row)]"
+                  v-bind="statusChipData[getStatus(props.row)]"
                   class="no-pointer-events"
                 />
               </q-td>
@@ -98,14 +98,14 @@
 
             <template
               v-if="tab === BooksTab.RESERVED"
-              #body-cell-actions="{ row }"
+              #body-cell-actions="props"
             >
-              <q-td :class="isMobile ? 'no-padding' : ''" class="text-center">
+              <q-td :props :class="isMobile ? 'no-padding' : ''">
                 <chip-button
                   v-if="!isMobile"
                   :label="$t('myBooks.cancelReservation')"
                   color="primary"
-                  @click="cancelReservation(row)"
+                  @click="cancelReservation(props.row)"
                 />
 
                 <q-btn
@@ -120,7 +120,7 @@
                       <q-item
                         v-close-popup
                         clickable
-                        @click="cancelReservation(row)"
+                        @click="cancelReservation(props.row)"
                       >
                         <q-item-section>
                           <q-item-label>
@@ -136,23 +136,23 @@
 
             <template
               v-if="tab === BooksTab.REQUESTED"
-              #body-cell-availability="{ value }"
+              #body-cell-availability="props"
             >
-              <q-td>
-                <status-chip :value="value" />
+              <q-td :props>
+                <status-chip :value="props.value" />
               </q-td>
             </template>
 
             <template
               v-if="tab === BooksTab.REQUESTED"
-              #body-cell-reserve="{ value, row }"
+              #body-cell-reserve="props"
             >
-              <q-td :class="isMobile ? 'no-padding' : ''">
+              <q-td :props :class="isMobile ? 'no-padding' : ''">
                 <chip-button
-                  v-if="value && !isMobile"
+                  v-if="props.value && !isMobile"
                   :label="t('myBooks.reserve')"
                   color="primary"
-                  @click="reserveBook(row)"
+                  @click="reserveBook(props.row)"
                 />
 
                 <q-btn
@@ -165,10 +165,10 @@
                   <q-menu>
                     <q-list>
                       <q-item
-                        v-if="value"
+                        v-if="props.value"
                         v-close-popup
                         clickable
-                        @click="reserveBook(row)"
+                        @click="reserveBook(props.row)"
                       >
                         <q-item-section>
                           <q-item-label>
@@ -180,7 +180,7 @@
                       <q-item
                         v-close-popup
                         clickable
-                        @click="cancelRequest(row)"
+                        @click="cancelRequest(props.row)"
                       >
                         <q-item-section>
                           <q-item-label>
@@ -196,13 +196,13 @@
 
             <template
               v-if="tab === BooksTab.REQUESTED && !isMobile"
-              #body-cell-cancel-request="{ row }"
+              #body-cell-cancel-request="props"
             >
-              <q-td>
+              <q-td :props>
                 <chip-button
                   :label="t('myBooks.cancelRequest')"
                   color="accent"
-                  @click="cancelRequest(row)"
+                  @click="cancelRequest(props.row)"
                 />
               </q-td>
             </template>

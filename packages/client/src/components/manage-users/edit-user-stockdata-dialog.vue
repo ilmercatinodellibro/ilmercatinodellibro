@@ -20,13 +20,11 @@
       <q-tabs v-model="tab" align="justify" active-color="accent" inline-label>
         <q-tab name="in-retrieval" :label="$t('manageUsers.inRetrieval')" />
         <q-tab name="in-stock" :label="$t('manageUsers.inStock')">
-          <template #default>
-            <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
-              <q-tooltip>
-                {{ $t("manageUsers.inStockDialog.retrievableTooltip") }}
-              </q-tooltip>
-            </q-icon>
-          </template>
+          <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
+            <q-tooltip>
+              {{ $t("manageUsers.inStockDialog.retrievableTooltip") }}
+            </q-tooltip>
+          </q-icon>
         </q-tab>
       </q-tabs>
 
@@ -58,33 +56,39 @@
             :loading="loading"
             class="col"
           >
-            <template #body-cell-author="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-author="cellProps">
+              <table-cell-with-tooltip
+                :props="cellProps"
+                :value="cellProps.value"
+              />
             </template>
 
-            <template #body-cell-subject="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-subject="cellProps">
+              <table-cell-with-tooltip
+                :props="cellProps"
+                :value="cellProps.value"
+              />
             </template>
 
-            <template #body-cell-status="{ value }">
-              <q-td>
-                <status-chip :value="value" />
+            <template #body-cell-status="cellProps">
+              <q-td :props="cellProps">
+                <status-chip :value="cellProps.value" />
               </q-td>
             </template>
 
-            <template #body-cell-utility="{ value }">
-              <q-td class="text-center">
-                <utility-chip :utility="value" />
+            <template #body-cell-utility="cellProps">
+              <q-td :props="cellProps">
+                <utility-chip :utility="cellProps.value" />
               </q-td>
             </template>
 
-            <template #body-cell-actions="{ rowIndex }">
-              <q-td :class="isMobile ? 'no-padding' : ''" class="text-center">
+            <template #body-cell-actions="cellProps">
+              <q-td :props="cellProps" :class="isMobile ? 'no-padding' : ''">
                 <chip-button
                   v-if="!isMobile"
                   color="primary"
                   no-wrap
-                  @click="openDeleteBookDialog(rowIndex)"
+                  @click="openDeleteBookDialog(cellProps.rowIndex)"
                 >
                   <q-item-label> {{ $t("common.delete") }} </q-item-label>
                   <q-icon
@@ -110,7 +114,7 @@
                       <q-item
                         v-close-popup
                         clickable
-                        @click="openDeleteBookDialog(rowIndex)"
+                        @click="openDeleteBookDialog(cellProps.rowIndex)"
                       >
                         <q-item-section>
                           <q-item-label>
@@ -136,23 +140,29 @@
             :loading="inStockLoading"
             class="col"
           >
-            <template #body-cell-author="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-author="cellProps">
+              <table-cell-with-tooltip
+                :props="cellProps"
+                :value="cellProps.value"
+              />
             </template>
 
-            <template #body-cell-subject="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-subject="cellProps">
+              <table-cell-with-tooltip
+                :props="cellProps"
+                :value="cellProps.value"
+              />
             </template>
 
-            <template #body-cell-status="{ value }">
-              <q-td>
-                <status-chip :value="value" />
+            <template #body-cell-status="cellProps">
+              <q-td :props="cellProps">
+                <status-chip :value="cellProps.value" />
               </q-td>
             </template>
 
-            <template #body-cell-utility="{ value }">
-              <q-td class="text-center">
-                <utility-chip :utility="value" />
+            <template #body-cell-utility="cellProps">
+              <q-td :props="cellProps">
+                <utility-chip :utility="cellProps.value" />
               </q-td>
             </template>
           </dialog-table>

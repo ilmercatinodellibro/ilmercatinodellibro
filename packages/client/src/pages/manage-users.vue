@@ -37,45 +37,50 @@
           row-key="id"
           @request="onRequest"
         >
-          <template #header-cell-in-stock="{ col }">
+          <template #header-cell-in-stock="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.inStock"
             />
           </template>
-          <template #header-cell-sold="{ col }">
+          <template #header-cell-sold="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.sold"
             />
           </template>
-          <template #header-cell-reserved="{ col }">
+          <template #header-cell-reserved="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.reserved"
             />
           </template>
-          <template #header-cell-requested="{ col }">
+          <template #header-cell-requested="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.requested"
             />
           </template>
-          <template #header-cell-purchased="{ col }">
+          <template #header-cell-purchased="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.purchased"
             />
           </template>
 
           <template #body="props">
             <q-tr
-              :props="props"
+              :props
               :class="
                 !props.row.emailVerified ? 'bg-blue-grey-1 text-black-54' : ''
               "
             >
-              <q-td key="edit" :props="props">
+              <q-td key="edit" :props>
                 <q-btn
                   :icon="mdiPencil"
                   color="primary"
@@ -88,7 +93,7 @@
 
               <table-cell-with-tooltip
                 key-td="email"
-                :props="props"
+                :props
                 :value="getColValue(props.cols, 'email')"
               >
                 <template v-if="!props.row.emailVerified">
@@ -107,7 +112,7 @@
                 </template>
               </table-cell-with-tooltip>
 
-              <q-td key="first-name" :props="props">
+              <q-td key="first-name" :props>
                 <span class="gap-16 items-center justify-between no-wrap row">
                   {{ getColValue(props.cols, "first-name") }}
                   <q-icon
@@ -123,11 +128,11 @@
                 </span>
               </q-td>
 
-              <q-td key="last-name" :props="props">
+              <q-td key="last-name" :props>
                 {{ getColValue(props.cols, "last-name") }}
               </q-td>
 
-              <q-td key="phone-number" :props="props">
+              <q-td key="phone-number" :props>
                 {{ getColValue(props.cols, "phone-number") }}
               </q-td>
 
@@ -142,7 +147,7 @@
                 ]"
                 :key="colName"
                 :key-td="colName"
-                :props="props"
+                :props
                 :clickable-when-zero="
                   alwaysClickableColsNames.includes(colName)
                 "
@@ -175,7 +180,7 @@
                 </template>
               </table-cell-with-dialog>
 
-              <q-td key="shopping-cart" :props="props">
+              <q-td key="shopping-cart" :props>
                 <q-btn
                   :disable="willBeDeleted(props.row)"
                   :icon="mdiCart"
@@ -194,11 +199,11 @@
                 </q-btn>
               </q-td>
 
-              <q-td key="creation-date" :props="props">
+              <q-td key="creation-date" :props>
                 {{ getColValue(props.cols, "creation-date") }}
               </q-td>
 
-              <q-td key="receipts" :props="props">
+              <q-td key="receipts" :props>
                 <q-btn
                   :icon="mdiReceiptText"
                   color="primary"
@@ -209,7 +214,7 @@
                 />
               </q-td>
 
-              <q-td key="pay-off" :props="props">
+              <q-td key="pay-off" :props>
                 <chip-button
                   :disable="
                     !hasAdminRole &&
@@ -227,7 +232,7 @@
               </q-td>
 
               <!-- Mobile actions button -->
-              <q-td key="actions" :props="props">
+              <q-td key="actions" :props>
                 <q-btn
                   :icon="mdiDotsVertical"
                   class="full-height"
@@ -454,6 +459,7 @@ import TableHeaderWithInfo from "src/components/manage-users/table-header-with-i
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
+import { getColValue } from "src/helpers/table-helpers";
 import { UserDialogPayload } from "src/models/user";
 import { useAuthService } from "src/services/auth";
 import { useCustomerService } from "src/services/customer";
@@ -854,15 +860,6 @@ function openCart(user: CustomerFragment) {
   }).onDismiss(() => {
     tableRef.value.requestServerInteraction();
   });
-}
-
-function getColValue(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  cols: { name: string; value: any }[],
-  colName: string,
-) {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-unsafe-return
-  return cols.find(({ name }) => name === colName)!.value;
 }
 </script>
 

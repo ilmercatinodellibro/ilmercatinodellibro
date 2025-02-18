@@ -45,14 +45,14 @@
         @request="fetchBooksPage"
       >
         <template #header="props">
-          <q-tr :props="props">
+          <q-tr :props>
             <q-th auto-width />
 
             <q-th
               v-for="{ name, label } in props.cols"
               :key="name"
               :colspan="name === 'title' ? 2 : 1"
-              :props="props"
+              :props
             >
               {{ label }}
             </q-th>
