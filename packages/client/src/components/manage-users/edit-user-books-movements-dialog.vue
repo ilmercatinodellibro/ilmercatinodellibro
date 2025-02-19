@@ -53,47 +53,35 @@
               @click="openHistoryDialog(cellProps.row)"
             />
 
-            <q-btn
-              v-else
-              :icon="mdiDotsVertical"
-              class="fit"
-              color="primary"
-              flat
-            >
-              <q-menu>
-                <q-list>
-                  <q-item
-                    v-close-popup
-                    clickable
-                    @click="reportOrSolveProblem(cellProps.row)"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{
-                          t(
-                            `manageUsers.booksMovementsDialog.${hasProblem(cellProps.row) ? "solveProblem" : "reportProblem"}`,
-                          )
-                        }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
+            <actions-list-button>
+              <q-item
+                v-close-popup
+                clickable
+                @click="reportOrSolveProblem(cellProps.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{
+                      t(
+                        `manageUsers.booksMovementsDialog.${hasProblem(cellProps.row) ? "solveProblem" : "reportProblem"}`,
+                      )
+                    }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
 
-                  <q-item
-                    v-close-popup
-                    clickable
-                    @click="openHistoryDialog(cellProps.row)"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{
-                          t("manageUsers.booksMovementsDialog.problemsHistory")
-                        }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
+              <q-item
+                v-close-popup
+                clickable
+                @click="openHistoryDialog(cellProps.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("manageUsers.booksMovementsDialog.problemsHistory") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -131,30 +119,19 @@
               color="primary"
               @click="openReturnDialog(cellProps.row)"
             />
-
-            <q-btn
-              v-else
-              :icon="mdiDotsVertical"
-              class="fit"
-              color="primary"
-              flat
-            >
-              <q-menu>
-                <q-list>
-                  <q-item
-                    v-close-popup
-                    clickable
-                    @click="openReturnDialog(cellProps.row)"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{ t("book.return") }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="openReturnDialog(cellProps.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("book.return") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -163,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiDotsVertical, mdiHistory } from "@quasar/extras/mdi-v7";
+import { mdiHistory } from "@quasar/extras/mdi-v7";
 import { formatDate } from "@vueuse/core";
 import {
   Dialog,
@@ -185,6 +162,7 @@ import {
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserSummaryFragment } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import ProblemsButton from "../problems-button.vue";
 import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";

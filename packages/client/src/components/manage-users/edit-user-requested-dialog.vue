@@ -137,48 +137,37 @@
               </q-item-section>
             </q-item>
           </chip-button>
+          <actions-list-button v-else>
+            <template v-if="request.book.meta.isAvailable">
+              <q-item v-close-popup clickable @click="reserveBook(request)">
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("book.reservedBooksDialog.options.reserved") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
 
-          <q-btn
-            v-else
-            :icon="mdiDotsVertical"
-            class="fit"
-            color="primary"
-            flat
-          >
-            <q-menu>
-              <q-list>
-                <template v-if="request.book.meta.isAvailable">
-                  <q-item v-close-popup clickable @click="reserveBook(request)">
-                    <q-item-section>
-                      <q-item-label>
-                        {{ t("book.reservedBooksDialog.options.reserved") }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
+              <q-item
+                v-close-popup
+                clickable
+                @click="putRequestedBookIntoCart(request)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("book.reservedBooksDialog.options.cart") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
 
-                  <q-item
-                    v-close-popup
-                    clickable
-                    @click="putRequestedBookIntoCart(request)"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{ t("book.reservedBooksDialog.options.cart") }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-
-                <q-item v-close-popup clickable @click="deleteRequest(request)">
-                  <q-item-section>
-                    <q-item-label>
-                      {{ t("common.delete") }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </q-btn>
+            <q-item v-close-popup clickable @click="deleteRequest(request)">
+              <q-item-section>
+                <q-item-label>
+                  {{ t("common.delete") }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </actions-list-button>
         </template>
       </requested-reserved-table>
     </k-dialog-card>
@@ -212,6 +201,7 @@ import { useReservationService } from "src/services/reservation";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import ChipButton from "./chip-button.vue";

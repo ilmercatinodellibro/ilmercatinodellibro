@@ -42,30 +42,19 @@
                   color="negative"
                   @click="deleteUser(props.row.id)"
                 />
-
-                <q-btn
-                  v-else
-                  :icon="mdiDotsVertical"
-                  class="fit"
-                  color="primary"
-                  flat
-                >
-                  <q-menu>
-                    <q-list>
-                      <q-item
-                        v-close-popup
-                        clickable
-                        @click="deleteUser(props.row.id)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("actions.removeOperator") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                <actions-list-button v-else>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="deleteUser(props.row.id)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("actions.removeOperator") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
               </template>
             </q-td>
           </template>
@@ -88,12 +77,13 @@
 
 <script setup lang="ts">
 import { ApolloError } from "@apollo/client";
-import { mdiDotsVertical, mdiPlus } from "@quasar/extras/mdi-v7";
+import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { Dialog, Notify, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Role } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";

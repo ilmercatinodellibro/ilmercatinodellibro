@@ -112,78 +112,68 @@
                     "
                     class="full-height gap-16 items-center row sticky-button-group"
                   >
-                    <q-btn
-                      v-if="isMobile"
-                      :icon="mdiDotsVertical"
-                      class="fit"
-                      color="primary"
-                      flat
-                    >
-                      <q-menu>
-                        <q-list>
-                          <q-item
-                            v-close-popup
-                            clickable
-                            @click="donateBooks(selectedRows)"
-                          >
-                            <q-item-section>
-                              <q-item-label>
-                                {{
-                                  t(
-                                    "manageUsers.payOffUserDialog.returnOptions.donate",
-                                  )
-                                }}
-                              </q-item-label>
-                            </q-item-section>
-                          </q-item>
-                          <q-item
-                            v-close-popup
-                            clickable
-                            @click="reimburseBooks(selectedRows)"
-                          >
-                            <q-item-section>
-                              <q-item-label>
-                                {{
-                                  t(
-                                    "manageUsers.payOffUserDialog.returnOptions.reimburse",
-                                  )
-                                }}
-                              </q-item-label>
-                            </q-item-section>
-                          </q-item>
-                          <q-item
-                            v-close-popup
-                            clickable
-                            @click="returnBooks(selectedRows)"
-                          >
-                            <q-item-section>
-                              <q-item-label>
-                                {{
-                                  t(
-                                    "manageUsers.payOffUserDialog.returnOptions.return",
-                                  )
-                                }}
-                              </q-item-label>
-                            </q-item-section>
-                          </q-item>
-                          <q-item
-                            v-close-popup
-                            clickable
-                            @click="reportProblems(selectedRows)"
-                          >
-                            <q-item-section>
-                              <q-item-label>
-                                {{
-                                  t(
-                                    "manageUsers.booksMovementsDialog.reportProblem",
-                                  )
-                                }}
-                              </q-item-label>
-                            </q-item-section>
-                          </q-item>
-                        </q-list>
-                      </q-menu>
-                    </q-btn>
+                    <actions-list-button v-if="isMobile">
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="donateBooks(selectedRows)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{
+                              t(
+                                "manageUsers.payOffUserDialog.returnOptions.donate",
+                              )
+                            }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="reimburseBooks(selectedRows)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{
+                              t(
+                                "manageUsers.payOffUserDialog.returnOptions.reimburse",
+                              )
+                            }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="returnBooks(selectedRows)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{
+                              t(
+                                "manageUsers.payOffUserDialog.returnOptions.return",
+                              )
+                            }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="reportProblems(selectedRows)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{
+                              t(
+                                "manageUsers.booksMovementsDialog.reportProblem",
+                              )
+                            }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </actions-list-button>
                     <template v-else>
                       <q-btn
                         :label="
@@ -406,6 +396,7 @@ import {
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserFragment, useSettleUserMutation } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";

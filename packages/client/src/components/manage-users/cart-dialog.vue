@@ -92,29 +92,19 @@
                   round
                   @click="removeBook(bodyProps.row)"
                 />
-                <q-btn
-                  v-else
-                  :icon="mdiDotsVertical"
-                  class="fit"
-                  color="primary"
-                  flat
-                >
-                  <q-menu>
-                    <q-list>
-                      <q-item
-                        v-close-popup
-                        clickable
-                        @click="removeBook(bodyProps.row)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("actions.remove") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                <actions-list-button v-else>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="removeBook(bodyProps.row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("actions.remove") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
               </template>
               <span v-else>
                 <q-tooltip v-if="['subject', 'author'].includes(name)">
@@ -205,7 +195,6 @@ import {
   mdiChevronDown,
   mdiChevronUp,
   mdiDelete,
-  mdiDotsVertical,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { sumBy } from "lodash-es";
@@ -233,6 +222,7 @@ import { GetRequestsDocument } from "src/services/request.graphql";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import DialogTable from "./dialog-table.vue";

@@ -101,30 +101,19 @@
                     </q-tooltip>
                   </q-icon>
                 </chip-button>
-
-                <q-btn
-                  v-else
-                  :icon="mdiDotsVertical"
-                  class="fit"
-                  color="primary"
-                  flat
-                >
-                  <q-menu>
-                    <q-list>
-                      <q-item
-                        v-close-popup
-                        clickable
-                        @click="openDeleteBookDialog(cellProps.rowIndex)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("common.delete") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                <actions-list-button v-else>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="openDeleteBookDialog(cellProps.rowIndex)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("common.delete") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
               </q-td>
             </template>
           </dialog-table>
@@ -173,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiDotsVertical, mdiInformationOutline } from "@quasar/extras/mdi-v7";
+import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
 import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
@@ -196,6 +185,7 @@ import {
   CustomerFragment,
   CustomerFragmentDoc,
 } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
 import CardTableHeader from "./card-table-header.vue";

@@ -233,194 +233,177 @@
 
               <!-- Mobile actions button -->
               <q-td key="actions" :props>
-                <q-btn
-                  :icon="mdiDotsVertical"
-                  class="full-height"
-                  color="primary"
-                  flat
-                >
-                  <q-menu>
-                    <q-list>
-                      <q-item
-                        v-close-popup
-                        clickable
-                        @click="openEdit(props.row)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.editUser.title") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
+                <actions-list-button>
+                  <q-item v-close-popup clickable @click="openEdit(props.row)">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.editUser.title") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                      <q-item
-                        v-close-popup
-                        :disable="willBeDeleted(props.row)"
-                        clickable
-                        @click="
-                          openCellEditDialog(
-                            props.row,
-                            'in-stock',
-                            props.row.booksInStock,
-                          )
-                        "
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.fields.inStock") }} ({{
-                              props.row.booksInStock
-                            }})
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
+                  <q-item
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(
+                        props.row,
+                        'in-stock',
+                        props.row.booksInStock,
+                      )
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.inStock") }} ({{
+                          props.row.booksInStock
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                      <q-item
-                        v-if="props.row.booksSold > 0"
-                        v-close-popup
-                        :disable="willBeDeleted(props.row)"
-                        clickable
-                        @click="
-                          openCellEditDialog(
-                            props.row,
-                            'sold',
-                            props.row.booksSold,
-                          )
-                        "
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.fields.sold") }} ({{
-                              props.row.booksSold
-                            }})
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
+                  <q-item
+                    v-if="props.row.booksSold > 0"
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(props.row, 'sold', props.row.booksSold)
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.sold") }} ({{
+                          props.row.booksSold
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                      <q-item
-                        v-close-popup
-                        :disable="willBeDeleted(props.row)"
-                        clickable
-                        @click="
-                          openCellEditDialog(
-                            props.row,
-                            'reserved',
-                            props.row.booksReserved,
-                          )
-                        "
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.fields.reserved") }} ({{
-                              props.row.booksReserved
-                            }})
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
+                  <q-item
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(
+                        props.row,
+                        'reserved',
+                        props.row.booksReserved,
+                      )
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.reserved") }} ({{
+                          props.row.booksReserved
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                      <q-item
-                        v-close-popup
-                        :disable="willBeDeleted(props.row)"
-                        clickable
-                        @click="
-                          openCellEditDialog(
-                            props.row,
-                            'requested',
-                            props.row.booksRequested,
-                          )
-                        "
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.fields.requested") }} ({{
-                              props.row.booksRequested
-                            }})
-                          </q-item-label>
-                        </q-item-section>
+                  <q-item
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(
+                        props.row,
+                        'requested',
+                        props.row.booksRequested,
+                      )
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.requested") }} ({{
+                          props.row.booksRequested
+                        }})
+                      </q-item-label>
+                    </q-item-section>
 
-                        <q-item-section
-                          v-if="props.row.booksRequestedAndAvailable > 0"
-                          side
-                        >
-                          <round-badge color="positive">
-                            <q-item-label>
-                              {{ props.row.booksRequestedAndAvailable }}
-                            </q-item-label>
+                    <q-item-section
+                      v-if="props.row.booksRequestedAndAvailable > 0"
+                      side
+                    >
+                      <round-badge color="positive">
+                        <q-item-label>
+                          {{ props.row.booksRequestedAndAvailable }}
+                        </q-item-label>
 
-                            <q-tooltip>
-                              {{ t("manageUsers.tooltips.available") }}
-                            </q-tooltip>
-                          </round-badge>
-                        </q-item-section>
-                      </q-item>
+                        <q-tooltip>
+                          {{ t("manageUsers.tooltips.available") }}
+                        </q-tooltip>
+                      </round-badge>
+                    </q-item-section>
+                  </q-item>
 
-                      <q-item
-                        v-if="props.row.booksBought > 0"
-                        v-close-popup
-                        :disable="willBeDeleted(props.row)"
-                        clickable
-                        @click="
-                          openCellEditDialog(
-                            props.row,
-                            'purchased',
-                            props.row.booksBought,
-                          )
-                        "
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.fields.purchased") }} ({{
-                              props.row.booksBought
-                            }})
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
+                  <q-item
+                    v-if="props.row.booksBought > 0"
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(
+                        props.row,
+                        'purchased',
+                        props.row.booksBought,
+                      )
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.purchased") }} ({{
+                          props.row.booksBought
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                      <q-item
-                        v-close-popup
-                        :disable="willBeDeleted(props.row)"
-                        clickable
-                        @click="openCart(props.row)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.fields.cart") }} ({{
-                              props.row.booksInCart
-                            }})
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
+                  <q-item
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="openCart(props.row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.cart") }} ({{
+                          props.row.booksInCart
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                      <q-item
-                        v-close-popup
-                        clickable
-                        @click="openReceipt(props.row)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.fields.receipts") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="openReceipt(props.row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.receipts") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                      <q-item
-                        v-close-popup
-                        :disable="
-                          !hasAdminRole &&
-                          (!selectedLocation.payOffEnabled ||
-                            willBeDeleted(props.row))
-                        "
-                        clickable
-                        @click="openPayOff(props.row)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("manageUsers.payOff") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                  <q-item
+                    v-close-popup
+                    :disable="
+                      !hasAdminRole &&
+                      (!selectedLocation.payOffEnabled ||
+                        willBeDeleted(props.row))
+                    "
+                    clickable
+                    @click="openPayOff(props.row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.payOff") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
               </q-td>
             </q-tr>
           </template>
@@ -433,7 +416,6 @@
 <script setup lang="ts">
 import {
   mdiCart,
-  mdiDotsVertical,
   mdiInformationOutline,
   mdiPencil,
   mdiPlus,
@@ -442,6 +424,7 @@ import {
 import { Dialog, Notify, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";

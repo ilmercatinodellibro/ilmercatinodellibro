@@ -38,11 +38,7 @@
         v-for="{ align, classes, name, field, format } in bodyHeaderCols"
         :key="name"
         :auto-width="name === 'problems'"
-        :class="[
-          `text-${align ?? 'left'}`,
-          classes,
-          isMobile && name === 'history' ? 'no-padding' : '',
-        ]"
+        :class="[`text-${align ?? 'left'}`, classes]"
         :colspan="getColspan(name)"
       >
         <template v-if="name === 'status'">
@@ -66,47 +62,34 @@
             round
             @click="emit('openHistory', bookCopy)"
           />
-
-          <q-btn
-            v-else
-            :icon="mdiDotsVertical"
-            class="full-height"
-            color="primary"
-            flat
-          >
-            <q-menu>
-              <q-list>
-                <q-item
-                  v-close-popup
-                  clickable
-                  @click="reportOrSolveProblem(bookCopy)"
-                >
-                  <q-item-section>
-                    <q-item-label>
-                      {{
-                        t(
-                          `manageUsers.booksMovementsDialog.${hasProblem(bookCopy) ? "solveProblem" : "reportProblem"}`,
-                        )
-                      }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item
-                  v-close-popup
-                  clickable
-                  @click="emit('openHistory', bookCopy)"
-                >
-                  <q-item-section>
-                    <q-item-label>
-                      {{
-                        t("manageUsers.booksMovementsDialog.problemsHistory")
-                      }}
-                    </q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </q-btn>
+          <actions-list-button v-else>
+            <q-item
+              v-close-popup
+              clickable
+              @click="reportOrSolveProblem(bookCopy)"
+            >
+              <q-item-section>
+                <q-item-label>
+                  {{
+                    t(
+                      `manageUsers.booksMovementsDialog.${hasProblem(bookCopy) ? "solveProblem" : "reportProblem"}`,
+                    )
+                  }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item
+              v-close-popup
+              clickable
+              @click="emit('openHistory', bookCopy)"
+            >
+              <q-item-section>
+                <q-item-label>
+                  {{ t("manageUsers.booksMovementsDialog.problemsHistory") }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </actions-list-button>
         </template>
 
         <template v-else>
@@ -122,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiDotsVertical, mdiHistory } from "@quasar/extras/mdi-v7";
+import { mdiHistory } from "@quasar/extras/mdi-v7";
 import { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -139,6 +122,7 @@ import {
   BookCopyDetailsFragment,
   useGetBookCopiesQuery,
 } from "src/services/book-copy.graphql";
+import ActionsListButton from "./actions-list-button.vue";
 
 const props = defineProps<{
   bookId: string;
@@ -194,6 +178,7 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     name: "history",
     field: () => undefined,
     label: "",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 

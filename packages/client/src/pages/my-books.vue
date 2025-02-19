@@ -107,30 +107,19 @@
                   color="primary"
                   @click="cancelReservation(props.row)"
                 />
-
-                <q-btn
-                  v-else
-                  :icon="mdiDotsVertical"
-                  class="full-height"
-                  color="primary"
-                  flat
-                >
-                  <q-menu>
-                    <q-list>
-                      <q-item
-                        v-close-popup
-                        clickable
-                        @click="cancelReservation(props.row)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("myBooks.cancelReservation") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                <actions-list-button v-else>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="cancelReservation(props.row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("myBooks.cancelReservation") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
               </q-td>
             </template>
 
@@ -154,43 +143,32 @@
                   color="primary"
                   @click="reserveBook(props.row)"
                 />
+                <actions-list-button v-else-if="isMobile">
+                  <q-item
+                    v-if="props.value"
+                    v-close-popup
+                    clickable
+                    @click="reserveBook(props.row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("myBooks.reserve") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                <q-btn
-                  v-else-if="isMobile"
-                  :icon="mdiDotsVertical"
-                  class="full-height"
-                  color="primary"
-                  flat
-                >
-                  <q-menu>
-                    <q-list>
-                      <q-item
-                        v-if="props.value"
-                        v-close-popup
-                        clickable
-                        @click="reserveBook(props.row)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("myBooks.reserve") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-
-                      <q-item
-                        v-close-popup
-                        clickable
-                        @click="cancelRequest(props.row)"
-                      >
-                        <q-item-section>
-                          <q-item-label>
-                            {{ t("myBooks.cancelRequest") }}
-                          </q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-menu>
-                </q-btn>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="cancelRequest(props.row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("myBooks.cancelRequest") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
               </q-td>
             </template>
 
@@ -219,7 +197,6 @@ import {
   mdiCash,
   mdiCurrencyEur,
   mdiCurrencyEurOff,
-  mdiDotsVertical,
   mdiGift,
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
@@ -228,6 +205,7 @@ import { Notify, QChipProps, QTab, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";

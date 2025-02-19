@@ -57,34 +57,23 @@
               color="negative"
               @click="remove(booksToReserve, cellProps.row)"
             />
-
-            <q-btn
-              v-else
-              :icon="mdiDotsVertical"
-              class="full-height"
-              color="primary"
-              flat
-            >
-              <q-menu>
-                <q-list>
-                  <q-item
-                    v-close-popup
-                    clickable
-                    @click="remove(booksToReserve, cellProps.row)"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{
-                          t(
-                            "reserveBooks.confirmReserveByClassDialog.removeFromList",
-                          )
-                        }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="remove(booksToReserve, cellProps.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{
+                      t(
+                        "reserveBooks.confirmReserveByClassDialog.removeFromList",
+                      )
+                    }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -93,7 +82,6 @@
 </template>
 
 <script setup lang="ts">
-import { mdiDotsVertical } from "@quasar/extras/mdi-v7";
 import { cloneDeep, remove } from "lodash-es";
 import { QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
@@ -102,6 +90,7 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { discountedPrice } from "src/helpers/book-copy";
 import { formatPrice } from "src/helpers/formatting";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
+import ActionsListButton from "./actions-list-button.vue";
 import KDialogCard from "./k-dialog-card.vue";
 import chipButton from "./manage-users/chip-button.vue";
 import dialogTable from "./manage-users/dialog-table.vue";

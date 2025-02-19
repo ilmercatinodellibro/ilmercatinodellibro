@@ -176,48 +176,31 @@
               round
               @click="openHistory(props.row)"
             />
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="reportOrSolveProblem(props.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{
+                      t(
+                        `manageUsers.booksMovementsDialog.${hasProblem(props.row) ? "solveProblem" : "reportProblem"}`,
+                      )
+                    }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
 
-            <q-btn
-              v-else
-              :icon="mdiDotsVertical"
-              class="fit"
-              color="primary"
-              flat
-            >
-              <q-menu>
-                <q-list>
-                  <q-item
-                    v-close-popup
-                    clickable
-                    @click="reportOrSolveProblem(props.row)"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{
-                          t(
-                            `manageUsers.booksMovementsDialog.${hasProblem(props.row) ? "solveProblem" : "reportProblem"}`,
-                          )
-                        }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item
-                    v-close-popup
-                    clickable
-                    @click="openHistory(props.row)"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{
-                          t("manageUsers.booksMovementsDialog.problemsHistory")
-                        }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
+              <q-item v-close-popup clickable @click="openHistory(props.row)">
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("manageUsers.booksMovementsDialog.problemsHistory") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -229,13 +212,13 @@
 import {
   mdiChevronDown,
   mdiChevronUp,
-  mdiDotsVertical,
   mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
 import { Dialog, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import BookCopyDetailsRow from "src/components/book-copy-details-row.vue";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";

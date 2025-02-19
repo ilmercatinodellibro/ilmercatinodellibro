@@ -91,29 +91,19 @@
         <template #body-cell-actions="props">
           <q-td :props auto-width>
             <chip-button v-if="!isMobile" v-bind="getButtonData(props.row)" />
-            <q-btn
-              v-else
-              :icon="mdiDotsVertical"
-              class="full-height"
-              color="primary"
-              flat
-            >
-              <q-menu>
-                <q-list>
-                  <q-item
-                    v-close-popup
-                    clickable
-                    @click="getButtonData(props.row).onClick"
-                  >
-                    <q-item-section>
-                      <q-item-label>
-                        {{ getButtonData(props.row).label }}
-                      </q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="getButtonData(props.row).onClick"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ getButtonData(props.row).label }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -124,7 +114,6 @@
 <script setup lang="ts">
 import {
   mdiArrowLeft,
-  mdiDotsVertical,
   mdiFilter,
   mdiMagnify,
   mdiPlus,
@@ -135,6 +124,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { evictQuery } from "src/apollo/cache";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
