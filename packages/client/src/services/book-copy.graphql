@@ -51,6 +51,7 @@ fragment BookCopyDetails on BookCopy {
   reimbursedAt
   reimbursedById
   sales {
+    iseeDiscountApplied
     refundedAt
   }
   settledAt

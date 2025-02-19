@@ -362,7 +362,19 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       coverPriceColumn.value,
       {
         name: "paid-price",
-        field: ({ book }) => calculateBookCopyPrice(book.originalPrice, "sell"),
+        field: (bookCopy) => {
+          // This is a purchased book, we are guaranteed to have a valid sale for it
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const bookSale = (
+            bookCopy as BookCopyDetailsFragment
+          ).sales!.findLast(({ refundedAt }) => refundedAt === null)!;
+
+          return calculateBookCopyPrice(
+            bookCopy.book.originalPrice,
+            "sell",
+            bookSale.iseeDiscountApplied,
+          );
+        },
         label: t("myBooks.priceYouPaid"),
         align: "left",
         format: formatPrice,
