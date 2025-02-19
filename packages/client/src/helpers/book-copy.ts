@@ -3,7 +3,6 @@ import { ProblemType } from "src/@generated/graphql";
 import { useI18nOutsideSetup } from "src/boot/i18n";
 import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
 import { notifyError } from "src/helpers/error-messages";
-import { formatPrice } from "src/helpers/formatting";
 import {
   BookCopyDetailsFragment,
   BookCopyDetailsFragmentDoc,
@@ -59,14 +58,16 @@ export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
             : "available";
 }
 
-export const discountedPrice = (originalPrice: number, kind: "sell" | "buy") =>
-  formatPrice(
-    (originalPrice *
-      (kind === "buy"
-        ? selectedLocation.value.buyRate
-        : selectedLocation.value.sellRate)) /
-      100,
-  );
+export const calculateBookCopyPrice = (
+  originalPrice: number,
+  kind: "sell" | "buy",
+  iseeDiscountApplied = false,
+) =>
+  (originalPrice *
+    (kind === "buy" || iseeDiscountApplied
+      ? selectedLocation.value.buyRate
+      : selectedLocation.value.sellRate)) /
+  100;
 
 const { resolveProblem } = useResolveProblemMutation();
 const { reportProblem } = useReportProblemMutation();

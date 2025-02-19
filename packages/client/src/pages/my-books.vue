@@ -217,7 +217,7 @@ import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { discountedPrice } from "src/helpers/book-copy";
+import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { formatPrice } from "src/helpers/formatting";
 import { BooksTab } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
@@ -351,10 +351,10 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       coverPriceColumn.value,
       {
         name: "sale-price",
-        field: ({ book }) => book.originalPrice,
+        field: ({ book }) => calculateBookCopyPrice(book.originalPrice, "buy"),
         label: t("myBooks.receivedAmount"),
         align: "left",
-        format: (val: number) => discountedPrice(val, "buy"),
+        format: formatPrice,
       },
     ],
     [BooksTab.PURCHASED]: [
@@ -362,10 +362,10 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       coverPriceColumn.value,
       {
         name: "paid-price",
-        field: ({ book }) => book.originalPrice,
+        field: ({ book }) => calculateBookCopyPrice(book.originalPrice, "sell"),
         label: t("myBooks.priceYouPaid"),
         align: "left",
-        format: (val: number) => discountedPrice(val, "sell"),
+        format: formatPrice,
       },
     ],
     [BooksTab.REQUESTED]: [
@@ -373,10 +373,10 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       coverPriceColumn.value,
       {
         name: "price",
-        field: ({ book }) => book.originalPrice,
+        field: ({ book }) => calculateBookCopyPrice(book.originalPrice, "sell"),
         label: t("myBooks.price"),
         align: "left",
-        format: (val: number) => discountedPrice(val, "sell"),
+        format: formatPrice,
       },
       {
         name: "availability",
@@ -405,10 +405,10 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       coverPriceColumn.value,
       {
         name: "price",
-        field: ({ book }) => book.originalPrice,
+        field: ({ book }) => calculateBookCopyPrice(book.originalPrice, "sell"),
         label: t("myBooks.price"),
         align: "left",
-        format: (val: number) => discountedPrice(val, "sell"),
+        format: formatPrice,
       },
       {
         name: "actions",

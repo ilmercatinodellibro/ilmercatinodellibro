@@ -87,7 +87,7 @@ import { QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { discountedPrice } from "src/helpers/book-copy";
+import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { formatPrice } from "src/helpers/formatting";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import ActionsListButton from "./actions-list-button.vue";
@@ -149,10 +149,11 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
     },
     {
       name: "price",
-      field: ({ originalPrice }) => originalPrice,
+      field: ({ originalPrice }) =>
+        calculateBookCopyPrice(originalPrice, "sell"),
       label: t("book.fields.price"),
       align: "left",
-      format: (val: number) => discountedPrice(val, "sell"),
+      format: formatPrice,
     },
     {
       name: "availability",

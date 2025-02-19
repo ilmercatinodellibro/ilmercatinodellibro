@@ -377,7 +377,7 @@ import { SettleRemainingType } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { discountedPrice, getStatus } from "src/helpers/book-copy";
+import { calculateBookCopyPrice, getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { formatPrice } from "src/helpers/formatting";
 import { getColValue } from "src/helpers/table-helpers";
@@ -462,17 +462,17 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "buy-price",
-    field: ({ book }) => book.originalPrice,
+    field: ({ book }) => calculateBookCopyPrice(book.originalPrice, "buy"),
     label: t("manageUsers.payOffUserDialog.buyPrice"),
     align: "left",
-    format: (val: number) => discountedPrice(val, "buy"),
+    format: formatPrice,
   },
   {
     name: "public-price",
-    field: ({ book }) => book.originalPrice,
+    field: ({ book }) => calculateBookCopyPrice(book.originalPrice, "sell"),
     label: t("manageUsers.payOffUserDialog.publicPrice"),
     align: "left",
-    format: (val: number) => discountedPrice(val, "sell"),
+    format: formatPrice,
   },
   {
     name: "book-code",

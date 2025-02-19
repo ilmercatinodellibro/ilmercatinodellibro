@@ -133,7 +133,7 @@ import TableCellWithTooltip from "src/components/manage-users/table-cell-with-to
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
-import { discountedPrice } from "src/helpers/book-copy";
+import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { formatPrice } from "src/helpers/formatting";
 import { BooksTab, SchoolFilters } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
@@ -212,10 +212,10 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "price",
-    field: "originalPrice",
+    field: ({ originalPrice }) => calculateBookCopyPrice(originalPrice, "sell"),
     label: t("book.fields.price"),
     align: "left",
-    format: (val: number) => discountedPrice(val, "sell"),
+    format: formatPrice,
   },
   {
     name: "availability",

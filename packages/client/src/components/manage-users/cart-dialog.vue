@@ -211,7 +211,7 @@ import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { discountedPrice } from "src/helpers/book-copy";
+import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { formatPrice } from "src/helpers/formatting";
 import { GetBookCopiesInStockDocument } from "src/services/book-copy.graphql";
@@ -292,14 +292,14 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     field: "originalPrice",
     label: t("manageUsers.payOffUserDialog.buyPrice"),
     align: "left",
-    format: (value: number) => discountedPrice(value, "buy"),
+    format: (value: number) => calculateBookCopyPrice(value, "buy"),
   },
   {
     name: "public-price",
-    field: "originalPrice",
+    field: ({ originalPrice }) => calculateBookCopyPrice(originalPrice, "sell"),
     label: t("manageUsers.payOffUserDialog.publicPrice"),
     align: "left",
-    format: (val: number) => discountedPrice(val, "sell"),
+    format: formatPrice,
   },
   {
     name: "delete",
