@@ -53,6 +53,7 @@ import { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { formatPrice } from "src/helpers/formatting";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
@@ -122,8 +123,9 @@ const columns = computed<
   },
   {
     name: "price",
-    field: ({ book: { originalPrice } }) => originalPrice,
-    label: t("book.fields.coverPrice"),
+    field: ({ book: { originalPrice } }) =>
+      calculateBookCopyPrice(originalPrice, "sell"),
+    label: t("book.fields.price"),
     align: "left",
     format: formatPrice,
   },

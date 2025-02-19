@@ -169,6 +169,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { formatPrice } from "src/helpers/formatting";
 import { fetchBookByISBN } from "src/services/book";
@@ -224,6 +225,7 @@ const { bookCopiesInStock: copiesInStock, loading: inStockLoading } =
   }));
 
 // probably unnecessarily complex, but 🤷
+// TODO: Totally agree, this must be simplified
 function getCommonColumns<
   const TEntity extends "book" | "copy",
   TFragment extends TEntity extends "book"
@@ -274,8 +276,17 @@ function getCommonColumns<
       format: (val: string) => startCase(toLower(val)),
     },
     {
-      label: t("book.fields.coverPrice"),
-      field: getField("originalPrice"),
+      label: t("book.fields.price"),
+      field: (row) => {
+        const fieldValueOrGetter = getField("originalPrice");
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const fieldValue: number =
+          typeof fieldValueOrGetter === "function"
+            ? fieldValueOrGetter(row)
+            : fieldValueOrGetter;
+
+        return calculateBookCopyPrice(fieldValue, "sell");
+      },
       name: "price",
       headerClasses: "text-center",
       align: "left",
