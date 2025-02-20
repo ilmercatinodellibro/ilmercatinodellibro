@@ -34,7 +34,7 @@
           @request="onRequest"
         >
           <template #body-cell-actions="props">
-            <q-td auto-width>
+            <q-td :props>
               <template v-if="props.row.role !== 'ADMIN'">
                 <chip-button
                   v-if="!isMobile"

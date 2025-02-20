@@ -278,12 +278,16 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     name: "sold-to",
     align: "left",
   },
-  {
-    label: "",
-    field: () => undefined,
-    name: "problems",
-    align: "center",
-  },
+  ...((!isMobile.value
+    ? [
+        {
+          label: "",
+          field: () => undefined,
+          name: "problems",
+          align: "center",
+        },
+      ]
+    : []) satisfies QTableColumn<SoldBookCopy>[]),
   {
     label: "",
     field: () => undefined,

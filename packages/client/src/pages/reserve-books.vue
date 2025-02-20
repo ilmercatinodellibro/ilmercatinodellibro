@@ -233,6 +233,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     name: "actions",
     field: () => undefined,
     label: "",
+    align: "center",
     classes: isMobile.value ? "no-padding" : "",
   },
 ]);

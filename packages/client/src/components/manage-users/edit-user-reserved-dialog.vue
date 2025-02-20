@@ -139,8 +139,7 @@
                 </q-item-section>
               </q-item>
             </chip-button>
-
-            <actions-list-button>
+            <actions-list-button v-else>
               <q-item
                 v-close-popup
                 clickable

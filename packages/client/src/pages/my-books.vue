@@ -19,12 +19,18 @@
         </q-input>
       </q-card-section>
 
-      <q-tabs v-model="selectedTab" align="justify" active-color="accent">
+      <q-tabs
+        v-model="selectedTab"
+        active-color="accent"
+        align="justify"
+        class="full-width"
+        mobile-arrows
+      >
         <q-tab
           v-for="tab in BooksTab"
           :key="tab"
           :name="tab"
-          class="col text-black-54 text-weight-medium text-wrap"
+          class="text-black-54 text-weight-medium"
           @click="
             router.replace({
               path: AvailableRouteNames.MyBooks,
@@ -51,7 +57,7 @@
             :class="
               isMobile && [BooksTab.REQUESTED, BooksTab.RESERVED].includes(tab)
                 ? 'sticky-last-column'
-                : undefined
+                : ''
             "
             :columns="columns[tab]"
             :filter="searchQuery"

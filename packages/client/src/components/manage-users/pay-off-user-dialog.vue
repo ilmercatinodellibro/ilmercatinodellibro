@@ -507,6 +507,7 @@ const textColumns = [
   "buy-price",
   "public-price",
   "book-code",
+  "status",
 ];
 
 const { selectedLocation } = useRetailLocationService();

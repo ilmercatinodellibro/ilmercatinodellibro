@@ -1,5 +1,5 @@
 <template>
-  <q-btn :icon="mdiDotsVertical" class="full-height" color="primary" flat>
+  <q-btn :icon="mdiDotsVertical" class="fit" color="primary" flat>
     <q-menu>
       <q-list>
         <slot>
