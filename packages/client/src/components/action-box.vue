@@ -10,16 +10,18 @@
 
     <q-btn
       v-if="to"
-      color="accent"
       :icon-right="mdiArrowRight"
       :label="buttonLabel"
       :to="to"
+      color="accent"
+      no-wrap
     />
     <q-btn
       v-else
-      color="accent"
       :icon-right="mdiArrowRight"
       :label="buttonLabel"
+      color="accent"
+      no-wrap
       @click="emit('action-clicked')"
     />
   </div>

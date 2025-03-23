@@ -11,7 +11,7 @@ export default {
       buttonLabel: "Consulta catalogo",
     },
     seeMyData: {
-      text: "Voglio vedere i dati sulle mie prenotazioni, sulle mie vendite e i miei acquisti",
+      text: "Voglio vedere i dati sulle mie prenotazioni, vendite e acquisti",
       buttonLabel: "Vai alla pagina “I miei libri”",
     },
     sellBooks: {

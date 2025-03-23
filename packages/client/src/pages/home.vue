@@ -20,12 +20,15 @@
         :to="action.to"
       >
         <q-icon
-          class="q-mb-lg q-mt-xl"
-          color="white"
+          :class="isMobile ? 'q-mb-md' : 'q-mb-lg q-mt-xl'"
           :name="action.icon"
+          color="white"
           size="100px"
         />
-        <div class="q-px-xl text-h4 text-white">
+        <div
+          :class="isMobile ? 'q-px-lg text-h5' : 'q-px-xl text-h4'"
+          class="text-white"
+        >
           {{ action.text }}
         </div>
         <q-space />
@@ -44,9 +47,12 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import ActionBox from "src/components/action-box.vue";
 import HeaderBar from "src/components/header-bar.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { AvailableRouteNames } from "src/models/routes";
 
 const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 const actionsList = computed(() => {
   return [
@@ -75,7 +81,13 @@ const actionsList = computed(() => {
 <style lang="scss" scoped>
 .action-box {
   aspect-ratio: 3 / 4;
-  width: 400px;
+  max-width: 400px;
+  width: 100%;
+
+  @media screen and (min-width: $breakpoint-sm-min) {
+    aspect-ratio: 1 / 1;
+    width: 400px;
+  }
 }
 
 .readability-max-width {
