@@ -126,7 +126,7 @@ const IT_RE_FAQ = `<section>
     controllare periodicamente la lista dei libri richiesti. Quando un libro è
     disponibile nel nostro magazzino lo stato del libro sarà&nbsp; "disponibile"
     con la scritta colorata di verde. Non possiamo prevedere quali libri ci arriveranno nel corso delle
-    settimane. Ad inizio mercatino, è� possibile che quello che
+    settimane. Ad inizio mercatino, è possibile che quello che
     stai cercando ma che ancora non c'è arrivi fra poco!
   </p>
   <p>
@@ -151,7 +151,7 @@ const IT_RE_FAQ = `<section>
     La durata delle prenotazioni varia durante il periodo di apertura del mercatino, solitamente una prenotazione dura 3 giorni (anche non lavorativi).
   </p>
 </section>
-<div class="gap-16 row no-wrap">
+<div class="gap-16 row">
   <div class="col">
     <article>
       <header>
@@ -230,7 +230,7 @@ const IT_RE_FAQ = `<section>
           >!&nbsp;<br />Ci trovate in<strong> Via Cassoli 1</strong>,<strong>
             sulla</strong
           ><b
-            >&nbsp;circonvallazione&nbsp;vicino l'incrocio&nbsp;di&nbsp;viale
+            >Circonvallazione vicino all'incrocio di Viale
             Umberto I</b
           >.<br />Ancora più precisamente: <a
             href="https://goo.gl/maps/tTbjyUBBRYV2Nh5QA"

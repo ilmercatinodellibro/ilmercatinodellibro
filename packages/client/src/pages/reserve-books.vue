@@ -1,11 +1,17 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
-      <q-card-section class="gap-16 row">
+    <q-card
+      :class="!isMobile ? 'q-ma-md' : ''"
+      class="absolute-full column no-wrap"
+    >
+      <q-card-section
+        :class="isMobile ? 'column reverse' : 'row'"
+        class="gap-16"
+      >
         <q-input
           :model-value="tableFilter.searchQuery"
           :placeholder="t('common.search')"
-          class="col max-width-600"
+          class="full-width max-width-600"
           clearable
           debounce="400"
           outlined
@@ -19,11 +25,15 @@
           </template>
         </q-input>
 
-        <q-space />
+        <q-space v-if="!isMobile" />
 
-        <div class="flex-center gap-16 no-padding no-wrap row">
+        <div
+          :class="isMobile ? 'column items-stretch' : 'row flex-center'"
+          class="gap-16 no-padding no-wrap"
+        >
           <q-btn
             v-if="!showByClass"
+            :class="isMobile ? 'full-width' : ''"
             :icon="mdiFilter"
             :label="$t('reserveBooks.filterButton')"
             class="text-transform-none"
@@ -41,6 +51,7 @@
             />
 
             <q-btn
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiPlus"
               :label="t('reserveBooks.reserveAll')"
               color="positive"
@@ -53,6 +64,7 @@
 
       <dialog-table
         v-model:pagination="tablePagination"
+        :class="isMobile ? 'sticky-last-column' : ''"
         :columns="columns"
         :filter="tableFilter"
         :filter-method="filterMethod"
@@ -62,23 +74,36 @@
         class="col"
         @request="onRequest"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="props">
+          <table-cell-with-tooltip :props="props" :value="props.value" />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="props">
+          <table-cell-with-tooltip :props :value="props.value" />
         </template>
 
-        <template #body-cell-availability="{ value }">
-          <q-td>
-            <status-chip :value="value" />
+        <template #body-cell-availability="props">
+          <q-td :props>
+            <status-chip :value="props.value" />
           </q-td>
         </template>
 
-        <template #body-cell-actions="{ row }">
-          <q-td auto-width class="text-center">
-            <chip-button v-bind="getButtonData(row)" />
+        <template #body-cell-actions="props">
+          <q-td :props auto-width>
+            <chip-button v-if="!isMobile" v-bind="getButtonData(props.row)" />
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="getButtonData(props.row).onClick"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ getButtonData(props.row).label }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -99,28 +124,36 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { evictQuery } from "src/apollo/cache";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
-import { formatPrice } from "src/composables/use-misc-formats";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { discountedPrice } from "src/helpers/book-copy";
+import { formatPrice } from "src/helpers/formatting";
 import { BooksTab, SchoolFilters } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
+import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
 import { GetRequestsDocument } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
+const { t } = useI18n();
+const router = useRouter();
+
 const { user } = useAuthService();
 const { selectedLocation } = useRetailLocationService();
+
+const { isMobile } = useLateralDrawer();
 
 const { useCreateReservationsMutation, useGetReservationsQuery } =
   useReservationService();
@@ -141,23 +174,12 @@ const { bookRequests } = useGetRequestsQuery({
   userId: user.value!.id,
 });
 
-const { t } = useI18n();
-
-const router = useRouter();
-
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "isbn",
     field: "isbnCode",
     label: t("book.fields.isbn"),
     align: "left",
-  },
-  {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
   },
   {
     name: "subject",
@@ -174,10 +196,11 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     classes: "text-wrap",
   },
   {
-    name: "availability",
-    field: ({ meta }) => meta.isAvailable,
-    label: t("book.fields.availability"),
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
     align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     name: "cover-price",
@@ -195,6 +218,12 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     format: (val: number) => discountedPrice(val, "sell"),
   },
   {
+    name: "availability",
+    field: ({ meta }) => meta.isAvailable,
+    label: t("book.fields.availability"),
+    align: "left",
+  },
+  {
     name: "available-copies",
     field: ({ meta }) => meta.availableCount,
     label: t("reserveBooks.availableCopies"),
@@ -204,6 +233,8 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     name: "actions",
     field: () => undefined,
     label: "",
+    align: "center",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 
@@ -384,7 +415,7 @@ function openReserveAllDialog() {
     componentProps: {
       classBooks: rows.value,
     },
-  }).onOk(async (books: BookSummaryFragment[]) => {
+  }).onOk(async (books: BookWithAvailableCopiesFragment[]) => {
     try {
       const { cache } = await createReservations({
         input: {

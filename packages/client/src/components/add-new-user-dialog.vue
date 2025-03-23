@@ -3,7 +3,8 @@
     <k-dialog-form-card
       :title="t('general.rolesAndPermissions.addNewOperator.title')"
       :submit-label="t('actions.sendInvitation')"
-      size="sm"
+      class="full-width max-width-360"
+      size="fullscreen"
       @cancel="onDialogCancel"
       @submit="onSubmit"
     >

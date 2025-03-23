@@ -1,13 +1,22 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="!isMobile ? 'q-ma-md' : ''"
+      class="absolute-full column no-wrap"
+    >
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
         :search-input-placeholder="t('warehouse.searchPlaceholder')"
       >
         <template #side-actions>
-          <q-btn color="black-12" no-wrap outline @click="swapView()">
+          <q-btn
+            :class="isMobile ? 'full-width' : ''"
+            color="black-12"
+            no-wrap
+            outline
+            @click="swapView()"
+          >
             <q-item-section class="q-pl-none q-pr-sm text-black-87" side>
               <q-icon :name="mdiSort" />
             </q-item-section>
@@ -36,22 +45,20 @@
         @request="fetchBooksPage"
       >
         <template #header="props">
-          <q-tr :props="props">
+          <q-tr :props>
             <q-th auto-width />
 
-            <q-th
-              v-for="{ name, label } in props.cols"
-              :key="name"
-              :colspan="name === 'title' ? 2 : 1"
-              :props="props"
-            >
+            <q-th v-for="{ name, label } in props.cols" :key="name" :props>
               {{ label }}
             </q-th>
+
+            <!-- To occupy all the remaining cells' space; on mobile one of the columns is hidden -->
+            <q-th :colspan="isMobile ? 1 : 2" />
           </q-tr>
         </template>
 
         <template #body="props">
-          <q-tr :props="props">
+          <q-tr :props>
             <q-td auto-width>
               <q-btn
                 :icon="props.expand ? mdiChevronUp : mdiChevronDown"
@@ -62,13 +69,7 @@
               />
             </q-td>
 
-            <q-td
-              v-for="{ name, field, align, classes } in booksColumns"
-              :key="name"
-              :class="[align ? `text-${align}` : 'text-left', classes]"
-              :colspan="name === 'title' ? 2 : 1"
-              auto-width
-            >
+            <q-td v-for="{ name, field } in booksColumns" :key="name" :props>
               <status-chip
                 v-if="name === 'status'"
                 :value="props.row.meta.isAvailable"
@@ -101,22 +102,25 @@
                 {{ getFieldValue(field, props.row) }}
               </span>
             </q-td>
+
+            <!-- To occupy all the remaining cells' space; on mobile one of the columns is hidden -->
+            <q-td :colspan="isMobile ? 1 : 2" />
           </q-tr>
 
-          <template v-if="props.expand">
-            <book-copy-details-row
-              :book-id="props.row.id"
-              :show-only-available="booleanFilters?.isAvailable"
-              @open-history="(bookCopy) => openHistory(bookCopy)"
-              @update-problems="fetchBooks(pagination)"
-            />
-          </template>
+          <book-copy-details-row
+            v-if="props.expand"
+            :book-id="props.row.id"
+            :show-only-available="booleanFilters?.isAvailable"
+            @open-history="(bookCopy) => openHistory(bookCopy)"
+            @update-problems="fetchBooks(pagination)"
+          />
         </template>
       </dialog-table>
 
       <dialog-table
         v-else
         v-model:pagination="pagination"
+        :class="isMobile ? 'sticky-last-column' : ''"
         :columns="bookCopyColumns"
         :filter="tableFilter"
         :loading="isLoading"
@@ -124,40 +128,79 @@
         class="col"
         @request="fetchBooksPage"
       >
-        <template #body-cell-author="{ col, value }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="props">
+          <table-cell-with-tooltip
+            :key-td="props.key"
+            :props
+            :value="props.value"
+          />
         </template>
-        <template #body-cell-subject="{ col, value }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="props">
+          <table-cell-with-tooltip
+            :key-td="props.key"
+            :props
+            :value="props.value"
+          />
         </template>
-        <template #body-cell-owner="{ col, value }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-owner="props">
+          <table-cell-with-tooltip
+            :key-td="props.key"
+            :props
+            :value="props.value"
+          />
         </template>
 
-        <template #body-cell-status="{ row }">
-          <q-td>
-            <book-copy-status-chip :book-copy="row" />
+        <template #body-cell-status="props">
+          <q-td :props>
+            <book-copy-status-chip :book-copy="props.row" />
           </q-td>
         </template>
 
-        <template #body-cell-problems="{ col, row }">
-          <q-td :class="[`text-${col.align ?? 'left'}`, col.classes]">
+        <template #body-cell-problems="props">
+          <q-td :props>
             <problems-button
-              :book-copy="row"
+              v-if="!isMobile"
+              :book-copy="props.row"
               @update-problems="fetchBooks(pagination)"
             />
           </q-td>
         </template>
 
-        <template #body-cell-history="{ row }">
-          <q-td>
+        <template #body-cell-history="props">
+          <q-td :props>
             <q-btn
+              v-if="!isMobile"
               :icon="mdiHistory"
               color="primary"
               flat
               round
-              @click="openHistory(row)"
+              @click="openHistory(props.row)"
             />
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="reportOrSolveProblem(props.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{
+                      t(
+                        `manageUsers.booksMovementsDialog.${hasProblem(props.row) ? "solveProblem" : "reportProblem"}`,
+                      )
+                    }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item v-close-popup clickable @click="openHistory(props.row)">
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("manageUsers.booksMovementsDialog.problemsHistory") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -175,6 +218,7 @@ import {
 import { Dialog, QTableColumn, QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import BookCopyDetailsRow from "src/components/book-copy-details-row.vue";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
@@ -183,7 +227,12 @@ import ProblemsHistoryDialog from "src/components/manage-users/problems-history-
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import ProblemsButton from "src/components/problems-button.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
+import {
+  reportOrSolveProblem as _reportOrSolveProblem,
+  hasProblem,
+} from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { getFieldValue } from "src/helpers/table-helpers";
 import { fetchBooksWithCopies } from "src/services/book";
@@ -196,6 +245,10 @@ import {
   BookSummaryFragment,
   PaginatedBookResultFragment,
 } from "src/services/book.graphql";
+
+const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 interface WarehousePagination {
   page: number;
@@ -289,25 +342,11 @@ async function swapView() {
   await fetchBooks(pagination.value);
 }
 
-const { t } = useI18n();
-
 const booksColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "isbn",
     field: "isbnCode",
     label: t("book.fields.isbn"),
-    align: "left",
-  },
-  {
-    name: "available-copies",
-    field: ({ meta }) => meta.availableCount,
-    label: t("reserveBooks.availableCopies"),
-    align: "center",
-  },
-  {
-    name: "status",
-    field: ({ meta }) => meta.isAvailable,
-    label: t("book.fields.status"),
     align: "left",
   },
   {
@@ -318,6 +357,13 @@ const booksColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     classes: "max-width-160 ellipsis",
   },
   {
+    name: "title",
+    field: "title",
+    label: t("book.fields.title"),
+    align: "left",
+    classes: "text-wrap",
+  },
+  {
     name: "author",
     field: "authorsFullName",
     label: t("book.fields.author"),
@@ -325,11 +371,16 @@ const booksColumns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     classes: "max-width-160 ellipsis",
   },
   {
-    name: "title",
-    field: "title",
-    label: t("book.fields.title"),
+    name: "status",
+    field: ({ meta }) => meta.isAvailable,
+    label: t("book.fields.status"),
     align: "left",
-    classes: "text-wrap",
+  },
+  {
+    name: "available-copies",
+    field: ({ meta }) => meta.availableCount,
+    label: t("reserveBooks.availableCopies"),
+    align: "center",
   },
 ]);
 
@@ -381,19 +432,29 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       align: "left",
       classes: "max-width-160 ellipsis",
     },
-    {
-      name: "problems",
-      field: "problems",
-      label: "",
-      align: "center",
-    },
+    ...((!isMobile.value
+      ? [
+          {
+            name: "problems",
+            field: "problems",
+            label: "",
+            align: "center",
+          },
+        ]
+      : []) satisfies QTableColumn<BookCopyDetailsFragment>[]),
     {
       name: "history",
       field: () => undefined,
       label: "",
+      classes: isMobile.value ? "no-padding" : "",
     },
   ],
 );
+
+async function reportOrSolveProblem(bookCopy: BookCopyDetailsFragment) {
+  await _reportOrSolveProblem(bookCopy);
+  void fetchBooks(pagination.value);
+}
 
 function openHistory(bookCopy: BookCopyDetailsFragment) {
   Dialog.create({

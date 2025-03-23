@@ -1,23 +1,32 @@
 <template>
-  <q-dialog ref="dialogRef" :persistent="loading" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    :persistent="loading"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
+      :class="isMobile ? 'card-actions-shadow' : ''"
       :title="
         $t('manageUsers.cartDialog.title', [
           `${user.firstname} ${user.lastname}`,
         ])
       "
       size="fullscreen"
+      @cancel="onDialogCancel"
     >
       <card-table-header @add-book="addBookToCart">
         <template #side-actions>
           <q-input
             :model-value="cartBooks.length"
+            :dense="isMobile"
             :label="$t('manageUsers.cartDialog.totalBooks')"
             disable
             outlined
           />
           <q-input
             :model-value="discountValue.toFixed(2)"
+            :dense="isMobile"
             :label="$t('manageUsers.cartDialog.discount')"
             disable
             outlined
@@ -25,6 +34,7 @@
           />
           <q-input
             :model-value="totalBooksPrice.toFixed(2)"
+            :dense="isMobile"
             :label="$t('manageUsers.cartDialog.total')"
             disable
             outlined
@@ -40,12 +50,31 @@
         class="flex-delegate-height-management"
         row-key="id"
       >
+        <template #header-cell-buy-price="cellProps">
+          <table-header-with-info
+            :props="cellProps"
+            :info="t('manageUsers.payOffUserDialog.buyPriceTooltip')"
+            :label="cellProps.col.label"
+          />
+        </template>
+
+        <template #header-cell-public-price="cellProps">
+          <table-header-with-info
+            :props="cellProps"
+            :info="t('manageUsers.payOffUserDialog.publicPriceTooltip')"
+            :label="cellProps.col.label"
+          />
+        </template>
+
         <template #body="bodyProps">
-          <q-tr>
+          <q-tr
+            :class="isMobile ? 'sticky-last-column' : ''"
+            :props="bodyProps"
+          >
             <q-td
-              v-for="{ name, value, classes } in bodyProps.cols"
+              v-for="{ name, value } in bodyProps.cols"
               :key="name"
-              :class="classes"
+              :props="bodyProps"
             >
               <q-btn
                 v-if="name === 'selection'"
@@ -54,14 +83,29 @@
                 round
                 @click="bodyProps.expand = !bodyProps.expand"
               />
-              <q-btn
-                v-if="name === 'delete'"
-                :icon="mdiDelete"
-                color="negative"
-                flat
-                round
-                @click="removeBook(bodyProps.row)"
-              />
+              <template v-if="name === 'delete'">
+                <q-btn
+                  v-if="!isMobile"
+                  :icon="mdiDelete"
+                  color="negative"
+                  flat
+                  round
+                  @click="removeBook(bodyProps.row)"
+                />
+                <actions-list-button v-else>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="removeBook(bodyProps.row)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("actions.remove") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
+              </template>
               <span v-else>
                 <q-tooltip v-if="['subject', 'author'].includes(name)">
                   {{ value }}
@@ -96,7 +140,7 @@
                 @click="bodyProps.expand = true"
               />
             </q-td>
-            <q-td colspan="11">
+            <q-td colspan="9">
               {{ bookCopy.code }}
             </q-td>
           </q-tr>
@@ -110,15 +154,26 @@
           color="negative"
           @click="emptyAndDestroyCart()"
         />
-        <q-icon
-          :name="mdiInformationOutline"
-          class="q-pl-md q-pr-sm"
-          color="black-87"
-          size="24px"
+
+        <template v-if="!isMobile">
+          <q-icon
+            :name="mdiInformationOutline"
+            class="q-pl-md q-pr-sm"
+            color="black-87"
+            size="sm"
+          />
+          {{
+            $t("manageUsers.cartDialog.autoEmptyDisclaimer", [timeUntilEmpty])
+          }}
+          <q-space />
+        </template>
+
+        <q-btn
+          :label="$t('common.cancel')"
+          :flat="!isMobile"
+          :outline="isMobile"
+          @click="onDialogCancel()"
         />
-        {{ $t("manageUsers.cartDialog.autoEmptyDisclaimer", [timeUntilEmpty]) }}
-        <q-space />
-        <q-btn :label="$t('common.cancel')" flat @click="onDialogCancel()" />
         <q-btn
           :disable="cartBooks.length === 0"
           :label="
@@ -155,9 +210,10 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
-import { formatPrice } from "src/composables/use-misc-formats";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { discountedPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
+import { formatPrice } from "src/helpers/formatting";
 import { GetBookCopiesInStockDocument } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
@@ -166,21 +222,24 @@ import { GetRequestsDocument } from "src/services/request.graphql";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import DialogTable from "./dialog-table.vue";
+import TableHeaderWithInfo from "./table-header-with-info.vue";
 
 const props = defineProps<{
   user: CustomerFragment;
 }>();
 
-const { selectedLocation: retailLocation } = useRetailLocationService();
-
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
-
 const { t } = useI18n();
+
+const { selectedLocation: retailLocation } = useRetailLocationService();
+
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
@@ -192,19 +251,6 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     name: "isbn-code",
     field: "isbnCode",
     label: t("book.fields.isbn"),
-    align: "left",
-  },
-  {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
-    name: "publisher",
-    field: "publisherName",
-    label: t("book.fields.publisher"),
     align: "left",
   },
   {
@@ -222,11 +268,31 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     classes: "text-wrap",
   },
   {
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "publisher",
+    field: "publisherName",
+    label: t("book.fields.publisher"),
+    align: "left",
+  },
+  {
     name: "cover-price",
     field: "originalPrice",
     label: t("book.fields.coverPrice"),
     align: "left",
     format: formatPrice,
+  },
+  {
+    name: "buy-price",
+    field: "originalPrice",
+    label: t("manageUsers.payOffUserDialog.buyPrice"),
+    align: "left",
+    format: (value: number) => discountedPrice(value, "buy"),
   },
   {
     name: "public-price",
@@ -239,6 +305,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     name: "delete",
     field: () => undefined,
     label: "",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 
@@ -503,5 +570,10 @@ function sellBooks() {
 <style scoped lang="scss">
 .border-bottom-width-0 > td {
   border-bottom-width: 0 !important;
+}
+
+.card-actions-shadow > :deep(.q-card__actions) {
+  box-shadow: $shadow-up-15;
+  z-index: 1;
 }
 </style>

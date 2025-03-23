@@ -1,38 +1,53 @@
 <template>
-  <q-dialog ref="dialogRef" full-width full-height @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    full-width
+    full-height
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :title="
         $t('manageUsers.payOffUserDialog.title', [
           `${user.firstname} ${user.lastname}`,
         ])
       "
+      @cancel="onDialogCancel"
     >
-      <q-card-section class="gap-16 items-center no-wrap q-pa-md row">
+      <q-card-section
+        :class="isMobile ? 'column items-stretch' : 'row items-center'"
+        class="gap-16 no-wrap q-pa-md"
+      >
         <q-input
           :model-value="soldCopies.length"
+          :dense="isMobile"
           :label="$t('manageUsers.payOffUserDialog.soldBooksCountLabel')"
           outlined
           readonly
         />
         <q-input
-          :label="$t('manageUsers.payOffUserDialog.totalPayOffLabel')"
           :model-value="totalCheckoutMoney.toFixed(2)"
+          :dense="isMobile"
+          :label="$t('manageUsers.payOffUserDialog.totalPayOffLabel')"
           outlined
           readonly
           suffix="€"
         />
         <q-input
-          :label="$t('manageUsers.payOffUserDialog.totalCheckedOutLabel')"
           :model-value="totalCheckedOutMoney.toFixed(2)"
+          :dense="isMobile"
+          :label="$t('manageUsers.payOffUserDialog.totalCheckedOutLabel')"
           outlined
           readonly
           suffix="€"
         />
 
-        <q-space />
+        <q-space v-if="!isMobile" />
 
-        <q-icon :name="mdiInformationOutline" color="black-54" size="24px" />
-        {{ $t("manageUsers.payOffUserDialog.info") }}
+        <span class="gap-8 no-wrap row">
+          <q-icon :name="mdiInformationOutline" color="black-54" size="sm" />
+          {{ $t("manageUsers.payOffUserDialog.info") }}
+        </span>
       </q-card-section>
 
       <q-card-section class="col-grow column height-0 no-wrap q-pa-none">
@@ -59,15 +74,15 @@
           </template>
 
           <!-- Body slot is used because we need to split the table into 3 parts -->
-          <template #body="{ row, cols }">
+          <template #body="bodyProps">
             <q-tr
-              v-if="Object.values(Titles).includes(row.id)"
+              v-if="Object.values(Titles).includes(bodyProps.row.id)"
               class="bg-grey-1"
               no-hover
             >
               <q-td auto-width>
                 <q-checkbox
-                  v-if="row.id === Titles.InStock"
+                  v-if="bodyProps.row.id === Titles.InStock"
                   :disable="selectableRows.length === 0"
                   :model-value="rowsSelectionStatus"
                   dense
@@ -78,52 +93,129 @@
                 This <td> takes all the remaining columns of the table's worth of width
                 so the colspan is set to take up the space of all the other columns
               -->
-              <q-td class="non-selectable text-weight-medium" colspan="11">
-                <span class="items-center row">
-                  {{ localizedSectionTitle(row.id) }}
+              <q-td
+                :class="{
+                  'mobile-in-stock-title-bar': isMobile,
+                  'sticky-last-column':
+                    isMobile && bodyProps.row.id === Titles.InStock,
+                }"
+                class="non-selectable text-weight-medium"
+                colspan="11"
+              >
+                <span class="fit items-center row">
+                  {{ localizedSectionTitle(bodyProps.row.id) }}
                   <q-space />
                   <span
                     v-if="
-                      rowsSelectionStatus !== false && row.id === Titles.InStock
+                      rowsSelectionStatus !== false &&
+                      bodyProps.row.id === Titles.InStock
                     "
-                    class="gap-16 items-center row sticky-button-group"
+                    class="full-height gap-16 items-center row sticky-button-group"
                   >
-                    <q-btn
-                      :label="
-                        $t('manageUsers.payOffUserDialog.returnOptions.donate')
-                      "
-                      outline
-                      @click="donateBooks(selectedRows)"
-                    />
-                    <q-btn
-                      :label="
-                        $t(
-                          'manageUsers.payOffUserDialog.returnOptions.reimburse',
-                        )
-                      "
-                      outline
-                      @click="reimburseBooks(selectedRows)"
-                    />
-                    <q-btn
-                      :label="
-                        $t('manageUsers.payOffUserDialog.returnOptions.return')
-                      "
-                      color="positive"
-                      @click="returnBooks(selectedRows)"
-                    />
-                    <q-btn
-                      :label="
-                        $t('manageUsers.booksMovementsDialog.reportProblem')
-                      "
-                      color="negative"
-                      @click="reportProblems(selectedRows)"
-                    />
+                    <actions-list-button v-if="isMobile">
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="donateBooks(selectedRows)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{
+                              t(
+                                "manageUsers.payOffUserDialog.returnOptions.donate",
+                              )
+                            }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="reimburseBooks(selectedRows)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{
+                              t(
+                                "manageUsers.payOffUserDialog.returnOptions.reimburse",
+                              )
+                            }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="returnBooks(selectedRows)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{
+                              t(
+                                "manageUsers.payOffUserDialog.returnOptions.return",
+                              )
+                            }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                      <q-item
+                        v-close-popup
+                        clickable
+                        @click="reportProblems(selectedRows)"
+                      >
+                        <q-item-section>
+                          <q-item-label>
+                            {{
+                              t(
+                                "manageUsers.booksMovementsDialog.reportProblem",
+                              )
+                            }}
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </actions-list-button>
+                    <template v-else>
+                      <q-btn
+                        :label="
+                          $t(
+                            'manageUsers.payOffUserDialog.returnOptions.donate',
+                          )
+                        "
+                        outline
+                        @click="donateBooks(selectedRows)"
+                      />
+                      <q-btn
+                        :label="
+                          $t(
+                            'manageUsers.payOffUserDialog.returnOptions.reimburse',
+                          )
+                        "
+                        outline
+                        @click="reimburseBooks(selectedRows)"
+                      />
+                      <q-btn
+                        :label="
+                          $t(
+                            'manageUsers.payOffUserDialog.returnOptions.return',
+                          )
+                        "
+                        color="positive"
+                        @click="returnBooks(selectedRows)"
+                      />
+                      <q-btn
+                        :label="
+                          $t('manageUsers.booksMovementsDialog.reportProblem')
+                        "
+                        color="negative"
+                        @click="reportProblems(selectedRows)"
+                      />
+                    </template>
                   </span>
                 </span>
               </q-td>
             </q-tr>
 
-            <q-tr v-else-if="row.id === 'EMPTY'" no-hover>
+            <q-tr v-else-if="bodyProps.row.id === 'EMPTY'" no-hover>
               <q-td auto-width />
 
               <q-td class="text-left" colspan="11">
@@ -131,26 +223,48 @@
               </q-td>
             </q-tr>
 
-            <q-tr v-else>
-              <q-td v-for="col in cols" :key="col.name" :class="col.classes">
+            <q-tr
+              v-else
+              :props="bodyProps"
+              :class="
+                isMobile && selectableRows.includes(bodyProps.row)
+                  ? 'sticky-last-column'
+                  : ''
+              "
+            >
+              <q-td key="select" :props="bodyProps">
                 <!--
                   Since we can't use #body-cell-[column-name] because we're using
                   the #body slot, we have to use v-if on the col.name instead
                 -->
                 <q-checkbox
-                  v-if="col.name === 'select' && selectableRows.includes(row)"
+                  v-if="selectableRows.includes(bodyProps.row)"
                   :model-value="
-                    selectedRows.map(({ id }) => id).includes(row.id)
+                    selectedRows.map(({ id }) => id).includes(bodyProps.row.id)
                   "
                   dense
-                  @update:model-value="swapRow(row)"
+                  @update:model-value="swapRow(bodyProps.row)"
                 />
+              </q-td>
 
+              <q-td
+                v-for="columnKey in textColumns"
+                :key="columnKey"
+                :props="bodyProps"
+              >
+                <q-tooltip v-if="['subject', 'author'].includes(columnKey)">
+                  {{ getColValue(bodyProps.cols, columnKey) }}
+                </q-tooltip>
+                {{ getColValue(bodyProps.cols, columnKey) }}
+              </q-td>
+
+              <q-td key="actions" :props="bodyProps">
                 <q-btn
-                  v-else-if="
-                    col.name === 'actions' &&
-                    ownedCopies.includes(row) &&
-                    !['donated', 'reimbursed'].includes(getStatus(row))
+                  v-if="
+                    ownedCopies.includes(bodyProps.row) &&
+                    !['donated', 'reimbursed'].includes(
+                      getStatus(bodyProps.row),
+                    )
                   "
                   :icon="mdiDotsVertical"
                   dense
@@ -160,20 +274,20 @@
                 >
                   <q-menu auto-close>
                     <q-item
-                      v-if="returnableRows.includes(row)"
+                      v-if="returnableRows.includes(bodyProps.row)"
                       class="items-center"
                       clickable
-                      @click="returnBooks([row])"
+                      @click="returnBooks([bodyProps.row])"
                     >
                       {{
                         $t("manageUsers.payOffUserDialog.returnOptions.return")
                       }}
                     </q-item>
                     <q-item
-                      v-if="selectableRows.includes(row)"
+                      v-if="selectableRows.includes(bodyProps.row)"
                       class="items-center"
                       clickable
-                      @click="donateBooks([row])"
+                      @click="donateBooks([bodyProps.row])"
                     >
                       {{
                         $t("manageUsers.payOffUserDialog.returnOptions.donate")
@@ -182,7 +296,7 @@
                     <q-item
                       class="items-center"
                       clickable
-                      @click="reimburseBooks([row])"
+                      @click="reimburseBooks([bodyProps.row])"
                     >
                       {{
                         $t(
@@ -191,21 +305,15 @@
                       }}
                     </q-item>
                     <q-item
-                      v-if="selectableRows.includes(row)"
+                      v-if="selectableRows.includes(bodyProps.row)"
                       class="items-center"
                       clickable
-                      @click="reportProblems([row])"
+                      @click="reportProblems([bodyProps.row])"
                     >
                       {{ $t("manageUsers.booksMovementsDialog.reportProblem") }}
                     </q-item>
                   </q-menu>
                 </q-btn>
-                <span v-else>
-                  <q-tooltip v-if="['subject', 'author'].includes(col.name)">
-                    {{ col.value }}
-                  </q-tooltip>
-                  {{ col.value }}
-                </span>
               </q-td>
             </q-tr>
           </template>
@@ -213,7 +321,12 @@
       </q-card-section>
 
       <template #card-actions>
-        <q-btn flat :label="$t('common.cancel')" @click="onDialogCancel" />
+        <q-btn
+          :flat="!isMobile"
+          :outline="isMobile"
+          :label="$t('common.cancel')"
+          @click="onDialogCancel"
+        />
         <q-btn
           :disable="totalCheckoutMoney === 0"
           :label="
@@ -263,9 +376,11 @@ import { useI18n } from "vue-i18n";
 import { SettleRemainingType } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
 import KDialogCard from "src/components/k-dialog-card.vue";
-import { formatPrice } from "src/composables/use-misc-formats";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { discountedPrice, getStatus } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
+import { formatPrice } from "src/helpers/formatting";
+import { getColValue } from "src/helpers/table-helpers";
 import {
   BookCopyDetailsFragment,
   GetSoldBookCopiesDocument,
@@ -281,12 +396,11 @@ import {
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserFragment, useSettleUserMutation } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
 import ReturnBooksConfirmDialog from "./return-books-confirm-dialog.vue";
 import TableHeaderWithInfo from "./table-header-with-info.vue";
-
-const { t } = useI18n();
 
 const props = defineProps<{
   user: UserFragment;
@@ -294,8 +408,11 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { t } = useI18n();
+
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<SettleRemainingType>();
+const { isMobile } = useLateralDrawer();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
@@ -307,35 +424,6 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     name: "isbn-code",
     field: ({ book }) => book.isbnCode,
     label: t("book.fields.isbn"),
-    align: "left",
-  },
-  {
-    name: "book-code",
-    field: "code",
-    label: t("book.code"),
-    align: "left",
-  },
-  {
-    name: "status",
-    field: getStatus,
-    label: t("book.fields.status"),
-    align: "left",
-    format: (_, row) =>
-      t(
-        `warehouse.bookCopyStatus.${selectableRows.value.includes(row) ? "inStock" : getStatus(row)}`,
-      ),
-  },
-  {
-    name: "author",
-    field: ({ book }) => book.authorsFullName,
-    label: t("book.fields.author"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
-    name: "publisher",
-    field: ({ book }) => book.publisherName,
-    label: t("book.fields.publisher"),
     align: "left",
   },
   {
@@ -351,6 +439,19 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     label: t("book.fields.title"),
     align: "left",
     classes: "text-wrap",
+  },
+  {
+    name: "author",
+    field: ({ book }) => book.authorsFullName,
+    label: t("book.fields.author"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "publisher",
+    field: ({ book }) => book.publisherName,
+    label: t("book.fields.publisher"),
+    align: "left",
   },
   {
     name: "cover-price",
@@ -374,11 +475,40 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
     format: (val: number) => discountedPrice(val, "sell"),
   },
   {
+    name: "book-code",
+    field: "code",
+    label: t("book.code"),
+    align: "left",
+  },
+  {
+    name: "status",
+    field: getStatus,
+    label: t("book.fields.status"),
+    align: "left",
+    format: (_, row) =>
+      t(
+        `warehouse.bookCopyStatus.${selectableRows.value.includes(row) ? "inStock" : getStatus(row)}`,
+      ),
+  },
+  {
     name: "actions",
     field: () => undefined,
     label: "",
   },
 ]);
+
+const textColumns = [
+  "isbn-code",
+  "subject",
+  "title",
+  "author",
+  "publisher",
+  "cover-price",
+  "buy-price",
+  "public-price",
+  "book-code",
+  "status",
+];
 
 const { selectedLocation } = useRetailLocationService();
 
@@ -742,10 +872,25 @@ function performCashOnlyCheckout() {
 </script>
 
 <style scoped lang="scss">
+// Prevents the sticky bulk actions button in title bar to have weird GUI.
+// It's only present when in mobile viewport and when a row is selected
+// It isn't implemented using as a proper q-td and thus we need to manage padding
+// at the title bar level
+.mobile-in-stock-title-bar {
+  padding-bottom: 0 !important;
+  padding-right: 0;
+  padding-top: 0;
+}
+
 // This class is used so that the bulk action buttons
 // can be seen without scrolling the table to the right
 .sticky-button-group {
   position: sticky;
   right: 16px;
+
+  @media screen and (max-width: $breakpoint-sm) {
+    right: 0;
+    border-left: 1px solid rgba(0 0 0 / 12%);
+  }
 }
 </style>

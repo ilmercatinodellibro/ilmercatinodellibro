@@ -11,7 +11,7 @@
       :show-search-bar="isHeaderSearchEnabled"
       :title="headerName"
     >
-      <template #left>
+      <template v-if="!isMobile" #left>
         <q-btn
           v-if="showBackToLocations"
           :icon="mdiArrowLeft"
@@ -29,31 +29,33 @@
         />
       </template>
 
-      <q-btn
-        flat
-        stretch
-        :label="t('routesNames.who-we-are')"
-        :to="{ name: AvailableRouteNames.WhoWeAre }"
-      />
-      <q-btn
-        flat
-        stretch
-        :label="t('routesNames.join-us')"
-        :to="{ name: AvailableRouteNames.JoinUs }"
-      />
-      <q-btn
-        flat
-        stretch
-        :label="t('routesNames.contacts')"
-        :to="{ name: AvailableRouteNames.Contacts }"
-      />
-      <q-btn
-        v-if="isAuthenticated"
-        flat
-        stretch
-        :label="t('routesNames.faq')"
-        :to="{ name: AvailableRouteNames.FAQ }"
-      />
+      <div v-if="!isMobile" class="full-height q-px-md row">
+        <q-btn
+          flat
+          stretch
+          :label="t('routesNames.who-we-are')"
+          :to="{ name: AvailableRouteNames.WhoWeAre }"
+        />
+        <q-btn
+          flat
+          stretch
+          :label="t('routesNames.join-us')"
+          :to="{ name: AvailableRouteNames.JoinUs }"
+        />
+        <q-btn
+          flat
+          stretch
+          :label="t('routesNames.contacts')"
+          :to="{ name: AvailableRouteNames.Contacts }"
+        />
+        <q-btn
+          v-if="isAuthenticated"
+          flat
+          stretch
+          :label="t('routesNames.faq')"
+          :to="{ name: AvailableRouteNames.FAQ }"
+        />
+      </div>
       <language-dropdown-btn v-if="!isAuthenticated" />
     </k-toolbar>
   </q-header>
@@ -61,11 +63,9 @@
 
 <script setup lang="ts">
 import { mdiArrowLeft } from "@quasar/extras/mdi-v7";
-import { Screen } from "quasar";
-import { computed, provide } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import { IsLayoutHeaderXsInjectionKey } from "src/composables/header-features/models";
 import { provideHeaderFilters } from "src/composables/header-features/use-header-filters";
 import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
 import { provideHeaderSearch } from "src/composables/header-features/use-header-search";
@@ -75,7 +75,13 @@ import { useAuthService } from "src/services/auth";
 import kToolbar from "./k-toolbar.vue";
 import LanguageDropdownBtn from "./language-dropdown-btn.vue";
 
-const { isDrawerOpen, showLateralDrawer } = useLateralDrawer();
+const { t } = useI18n();
+const route = useRoute();
+
+const { user, isAuthenticated } = useAuthService();
+
+const { isDrawerOpen, showLateralDrawer, isMobile } = useLateralDrawer();
+
 const { isHeaderSearchEnabled, searchText } = provideHeaderSearch();
 const {
   compareFunction,
@@ -84,12 +90,7 @@ const {
   selectedFilter,
 } = provideHeaderFilters();
 const { headerName } = provideHeaderName();
-const { user, isAuthenticated } = useAuthService();
-const isLayoutHeaderXs = computed(() => Screen.lt.sm);
-provide(IsLayoutHeaderXsInjectionKey, isLayoutHeaderXs);
-const { t } = useI18n();
 
-const route = useRoute();
 const showBackToLocations = computed(
   () => route.name === AvailableRouteNames.Login && !user.value,
 );

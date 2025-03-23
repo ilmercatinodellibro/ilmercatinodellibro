@@ -1,6 +1,11 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
+      :class="isMobile ? 'sticky-last-column' : ''"
       :title="$t('reserveBooks.confirmReserveByClassDialog.title')"
       :save-label="$t('reserveBooks.reserveAll')"
       size="fullscreen"
@@ -12,7 +17,7 @@
         <p class="text-subtitle1">
           {{ $t("reserveBooks.confirmReserveByClassDialog.message") }}
         </p>
-        <p class="text-h6 text-weight-medium">
+        <p class="line-height-20 text-size-20 text-weight-medium">
           {{ $t("reserveBooks.confirmReserveByClassDialog.disclaimer") }}
         </p>
       </q-card-section>
@@ -22,22 +27,53 @@
         :rows="booksToReserve"
         class="flex-delegate-height-management"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
-        <template #body-cell-actions="{ row }">
-          <q-td>
+
+        <template #body-cell-availability="cellProps">
+          <q-td :props="cellProps">
+            <status-chip :value="cellProps.value" />
+          </q-td>
+        </template>
+
+        <template #body-cell-actions="cellProps">
+          <q-td :props="cellProps">
             <chip-button
+              v-if="!isMobile"
               :label="
                 $t('reserveBooks.confirmReserveByClassDialog.removeFromList')
               "
               color="negative"
-              @click="remove(booksToReserve, row)"
+              @click="remove(booksToReserve, cellProps.row)"
             />
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="remove(booksToReserve, cellProps.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{
+                      t(
+                        "reserveBooks.confirmReserveByClassDialog.removeFromList",
+                      )
+                    }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -50,25 +86,29 @@ import { cloneDeep, remove } from "lodash-es";
 import { QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { formatPrice } from "src/composables/use-misc-formats";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { discountedPrice } from "src/helpers/book-copy";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import { formatPrice } from "src/helpers/formatting";
 import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
+import ActionsListButton from "./actions-list-button.vue";
 import KDialogCard from "./k-dialog-card.vue";
 import chipButton from "./manage-users/chip-button.vue";
 import dialogTable from "./manage-users/dialog-table.vue";
+import StatusChip from "./manage-users/status-chip.vue";
 import TableCellWithTooltip from "./manage-users/table-cell-with-tooltip.vue";
 
 const props = defineProps<{
-  classBooks: BookSummaryFragment[];
+  classBooks: BookWithAvailableCopiesFragment[];
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
-  useDialogPluginComponent<BookSummaryFragment[]>();
-
 const { t } = useI18n();
+
+const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
+  useDialogPluginComponent<BookWithAvailableCopiesFragment[]>();
+
+const { isMobile } = useLateralDrawer();
 
 const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
   () => [
@@ -77,13 +117,6 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       field: "isbnCode",
       label: t("book.fields.isbn"),
       align: "left",
-    },
-    {
-      name: "author",
-      field: "authorsFullName",
-      label: t("book.fields.author"),
-      align: "left",
-      classes: "max-width-160 ellipsis",
     },
     {
       name: "subject",
@@ -100,10 +133,11 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       classes: "text-wrap",
     },
     {
-      name: "availability",
-      field: ({ meta }) => meta.isAvailable,
-      label: t("book.fields.availability"),
+      name: "author",
+      field: "authorsFullName",
+      label: t("book.fields.author"),
       align: "left",
+      classes: "max-width-160 ellipsis",
     },
     {
       name: "cover-price",
@@ -121,15 +155,22 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
       format: (val: number) => discountedPrice(val, "sell"),
     },
     {
+      name: "availability",
+      field: ({ meta }) => meta.isAvailable,
+      label: t("book.fields.availability"),
+      align: "left",
+    },
+    {
       name: "available-copies",
       field: ({ copies }) => copies?.length ?? 0,
       label: t("reserveBooks.availableCopies"),
-      align: "left",
+      align: "center",
     },
     {
       name: "actions",
       field: () => undefined,
       label: "",
+      classes: isMobile.value ? "no-padding" : "",
     },
   ],
 );

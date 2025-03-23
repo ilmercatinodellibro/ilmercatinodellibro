@@ -1,9 +1,12 @@
 <template>
   <q-page>
-    <q-card class="absolute-full flex-center q-ma-md row">
+    <q-card
+      :class="!isMobile ? 'q-ma-md' : ''"
+      class="absolute-full flex-center q-pa-md row"
+    >
       <q-card-section class="column no-padding width-min-360">
         <template v-if="user">
-          <q-list>
+          <q-list :separator="isMobile">
             <q-item
               v-for="{ icon, label, field, showInfo, infoLabel } in userData"
               :key="label"
@@ -79,6 +82,7 @@ import { useI18n } from "vue-i18n";
 import { UpdateUserPayload } from "src/@generated/graphql";
 import DeleteAccountDialog from "src/components/delete-account-dialog.vue";
 import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { CurrentUserFragment } from "src/services/auth.graphql";
@@ -92,6 +96,8 @@ import {
 const { t } = useI18n();
 
 const { user, updateCurrentUser } = useAuthService();
+
+const { isMobile } = useLateralDrawer();
 
 interface ItemData {
   icon: string;

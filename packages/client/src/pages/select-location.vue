@@ -5,14 +5,10 @@
         <language-dropdown-btn class="fixed-top-right q-ma-md" />
         <q-spinner v-if="loading" />
 
-        <h4
-          class="q-mb-36 q-mt-none readability-max-width text-accent text-center"
-        >
+        <h4 class="q-mb-36 q-mt-none text-accent text-center">
           {{ t("home.title") }}
         </h4>
-        <p
-          class="q-ma-none q-mb-36 readability-max-width text-center text-h5 text-primary"
-        >
+        <p class="q-ma-none q-mb-36 text-center text-h5 text-primary">
           {{ t("home.locationSelectionDescription") }}
         </p>
 
@@ -57,10 +53,10 @@ async function selectLocation(location: RetailLocationFragment) {
 
 <style lang="scss" scoped>
 .action-box {
-  aspect-ratio: 1 / 1;
-  width: 300px;
+  width: 100%;
 
   @media screen and (min-width: $breakpoint-sm-min) {
+    aspect-ratio: 1 / 1;
     width: 400px;
   }
 }

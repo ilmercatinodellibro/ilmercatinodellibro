@@ -1,7 +1,12 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       :cancel-label="$t('common.close')"
+      :no-actions="isMobile"
       :title="
         $t('manageUsers.requestedBooksDialog.title', [
           `${userData.firstname} ${userData.lastname}`,
@@ -12,9 +17,15 @@
     >
       <card-table-header @add-book="addBookToRequest">
         <template #side-actions>
+          <q-separator v-if="isMobile" />
           <!-- TODO: consider extracting this into a separate component -->
-          <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
+          <span
+            v-if="screenWidth >= WidthSize.MD || isMobile"
+            :class="isMobile ? 'full-width column items-stretch' : 'row'"
+            class="gap-16"
+          >
             <q-btn
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiDelete"
               :label="$t('manageUsers.requestedBooksDialog.deleteAll')"
               color="negative"
@@ -23,14 +34,20 @@
             />
             <q-btn
               v-if="selectedLocation.maxBookingDays > 0"
+              :class="isMobile ? 'full-width' : ''"
               :label="$t('manageUsers.requestedBooksDialog.moveIntoReserved')"
               no-wrap
               outline
               @click="reserveAllAvailableRequested()"
             />
           </span>
-          <span v-if="screenWidth === WidthSize.LG" class="gap-16 row">
+          <span
+            v-if="screenWidth === WidthSize.LG || isMobile"
+            :class="isMobile ? 'full-width column items-stretch' : 'row'"
+            class="gap-16"
+          >
             <q-btn
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.requestedBooksDialog.moveIntoCart')"
               color="primary"
@@ -38,6 +55,7 @@
               @click="moveAllIntoCart()"
             />
             <q-btn
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiCart"
               :label="$t('manageUsers.goToCart')"
               no-wrap
@@ -90,6 +108,7 @@
       >
         <template #book-actions="{ requestOrReservation: request }">
           <chip-button
+            v-if="!isMobile"
             :label="$t('manageUsers.actions')"
             color="primary"
             show-dropdown
@@ -100,6 +119,7 @@
                   {{ $t("book.reservedBooksDialog.options.reserved") }}
                 </q-item-section>
               </q-item>
+
               <q-item
                 v-close-popup
                 clickable
@@ -117,6 +137,37 @@
               </q-item-section>
             </q-item>
           </chip-button>
+          <actions-list-button v-else>
+            <template v-if="request.book.meta.isAvailable">
+              <q-item v-close-popup clickable @click="reserveBook(request)">
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("book.reservedBooksDialog.options.reserved") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item
+                v-close-popup
+                clickable
+                @click="putRequestedBookIntoCart(request)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("book.reservedBooksDialog.options.cart") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+
+            <q-item v-close-popup clickable @click="deleteRequest(request)">
+              <q-item-section>
+                <q-item-label>
+                  {{ t("common.delete") }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </actions-list-button>
         </template>
       </requested-reserved-table>
     </k-dialog-card>
@@ -136,6 +187,7 @@ import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
@@ -149,30 +201,37 @@ import { useReservationService } from "src/services/reservation";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { CustomerFragment } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
 
-const { t } = useI18n();
-
-const smallBreakpoint = 1230;
-const largeBreakpoint = 1695;
-const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
-
 const props = defineProps<{
   userData: CustomerFragment;
   retailLocationId: string;
 }>();
-// TODO: Update userData.booksInCart cache and directly use it instead
-const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
-const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
-  useDialogPluginComponent();
+
+const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
+
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
+  useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
+
+const SMALL_CUSTOM_BREAKPOINT = 1230;
+const LARGE_CUSTOM_BREAKPOINT = 1695;
+const screenWidth = useScreenWidth(
+  SMALL_CUSTOM_BREAKPOINT,
+  LARGE_CUSTOM_BREAKPOINT,
+);
+
+// TODO: Update userData.booksInCart cache and directly use it instead
+const booksCartCount = ref(props.userData.booksInCart);
 
 const {
   useGetRequestsQuery,

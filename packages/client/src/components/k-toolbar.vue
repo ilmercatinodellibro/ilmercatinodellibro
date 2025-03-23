@@ -26,8 +26,8 @@
     </template>
 
     <q-toolbar-title
-      v-if="!showHeaderFilters"
-      class="font-weight-500 q-px-none text-size-20"
+      v-if="!showHeaderFilters || isMobile"
+      class="font-weight-500 k-toolbar-title text-size-20"
     >
       {{ title }}
     </q-toolbar-title>
@@ -87,18 +87,23 @@ const searchTextProxy = defineModel<string>("searchText", { default: "" });
 
 const drawerProxy = defineModel<boolean>("drawer");
 
+const { isMobile } = useLateralDrawer();
+
 const showHeaderFilters = ref(true);
 
 function updateSearchBarActiveState(newState: boolean) {
   showHeaderFilters.value = newState;
 }
-
-const { isMobile } = useLateralDrawer();
 </script>
 
 <style scoped lang="scss">
 .k-toolbar {
   // Keeps toolbar height consistent while toggling the search bar
   min-height: 56px;
+
+  &-title {
+    padding-left: 32px;
+    padding-right: 0;
+  }
 }
 </style>

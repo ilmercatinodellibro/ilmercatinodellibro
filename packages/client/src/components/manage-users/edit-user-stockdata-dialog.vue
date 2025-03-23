@@ -1,12 +1,14 @@
 <template>
   <q-dialog
     ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
     :persistent="tab === 'in-retrieval' && booksToRegister.length > 0"
     full-width
     @hide="onDialogHide"
   >
     <k-dialog-card
       :cancel-label="$t('common.close')"
+      :no-actions="isMobile"
       :title="
         $t('manageUsers.inStockDialog.title', [
           `${userData.firstname} ${userData.lastname}`,
@@ -18,13 +20,11 @@
       <q-tabs v-model="tab" align="justify" active-color="accent" inline-label>
         <q-tab name="in-retrieval" :label="$t('manageUsers.inRetrieval')" />
         <q-tab name="in-stock" :label="$t('manageUsers.inStock')">
-          <template #default>
-            <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
-              <q-tooltip>
-                {{ $t("manageUsers.inStockDialog.retrievableTooltip") }}
-              </q-tooltip>
-            </q-icon>
-          </template>
+          <q-icon :name="mdiInformationOutline" class="q-ml-sm" size="sm">
+            <q-tooltip>
+              {{ $t("manageUsers.inStockDialog.retrievableTooltip") }}
+            </q-tooltip>
+          </q-icon>
         </q-tab>
       </q-tabs>
 
@@ -50,49 +50,70 @@
           </card-table-header>
 
           <dialog-table
+            :class="isMobile ? 'sticky-last-column' : ''"
             :rows="booksToRegister"
             :columns="booksToRegisterColumns"
             :loading="loading"
             class="col"
           >
-            <template #body-cell-author="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-author="cellProps">
+              <table-cell-with-tooltip
+                :props="cellProps"
+                :value="cellProps.value"
+              />
             </template>
 
-            <template #body-cell-subject="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-subject="cellProps">
+              <table-cell-with-tooltip
+                :props="cellProps"
+                :value="cellProps.value"
+              />
             </template>
 
-            <template #body-cell-status="{ value }">
-              <q-td>
-                <status-chip :value="value" />
+            <template #body-cell-status="cellProps">
+              <q-td :props="cellProps">
+                <status-chip :value="cellProps.value" />
               </q-td>
             </template>
 
-            <template #body-cell-utility="{ value }">
-              <q-td class="text-center">
-                <utility-chip :utility="value" />
+            <template #body-cell-utility="cellProps">
+              <q-td :props="cellProps">
+                <utility-chip :utility="cellProps.value" />
               </q-td>
             </template>
 
-            <template #body-cell-actions="{ rowIndex }">
-              <q-td class="text-center">
+            <template #body-cell-actions="cellProps">
+              <q-td :props="cellProps">
                 <chip-button
+                  v-if="!isMobile"
                   color="primary"
                   no-wrap
-                  @click="openDeleteBookDialog(rowIndex)"
+                  @click="openDeleteBookDialog(cellProps.rowIndex)"
                 >
                   <q-item-label> {{ $t("common.delete") }} </q-item-label>
                   <q-icon
                     class="q-ml-sm"
                     :name="mdiInformationOutline"
-                    size="18px"
+                    size="xs"
                   >
                     <q-tooltip>
                       {{ $t("manageUsers.inStockDialog.deleteBookBtnTooltip") }}
                     </q-tooltip>
                   </q-icon>
                 </chip-button>
+                <actions-list-button v-else>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="openDeleteBookDialog(cellProps.rowIndex)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("common.delete") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
               </q-td>
             </template>
           </dialog-table>
@@ -108,23 +129,29 @@
             :loading="inStockLoading"
             class="col"
           >
-            <template #body-cell-author="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-author="cellProps">
+              <table-cell-with-tooltip
+                :props="cellProps"
+                :value="cellProps.value"
+              />
             </template>
 
-            <template #body-cell-subject="{ value, col }">
-              <table-cell-with-tooltip :class="col.classes" :value="value" />
+            <template #body-cell-subject="cellProps">
+              <table-cell-with-tooltip
+                :props="cellProps"
+                :value="cellProps.value"
+              />
             </template>
 
-            <template #body-cell-status="{ value }">
-              <q-td>
-                <status-chip :value="value" />
+            <template #body-cell-status="cellProps">
+              <q-td :props="cellProps">
+                <status-chip :value="cellProps.value" />
               </q-td>
             </template>
 
-            <template #body-cell-utility="{ value }">
-              <q-td class="text-center">
-                <utility-chip :utility="value" />
+            <template #body-cell-utility="cellProps">
+              <q-td :props="cellProps">
+                <utility-chip :utility="cellProps.value" />
               </q-td>
             </template>
           </dialog-table>
@@ -141,8 +168,9 @@ import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { evictQuery } from "src/apollo/cache";
-import { discountedPrice, isAvailable } from "src/helpers/book-copy";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
+import { formatPrice } from "src/helpers/formatting";
 import { fetchBookByISBN } from "src/services/book";
 import {
   BookCopyDetailsFragment,
@@ -157,6 +185,7 @@ import {
   CustomerFragment,
   CustomerFragmentDoc,
 } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -172,9 +201,10 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
-
 const { t } = useI18n();
+
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
 
 const { createBookCopies } = useCreateBookCopiesMutation();
 
@@ -213,12 +243,28 @@ function getCommonColumns<
 
   return [
     {
+      label: t("book.fields.subject"),
+      field: getField("subject"),
+      name: "subject",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
+    },
+    {
       label: t("book.fields.title"),
       field: getField("title"),
       name: "title",
       align: "left",
       format: (val: string) => startCase(toLower(val)),
       classes: "text-wrap",
+    },
+    {
+      label: t("book.fields.author"),
+      field: getField("authorsFullName"),
+      name: "author",
+      align: "left",
+      format: (val: string) => startCase(toLower(val)),
+      classes: "max-width-160 ellipsis",
     },
     {
       label: t("book.fields.publisher"),
@@ -228,12 +274,18 @@ function getCommonColumns<
       format: (val: string) => startCase(toLower(val)),
     },
     {
-      label: t("book.fields.price"),
+      label: t("book.fields.coverPrice"),
       field: getField("originalPrice"),
       name: "price",
       headerClasses: "text-center",
       align: "left",
-      format: (val: number) => discountedPrice(val, "sell"),
+      format: formatPrice,
+    },
+    {
+      label: t("book.fields.status"),
+      field: getField(({ meta }) => meta.isAvailable),
+      name: "status",
+      align: "left",
     },
     {
       label: t("book.fields.utility"),
@@ -253,28 +305,6 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       align: "left",
       format: (val: string) => startCase(toLower(val)),
     },
-    {
-      label: t("book.fields.author"),
-      field: "authorsFullName",
-      name: "author",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      label: t("book.fields.subject"),
-      field: "subject",
-      name: "subject",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      label: t("book.fields.status"),
-      field: ({ meta }) => meta.isAvailable,
-      name: "status",
-      align: "left",
-    },
 
     ...getCommonColumns("book"),
 
@@ -283,6 +313,7 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       field: () => undefined,
       name: "actions",
       align: "center",
+      classes: isMobile.value ? "no-padding" : "",
     },
   ],
 );
@@ -307,29 +338,6 @@ const copiesInStockColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       name: "original-code",
       align: "left",
       format: (code?: string) => code ?? "/",
-    },
-    {
-      label: t("book.fields.author"),
-      field: ({ book }) => book.authorsFullName,
-      name: "author",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      label: t("book.fields.subject"),
-      field: ({ book }) => book.subject,
-      name: "subject",
-      align: "left",
-      format: (val: string) => startCase(toLower(val)),
-      classes: "max-width-160 ellipsis",
-    },
-    {
-      label: t("book.fields.status"),
-      field: isAvailable,
-      name: "status",
-      align: "left",
-      classes: "max-width-160 ellipsis",
     },
 
     ...getCommonColumns("copy"),
@@ -439,6 +447,5 @@ function openDeleteBookDialog(bookIndex: number) {
 .dialog-panels > * > .q-tab-panel[role="tabpanel"] {
   display: flex;
   overflow: auto;
-  height: auto;
 }
 </style>

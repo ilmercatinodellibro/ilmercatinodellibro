@@ -3,7 +3,7 @@
     :name="value ? mdiCheckCircle : mdiCancel"
     :color="value ? 'green' : 'red'"
     class="q-mr-md"
-    size="24px"
+    size="sm"
   />
   <span>
     {{ $t(`book.availability.${value ? "available" : "notAvailable"}`) }}

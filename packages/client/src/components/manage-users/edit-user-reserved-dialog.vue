@@ -1,8 +1,14 @@
 <template>
-  <q-dialog ref="dialogRef" full-height @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    full-height
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       size="fullscreen"
       :cancel-label="$t('common.close')"
+      :no-actions="isMobile"
       :title="
         $t('manageUsers.reservedBooksDialog.title', [
           `${userData.firstname} ${userData.lastname}`,
@@ -13,8 +19,13 @@
       <card-table-header @add-book="addReservationFromIsbn">
         <template #side-actions>
           <!-- TODO: consider extracting this into a separate component -->
-          <span v-if="screenWidth >= WidthSize.MD" class="gap-16 row">
+          <span
+            v-if="screenWidth >= WidthSize.MD || isMobile"
+            :class="isMobile ? 'full-width column items-stretch' : 'row'"
+            class="gap-16 no-wrap"
+          >
             <q-btn
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiDelete"
               :label="$t('manageUsers.reservedBooksDialog.deleteAllReserved')"
               color="negative"
@@ -22,6 +33,7 @@
               @click="deleteAllReserved()"
             />
             <q-btn
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.reservedBooksDialog.moveAllIntoCart')"
               color="primary"
@@ -29,8 +41,13 @@
               @click="moveAllIntoCart()"
             />
           </span>
-          <span v-if="screenWidth === WidthSize.LG" class="gap-16 row">
+          <span
+            v-if="screenWidth === WidthSize.LG || isMobile"
+            :class="isMobile ? 'full-width column items-stretch' : 'row'"
+            class="gap-16 no-wrap"
+          >
             <q-btn
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiCartPlus"
               :label="$t('manageUsers.reservedBooksDialog.reservedIntoCart')"
               no-wrap
@@ -38,6 +55,7 @@
               @click="moveReservedIntoCart()"
             />
             <q-btn
+              :class="isMobile ? 'full-width' : ''"
               :icon="mdiCart"
               :label="$t('manageUsers.goToCart')"
               no-wrap
@@ -90,14 +108,15 @@
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
         <requested-reserved-table
+          :loading="reservedLoading"
           :rows="userReservations"
           class="col"
-          :loading="reservedLoading"
           is-showing-reservations
         >
           <template #book-actions="{ requestOrReservation: reservation }">
             <chip-button
-              :label="$t('manageUsers.actions')"
+              v-if="!isMobile"
+              :label="t('manageUsers.actions')"
               color="primary"
               show-dropdown
             >
@@ -120,6 +139,31 @@
                 </q-item-section>
               </q-item>
             </chip-button>
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="putBooksIntoCart(reservation)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("book.reservedBooksDialog.options.cart") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item
+                v-close-popup
+                clickable
+                @click="removeFromReserved(reservation)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("common.delete") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </template>
         </requested-reserved-table>
 
@@ -132,12 +176,13 @@
         </span>
 
         <requested-reserved-table
-          :rows="bookRequests"
           :loading="requestLoading"
+          :rows="bookRequests"
           class="col"
         >
           <template #book-actions="{ requestOrReservation: request }">
             <chip-button
+              v-if="!isMobile"
               :label="$t('manageUsers.actions')"
               color="primary"
               show-dropdown
@@ -165,6 +210,35 @@
                 </q-item-section>
               </q-item>
             </chip-button>
+            <actions-list-button v-else>
+              <template v-if="request.book.meta.isAvailable">
+                <q-item v-close-popup clickable @click="reserveBook(request)">
+                  <q-item-section>
+                    {{ $t("book.reservedBooksDialog.options.reserved") }}
+                  </q-item-section>
+                </q-item>
+
+                <q-item
+                  v-close-popup
+                  clickable
+                  @click="putBooksIntoCart(request)"
+                >
+                  <q-item-section>
+                    <q-item-label>
+                      {{ t("book.reservedBooksDialog.options.cart") }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </template>
+
+              <q-item v-close-popup clickable @click="deleteRequest(request)">
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("common.delete") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </template>
         </requested-reserved-table>
       </q-card-section>
@@ -182,6 +256,7 @@ import {
 import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
 import { WidthSize, useScreenWidth } from "src/helpers/screen";
 import { fetchBookByISBN } from "src/services/book";
@@ -195,28 +270,34 @@ import {
 import { useReservationService } from "src/services/reservation";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { CustomerFragment } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
 import ChipButton from "./chip-button.vue";
 import RequestedReservedTable from "./requested-reserved-table.vue";
 import RoundBadge from "./round-badge.vue";
 
-const { t } = useI18n();
-
-const largeBreakpoint = 1920;
-const smallBreakpoint = 1440;
-const screenWidth = useScreenWidth(smallBreakpoint, largeBreakpoint);
-
 const props = defineProps<{
   userData: CustomerFragment;
   retailLocationId: string;
 }>();
-const booksCartCount = ref(props.userData.booksInCart);
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { t } = useI18n();
+
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
+
+const SMALL_CUSTOM_BREAKPOINT = 1440;
+const LARGE_CUSTOM_BREAKPOINT = 1920;
+const screenWidth = useScreenWidth(
+  SMALL_CUSTOM_BREAKPOINT,
+  LARGE_CUSTOM_BREAKPOINT,
+);
+
+const booksCartCount = ref(props.userData.booksInCart);
 
 const {
   useCreateReservationsMutation,

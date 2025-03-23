@@ -57,13 +57,26 @@ onMounted(() => {
 });
 </script>
 
+<style lang="scss">
+.sticky-last-column {
+  tr:last-child th:last-child,
+  td:last-child {
+    background-color: #fff;
+    border-left: 1px solid rgba(0 0 0 / 12%);
+    position: sticky;
+    right: 0;
+    z-index: 1;
+  }
+}
+</style>
+
 <style scoped lang="scss">
 // This is the suggested way from Quasar docs; simply adding
 // the css to the element doesn't work and there is no table
 // property to make the thead sticky otherwise
 :deep(thead) {
   position: sticky;
-  z-index: 1;
+  z-index: 2;
   top: 0;
   background-color: #fff;
 }

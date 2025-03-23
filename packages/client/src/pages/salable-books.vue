@@ -1,6 +1,9 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="!isMobile ? 'q-ma-md' : ''"
+      class="absolute-full column no-wrap"
+    >
       <q-card-section class="text-center title-section">
         <h6 class="q-ma-none text-primary text-weight-regular">
           {{ $t("salableBooks.title") }}
@@ -11,7 +14,11 @@
       </q-card-section>
 
       <q-card-section class="col column gap-4 no-padding no-wrap">
-        <q-form class="flex-center gap-16 q-px-sm row" @submit="searchBook()">
+        <q-form
+          :class="isMobile ? 'column items-stretch' : 'flex-center row'"
+          class="gap-16 q-px-sm"
+          @submit="searchBook()"
+        >
           <q-input
             v-model="searchQuery"
             :placeholder="$t('salableBooks.searchHint')"
@@ -27,6 +34,7 @@
           </q-input>
 
           <q-btn
+            :class="isMobile ? 'full-width' : ''"
             :label="$t('common.search')"
             class="bottom-separator-20"
             color="accent"
@@ -44,36 +52,32 @@
           "
           class="flex-delegate-height-management"
         >
-          <template #body="{ row, cols }">
+          <template #body="props">
             <q-tr
-              v-if="Object.values(AcceptanceStatus).includes(row.id)"
+              v-if="Object.values(AcceptanceStatus).includes(props.row.id)"
               class="bg-grey-1"
               no-hover
             >
               <q-td class="non-selectable text-weight-medium" colspan="5">
-                {{ $t(`salableBooks.tableSectionTitles.${row.id}`) }}
+                {{ $t(`salableBooks.tableSectionTitles.${props.row.id}`) }}
               </q-td>
             </q-tr>
-            <q-tr v-else-if="row.id === 'EMPTY'">
+            <q-tr v-else-if="props.row.id === 'EMPTY'">
               <q-td colspan="5">
                 {{ $t("salableBooks.emptyRowMessage") }}
               </q-td>
             </q-tr>
-            <q-tr v-else>
-              <q-td
-                v-for="{ name, value, classes } in cols"
-                :key="name"
-                :class="classes"
-              >
+            <q-tr v-else :props>
+              <q-td v-for="{ name, value } in props.cols" :key="name" :props>
                 <span
                   v-if="name === 'status'"
                   :class="`text-${
-                    row.status === AcceptanceStatus.ACCEPTED
+                    props.row.status === AcceptanceStatus.ACCEPTED
                       ? 'positive'
                       : 'negative'
                   }`"
                 >
-                  {{ $t(`salableBooks.acceptanceStatus.${row.status}`) }}
+                  {{ $t(`salableBooks.acceptanceStatus.${props.row.status}`) }}
                 </span>
                 <span v-else>
                   <q-tooltip v-if="['subject', 'author'].includes(name)">
@@ -96,12 +100,15 @@ import { Notify, QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
 import { requiredRule, validISBN } from "src/helpers/rules";
 import { fetchBookByISBN } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
 
 const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 const searchQuery = ref("");
 
@@ -119,13 +126,6 @@ const columns = computed<QTableColumn<BookWithStatus>[]>(() => [
     align: "left",
   },
   {
-    name: "author",
-    field: "authorsFullName",
-    label: t("book.fields.author"),
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
     name: "subject",
     field: "subject",
     label: t("book.fields.subject"),
@@ -138,6 +138,13 @@ const columns = computed<QTableColumn<BookWithStatus>[]>(() => [
     label: t("book.fields.title"),
     align: "left",
     classes: "text-wrap",
+  },
+  {
+    name: "author",
+    field: "authorsFullName",
+    label: t("book.fields.author"),
+    align: "left",
+    classes: "max-width-160 ellipsis",
   },
 ]);
 

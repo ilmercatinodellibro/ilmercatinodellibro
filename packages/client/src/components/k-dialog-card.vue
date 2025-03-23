@@ -1,6 +1,16 @@
 <template>
   <q-card :class="`size--${size}`" class="mobile-responsive-dialog">
-    <q-card-section class="bg-white text-h6 text-primary">
+    <q-card-section class="bg-white gap-16 no-wrap row text-h6 text-primary">
+      <q-btn
+        v-if="isMobile"
+        :icon="mdiClose"
+        class="height-24 width-24"
+        color="dark"
+        dense
+        flat
+        round
+        @click="emit('cancel')"
+      />
       <slot name="title">
         {{ title }}
       </slot>
@@ -12,17 +22,26 @@
 
     <q-separator />
 
-    <q-card-actions v-if="!noActions" align="right">
+    <q-card-actions
+      v-if="!noActions"
+      :class="
+        isMobile ? 'column items-stretch gap-8 card-actions-mobile' : undefined
+      "
+      align="right"
+    >
       <slot name="card-actions">
         <q-btn
           :label="cancelLabel ?? t('common.cancel')"
-          flat
+          :outline="isMobile"
+          :flat="!isMobile"
           @click="emit('cancel')"
         />
         <q-btn
           v-if="showSaveButton"
-          flat
+          :class="isMobile ? 'no-margin' : ''"
           :label="saveLabel ?? t('common.confirm')"
+          :outline="isMobile"
+          :flat="!isMobile"
           @click="emit('save')"
         />
       </slot>
@@ -31,11 +50,11 @@
 </template>
 
 <script setup lang="ts">
+import { mdiClose } from "@quasar/extras/mdi-v7";
 import { QCard } from "quasar";
 import { useI18n } from "vue-i18n";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { CommonDialogProps } from "./dialog-models";
-
-const { t } = useI18n();
 
 withDefaults(
   defineProps<
@@ -57,6 +76,10 @@ const emit = defineEmits<{
   save: [];
   cancel: [];
 }>();
+
+const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 </script>
 
 <style lang="scss" scoped>
@@ -76,7 +99,8 @@ $dialog-fullscreen-max-height: calc(100vh - #{$dialog-margin} * 2);
   &--sm {
     max-width: 360px;
     max-height: $dialog-fullscreen-max-height;
-    min-width: 360px;
+    min-width: 320px;
+    width: 100%;
 
     @media screen and (height >= $complex-dialog-breakpoint) {
       max-height: $complex-dialog-max-height;
@@ -136,5 +160,11 @@ $dialog-fullscreen-max-height: calc(100vh - #{$dialog-margin} * 2);
   &--fullscreen {
     @extend %fullscreen;
   }
+}
+
+// Remove the default horizontal separator to card actions on mobile
+// since they are stacked vertically instead of aligned horizontally
+.card-actions-mobile :deep(> *) {
+  margin-left: 0 !important;
 }
 </style>

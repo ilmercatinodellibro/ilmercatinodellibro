@@ -1,16 +1,10 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
-    <!--
-      I didn't use k-dialog-card because it didn't
-      have any width that satisfies this dialog's
-    -->
-    <q-card
-      class="column max-height-600 max-height-fullscreen min-height-400 min-width-420 no-wrap"
+    <k-dialog-card
+      :title="t('manageUsers.receiptsDialog.title')"
+      size="md"
+      @cancel="onDialogCancel"
     >
-      <q-card-section class="text-h6 text-primary">
-        {{ $t("manageUsers.receiptsDialog.title") }}
-      </q-card-section>
-      <q-separator />
       <q-card-section
         class="col column flex-delegate-height-management no-wrap q-pa-none"
       >
@@ -27,20 +21,18 @@
           type="PURCHASE"
         />
       </q-card-section>
-      <q-separator />
-      <q-card-actions align="right">
-        <q-btn :label="$t('common.close')" flat @click="onDialogCancel" />
-      </q-card-actions>
-    </q-card>
+    </k-dialog-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
 import { useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { useGetReceiptsQuery } from "src/services/receipt.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserFragment } from "src/services/user.graphql";
+import KDialogCard from "../k-dialog-card.vue";
 import ReceiptsTable from "./receipts-table.vue";
 
 const props = defineProps<{
@@ -48,6 +40,8 @@ const props = defineProps<{
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
+
+const { t } = useI18n();
 
 const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
 
@@ -64,12 +58,3 @@ const purchaseReceipts = computed(() =>
   receipts.value.filter(({ type }) => type === "PURCHASE"),
 );
 </script>
-
-<style scoped lang="scss">
-$dialog-margin: 24px;
-
-// TODO: remove when card height is standardized
-.max-height-fullscreen {
-  max-height: calc(100vh - #{$dialog-margin} * 2) !important;
-}
-</style>

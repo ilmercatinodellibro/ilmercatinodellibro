@@ -12,7 +12,9 @@
       @cancel="onDialogCancel()"
       @save="onDialogOK()"
     >
-      <q-card-section class="column gap-24 q-pa-md width-560">
+      <q-card-section
+        class="column full-width gap-24 max-width-560 no-wrap q-pa-md scroll"
+      >
         <span class="text-h6 text-primary">
           {{ t("auth.deleteAccountDialog.disclaimer") }}
         </span>

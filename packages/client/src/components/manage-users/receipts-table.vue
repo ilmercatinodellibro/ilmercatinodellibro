@@ -7,32 +7,30 @@
     :rows-per-page-options="[0]"
     square
   >
-    <template #header-cell-created-by="{ col }">
-      <q-th class="text-left">
-        <span v-if="col.label !== ''">
-          {{ col.label }}
-        </span>
+    <template #header-cell-created-by="headerProps">
+      <q-th :props="headerProps">
+        {{ headerProps.col.label }}
       </q-th>
     </template>
 
-    <template #body-cell-timestamp="{ row, value }">
-      <q-td class="text-left width-200">
+    <template #body-cell-timestamp="cellProps">
+      <q-td :props="cellProps">
         <q-btn
           class="text-underline text-weight-regular"
-          :label="value"
+          :label="cellProps.value"
           flat
           dense
-          @click="openReceipt(row)"
+          @click="openReceipt(cellProps.row)"
         />
       </q-td>
     </template>
 
-    <template #body-cell-resend="{ row }">
-      <q-td class="text-center width-0">
+    <template #body-cell-resend="cellProps">
+      <q-td :props="cellProps">
         <chip-button
           :label="$t('manageUsers.receiptsDialog.resend')"
           color="primary"
-          @click="sendAgain(row)"
+          @click="sendAgain(cellProps.row)"
         />
       </q-td>
     </template>
@@ -67,6 +65,7 @@ const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
     format: (date: number) => formatDate(date, "YYYY-MM-DD HH:mm:ss"),
     name: "timestamp",
     align: "left",
+    classes: "width-200",
   },
   {
     label: t("manageUsers.receiptsDialog.createdBy"),
@@ -80,6 +79,7 @@ const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
     field: () => undefined,
     name: "resend",
     align: "center",
+    classes: "width-0",
   },
 ]);
 

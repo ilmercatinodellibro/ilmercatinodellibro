@@ -1,67 +1,137 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-bind="isMobile ? { maximized: true, fullHeight: true } : undefined"
+    @hide="onDialogHide"
+  >
     <k-dialog-card
       size="fullscreen"
       :cancel-label="$t('common.close')"
+      :no-actions="isMobile"
       :title="title"
       @cancel="onDialogCancel()"
     >
       <dialog-table
         v-if="type === 'sold'"
+        :class="isMobile ? 'sticky-last-column' : ''"
         :columns="soldColumns"
         :loading="soldLoading"
-        :rows="soldBookCopies as readonly SoldBookCopy[]"
+        :rows="
+          // prettier-ignore
+          soldBookCopies as readonly SoldBookCopy[]
+        "
         class="flex-delegate-height-management"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-problems="{ row }">
-          <q-td class="text-center">
-            <problems-button :book-copy="row" />
+        <template v-if="!isMobile" #body-cell-problems="cellProps">
+          <q-td :props="cellProps">
+            <problems-button :book-copy="cellProps.row" />
           </q-td>
         </template>
 
-        <template #body-cell-history="{ row }">
-          <q-td class="text-center">
+        <template #body-cell-history="cellProps">
+          <q-td :props="cellProps">
             <q-btn
+              v-if="!isMobile"
               round
               flat
               color="primary"
               :icon="mdiHistory"
-              @click="openHistoryDialog(row)"
+              @click="openHistoryDialog(cellProps.row)"
             />
+
+            <actions-list-button>
+              <q-item
+                v-close-popup
+                clickable
+                @click="reportOrSolveProblem(cellProps.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{
+                      t(
+                        `manageUsers.booksMovementsDialog.${hasProblem(cellProps.row) ? "solveProblem" : "reportProblem"}`,
+                      )
+                    }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item
+                v-close-popup
+                clickable
+                @click="openHistoryDialog(cellProps.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("manageUsers.booksMovementsDialog.problemsHistory") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
 
       <dialog-table
         v-else
+        :class="isMobile ? 'sticky-last-column' : ''"
         :columns="purchasedColumns"
         :loading="purchasedLoading"
-        :rows="purchasedBookCopies as readonly SoldBookCopy[]"
+        :rows="
+          // prettier-ignore
+          purchasedBookCopies as readonly SoldBookCopy[]
+        "
         class="flex-delegate-height-management"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="cellProps">
+          <table-cell-with-tooltip
+            :props="cellProps"
+            :value="cellProps.value"
+          />
         </template>
 
-        <template #body-cell-return="{ row }">
-          <q-td class="text-center">
+        <template #body-cell-return="cellProps">
+          <q-td :props="cellProps">
             <chip-button
-              :label="$t('book.return')"
+              v-if="!isMobile"
+              :label="t('book.return')"
               color="primary"
-              @click="openReturnDialog(row)"
+              @click="openReturnDialog(cellProps.row)"
             />
+            <actions-list-button v-else>
+              <q-item
+                v-close-popup
+                clickable
+                @click="openReturnDialog(cellProps.row)"
+              >
+                <q-item-section>
+                  <q-item-label>
+                    {{ t("book.return") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </actions-list-button>
           </q-td>
         </template>
       </dialog-table>
@@ -81,6 +151,8 @@ import {
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogCard from "src/components/k-dialog-card.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import { hasProblem, reportOrSolveProblem } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import {
   BookCopyDetailsFragment,
@@ -90,6 +162,7 @@ import {
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 import { UserSummaryFragment } from "src/services/user.graphql";
+import ActionsListButton from "../actions-list-button.vue";
 import ProblemsButton from "../problems-button.vue";
 import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
@@ -110,9 +183,12 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
-
 const { t } = useI18n();
+
+const { selectedLocation } = useRetailLocationService();
+
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+const { isMobile } = useLateralDrawer();
 
 const title = computed(() =>
   t(
@@ -122,8 +198,6 @@ const title = computed(() =>
     [`${props.userData.firstname} ${props.userData.lastname}`],
   ),
 );
-
-const { selectedLocation } = useRetailLocationService();
 
 const { soldBookCopies, loading: soldLoading } = useGetSoldBookCopiesQuery(
   () => ({
@@ -148,13 +222,6 @@ const { purchasedBookCopies, loading: purchasedLoading } =
 
 const bookMiddleInfoColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   {
-    label: t("book.fields.author"),
-    field: ({ book }) => book.authorsFullName,
-    name: "author",
-    align: "left",
-    classes: "max-width-160 ellipsis",
-  },
-  {
     label: t("book.fields.subject"),
     field: ({ book }) => book.subject,
     name: "subject",
@@ -167,6 +234,13 @@ const bookMiddleInfoColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     name: "title",
     align: "left",
     classes: "text-wrap",
+  },
+  {
+    label: t("book.fields.author"),
+    field: ({ book }) => book.authorsFullName,
+    name: "author",
+    align: "left",
+    classes: "max-width-160 ellipsis",
   },
   {
     label: t("book.fields.publisher"),
@@ -204,15 +278,21 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     name: "sold-to",
     align: "left",
   },
-  {
-    label: "",
-    field: () => undefined,
-    name: "problems",
-  },
+  ...((!isMobile.value
+    ? [
+        {
+          label: "",
+          field: () => undefined,
+          name: "problems",
+          align: "center",
+        },
+      ]
+    : []) satisfies QTableColumn<SoldBookCopy>[]),
   {
     label: "",
     field: () => undefined,
     name: "history",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 
@@ -249,6 +329,7 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     field: () => undefined,
     name: "return",
     align: "center",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 

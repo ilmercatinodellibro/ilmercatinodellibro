@@ -1,40 +1,47 @@
 <template>
-  <dialog-table :rows="rows" :columns="columns">
-    <template #body-cell-author="{ value, col }">
-      <table-cell-with-tooltip :class="col.classes" :value="value" />
+  <dialog-table
+    :class="isMobile ? 'sticky-last-column' : ''"
+    :rows="rows"
+    :columns="columns"
+  >
+    <template #body-cell-author="cellProps">
+      <table-cell-with-tooltip :peops="cellProps" :value="cellProps.value" />
     </template>
 
-    <template #body-cell-subject="{ value, col }">
-      <table-cell-with-tooltip :class="col.classes" :value="value" />
+    <template #body-cell-subject="cellProps">
+      <table-cell-with-tooltip :props="cellProps" :value="cellProps.value" />
     </template>
 
-    <template #body-cell-request-status="{ value }">
-      <q-td>
-        <span :class="value && !isShowingReservations ? 'text-positive' : ''">
-          {{
-            t(
-              isShowingReservations
-                ? "book.availability.reserved"
-                : value
-                  ? "book.availability.available"
-                  : "book.availability.requested",
-            )
-          }}
-        </span>
+    <template #body-cell-request-status="cellProps">
+      <q-td
+        :props="cellProps"
+        :class="
+          cellProps.value && !isShowingReservations ? 'text-positive' : ''
+        "
+      >
+        {{
+          t(
+            isShowingReservations
+              ? "book.availability.reserved"
+              : cellProps.value
+                ? "book.availability.available"
+                : "book.availability.requested",
+          )
+        }}
       </q-td>
     </template>
-    <template #body-cell-utility="{ value }">
-      <q-td>
-        <utility-chip :utility="value" />
+    <template #body-cell-utility="cellProps">
+      <q-td :props="cellProps">
+        <utility-chip :utility="cellProps.value" />
       </q-td>
     </template>
-    <template #body-cell-actions="{ row }">
-      <q-td>
-        <!--
-          Slot here so every usage of this component can define the
-          options available inside the menu and their behavior
-        -->
-        <slot name="book-actions" v-bind="{ requestOrReservation: row }" />
+    <template #body-cell-actions="cellProps">
+      <q-td :props="cellProps">
+        <!-- To define the options available inside the menu and their behavior -->
+        <slot
+          name="book-actions"
+          v-bind="{ requestOrReservation: cellProps.row }"
+        />
       </q-td>
     </template>
   </dialog-table>
@@ -45,13 +52,13 @@ import { startCase, toLower } from "lodash-es";
 import { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { discountedPrice } from "src/helpers/book-copy";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import { formatPrice } from "src/helpers/formatting";
 import { RequestSummaryFragment } from "src/services/request.graphql";
 import { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
 import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
-const { t } = useI18n();
 
 defineProps<
   {
@@ -62,6 +69,10 @@ defineProps<
     // eslint-disable-next-line vue/no-unused-properties
   } & Pick<QTableProps, "loading">
 >();
+
+const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 const columns = computed<
   QTableColumn<ReservationSummaryFragment | RequestSummaryFragment>[]
@@ -77,14 +88,6 @@ const columns = computed<
     field: ({ book: { isbnCode } }) => isbnCode,
     label: t("book.fields.isbn"),
     align: "left",
-  },
-  {
-    name: "author",
-    field: ({ book: { authorsFullName } }) => authorsFullName,
-    label: t("book.fields.author"),
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-    classes: "max-width-160 ellipsis",
   },
   {
     name: "subject",
@@ -103,6 +106,14 @@ const columns = computed<
     classes: "text-wrap",
   },
   {
+    name: "author",
+    field: ({ book: { authorsFullName } }) => authorsFullName,
+    label: t("book.fields.author"),
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+    classes: "max-width-160 ellipsis",
+  },
+  {
     name: "publisher",
     field: ({ book: { publisherName } }) => publisherName,
     label: t("book.fields.publisher"),
@@ -112,9 +123,9 @@ const columns = computed<
   {
     name: "price",
     field: ({ book: { originalPrice } }) => originalPrice,
-    label: t("book.fields.price"),
+    label: t("book.fields.coverPrice"),
     align: "left",
-    format: (val: number) => discountedPrice(val, "sell"),
+    format: formatPrice,
   },
   {
     name: "utility",
@@ -127,6 +138,7 @@ const columns = computed<
     field: () => undefined,
     label: t("manageUsers.actions"),
     align: "center",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 </script>

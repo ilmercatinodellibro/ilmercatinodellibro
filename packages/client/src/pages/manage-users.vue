@@ -1,17 +1,20 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="!isMobile ? 'q-ma-md' : ''"
+      class="absolute-full column no-wrap"
+    >
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
       >
         <template #side-actions>
           <q-btn
-            class="q-ma-sm"
+            :class="isMobile ? 'full-width' : 'q-ma-sm'"
             color="accent"
             no-wrap
             :icon="mdiPlus"
-            :label="$t('manageUsers.createUser')"
+            :label="t('manageUsers.createUser')"
             @click="addNewUser"
           />
         </template>
@@ -21,199 +24,387 @@
         <q-table
           ref="tableRef"
           v-model:pagination="pagination"
-          class="col"
-          flat
-          square
-          row-key="id"
-          :rows="customers"
+          :class="isMobile ? 'sticky-last-column' : ''"
           :columns="columns"
           :filter="tableFilter"
           :filter-method="filterMethod"
           :loading="loading"
+          :rows="customers"
           :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
+          class="col"
+          flat
+          square
+          row-key="id"
           @request="onRequest"
         >
-          <template #header-cell-in-stock="{ col }">
+          <template #header-cell-in-stock="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.inStock"
             />
           </template>
-          <template #header-cell-sold="{ col }">
+          <template #header-cell-sold="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.sold"
             />
           </template>
-          <template #header-cell-reserved="{ col }">
+          <template #header-cell-reserved="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.reserved"
             />
           </template>
-          <template #header-cell-requested="{ col }">
+          <template #header-cell-requested="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.requested"
             />
           </template>
-          <template #header-cell-purchased="{ col }">
+          <template #header-cell-purchased="props">
             <table-header-with-info
-              :label="col.label"
+              :props
+              :label="props.col.label"
               :info="columnTooltip.purchased"
             />
           </template>
 
           <template #body="props">
             <q-tr
-              :props="props"
-              v-bind="
-                !props.row.emailVerified
-                  ? {
-                      class: 'bg-blue-grey-1 text-black-54',
-                    }
-                  : undefined
+              :props
+              :class="
+                !props.row.emailVerified ? 'bg-blue-grey-1 text-black-54' : ''
               "
             >
-              <template v-for="col in props.cols" :key="col.name">
-                <q-td v-if="col.name === 'edit'">
-                  <q-btn
-                    :icon="mdiPencil"
-                    color="primary"
-                    flat
-                    round
-                    size="md"
-                    @click="openEdit(props.row)"
-                  />
-                </q-td>
+              <q-td key="edit" :props>
+                <q-btn
+                  :icon="mdiPencil"
+                  color="primary"
+                  flat
+                  round
+                  size="md"
+                  @click="openEdit(props.row)"
+                />
+              </q-td>
 
-                <q-td v-else-if="col.name === 'firstname'" :class="col.classes">
-                  <span class="gap-16 items-center justify-between no-wrap row">
-                    {{ col.value }}
-                    <q-icon
-                      v-if="col.row.notes.length > 0"
-                      :name="mdiInformationOutline"
-                      size="24px"
-                      color="primary"
-                    >
+              <table-cell-with-tooltip
+                key-td="email"
+                :props
+                :value="getColValue(props.cols, 'email')"
+              >
+                <template v-if="!props.row.emailVerified">
+                  <round-badge
+                    class="q-ma-xs"
+                    color="warning"
+                    float-right
+                    text-color="black-87"
+                  >
+                    <q-icon :name="mdiInformationOutline" size="xs">
                       <q-tooltip>
-                        {{ col.row.notes }}
+                        {{ t("auth.emailNotVerified") }}
                       </q-tooltip>
                     </q-icon>
-                  </span>
-                </q-td>
+                  </round-badge>
+                </template>
+              </table-cell-with-tooltip>
 
-                <table-cell-with-tooltip
-                  v-else-if="col.name === 'email'"
-                  :class="col.classes"
-                  :value="col.value"
-                >
-                  <template v-if="!props.row.emailVerified">
-                    <round-badge
-                      class="q-ma-xs"
-                      color="warning"
-                      float-right
-                      text-color="black-87"
-                    >
-                      <q-icon :name="mdiInformationOutline" size="18px">
-                        <q-tooltip>
-                          {{ t("auth.emailNotVerified") }}
-                        </q-tooltip>
-                      </q-icon>
-                    </round-badge>
-                  </template>
-                </table-cell-with-tooltip>
-
-                <table-cell-with-dialog
-                  v-else-if="
-                    [
-                      'in-stock',
-                      'sold',
-                      'reserved',
-                      'requested',
-                      'purchased',
-                    ].includes(col.name)
-                  "
-                  :clickable-when-zero="
-                    alwaysClickableColsNames.includes(col.name)
-                  "
-                  :disable="willBeDeleted(props.row)"
-                  :secondary-value="
-                    col.name === 'requested'
-                      ? props.row.booksRequestedAndAvailable
-                      : undefined
-                  "
-                  :value="col.value"
-                  @click="openCellEditDialog(props.row, col, col.value)"
-                >
-                  <template
-                    v-if="col.name === 'requested'"
-                    #secondary-value="{ value: availableCount }"
-                  >
-                    <round-badge color="positive">
-                      {{ availableCount }}
-
-                      <q-tooltip>
-                        {{ $t("manageUsers.tooltips.available") }}
-                      </q-tooltip>
-                    </round-badge>
-                  </template>
-                </table-cell-with-dialog>
-
-                <q-td
-                  v-else-if="col.name === 'shopping-cart'"
-                  :class="col.classes"
-                >
-                  <q-btn
-                    :disable="willBeDeleted(props.row)"
-                    :icon="mdiCart"
+              <q-td key="first-name" :props>
+                <span class="gap-16 items-center justify-between no-wrap row">
+                  {{ getColValue(props.cols, "first-name") }}
+                  <q-icon
+                    v-if="props.row.notes.length > 0"
+                    :name="mdiInformationOutline"
+                    size="sm"
                     color="primary"
-                    flat
-                    round
+                  >
+                    <q-tooltip>
+                      {{ props.row.notes }}
+                    </q-tooltip>
+                  </q-icon>
+                </span>
+              </q-td>
+
+              <q-td key="last-name" :props>
+                {{ getColValue(props.cols, "last-name") }}
+              </q-td>
+
+              <q-td key="phone-number" :props>
+                {{ getColValue(props.cols, "phone-number") }}
+              </q-td>
+
+              <!-- `key` is needed for the v-for, `key-td` is needed for `QTable` -->
+              <table-cell-with-dialog
+                v-for="colName in [
+                  'in-stock',
+                  'sold',
+                  'reserved',
+                  'requested',
+                  'purchased',
+                ]"
+                :key="colName"
+                :key-td="colName"
+                :props
+                :clickable-when-zero="
+                  alwaysClickableColsNames.includes(colName)
+                "
+                :disable="willBeDeleted(props.row)"
+                :secondary-value="
+                  colName === 'requested'
+                    ? props.row.booksRequestedAndAvailable
+                    : undefined
+                "
+                :value="getColValue(props.cols, colName)"
+                @click="
+                  openCellEditDialog(
+                    props.row,
+                    colName,
+                    getColValue(props.cols, colName),
+                  )
+                "
+              >
+                <template
+                  v-if="colName === 'requested'"
+                  #secondary-value="{ value: availableCount }"
+                >
+                  <round-badge color="positive">
+                    {{ availableCount }}
+
+                    <q-tooltip>
+                      {{ t("manageUsers.tooltips.available") }}
+                    </q-tooltip>
+                  </round-badge>
+                </template>
+              </table-cell-with-dialog>
+
+              <q-td key="shopping-cart" :props>
+                <q-btn
+                  :disable="willBeDeleted(props.row)"
+                  :icon="mdiCart"
+                  color="primary"
+                  flat
+                  round
+                  @click="openCart(props.row)"
+                >
+                  <round-badge
+                    v-if="getColValue(props.cols, 'shopping-cart') > 0"
+                    :label="getColValue(props.cols, 'shopping-cart')"
+                    class="badge-top-left"
+                    color="accent"
+                    float-left
+                  />
+                </q-btn>
+              </q-td>
+
+              <q-td key="creation-date" :props>
+                {{ getColValue(props.cols, "creation-date") }}
+              </q-td>
+
+              <q-td key="receipts" :props>
+                <q-btn
+                  :icon="mdiReceiptText"
+                  color="primary"
+                  flat
+                  round
+                  size="md"
+                  @click="openReceipt(props.row)"
+                />
+              </q-td>
+
+              <q-td key="pay-off" :props>
+                <chip-button
+                  :disable="
+                    !hasAdminRole &&
+                    (!selectedLocation.payOffEnabled ||
+                      willBeDeleted(props.row))
+                  "
+                  color="primary"
+                  :label="t('manageUsers.payOff')"
+                  @click="openPayOff(props.row)"
+                >
+                  <q-tooltip v-if="!selectedLocation.payOffEnabled">
+                    {{ t("manageUsers.payOffDisabled") }}
+                  </q-tooltip>
+                </chip-button>
+              </q-td>
+
+              <!-- Mobile actions button -->
+              <q-td key="actions" :props>
+                <actions-list-button>
+                  <q-item v-close-popup clickable @click="openEdit(props.row)">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.editUser.title") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(
+                        props.row,
+                        'in-stock',
+                        props.row.booksInStock,
+                      )
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.inStock") }} ({{
+                          props.row.booksInStock
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-if="props.row.booksSold > 0"
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(props.row, 'sold', props.row.booksSold)
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.sold") }} ({{
+                          props.row.booksSold
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(
+                        props.row,
+                        'reserved',
+                        props.row.booksReserved,
+                      )
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.reserved") }} ({{
+                          props.row.booksReserved
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(
+                        props.row,
+                        'requested',
+                        props.row.booksRequested,
+                      )
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.requested") }} ({{
+                          props.row.booksRequested
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+
+                    <q-item-section
+                      v-if="props.row.booksRequestedAndAvailable > 0"
+                      side
+                    >
+                      <round-badge color="positive">
+                        <q-item-label>
+                          {{ props.row.booksRequestedAndAvailable }}
+                        </q-item-label>
+
+                        <q-tooltip>
+                          {{ t("manageUsers.tooltips.available") }}
+                        </q-tooltip>
+                      </round-badge>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-if="props.row.booksBought > 0"
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
+                    @click="
+                      openCellEditDialog(
+                        props.row,
+                        'purchased',
+                        props.row.booksBought,
+                      )
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.purchased") }} ({{
+                          props.row.booksBought
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    v-close-popup
+                    :disable="willBeDeleted(props.row)"
+                    clickable
                     @click="openCart(props.row)"
                   >
-                    <round-badge
-                      v-if="col.value > 0"
-                      :label="col.value"
-                      class="badge-top-left"
-                      color="accent"
-                      float-left
-                    />
-                  </q-btn>
-                </q-td>
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.cart") }} ({{
+                          props.row.booksInCart
+                        }})
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                <q-td v-else-if="col.name === 'receipts'" :class="col.classes">
-                  <q-btn
-                    :icon="mdiReceiptText"
-                    color="primary"
-                    flat
-                    round
-                    size="md"
+                  <q-item
+                    v-close-popup
+                    clickable
                     @click="openReceipt(props.row)"
-                  />
-                </q-td>
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.fields.receipts") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
 
-                <q-td v-else-if="col.name === 'pay-off'">
-                  <chip-button
+                  <q-item
+                    v-close-popup
                     :disable="
                       !hasAdminRole &&
                       (!selectedLocation.payOffEnabled ||
                         willBeDeleted(props.row))
                     "
-                    color="primary"
-                    :label="$t('manageUsers.payOff')"
+                    clickable
                     @click="openPayOff(props.row)"
                   >
-                    <q-tooltip v-if="!selectedLocation.payOffEnabled">
-                      {{ t("manageUsers.payOffDisabled") }}
-                    </q-tooltip>
-                  </chip-button>
-                </q-td>
-
-                <q-td v-else :class="col.classes">
-                  {{ col.value }}
-                </q-td>
-              </template>
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("manageUsers.payOff") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
+              </q-td>
             </q-tr>
           </template>
         </q-table>
@@ -233,6 +424,7 @@ import {
 import { Dialog, Notify, QTable, QTableColumn, QTableProps } from "quasar";
 import { Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import CartDialog from "src/components/manage-users/cart-dialog.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
@@ -247,8 +439,10 @@ import RoundBadge from "src/components/manage-users/round-badge.vue";
 import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
+import { getColValue } from "src/helpers/table-helpers";
 import { UserDialogPayload } from "src/models/user";
 import { useAuthService } from "src/services/auth";
 import { useCustomerService } from "src/services/customer";
@@ -262,13 +456,15 @@ import {
   useUpdateUserMutation,
 } from "src/services/user.graphql";
 
-const tableRef = ref() as Ref<QTable>;
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
 
 const { t, locale } = useI18n();
 
-const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
-
 const { hasAdminRole } = useAuthService();
+
+const { isMobile } = useLateralDrawer();
+
+const tableRef = ref() as Ref<QTable>;
 
 const {
   customers,
@@ -311,8 +507,11 @@ const columnTooltip = computed(() => ({
   available: t("manageUsers.tooltips.available"),
 }));
 
+// The "satisfies QTableColumn<...>" is needed to avoid a TS mismatch caused by `computed` type
 const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
-  { name: "edit", field: () => undefined, label: "" },
+  ...((!isMobile.value
+    ? [{ name: "edit", field: () => undefined, label: "" }]
+    : []) satisfies QTableColumn<CustomerFragment>[]),
   {
     name: "email",
     field: "email",
@@ -374,12 +573,16 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: t("manageUsers.fields.purchased"),
     align: "left",
   },
-  {
-    name: "shopping-cart",
-    field: "booksInCart",
-    label: t("manageUsers.fields.cart"),
-    align: "center",
-  },
+  ...((!isMobile.value
+    ? [
+        {
+          name: "shopping-cart",
+          field: "booksInCart",
+          label: t("manageUsers.fields.cart"),
+          align: "center",
+        },
+      ]
+    : []) satisfies QTableColumn<CustomerFragment>[]),
   {
     name: "creation-date",
     field: "createdAt",
@@ -396,17 +599,31 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: t("manageUsers.fields.creationDate"),
     align: "left",
   },
-  {
-    name: "receipts",
-    field: () => undefined,
-    label: t("manageUsers.fields.receipts"),
-    align: "center",
-  },
-  {
-    name: "pay-off",
-    field: () => undefined,
-    label: "",
-  },
+  ...((!isMobile.value
+    ? [
+        {
+          name: "receipts",
+          field: () => undefined,
+          label: t("manageUsers.fields.receipts"),
+          align: "center",
+        },
+        {
+          name: "pay-off",
+          field: () => undefined,
+          label: "",
+        },
+      ]
+    : [
+        {
+          name: "actions",
+          field: () => undefined,
+          label: "",
+          classes: ({ emailVerified }) =>
+            `no-padding ${
+              !emailVerified ? "bg-blue-grey-1 text-black-54" : ""
+            }`,
+        },
+      ]) satisfies QTableColumn<CustomerFragment>[]),
 ]);
 
 const { createUser } = useAddUserMutation();
@@ -550,17 +767,17 @@ const alwaysClickableColsNames = ["in-stock", "reserved", "requested"];
 const { selectedLocation } = useRetailLocationService();
 function openCellEditDialog(
   userData: CustomerFragment,
-  { name }: QTableColumn,
+  colName: string,
   value: number,
 ) {
   if (
     !selectedLocation.value.id ||
-    (value <= 0 && !alwaysClickableColsNames.includes(name))
+    (value <= 0 && !alwaysClickableColsNames.includes(colName))
   ) {
     return;
   }
 
-  switch (name) {
+  switch (colName) {
     case "in-stock":
       Dialog.create({
         component: EditUserStockdataDialog,
@@ -607,7 +824,7 @@ function openCellEditDialog(
 
       Dialog.create({
         component: EditUserBooksMovementsDialog,
-        componentProps: { userData, type: name },
+        componentProps: { userData, type: colName },
       }).onDismiss(() => {
         tableRef.value.requestServerInteraction();
       });
@@ -635,8 +852,18 @@ function openCart(user: CustomerFragment) {
 // property to make the thead sticky otherwise
 :deep(thead) {
   position: sticky;
-  z-index: 1;
+  z-index: 2;
   top: 0;
   background-color: #fff;
+}
+
+.sticky-last-column {
+  tr:last-child th:last-child,
+  td:last-child {
+    border-left: 1px solid rgba(0 0 0 / 12%);
+    position: sticky;
+    right: 0;
+    z-index: 1;
+  }
 }
 </style>

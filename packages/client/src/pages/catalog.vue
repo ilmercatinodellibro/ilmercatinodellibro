@@ -1,14 +1,17 @@
 <template>
   <q-page>
-    <q-card class="absolute-full column no-wrap q-ma-md">
+    <q-card
+      :class="!isMobile ? 'q-ma-md' : ''"
+      class="absolute-full column no-wrap"
+    >
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
       >
         <template #side-actions>
           <q-btn
+            :class="isMobile ? 'full-width' : 'q-ma-sm'"
             :label="$t('book.addBook')"
-            class="q-ma-sm"
             color="accent"
             no-wrap
             :icon="mdiPlus"
@@ -29,23 +32,23 @@
         class="col"
         @request="onRequest"
       >
-        <template #body-cell-author="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-author="props">
+          <table-cell-with-tooltip :value="props.value" />
         </template>
 
-        <template #body-cell-subject="{ value, col }">
-          <table-cell-with-tooltip :class="col.classes" :value="value" />
+        <template #body-cell-subject="props">
+          <table-cell-with-tooltip :value="props.value" />
         </template>
 
-        <template #body-cell-status="{ value }">
+        <template #body-cell-status="props">
           <q-td>
-            <status-chip :value="value" />
+            <status-chip :value="props.value" />
           </q-td>
         </template>
 
-        <template #body-cell-utility="{ value }">
-          <q-td class="text-center">
-            <utility-chip :utility="value" />
+        <template #body-cell-utility="props">
+          <q-td>
+            <utility-chip :utility="props.value" />
           </q-td>
         </template>
       </q-table>
@@ -64,12 +67,17 @@ import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue
 import StatusChip from "src/components/manage-users/status-chip.vue";
 import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
 import UtilityChip from "src/components/utility-chip.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
+import { formatPrice } from "src/helpers/formatting";
 import { useBookService } from "src/services/book";
 import { BookSummaryFragment } from "src/services/book.graphql";
-import { formatPrice } from "../composables/use-misc-formats";
+
+const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
 const { t } = useI18n();
+
+const { isMobile } = useLateralDrawer();
 
 const tableRef = ref<QTable>();
 
@@ -78,8 +86,6 @@ const numberOfRows = ref(50);
 
 const { refetchFilterProxy, filterOptions, tableFilter, filterMethod } =
   useTableFilters("book.filters.options", true);
-
-const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
 // We add "refetchFilterProxy" as param here because otherwise we would get a double initial fetch
 // when the component is mounted, one without "filter" variable and one with a "filter" variable
@@ -99,21 +105,6 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
   },
   {
-    name: "author",
-    label: t("book.fields.author"),
-    field: "authorsFullName",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-    classes: "max-width-160 ellipsis",
-  },
-  {
-    name: "publisher",
-    label: t("book.fields.publisher"),
-    field: "publisherName",
-    align: "left",
-    format: (val: string) => startCase(toLower(val)),
-  },
-  {
     name: "subject",
     label: t("book.fields.subject"),
     field: "subject",
@@ -128,6 +119,21 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     align: "left",
     format: (val: string) => startCase(toLower(val)),
     classes: "text-wrap",
+  },
+  {
+    name: "author",
+    label: t("book.fields.author"),
+    field: "authorsFullName",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
+    classes: "max-width-160 ellipsis",
+  },
+  {
+    name: "publisher",
+    label: t("book.fields.publisher"),
+    field: "publisherName",
+    align: "left",
+    format: (val: string) => startCase(toLower(val)),
   },
   {
     name: "price",

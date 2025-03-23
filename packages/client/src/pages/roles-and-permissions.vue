@@ -1,12 +1,16 @@
 <template>
-  <q-page class="justify-center row">
-    <q-card class="absolute-full column q-ma-md">
+  <q-page>
+    <q-card
+      :class="!isMobile ? 'q-ma-md' : ''"
+      class="absolute-full column no-wrap"
+    >
       <header-search-bar-filters
         v-model="tableFilter"
         :filter-options="filterOptions"
       >
         <template #side-actions>
           <q-btn
+            :class="isMobile ? 'full-width' : ''"
             :icon="mdiPlus"
             :label="t('general.rolesAndPermissions.addNewOperator.title')"
             color="accent"
@@ -17,9 +21,10 @@
 
       <q-separator color="black-12" />
 
-      <q-card-section v-if="!loading" class="col column no-padding">
+      <q-card-section v-if="!loading" class="col column no-padding no-wrap">
         <dialog-table
           v-model:pagination="pagination"
+          :class="isMobile ? 'sticky-last-column' : ''"
           :columns="columns"
           :filter="tableFilter"
           :filter-method="filterMethod"
@@ -28,14 +33,29 @@
           class="col flex-delegate-height-management"
           @request="onRequest"
         >
-          <template #body-cell-actions="{ row, col }">
-            <q-td :class="col.classes" auto-width>
-              <chip-button
-                v-if="row.role !== 'ADMIN'"
-                :label="t('actions.removeOperator')"
-                color="negative"
-                @click="deleteUser(row.id)"
-              />
+          <template #body-cell-actions="props">
+            <q-td :props>
+              <template v-if="props.row.role !== 'ADMIN'">
+                <chip-button
+                  v-if="!isMobile"
+                  :label="t('actions.removeOperator')"
+                  color="negative"
+                  @click="deleteUser(props.row.id)"
+                />
+                <actions-list-button v-else>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    @click="deleteUser(props.row.id)"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        {{ t("actions.removeOperator") }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </actions-list-button>
+              </template>
             </q-td>
           </template>
         </dialog-table>
@@ -63,11 +83,13 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Role } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
+import ActionsListButton from "src/components/actions-list-button.vue";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
 import ChipButton from "src/components/manage-users/chip-button.vue";
 import DialogTable from "src/components/manage-users/dialog-table.vue";
+import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { useAddOrInviteOperatorMutation } from "src/services/auth.graphql";
@@ -86,6 +108,8 @@ const { loading, removeMember } = useMembersService();
 const { members, refetch: refetchMembers } = useGetMembersQuery(() => ({
   retailLocationId: selectedLocation.value.id,
 }));
+
+const { isMobile } = useLateralDrawer();
 
 const pagination = ref({
   rowsNumber: members.value.length,
@@ -139,6 +163,7 @@ const columns = computed<QTableColumn<MemberFragment>[]>(() => [
     label: "",
     name: "actions",
     align: "center",
+    classes: isMobile.value ? "no-padding" : "",
   },
 ]);
 
