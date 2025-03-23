@@ -141,7 +141,11 @@
                 v-for="colName in [
                   'in-stock',
                   'sold',
-                  'reserved',
+                  // `getColValue` would return undefined if the column is not present,
+                  // breaking `:value` prop which requires a defined value
+                  // This is caused by `reserved` column definition not being included in the `columns` computed property
+                  // when reservations aren't enabled
+                  ...(areReservationsEnabled ? ['reserved'] : []),
                   'requested',
                   'purchased',
                 ]"
@@ -464,6 +468,12 @@ const { hasAdminRole } = useAuthService();
 
 const { isMobile } = useLateralDrawer();
 
+const { selectedLocation } = useRetailLocationService();
+
+const areReservationsEnabled = computed(
+  () => selectedLocation.value.maxBookingDays > 0,
+);
+
 const tableRef = ref() as Ref<QTable>;
 
 const {
@@ -551,7 +561,7 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: t("manageUsers.fields.sold"),
     align: "left",
   },
-  ...(selectedLocation.value.maxBookingDays > 0
+  ...(areReservationsEnabled.value
     ? [
         {
           name: "reserved",
@@ -764,7 +774,6 @@ function openEdit({
 // cells to always be clickable
 const alwaysClickableColsNames = ["in-stock", "reserved", "requested"];
 
-const { selectedLocation } = useRetailLocationService();
 function openCellEditDialog(
   userData: CustomerFragment,
   colName: string,

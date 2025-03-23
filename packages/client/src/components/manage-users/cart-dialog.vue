@@ -289,10 +289,10 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "buy-price",
-    field: "originalPrice",
+    field: ({ originalPrice }) => calculateBookCopyPrice(originalPrice, "buy"),
     label: t("manageUsers.payOffUserDialog.buyPrice"),
     align: "left",
-    format: (value: number) => calculateBookCopyPrice(value, "buy"),
+    format: formatPrice,
   },
   {
     name: "public-price",
