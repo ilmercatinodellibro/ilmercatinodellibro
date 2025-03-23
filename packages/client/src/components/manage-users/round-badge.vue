@@ -23,7 +23,7 @@ const positionClass = computed(() =>
       ? "top-left--square"
       : props.floatRight
         ? "top-right"
-        : undefined,
+        : '',
 );
 </script>
 

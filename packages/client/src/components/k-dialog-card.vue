@@ -24,9 +24,7 @@
 
     <q-card-actions
       v-if="!noActions"
-      :class="
-        isMobile ? 'column items-stretch gap-8 card-actions-mobile' : undefined
-      "
+      :class="isMobile ? 'column items-stretch gap-8 card-actions-mobile' : ''"
       align="right"
     >
       <slot name="card-actions">
