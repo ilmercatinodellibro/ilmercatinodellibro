@@ -8,22 +8,37 @@ services:
     volumes:
       - postgres:/var/lib/postgres/data
       - ${STORAGE_PATH}/tmp:/tmp/tmp-files
-    networks:
-      - postgres
     # https://github.com/docker-library/docs/blob/master/postgres/README.md#environment-variables
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
-  redis:
-    image: "redis:alpine"
-    container_name: ilmercatinodellibro-redis
-    ports:
-      - "${QUEUE_PORT:-6379}:6379"
+
+  backup:
+    image: alpine:latest
+    container_name: backup
+    depends_on:
+      - postgres
+    volumes:
+      - ./backup/scripts:/scripts
+      - ./backup/logs:/logs
+      - ./backup/config/rclone.conf:/root/.config/rclone/rclone.conf_tmp
+      - ./backup/config/msmtprc:/etc/msmtprc_tmp
+    env_file:
+      - .env
+    command: >
+      sh -c '
+      apk add --no-cache rclone postgresql-client tzdata msmtp gettext &&
+      chmod +x /scripts/*.sh &&
+      echo "0 14 * * * /scripts/backup.sh" > /etc/crontabs/root &&
+      echo "30 19 * * * /scripts/backup.sh" >> /etc/crontabs/root &&
+      echo "0 0 * * * /scripts/sync.sh" >> /etc/crontabs/root &&
+      crond -f
+      '
 
 volumes:
   postgres:
 
 networks:
-  postgres:
-    driver: bridge
+  default:
+    name: mercatino_network
