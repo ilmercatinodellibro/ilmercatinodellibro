@@ -30,6 +30,59 @@ $ pnpm db:seed
 $ pnpm db:psql
 ```
 
+## **Database Backup**
+
+The database is backed up using an Alpine-based container that performs automated tasks via cron jobs.
+
+**Schedule**
+
+• **Daily Backups:**
+
+- Performed twice a day at **14:00** and **19:30**.
+
+• **Retention:**
+
+- Only the **last 7 backups** are kept locally.
+
+• **Cloud Sync:**
+
+- Backups are uploaded to cloud storage daily at **00:00** using the **S3 protocol** via [rclone](https://rclone.org/).
+  > **⚠️ Warning:**
+  > Ensure that the environment variables for the cloud storage configuration are properly set up to avoid backup failures.
+
+### Configuration
+
+• **Cloud Storage Config:**
+
+- Located at [/backup/config/rclone.conf](https://www.notion.so/backup/config/rclone.conf)
+
+• **Email Notification (Error Logs):**
+
+• Errors are logged and emailed using **msmtp**.
+
+- Config: [/backup/config/msmtprc](https://www.notion.so/backup/config/msmtprc)
+
+• Recipient email is defined in the environment variables.
+
+### Logs
+
+You can view backup and sync logs in the [/backup/logs](https://www.notion.so/backup/logs) directory.
+
+### Manual Commands
+
+Use the following commands to run tasks manually:
+
+```bash
+# Perform a manual database backup
+pnpm db:backup
+
+# Sync backups to cloud storage
+pnpm db:backup:sync
+
+# Access the Alpine container used for backup
+pnpm db:backup:alpine
+```
+
 ## Run code generators and migrations
 
 ```bash
