@@ -1,0 +1,3 @@
+0 14 * * * /scripts/backup.sh
+30 19 * * * /scripts/backup.sh
+0 0 * * * /scripts/sync.sh
