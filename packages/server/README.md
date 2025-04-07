@@ -42,31 +42,44 @@ The database is backed up using an Alpine-based container that performs automate
 
 • **Retention:**
 
-- Only the **last 7 backups** are kept locally.
+- Only the **last 7 backups** are kept.
 
 • **Cloud Sync:**
 
-- Backups are uploaded to cloud storage daily at **00:00** using the **S3 protocol** via [rclone](https://rclone.org/).
+- Backups are uploaded to cloud storage daily at **00:00** using the **S3 protocol** via [RCLONE](https://rclone.org/).
   > **⚠️ Warning:**
   > Ensure that the environment variables for the cloud storage configuration are properly set up to avoid backup failures.
 
 ### Configuration
 
+• **Schedule:**
+
+- Located at [/backup/config/crontab](/backup/config/crontab)
+
+Syntax is as follows:
+
+```bash
+# Minute Hour Day Month DayOfWeek Command
+# ────── ──── ──── ──── ────────── ─────────────────────────────────────────────
+# 0      0    *    *    *         /backup/scripts/backup.sh
+# 30     14   *    *    *         /backup/scripts/backup.sh
+```
+
 • **Cloud Storage Config:**
 
-- Located at [/backup/config/rclone.conf](https://www.notion.so/backup/config/rclone.conf)
+- Located at [/backup/config/rclone.conf](/backup/config/rclone.conf)
 
 • **Email Notification (Error Logs):**
 
 • Errors are logged and emailed using **msmtp**.
 
-- Config: [/backup/config/msmtprc](https://www.notion.so/backup/config/msmtprc)
+- Config: [/backup/config/msmtprc](/backup/config/msmtprc)
 
 • Recipient email is defined in the environment variables.
 
 ### Logs
 
-You can view backup and sync logs in the [/backup/logs](https://www.notion.so/backup/logs) directory.
+You can view backup and sync logs in the [/backup/logs](/backup/logs) directory.
 
 ### Manual Commands
 
