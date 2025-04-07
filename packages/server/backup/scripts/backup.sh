@@ -4,7 +4,6 @@ export PGPASSWORD="$DB_PASS"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/backups"
 LOG_DIR="/logs"
-RCLONE_REMOTE="minio"
 EMAIL="$MAIL_SUPPORT"
 
 BACKUP_FILE="$BACKUP_DIR/dump_$TIMESTAMP.sql.gz"
