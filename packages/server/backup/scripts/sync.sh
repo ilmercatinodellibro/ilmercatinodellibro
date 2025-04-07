@@ -12,20 +12,6 @@ mkdir -p "$LOG_DIR"
 # All output goes to the log file
 exec > "$LOG_FILE" 2>&1
 
-# Replace env variables in the rclone.conf file
-if ! envsubst < /root/.config/rclone/rclone.conf_tmp > /root/.config/rclone/rclone.conf; then
-    echo "ERRORE: Sostituzione variabili nel file di configurazione di rclone fallita!"
-    exit 1
-fi
-
-if ! envsubst < /etc/msmtprc_tmp > /etc/msmtprc; then
-    echo "ERRORE: Sostituzione variabili nel file msmtprc fallita!"
-    exit 1
-fi
-
-chmod 600 /etc/msmtprc
-chmod 600 /root/.config/rclone/rclone.conf
-
 echo "=== Inizio Sync $(date) ==="
 echo "Sincronizzazione backup con storage remoto..."
 
