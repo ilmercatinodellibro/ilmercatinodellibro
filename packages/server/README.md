@@ -54,7 +54,7 @@ The database is backed up using an Alpine-based container that performs automate
 
 • **Schedule:**
 
-- Located at [/backup/config/crontab](/backup/config/crontab)
+- Located at [backup/config/crontabs](backup/config/crontabs)
 
 Syntax is as follows:
 
@@ -67,19 +67,19 @@ Syntax is as follows:
 
 • **Cloud Storage Config:**
 
-- Located at [/backup/config/rclone.conf](/backup/config/rclone.conf)
+- Located at [backup/config/rclone.conf](backup/config/rclone.conf)
 
 • **Email Notification (Error Logs):**
 
 • Errors are logged and emailed using **msmtp**.
 
-- Config: [/backup/config/msmtprc](/backup/config/msmtprc)
+- Config: [backup/config/msmtprc](backup/config/msmtprc)
 
 • Recipient email is defined in the environment variables.
 
 ### Logs
 
-You can view backup and sync logs in the [/backup/logs](/backup/logs) directory.
+You can view backup and sync logs in the [backup/logs](backup/logs) directory.
 
 ### Manual Commands
 
