@@ -22,6 +22,7 @@ services:
     volumes:
       - ./backup/logs:/logs
       - ./backup/scripts:/scripts
+      - ./backup/DB_backups:/backups
       - ./backup/config/crontabs:/etc/crontabs/root
       - ./backup/config/msmtprc:/etc/msmtprc_template
       - ./backup/config/rclone.conf:/root/.config/rclone/rclone.conf_template
