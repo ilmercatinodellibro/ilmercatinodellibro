@@ -68,6 +68,154 @@ $ pnpm serve
 # If you're serving it locally, you can access it at http://localhost:3000 by default
 ```
 
+## Application Backup
+
+The system performs automated backups of both the **database** and **application files** to ensure full recoverability. Backups are stored locally and synced with Aruba Cloud Storage.
+
+### 📦 What Gets Backed Up
+
+| Component         | Details                                                                               | Frequency               | Retention |
+| ----------------- | ------------------------------------------------------------------------------------- | ----------------------- | --------- |
+| **Database**      | Complete PostgreSQL dump (compressed)                                                 | 2x daily (14:00, 19:30) | 7 days    |
+| **Application**   | All application files (excluding `node_modules`, `.git`, and logs)                    | Daily (02:00)           | 7 days    |
+| **Configuration** | Critical config files (`.env`, [Docker configs](/packages/server/docker-compose.yml)) | With application        | 7 days    |
+
+> ⚠️ **Note**: Insure you have `.env` configured correctly for the backup process to work. The backup script will not run if the `.env` file is missing or misconfigured.
+
+---
+
+### 🔧 How It Works
+
+#### **1. Database Backup**
+
+Automated PostgreSQL backups via Alpine container with cron scheduling.
+
+- To manage the cron jobs, see the [`crontab`](/packages/server/backup/config/crontabs) file.
+- To view the DB backup script, see [`backup_db.sh`](/packages/server/backup/scripts/backup_db.sh).
+
+**Schedule:**
+
+```bash
+# Minute  Hour  Day/Month  Month  Day/Week  Command
+# ──────  ────  ─────────  ─────  ────────  ──────────────────
+0         14    *          *      *         /scripts/backup_db.sh    # Daily at 14:00
+30        19    *          *      *         /scripts/backup_db.sh    # Daily at 19:30
+0         0     *          *      *         /scripts/sync.sh         # Cloud sync at midnight
+```
+
+**Key Features:**
+
+- **Retention:** 7 days (local and cloud)
+- **Compression:** Gzip-compressed SQL dumps
+- **Verification:** Automatic integrity checks
+- **Naming:** `db_backup_YYYYMMDD_HHMMSS.sql.gz`
+
+---
+
+#### **2. Application Backup**
+
+Full application directory backup excluding non-essential files.
+
+- To view the application backup script, see [`backup_app.sh`](/packages/server/backup/scripts/backup_app.sh).
+
+**Schedule:**
+
+```bash
+0  2  *  *  *  /scripts/backup_app.sh  # Daily at 02:00
+```
+
+**Excluded:**
+
+```text
+node_modules/
+.git/
+*.log
+```
+
+---
+
+#### **3. Cloud Sync with Rclone**
+
+Backups are synced to Aruba Cloud via S3 protocol.
+
+**Configuration:**
+
+- To view the Rclone configuration, see [`rclone.conf`](/packages/server/backup/config/rclone.conf).
+- To view the sync script, see [`sync.sh`](/packages/server/backup/scripts/sync.sh).
+- To view the cron job for syncing, see [`crontab`](/packages/server/backup/config/crontabs).
+
+#### Email Alerts
+
+- Email alerts for backup failures are sent to the configured email address.
+- To view the email configuration, see [`msmtprc`](/packages/server/backup/config/msmtprc).
+- To view the email script, see [`send_mail.sh`](/packages/server/backup/scripts/send_mail.sh).
+
+---
+
+### 🚀 Useful Commands
+
+#### Manual Backups
+
+```bash
+# Manual DB backup
+pnpm backup:db
+
+# Full app backup
+pnpm backup:app
+
+# Force cloud sync
+pnpm backup:sync
+```
+
+#### To enter the backup container
+
+```bash
+# Enter the backup container
+pnpm backup:alpine
+```
+
+### 🔍 Monitoring
+
+- Check logs file in `$HOME/mdl_backups/logs/` for backup status
+- Email alerts for backup failures are sent to the configured email address
+
+## **Restore Procedures**
+
+### **1. How Restoration Works**
+
+Restoration is performed via dedicated scripts running inside the `backup` container. The system supports:
+
+| Type            | Script Location                                                                     | Key Features                                                                |
+| --------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Database**    | [`./backup/scripts/restore_db.sh`](/packages/server/backup/scripts/restore_db.sh)   | - Atomic operation<br>- Preserves permissions<br>- Interactive confirmation |
+| **Application** | [`./backup/scripts/restore_app.sh`](/packages/server/backup/scripts/restore_app.sh) | - Selective file extraction<br>- Version rollback capability                |
+
+### **2. Step-by-Step Guide**
+
+#### **Database Restoration**
+
+```bash
+# 1. List available backups
+pnpm restore:db:list
+
+# 2. Run restore
+pnpm restore:db <backup_file_name>
+```
+
+> 💡 **Note:** Requires active PostgreSQL container. The script will prompt for confirmation before overwriting data.
+
+#### **Application Restoration**
+
+```bash
+# 1. List application backups
+pnpm restore:app:list
+
+# 2. Run restore
+pnpm restore:app <backup_file_name>
+```
+
+> ⚠️ **Warning:** This overwrites existing files in `/app`. Critical files like `.env` should be backed up separately.
+
 ## Production Setup
 
 This section is meant to describe the setup steps for a production installation of the software or anyway the installation on a machine that needs to be configured from scratch.
