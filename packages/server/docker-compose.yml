@@ -20,9 +20,10 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./backup/logs:/logs
+      - ../../:/app:ro
       - ./backup/scripts:/scripts
-      - ./backup/DB_backups:/backups
+      - ${HOME}/mdl_backups/logs:/logs
+      - ${HOME}/mdl_backups/backups:/backups
       - ./backup/config/crontabs:/etc/crontabs/root
       - ./backup/config/msmtprc:/etc/msmtprc_template
       - ./backup/config/rclone.conf:/root/.config/rclone/rclone.conf_template
