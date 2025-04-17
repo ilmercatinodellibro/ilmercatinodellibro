@@ -1,10 +1,10 @@
 #!/bin/sh
 
+ARUBA_BUCKET="$ARUBA_BUCKET"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/backups"
 LOG_DIR="/logs"
-ARUBA_BUCKET="$ARUBA_BUCKET"
-EMAIL="$MAIL_SUPPORT"
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
 LOG_FILE="$LOG_DIR/sync_$TIMESTAMP.log"
 
 mkdir -p "$LOG_DIR"
@@ -29,21 +29,14 @@ if $SYNC_SUCCESS && ! rclone check "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --size-on
 fi
 
 if $SYNC_SUCCESS; then
-    echo "Sync completato con successo"
+    echo "Sync completed successfully!"
+    echo "Backup Directory: $BACKUP_DIR ($(du -sh "$BACKUP_DIR" | cut -f1))"
+else
+    echo "Sync completed with errors!"
+    # Send error notification
+    /scripts/send_email.sh "$LOG_FILE" "[Mercatino] Sync Error $(date)"
 fi
-
-echo "=== Fine Sync $(date) ==="
-
-# Send email if there are errors (using the log file already created)
-if ! $SYNC_SUCCESS || grep -q "ERRORE" "$LOG_FILE"; then
-    (
-        echo "Subject: [Mercatino] Errore Sync Backup $(date)"
-        echo "From: $MAIL_FROM_DEFAULT"
-        echo "To: $EMAIL"
-        echo ""
-        cat "$LOG_FILE"
-    ) | msmtp --read-recipients "$EMAIL"
-fi
+echo "=== Sync Finished $(date) ==="
 
 if ! $SYNC_SUCCESS; then
     exit 1
