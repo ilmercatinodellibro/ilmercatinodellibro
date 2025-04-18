@@ -48,7 +48,7 @@ if $BACKUP_SUCCESS && ! gzip -t "$DB_BACKUP_FILE"; then
 fi
 
 # Cleanup old backups (keeping last 7 days)
-find "$BACKUP_DIR" -name "*.tz" -type f -mtime +7 -delete
+find "$BACKUP_DIR" -name "*.gz" -type f -mtime +7 -delete
 find "$LOG_DIR" -name "*.log" -type f -mtime +7 -delete
 
 if $BACKUP_SUCCESS; then
