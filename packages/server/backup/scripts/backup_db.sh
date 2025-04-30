@@ -17,14 +17,11 @@ exec > "$LOG_FILE" 2>&1
 
 echo "=== Starting DB Backup $(date) ==="
 
-# DB dump
-if ! pg_dump -h postgres -U "$DB_USER" -d "$DB_NAME" | gzip > "$BACKUP_FILE"; then
-    echo "ERROR: Database dump failed!"
-    BACKUP_SUCCESS=false
-fi
+# Source the backup_database functions script
+. /scripts/functions.sh
 
-if $BACKUP_SUCCESS && ! gzip -t "$BACKUP_FILE"; then
-    echo "ERROR: Database backup verification failed!"
+backup_database "$BACKUP_FILE"
+if [ $? -ne 0 ]; then
     BACKUP_SUCCESS=false
 fi
 
@@ -34,7 +31,7 @@ if $BACKUP_SUCCESS; then
 else
     echo "DB backup completed with errors!"
     # Send error notification
-    /scripts/send_email.sh "$LOG_FILE" "[Mercatino] DB backup Error $(date)"
+    send_mail "$LOG_FILE" "[Mercatino] DB backup Error $(date)"
 fi
 echo "=== Backup Finished $(date) ==="
 
