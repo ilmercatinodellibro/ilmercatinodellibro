@@ -68,7 +68,7 @@ $ pnpm serve
 # If you're serving it locally, you can access it at http://localhost:3000 by default
 ```
 
-## Application Backup
+## Backup feature
 
 The system performs automated backups of both the **database** and **application files** to ensure full recoverability. Backups are stored locally and synced with Aruba Cloud Storage.
 
@@ -80,7 +80,7 @@ The system performs automated backups of both the **database** and **application
 | **Application**   | All application files (excluding `node_modules`, `.git`, and logs)                    | Daily (02:00)           | 7 days    |
 | **Configuration** | Critical config files (`.env`, [Docker configs](/packages/server/docker-compose.yml)) | With application        | 7 days    |
 
-> ⚠️ **Note**: Insure you have `.env` configured correctly for the backup process to work. The backup script will not run if the `.env` file is missing or misconfigured.
+> ⚠️ **Note**: Ensure you have `.env` configured correctly for the backup process to work. The backup script will not run if the `.env` file is missing or misconfigured.
 
 ---
 
@@ -93,22 +93,13 @@ Automated PostgreSQL backups via Alpine container with cron scheduling.
 - To manage the cron jobs, see the [`crontab`](/packages/server/backup/config/crontabs) file.
 - To view the DB backup script, see [`backup_db.sh`](/packages/server/backup/scripts/backup_db.sh).
 
-**Schedule:**
+**Schedule syntax:**
 
 ```bash
 # Minute  Hour  Day/Month  Month  Day/Week  Command
 # ──────  ────  ─────────  ─────  ────────  ──────────────────
-0         14    *          *      *         /scripts/backup_db.sh    # Daily at 14:00
-30        19    *          *      *         /scripts/backup_db.sh    # Daily at 19:30
-0         0     *          *      *         /scripts/sync.sh         # Cloud sync at midnight
+# 0       0     *          *      *         /script_name.sh
 ```
-
-**Key Features:**
-
-- **Retention:** 7 days (local and cloud)
-- **Compression:** Gzip-compressed SQL dumps
-- **Verification:** Automatic integrity checks
-- **Naming:** `db_backup_YYYYMMDD_HHMMSS.sql.gz`
 
 ---
 
@@ -117,20 +108,6 @@ Automated PostgreSQL backups via Alpine container with cron scheduling.
 Full application directory backup excluding non-essential files.
 
 - To view the application backup script, see [`backup_app.sh`](/packages/server/backup/scripts/backup_app.sh).
-
-**Schedule:**
-
-```bash
-0  2  *  *  *  /scripts/backup_app.sh  # Daily at 02:00
-```
-
-**Excluded:**
-
-```text
-node_modules/
-.git/
-*.log
-```
 
 ---
 
