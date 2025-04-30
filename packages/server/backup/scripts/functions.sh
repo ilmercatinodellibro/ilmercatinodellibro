@@ -2,7 +2,7 @@ function backup_database() {
     BACKUP_FILE=$1
 
     if [ -z "$BACKUP_FILE" ]; then
-        echo "ERROR: Usage: perform_backup <backup_file>"
+        echo "ERROR: Usage: backup_database <backup_file>"
         return 1
     fi
 
@@ -17,15 +17,20 @@ function backup_database() {
         return 3
     fi
 
+    if [ -z "$DB_NAME" ]; then
+        echo "DB_NAME is not set. Please set it in the environment."
+        return 4
+    fi
+
     echo "Creating database backup..."
     if ! pg_dump -h postgres -U "$DB_USER" -d "$DB_NAME" | gzip > "$BACKUP_FILE"; then
         echo "ERROR: Database dump failed!"
-        return 4
+        return 5
     fi
 
     if ! gzip -t "$BACKUP_FILE"; then
         echo "ERROR: Database backup verification failed!"
-        return 5
+        return 6
     fi
 
     return 0
@@ -96,5 +101,11 @@ function send_mail() {
         cat "$LOG_FILE"
     ) | msmtp --read-recipients "$EMAIL"
 
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to send email."
+        return 5
+    fi
+
     echo "Email sent to $EMAIL with subject: $SUBJECT"
+    return 0
 }
