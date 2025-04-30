@@ -16,7 +16,7 @@ services:
 
   backup:
     image: alpine:latest
-    container_name: backup
+    container_name: ilmercatinodellibro-backup
     depends_on:
       - postgres
     volumes:
