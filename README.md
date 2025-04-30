@@ -15,11 +15,14 @@ Afterwards, execute the following commands:
 ```bash
 $ pnpm install
 
-# Runs the needed docker containers
-$ pnpm db:start
+# Runs the needed docker containers (DB, backup)
+$ pnpm docker:start
 
 # Wipe out the DB (if present), (re)run all migrations, then seed the DB
 $ pnpm server:migrate:reset
+
+# To stop the docker containers (DB, backup)
+$ pnpm docker:stop
 ```
 
 If this is the first time working on this project, make sure to read the following documents before starting to code:
@@ -30,13 +33,13 @@ If this is the first time working on this project, make sure to read the followi
 ## Run in development mode (everyday usage)
 
 ```bash
-# Runs the needed docker containers, only needed if you haven't run it already
+# Runs the DB container if not already running
 $ pnpm db:start
 # Open the following commands in 2 separate terminals
 $ pnpm server:dev
 $ pnpm client:dev
 
-# Stops docker containers
+# Stops DB container
 $ pnpm db:stop
 ```
 
