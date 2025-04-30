@@ -1,6 +1,5 @@
 #!/bin/sh
 
-ARUBA_BUCKET="$ARUBA_BUCKET"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/backups"
 LOG_DIR="/logs"
@@ -17,10 +16,18 @@ echo "Starting backup synchronization with remote storage..."
 
 SYNC_SUCCESS=true
 
-# Sync to Aruba
-if ! rclone sync "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --log-level INFO; then
-    echo "ERROR: Sync to Aruba failed!"
-    SYNC_SUCCESS=false
+# Copy /backups in development
+if [ "$NODE_ENV" = "development" ]; then
+    if ! rclone copy "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --log-level INFO; then
+        echo "ERROR: Copy to Aruba failed!"
+        SYNC_SUCCESS=false
+    fi
+else
+    # Sync /backups in production
+    if ! rclone sync "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --log-level INFO; then
+        echo "ERROR: Sync to Aruba failed!"
+        SYNC_SUCCESS=false
+    fi
 fi
 
 if $SYNC_SUCCESS && ! rclone check "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --size-only; then
