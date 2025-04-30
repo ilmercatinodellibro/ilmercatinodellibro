@@ -1,4 +1,4 @@
-0 0 * * * /scripts/sync.sh   
 0 2 * * * /scripts/backup_app.sh
+0 4 * * * /scripts/sync.sh   
 0 14 * * * /scripts/backup_db.sh
 30 19 * * * /scripts/backup_db.sh
