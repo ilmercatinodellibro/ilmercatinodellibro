@@ -39,9 +39,9 @@ services:
     command: >
       sh -c '
       apk add --no-cache rclone postgresql-client tzdata msmtp gettext &&
-      envsubst < /etc/msmtprc_template > /etc/msmtprc && chmod 600 /etc/msmtprc &&
       envsubst < /root/.config/rclone/rclone.conf_template > /root/.config/rclone/rclone.conf && 
       chmod +x /scripts/*.sh && chmod 600 /root/.config/rclone/rclone.conf &&
+      /scripts/generate_msmtprc.sh &&
       crond -f
       '
 
