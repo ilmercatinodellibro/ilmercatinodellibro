@@ -29,8 +29,8 @@ services:
     volumes:
       - ../../:/app:ro
       - ./backup/scripts:/scripts
-      - ${HOME}/mdl_backups/logs:/logs
-      - ${HOME}/mdl_backups/backups:/backups
+      - ./backup/mdl_backups/logs:/logs
+      - ./backup/mdl_backups/backups:/backups
       - ./backup/config/crontabs:/etc/crontabs/root
       - ./backup/config/msmtprc:/etc/msmtprc_template
       - ./backup/config/rclone.conf:/root/.config/rclone/rclone.conf_template

@@ -77,11 +77,11 @@ The system performs automated backups of both the **database** and **application
 
 ### 📦 What Gets Backed Up
 
-| Component         | Details                                                                               | Frequency               | Retention |
-| ----------------- | ------------------------------------------------------------------------------------- | ----------------------- | --------- |
-| **Database**      | Complete PostgreSQL dump (compressed)                                                 | 2x daily (14:00, 19:30) | 7 days    |
-| **Application**   | All application files (excluding `node_modules`, `.git`, and logs)                    | Daily (02:00)           | 7 days    |
-| **Configuration** | Critical config files (`.env`, [Docker configs](/packages/server/docker-compose.yml)) | With application        | 7 days    |
+| Component         | Details                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| **Database**      | Complete PostgreSQL dump (compressed)                                                 |
+| **Application**   | All application files (excluding `node_modules`, `.git`, and logs)                    |
+| **Configuration** | Critical config files (`.env`, [Docker configs](/packages/server/docker-compose.yml)) |
 
 > ⚠️ **Note**: Ensure you have `.env` configured correctly for the backup process to work. The backup script will not run if the `.env` file is missing or misconfigured.
 
@@ -156,7 +156,7 @@ pnpm backup:alpine
 
 ### 🔍 Monitoring
 
-- Check logs file in `$HOME/mdl_backups/logs/` for backup status
+- Check logs file in [`/mdl_backups/logs/`](/packages/server/backup/mdl_backups/logs/) for backup status
 - Email alerts for backup failures are sent to the configured email address
 
 ## **Restore Procedures**
