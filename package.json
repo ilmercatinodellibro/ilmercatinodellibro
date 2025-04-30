@@ -28,8 +28,6 @@
     "server:migrate:reset": "pnpm --filter \"./packages/server\" migrate:reset",
     "db:start": "pnpm --filter \"./packages/server\" db:start",
     "db:stop": "pnpm --filter \"./packages/server\" db:stop",
-    "prepare": "husky && pnpm generate",
-    "preinstall": "npx only-allow pnpm",
     "backup:db": "pnpm --filter \"./packages/server\" backup:db",
     "backup:app": "pnpm --filter \"./packages/server\" backup:app",
     "restore:db": "pnpm --filter \"./packages/server\" restore:db",
@@ -37,7 +35,9 @@
     "backup:sync": "pnpm --filter \"./packages/server\" backup:sync",
     "backup:alpine": "pnpm --filter \"./packages/server\" backup:alpine",
     "restore:db:list": "pnpm --filter \"./packages/server\" restore:db:list",
-    "restore:app:list": "pnpm --filter \"./packages/server\" restore:app:list"
+    "restore:app:list": "pnpm --filter \"./packages/server\" restore:app:list",
+    "prepare": "husky && pnpm generate",
+    "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
     "@types/node": "^20.12.6",
