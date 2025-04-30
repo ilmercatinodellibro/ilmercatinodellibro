@@ -4,22 +4,23 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/backups"
 LOG_DIR="/logs"
 
-LOG_FILE="$LOG_DIR/sync_$TIMESTAMP.log"
-
 mkdir -p "$LOG_DIR"
+mkdir -p "$BACKUP_DIR"
+
+LOG_FILE="$LOG_DIR/sync_$TIMESTAMP.log"
 
 # All output goes to the log file
 exec > "$LOG_FILE" 2>&1
-
-echo "=== Starting Sync $(date) ==="
-echo "Starting backup synchronization with remote storage..."
-
-SYNC_SUCCESS=true
 
 if [ -z "$NODE_ENV" ]; then
     echo "ERROR: NODE_ENV is not set!"
     exit 1
 fi
+
+echo "=== Starting Sync $(date) ==="
+echo "Starting backup synchronization with remote storage..."
+
+SYNC_SUCCESS=true
 
 # Define the bucket path based on NODE_ENV
 REMOTE_PATH="aruba:$ARUBA_BUCKET/$NODE_ENV"

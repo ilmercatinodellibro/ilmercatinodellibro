@@ -3,7 +3,8 @@
 # Usage: ./restore_app.sh <backup_file.tar.gz>
 
 if [ -z "$1" ]; then
-  echo "ERROR: Please specify backup file (e.g., app_backup_20240501_020000.tar.gz)"
+  echo "Usage: $0 <backup_file.tar.gz>"
+  echo "ERROR: Please specify a backup file (e.g., app_backup_20240501_020000.tar.gz)"
   exit 1
 fi
 
@@ -21,8 +22,8 @@ fi
 . /scripts/functions.sh
 
 echo "=== Creating a backup of the current application ==="
-CURRENT_DATE=$(date +"%Y%m%d_%H%M%S")
-BACKUP_BEFORE_RESTORE="/backups/app_backup_before_restore_$CURRENT_DATE.tar.gz"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+BACKUP_BEFORE_RESTORE="/backups/app_backup_before_restore_$TIMESTAMP.tar.gz"
 
 backup_application "$BACKUP_BEFORE_RESTORE" "$APP_DIR"
 if [ $? -eq 0 ]; then

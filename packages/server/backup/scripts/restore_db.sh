@@ -21,8 +21,8 @@ fi
 
 echo "=== Creating a backup of the current database ==="
 
-CURRENT_DATE=$(date +"%Y%m%d_%H%M%S")
-BACKUP_BEFORE_RESTORE="/backups/db_backup_before_restore_$CURRENT_DATE.sql.gz"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+BACKUP_BEFORE_RESTORE="/backups/db_backup_before_restore_$TIMESTAMP.sql.gz"
 
 backup_database "$BACKUP_BEFORE_RESTORE"
 
