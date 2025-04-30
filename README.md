@@ -124,6 +124,8 @@ Backups are synced to Aruba Cloud via S3 protocol.
 - To view the sync script, see [`sync.sh`](/packages/server/backup/scripts/sync.sh).
 - To view the cron job for syncing, see [`crontab`](/packages/server/backup/config/crontabs).
 
+> ⚠️ **Note**: In development mode, the sync script make a `copy` of the backup files instead of syncing them to the cloud. This is to avoid to overwrite the files in the cloud with the development ones. In production mode, the sync script will `sync` the backup files to the cloud.
+
 #### Email Alerts
 
 - Email alerts for backup failures are sent to the configured email address.
