@@ -16,23 +16,33 @@ echo "Starting backup synchronization with remote storage..."
 
 SYNC_SUCCESS=true
 
+if [ -z "$NODE_ENV" ]; then
+    echo "ERROR: NODE_ENV is not set!"
+    exit 1
+fi
+
+# Define the bucket path based on NODE_ENV
+REMOTE_PATH="aruba:$ARUBA_BUCKET/$NODE_ENV"
+
+echo "Remote path: $REMOTE_PATH"
+
 # Copy /backups in development
 if [ "$NODE_ENV" = "development" ]; then
-    if ! rclone copy "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --log-level INFO; then
+    if ! rclone copy "$BACKUP_DIR" "$REMOTE_PATH" --log-level INFO; then
         echo "ERROR: Copy to Aruba failed!"
         SYNC_SUCCESS=false
     fi
 else
     # Sync /backups in production
-    if ! rclone sync "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --log-level INFO; then
+    if ! rclone sync "$BACKUP_DIR" "$REMOTE_PATH" --log-level INFO; then
         echo "ERROR: Sync to Aruba failed!"
         SYNC_SUCCESS=false
     fi
-fi
 
-if $SYNC_SUCCESS && ! rclone check "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --size-only; then
-    echo "ATTENTION: Sync verification failed!"
-    SYNC_SUCCESS=false
+    if $SYNC_SUCCESS && ! rclone check "$BACKUP_DIR" "$REMOTE_PATH" --size-only; then
+        echo "ATTENTION: Sync verification failed!"
+        SYNC_SUCCESS=false
+    fi
 fi
 
 if $SYNC_SUCCESS; then
@@ -40,8 +50,12 @@ if $SYNC_SUCCESS; then
     echo "Backup Directory: $BACKUP_DIR ($(du -sh "$BACKUP_DIR" | cut -f1))"
 else
     echo "Sync completed with errors!"
+    
+    # Source the functions script
+    . /scripts/functions.sh
+
     # Send error notification
-    /scripts/send_email.sh "$LOG_FILE" "[Mercatino] Sync Error $(date)"
+    send_mail "$LOG_FILE" "[Mercatino] Sync Error $(date)"
 fi
 echo "=== Sync Finished $(date) ==="
 
