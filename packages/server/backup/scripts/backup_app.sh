@@ -26,6 +26,7 @@ cd /
 if ! tar --exclude='node_modules' \
          --exclude='.git' \
          --exclude='*.log' \
+         --exclude='*.gz' \
          -czf "$BACKUP_FILE" "$APP_DIR"; then
     echo "ERROR: Application backup failed!"
     BACKUP_SUCCESS=false
