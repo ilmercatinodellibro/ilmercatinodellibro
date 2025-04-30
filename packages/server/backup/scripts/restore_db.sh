@@ -16,6 +16,25 @@ if [ ! -f "$BACKUP_FILE" ]; then
   exit 1
 fi
 
+# Source the backup_database functions script
+. /scripts/functions.sh
+
+echo "=== Creating a backup of the current database ==="
+
+CURRENT_DATE=$(date +"%Y%m%d_%H%M%S")
+BACKUP_BEFORE_RESTORE="/backups/db_backup_before_restore_$CURRENT_DATE.sql.gz"
+
+backup_database "$BACKUP_BEFORE_RESTORE"
+
+if [ $? -eq 0 ]; then
+  echo "Backup created successfully!"
+  echo "Database Backup: $BACKUP_BEFORE_RESTORE ($(du -h "$BACKUP_BEFORE_RESTORE" | cut -f1))"
+else
+  echo "ERROR: Failed to create a backup before restoring!"
+  exit 1
+fi
+echo "=== Backup complete ==="
+
 echo "=== Restoring database from $1 ==="
 echo "This will OVERWRITE existing data. Continue? (y/N)"
 read -r confirm
