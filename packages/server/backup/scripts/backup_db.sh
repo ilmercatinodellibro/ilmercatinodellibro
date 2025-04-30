@@ -15,7 +15,7 @@ mkdir -p "$LOG_DIR"
 BACKUP_SUCCESS=true
 exec > "$LOG_FILE" 2>&1
 
-echo "=== Inizio Backup $(date) ==="
+echo "=== Starting DB Backup $(date) ==="
 
 # DB dump
 if ! pg_dump -h postgres -U "$DB_USER" -d "$DB_NAME" | gzip > "$BACKUP_FILE"; then

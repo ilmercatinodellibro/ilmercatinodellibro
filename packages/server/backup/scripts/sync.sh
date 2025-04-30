@@ -12,19 +12,19 @@ mkdir -p "$LOG_DIR"
 # All output goes to the log file
 exec > "$LOG_FILE" 2>&1
 
-echo "=== Inizio Sync $(date) ==="
-echo "Sincronizzazione backup con storage remoto..."
+echo "=== Starting Sync $(date) ==="
+echo "Starting backup synchronization with remote storage..."
 
 SYNC_SUCCESS=true
 
 # Sync to Aruba
 if ! rclone sync "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --log-level INFO; then
-    echo "ERRORE: Sincronizzazione fallita!"
+    echo "ERROR: Sync to Aruba failed!"
     SYNC_SUCCESS=false
 fi
 
 if $SYNC_SUCCESS && ! rclone check "$BACKUP_DIR" "aruba:$ARUBA_BUCKET" --size-only; then
-    echo "ATTENZIONE: Verifica sincronizzazione fallita!"
+    echo "ATTENTION: Sync verification failed!"
     SYNC_SUCCESS=false
 fi
 
