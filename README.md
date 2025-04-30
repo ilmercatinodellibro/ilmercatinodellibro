@@ -80,7 +80,7 @@ The system performs automated backups of both the **database** and **application
 | Component         | Details                                                                               |
 | ----------------- | ------------------------------------------------------------------------------------- |
 | **Database**      | Complete PostgreSQL dump (compressed)                                                 |
-| **Application**   | All application files (excluding `node_modules`, `.git`, and logs)                    |
+| **Application**   | All application files (excluding `node_modules`, `.git`, `*.log` and `*.gz`)          |
 | **Configuration** | Critical config files (`.env`, [Docker configs](/packages/server/docker-compose.yml)) |
 
 > ⚠️ **Note**: Ensure you have `.env` configured correctly for the backup process to work. The backup script will not run if the `.env` file is missing or misconfigured.
@@ -124,7 +124,7 @@ Backups are synced to Aruba Cloud via S3 protocol.
 - To view the sync script, see [`sync.sh`](/packages/server/backup/scripts/sync.sh).
 - To view the cron job for syncing, see [`crontab`](/packages/server/backup/config/crontabs).
 
-> ⚠️ **Note**: In development mode, the sync script make a `copy` of the backup files instead of syncing them to the cloud. This is to avoid to overwrite the files in the cloud with the development ones. In production mode, the sync script will `sync` the backup files to the cloud.
+> ⚠️ **Note**: In development mode, the sync script performs a `copy` of the backup files to the cloud storage path defined by `NODE_ENV`, ensuring that development backups do not overwrite production backups. In production mode, the sync script uses `sync` to ensure the cloud storage is fully synchronized with the local backup directory.
 
 #### Email Alerts
 
@@ -167,10 +167,10 @@ pnpm backup:alpine
 
 Restoration is performed via dedicated scripts running inside the `backup` container. The system supports:
 
-| Type            | Script Location                                                                     | Key Features                                                                |
-| --------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| **Database**    | [`./backup/scripts/restore_db.sh`](/packages/server/backup/scripts/restore_db.sh)   | - Atomic operation<br>- Preserves permissions<br>- Interactive confirmation |
-| **Application** | [`./backup/scripts/restore_app.sh`](/packages/server/backup/scripts/restore_app.sh) | - Selective file extraction<br>- Version rollback capability                |
+| Type            | Script Location                                                                     | Key Features                                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Database**    | [`./backup/scripts/restore_db.sh`](/packages/server/backup/scripts/restore_db.sh)   | - Performs a backup with an appropriate name before restore<br>- Preserves permissions<br>- Interactive confirmation      |
+| **Application** | [`./backup/scripts/restore_app.sh`](/packages/server/backup/scripts/restore_app.sh) | - Performs a backup with an appropriate name before restore<br>- Selective file extraction <br>- Interactive confirmation |
 
 ### **2. Step-by-Step Guide**
 
