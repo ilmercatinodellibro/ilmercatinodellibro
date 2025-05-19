@@ -7,10 +7,16 @@ import { RetailLocation } from "src/@generated/retail-location";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Input } from "src/modules/auth/decorators/input.decorator";
-import { UpdateRetailLocationSettingsInput } from "src/modules/retail-location/retail-location.input";
+import {
+  UpdateRetailLocationInfoInput,
+  UpdateRetailLocationSettingsInput,
+} from "src/modules/retail-location/retail-location.input";
 import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
-import { languageLocales } from "test/fixtures/retail-locations";
+import {
+  languageLocales,
+  type RetailLocationInfo,
+} from "test/fixtures/retail-locations";
 import { Public } from "../auth/decorators/public-route.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
@@ -875,5 +881,55 @@ export class RetailLocationResolver {
       ({ timestamp: timestampA }, { timestamp: timestampB }) =>
         timestampA.valueOf() - timestampB.valueOf(),
     );
+  }
+
+  @Mutation(() => RetailLocation)
+  async updateRetailLocationInfo(
+    @Input()
+    {
+      retailLocationId,
+      languageId,
+      faqContent,
+      whoAreWeContent,
+      joinUsContent,
+    }: UpdateRetailLocationInfoInput,
+    @CurrentUser() currentUser: User,
+  ) {
+    await this.authService.assertMembership({
+      userId: currentUser.id,
+      role: Role.ADMIN,
+      message: "You cannot update the retail locations data",
+    });
+
+    const { infoPagesContent } =
+      await this.prisma.retailLocation.findUniqueOrThrow({
+        where: {
+          id: retailLocationId,
+        },
+        select: {
+          infoPagesContent: true,
+        },
+      });
+
+    const { [languageId]: currentInfo, ...rest } =
+      infoPagesContent as unknown as Record<string, RetailLocationInfo>;
+
+    const updatedInfo = {
+      faqContent: faqContent ?? currentInfo.faqContent,
+      whoAreWeContent: whoAreWeContent ?? currentInfo.whoAreWeContent,
+      joinUsContent: joinUsContent ?? currentInfo.joinUsContent,
+    } satisfies RetailLocationInfo;
+
+    return this.prisma.retailLocation.update({
+      where: {
+        id: retailLocationId,
+      },
+      data: {
+        infoPagesContent: {
+          ...(rest as unknown as Record<string, object>),
+          [languageId]: updatedInfo,
+        },
+      },
+    });
   }
 }

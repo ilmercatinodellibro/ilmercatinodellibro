@@ -1,4 +1,4 @@
-import { InputType, IntersectionType, PickType } from "@nestjs/graphql";
+import { Field, InputType, IntersectionType, PickType } from "@nestjs/graphql";
 import { RetailLocation } from "src/@generated";
 import { LocationBoundInput } from "src/modules/retail-location/retail-location.args";
 
@@ -19,3 +19,18 @@ export class UpdateRetailLocationSettingsInput extends IntersectionType(
     InputType,
   ),
 ) {}
+
+@InputType()
+export class UpdateRetailLocationInfoInput extends LocationBoundInput {
+  @Field()
+  languageId!: string;
+
+  @Field({ nullable: true })
+  faqContent?: string;
+
+  @Field({ nullable: true })
+  whoAreWeContent?: string;
+
+  @Field({ nullable: true })
+  joinUsContent?: string;
+}
