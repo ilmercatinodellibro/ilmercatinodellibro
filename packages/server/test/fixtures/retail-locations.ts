@@ -410,7 +410,7 @@ const IT_MO_FAQ = `<section class="article-intro clearfix">
 </section>
 `;
 
-interface RetailLocationInfo {
+export interface RetailLocationInfo {
   whoAreWeContent: string;
   joinUsContent: string;
   faqContent: string;
