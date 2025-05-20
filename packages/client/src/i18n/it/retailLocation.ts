@@ -11,4 +11,7 @@ export default {
     settle: "Liquidazioni",
     return: "Restituzioni",
   } satisfies Record<StatisticsTab, string>,
+  faqContent: "FAQ",
+  foregroundColor: "Colore testo",
+  backgroundColor: "Colore sfondo",
 };

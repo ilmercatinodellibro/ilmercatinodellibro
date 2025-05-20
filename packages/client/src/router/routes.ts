@@ -201,6 +201,11 @@ const routes: RouteRecordRaw[] = [
         beforeEnter: redirectIfNotAdmin,
         children: [
           {
+            path: "edit-info",
+            name: AvailableRouteNames.EditInfo,
+            component: () => import("src/pages/edit-info.vue"),
+          },
+          {
             path: "roles-and-permissions",
             name: AvailableRouteNames.RolesAndPermissions,
             component: () => import("src/pages/roles-and-permissions.vue"),

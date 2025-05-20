@@ -11,4 +11,7 @@ export default {
     settle: "Settlements",
     return: "Returnings",
   } satisfies Record<StatisticsTab, string>,
+  faqContent: "FAQ",
+  foregroundColor: "Text color",
+  backgroundColor: "Background color",
 };

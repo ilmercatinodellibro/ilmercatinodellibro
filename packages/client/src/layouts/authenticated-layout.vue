@@ -348,6 +348,28 @@
 
           <q-item
             v-ripple
+            :to="{ name: AvailableRouteNames.EditInfo }"
+            active-class="bg-black-activated-light"
+            clickable
+            data-cy="faq-editor"
+          >
+            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+              {{ t(`routesNames.${AvailableRouteNames.EditInfo}`) }}
+            </q-tooltip>
+            <q-item-section side>
+              <q-icon :name="mdiPencilCircle" color="black-54" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="ellipsis text-size-16">
+                {{ t(`routesNames.${AvailableRouteNames.EditInfo}`) }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-separator />
+
+          <q-item
+            v-ripple
             :to="{ name: AvailableRouteNames.RolesAndPermissions }"
             active-class="bg-black-activated-light"
             clickable
@@ -470,6 +492,7 @@ import {
   mdiInformationOutline,
   mdiKey,
   mdiMenuDown,
+  mdiPencilCircle,
   mdiPhone,
   mdiWeb,
 } from "@quasar/extras/mdi-v7";

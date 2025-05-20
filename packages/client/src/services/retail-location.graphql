@@ -135,3 +135,9 @@ query getReturningsChartData($retailLocationId: String!) {
     ...chartData
   }
 }
+
+mutation updateRetailLocationInfo($input: UpdateRetailLocationInfoInput!) {
+  updateRetailLocationInfo(input: $input) {
+    ...RetailLocation
+  }
+}
