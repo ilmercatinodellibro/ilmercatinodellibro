@@ -40,6 +40,11 @@ export default {
   myBooks: "My Books",
   salableBooks: "Salable Books",
   saveChanges: "Save Changes",
+  unsavedChanges: "Unsaved changes",
+  leavingWithoutSaving:
+    "You're leaving a page that contains unsaved changes. Save before proceeding or you will lose your work.",
+  discardChanges: "Discard changes",
+  saveAndProceed: "Save and proceed",
   themeChanged: "Theme changed!",
   leaveWithoutSaving: "Do you want to leave this page without saving?",
   logoSizeMessage:

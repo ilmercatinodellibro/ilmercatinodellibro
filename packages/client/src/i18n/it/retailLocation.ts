@@ -4,6 +4,8 @@ import type { StatisticsTab } from "src/pages/statistics-page";
 export default {
   errors: {
     noLocation: "Nessun mercatino selezionato.",
+    couldNotUpdateInfo:
+      "Non è stato possibile aggiornare i contenuti selezionati.",
   },
   statistics: {
     general: "Generali",

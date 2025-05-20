@@ -27,6 +27,7 @@
           <info-editor v-model="editorModel" class="full-height">
             <template #toolbar-actions>
               <q-btn
+                :disable="!isModified"
                 :label="t('general.saveChanges')"
                 class="save-btn"
                 color="accent"
@@ -41,39 +42,114 @@
 </template>
 
 <script setup lang="ts">
+import { Dialog } from "quasar";
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { onBeforeRouteLeave } from "vue-router";
 import InfoEditor from "src/components/info-editor.vue";
 import { RetailLocationInfo } from "src/models/retail-location";
 import { useRetailLocationService } from "src/services/retail-location";
+import { useUpdateRetailLocationInfoMutation } from "src/services/retail-location.graphql";
 
 const { t, locale } = useI18n();
 
 const selectedTab = ref(RetailLocationInfo.FAQ);
 
 const { selectedLocation } = useRetailLocationService();
-const currentInfo = computed<Record<RetailLocationInfo, string>>(
+const currentInfo = computed(
   () =>
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    selectedLocation.value.infoPagesContent[locale.value] as Record<
-      RetailLocationInfo,
-      string
-    >,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    (
+      selectedLocation.value.infoPagesContent as Record<
+        string,
+        Record<RetailLocationInfo, string>
+      >
+    )[locale.value]!,
 );
-const editorModel = ref<string>(currentInfo.value[selectedTab.value]);
+const editorModel = ref(currentInfo.value[selectedTab.value]);
+const isModified = computed(
+  () => currentInfo.value[selectedTab.value] !== editorModel.value,
+);
 
-async function switchTab(tab: RetailLocationInfo) {
-  await updateInfo();
-  selectedTab.value = tab;
-  editorModel.value = currentInfo.value[tab];
+function openConfirmDialog() {
+  return Dialog.create({
+    cancel: t("general.discardChanges"),
+    message: t("general.leavingWithoutSaving"),
+    ok: t("general.saveAndProceed"),
+    persistent: true,
+    title: t("general.unsavedChanges"),
+  });
 }
 
-async function updateInfo() {
-  // TODO: update info
+function switchTab(tab: RetailLocationInfo) {
+  const updateTab = () => {
+    selectedTab.value = tab;
+    editorModel.value = currentInfo.value[tab];
+  };
+
+  if (isModified.value) {
+    openConfirmDialog()
+      .onOk(async () => {
+        await updateInfo();
+        updateTab();
+      })
+      .onCancel(updateTab);
+  } else {
+    updateTab();
+  }
 }
 
-watch(locale, () => {
-  // Update model on locale change
+const { updateRetailLocationInfo } = useUpdateRetailLocationInfoMutation();
+async function updateInfo(text?: string, language?: string) {
+  try {
+    await updateRetailLocationInfo({
+      input: {
+        languageId: language ?? locale.value,
+        retailLocationId: selectedLocation.value.id,
+        [selectedTab.value]: text ?? editorModel.value,
+      },
+    });
+  } catch {
+    t("retailLocation.errors.couldNotUpdateInfo");
+  }
+}
+
+watch(locale, (_, previousLocale) => {
+  const updateModel = () => {
+    editorModel.value = currentInfo.value[selectedTab.value];
+  };
+
+  if (
+    (
+      selectedLocation.value.infoPagesContent as Record<
+        string,
+        Record<RetailLocationInfo, string>
+      >
+    )[previousLocale]?.[selectedTab.value] !== editorModel.value
+  ) {
+    openConfirmDialog()
+      .onOk(async () => {
+        await updateInfo(editorModel.value, previousLocale);
+        updateModel();
+      })
+      .onCancel(updateModel);
+  } else {
+    updateModel();
+  }
+});
+
+onBeforeRouteLeave(async () => {
+  if (isModified.value) {
+    await new Promise<void>((resolve) => {
+      openConfirmDialog()
+        .onOk(async () => {
+          await updateInfo();
+          resolve();
+        })
+        .onCancel(resolve);
+    });
+    return;
+  }
 });
 </script>
 
@@ -90,5 +166,6 @@ watch(locale, () => {
 
 .save-btn {
   float: right;
+  width: auto;
 }
 </style>

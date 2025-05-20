@@ -4,6 +4,7 @@ import type { StatisticsTab } from "src/pages/statistics-page";
 export default {
   errors: {
     noLocation: "No retail location has been selected.",
+    couldNotUpdateInfo: "Could not update the selected content.",
   },
   statistics: {
     general: "General",
