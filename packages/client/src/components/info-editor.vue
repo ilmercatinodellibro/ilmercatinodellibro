@@ -3,16 +3,7 @@
     ref="editorRef"
     v-model="editorModel"
     :toolbar="[
-      !isMobile
-        ? ['left', 'center', 'right', 'justify']
-        : [
-            {
-              icon: $q.iconSet.editor.align,
-              fixedLabel: true,
-              list: 'only-icons',
-              options: ['left', 'center', 'right', 'justify'],
-            },
-          ],
+      ['left', 'center', 'right', 'justify'],
       ['bold', 'italic', 'underline', 'strike'],
       [
         {
@@ -40,9 +31,13 @@
     toolbar-bg="white"
   >
     <template #color>
-      <q-btn flat>
-        <q-icon :name="mdiFormatColorText" />
-        <q-icon :name="mdiColorHelper" class="absolute" />
+      <q-btn class="min-height-0" dense flat>
+        <q-icon :name="mdiFormatColorText" :size="isMobile ? '18px' : '24px'" />
+        <q-icon
+          :name="mdiColorHelper"
+          :size="isMobile ? '18px' : '24px'"
+          class="absolute"
+        />
 
         <q-menu class="font-weight-600 q-pa-sm row">
           <q-item-section>
@@ -99,14 +94,16 @@ function changeTextColor(target: "back" | "fore") {
 <style scoped lang="scss">
 .info-editor {
   background-color: inherit;
-}
 
-// Override default QEditor toolbar buttons dimensions and spacing
-:deep(.q-icon) {
-  font-size: 24px;
+  // Override default QEditor toolbar buttons dimensions and spacing
+  :deep(.q-icon) {
+    height: 24px;
+    width: 24px;
 
-  @media screen and (max-width: $breakpoint-sm) {
-    font-size: 18px;
+    @media screen and (max-width: $breakpoint-sm) {
+      height: 18px;
+      width: 18px;
+    }
   }
 }
 

@@ -40,6 +40,11 @@ export default {
   myBooks: "I Miei Libri",
   salableBooks: "Libri Vendibili",
   saveChanges: "Salva modifiche",
+  unsavedChanges: "Modifiche non salvate",
+  leavingWithoutSaving:
+    "Stai abbandonando una scheda contenente modifiche non salvate. Prima di procedere esegui il salvataggio o perderai il lavoro svolto.",
+  discardChanges: "Scarta modifiche",
+  saveAndProceed: "Salva e procedi",
   themeChanged: "Tema aggiornato!",
   leaveWithoutSaving: "Vuoi uscire dalla pagina senza salvare?",
   logoSizeMessage:
