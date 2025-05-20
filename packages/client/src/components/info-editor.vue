@@ -34,7 +34,7 @@
       ],
       ['hr', 'link'],
       ['unordered', 'ordered', 'outdent', 'indent'],
-      ['save', 'undo', 'redo'],
+      ['undo', 'redo', 'toolbar-actions'],
     ]"
     class="column info-editor no-wrap"
     toolbar-bg="white"
@@ -64,13 +64,8 @@
         </q-menu>
       </q-btn>
     </template>
-    <template v-if="!isMobile" #save>
-      <q-btn
-        :label="t('general.saveChanges')"
-        class="save-btn"
-        color="accent"
-        @click="emit('save', editorModel)"
-      />
+    <template v-if="!isMobile" #toolbar-actions>
+      <slot name="toolbar-actions" />
     </template>
   </q-editor>
 </template>
@@ -81,24 +76,14 @@ import { QEditor } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useRetailLocationService } from "src/services/retail-location";
 
-const props = defineProps<{
-  infoType: "faqContent" | "joinUsContent" | "whoAreWeContent";
-}>();
+defineEmits<{ "update:modelValue": [newValue: string] }>();
 
-const emit = defineEmits<{ save: [text: string] }>();
-
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const { isMobile } = useLateralDrawer();
 
-const { selectedLocation } = useRetailLocationService();
-
-const editorModel = ref(
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  selectedLocation.value.infoPagesContent[locale.value][props.infoType],
-);
+const editorModel = defineModel<string>({ required: true });
 const editorRef = ref<QEditor>();
 const bgColorModel = ref("#edf2fa");
 const textColorModel = ref("#000");
@@ -123,17 +108,6 @@ function changeTextColor(target: "back" | "fore") {
   @media screen and (max-width: $breakpoint-sm) {
     font-size: 18px;
   }
-}
-
-:deep(.q-btn-item):not(.save-btn) {
-  min-height: 24px;
-  min-width: 24px;
-  margin: 12px 8px;
-  padding: 0;
-}
-
-.save-btn {
-  float: right;
 }
 
 :deep(.q-btn-dropdown__arrow) {
