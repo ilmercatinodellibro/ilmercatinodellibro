@@ -1,4 +1,5 @@
-import { StatisticsTab } from "src/pages/statistics-page";
+import type { RetailLocationInfo } from "src/models/retail-location";
+import type { StatisticsTab } from "src/pages/statistics-page";
 
 export default {
   errors: {
@@ -11,7 +12,11 @@ export default {
     settle: "Settlements",
     return: "Returnings",
   } satisfies Record<StatisticsTab, string>,
-  faqContent: "FAQ",
+  info: {
+    faqContent: "FAQ",
+    joinUsContent: "Unisciti a noi",
+    whoAreWeContent: "Chi siamo",
+  } satisfies Record<RetailLocationInfo, string>,
   foregroundColor: "Text color",
   backgroundColor: "Background color",
 };

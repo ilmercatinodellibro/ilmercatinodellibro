@@ -163,7 +163,7 @@ export default {
     [AvailableRouteNames.Registration]: "Registration",
     [AvailableRouteNames.RegistrationSent]: "Registration sent",
     [AvailableRouteNames.FAQ]: "FAQ",
-    [AvailableRouteNames.EditInfo]: "FAQ Editor",
+    [AvailableRouteNames.EditInfo]: "Content Editor",
   } satisfies Record<AvailableRouteNames, string>,
   sidebar: {
     settings: "Settings",
