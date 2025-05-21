@@ -16,8 +16,8 @@ export default {
   } satisfies Record<StatisticsTab, string>,
   info: {
     faqContent: "FAQ",
-    joinUsContent: "Join Us",
-    whoAreWeContent: "Who We Are",
+    joinUsContent: "Unisciti a noi",
+    whoAreWeContent: "Chi siamo",
   } satisfies Record<RetailLocationInfo, string>,
   foregroundColor: "Colore testo",
   backgroundColor: "Colore sfondo",
