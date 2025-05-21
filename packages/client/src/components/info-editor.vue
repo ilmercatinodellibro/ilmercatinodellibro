@@ -59,7 +59,7 @@
         </q-menu>
       </q-btn>
     </template>
-    <template v-if="!isMobile" #toolbar-actions>
+    <template #toolbar-actions>
       <slot name="toolbar-actions" />
     </template>
   </q-editor>

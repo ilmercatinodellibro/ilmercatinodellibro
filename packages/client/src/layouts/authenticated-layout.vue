@@ -504,6 +504,7 @@ import { setLanguage } from "src/boot/i18n";
 import AppDrawer from "src/components/app-drawer.vue";
 import HeaderBar from "src/components/header-bar.vue";
 import SettingsDialog from "src/components/settings-dialog.vue";
+import { provideHeaderActions } from "src/composables/header-features/use-header-actions";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
 import { SettingsUpdate } from "src/models/book";
@@ -534,6 +535,8 @@ const { user, hasAdminRole, hasOperatorRole, hasUserRole } = useAuthService();
 const { selectedLocation } = useRetailLocationService();
 
 const { isDrawerMini, isDrawerOpen, isMobile } = useLateralDrawer();
+
+provideHeaderActions();
 
 const isOnline = useOnline();
 watch(isOnline, (becomeOnline) => {

@@ -56,6 +56,7 @@
           :to="{ name: AvailableRouteNames.FAQ }"
         />
       </div>
+      <q-btn v-for="(button, key) in headerActions" v-bind="button" :key />
       <language-dropdown-btn v-if="!isAuthenticated" />
     </k-toolbar>
   </q-header>
@@ -66,6 +67,7 @@ import { mdiArrowLeft } from "@quasar/extras/mdi-v7";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
+import { useHeaderActions } from "src/composables/header-features/use-header-actions";
 import { provideHeaderFilters } from "src/composables/header-features/use-header-filters";
 import { provideHeaderName } from "src/composables/header-features/use-header-name-button";
 import { provideHeaderSearch } from "src/composables/header-features/use-header-search";
@@ -90,6 +92,7 @@ const {
   selectedFilter,
 } = provideHeaderFilters();
 const { headerName } = provideHeaderName();
+const { headerActions } = useHeaderActions();
 
 const showBackToLocations = computed(
   () => route.name === AvailableRouteNames.Login && !user.value,
