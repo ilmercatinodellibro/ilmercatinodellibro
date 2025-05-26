@@ -83,6 +83,7 @@ import { QTooltipProps } from "quasar";
 import { useI18n } from "vue-i18n";
 import AppDrawer from "src/components/app-drawer.vue";
 import HeaderBar from "src/components/header-bar.vue";
+import { provideHeaderActions } from "src/composables/header-features/use-header-actions";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { AvailableRouteNames } from "src/models/routes";
 
@@ -95,4 +96,6 @@ const TOOLTIP_SHARED_PROPS: QTooltipProps = {
 const { t } = useI18n();
 
 const { isMobile, isDrawerMini } = useLateralDrawer();
+
+provideHeaderActions();
 </script>
