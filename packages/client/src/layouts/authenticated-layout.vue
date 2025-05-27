@@ -351,7 +351,6 @@
             :to="{ name: AvailableRouteNames.EditInfo }"
             active-class="bg-black-activated-light"
             clickable
-            data-cy="faq-editor"
           >
             <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
               {{ t(`routesNames.${AvailableRouteNames.EditInfo}`) }}

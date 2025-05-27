@@ -6,15 +6,15 @@
       <q-tabs
         :model-value="selectedTab"
         active-color="accent"
+        align="justify"
         class="bg-white"
-        @update:model-value="(tab) => switchTab(tab)"
+        @update:model-value="switchTab($event)"
       >
         <q-tab
           v-for="name in RetailLocationInfo"
           :key="name"
           :name
           :label="$t(`retailLocation.info.${name}`)"
-          class="full-width"
         />
       </q-tabs>
       <q-tab-panels v-model="selectedTab" class="bg-transparent">
@@ -22,15 +22,15 @@
           v-for="name in RetailLocationInfo"
           :key="name"
           :name
-          class="column no-padding no-wrap"
+          class="no-padding"
         >
           <info-editor v-model="editorModel" class="full-height">
             <template v-if="!isMobile" #toolbar-actions>
               <q-btn
                 :disable="!isModified"
                 :label="t('general.saveChanges')"
-                class="save-btn"
                 color="accent"
+                no-wrap
                 @click="updateInfo()"
               />
             </template>
@@ -62,16 +62,15 @@ const { headerActions } = useHeaderActions();
 const selectedTab = ref(RetailLocationInfo.FAQ);
 
 const { selectedLocation } = useRetailLocationService();
-const currentInfo = computed(
-  () =>
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    (
-      selectedLocation.value.infoPagesContent as Record<
-        string,
-        Record<RetailLocationInfo, string>
-      >
-    )[locale.value]!,
-);
+const currentInfo = computed(() => {
+  const infoPagesContent = selectedLocation.value.infoPagesContent as Record<
+    string, // Locale code
+    Record<RetailLocationInfo, string>
+  >;
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return infoPagesContent[locale.value]!;
+});
 const editorModel = ref(currentInfo.value[selectedTab.value]);
 const isModified = computed(
   () => currentInfo.value[selectedTab.value] !== editorModel.value,
@@ -101,10 +100,10 @@ function openConfirmDialog() {
 }
 
 function switchTab(tab: RetailLocationInfo) {
-  const updateTab = () => {
+  function updateTab() {
     selectedTab.value = tab;
     editorModel.value = currentInfo.value[tab];
-  };
+  }
 
   if (isModified.value) {
     openConfirmDialog()
@@ -133,28 +132,30 @@ async function updateInfo(text?: string, language?: string) {
   }
 }
 
+function updateModel() {
+  editorModel.value = currentInfo.value[selectedTab.value];
+}
 watch(locale, (_, previousLocale) => {
-  const updateModel = () => {
-    editorModel.value = currentInfo.value[selectedTab.value];
-  };
+  const previousLocationInfo = selectedLocation.value
+    .infoPagesContent as Record<
+    string, // Locale code
+    Record<RetailLocationInfo, string>
+  >;
+  const previousInfoText =
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    previousLocationInfo[previousLocale]![selectedTab.value];
 
-  if (
-    (
-      selectedLocation.value.infoPagesContent as Record<
-        string,
-        Record<RetailLocationInfo, string>
-      >
-    )[previousLocale]?.[selectedTab.value] !== editorModel.value
-  ) {
+  if (previousInfoText !== editorModel.value) {
     openConfirmDialog()
       .onOk(async () => {
         await updateInfo(editorModel.value, previousLocale);
         updateModel();
       })
       .onCancel(updateModel);
-  } else {
-    updateModel();
+    return;
   }
+
+  updateModel();
 });
 
 onBeforeRouteLeave(async () => {
@@ -181,10 +182,5 @@ onBeforeRouteLeave(async () => {
     margin: 0;
     max-width: 100%;
   }
-}
-
-.save-btn {
-  float: right;
-  width: auto;
 }
 </style>

@@ -2,31 +2,7 @@
   <q-editor
     ref="editorRef"
     v-model="editorModel"
-    :toolbar="[
-      ['left', 'center', 'right', 'justify'],
-      ['bold', 'italic', 'underline', 'strike'],
-      [
-        {
-          fixedIcon: true,
-          fixedLabel: true,
-          icon: $q.iconSet.editor.fontSize,
-          list: 'no-icons',
-          options: [
-            'size-1',
-            'size-2',
-            'size-3',
-            'size-4',
-            'size-5',
-            'size-6',
-            'size-7',
-          ],
-        },
-        'color',
-      ],
-      ['hr', 'link'],
-      ['unordered', 'ordered', 'outdent', 'indent'],
-      ['undo', 'redo', 'toolbar-actions'],
-    ]"
+    :toolbar
     class="column info-editor no-wrap"
     toolbar-bg="white"
   >
@@ -67,7 +43,7 @@
 
 <script setup lang="ts">
 import { mdiColorHelper, mdiFormatColorText } from "@quasar/extras/mdi-v7";
-import { QEditor } from "quasar";
+import { QEditor, useQuasar } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
@@ -82,6 +58,34 @@ const editorModel = defineModel<string>({ required: true });
 const editorRef = ref<QEditor>();
 const bgColorModel = ref("#edf2fa");
 const textColorModel = ref("#000");
+
+const q = useQuasar();
+const toolbar = [
+  ["left", "center", "right", "justify"],
+  ["bold", "italic", "underline", "strike"],
+  [
+    {
+      fixedIcon: true,
+      fixedLabel: true,
+      icon: q.iconSet.editor.fontSize,
+      list: "no-icons",
+      options: [
+        "size-1",
+        "size-2",
+        "size-3",
+        "size-4",
+        "size-5",
+        "size-6",
+        "size-7",
+      ],
+    },
+    "color",
+  ],
+  ["hr", "link"],
+  ["unordered", "ordered", "outdent", "indent"],
+  ["undo", "redo"],
+  ["toolbar-actions"],
+];
 
 function changeTextColor(target: "back" | "fore") {
   editorRef.value?.runCmd(
@@ -104,6 +108,10 @@ function changeTextColor(target: "back" | "fore") {
       height: 18px;
       width: 18px;
     }
+  }
+
+  :deep(.q-editor__toolbar > :last-child)::before {
+    display: none;
   }
 }
 
