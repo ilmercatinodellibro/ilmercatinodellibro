@@ -4,6 +4,7 @@ import { AuthModule } from "src/modules/auth/auth.module";
 import { AddAdminUserCommand } from "src/modules/user/add-admin-user.command";
 import { SeedUsersWithBooksCommand } from "src/modules/user/seed-users-with-books.command";
 import { UserAccountResolver } from "src/modules/user/user-account.resolver";
+import { UserController } from "src/modules/user/user.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 import { UserResolver } from "./user.resolver";
 import { UserService } from "./user.service";
@@ -18,5 +19,6 @@ import { UserService } from "./user.service";
     SeedUsersWithBooksCommand,
   ],
   exports: [UserService],
+  controllers: [UserController],
 })
 export class UserModule {}

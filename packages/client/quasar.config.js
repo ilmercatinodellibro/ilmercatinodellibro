@@ -254,6 +254,10 @@ module.exports = configure(function (ctx) {
           changeOrigin: true,
           target: process.env.GRAPHQL_DOMAIN,
         },
+        "/users": {
+          changeOrigin: true,
+          target: process.env.GRAPHQL_DOMAIN,
+        },
       },
     },
 
