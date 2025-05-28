@@ -175,12 +175,12 @@ onBeforeRouteLeave(async () => {
 
 <style scoped lang="scss">
 .info-editor-container {
-  margin: 100px 0;
-  max-width: 732px;
+  margin: 0;
+  max-width: 100%;
 
-  @media screen and (max-width: $breakpoint-sm) {
-    margin: 0;
-    max-width: 100%;
+  @media screen and (width >= $breakpoint-sm) {
+    margin: 100px 0;
+    max-width: 732px;
   }
 }
 </style>
