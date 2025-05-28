@@ -911,13 +911,13 @@ export class RetailLocationResolver {
         },
       });
 
-    const { [languageId]: currentInfo, ...rest } =
+    const { [languageId]: currentLocaleInfo, ...otherLocalesInfo } =
       infoPagesContent as unknown as Record<string, RetailLocationInfo>;
 
     const updatedInfo = {
-      faqContent: faqContent ?? currentInfo.faqContent,
-      whoAreWeContent: whoAreWeContent ?? currentInfo.whoAreWeContent,
-      joinUsContent: joinUsContent ?? currentInfo.joinUsContent,
+      faqContent: faqContent ?? currentLocaleInfo.faqContent,
+      whoAreWeContent: whoAreWeContent ?? currentLocaleInfo.whoAreWeContent,
+      joinUsContent: joinUsContent ?? currentLocaleInfo.joinUsContent,
     } satisfies RetailLocationInfo;
 
     return this.prisma.retailLocation.update({
@@ -926,7 +926,7 @@ export class RetailLocationResolver {
       },
       data: {
         infoPagesContent: {
-          ...(rest as unknown as Record<string, object>),
+          ...(otherLocalesInfo as unknown as Record<string, object>),
           [languageId]: updatedInfo,
         },
       },
