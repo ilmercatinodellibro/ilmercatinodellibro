@@ -101,12 +101,12 @@ function changeTextColor(target: "back" | "fore") {
 
   // Override default QEditor toolbar buttons dimensions and spacing
   :deep(.q-icon) {
-    height: 24px;
-    width: 24px;
+    height: 18px;
+    width: 18px;
 
-    @media screen and (max-width: $breakpoint-sm) {
-      height: 18px;
-      width: 18px;
+    @media screen and (width >= $breakpoint-sm) {
+      height: 24px;
+      width: 24px;
     }
   }
 
