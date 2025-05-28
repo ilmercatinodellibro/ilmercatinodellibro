@@ -84,6 +84,8 @@ export default {
     notConnected: "Non Connesso",
 
     noData: "Nessun dato disponibile",
+
+    downloadFile: "Scarica file",
   },
 
   roleMap: {

@@ -54,6 +54,18 @@
           <q-checkbox v-model="newSettings.payOffEnabled" color="primary" />
           {{ t("general.settings.payOffEnabled") }}
         </span>
+
+        <span>
+          {{ t("general.settings.downloadUserList") }}
+
+          <q-btn
+            v-if="hasAdminRole"
+            :label="t('common.downloadFile')"
+            class="q-ml-md"
+            color="accent"
+            @click="getUsersCSV()"
+          />
+        </span>
       </q-card-section>
 
       <template #card-actions="{ uniqueFormId }">
@@ -151,5 +163,16 @@ function confirmReset() {
   }).onOk(() => {
     onDialogOK({ type: "reset" });
   });
+}
+
+const { getJwtHeader } = useAuthService();
+
+async function getUsersCSV() {
+  const headers = getJwtHeader();
+  const response = await fetch("/users/export-csv", { headers });
+  const blob = await response.blob();
+
+  const dataUrl = URL.createObjectURL(blob);
+  window.open(dataUrl, "_blank");
 }
 </script>

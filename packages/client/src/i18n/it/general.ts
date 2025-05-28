@@ -83,6 +83,8 @@ export default {
       "Stai effettuando il reset di tutti i dati di sistema per predisporre il software alle attività dell'anno successivo. Vuoi procedere?",
     resetButton: "Effettua reset annuale",
     resetConfirmButton: "Effettua reset",
+    downloadUserList:
+      "Scarica la lista degli utenti con e-mail verificata in un file CSV",
   },
   role: "Ruolo",
   rolesAndPermissions: {
