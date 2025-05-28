@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: focus the link bar text when pressing the link button -->
   <q-editor
     ref="editorRef"
     v-model="editorModel"
