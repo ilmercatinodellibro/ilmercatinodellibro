@@ -13,7 +13,7 @@ mkdir -p "$LOG_DIR"
 
 # All output goes to the log file
 BACKUP_SUCCESS=true
-exec > "$LOG_FILE" 2>&1
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=== Starting DB Backup $(date) ==="
 

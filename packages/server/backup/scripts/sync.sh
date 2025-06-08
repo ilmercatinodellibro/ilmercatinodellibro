@@ -10,7 +10,7 @@ mkdir -p "$BACKUP_DIR"
 LOG_FILE="$LOG_DIR/sync_$TIMESTAMP.log"
 
 # All output goes to the log file
-exec > "$LOG_FILE" 2>&1
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 if [ -z "$NODE_ENV" ]; then
     echo "ERROR: NODE_ENV is not set!"
