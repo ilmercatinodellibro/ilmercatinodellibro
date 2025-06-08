@@ -99,7 +99,7 @@ function send_mail() {
         echo "To: $EMAIL"
         echo ""
         cat "$LOG_FILE"
-    ) | msmtp --read-recipients "$EMAIL"
+    ) | msmtp --read-recipients
 
     if [ $? -ne 0 ]; then
         echo "ERROR: Failed to send email."
