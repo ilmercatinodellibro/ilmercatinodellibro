@@ -110,7 +110,7 @@ Automated PostgreSQL backups via Alpine container with cron scheduling.
 
 Full application directory backup excluding non-essential files.
 
-- To view the application backup script, see [`backup_app.sh`](/packages/server/backup/scripts/backup_app.sh).
+- To view the application backup script, see [backup_app.sh](/packages/server/backup/scripts/backup_app.sh).
 
 ---
 
@@ -120,17 +120,18 @@ Backups are synced to Aruba Cloud via S3 protocol.
 
 **Configuration:**
 
-- To view the Rclone configuration, see [`rclone.conf`](/packages/server/backup/config/rclone.conf).
-- To view the sync script, see [`sync.sh`](/packages/server/backup/scripts/sync.sh).
-- To view the cron job for syncing, see [`crontab`](/packages/server/backup/config/crontabs).
+- To view the Rclone configuration, see [rclone.conf](/packages/server/backup/config/rclone.conf).
+- To view the sync script, see [sync.sh](/packages/server/backup/scripts/sync.sh).
+- To view the cron job for syncing, see [crontab](/packages/server/backup/config/crontabs).
 
 > ⚠️ **Note**: In development mode, the sync script performs a `copy` of the backup files to the cloud storage path defined by `NODE_ENV`, ensuring that development backups do not overwrite production backups. In production mode, the sync script uses `sync` to ensure the cloud storage is fully synchronized with the local backup directory.
 
 #### Email Alerts
 
 - Email alerts for backup failures are sent to the configured email address.
-- To view the email configuration, see [`msmtprc`](/packages/server/backup/config/msmtprc).
-- To view the email script, see [`send_mail.sh`](/packages/server/backup/scripts/send_mail.sh).
+- To view the email configuration, see [msmtprc](/packages/server/backup/config/msmtprc) and [generate_msmtprc.sh](/packages/server/backup/scripts/generate_msmtprc.sh).
+
+> 🚨 **Note**: If you change the [`crontab, rclone.config, msmtprc, generate_msmtprc.sh`] configuration files, you must restarting the backup container for the changes to take effect.
 
 ---
 
