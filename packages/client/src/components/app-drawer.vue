@@ -21,8 +21,8 @@
       @click="isDrawerOpen = false"
     />
 
-    <div class="full-width q-pa-md">
-      <q-img :src="theme.logo" />
+    <div class="q-pa-md">
+      <q-img fit="scale-down" height="60px" :src="theme.logo" />
     </div>
 
     <q-scroll-area class="col-grow">
