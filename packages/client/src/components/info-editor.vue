@@ -6,6 +6,7 @@
     :toolbar
     class="column info-editor no-wrap"
     toolbar-bg="white"
+    toolbar-toggle-color="accent"
   >
     <template #color>
       <q-btn class="min-height-0" dense flat>
