@@ -178,7 +178,7 @@ onBeforeRouteLeave(async () => {
   margin: 0;
   max-width: 100%;
 
-  @media screen and (width >= $breakpoint-sm) {
+  @media screen and (min-width: $breakpoint-sm) {
     margin: 100px 0;
     max-width: 732px;
   }

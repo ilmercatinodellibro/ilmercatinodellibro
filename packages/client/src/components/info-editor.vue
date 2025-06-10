@@ -105,12 +105,13 @@ function changeTextColor(target: "back" | "fore") {
     height: 18px;
     width: 18px;
 
-    @media screen and (width >= $breakpoint-sm) {
+    @media screen and (min-width: $breakpoint-sm) {
       height: 24px;
       width: 24px;
     }
   }
 
+  // Hides the last toolbar column vertical separator to match the design
   :deep(.q-editor__toolbar > :last-child)::before {
     display: none;
   }
