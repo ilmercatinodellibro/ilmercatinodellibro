@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaTransactionClient } from "../../helpers/prisma";
+import { PrismaTransactionClient } from "src/helpers/prisma";
 
 @Injectable()
 export class BookCopyService {
@@ -83,9 +83,7 @@ export class BookCopyService {
         },
       });
 
-      const currentMaxAssignedNumber = storedMaxCode._max.code
-        ? storedMaxCode._max.code
-        : "0000/000";
+      const currentMaxAssignedNumber = storedMaxCode._max.code ?? "0000/000";
       let shelfCode = parseInt(currentMaxAssignedNumber.split("/")[0]);
       const generatedCodes: string[] = [];
       for (let i = 0; i < numberOfCodesToGenerate; i++) {

@@ -111,6 +111,7 @@ export class RetailLocationController {
       },
       data: {
         theme: {
+          // eslint-disable-next-line @typescript-eslint/no-misused-spread
           ...(location.theme as unknown as Theme),
           logo: logoFileName,
         } as unknown as Prisma.InputJsonObject,

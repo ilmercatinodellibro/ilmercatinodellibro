@@ -8,7 +8,6 @@
     "editor.defaultFormatter": "Prisma.prisma"
   },
   "editor.codeActionsOnSave": [
-    "source.organizeImports",
     "source.fixAll.eslint",
     "source.fixAll.stylelint"
   ],
