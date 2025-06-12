@@ -11,7 +11,10 @@ export const PASSWORD_STUB_HASH =
 
 // The pool size can be increased if needed
 // eslint-disable-next-line @typescript-eslint/unbound-method
-const uniqueEmailPool = faker.helpers.uniqueArray(faker.internet.email, 100);
+const uniqueEmailPool = faker.helpers.uniqueArray(
+  () => faker.internet.email(),
+  100,
+);
 const getEmail = () => {
   const email = uniqueEmailPool.pop();
   if (!email) {

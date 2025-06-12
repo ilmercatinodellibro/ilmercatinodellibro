@@ -89,6 +89,7 @@ export class ProblemResolver {
     return this.prisma.problem.create({
       data: {
         createdById: userId,
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread
         ...input,
       },
     });

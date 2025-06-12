@@ -58,8 +58,8 @@ const { isMobile } = useLateralDrawer();
 
 const editorModel = defineModel<string>({ required: true });
 const editorRef = ref<QEditor>();
-const bgColorModel = ref("#edf2fa");
 const textColorModel = ref("#000");
+const bgColorModel = ref("#edf2fa");
 
 const q = useQuasar();
 const toolbar = [

@@ -59,10 +59,7 @@ export class MailService {
   }
 
   async sendMail(mailDetails: SendMailOptions): Promise<SentMessageInfo> {
-    const addressOverrides: {
-      // some fields are not arrays, so we simply use AddressObject to make TS happy
-      [key in AddressableField]?: AddressObject;
-    } = {};
+    const addressOverrides: Partial<Record<AddressableField, AddressObject>> = {};
     try {
       for (const field of addressableFields) {
         const value = mailDetails[field];

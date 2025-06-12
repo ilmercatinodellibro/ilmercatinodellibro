@@ -10,16 +10,14 @@ export const htmlToTextPlugin: PluginFunction = (mail, done) => {
     return;
   }
 
-  if (htmlToText === undefined) {
-    htmlToText = compile({
-      decodeEntities: true,
-      selectors: [
-        { selector: "a", options: { hideLinkHrefIfSameAsText: true } },
-        // Remove inlined CID images
-        { selector: "img[src^='cid:']", format: "skip" },
-      ],
-    });
-  }
+  htmlToText ??= compile({
+    decodeEntities: true,
+    selectors: [
+      { selector: "a", options: { hideLinkHrefIfSameAsText: true } },
+      // Remove inlined CID images
+      { selector: "img[src^='cid:']", format: "skip" },
+    ],
+  });
 
   void mail.resolveContent(mail.data, "html", (error, value) => {
     if (error) {
