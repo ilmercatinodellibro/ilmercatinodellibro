@@ -55,7 +55,6 @@ const { formatDate } = date;
 type Model = { from: string; to: string } | undefined;
 
 const props =
-  // eslint-disable-next-line vue/no-unused-properties -- props are actually used in template via v-bind
   defineProps<Omit<QFieldProps, "modelValue" | "onUpdate:modelValue">>();
 
 const model = defineModel<Model>({ required: true });

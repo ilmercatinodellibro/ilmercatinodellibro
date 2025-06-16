@@ -8,8 +8,8 @@
       props.color !== undefined
         ? props.color
         : isFabExpanded
-        ? 'secondary'
-        : 'accent'
+          ? 'secondary'
+          : 'accent'
     "
   >
     <template v-for="(_, name) in slots" #[name]="slotData">
@@ -25,9 +25,7 @@ import { mdiChevronUp } from "@quasar/extras/mdi-v7";
 import { QFabProps, QFabSlots } from "quasar";
 import { ref } from "vue";
 
-// eslint-disable-next-line vue/no-unused-properties
 type Props = Omit<QFabProps, "modelValue" | "onUpdate:modelValue"> & {
-  // eslint-disable-next-line vue/no-unused-properties
   sticky?: boolean;
 };
 const props = withDefaults(defineProps<Props>(), {

@@ -362,7 +362,6 @@ async function removeFromReserved(reservation: ReservationSummaryFragment) {
   } finally {
     await Promise.all([refetchReservations(), refetchRequests()]);
   }
-  reservation;
 }
 
 const { createReservations } = useCreateReservationsMutation();
@@ -404,7 +403,7 @@ async function addReservationFromIsbn(isbnCode: string) {
           userId: props.userData.id,
         },
       });
-    } catch (e) {
+    } catch {
       notifyError(t("bookErrors.notRequested"));
     } finally {
       await refetchRequests();

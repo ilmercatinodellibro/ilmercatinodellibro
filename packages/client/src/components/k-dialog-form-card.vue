@@ -14,7 +14,7 @@
         :id="uniqueFormId"
         :greedy="greedy"
         @submit="emit('submit')"
-        @validation-error="emit('validation-error', $event)"
+        @validation-error="emit('validationError', $event)"
       >
         <slot />
       </q-form>
@@ -97,6 +97,6 @@ withDefaults(
 const emit = defineEmits<{
   submit: [];
   cancel: [];
-  "validation-error": [Component];
+  validationError: [Component];
 }>();
 </script>

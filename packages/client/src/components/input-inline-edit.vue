@@ -31,7 +31,7 @@ import { mdiPencil } from "@quasar/extras/mdi-v7";
 import { QInput, QInputProps, QInputSlots } from "quasar";
 import { Ref, computed, ref } from "vue";
 
-// eslint-disable-next-line vue/prop-name-casing, vue/no-unused-properties -- we bind all props, but vue-eslint isn't able to recognize it
+// eslint-disable-next-line vue/prop-name-casing
 const props = withDefaults(defineProps<QInputProps>(), {
   dense: true,
 });

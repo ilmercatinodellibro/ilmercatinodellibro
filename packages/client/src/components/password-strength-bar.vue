@@ -84,6 +84,7 @@ async function checkPassword(password: string) {
           }
         }
       } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         const { message } = e as ServerError;
 
         notifyError(message);
@@ -197,6 +198,7 @@ export default defineComponent({
             const numberOfOccurrences = resp?.numberOfOccurrences ?? 0;
             numberOfOccurrencesFounded.value = numberOfOccurrences;
           } catch (e) {
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
             const { message } = e as ServerError;
 
             notifyError(message);

@@ -9,6 +9,7 @@ export const enum BookCopyStatuses {
   NOT_AVAILABLE = "not-available",
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
 enum BookUtilityCategory {
   LOW_UTILITY,
   MEDIUM_UTILITY,

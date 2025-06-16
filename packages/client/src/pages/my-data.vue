@@ -161,7 +161,8 @@ function modifyUserData() {
             newUserData.email && newUserData.email !== user.value.email
               ? newUserData.email
               : undefined,
-          password: newUserData.password ? newUserData.password : undefined,
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- AFAIK this could be a null too
+          password: newUserData.password || undefined,
           id: user.value.id,
           retailLocationId: selectedLocation.value.id,
         },

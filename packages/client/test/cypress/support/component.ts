@@ -31,7 +31,7 @@ import { Dialog } from "quasar";
 
 // Since Cypress v10 we cannot import `config` directly from VTU as Cypress bundles its own version of it
 // See https://github.com/cypress-io/cypress/issues/22611
-// eslint-disable-next-line import/order
+// eslint-disable-next-line import-x/order
 import { VueTestUtils } from "cypress/vue";
 const { config } = VueTestUtils;
 

@@ -153,7 +153,7 @@ describe("Authentication", () => {
 
       // The link points to the server, which then verifies the email and redirects to the client
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const link = email!.match(/href="(.*)"/)?.[1];
+      const link = (/href="(.*)"/.exec((email!)))?.[1];
       expect(link, "Email should contain a link").to.exist;
 
       cy.request({
@@ -354,7 +354,7 @@ function openChangePasswordForm(emailAddress: string) {
 
     // The link points to the client, which opens the reset password form
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const link = email!.match(/href="(.*)"/)?.[1];
+    const link = (/href="(.*)"/.exec((email!)))?.[1];
     expect(link, "Email should contain a link").to.exist;
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

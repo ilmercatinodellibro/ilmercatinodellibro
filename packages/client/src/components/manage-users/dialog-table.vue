@@ -39,7 +39,7 @@ const props = withDefaults(
       rows: readonly T[];
       columns?: QTableColumn<T>[];
       rowKey?: Extract<keyof T, string>;
-      // eslint-disable-next-line vue/prop-name-casing, vue/no-unused-properties
+      // eslint-disable-next-line vue/prop-name-casing
     } & Pick<
       QTableProps,
       "pagination" | "rowsPerPageOptions" | "onRequest" | "onUpdate:pagination"
