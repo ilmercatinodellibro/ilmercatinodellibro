@@ -17,22 +17,19 @@
           class="absolute"
         />
 
-        <q-menu class="font-weight-600 q-pa-sm row">
+        <q-menu auto-close class="font-weight-600 q-pa-sm row">
           <q-item-section>
             <q-item-label>
               {{ t("retailLocation.foregroundColor") }}
             </q-item-label>
-            <q-color
-              v-model="textColorModel"
-              @change="changeTextColor('fore')"
-            />
+            <q-color v-model="textColor" @change="updateTextColor()" />
           </q-item-section>
 
           <q-item-section>
             <q-item-label>
-              {{ t("retailLocation.backgroundColor") }}
+              {{ t("retailLocation.highlightColor") }}
             </q-item-label>
-            <q-color v-model="bgColorModel" @change="changeTextColor('back')" />
+            <q-color v-model="highlightColor" @change="updateTextHighlight()" />
           </q-item-section>
         </q-menu>
       </q-btn>
@@ -46,7 +43,7 @@
 <script setup lang="ts">
 import { mdiColorHelper, mdiFormatColorText } from "@quasar/extras/mdi-v7";
 import { QEditor, useQuasar } from "quasar";
-import { ref } from "vue";
+import { ref, Ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 
@@ -57,9 +54,16 @@ const { t } = useI18n();
 const { isMobile } = useLateralDrawer();
 
 const editorModel = defineModel<string>({ required: true });
-const editorRef = ref<QEditor>();
-const textColorModel = ref("#000");
-const bgColorModel = ref("#edf2fa");
+
+onMounted(() => {
+  // Forces usage of inline CSS style for text color and background color
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  document.execCommand("styleWithCSS", false, true);
+});
+
+const editorRef = ref() as Ref<QEditor>;
+const textColor = ref("#000");
+const highlightColor = ref("#edf2fa");
 
 const q = useQuasar();
 const toolbar = [
@@ -89,11 +93,14 @@ const toolbar = [
   ["toolbar-actions"],
 ];
 
-function changeTextColor(target: "back" | "fore") {
-  editorRef.value?.runCmd(
-    `${target}Color`,
-    target === "back" ? bgColorModel.value : textColorModel.value,
-  );
+function updateTextColor() {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  document.execCommand("foreColor", false, textColor.value);
+}
+
+function updateTextHighlight() {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  document.execCommand("backColor", false, highlightColor.value);
 }
 </script>
 

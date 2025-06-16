@@ -20,5 +20,5 @@ export default {
     whoAreWeContent: "Chi siamo",
   } satisfies Record<RetailLocationInfo, string>,
   foregroundColor: "Colore testo",
-  backgroundColor: "Colore sfondo",
+  highlightColor: "Colore di sfondo",
 };
