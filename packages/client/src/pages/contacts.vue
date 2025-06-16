@@ -170,7 +170,7 @@ async function submitFeedback() {
     });
 
     message.value = "";
-  } catch (e) {
+  } catch {
     notifyError(t("general.feedbackRequestError"));
   }
 }

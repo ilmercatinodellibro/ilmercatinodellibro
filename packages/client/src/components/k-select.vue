@@ -31,7 +31,7 @@ interface Props {
   options?: readonly unknown[];
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   options: () => [],
 });
 
@@ -44,7 +44,7 @@ const slots = defineSlots<QSelectSlots>();
 
 const { t } = useI18n();
 
-function onUpdateModelValue(newVal: typeof props.modelValue | null) {
+function onUpdateModelValue(newVal: Props["modelValue"] | null) {
   if (newVal !== null) {
     emit("update:modelValue", newVal);
   }

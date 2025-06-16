@@ -111,6 +111,7 @@ async function onSubmit() {
     passwordPayload.newPassword = "";
     passwordPayload.confirmNewPassword = "";
   } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     const { message, status } = e as ServerError;
 
     // TODO: implement centralized error handling

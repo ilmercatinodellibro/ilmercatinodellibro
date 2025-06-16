@@ -5,7 +5,6 @@
 <script setup lang="ts">
 import { QFabAction, QFabActionProps } from "quasar";
 
-// eslint-disable-next-line vue/no-unused-properties
 const props = withDefaults(defineProps<QFabActionProps>(), {
   color: "accent",
   textColor: "black-54",

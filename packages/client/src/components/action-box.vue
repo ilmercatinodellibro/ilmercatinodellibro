@@ -22,7 +22,7 @@
       :label="buttonLabel"
       color="accent"
       no-wrap
-      @click="emit('action-clicked')"
+      @click="emit('actionClicked')"
     />
   </div>
 </template>
@@ -38,7 +38,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  "action-clicked": [];
+  actionClicked: [];
 }>();
 </script>
 

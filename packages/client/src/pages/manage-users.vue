@@ -757,7 +757,8 @@ function openEdit({
             newUserData.email && newUserData.email !== email
               ? newUserData.email
               : undefined,
-          password: newUserData.password ? newUserData.password : undefined,
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- AFAIK this could be a null too
+          password: newUserData.password || undefined,
         },
       });
 

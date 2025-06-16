@@ -64,6 +64,7 @@ async function onSubmit() {
     });
     void router.push({ name: "reset-password-link-sent" });
   } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     const { message, status } = e as ServerError;
 
     // TODO: implement centralized error handling

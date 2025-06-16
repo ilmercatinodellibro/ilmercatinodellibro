@@ -180,7 +180,7 @@ export function initTokenRefresh(router: Router) {
       try {
         const { data: jwt } = await refreshToken();
         token.value = jwt;
-      } catch (error) {
+      } catch {
         logout();
         throw new Error("Could not refresh the access token");
       }

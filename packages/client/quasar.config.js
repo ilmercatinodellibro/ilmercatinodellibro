@@ -1,5 +1,5 @@
 /* eslint-env node */
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 /*
  * This file runs in a Node context (it's NOT transpiled by Babel), so use only
@@ -11,6 +11,8 @@
 
 const { existsSync, rmSync, renameSync } = require("fs");
 const path = require("path");
+
+const vitePluginChecker = require("vite-plugin-checker");
 
 // Be careful about how/what you expose here, process.env has access to root envs here
 require("dotenv-expand").expand(
@@ -155,7 +157,7 @@ module.exports = configure(function (ctx) {
 
         SOCIAL_LOGIN_ENABLED:
           process.env.FACEBOOK_LOGIN_ENABLED === "true" ||
-          process.env.GOOGLE_LOGIN_ENABLED === "true"
+            process.env.GOOGLE_LOGIN_ENABLED === "true"
             ? "true"
             : "false",
         FACEBOOK_LOGIN_ENABLED: process.env.FACEBOOK_LOGIN_ENABLED || "false",
@@ -193,7 +195,7 @@ module.exports = configure(function (ctx) {
         ],
         */
         [
-          "vite-plugin-checker",
+          vitePluginChecker,
           {
             vueTsc: {
               // This path is provided to tsc via --project flag under the hood
