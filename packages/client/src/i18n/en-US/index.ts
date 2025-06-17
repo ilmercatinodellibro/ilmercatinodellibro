@@ -83,7 +83,7 @@ export default {
 
     noData: "No data available",
 
-    downloadFile: "Download file",
+    download: "Download",
   },
 
   roleMap: {

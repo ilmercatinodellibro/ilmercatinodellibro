@@ -60,7 +60,7 @@
 
           <q-btn
             v-if="hasAdminRole"
-            :label="t('common.downloadFile')"
+            :label="t('common.download')"
             class="q-ml-md"
             color="accent"
             @click="getUsersCSV()"
@@ -99,10 +99,11 @@
 
 <script setup lang="ts">
 import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
-import { Dialog, useDialogPluginComponent } from "quasar";
+import { Notify, Dialog, useDialogPluginComponent, exportFile } from "quasar";
 import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
 import KDialogFormCard from "src/components/k-dialog-form-card.vue";
+import { notifyError } from "src/helpers/error-messages";
 import {
   allowOnlyIntegerNumbers,
   nonNegativeNumberRule,
@@ -110,8 +111,9 @@ import {
 import { SettingsUpdate } from "src/models/book";
 import { useAuthService } from "src/services/auth";
 import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
+import { type SettingsDialogProps } from "./settings-dialog";
 
-const props = defineProps<Omit<RetailLocationSettingsFragment, "__typename">>();
+const props = defineProps<SettingsDialogProps>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
@@ -169,10 +171,36 @@ const { getJwtHeader } = useAuthService();
 
 async function getUsersCSV() {
   const headers = getJwtHeader();
-  const response = await fetch("/users/export-csv", { headers });
+  const response = await fetch(`/users/export-csv/${props.retailLocationId}`, {
+    headers,
+  });
+
+  if (!response.ok) {
+    const { message } = (await response.json()) as {
+      message: string;
+      statusCode: number;
+    };
+    console.error(message);
+    notifyError(message);
+    return;
+  }
+
   const blob = await response.blob();
 
-  const dataUrl = URL.createObjectURL(blob);
-  window.open(dataUrl, "_blank");
+  const result = exportFile(
+    `${props.retailLocationId}-ilmercatinodellibro-users-export.csv`,
+    blob,
+  );
+
+  if (result !== true) {
+    console.error(result);
+    notifyError(t("general.settings.downloadUserListFailed"));
+    return;
+  }
+
+  Notify.create({
+    type: "positive",
+    message: t("general.settings.downloadUserListSuccess"),
+  });
 }
 </script>
