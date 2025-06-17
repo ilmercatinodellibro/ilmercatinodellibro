@@ -85,6 +85,10 @@ export default {
     resetConfirmButton: "Effettua reset",
     downloadUserList:
       "Scarica la lista degli utenti con e-mail verificata in un file CSV",
+    downloadUserListSuccess:
+      "Il download della lista degli utenti inizierà a breve",
+    downloadUserListFailed:
+      "Non è stato possibile scaricare la lista degli utenti. Contattate il supporto tecnico.",
   },
   role: "Ruolo",
   rolesAndPermissions: {

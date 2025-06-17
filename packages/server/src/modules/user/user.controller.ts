@@ -1,60 +1,83 @@
-import { createReadStream, writeFileSync } from "fs";
-import { join } from "path";
-import { Controller, Get, Header, StreamableFile } from "@nestjs/common";
+import { createReadStream, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import {
+  Controller,
+  Get,
+  Header,
+  Inject,
+  Param,
+  StreamableFile,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import { Role, type User } from "@prisma/client";
+import { upperCase } from "lodash";
+import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
+import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
 
-const contactsCsvFilePath = "storage/tmp/CONTACTS_LIST.csv";
+const CONTACTS_CSV_FILE_PATH = "./tmp/user_list.csv";
 
 @Controller("users")
 export class UserController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    @Inject(rootConfiguration.KEY)
+    private readonly rootConfig: RootConfiguration,
   ) {}
 
-  @Get("export-csv")
+  @Get("export-csv/:id")
   @Header("Content-Type", "text/csv")
-  async getUsersCSV(@CurrentUser() currentUser: User) {
+  async getUsersCSV(
+    @Param("id") retailLocationId: string,
+    @CurrentUser() currentUser: User,
+  ) {
     await this.authService.assertMembership({
       userId: currentUser.id,
       message: "Forbidden access",
       role: Role.ADMIN,
     });
 
+    const { activeUsersFilter } =
+      getPrismaRetailLocationFilters(retailLocationId);
+
     const users = await this.prisma.user.findMany({
-      where: { emailVerified: true },
-      distinct: "email",
+      where: { emailVerified: true, ...activeUsersFilter },
       select: {
-        id: true,
         firstname: true,
-        email: true,
         lastname: true,
-        locale: true,
+        email: true,
+        phoneNumber: true,
       },
     });
 
-    let csvBody = users
-      .map((user) => {
-        const userDataCsvRow = Object.values(user)
-          .map((value) => value ?? "null")
-          .join(",");
+    if (users.length === 0) {
+      throw new UnprocessableEntityException(
+        "No active users found for the specified retail location.",
+      );
+    }
 
-        return userDataCsvRow;
-      })
+    const csvHeader = Object.keys(users[0])
+      .map((value) => upperCase(value))
+      .join(",");
+    const csvBody = users
+      .map((user) =>
+        Object.values(user)
+          // Wrap values in double quotes to handle special characters
+          .map((value) => `"${value}"`)
+          .join(","),
+      )
       .join("\n");
 
-    const csvHeader = Object.keys(users[0]).join(",");
-    csvBody = `${csvHeader}\n${csvBody}`;
+    const filePath = resolve(
+      this.rootConfig.storagePath,
+      CONTACTS_CSV_FILE_PATH,
+    );
 
-    writeFileSync(contactsCsvFilePath, csvBody);
+    writeFileSync(filePath, `${csvHeader}\n${csvBody}`);
 
-    const file = createReadStream(join(process.cwd(), contactsCsvFilePath));
-
-    return new StreamableFile(file, {
-      type: "text/csv",
-    });
+    return new StreamableFile(createReadStream(filePath));
   }
 }

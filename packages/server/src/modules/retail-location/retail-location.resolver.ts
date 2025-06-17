@@ -7,6 +7,7 @@ import { RetailLocation } from "src/@generated/retail-location";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Input } from "src/modules/auth/decorators/input.decorator";
+import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
 import {
   UpdateRetailLocationInfoInput,
   UpdateRetailLocationSettingsInput,
@@ -233,21 +234,8 @@ export class RetailLocationResolver {
       message: STATISTICS_FORBIDDEN_MESSAGE,
     });
 
-    const retailLocationFilter = {
-      book: {
-        retailLocationId,
-      },
-    };
-
-    const notAdminUser = {
-      memberships: {
-        none: {
-          // An admin in a retail location could possibly be a normal user in another one
-          retailLocationId,
-          role: Role.ADMIN,
-        },
-      },
-    } satisfies Prisma.UserWhereInput;
+    const { retailLocationFilter, notAdminUser, activeUsersFilter } =
+      getPrismaRetailLocationFilters(retailLocationId);
 
     const getBooksCopiesCount = this.prisma.bookCopy.count({
       where: retailLocationFilter,
@@ -377,29 +365,6 @@ export class RetailLocationResolver {
         deletedAt: null,
       },
     });
-
-    const activeUsersFilter = {
-      OR: [
-        // Requested at least one book
-        {
-          requestedBooks: {
-            some: {
-              ...retailLocationFilter,
-              deletedAt: null,
-            },
-          },
-        },
-        // Gave in at least one book
-        {
-          bookCopies: {
-            some: {
-              ...retailLocationFilter,
-            },
-          },
-        },
-      ],
-      ...notAdminUser,
-    } satisfies Prisma.UserWhereInput;
 
     const getActiveUsersCount = this.prisma.user.count({
       where: activeUsersFilter,

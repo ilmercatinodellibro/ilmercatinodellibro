@@ -502,6 +502,7 @@ import { useI18n } from "vue-i18n";
 import { setLanguage } from "src/boot/i18n";
 import AppDrawer from "src/components/app-drawer.vue";
 import HeaderBar from "src/components/header-bar.vue";
+import { type SettingsDialogProps } from "src/components/settings-dialog";
 import SettingsDialog from "src/components/settings-dialog.vue";
 import { provideHeaderActions } from "src/composables/header-features/use-header-actions";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
@@ -513,7 +514,6 @@ import { useAuthService, useLogoutMutation } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
   RetailLocationFragmentDoc,
-  RetailLocationSettingsFragment,
   useResetRetailLocationMutation,
   useUpdateRetailLocationSettingsMutation,
 } from "src/services/retail-location.graphql";
@@ -575,7 +575,8 @@ function openSettings() {
       sellRate: selectedLocation.value.sellRate,
       registrationEnabled: selectedLocation.value.registrationEnabled,
       payOffEnabled: selectedLocation.value.payOffEnabled,
-    } satisfies RetailLocationSettingsFragment,
+      retailLocationId: selectedLocation.value.id,
+    } satisfies SettingsDialogProps,
   }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
       try {

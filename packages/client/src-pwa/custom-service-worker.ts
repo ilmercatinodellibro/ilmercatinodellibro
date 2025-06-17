@@ -41,6 +41,7 @@ if (process.env.PROD) {
           /auth\/*/,
           /receipts\/*/,
           /location\/*/,
+          /users\/*/,
         ],
       },
     ),
