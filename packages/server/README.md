@@ -231,9 +231,16 @@ Before being able to actually import School and School Courses, it is necessary 
 
 1. Have run the import of books in step 1.
 2. Download peer schools's CSV for the current year from the [ministry website](https://dati.istruzione.it/opendata/opendata/catalogo/elements1/?area=Scuole) It is in the section _Informazioni anagrafiche scuole paritarie_.
-3. Rename CSV downloaded in point 2 of this list to `SCUOLE_PARITARIE.csv` and place it into the folder `./storage/tmp/`.
-4. From the same link in point 2 of this list, download the CSV for the state's schools from the area called _Informazioni anagrafiche scuole statali_ and pay attention to its year.
-5. Rename CSV downloaded in point 4 of this list to `SCUOLE_STATALI.csv` and place it into the folder `./storage/tmp/`.
+
+```bash
+wget https://dati.istruzione.it/opendata/opendata/catalogo/elements1/SCUANAGRAFEPARXXXXXXXXXXXXXX.csv -O ./storage/tmp/SCUOLE_PARITARIE.csv
+```
+
+3. From the same link in point 2 of this list, download the CSV for the state's schools from the area called _Informazioni anagrafiche scuole statali_ and pay attention to its year.
+
+```bash
+wget https://dati.istruzione.it/opendata/opendata/catalogo/elements1/SCUANAGRAFESTATXXXXXXXXXXXXXX.csv -O ./storage/tmp/SCUOLE_STATALI.csv
+```
 
 After the setup operations are concluded, you can then run a command similar to the command run for importing books:
 
