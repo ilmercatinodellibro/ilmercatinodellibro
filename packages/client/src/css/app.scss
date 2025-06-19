@@ -6,7 +6,8 @@ $icons-dimension: 24px;
 $icons-gap: 16px;
 $separator-gap: 13px;
 $reserved-space-for-the-toolbar-addition: calc(
-  #{$icons-dimension} + #{$separator-gap} * 2 - #{$default-reserved-space-for-the-toolbar}
+  #{$icons-dimension} + #{$separator-gap} * 2 -
+    #{$default-reserved-space-for-the-toolbar}
 );
 
 // Change the default text color system-wide

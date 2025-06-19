@@ -10,7 +10,6 @@ export const PASSWORD_STUB_HASH =
   "$argon2id$v=19$m=65536,t=3,p=4$3S7CSbDtcAUVF1hcrMDkQw$Kx69jwO1b+VjdM5uILwtRHLdEwscdidcapNZjGevvm8";
 
 // The pool size can be increased if needed
- 
 const uniqueEmailPool = faker.helpers.uniqueArray(
   () => faker.internet.email(),
   100,

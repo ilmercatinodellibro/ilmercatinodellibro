@@ -11,7 +11,7 @@ export const nameAddrSchema = z.custom<`${string} <${string}>`>((value) => {
     return false;
   }
 
-  const [, name, addr] = (/^(.+) <(.+)>$/.exec(value)) ?? [];
+  const [, name, addr] = /^(.+) <(.+)>$/.exec(value) ?? [];
   if (!name || !addr) {
     return false;
   }

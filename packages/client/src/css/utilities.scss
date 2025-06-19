@@ -82,8 +82,8 @@ $text-size-list: 10, 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48;
 }
 
 // letter spacings
-$letter-spacing-list: 5, 10, 15, 25, 40, 44, 75, 100, 225, 263, 300, 375, 450,
-  675;
+$letter-spacing-list:
+  5, 10, 15, 25, 40, 44, 75, 100, 225, 263, 300, 375, 450, 675;
 
 @each $letter-spacing in $letter-spacing-list {
   .letter-spacing-#{$letter-spacing} {
@@ -109,8 +109,8 @@ $line-heights-list: 16, 20, 28, 50, 75;
   }
 }
 
-$widths-list: 0, 24, 32, 160, 180, 200, 250, 260, 300, 315, 360, 420, 560, 600,
-  700, 1024;
+$widths-list:
+  0, 24, 32, 160, 180, 200, 250, 260, 300, 315, 360, 420, 560, 600, 700, 1024;
 
 @each $width in $widths-list {
   .width-#{$width} {

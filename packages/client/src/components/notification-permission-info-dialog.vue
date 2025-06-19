@@ -62,9 +62,9 @@ const activePlatform = Platform.is.mobile ? "mobile" : "desktop";
 const activeBrowser = Platform.is.firefox
   ? "firefox"
   : Platform.is.safari
-  ? // TODO: Add a mobile Safari image
-    "safari"
-  : "chromium";
+    ? // TODO: Add a mobile Safari image
+      "safari"
+    : "chromium";
 
 const getImagePath = (language: string) =>
   `/push-notification/${language}/browser-popup-${activePlatform}-${activeBrowser}.jpg`;

@@ -310,6 +310,7 @@ async function onSubmit() {
     });
   } catch (error) {
     const { message, graphQLErrors } = error as ApolloError;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- we're not sure if this a false positive or not
     const status = graphQLErrors[0]?.extensions?.status as number | undefined;
 
     // TODO: implement centralized error handling

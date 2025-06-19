@@ -59,7 +59,8 @@ export class MailService {
   }
 
   async sendMail(mailDetails: SendMailOptions): Promise<SentMessageInfo> {
-    const addressOverrides: Partial<Record<AddressableField, AddressObject>> = {};
+    const addressOverrides: Partial<Record<AddressableField, AddressObject>> =
+      {};
     try {
       for (const field of addressableFields) {
         const value = mailDetails[field];
