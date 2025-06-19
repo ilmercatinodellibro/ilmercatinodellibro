@@ -12,8 +12,6 @@
 const { existsSync, rmSync, renameSync } = require("fs");
 const path = require("path");
 
-const vitePluginChecker = require("vite-plugin-checker");
-
 // Be careful about how/what you expose here, process.env has access to root envs here
 require("dotenv-expand").expand(
   require("dotenv").config({
@@ -22,6 +20,8 @@ require("dotenv-expand").expand(
 );
 
 const { configure } = require("quasar/wrappers");
+
+const vitePluginChecker = require("vite-plugin-checker");
 
 function getVueTscTsconfigPath(isPwa) {
   return path.join(
@@ -276,7 +276,7 @@ module.exports = configure(function (ctx) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ["Dialog", "Notify", "LocalStorage"],
+      plugins: ["Dialog", "Notify", "LocalStorage", "Loading"],
     },
 
     // animations: 'all', // --- includes all animations

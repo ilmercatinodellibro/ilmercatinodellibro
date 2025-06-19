@@ -496,18 +496,20 @@ import {
   mdiWeb,
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
-import { Dialog, Notify, QTooltipProps } from "quasar";
+import { Dialog, Loading, Notify, QTooltipProps, exportFile } from "quasar";
 import { watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { setLanguage } from "src/boot/i18n";
 import AppDrawer from "src/components/app-drawer.vue";
 import HeaderBar from "src/components/header-bar.vue";
-import { type SettingsDialogProps } from "src/components/settings-dialog";
+import {
+  type SettingsDialogProps,
+  type SettingsUpdate,
+} from "src/components/settings-dialog";
 import SettingsDialog from "src/components/settings-dialog.vue";
 import { provideHeaderActions } from "src/composables/header-features/use-header-actions";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { notifyError } from "src/helpers/error-messages";
-import { SettingsUpdate } from "src/models/book";
 import { languages } from "src/models/language";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService, useLogoutMutation } from "src/services/auth";
@@ -564,7 +566,24 @@ function logout() {
 
 const { updateRetailLocationSettings } =
   useUpdateRetailLocationSettingsMutation();
-const { resetRetailLocation } = useResetRetailLocationMutation();
+const { resetRetailLocation, loading: resetMutationLoading } =
+  useResetRetailLocationMutation();
+
+// Disable the whole interface while resetting the retail location
+watch(resetMutationLoading, (loading) => {
+  if (loading) {
+    Loading.show({
+      message: t("general.loading"),
+      spinnerSize: 50,
+      spinnerColor: "primary",
+    });
+  } else {
+    Loading.hide();
+  }
+});
+
+const { getJwtHeader } = useAuthService();
+
 function openSettings() {
   Dialog.create({
     component: SettingsDialog,
@@ -575,7 +594,6 @@ function openSettings() {
       sellRate: selectedLocation.value.sellRate,
       registrationEnabled: selectedLocation.value.registrationEnabled,
       payOffEnabled: selectedLocation.value.payOffEnabled,
-      retailLocationId: selectedLocation.value.id,
     } satisfies SettingsDialogProps,
   }).onOk(async (payload: SettingsUpdate) => {
     if (payload.type === "save") {
@@ -607,13 +625,57 @@ function openSettings() {
       } catch {
         notifyError(t("common.genericErrorMessage"));
       }
-    } else {
-      await resetRetailLocation({
-        input: {
-          retailLocationId: selectedLocation.value.id,
+    }
+
+    if (payload.type === "reset") {
+      try {
+        await resetRetailLocation({
+          input: {
+            retailLocationId: selectedLocation.value.id,
+          },
+        });
+        window.location.reload();
+      } catch {
+        notifyError(t("common.genericErrorMessage"));
+      }
+    }
+
+    if (payload.type === "export-users") {
+      const headers = getJwtHeader();
+      const response = await fetch(
+        `/users/export-csv/${selectedLocation.value.id}`,
+        {
+          headers,
         },
+      );
+
+      if (!response.ok) {
+        const { message } = (await response.json()) as {
+          message: string;
+          statusCode: number;
+        };
+        console.error(message);
+        notifyError(message);
+        return;
+      }
+
+      const blob = await response.blob();
+
+      const result = exportFile(
+        `${selectedLocation.value.id}-ilmercatinodellibro-users-export.csv`,
+        blob,
+      );
+
+      if (result !== true) {
+        console.error(result);
+        notifyError(t("general.settings.downloadUserListFailed"));
+        return;
+      }
+
+      Notify.create({
+        type: "positive",
+        message: t("general.settings.downloadUserListSuccess"),
       });
-      window.location.reload();
     }
   });
 }

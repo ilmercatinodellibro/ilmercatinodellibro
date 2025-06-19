@@ -1,5 +1,4 @@
 import { BookQueryFilter } from "src/@generated/graphql";
-import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
 
 export const enum BookCopyStatuses {
   LOST = "lost",
@@ -41,10 +40,3 @@ export enum BooksTab {
   REQUESTED = "requested",
   PURCHASED = "purchased",
 }
-
-export type SettingsUpdate =
-  | {
-      type: "save";
-      settings: RetailLocationSettingsFragment;
-    }
-  | { type: "reset" };
