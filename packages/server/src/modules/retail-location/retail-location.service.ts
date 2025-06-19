@@ -1,4 +1,4 @@
-import { cp, mkdir, rmdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, rm, writeFile, open } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Inject, Injectable } from "@nestjs/common";
 import { stringify } from "csv";
@@ -65,7 +65,7 @@ export class RetailLocationService {
     const filePromises = [];
     const backupDirectory = this.resolveStoragePath(
       locationId,
-      `./backups/${Date.now()}`,
+      `./backups/${new Date().toISOString()}`,
     );
     // Ensure the directory exists
     await mkdir(backupDirectory, { recursive: true });
@@ -85,9 +85,10 @@ export class RetailLocationService {
 
     try {
       await Promise.all(filePromises);
+      // TODO: zip the backup receipts directory
     } catch (error) {
       try {
-        await rmdir(backupDirectory, { recursive: true });
+        await rm(backupDirectory, { recursive: true, force: true });
       } catch {
         // nothing to do
       }
@@ -132,8 +133,12 @@ export class RetailLocationService {
     ]);
 
     const receiptsDirectory = this.resolveStoragePath(locationId, "./receipts");
-    await rmdir(receiptsDirectory, { recursive: true });
+    await rm(receiptsDirectory, { recursive: true, force: true });
     // Create the directory again
     await mkdir(receiptsDirectory);
+    // Recreates the .gitkeep file to keep the directory in version control
+    const gitkeepPath = resolve(receiptsDirectory, ".gitkeep");
+    const gitkeepHandle = await open(gitkeepPath, "a");
+    await gitkeepHandle.close();
   }
 }

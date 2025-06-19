@@ -38,3 +38,6 @@ client-dist*
 storage/**
 !storage/**/
 !storage/**/.gitkeep
+# During backup we copy the whole receipts directory, including the .gitkeep file,
+# but we don't want to keep it in the repository.
+storage/location/*/backups/*/receipts/.gitkeep
