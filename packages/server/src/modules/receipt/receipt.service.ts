@@ -71,12 +71,12 @@ export class ReceiptService {
   // TODO: Make this dynamic and configurable from the admin panel
   readonly #settlementPeriod: Record<"re" | "mo", SettlementPeriod> = {
     re: {
-      from: new Date(2024, 8, 17),
-      to: new Date(2024, 8, 28),
+      from: new Date(2025, 8, 9),
+      to: new Date(2025, 8, 27),
     },
     mo: {
-      from: new Date(2024, 8, 16),
-      to: new Date(2024, 8, 27),
+      from: new Date(2025, 8, 15),
+      to: new Date(2025, 8, 27),
     },
   };
 
