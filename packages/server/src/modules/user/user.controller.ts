@@ -17,8 +17,6 @@ import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator"
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
 
-const CONTACTS_CSV_FILE_PATH = "./tmp/user_list.csv";
-
 @Controller("users")
 export class UserController {
   constructor(
@@ -71,13 +69,17 @@ export class UserController {
       )
       .join("\n");
 
-    const filePath = resolve(
-      this.rootConfig.storagePath,
-      CONTACTS_CSV_FILE_PATH,
-    );
+    const filePath = this.#resolveContactsCsvFilePath(retailLocationId);
 
     writeFileSync(filePath, `${csvHeader}\n${csvBody}`);
 
     return new StreamableFile(createReadStream(filePath));
+  }
+
+  #resolveContactsCsvFilePath(locationId: string) {
+    return resolve(
+      this.rootConfig.storagePath,
+      `./location/${locationId}/user_list_${locationId}.csv`,
+    );
   }
 }
