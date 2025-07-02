@@ -1,4 +1,3 @@
-import { appendFileSync, existsSync, readFileSync } from "fs";
 import {
   ContactsApi,
   ContactsApiApiKeys,
@@ -8,13 +7,11 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import type { User } from "@prisma/client";
-import type { IncomingMessage } from "http";
 
 @Injectable()
 export class NewsletterContactsService {
   private readonly logger = new Logger(NewsletterContactsService.name);
   private readonly brevoContactsApi = new ContactsApi();
-  private readonly contactsCsvFilePath = `storage/tmp/NEWSLETTER_USER_DATA.csv`;
 
   constructor(private readonly prisma: PrismaService) {
     const apiKey = process.env.BREVO_API_KEY;
@@ -25,7 +22,7 @@ export class NewsletterContactsService {
     this.brevoContactsApi.setApiKey(ContactsApiApiKeys.apiKey, apiKey);
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async updateNewsletterContactsList() {
     const oneDayAgo =
       new Date().getTime() -
@@ -40,11 +37,10 @@ export class NewsletterContactsService {
         emailVerified: true,
       },
       select: {
-        id: true,
         firstname: true,
-        email: true,
         lastname: true,
-        locale: true,
+        email: true,
+        phoneNumber: true,
       },
     });
 
@@ -59,68 +55,40 @@ export class NewsletterContactsService {
       `Updating the list of newsletter contacts - ${newOrUpdatedUsers.length} new/updated users in the past 24hrs`,
     );
 
-    try {
-      await this.importContacts(newOrUpdatedUsers);
-    } catch (_error) {
-      const error = _error as Error | { body: ErrorModel };
-      this.logger.error(
-        `Could not update the contact list: ${error instanceof Error ? error.message : error.body.message}`,
-      );
+    const retailLocationData = await this.prisma.retailLocation.findMany({
+      select: {
+        brevoContactsListId: true,
+        name: true,
+      },
+    });
+
+    for (const { brevoContactsListId, name } of retailLocationData) {
+      try {
+        if (brevoContactsListId === "") {
+          // The list ID for this retail location was not set, so we skip it
+          throw new Error(`The ID is not set for this location.`);
+        }
+
+        await this.importContacts(newOrUpdatedUsers, brevoContactsListId);
+      } catch (_error) {
+        const error = _error as Error | { body: ErrorModel };
+        this.logger.error(
+          `Could not update the contact list for ${name}: ${error instanceof Error ? error.message : error.body.message}`,
+        );
+      }
     }
   }
 
   async importContacts(
-    users: Pick<User, "id" | "firstname" | "lastname" | "locale" | "email">[],
+    jsonBody: Pick<User, "firstname" | "lastname" | "email" | "phoneNumber">[],
+    listId: string,
   ) {
-    let csvBody = users
-      .map((user) => {
-        const userDataCsvRow = Object.values(user)
-          .map((value) => value ?? "null")
-          .join(",");
+    this.logger.log("Uploading the user data to Brevo contact list");
 
-        return userDataCsvRow;
-      })
-      .join("\n");
-
-    const isUpdatingCsv = existsSync(this.contactsCsvFilePath);
-    this.logger.log(
-      `${isUpdatingCsv ? "Updating" : "Creating"} the contacts list CSV`,
-    );
-
-    let csvHeader = "";
-    if (!isUpdatingCsv) {
-      csvHeader = Object.keys(users[0]).join(",");
-    }
-    csvBody = `${csvHeader}\n${csvBody}`;
-
-    appendFileSync(this.contactsCsvFilePath, csvBody);
-
-    const fullPath = `${process.cwd()}/${this.contactsCsvFilePath}`;
-    this.logger.log(
-      `CSV file ${isUpdatingCsv ? "updated" : "created"} successfully at the path ${fullPath}`,
-    );
-
-    const fileBody = readFileSync(this.contactsCsvFilePath).toString();
-
-    const listId = process.env.BREVO_CONTACTS_LIST_ID;
-    if (!listId) {
-      throw new Error("Missing contacts list ID in the configuration");
-    }
-
-    this.logger.log(
-      `${isUpdatingCsv ? "Updating" : "Uploading"} the CSV to Brevo contact list`,
-    );
-
-    const { response } = await new Promise<{
-      response: Partial<IncomingMessage>;
-    }>((resolve) => {
-      this.logger.debug("Fake API communication");
-      resolve({ response: { statusCode: 202, statusMessage: fileBody[0] } });
+    const { response } = await this.brevoContactsApi.importContacts({
+      jsonBody,
+      listIds: [parseInt(listId)],
     });
-    // await this.brevoContactsApi.importContacts({
-    //   fileBody,
-    //   listIds: [parseInt(listId)],
-    // });
 
     if (response.statusCode !== 202) {
       throw new Error(`Invalid response status: ${response.statusMessage}`);
