@@ -4,8 +4,9 @@ import {
   type ErrorModel,
   type RequestContactImportJsonBodyInner,
 } from "@getbrevo/brevo";
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { BrevoConfiguration, brevoConfiguration } from "src/config/brevo";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import type { User } from "@prisma/client";
 
@@ -14,13 +15,15 @@ export class NewsletterContactsService {
   private readonly logger = new Logger(NewsletterContactsService.name);
   private readonly brevoContactsApi = new ContactsApi();
 
-  constructor(private readonly prisma: PrismaService) {
-    const apiKey = process.env.BREVO_API_KEY;
-    if (!apiKey) {
-      throw new Error("Missing API key in the configuration");
-    }
-
-    this.brevoContactsApi.setApiKey(ContactsApiApiKeys.apiKey, apiKey);
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(brevoConfiguration.KEY)
+    readonly brevoConfig: BrevoConfiguration,
+  ) {
+    this.brevoContactsApi.setApiKey(
+      ContactsApiApiKeys.apiKey,
+      brevoConfig.apiKey,
+    );
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -64,18 +67,30 @@ export class NewsletterContactsService {
     });
 
     for (const { brevoContactsListId, name } of retailLocationData) {
-      try {
-        const listId = parseInt(brevoContactsListId);
-        if (isNaN(listId)) {
-          // The list ID for this retail location was not set, so we skip it
-          throw new Error(`The ID is not set for this location.`);
-        }
+      if (!brevoContactsListId) {
+        this.logger.warn(
+          `The Brevo contacts list ID is not set for the location: ${name}`,
+        );
+        continue;
+      }
 
+      const listId = parseInt(brevoContactsListId);
+      if (isNaN(listId)) {
+        this.logger.warn(
+          `The set Brevo contacts list ID isn't numeric and thus is invalid for the location: ${name}`,
+        );
+        continue;
+      }
+
+      try {
         await this.importContacts(newOrUpdatedUsers, listId);
       } catch (_error) {
         const error = _error as Error | { body: ErrorModel };
+        const errorMessage =
+          error instanceof Error ? error.message : error.body.message;
+
         this.logger.error(
-          `Could not update the contact list for ${name}: ${error instanceof Error ? error.message : error.body.message}`,
+          `Could not update the contact list for location ${name}: ${errorMessage}`,
         );
       }
     }
