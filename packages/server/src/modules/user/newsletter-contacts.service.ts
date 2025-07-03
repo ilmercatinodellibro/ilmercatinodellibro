@@ -65,15 +65,13 @@ export class NewsletterContactsService {
 
     for (const { brevoContactsListId, name } of retailLocationData) {
       try {
-        if (brevoContactsListId === "") {
+        const listId = parseInt(brevoContactsListId);
+        if (isNaN(listId)) {
           // The list ID for this retail location was not set, so we skip it
           throw new Error(`The ID is not set for this location.`);
         }
 
-        await this.importContacts(
-          newOrUpdatedUsers,
-          parseInt(brevoContactsListId),
-        );
+        await this.importContacts(newOrUpdatedUsers, listId);
       } catch (_error) {
         const error = _error as Error | { body: ErrorModel };
         this.logger.error(
