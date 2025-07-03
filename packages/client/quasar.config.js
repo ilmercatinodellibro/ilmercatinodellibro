@@ -157,7 +157,7 @@ module.exports = configure(function (ctx) {
 
         SOCIAL_LOGIN_ENABLED:
           process.env.FACEBOOK_LOGIN_ENABLED === "true" ||
-            process.env.GOOGLE_LOGIN_ENABLED === "true"
+          process.env.GOOGLE_LOGIN_ENABLED === "true"
             ? "true"
             : "false",
         FACEBOOK_LOGIN_ENABLED: process.env.FACEBOOK_LOGIN_ENABLED || "false",
@@ -251,10 +251,6 @@ module.exports = configure(function (ctx) {
           target: process.env.GRAPHQL_DOMAIN,
         },
         "/auth": {
-          changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN,
-        },
-        "/users": {
           changeOrigin: true,
           target: process.env.GRAPHQL_DOMAIN,
         },

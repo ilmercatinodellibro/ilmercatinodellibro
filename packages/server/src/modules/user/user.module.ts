@@ -5,7 +5,6 @@ import { AddAdminUserCommand } from "src/modules/user/commands/add-admin-user.co
 import { SeedUsersWithBooksCommand } from "src/modules/user/commands/seed-users-with-books.command";
 import { NewsletterContactsService } from "src/modules/user/newsletter-contacts.service";
 import { UserAccountResolver } from "src/modules/user/user-account.resolver";
-import { UserController } from "src/modules/user/user.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 import { UserResolver } from "./user.resolver";
 import { UserService } from "./user.service";
@@ -21,6 +20,5 @@ import { UserService } from "./user.service";
     NewsletterContactsService,
   ],
   exports: [UserService],
-  controllers: [UserController],
 })
 export class UserModule {}

@@ -643,7 +643,7 @@ function openSettings() {
     if (payload.type === "export-users") {
       const headers = getJwtHeader();
       const response = await fetch(
-        `/users/export-csv/${selectedLocation.value.id}`,
+        `/location/${selectedLocation.value.id}/export-active-users`,
         {
           headers,
         },
