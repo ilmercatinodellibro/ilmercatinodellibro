@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "src/modules/auth/auth.module";
+import { NewsletterContactsService } from "src/modules/retail-location/newsletter-contacts.service";
 import { RetailLocationController } from "src/modules/retail-location/retail-location.controller";
 import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import { PrismaModule } from "../prisma/prisma.module";
@@ -8,7 +9,11 @@ import { RetailLocationResolver } from "./retail-location.resolver";
 
 @Module({
   imports: [PrismaModule, AuthModule, ConfigModule],
-  providers: [RetailLocationResolver, RetailLocationService],
+  providers: [
+    RetailLocationResolver,
+    RetailLocationService,
+    NewsletterContactsService,
+  ],
   exports: [RetailLocationService],
   controllers: [RetailLocationController],
 })
