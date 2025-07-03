@@ -2,6 +2,7 @@ import {
   ContactsApi,
   ContactsApiApiKeys,
   type ErrorModel,
+  type RequestContactImportJsonBodyInner,
 } from "@getbrevo/brevo";
 import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
@@ -69,7 +70,10 @@ export class NewsletterContactsService {
           throw new Error(`The ID is not set for this location.`);
         }
 
-        await this.importContacts(newOrUpdatedUsers, brevoContactsListId);
+        await this.importContacts(
+          newOrUpdatedUsers,
+          parseInt(brevoContactsListId),
+        );
       } catch (_error) {
         const error = _error as Error | { body: ErrorModel };
         this.logger.error(
@@ -80,15 +84,29 @@ export class NewsletterContactsService {
   }
 
   async importContacts(
-    jsonBody: Pick<User, "firstname" | "lastname" | "email" | "phoneNumber">[],
-    listId: string,
+    users: Pick<User, "firstname" | "lastname" | "email" | "phoneNumber">[],
+    listId: number,
   ) {
-    this.logger.log("Uploading the user data to Brevo contact list");
+    this.logger.log(
+      `Uploading the user data to Brevo contact list with ID ${listId}`,
+    );
 
     const { response } = await this.brevoContactsApi.importContacts({
-      jsonBody,
-      listIds: [parseInt(listId)],
+      jsonBody: users.map(
+        ({ email, phoneNumber, firstname, lastname }) =>
+          ({
+            email,
+            attributes: {
+              SMS: phoneNumber,
+              FIRSTNAME: firstname,
+              LASTNAME: lastname,
+            },
+          }) satisfies RequestContactImportJsonBodyInner,
+      ),
+      listIds: [listId],
     });
+
+    this.logger.log(`Update successful for list with ID ${listId}`);
 
     if (response.statusCode !== 202) {
       throw new Error(`Invalid response status: ${response.statusMessage}`);
