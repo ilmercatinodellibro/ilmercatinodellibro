@@ -26,6 +26,8 @@ export class UserController {
     private readonly rootConfig: RootConfiguration,
   ) {}
 
+  // TODO: move into retail location controller
+  // @Get("retail-location/:id/export-active-users")
   @Get("export-csv/:id")
   @Header("Content-Type", "text/csv")
   async getUsersCSV(
