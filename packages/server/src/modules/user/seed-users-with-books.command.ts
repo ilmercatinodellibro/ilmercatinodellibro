@@ -31,6 +31,10 @@ const DEFAULT_USERS_COUNT = 5;
 // How many copies above the base when generating user book copies
 const DEFAULT_ADDITIONAL_BOOKS_PER_USER = 5;
 
+// We hardcode the first 3 digits because the actual validation rules
+// are kinda complex and we don't want to deal with them here
+const ITALIAN_PHONE_NUMBER_REGEXP = /348[0-9]{7}/;
+
 function composeUserEmail(index: number, role: string, location: string) {
   return `${location}-user-${role}-${index + 1}${EMAIL_SEEDING_SUFFIX}`;
 }
@@ -221,7 +225,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
           firstname: faker.person.firstName(),
           lastname: faker.person.lastName(),
           password: PASSWORD_STUB_HASH,
-          phoneNumber: faker.string.numeric({ length: 10 }),
+          phoneNumber: faker.helpers.fromRegExp(ITALIAN_PHONE_NUMBER_REGEXP),
           emailVerified: true,
         },
       });
@@ -233,7 +237,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
           firstname: faker.person.firstName(),
           lastname: faker.person.lastName(),
           password: PASSWORD_STUB_HASH,
-          phoneNumber: faker.string.numeric({ length: 10 }),
+          phoneNumber: faker.helpers.fromRegExp(ITALIAN_PHONE_NUMBER_REGEXP),
           emailVerified: true,
         },
       });
