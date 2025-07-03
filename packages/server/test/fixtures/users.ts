@@ -14,24 +14,29 @@ export const TEST_ADMIN = {
   email: "admin@example.com",
   emailVerified: true,
   role: "ADMIN",
+  phoneNumber: "+393324538390",
 } satisfies SeedUserCreateInput;
 export const TEST_OPERATOR = {
   email: "operator@example.com",
   emailVerified: true,
   role: "OPERATOR",
+  phoneNumber: "+394343515887",
 } satisfies SeedUserCreateInput;
 export const TEST_USER = {
   email: "user@example.com",
   emailVerified: true,
+  phoneNumber: "+393182463108",
 } satisfies SeedUserCreateInput;
 // Separate user which the password is not predictable since it's meant to be used by the forgot password test
 export const TEST_USER_FORGOT_PASSWORD = {
   email: "user-forgot-password@example.com",
   emailVerified: true,
+  phoneNumber: "+393106083278",
 } satisfies SeedUserCreateInput;
 export const TEST_USER_NON_VERIFIED = {
   email: "non_verified_user@example.com",
   emailVerified: false,
+  phoneNumber: "+393324538393",
 } satisfies SeedUserCreateInput;
 
 export const TEST_USERS = [
