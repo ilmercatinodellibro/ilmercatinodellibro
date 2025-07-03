@@ -1,9 +1,8 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "src/modules/auth/auth.module";
-import { AddAdminUserCommand } from "src/modules/user/commands/add-admin-user.command";
-import { SeedUsersWithBooksCommand } from "src/modules/user/commands/seed-users-with-books.command";
-import { NewsletterContactsService } from "src/modules/user/newsletter-contacts.service";
+import { AddAdminUserCommand } from "src/modules/user/add-admin-user.command";
+import { SeedUsersWithBooksCommand } from "src/modules/user/seed-users-with-books.command";
 import { UserAccountResolver } from "src/modules/user/user-account.resolver";
 import { PrismaModule } from "../prisma/prisma.module";
 import { UserResolver } from "./user.resolver";
@@ -17,7 +16,6 @@ import { UserService } from "./user.service";
     UserService,
     AddAdminUserCommand,
     SeedUsersWithBooksCommand,
-    NewsletterContactsService,
   ],
   exports: [UserService],
 })
