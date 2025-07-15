@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import {
   Book,
@@ -39,7 +39,7 @@ export class BookRequestService {
     ],
   } satisfies Prisma.BookRequestWhereInput;
 
-  @OnEvent("booksBecameAvailable")
+  // @OnEvent("booksBecameAvailable")
   async handleBooksBecameAvailable({ bookIds }: { bookIds: string[] }) {
     const retailLocations = await this.prisma.retailLocation.findMany({
       select: {
