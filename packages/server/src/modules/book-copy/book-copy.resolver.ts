@@ -584,7 +584,8 @@ export class BookCopyResolver {
         })),
       });
 
-      return prisma.bookCopy.findMany({
+      // The underscore avoids variable name shadowing
+      const _bookCopies = await prisma.bookCopy.findMany({
         where: {
           ownerId,
           code: {
@@ -598,14 +599,16 @@ export class BookCopyResolver {
           book: true,
         },
       });
-    });
 
-    await this.receiptService.createReceipt({
-      type: ReceiptType.WITHDRAWAL,
-      userId: ownerId,
-      retailLocationId,
-      createdById: userId,
-      data: bookCopies,
+      await this.receiptService.createReceipt(prisma, {
+        type: ReceiptType.WITHDRAWAL,
+        userId: ownerId,
+        retailLocationId,
+        createdById: userId,
+        data: _bookCopies,
+      });
+
+      return _bookCopies;
     });
 
     this.eventEmitter.emit("booksBecameAvailable", { bookIds });

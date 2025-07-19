@@ -7,6 +7,7 @@ import { line, readOnlyText, table, text } from "@pdfme/schemas";
 import {
   Book,
   BookCopy,
+  Prisma,
   Receipt,
   RetailLocation,
   Sale,
@@ -121,14 +122,11 @@ export class ReceiptService {
     });
   }
 
-  async createReceipt({
-    userId,
-    retailLocationId,
-    createdById,
-    type,
-    data,
-  }: CreateReceiptInput) {
-    const receipt = await this.prisma.receipt.create({
+  async createReceipt(
+    prisma: Prisma.TransactionClient,
+    { userId, retailLocationId, createdById, type, data }: CreateReceiptInput,
+  ) {
+    const receipt = await prisma.receipt.create({
       data: {
         type,
         userId,

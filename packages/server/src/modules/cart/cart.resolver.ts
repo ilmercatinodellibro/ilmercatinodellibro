@@ -426,7 +426,7 @@ export class CartResolver {
       }),
     );
 
-    await this.receiptService.createReceipt({
+    await this.receiptService.createReceipt(prisma, {
       type: ReceiptType.PURCHASE,
       userId: cart.userId,
       retailLocationId: cart.retailLocationId,
