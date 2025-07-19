@@ -278,12 +278,12 @@ function getCommonColumns<
     {
       label: t("book.fields.price"),
       field: (row) => {
-        const fieldValueOrGetter = getField("originalPrice");
+        const fieldNameOrGetter = getField("originalPrice");
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const fieldValue: number =
-          typeof fieldValueOrGetter === "function"
-            ? fieldValueOrGetter(row)
-            : fieldValueOrGetter;
+          typeof fieldNameOrGetter === "function"
+            ? fieldNameOrGetter(row)
+            : row[fieldNameOrGetter as keyof TFragment];
 
         return calculateBookCopyPrice(fieldValue, "sell");
       },
