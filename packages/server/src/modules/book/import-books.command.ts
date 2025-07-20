@@ -221,6 +221,13 @@ export class ImportBooksCommand extends CommandRunner {
     return locationBooks;
   }
 
+  #removeUnprintableCharsFromCsvRow(row: IngestedCsvRow): IngestedCsvRow {
+    return row.map((value) =>
+      // eslint-disable-next-line no-control-regex
+      value.replace(/[\u0000-\u001F\u007F-\u009F]/g, "").trim(),
+    ) as IngestedCsvRow;
+  }
+
   async #parseCsvBooksContent(
     locationsPrefixes: string[] = ["MO", "RE"],
     booksAlreadyPresent = false,
@@ -297,6 +304,8 @@ export class ImportBooksCommand extends CommandRunner {
     });
 
     const transformer = transform((row: IngestedCsvRow) => {
+      row = this.#removeUnprintableCharsFromCsvRow(row);
+
       const rowSubtitle = row[9];
       const subtitle =
         !rowSubtitle || rowSubtitle.toLowerCase() === "nd"
