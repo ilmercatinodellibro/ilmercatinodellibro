@@ -333,10 +333,9 @@ export class BookCopyResolver {
         retailLocationId,
       },
       returnedAt: null,
-      // TODO: it includes all available books, instead of adding this as and additional filter
       ...(includeCopyOrStatement
         ? {
-            OR: [
+            AND: [
               ...(isAvailable
                 ? ([
                     {

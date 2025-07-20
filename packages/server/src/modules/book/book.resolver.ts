@@ -92,52 +92,51 @@ export class BookResolver {
               },
             }
           : {},
-      ],
-
-      // Filters for school codes only if defined
-      ...(schoolCodes
-        ? {
-            courses: {
-              some: {
-                schoolCourse: {
-                  schoolCode: {
-                    in: schoolCodes,
+        // Filters for school codes only if defined
+        schoolCodes
+          ? {
+              courses: {
+                some: {
+                  schoolCourse: {
+                    schoolCode: {
+                      in: schoolCodes,
+                    },
                   },
                 },
               },
-            },
-          }
-        : {}),
+            }
+          : {},
 
-      // Filters for school courses only if defined
-      ...(schoolCourseIds
-        ? {
-            courses: {
-              some: {
-                schoolCourseId: {
-                  in: schoolCourseIds,
+        // Filters for school courses only if defined
+        schoolCourseIds
+          ? {
+              courses: {
+                some: {
+                  schoolCourseId: {
+                    in: schoolCourseIds,
+                  },
                 },
               },
-            },
-          }
-        : {}),
+            }
+          : {},
 
-      OR: searchText
-        ? [
-            {
-              isbnCode: {
-                startsWith: searchText,
-                mode: "insensitive",
+        ...(searchText
+          ? ([
+              {
+                isbnCode: {
+                  startsWith: searchText,
+                  mode: "insensitive",
+                },
               },
-            },
-            {
-              title: {
-                contains: searchText,
-                mode: "insensitive",
+              {
+                title: {
+                  contains: searchText,
+                  mode: "insensitive",
+                },
               },
-            },
-          ]
-        : undefined,
+            ] satisfies Prisma.BookWhereInput[])
+          : []),
+      ],
     };
 
     const [rowsCount, rows] = await this.prisma.$transaction([
