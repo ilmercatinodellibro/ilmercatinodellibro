@@ -261,7 +261,7 @@ interface WarehousePagination {
 const isSortedByCopyCode = ref(true);
 
 const { refetchFilterProxy, filterOptions, tableFilter, booleanFilters } =
-  useTableFilters("warehouse.filters", true);
+  useTableFilters("warehouse.filters");
 
 const paginatedBooksWithCopies = ref<PaginatedBookResultFragment>();
 // Avoids errors in the template while books haven't been fetched yet or are loading
@@ -283,7 +283,10 @@ async function fetchBooks({
   page,
   rowsPerPage,
 }: Omit<WarehousePagination, "rowsNumber">) {
-  if (refetchFilterProxy.value.search.length < 3) {
+  if (
+    refetchFilterProxy.value.search.length < 3 &&
+    booleanFilters.value === undefined
+  ) {
     paginatedBooksWithCopies.value = undefined;
     paginatedBookCopies.value = undefined;
 

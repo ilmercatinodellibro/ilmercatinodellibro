@@ -1,6 +1,5 @@
 import { QTableProps } from "quasar";
 import { computed, reactive } from "vue";
-import { BookCopyQueryFilter } from "src/@generated/graphql";
 import {
   FilterPath,
   useTranslatedFilters,
@@ -9,7 +8,7 @@ import { TableFilters } from "src/models/book";
 
 export function useTableFilters(
   filterPath: FilterPath,
-  useSchoolFilters?: boolean,
+  useSchoolFilters = false,
 ) {
   const filterOptions = useTranslatedFilters(filterPath);
 
@@ -24,22 +23,19 @@ export function useTableFilters(
       : undefined,
   });
 
-  function getBooleanFiltersFromOptions() {
-    // Only considers the checkbox options, required to send undefined in and ignore the filter when not required
+  const booleanFilters = computed(() => {
     const areFiltersEmpty = tableFilter.filters.length === 0;
-
     if (areFiltersEmpty) {
       return undefined;
     }
 
-    const booleanFiltersToReturn: Record<string, boolean> = {};
-
+    const extractedFiltersFromOptions: Record<string, boolean> = {};
     Object.keys(filterOptions.value).forEach((key) => {
-      booleanFiltersToReturn[key] = tableFilter.filters.includes(key);
+      extractedFiltersFromOptions[key] = tableFilter.filters.includes(key);
     });
 
-    return booleanFiltersToReturn;
-  }
+    return extractedFiltersFromOptions;
+  });
 
   const refetchFilterProxy = computed(() => {
     const selectedSchoolCodes =
@@ -58,25 +54,10 @@ export function useTableFilters(
 
     return {
       search: tableFilter.searchQuery,
-      ...getBooleanFiltersFromOptions(),
+      ...booleanFilters.value,
       ...schoolFilters,
     };
   });
-
-  const booleanFilters = computed<
-    Omit<BookCopyQueryFilter, "search"> | undefined
-  >(() =>
-    tableFilter.filters.length === 0
-      ? undefined
-      : {
-          // tableFilter is the checkbox array model
-          isAvailable: tableFilter.filters.includes(
-            "isAvailable" satisfies keyof BookCopyQueryFilter,
-          )
-            ? true
-            : undefined,
-        },
-  );
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const filterMethod: QTableProps["filterMethod"] = (rows) => rows;

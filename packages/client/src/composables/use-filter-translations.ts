@@ -7,6 +7,9 @@ export type FilterPath =
   | "manageUsers.filters"
   | "general.rolesAndPermissions.filters";
 
+// TODO: we extract the options from the i18n files, which is definitely an anti-pattern.
+// We should probably have a dedicated file for filters options, or use a different approach to manage
+// translations for filters.
 export function useTranslatedFilters(key: FilterPath) {
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const { tm, rt } = useI18n();
