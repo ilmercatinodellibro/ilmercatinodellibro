@@ -19,6 +19,8 @@ import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { BookCreateInput, BookQueryArgs, BookQueryResult } from "./book.args";
 
+const MAX_ROWS_PER_PAGE = 100;
+
 @Resolver(() => Book)
 export class BookResolver {
   constructor(private readonly prisma: PrismaService) {}
@@ -40,9 +42,9 @@ export class BookResolver {
     const schoolCodes = filter.schoolCodes;
     const schoolCourseIds = filter.schoolCourseIds;
 
-    if (rowsPerPage > 100) {
+    if (rowsPerPage > MAX_ROWS_PER_PAGE) {
       throw new UnprocessableEntityException(
-        "The maximum number of rows per page is 200.",
+        `The maximum number of rows per page is ${MAX_ROWS_PER_PAGE}.`,
       );
     }
 
@@ -92,51 +94,52 @@ export class BookResolver {
               },
             }
           : {},
-        // Filters for school codes only if defined
-        schoolCodes
-          ? {
-              courses: {
-                some: {
-                  schoolCourse: {
-                    schoolCode: {
-                      in: schoolCodes,
-                    },
-                  },
-                },
-              },
-            }
-          : {},
-
-        // Filters for school courses only if defined
-        schoolCourseIds
-          ? {
-              courses: {
-                some: {
-                  schoolCourseId: {
-                    in: schoolCourseIds,
-                  },
-                },
-              },
-            }
-          : {},
-
-        ...(searchText
-          ? ([
-              {
-                isbnCode: {
-                  startsWith: searchText,
-                  mode: "insensitive",
-                },
-              },
-              {
-                title: {
-                  contains: searchText,
-                  mode: "insensitive",
-                },
-              },
-            ] satisfies Prisma.BookWhereInput[])
-          : []),
       ],
+
+      // Filters for school codes only if defined
+      ...(schoolCodes
+        ? {
+            courses: {
+              some: {
+                schoolCourse: {
+                  schoolCode: {
+                    in: schoolCodes,
+                  },
+                },
+              },
+            },
+          }
+        : {}),
+
+      // Filters for school courses only if defined
+      ...(schoolCourseIds
+        ? {
+            courses: {
+              some: {
+                schoolCourseId: {
+                  in: schoolCourseIds,
+                },
+              },
+            },
+          }
+        : {}),
+
+      OR: searchText
+        ? [
+            {
+              isbnCode: {
+                startsWith: searchText,
+                mode: "insensitive",
+              },
+            },
+            {
+              title: {
+                contains: searchText,
+                mode: "insensitive",
+              },
+            },
+          ]
+        : undefined,
     };
 
     const [rowsCount, rows] = await this.prisma.$transaction([
