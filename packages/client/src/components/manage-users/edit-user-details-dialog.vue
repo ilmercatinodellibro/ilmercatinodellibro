@@ -79,6 +79,7 @@
           bottom-slots
           clearable
           outlined
+          type="email"
           @clear="newUserData.email = ''"
         >
           <template

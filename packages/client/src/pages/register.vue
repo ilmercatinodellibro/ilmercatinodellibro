@@ -140,6 +140,7 @@ import PasswordStrengthBar from "src/components/password-strength-bar.vue";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import {
+  emailRule,
   makeValueMatchRule,
   phoneNumberRules,
   requireIfUnderage,
@@ -243,7 +244,8 @@ const formData = computed<FormField[]>(() => [
     field: "email",
     inputData: {
       label: t("auth.emailAddress"),
-      rules: [requiredRule],
+      type: "email",
+      rules: [requiredRule, emailRule],
       readonly: !!props.email,
     },
   },

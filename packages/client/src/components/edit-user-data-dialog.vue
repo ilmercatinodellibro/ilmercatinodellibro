@@ -147,10 +147,12 @@ const formData = computed<
     },
     email: {
       label: t("auth.emailAddress"),
-      rules: newUserData.value.email ? [emailRule] : undefined,
+      type: "email",
+      rules: newUserData.value.email ? [requiredRule, emailRule] : undefined,
     },
     confirmEmail: {
       label: t("auth.confirmEmail"),
+      type: "email",
       rules:
         newUserData.value.email && newUserData.value.email !== user.value?.email
           ? [

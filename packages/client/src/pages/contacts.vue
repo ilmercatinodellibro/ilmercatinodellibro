@@ -61,6 +61,7 @@
           v-model="contactData.firstname"
           :disable="isAuthenticated"
           :label="$t('contacts.form.firstname')"
+          :rules="[requiredRule]"
           bottom-slots
           class="black-54 full-width"
           outlined
@@ -71,6 +72,7 @@
           v-model="contactData.lastname"
           :disable="isAuthenticated"
           :label="$t('contacts.form.lastname')"
+          :rules="[requiredRule]"
           bottom-slots
           class="black-54 full-width"
           outlined
@@ -81,15 +83,17 @@
           v-model="contactData.email"
           :disable="isAuthenticated"
           :label="$t('contacts.form.email')"
+          :rules="[requiredRule, emailRule]"
           bottom-slots
           class="black-54 full-width"
           outlined
-          type="text"
+          type="email"
         />
 
         <q-input
           v-model="message"
           :label="$t('contacts.form.message')"
+          :rules="[requiredRule]"
           bottom-slots
           class="black-54 full-width height-200"
           outlined
@@ -113,6 +117,7 @@ import { defineAsyncComponent, reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import SocialButton from "src/components/social-button.vue";
 import { notifyError } from "src/helpers/error-messages";
+import { emailRule, requiredRule } from "src/helpers/rules";
 import { useAuthService } from "src/services/auth";
 import { useFeedbackMutation } from "src/services/feedback.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
