@@ -45,6 +45,7 @@ export default {
     unverified: "Con email non verificata",
     alreadySettled: "Con liquidazione già effettuata",
     withSettleable: "Con liquidazione da effettuare",
+    withDiscount: "Con sconto 35%",
   } satisfies Record<Exclude<keyof UserQueryFilters, "search">, string>,
   editUser: {
     title: "Modifica Dati Utente",

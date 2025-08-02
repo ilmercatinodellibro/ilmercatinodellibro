@@ -45,6 +45,7 @@ export default {
     unverified: "With unverified email",
     alreadySettled: "Which has been settled already",
     withSettleable: "Which must be settled",
+    withDiscount: "With 35% discount",
   } satisfies Record<Exclude<keyof UserQueryFilters, "search">, string>,
   editUser: {
     title: "Edit User Data",

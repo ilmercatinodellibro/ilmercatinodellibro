@@ -41,6 +41,9 @@ export class UserQueryFilters {
 
   @Field(() => Boolean, { nullable: true })
   alreadySettled?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  withDiscount?: boolean;
 }
 
 @ArgsType()

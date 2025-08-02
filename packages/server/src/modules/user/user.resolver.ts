@@ -111,6 +111,10 @@ export class UserResolver {
           ? [{ emailVerified: false } satisfies Prisma.UserWhereInput]
           : []),
 
+        ...(filter.withDiscount
+          ? [{ discount: true } satisfies Prisma.UserWhereInput]
+          : []),
+
         {
           OR: [
             ...(filter.alreadySettled
