@@ -295,10 +295,11 @@ model Problem {
 }
 
 model Sale {
-  id                  String   @id @default(uuid())
-  bookCopyId          String   @map("book_copy_id")
-  bookCopy            BookCopy @relation("BookCopySale", fields: [bookCopyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  iseeDiscountApplied Boolean  @default(false) @map("isee_discount_applied")
+  id              String   @id @default(uuid())
+  bookCopyId      String   @map("book_copy_id")
+  bookCopy        BookCopy @relation("BookCopySale", fields: [bookCopyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  // TODO: update the field name to "discount_applied" too
+  discountApplied Boolean  @default(false) @map("isee_discount_applied")
 
   // Any user relation
   purchasedAt   DateTime @default(now()) @map("purchased_at") @db.Timestamptz()

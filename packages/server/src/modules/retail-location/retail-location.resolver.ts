@@ -416,7 +416,7 @@ export class RetailLocationResolver {
         OR: [sellingCustomersFilter, buyingCustomersFilter],
       },
     });
-    const getISEEUsersCount = this.prisma.user.count({
+    const getUsersWithDiscountCount = this.prisma.user.count({
       where: {
         discount: true,
       },
@@ -503,7 +503,7 @@ export class RetailLocationResolver {
 
       for (const sale of activeSales) {
         const {
-          iseeDiscountApplied,
+          discountApplied,
           bookCopy: {
             book: { originalPrice },
             owner: { memberships },
@@ -512,7 +512,7 @@ export class RetailLocationResolver {
         } = sale;
 
         const saleRevenue =
-          (originalPrice * (iseeDiscountApplied ? buyRate : sellRate)) / 100;
+          (originalPrice * (discountApplied ? buyRate : sellRate)) / 100;
         grossRevenue += saleRevenue;
         soldBooksOriginalPriceTotal += originalPrice;
 
@@ -586,7 +586,7 @@ export class RetailLocationResolver {
       buyingCustomersCount,
       sellingCustomersCount,
       customersCount,
-      iseeUsersCount,
+      usersWithDiscountCount,
       requestingUsersCount,
       activeUsersPerLocaleCount,
       {
@@ -620,7 +620,7 @@ export class RetailLocationResolver {
       getBuyingCustomersCount,
       getSellingCustomersCount,
       getCustomersCount,
-      getISEEUsersCount,
+      getUsersWithDiscountCount,
       getRequestingUsersCount,
       getActiveUsersPerLocaleCount,
       getMoneyAmounts(),
@@ -694,7 +694,7 @@ export class RetailLocationResolver {
       buyingCustomersCount,
       sellingCustomersCount,
       customersCount,
-      iseeUsersCount,
+      usersWithDiscountCount,
       requestingUsersCount,
       purchasedOrSoldBooksAverage,
       soldBooksFromSellersAverage,

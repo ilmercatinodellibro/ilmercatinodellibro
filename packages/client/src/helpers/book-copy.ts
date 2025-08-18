@@ -61,10 +61,10 @@ export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
 export const calculateBookCopyPrice = (
   originalPrice: number,
   kind: "sell" | "buy",
-  iseeDiscountApplied = false,
+  discountApplied = false,
 ) =>
   (originalPrice *
-    (kind === "buy" || iseeDiscountApplied
+    (kind === "buy" || discountApplied
       ? selectedLocation.value.buyRate
       : selectedLocation.value.sellRate)) /
   100;

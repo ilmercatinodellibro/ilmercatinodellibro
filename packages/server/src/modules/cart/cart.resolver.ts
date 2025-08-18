@@ -373,7 +373,7 @@ export class CartResolver {
         bookCopyId: bookCopy.id,
         purchasedAt,
         purchasedById: cart.user.id,
-        iseeDiscountApplied: cart.user.discount,
+        discountApplied: cart.user.discount,
         createdById: operator.id,
         cartCreatedById: cart.createdById,
       })),

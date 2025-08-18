@@ -80,7 +80,7 @@ fragment Statistics on StatisticsQueryResult {
   buyingCustomersCount
   sellingCustomersCount
   customersCount
-  iseeUsersCount
+  usersWithDiscountCount
   requestingUsersCount
   purchasedOrSoldBooksAverage
   soldBooksFromSellersAverage

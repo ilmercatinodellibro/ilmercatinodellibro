@@ -75,7 +75,7 @@ export class UserAccountResolver {
               select: {
                 id: true,
                 purchasedAt: true,
-                iseeDiscountApplied: true,
+                discountApplied: true,
               },
             },
             problems: {

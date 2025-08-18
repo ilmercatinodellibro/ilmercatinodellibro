@@ -372,7 +372,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
           return calculateBookCopyPrice(
             bookCopy.book.originalPrice,
             "sell",
-            bookSale.iseeDiscountApplied,
+            bookSale.discountApplied,
           );
         },
         label: t("myBooks.priceYouPaid"),

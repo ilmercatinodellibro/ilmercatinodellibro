@@ -458,7 +458,7 @@ export const RE_RETAIL_POINT: TranslatedRetailLocationCreateInput = {
 export const MO_RETAIL_POINT: TranslatedRetailLocationCreateInput = {
   id: "mo",
   name: "Modena",
-  email: " info-mo@ilmercatinodellibro.com",
+  email: "info-mo@ilmercatinodellibro.com",
   facebookLink: "https://www.facebook.com/IlMercatinoDelLibroMO/",
   instagramLink: "https://www.instagram.com/ilmercatinodellibromo/",
   fullAddress: "Strada Nazionale Canaletto Sud, 43L, 41121 - Modena MO",

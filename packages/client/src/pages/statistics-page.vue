@@ -20,7 +20,7 @@
         mobile-arrows
       >
         <q-tab v-for="tab in StatisticsTab" :key="tab" :name="tab">
-          {{ t(`retailLocation.statistics.${tab}`) }}
+          {{ t(`retailLocation.statisticsTabs.${tab}`) }}
         </q-tab>
       </q-tabs>
 
@@ -33,7 +33,7 @@
           class="full-height gap-24 grid"
         >
           <q-field
-            v-for="(item, index) in dataToShow"
+            v-for="(item, index) in statistics"
             :key="index"
             :label="item.label"
             outlined
@@ -98,6 +98,12 @@ import {
   useRetailLocationStatisticsQuery,
 } from "src/services/retail-location.graphql";
 
+interface StatisticsEntry {
+  label: string;
+  value?: string;
+  suffix?: string;
+}
+
 const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
@@ -110,163 +116,163 @@ const { retailLocationStatistics, loading: statisticsLoading } =
     { fetchPolicy: "network-only" },
   );
 
-const dataToShow = computed<
-  { label: string; value?: string; suffix?: string }[]
->(() => [
+const statistics = computed<StatisticsEntry[]>(() => [
   {
-    label: "Libri movimentati",
+    label: t("retailLocation.statistics.booksInTheSystem"),
     value: retailLocationStatistics.value?.bookCopiesCount.toString(),
   },
   {
-    label: "Libri in magazzino",
+    label: t("retailLocation.statistics.booksInWarehouse"),
     value: retailLocationStatistics.value?.booksInWarehouseCount.toString(),
   },
   {
-    label: "Libri in magazzino vendibili",
+    label: t("retailLocation.statistics.salableBooks"),
     value: retailLocationStatistics.value?.salableBooksCount.toString(),
   },
   {
-    label: "Libri in magazzino con problemi",
+    label: t("retailLocation.statistics.booksWithProblemsInWarehouse"),
     value:
       retailLocationStatistics.value?.booksWithProblemsInWarehouseCount.toString(),
   },
   {
-    label: "Libri con problemi",
+    label: t("retailLocation.statistics.booksWithProblems"),
     value: retailLocationStatistics.value?.booksWithProblemsCount.toString(),
   },
   {
-    label: "Libri restituiti",
+    label: t("retailLocation.statistics.returnedBooks"),
     value: retailLocationStatistics.value?.returnedBooksCount.toString(),
   },
   {
-    label: "Libri donati",
+    label: t("retailLocation.statistics.donatedBooks"),
     value: retailLocationStatistics.value?.donatedBooksCount.toString(),
   },
   {
-    label: "Libri rimborsati",
+    label: t("retailLocation.statistics.reimbursedBooks"),
     value: retailLocationStatistics.value?.reimbursedBooksCount.toString(),
   },
   {
-    label: "Totale rimborsato",
+    label: t("retailLocation.statistics.reimbursedAmount"),
     value: retailLocationStatistics.value?.reimbursedAmount.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Richieste",
+    label: t("retailLocation.statistics.activeRequests"),
     value: retailLocationStatistics.value?.activeRequestsCount.toString(),
   },
   {
-    label: "Prenotazioni attive",
+    label: t("retailLocation.statistics.activeReservations"),
     value: retailLocationStatistics.value?.activeReservationsCount.toString(),
   },
   {
-    label: "Vendite",
+    label: t("retailLocation.statistics.sales"),
     value: retailLocationStatistics.value?.salesCount.toString(),
   },
   {
-    label: "Vendite andate a buon fine",
+    label: t("retailLocation.statistics.activeSales"),
     value: retailLocationStatistics.value?.activeSalesCount.toString(),
   },
   {
-    label: "Vendite con reso",
+    label: t("retailLocation.statistics.refundedSales"),
     value: retailLocationStatistics.value?.refundedSalesCount.toString(),
   },
   {
-    label: "Liquidabile",
+    label: t("retailLocation.statistics.settleable"),
     value: retailLocationStatistics.value?.settleableAmount.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Da liquidare",
+    label: t("retailLocation.statistics.toSettle"),
     value: retailLocationStatistics.value?.toSettleAmount.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Liquidato",
+    label: t("retailLocation.statistics.settled"),
     value: retailLocationStatistics.value?.settledAmount.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Guadagno lordo",
+    label: t("retailLocation.statistics.grossRevenue"),
     value: retailLocationStatistics.value?.grossRevenue.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Guadagno netto",
+    label: t("retailLocation.statistics.netRevenue"),
     value: retailLocationStatistics.value?.netRevenue.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Guadagno da utente admin",
+    label: t("retailLocation.statistics.adminAccountsRevenue"),
     value: retailLocationStatistics.value?.adminAccountsRevenue.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Utenti attivi",
+    label: t("retailLocation.statistics.activeUsers"),
     value: retailLocationStatistics.value?.activeUsersCount.toString(),
   },
   {
-    label: "Utenti che hanno comprato almeno un libro",
+    label: t("retailLocation.statistics.buyingCustomers"),
     value: retailLocationStatistics.value?.buyingCustomersCount.toString(),
   },
   {
-    label: "Utenti che hanno venduto almeno un libro",
+    label: t("retailLocation.statistics.sellingCustomers"),
     value: retailLocationStatistics.value?.sellingCustomersCount.toString(),
   },
   {
-    label: "Utenti che hanno comprato o venduto almeno un libro",
+    label: t("retailLocation.statistics.buyingOrSellingCustomers"),
     value: retailLocationStatistics.value?.customersCount.toString(),
   },
   {
-    label: "Utenti con sconto ISEE",
-    value: retailLocationStatistics.value?.iseeUsersCount.toString(),
+    label: t("retailLocation.statistics.usersWithDiscount"),
+    value: retailLocationStatistics.value?.usersWithDiscountCount.toString(),
   },
   {
-    label: "Utenti che hanno richiesto libri",
+    label: t("retailLocation.statistics.requestingUsers"),
     value: retailLocationStatistics.value?.requestingUsersCount.toString(),
   },
   {
-    label: "Media dei libri venduti o comprati per utente",
+    label: t("retailLocation.statistics.purchasedOrSoldBooksAverage"),
     value:
       retailLocationStatistics.value?.purchasedOrSoldBooksAverage.toFixed(2),
   },
   {
-    label: "Media dei libri venduti da chi ha venduto almeno un libro",
+    label: t("retailLocation.statistics.soldBooksFromSellersAverage"),
     value:
       retailLocationStatistics.value?.soldBooksFromSellersAverage.toFixed(2),
   },
   {
-    label: "Media dei libri comprati da chi ha comprato almeno un libro",
+    label: t("retailLocation.statistics.purchasedBooksFromBuyersAverage"),
     value:
       retailLocationStatistics.value?.purchasedBooksFromBuyersAverage.toFixed(
         2,
       ),
   },
   {
-    label: "Media del denaro liquidabile per utente",
+    label: t("retailLocation.statistics.settleableMoneyAverage"),
     value: retailLocationStatistics.value?.settleableMoneyAverage.toFixed(2),
     suffix: "€",
   },
   ...(retailLocationStatistics.value?.activeUsersPerLocaleCount ?? []).map(
     ({ count, locale }) => ({
-      label: `Utenti che hanno selezionato la lingua ${languages.find(({ code }) => code === locale)?.label}`,
+      label: t("retailLocation.statistics.activeUsersLanguage", {
+        locale: languages.find(({ code }) => code === locale)?.label,
+      }),
       value: count.toString(),
     }),
   ),
   {
-    label: "Totale prezzo di copertina libri venduti",
+    label: t("retailLocation.statistics.soldBooksOriginalPriceTotal"),
     value:
       retailLocationStatistics.value?.soldBooksOriginalPriceTotal.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Guadagno medio tra chi ha venduto almeno un libro",
+    label: t("retailLocation.statistics.sellingCustomersIncomeAverage"),
     value:
       retailLocationStatistics.value?.sellingCustomersIncomeAverage.toFixed(2),
     suffix: "€",
   },
   {
-    label: "Spesa media al 100% per chi ha comprato almeno un libro",
+    label: t("retailLocation.statistics.buyingCustomersFullExpenseAverage"),
     value:
       retailLocationStatistics.value?.buyingCustomersFullExpenseAverage.toFixed(
         2,
@@ -274,7 +280,12 @@ const dataToShow = computed<
     suffix: "€",
   },
   {
-    label: `Spesa media al ${selectedLocation.value.sellRate}% per chi ha comprato almeno un libro`,
+    label: t(
+      "retailLocation.statistics.buyingCustomersDiscountedExpenseAverage",
+      {
+        sellRate: selectedLocation.value.sellRate,
+      },
+    ),
     value:
       retailLocationStatistics.value?.buyingCustomersDiscountedExpenseAverage.toFixed(
         2,
@@ -282,7 +293,7 @@ const dataToShow = computed<
     suffix: "€",
   },
   {
-    label: "Risparmio medio per chi ha comprato almeno un libro",
+    label: t("retailLocation.statistics.buyingCustomersSavingAverage"),
     value:
       retailLocationStatistics.value?.buyingCustomersSavingAverage.toFixed(2),
     suffix: "€",
@@ -348,6 +359,6 @@ const { returningsChartData, loading: returningsLoading } =
 <style lang="scss" scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 </style>

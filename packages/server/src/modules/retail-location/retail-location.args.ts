@@ -136,9 +136,9 @@ export class StatisticsQueryResult {
   @Field(() => Int)
   customersCount!: number;
 
-  // Count of users who have the ISEE discount
+  // Count of users who have the discount
   @Field(() => Int)
-  iseeUsersCount!: number;
+  usersWithDiscountCount!: number;
 
   // Count of users who have requested at least one book
   @Field(() => Int)
