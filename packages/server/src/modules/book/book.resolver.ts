@@ -15,6 +15,11 @@ import { BookCopy, BookMeta } from "src/@generated";
 import { Book } from "src/@generated/book";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { BookUtility } from "src/modules/book/book-utility";
+import {
+  availableBookCopyFilter,
+  noProblemsFilter,
+  noSalesFilter,
+} from "src/modules/book-copy/book-copy.filters";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import {
@@ -184,51 +189,6 @@ export class BookResolver {
       .meta();
   }
 
-  private readonly noSalesFilter: Prisma.BookCopyWhereInput[] = [
-    {
-      sales: {
-        none: {},
-      },
-    },
-    {
-      sales: {
-        every: {
-          refundedAt: {
-            not: null,
-          },
-        },
-      },
-    },
-  ];
-  private readonly noProblemsFilter: Prisma.BookCopyWhereInput[] = [
-    {
-      problems: {
-        none: {},
-      },
-    },
-    {
-      problems: {
-        every: {
-          resolvedAt: {
-            not: null,
-          },
-        },
-      },
-    },
-  ];
-  private readonly availableCopyFilter: Prisma.BookCopyWhereInput = {
-    returnedAt: null,
-    donatedAt: null,
-    AND: [
-      {
-        OR: this.noSalesFilter,
-      },
-      {
-        OR: this.noProblemsFilter,
-      },
-    ],
-  };
-
   @ResolveField(() => [BookCopy])
   async copies(
     @Root() book: Book,
@@ -239,7 +199,7 @@ export class BookResolver {
         where: { id: book.id },
       })
       .copies({
-        where: isAvailable ? this.availableCopyFilter : undefined,
+        where: isAvailable ? availableBookCopyFilter : undefined,
         orderBy: {
           code: "asc",
         },
@@ -301,22 +261,20 @@ export class BookResolver {
       bookRelationQuery("copies", {
         where: {
           bookId: book.id,
-          ...this.availableCopyFilter,
+          ...availableBookCopyFilter,
         },
       }),
       bookRelationQuery("copies", {
         where: {
           bookId: book.id,
-          OR: this.noProblemsFilter,
+          ...noProblemsFilter,
         },
       }),
       bookRelationQuery("copies", {
         where: {
           bookId: book.id,
           returnedAt: null,
-          NOT: {
-            OR: this.noSalesFilter,
-          },
+          NOT: noSalesFilter,
         },
       }),
       bookRelationQuery("requests", {

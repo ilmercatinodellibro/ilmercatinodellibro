@@ -39,6 +39,7 @@ import {
   PaginatedBookCopiesQueryArgs,
   PaginatedBookCopyQueryResult,
 } from "./book-copy.args";
+import { availableBookCopyFilter } from "./book-copy.filters";
 import { BookCopyService } from "./book-copy.service";
 
 @Resolver(() => BookCopy)
@@ -336,35 +337,7 @@ export class BookCopyResolver {
       ...(includeCopyOrStatement
         ? {
             AND: [
-              ...(isAvailable
-                ? ([
-                    {
-                      problems: {
-                        every: {
-                          resolvedAt: {
-                            not: null,
-                          },
-                        },
-                      },
-                      OR: [
-                        {
-                          sales: {
-                            none: {},
-                          },
-                        },
-                        {
-                          sales: {
-                            every: {
-                              refundedAt: {
-                                not: null,
-                              },
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  ] satisfies Prisma.BookCopyWhereInput[])
-                : []),
+              ...(isAvailable ? [availableBookCopyFilter] : []),
               ...(isSold
                 ? [
                     {
