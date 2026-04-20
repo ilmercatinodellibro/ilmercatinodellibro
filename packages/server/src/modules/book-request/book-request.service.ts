@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { Cron } from "@nestjs/schedule";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import {
   Book,
   BookRequest,
@@ -9,6 +9,7 @@ import {
   RetailLocation,
 } from "@prisma/client";
 import { BookMeta } from "src/@generated";
+import { availableBookCopyFilter } from "src/modules/book-copy/book-copy.filters";
 import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.module";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { PrismaService } from "src/modules/prisma/prisma.service";
@@ -18,8 +19,39 @@ type RequestQueue = PrismaRequestQueue & {
   currentRequest: BookRequest;
 };
 
+/**
+ * The maximum daily amount of email sends that the SMTP service
+ * allows per day (currently two 1k packages)
+ */
+const DAILY_EMAIL_QUOTA = 2000;
+
+/**
+ * The maximum reserved amount of daily sends for authentication
+ * and receipts emails, must be less than {@link DAILY_EMAIL_QUOTA}
+ */
+const DAILY_AUTH_AND_RECEIPTS_EMAIL_QUOTA = 500;
+
+/**
+ * The time in minutes after which a newly inserted book copy
+ * or expired/deleted reservation should trigger a notification
+ * for the book being available for reservation
+ */
+const AVAILABILITY_COOLDOWN = 120;
+
+/** Maximum size for each batch of queues */
+const MAX_SENDS_PER_BATCH = 5;
+
+/** Interval between batches in seconds */
+const SECONDS_BETWEEN_BATCHES = 15;
+
+/** The daily cap of emails for newly reservable books */
+const DAILY_RESERVATION_EMAIL_QUOTA =
+  DAILY_EMAIL_QUOTA - DAILY_AUTH_AND_RECEIPTS_EMAIL_QUOTA;
+
 @Injectable()
 export class BookRequestService {
+  private readonly logger = new Logger(BookRequestService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmitter: EventEmitter2,
@@ -96,6 +128,22 @@ export class BookRequestService {
     }
   }
 
+  /** The current amount of reservation email sends remaining for the day */
+  private currentlyAvailableReservationEmails = DAILY_RESERVATION_EMAIL_QUOTA;
+
+  /**
+   * Every day at midnight, reset the currently available reservation
+   * emails counter to the daily quota
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  resetAvailableReservationEmails() {
+    this.logger.log(
+      `Resetting the reservation availability email daily cap to ${DAILY_RESERVATION_EMAIL_QUOTA} sends`,
+    );
+
+    this.currentlyAvailableReservationEmails = DAILY_RESERVATION_EMAIL_QUOTA;
+  }
+
   /**
    * The time in minutes after which a queue will be rechecked.
    * This value must respect the frequency of the `@Cron` handler
@@ -105,10 +153,58 @@ export class BookRequestService {
   // Every day at the start of every hour from 8 am to 9pm (included)
   @Cron("0 8-21 * * *")
   async handleRequestQueues() {
+    if (this.currentlyAvailableReservationEmails === 0) {
+      // No more emails are allowed from our SMTP service for the
+      // day so we stop advancing the queues until the next day
+      return;
+    }
+
+    this.logger.log(
+      `Cron job running updating book request queues, remaining emails for the day: ${this.currentlyAvailableReservationEmails}`,
+    );
+
+    const cooldownCutoff = new Date();
+    cooldownCutoff.setMinutes(
+      cooldownCutoff.getMinutes() - AVAILABILITY_COOLDOWN,
+    );
+
+    const maxNumberOfBatches =
+      (this.#queueProcessingInterval * 60) / SECONDS_BETWEEN_BATCHES;
+
     const queues = await this.prisma.requestQueue.findMany({
       where: {
         lastCheckedAt: {
           lte: this.#getProcessTickTime(),
+        },
+        book: {
+          OR: [
+            {
+              // If some copies have just been added, wait before notifying the client
+              // about them being available for reservation until the cooldown expires
+              copies: {
+                some: {
+                  createdAt: {
+                    lte: cooldownCutoff,
+                  },
+
+                  ...availableBookCopyFilter,
+                },
+              },
+            },
+            {
+              // If some reservations were just deleted or just expired, wait before
+              // processing them as contributing to the book being available for
+              // reservation until the cooldown expires
+              reservations: {
+                some: {
+                  OR: [
+                    { deletedAt: { lte: cooldownCutoff, not: null } },
+                    { expiresAt: { lte: cooldownCutoff } },
+                  ],
+                },
+              },
+            },
+          ],
         },
       },
       include: {
@@ -120,10 +216,46 @@ export class BookRequestService {
         },
         currentRequest: true,
       },
+      take: Math.min(
+        this.currentlyAvailableReservationEmails,
+        maxNumberOfBatches * MAX_SENDS_PER_BATCH,
+      ),
     });
 
-    for (const queue of queues) {
-      await this.#handleQueue(queue.bookId, queue);
+    if (queues.length === 0) {
+      this.logger.log("No queues to update");
+
+      return;
+    }
+
+    const numberOfBatches = Math.ceil(queues.length / MAX_SENDS_PER_BATCH);
+
+    for (let batchIndex = 0; batchIndex < numberOfBatches; batchIndex++) {
+      const startTime = Date.now();
+
+      const start = batchIndex * MAX_SENDS_PER_BATCH;
+      const end = start + MAX_SENDS_PER_BATCH;
+      const batch = queues.slice(start, end);
+
+      await Promise.all(batch.map((queue) => this.#handleQueue(queue)));
+
+      // If there are no more batches left, don't wait for any delay and just exit
+      if (batchIndex === numberOfBatches - 1) {
+        break;
+      }
+
+      const processingTime = Date.now() - startTime;
+
+      if (processingTime > SECONDS_BETWEEN_BATCHES * 1000) {
+        throw new Error(
+          "A batch of emails for available books took too long to process",
+        );
+      }
+
+      // Delay the next batch of sends to avoid rate limit errors from the SMTP service
+      await new Promise((resolve) =>
+        setTimeout(resolve, SECONDS_BETWEEN_BATCHES * 1000 - processingTime),
+      );
     }
   }
 
@@ -132,21 +264,28 @@ export class BookRequestService {
     return new Date(Date.now() - this.#queueProcessingInterval * minute);
   }
 
-  async #handleQueue(bookId: string, queue: RequestQueue) {
-    if (!queue.book.meta.isAvailable) {
+  async #handleQueue({
+    book,
+    bookId,
+    id: queueId,
+    currentRequest,
+  }: RequestQueue) {
+    if (!book.meta.isAvailable) {
       await this.prisma.requestQueue.delete({
-        where: { id: queue.id },
+        where: { id: queueId },
       });
       return;
     }
 
-    await this.#notifyUser(queue.currentRequest, queue.book);
+    await this.#notifyUser(currentRequest, book);
+
+    this.currentlyAvailableReservationEmails--;
 
     const nextRequest = await this.prisma.bookRequest.findFirst({
       where: {
         bookId,
-        id: { not: queue.currentRequest.id },
-        createdAt: { gte: queue.currentRequest.createdAt },
+        id: { not: currentRequest.id },
+        createdAt: { gte: currentRequest.createdAt },
         ...this.availableRequestFilter,
       },
       orderBy: {
@@ -155,7 +294,7 @@ export class BookRequestService {
     });
     if (!nextRequest) {
       await this.prisma.requestQueue.delete({
-        where: { id: queue.id },
+        where: { id: queueId },
       });
 
       return;
