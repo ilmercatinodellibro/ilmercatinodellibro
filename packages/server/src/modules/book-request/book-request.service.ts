@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { Cron, CronExpression } from "@nestjs/schedule";
+import { Cron } from "@nestjs/schedule";
 import {
   Book,
   BookRequest,
@@ -97,12 +97,13 @@ export class BookRequestService {
   }
 
   /**
-   * The time in minutes after which a queue should be rechecked.
-   * Don't forget to update the `@Cron` decorator when changing this value.
+   * The time in minutes after which a queue will be rechecked.
+   * This value must respect the frequency of the `@Cron` handler
    */
-  readonly #queueProcessingInterval = 30;
+  readonly #queueProcessingInterval = 60;
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  // Every day at the start of every hour from 8 am to 9pm (included)
+  @Cron("0 8-21 * * *")
   async handleRequestQueues() {
     const queues = await this.prisma.requestQueue.findMany({
       where: {
