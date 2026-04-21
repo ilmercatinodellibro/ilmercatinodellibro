@@ -15,9 +15,10 @@ import { Prisma } from "@prisma/client";
 import * as argon2 from "argon2";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
-import { Role } from "src/@generated";
+import { ReceiptType, Role } from "src/@generated";
 import { User } from "src/@generated/user";
 import { AuthService } from "src/modules/auth/auth.service";
+import { ReceiptService } from "src/modules/receipt/receipt.service";
 import { LocationBoundQueryArgs } from "src/modules/retail-location";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";
@@ -41,6 +42,7 @@ export class UserResolver {
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly receiptService: ReceiptService,
   ) {}
 
   @Query(() => UsersQueryResult)
@@ -924,21 +926,21 @@ export class UserResolver {
       });
     }
 
-    await this.prisma.$transaction(async (prisma) => {
-      const bookCopies = await prisma.bookCopy.findMany({
-        where: {
-          ownerId: userId,
-          settledAt: null,
-          book: {
-            retailLocationId,
-          },
+    const bookCopies = await this.prisma.bookCopy.findMany({
+      where: {
+        ownerId: userId,
+        settledAt: null,
+        book: {
+          retailLocationId,
         },
-        include: {
-          book: true,
-          sales: true,
-        },
-      });
+      },
+      include: {
+        book: true,
+        sales: true,
+      },
+    });
 
+    await this.prisma.$transaction(async (prisma) => {
       if (remainingType !== SettleRemainingType.CASH_ONLY) {
         const returnableCopies = bookCopies.filter(
           ({ sales, returnedAt, donatedAt, reimbursedAt }) =>
@@ -985,6 +987,14 @@ export class UserResolver {
           settledById: operator.id,
         },
       });
+    });
+
+    await this.receiptService.createReceipt(this.prisma, {
+      data: bookCopies,
+      createdById: operator.id,
+      retailLocationId,
+      type: ReceiptType.SETTLEMENT,
+      userId,
     });
   }
 }

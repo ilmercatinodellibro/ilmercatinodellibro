@@ -1,9 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Injectable } from "@nestjs/common";
-import { GenerateProps } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
-import { line, readOnlyText, table, text } from "@pdfme/schemas";
+import { line, table, text } from "@pdfme/schemas";
 import {
   Book,
   BookCopy,
@@ -19,7 +18,9 @@ import { MailService } from "src/modules/mail/mail.service";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
 import purchaseTemplate from "./templates/purchase.json";
+import settlementTemplate from "./templates/settlement.json";
 import withdrawalTemplate from "./templates/withdrawal.json";
+import type { GenerateProps, GeneratorOptions } from "@pdfme/common";
 
 type BookCopyWithBook = BookCopy & { book: Book };
 export type CreateReceiptInput = {
@@ -35,12 +36,24 @@ export type CreateReceiptInput = {
       type: ReceiptType.WITHDRAWAL;
       data: BookCopyWithBook[];
     }
+  | {
+      type: ReceiptType.SETTLEMENT;
+      data: BookCopyWithBook[];
+    }
 );
 
-export type ReceiptBook = Pick<
-  Book,
-  "isbnCode" | "title" | "subject" | "originalPrice"
-> & { code: string };
+enum SettlementType {
+  RETURNED = "returned",
+  DONATED = "donated",
+  SOLD = "sold",
+}
+
+export interface ReceiptBook
+  extends Pick<Book, "isbnCode" | "title" | "subject" | "originalPrice">,
+    Pick<BookCopy, "code"> {
+  settlementType?: SettlementType;
+}
+
 export interface GenerateReceiptInput {
   creationDate: Date;
   user: User;
@@ -60,12 +73,20 @@ const RECEIPT_SUBJECT_TRANSLATIONS: Record<
   it: {
     [ReceiptType.PURCHASE]: "Ricevuta per acquisto libri",
     [ReceiptType.WITHDRAWAL]: "Ricevuta per consegna libri",
+    [ReceiptType.SETTLEMENT]: "Ricevuta per liquidazione fornitore",
   },
   "en-US": {
     [ReceiptType.PURCHASE]: "Book purchase receipt",
     [ReceiptType.WITHDRAWAL]: "Book consignment receipt",
+    [ReceiptType.SETTLEMENT]: "Vendor settlement receipt",
   },
 };
+interface BookWithBuyPrice extends ReceiptBook {
+  buyPrice: number;
+}
+
+type PDFInput = Pick<GenerateProps, "template" | "inputs"> &
+  Pick<GeneratorOptions, "title">;
 
 @Injectable()
 export class ReceiptService {
@@ -122,6 +143,18 @@ export class ReceiptService {
     });
   }
 
+  #getSettlementType({ returnedAt, donatedAt }: BookCopy) {
+    if (returnedAt !== null) {
+      return SettlementType.RETURNED;
+    }
+
+    if (donatedAt !== null) {
+      return SettlementType.DONATED;
+    }
+
+    return SettlementType.SOLD;
+  }
+
   async createReceipt(
     prisma: Prisma.TransactionClient,
     { userId, retailLocationId, createdById, type, data }: CreateReceiptInput,
@@ -139,28 +172,51 @@ export class ReceiptService {
       },
     });
 
-    const books = (
+    const bookCopies =
       type === ReceiptType.PURCHASE
         ? data.map(({ bookCopy }) => bookCopy)
-        : data
-    ).map(({ code, book }) => ({
+        : data;
+
+    const books: ReceiptBook[] = bookCopies.map(({ book, ...bookCopy }) => ({
       isbnCode: book.isbnCode,
       title: book.title,
       subject: book.subject,
       originalPrice: book.originalPrice,
-      code,
+      code: bookCopy.code,
+      ...(type === ReceiptType.SETTLEMENT
+        ? {
+            settlementType: this.#getSettlementType(bookCopy),
+          }
+        : {}),
     }));
 
-    const generateReceipt =
-      type === ReceiptType.PURCHASE
-        ? this.generatePurchaseReceipt.bind(this)
-        : this.generateWithdrawalReceipt.bind(this);
-    const receiptPdf = await generateReceipt({
+    const receiptInput: GenerateReceiptInput = {
       creationDate: receipt.createdAt,
       location: receipt.retailLocation,
       user: receipt.user,
       books,
-    });
+    };
+
+    const { template, inputs, title } = this.#getPDFInput(receiptInput, type);
+
+    const receiptPdf = (await generate({
+      template,
+      inputs,
+      options: {
+        creationDate: receiptInput.creationDate,
+        language: "it",
+        title,
+        // TODO: Use appropriate fonts, weights, etc.
+      },
+      plugins: {
+        text,
+        line,
+        Table: table,
+      },
+      // Currently the type returned by generate(...) is Promise<any> because it is
+      // typed as Uint8Array<...>, which is not generic in typescript < 5.7
+      // TODO: remove the cast once the typescript version has been updated
+    })) as Uint8Array;
 
     const path = this.getReceiptPath(receipt);
     await mkdir(path.directory, { recursive: true }); // Ensure the directory exists
@@ -171,12 +227,26 @@ export class ReceiptService {
     return receipt;
   }
 
-  async generateWithdrawalReceipt({
+  #getPDFInput(receiptInput: GenerateReceiptInput, type: ReceiptType) {
+    switch (type) {
+      case ReceiptType.PURCHASE: {
+        return this.generatePurchaseReceipt(receiptInput);
+      }
+      case ReceiptType.WITHDRAWAL: {
+        return this.generateWithdrawalReceipt(receiptInput);
+      }
+      case ReceiptType.SETTLEMENT: {
+        return this.generateSettlementReceipt(receiptInput);
+      }
+    }
+  }
+
+  generateWithdrawalReceipt({
     creationDate,
     user,
     location,
     books,
-  }: GenerateReceiptInput) {
+  }: GenerateReceiptInput): PDFInput {
     const formattedDate = this.#formatCreationDate(creationDate);
     const bookRows = books.map((book) => [
       book.isbnCode,
@@ -189,47 +259,32 @@ export class ReceiptService {
       this.#settlementPeriod[location.id as "re" | "mo"],
     );
 
-    const schema = withdrawalTemplate.schemas[0];
-    return await generate({
-      template: withdrawalTemplate as unknown as GenerateProps["template"],
+    const headerTitle = withdrawalTemplate.schemas[0].find(
+      ({ name }) => name === "headerTitle",
+    )?.content;
+
+    return {
+      template: withdrawalTemplate,
       inputs: [
         {
-          headerSubtitle: schema.headerSubtitle.content.replace(
-            "{location}",
-            location.name,
-          ),
-          headerDate: schema.headerDate.content.replace(
-            "{date}",
-            formattedDate,
-          ),
-          title: schema.title.content.replace("{email}", user.email),
-          table: JSON.stringify(bookRows),
-          notice: schema.notice.content
-            .replace("{from}", settlementPeriod.from)
-            .replace("{to}", settlementPeriod.to),
+          location: location.name,
+          date: formattedDate,
+          email: user.email,
+          table: bookRows,
+          from: settlementPeriod.from,
+          to: settlementPeriod.to,
         },
       ],
-      options: {
-        creationDate,
-        language: "it",
-        title: schema.headerTitle.content,
-        // TODO: Use appropriate fonts, weights, etc.
-      },
-      plugins: {
-        text,
-        readOnlyText,
-        line,
-        table,
-      },
-    });
+      title: headerTitle,
+    };
   }
 
-  async generatePurchaseReceipt({
+  generatePurchaseReceipt({
     creationDate,
     user,
     location,
     books,
-  }: GenerateReceiptInput) {
+  }: GenerateReceiptInput): PDFInput {
     const formattedDate = this.#formatCreationDate(creationDate);
     const booksWithSellPrice = books.map((book) => ({
       ...book,
@@ -246,40 +301,83 @@ export class ReceiptService {
       book.sellPrice.toFixed(2),
     ]);
 
-    const schema = purchaseTemplate.schemas[0];
-    return await generate({
-      template: purchaseTemplate as unknown as GenerateProps["template"],
+    const headerTitle = purchaseTemplate.schemas[0].find(
+      ({ name }) => name === "headerTitle",
+    )?.content;
+
+    return {
+      template: purchaseTemplate,
       inputs: [
         {
-          headerSubtitle: schema.headerSubtitle.content.replace(
-            "{location}",
-            location.name,
-          ),
-          headerDate: schema.headerDate.content.replace(
-            "{date}",
-            formattedDate,
-          ),
-          title: schema.title.content.replace("{email}", user.email),
-          table: JSON.stringify(bookRows),
-          notice: schema.notice.content.replace(
-            "{totalPrice}",
-            sumBy(booksWithSellPrice, "sellPrice").toFixed(2),
-          ),
+          location: location.name,
+          date: formattedDate,
+          email: user.email,
+          table: bookRows,
+          totalPrice: sumBy(booksWithSellPrice, "sellPrice").toFixed(2),
         },
       ],
-      options: {
-        creationDate,
-        language: "it",
-        title: schema.headerTitle.content,
-        // TODO: Use appropriate fonts, weights, etc.
-      },
-      plugins: {
-        text,
-        readOnlyText,
-        line,
-        table,
-      },
-    });
+
+      title: headerTitle,
+    };
+  }
+
+  #generateSettlementTableRows(
+    books: BookWithBuyPrice[],
+    type: SettlementType,
+  ) {
+    const tableBooks = books.filter(
+      ({ settlementType }) => type === settlementType,
+    );
+
+    return tableBooks.map(({ isbnCode, buyPrice, subject, title }) => [
+      isbnCode,
+      title,
+      subject,
+      buyPrice.toFixed(2),
+    ]);
+  }
+
+  generateSettlementReceipt({
+    books,
+    creationDate,
+    location,
+    user,
+  }: GenerateReceiptInput): PDFInput {
+    const formattedDate = this.#formatCreationDate(creationDate);
+
+    const booksWithBuyPrice: BookWithBuyPrice[] = books.map((book) => ({
+      ...book,
+      buyPrice: (book.originalPrice * location.buyRate) / 100,
+    }));
+
+    const headerTitle = settlementTemplate.schemas[0].find(
+      ({ name }) => name === "headerTitle",
+    )?.content;
+
+    return {
+      template: settlementTemplate,
+      inputs: [
+        {
+          location: location.name,
+          date: formattedDate,
+          email: user.email,
+          soldTable: this.#generateSettlementTableRows(
+            booksWithBuyPrice,
+            SettlementType.SOLD,
+          ),
+          returnedTable: this.#generateSettlementTableRows(
+            booksWithBuyPrice,
+            SettlementType.RETURNED,
+          ),
+          donatedTable: this.#generateSettlementTableRows(
+            booksWithBuyPrice,
+            SettlementType.DONATED,
+          ),
+          totalPrice: sumBy(booksWithBuyPrice, "buyPrice").toFixed(2),
+        },
+      ],
+      title: headerTitle,
+    };
   }
 
   #getFormattedSettlementPeriod({ from, to }: SettlementPeriod) {
