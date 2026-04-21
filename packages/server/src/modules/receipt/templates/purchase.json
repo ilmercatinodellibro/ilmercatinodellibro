@@ -1,8 +1,8 @@
 {
   "schemas": [
-    {
-      "headerTitle": {
-        "type": "readOnlyText",
+    [
+      {
+        "type": "text",
         "position": { "x": 10, "y": 6.5 },
         "content": "Ricevuta di acquisto",
         "width": 100,
@@ -17,9 +17,10 @@
         "backgroundColor": "",
         "opacity": 1,
         "readOnly": true,
-        "fontName": "NotoSerifJP-Regular"
+        "fontName": "NotoSerifJP-Regular",
+        "name": "headerTitle"
       },
-      "headerSubtitle": {
+      {
         "type": "text",
         "content": "Il Mercatino del Libro - {location}",
         "position": { "x": 10, "y": 12 },
@@ -34,9 +35,12 @@
         "fontColor": "#000000",
         "backgroundColor": "",
         "opacity": 1,
-        "fontName": "NotoSerifJP-Regular"
+        "fontName": "NotoSerifJP-Regular",
+        "name": "headerSubtitle",
+        "readOnly": true,
+        "required": false
       },
-      "headerDate": {
+      {
         "type": "text",
         "content": "{date}",
         "position": { "x": 220, "y": 9.04 },
@@ -51,9 +55,12 @@
         "fontColor": "#000000",
         "backgroundColor": "",
         "opacity": 1,
-        "fontName": "NotoSerifJP-Regular"
+        "fontName": "NotoSerifJP-Regular",
+        "name": "headerDate",
+        "readOnly": true,
+        "required": false
       },
-      "headerSeparator": {
+      {
         "type": "line",
         "position": { "x": 10, "y": 18.7 },
         "width": 280,
@@ -61,9 +68,11 @@
         "rotate": 0,
         "opacity": 1,
         "readOnly": true,
-        "color": "#000000"
+        "color": "#000000",
+        "name": "headerSeparator",
+        "content": ""
       },
-      "title": {
+      {
         "type": "text",
         "content": "Ricevuta di {email}",
         "position": { "x": 10, "y": 27.76 },
@@ -77,18 +86,22 @@
         "characterSpacing": 0,
         "fontColor": "#000000",
         "backgroundColor": "",
-        "opacity": 1
+        "opacity": 1,
+        "name": "title",
+        "readOnly": true,
+        "required": false,
+        "fontName": "Roboto"
       },
-      "table": {
+      {
         "type": "table",
         "position": { "x": 10, "y": 43 },
         "width": 280,
-        "height": 27.640000000000004,
+        "height": 24.112000000000002,
         "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\"]]",
         "showHead": true,
         "head": ["ISBN", "Titolo", "Materia", "Prezzo"],
         "headWidthPercentages": [
-          12.695641670590623, 50.497683704951354, 26.138244092042642,
+          12.695641670590623, 50.497683704951356, 26.13824409204264,
           10.668430532479764
         ],
         "tableStyles": { "borderWidth": 0, "borderColor": "" },
@@ -124,9 +137,10 @@
           "borderWidth": { "top": 1, "right": 1, "bottom": 1, "left": 1 },
           "padding": { "top": 2, "right": 1, "bottom": 2, "left": 1 }
         },
-        "columnStyles": {}
+        "columnStyles": {},
+        "name": "table"
       },
-      "notice": {
+      {
         "type": "text",
         "content": "Il totale da pagare è: {totalPrice}",
         "position": { "x": 10, "y": 76.32 },
@@ -141,10 +155,18 @@
         "fontColor": "#000000",
         "backgroundColor": "",
         "opacity": 1,
-        "fontName": "NotoSerifJP-Regular"
+        "fontName": "NotoSerifJP-Regular",
+        "name": "notice",
+        "readOnly": true,
+        "required": false
       }
-    }
+    ]
   ],
-  "basePdf": { "width": 300, "height": 215, "padding": [5, 10, 5, 10] },
-  "pdfmeVersion": "4-dev"
+  "basePdf": {
+    "width": 300,
+    "height": 215,
+    "padding": [5, 10, 5, 10],
+    "staticSchema": []
+  },
+  "pdfmeVersion": "6.0.6"
 }
