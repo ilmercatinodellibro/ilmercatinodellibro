@@ -239,8 +239,10 @@ export default {
     type: {
       PURCHASE: "Acquisto | Acquisti",
       WITHDRAWAL: "Ritiro | Ritiri",
+      SETTLEMENT: "Liquidazione",
     } satisfies Record<ReceiptType, string>,
     noWithdrawal: "Non sono presenti ricevute di ritiro",
     noPurchase: "Non sono presenti ricevute d'acquisto",
+    noSettlement: "Non sono presenti ricevute di liquidazione",
   },
 };
