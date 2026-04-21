@@ -175,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloCache } from "@apollo/client";
+import { ApolloCache } from "@apollo/client/core";
 import {
   mdiCart,
   mdiCartPlus,

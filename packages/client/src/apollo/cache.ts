@@ -1,4 +1,4 @@
-import { ApolloCache } from "@apollo/client";
+import { ApolloCache } from "@apollo/client/core";
 import {
   TypedDocumentNode,
   VariablesOf,

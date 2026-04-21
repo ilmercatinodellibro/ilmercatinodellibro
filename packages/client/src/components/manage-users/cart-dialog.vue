@@ -190,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloCache, isApolloError } from "@apollo/client";
+import { ApolloCache, isApolloError } from "@apollo/client/core";
 import {
   mdiChevronDown,
   mdiChevronUp,
