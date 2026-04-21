@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "src/modules/auth/auth.module";
 import { NewsletterContactsService } from "src/modules/retail-location/newsletter-contacts.service";
@@ -8,7 +8,7 @@ import { PrismaModule } from "../prisma/prisma.module";
 import { RetailLocationResolver } from "./retail-location.resolver";
 
 @Module({
-  imports: [PrismaModule, AuthModule, ConfigModule],
+  imports: [PrismaModule, forwardRef(() => AuthModule), ConfigModule],
   providers: [
     RetailLocationResolver,
     RetailLocationService,

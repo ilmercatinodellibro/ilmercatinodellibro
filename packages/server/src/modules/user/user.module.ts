@@ -1,6 +1,7 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "src/modules/auth/auth.module";
+import { ReceiptModule } from "src/modules/receipt/receipt.module";
 import { AddAdminUserCommand } from "src/modules/user/add-admin-user.command";
 import { SeedUsersWithBooksCommand } from "src/modules/user/seed-users-with-books.command";
 import { UserAccountResolver } from "src/modules/user/user-account.resolver";
@@ -9,7 +10,12 @@ import { UserResolver } from "./user.resolver";
 import { UserService } from "./user.service";
 
 @Module({
-  imports: [PrismaModule, forwardRef(() => AuthModule), ConfigModule],
+  imports: [
+    PrismaModule,
+    forwardRef(() => AuthModule),
+    ConfigModule,
+    ReceiptModule,
+  ],
   providers: [
     UserResolver,
     UserAccountResolver,
