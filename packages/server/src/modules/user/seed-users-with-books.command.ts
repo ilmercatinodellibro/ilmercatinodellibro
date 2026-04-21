@@ -1,6 +1,7 @@
 import { randomInt } from "crypto";
 import { faker } from "@faker-js/faker";
 import { Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   Book,
   BookCopy,
@@ -48,7 +49,10 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
   private readonly logger = new Logger(SeedUsersWithBooksCommand.name);
   private readonly bookService = new BookCopyService();
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {
     super();
   }
 
@@ -305,6 +309,12 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
             ),
             userId: buyer.id,
           })),
+      });
+
+      this.eventEmitter.emit("booksBecameAvailable", {
+        bookIds: availableRequests
+          .slice(ITEMS_TO_NOT_PROCESS_COUNT)
+          .map(({ bookId }) => bookId),
       });
 
       const reservations = await this.prisma.reservation.findMany({
