@@ -20,6 +20,12 @@
           class="flex-grow"
           type="PURCHASE"
         />
+        <receipts-table
+          :no-data-label="$t('manageUsers.receiptsDialog.noSettlement')"
+          :receipts="settlementReceipts"
+          class="flex-grow"
+          type="SETTLEMENT"
+        />
       </q-card-section>
     </k-dialog-card>
   </q-dialog>
@@ -56,5 +62,8 @@ const withdrawalReceipts = computed(() =>
 );
 const purchaseReceipts = computed(() =>
   receipts.value.filter(({ type }) => type === "PURCHASE"),
+);
+const settlementReceipts = computed(() =>
+  receipts.value.filter(({ type }) => type === "SETTLEMENT"),
 );
 </script>

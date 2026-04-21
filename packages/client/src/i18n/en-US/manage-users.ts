@@ -236,8 +236,10 @@ export default {
     type: {
       PURCHASE: "Purchase | Purchases",
       WITHDRAWAL: "Withdrawal | Withdrawals",
+      SETTLEMENT: "Settlement",
     } satisfies Record<ReceiptType, string>,
     noWithdrawal: "There are no withdrawal receipts",
     noPurchase: "There are no purchase receipts",
+    noSettlement: "There are no settlement receipts",
   },
 };
