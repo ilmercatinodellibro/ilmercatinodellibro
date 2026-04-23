@@ -68,7 +68,7 @@ export default {
   inStock: "In magazzino",
   searchHint: "Insert an ISBN code to add the book to the list",
   inStockDialog: {
-    title: "Books of {0} in Stock",
+    title: "Books of {firstname} {lastname} ({email}) in Stock",
     retrievableTooltip:
       "Includes the copies that are still present in stock, even if with problems or reserved",
     retrieveBtn: "Retrieve all the books in the list",
@@ -79,8 +79,8 @@ export default {
     },
   },
   booksMovementsDialog: {
-    purchasedTitle: "Books purchased by {0}",
-    soldTitle: "Books sold by {0}",
+    purchasedTitle: "Books purchased by {firstname} {lastname} ({email})",
+    soldTitle: "Books sold by {firstname} {lastname} ({email})",
     purchasedAt: "Purchased at",
     soldTo: "Sold to",
     purchasedBy: "Purchased by",
@@ -103,7 +103,7 @@ export default {
   },
   actions: "Actions",
   requestedBooksDialog: {
-    title: "Books requested by {0}",
+    title: "Books requested by {firstname} {lastname} ({email})",
     titleNoName: "Requested books",
     deleteAll: "Delete All",
     moveIntoReserved: "Move Available into Reserved",
@@ -111,7 +111,7 @@ export default {
     booksRequested: "",
   },
   reservedBooksDialog: {
-    title: "Books reserved by {0}",
+    title: "Books reserved by {firstname} {lastname} ({email})",
     deleteAllReserved: "Delete all Reserved Books",
     moveAllIntoCart: "Put Reserved and Available Books into the Cart",
     reservedIntoCart: "Put Reserved Books into the Cart",
@@ -126,7 +126,7 @@ export default {
     requestsReserved: "Reserved {0} copies of requested books.",
   },
   payOffUserDialog: {
-    title: "Check Out User {0}",
+    title: "Check Out User {firstname} {lastname} ({email})",
     soldBooksCountLabel: "Total of the User's Books Sold to Others",
     totalPayOffLabel: "Total Money Settleable to the User",
     totalCheckedOutLabel: "Total Settled to the User",
@@ -206,7 +206,7 @@ export default {
   iseeInfoTooltip:
     "Is this user entitled to the discount and does the total to be returned take it into account?",
   cartDialog: {
-    title: "Cart of {0}",
+    title: "Cart of {firstname} {lastname} ({email})",
     emptyCart: "Empty the cart",
     autoEmptyDisclaimer:
       "Remember: you cannot keep the available books stuck in the cart for too long, therefore it will automatically be emptied in: {0}",
@@ -228,7 +228,7 @@ export default {
     },
   },
   receiptsDialog: {
-    title: "Receipts",
+    title: "Receipts of {firstname} {lastname} ({email})",
     createdBy: "Created by",
     resend: "Send again",
     resendSuccess:

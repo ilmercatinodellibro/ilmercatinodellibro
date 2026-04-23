@@ -9,11 +9,7 @@
       size="fullscreen"
       :cancel-label="$t('common.close')"
       :no-actions="isMobile"
-      :title="
-        $t('manageUsers.reservedBooksDialog.title', [
-          `${userData.firstname} ${userData.lastname}`,
-        ])
-      "
+      :title="$t('manageUsers.reservedBooksDialog.title', userData)"
       @cancel="onDialogCancel"
     >
       <card-table-header @add-book="addReservationFromIsbn">
