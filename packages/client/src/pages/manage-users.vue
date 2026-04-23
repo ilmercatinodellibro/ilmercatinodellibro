@@ -77,8 +77,14 @@
             <q-tr
               :props
               :class="
-                !props.row.emailVerified ? 'bg-blue-grey-1 text-black-54' : ''
+                !props.row.emailVerified
+                  ? 'bg-blue-grey-1 text-black-54'
+                  : `user-row-${props.row.id}`
               "
+              :tabindex="props.rowIndex"
+              @focusin="toggleSelectedClass(props.row.id, true)"
+              @blur="toggleSelectedClass(props.row.id)"
+              @keydown.escape="toggleSelectedClass(props.row.id)"
             >
               <q-td key="edit" :props>
                 <q-btn
@@ -495,6 +501,18 @@ const { filterMethod, filterOptions, tableFilter, refetchFilterProxy } =
 onMounted(() => {
   tableRef.value.requestServerInteraction();
 });
+
+// Since for the table we are using the body slot, referencing a variable
+// from the template would cause a re-render of all rows, which heavily
+// impacted performance
+function toggleSelectedClass(rowId: string, forceState?: boolean) {
+  const tableRow = document.getElementsByClassName(`user-row-${rowId}`)[0];
+  if (!tableRow) {
+    return;
+  }
+
+  tableRow.classList.toggle("bg-primary-selected", forceState);
+}
 
 const onRequest: QTableProps["onRequest"] = async (requested) => {
   await fetchCustomers({
