@@ -68,6 +68,8 @@ export default {
     back: "Back",
     next: "Next",
 
+    of: "Of",
+
     from: "From",
     to: "To",
 

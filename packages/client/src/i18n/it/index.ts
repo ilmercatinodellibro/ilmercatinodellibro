@@ -64,6 +64,8 @@ export default {
     back: "Indietro",
     next: "Avanti",
 
+    of: "Di",
+
     from: "Da",
     to: "A",
 
