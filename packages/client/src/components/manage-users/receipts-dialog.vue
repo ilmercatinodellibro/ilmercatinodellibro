@@ -1,7 +1,7 @@
 <template>
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
-      :title="t('manageUsers.receiptsDialog.title')"
+      :title="t('manageUsers.receiptsDialog.title', user)"
       size="md"
       @cancel="onDialogCancel"
     >

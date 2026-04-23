@@ -7,11 +7,7 @@
     @hide="onDialogHide"
   >
     <k-dialog-card
-      :title="
-        $t('manageUsers.payOffUserDialog.title', [
-          `${user.firstname} ${user.lastname}`,
-        ])
-      "
+      :title="$t('manageUsers.payOffUserDialog.title', user)"
       @cancel="onDialogCancel"
     >
       <q-card-section

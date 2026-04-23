@@ -70,7 +70,7 @@ export default {
   inStock: "In magazzino",
   searchHint: "Inserisci un codice ISBN per aggiungere il libro alla lista",
   inStockDialog: {
-    title: "Libri di {0} in Magazzino",
+    title: "Libri di {firstname} {lastname} ({email}) in Magazzino",
     retrievableTooltip:
       "Include le copie ancora presenti in magazzino, anche quelle con problemi o prenotate",
     retrieveBtn: "Ritira tutti i libri nella lista",
@@ -81,8 +81,8 @@ export default {
     },
   },
   booksMovementsDialog: {
-    purchasedTitle: "Libri acquistati da {0}",
-    soldTitle: "Libri venduti da {0}",
+    purchasedTitle: "Libri acquistati da {firstname} {lastname} ({email})",
+    soldTitle: "Libri venduti da {firstname} {lastname} ({email})",
     purchasedAt: "Acquistato il",
     soldTo: "Venduto a",
     purchasedBy: "Il venditore",
@@ -105,7 +105,7 @@ export default {
   },
   actions: "Azioni",
   requestedBooksDialog: {
-    title: "Libri richiesti da {0}",
+    title: "Libri richiesti da {firstname} {lastname} ({email})",
     titleNoName: "Libri Richiesti",
     deleteAll: "Elimina Tutti",
     moveIntoReserved: "Sposta i Disponibili nei Prenotati",
@@ -113,7 +113,7 @@ export default {
     booksRequested: "",
   },
   reservedBooksDialog: {
-    title: "Libri prenotati da {0}",
+    title: "Libri prenotati da {firstname} {lastname} ({email})",
     deleteAllReserved: "Elimina tutti i Prenotati",
     moveAllIntoCart: "Metti Prenotati e Disponibili nel Carrello",
     reservedIntoCart: "Metti i Prenotati nel Carrello",
@@ -128,7 +128,7 @@ export default {
     requestsReserved: "{0} copie di libri richiesti prenotate.",
   },
   payOffUserDialog: {
-    title: "Liquida Utente {0}",
+    title: "Liquida Utente {firstname} {lastname} ({email})",
     soldBooksCountLabel: "Totale Libri dell'Utente Venduti ad Altri",
     totalPayOffLabel: "Totale Liquidabile all'Utente",
     totalCheckedOutLabel: "Totale Liquidato all'Utente",
@@ -209,7 +209,7 @@ export default {
   iseeInfoTooltip:
     "Questo utente ha diritto allo sconto e il totale da rendere ne tiene conto?",
   cartDialog: {
-    title: "Carrello di {0}",
+    title: "Carrello di {firstname} {lastname} ({email})",
     emptyCart: "Svuota carrello",
     autoEmptyDisclaimer:
       "Ricorda: non puoi tenere i libri disponibili bloccati nel carrello per troppo tempo, perciò si svuoterà automaticamente tra: {0}",
@@ -231,7 +231,7 @@ export default {
     },
   },
   receiptsDialog: {
-    title: "Ricevute",
+    title: "Ricevute di {firstname} {lastname} ({email})",
     createdBy: "Creata da",
     resend: "Invia di nuovo",
     resendSuccess:

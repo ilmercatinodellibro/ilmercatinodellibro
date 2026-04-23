@@ -9,11 +9,7 @@
     <k-dialog-card
       :cancel-label="$t('common.close')"
       :no-actions="isMobile"
-      :title="
-        $t('manageUsers.inStockDialog.title', [
-          `${userData.firstname} ${userData.lastname}`,
-        ])
-      "
+      :title="$t('manageUsers.inStockDialog.title', userData)"
       size="fullscreen"
       @cancel="onDialogCancel"
     >

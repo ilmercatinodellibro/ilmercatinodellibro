@@ -195,7 +195,7 @@ const title = computed(() =>
     props.type === "sold"
       ? "manageUsers.booksMovementsDialog.soldTitle"
       : "manageUsers.booksMovementsDialog.purchasedTitle",
-    [`${props.userData.firstname} ${props.userData.lastname}`],
+    props.userData,
   ),
 );
 
