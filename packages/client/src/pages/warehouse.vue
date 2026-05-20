@@ -40,6 +40,7 @@
         :filter="tableFilter"
         :loading="isLoading"
         :rows="bookRows"
+        :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
         class="flex-delegate-height-management"
         row-key="id"
         @request="fetchBooksPage"
@@ -125,6 +126,7 @@
         :filter="tableFilter"
         :loading="isLoading"
         :rows="bookCopiesRows"
+        :rows-per-page-options="ROWS_PER_PAGE_OPTIONS"
         class="col"
         @request="fetchBooksPage"
       >
@@ -245,6 +247,8 @@ import {
   BookSummaryFragment,
   PaginatedBookResultFragment,
 } from "src/services/book.graphql";
+
+const ROWS_PER_PAGE_OPTIONS = [30, 50, 100];
 
 const { t } = useI18n();
 
