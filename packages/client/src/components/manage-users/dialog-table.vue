@@ -51,13 +51,12 @@
           v-if="slotData.pagesNumber > 2"
           :model-value="slotData.pagination.page"
           :disable="loading"
-          :rules="[
-            allowOnlyIntegerNumbers,
-            numberBetween(1, slotData.pagesNumber),
-          ]"
+          :rules="[allowOnlyIntegerNumbers]"
           dense
           outlined
-          @update:model-value="updatePagination"
+          @update:model-value="
+            updatePagination(clamp($event, 1, slotData.pagesNumber))
+          "
         />
 
         <q-btn
@@ -92,12 +91,12 @@ import {
   mdiChevronLeft,
   mdiChevronRight,
 } from "@quasar/extras/mdi-v7";
-import { omit } from "lodash-es";
+import { clamp, omit } from "lodash-es";
 import { QTable, QTableColumn, QTableProps, QTableSlots } from "quasar";
 import { computed, onMounted, ref, type Slot } from "vue";
 import { useI18n } from "vue-i18n";
 import NumberInput from "src/components/manage-users/number-input.vue";
-import { allowOnlyIntegerNumbers, numberBetween } from "src/helpers/rules";
+import { allowOnlyIntegerNumbers } from "src/helpers/rules";
 
 withDefaults(
   defineProps<
