@@ -1,4 +1,8 @@
 <template>
+  <!--
+    Displaying errors would break the UI, so we prevent
+    invalid input instead and we don't show any error message
+  -->
   <q-input
     ref="inputRef"
     v-bind="props"
@@ -32,6 +36,9 @@ const props =
 
 const inputRef = ref<QInput>();
 
+// To prevent invalid values while typing, deleting, or pasting,
+// we compute the new value before it is applied to the input's value
+// This requires managing partial or total text selection and replacement
 const validate: HTMLInputElement["onbeforeinput"] = (event) => {
   if (!inputRef.value || !event.target) {
     return;
@@ -41,6 +48,8 @@ const validate: HTMLInputElement["onbeforeinput"] = (event) => {
   const start = target.selectionStart ?? 0;
   const end = target.selectionEnd ?? target.value.length;
 
+  // In case the user is deleting, check if at least one digit remains
+  // If not, prevent the deletion altogether to avoid empty values
   if (event.data === null) {
     if (target.value.length - (end - start) > 1) {
       return;
@@ -53,7 +62,7 @@ const validate: HTMLInputElement["onbeforeinput"] = (event) => {
   const newValue =
     target.value.substring(0, start) + event.data + target.value.substring(end);
 
-  const isInvalid = props.rules?.some(
+  const doesNotSatisfyRules = props.rules?.some(
     (rule) =>
       typeof rule === "function" &&
       rule(
@@ -62,7 +71,10 @@ const validate: HTMLInputElement["onbeforeinput"] = (event) => {
       ) !== true,
   );
 
-  if (isInvalid || event.data !== parseInt(event.data).toString()) {
+  // If the new value does not respect rules validation or if the input
+  // is not a plain text positive integer, prevent the change
+  const isInvalidNumber = isNaN(Number(newValue)) || !/^\d+$/.test(newValue);
+  if (doesNotSatisfyRules || isInvalidNumber) {
     event.preventDefault();
 
     return;
