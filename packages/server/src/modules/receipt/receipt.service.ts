@@ -73,12 +73,12 @@ const RECEIPT_SUBJECT_TRANSLATIONS: Record<
   it: {
     [ReceiptType.PURCHASE]: "Ricevuta per acquisto libri",
     [ReceiptType.WITHDRAWAL]: "Ricevuta per consegna libri",
-    [ReceiptType.SETTLEMENT]: "Ricevuta per liquidazione fornitore",
+    [ReceiptType.SETTLEMENT]: "Ricevuta per liquidazione",
   },
   "en-US": {
     [ReceiptType.PURCHASE]: "Book purchase receipt",
     [ReceiptType.WITHDRAWAL]: "Book consignment receipt",
-    [ReceiptType.SETTLEMENT]: "Vendor settlement receipt",
+    [ReceiptType.SETTLEMENT]: "Settlement receipt",
   },
 };
 interface BookWithBuyPrice extends ReceiptBook {
