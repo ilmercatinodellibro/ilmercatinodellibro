@@ -940,6 +940,12 @@ export class UserResolver {
       },
     });
 
+    if (bookCopies.length === 0) {
+      throw new UnprocessableEntityException(
+        "Cannot settle the selected user because there are no books to settle",
+      );
+    }
+
     await this.prisma.$transaction(async (prisma) => {
       if (remainingType !== SettleRemainingType.CASH_ONLY) {
         const returnableCopies = bookCopies.filter(
@@ -987,14 +993,14 @@ export class UserResolver {
           settledById: operator.id,
         },
       });
-    });
 
-    await this.receiptService.createReceipt(this.prisma, {
-      data: bookCopies,
-      createdById: operator.id,
-      retailLocationId,
-      type: ReceiptType.SETTLEMENT,
-      userId,
+      await this.receiptService.createReceipt(this.prisma, {
+        data: bookCopies,
+        createdById: operator.id,
+        retailLocationId,
+        type: ReceiptType.SETTLEMENT,
+        userId,
+      });
     });
   }
 }
