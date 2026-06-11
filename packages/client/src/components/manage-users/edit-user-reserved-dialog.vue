@@ -164,11 +164,7 @@
         </requested-reserved-table>
 
         <span class="q-px-md q-py-md text-h6 text-primary">
-          {{
-            $t("manageUsers.requestedBooksDialog.title", [
-              `${userData.firstname} ${userData.lastname}`,
-            ])
-          }}
+          {{ $t("manageUsers.requestedBooksDialog.title", userData) }}
         </span>
 
         <requested-reserved-table
