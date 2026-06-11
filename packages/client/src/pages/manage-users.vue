@@ -83,7 +83,7 @@
               "
               :tabindex="props.rowIndex"
               @focusin="updateSelectedStatus(props.row.id, 'selected')"
-              @blur="updateSelectedStatus(props.row.id, 'deselected')"
+              @focusout="updateSelectedStatus(props.row.id, 'deselected')"
               @keydown.escape="updateSelectedStatus(props.row.id, 'deselected')"
             >
               <q-td key="edit" :props>
