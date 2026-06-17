@@ -8,6 +8,7 @@
       :cancel-label="$t('common.close')"
       :no-actions="isMobile"
       :title="$t('manageUsers.requestedBooksDialog.title', userData)"
+      class="full-width"
       size="fullscreen"
       @cancel="onDialogCancel"
     >

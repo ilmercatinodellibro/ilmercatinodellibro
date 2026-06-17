@@ -8,6 +8,7 @@
     <k-dialog-card
       :class="isMobile ? 'card-actions-shadow' : ''"
       :title="$t('manageUsers.cartDialog.title', user)"
+      class="full-width"
       size="fullscreen"
       @cancel="onDialogCancel"
     >
