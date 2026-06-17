@@ -3,7 +3,10 @@
     [
       {
         "type": "text",
-        "position": { "x": 10, "y": 6.5 },
+        "position": {
+          "x": 10,
+          "y": 6.5
+        },
         "content": "Fattura di liquidazione",
         "width": 100,
         "height": 5.5,
@@ -23,7 +26,10 @@
       {
         "type": "text",
         "content": "Il Mercatino del Libro - {location}",
-        "position": { "x": 10, "y": 12 },
+        "position": {
+          "x": 10,
+          "y": 12
+        },
         "width": 100,
         "height": 5.5,
         "rotate": 0,
@@ -43,7 +49,10 @@
       {
         "type": "text",
         "content": "{date}",
-        "position": { "x": 220, "y": 9.04 },
+        "position": {
+          "x": 220,
+          "y": 9.04
+        },
         "width": 70,
         "height": 5.75,
         "rotate": 0,
@@ -62,7 +71,10 @@
       },
       {
         "type": "line",
-        "position": { "x": 10, "y": 18.7 },
+        "position": {
+          "x": 10,
+          "y": 18.7
+        },
         "width": 280,
         "height": 0.5,
         "rotate": 0,
@@ -75,7 +87,10 @@
       {
         "type": "text",
         "content": "Ricevuta di {email}",
-        "position": { "x": 10, "y": 27.76 },
+        "position": {
+          "x": 10,
+          "y": 27.76
+        },
         "width": 280,
         "height": 10,
         "rotate": 0,
@@ -94,79 +109,13 @@
       },
       {
         "type": "text",
-        "content": "Libri venduti",
-        "position": { "x": 10, "y": 41.47 },
-        "width": 280,
-        "height": 10,
-        "rotate": 0,
-        "alignment": "left",
-        "verticalAlignment": "top",
-        "fontSize": 14,
-        "lineHeight": 1,
-        "characterSpacing": 0,
-        "fontColor": "#000000",
-        "backgroundColor": "",
-        "opacity": 1,
-        "readOnly": true,
-        "fontName": "Roboto",
-        "name": "soldText",
-        "required": false
-      },
-      {
-        "type": "table",
-        "position": { "x": 10, "y": 54.91 },
-        "width": 280,
-        "height": 24.112000000000002,
-        "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\"]]",
-        "showHead": true,
-        "head": ["ISBN", "Titolo", "Materia", "Prezzo"],
-        "headWidthPercentages": [
-          12.695641670590623, 50.497683704951356, 26.13824409204264,
-          10.668430532479764
-        ],
-        "tableStyles": { "borderWidth": 0, "borderColor": "" },
-        "headStyles": {
-          "fontName": "NotoSerifJP-Regular",
-          "fontSize": 10,
-          "characterSpacing": 0,
-          "alignment": "left",
-          "verticalAlignment": "middle",
-          "lineHeight": 1,
-          "fontColor": "#000000",
-          "borderColor": "",
-          "backgroundColor": "",
-          "borderWidth": {
-            "top": 0.5,
-            "right": 0.5,
-            "bottom": 0.5,
-            "left": 0.5
-          },
-          "padding": { "top": 1, "right": 1, "bottom": 1, "left": 1 }
-        },
-        "bodyStyles": {
-          "fontName": "NotoSerifJP-Regular",
-          "fontSize": 10,
-          "characterSpacing": 0,
-          "alignment": "left",
-          "verticalAlignment": "middle",
-          "lineHeight": 1,
-          "fontColor": "#000000",
-          "borderColor": "",
-          "backgroundColor": "",
-          "alternateBackgroundColor": "",
-          "borderWidth": { "top": 1, "right": 1, "bottom": 1, "left": 1 },
-          "padding": { "top": 2, "right": 1, "bottom": 2, "left": 1 }
-        },
-        "columnStyles": {},
-        "readOnly": false,
-        "name": "soldTable"
-      },
-      {
-        "type": "text",
         "content": "Libri restituiti",
-        "position": { "x": 10, "y": 83.22 },
+        "position": {
+          "x": 10,
+          "y": 40
+        },
         "width": 280,
-        "height": 10,
+        "height": 7,
         "rotate": 0,
         "alignment": "left",
         "verticalAlignment": "top",
@@ -179,21 +128,25 @@
         "readOnly": true,
         "fontName": "Roboto",
         "name": "returnedText",
-        "required": false
+        "required": false,
+        "overflow": "visible"
       },
       {
         "type": "table",
-        "position": { "x": 10, "y": 97.45 },
+        "position": {
+          "x": 10,
+          "y": 48
+        },
         "width": 280,
-        "height": 24.112000000000002,
-        "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\"]]",
+        "height": 27.640000000000004,
+        "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\",\"0002/001\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\",\"0000/000\"]]",
         "showHead": true,
-        "head": ["ISBN", "Titolo", "Materia", "Prezzo"],
-        "headWidthPercentages": [
-          12.695641670590623, 50.497683704951356, 26.13824409204264,
-          10.668430532479764
-        ],
-        "tableStyles": { "borderWidth": 0, "borderColor": "" },
+        "head": ["ISBN", "Titolo", "Materia", "Valore", "Codice magazzino"],
+        "headWidthPercentages": [12, 50, 20, 8, 10],
+        "tableStyles": {
+          "borderWidth": 0,
+          "borderColor": ""
+        },
         "headStyles": {
           "fontName": "NotoSerifJP-Regular",
           "fontSize": 10,
@@ -210,7 +163,12 @@
             "bottom": 0.5,
             "left": 0.5
           },
-          "padding": { "top": 1, "right": 1, "bottom": 1, "left": 1 }
+          "padding": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          }
         },
         "bodyStyles": {
           "fontName": "NotoSerifJP-Regular",
@@ -223,8 +181,18 @@
           "borderColor": "",
           "backgroundColor": "",
           "alternateBackgroundColor": "",
-          "borderWidth": { "top": 1, "right": 1, "bottom": 1, "left": 1 },
-          "padding": { "top": 2, "right": 1, "bottom": 2, "left": 1 }
+          "borderWidth": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          },
+          "padding": {
+            "top": 2,
+            "right": 1,
+            "bottom": 2,
+            "left": 1
+          }
         },
         "columnStyles": {},
         "readOnly": false,
@@ -233,9 +201,12 @@
       {
         "type": "text",
         "content": "Libri donati",
-        "position": { "x": 10, "y": 126.02 },
+        "position": {
+          "x": 10,
+          "y": 80
+        },
         "width": 280,
-        "height": 10,
+        "height": 7,
         "rotate": 0,
         "alignment": "left",
         "verticalAlignment": "top",
@@ -248,21 +219,25 @@
         "readOnly": true,
         "fontName": "Roboto",
         "name": "donatedText",
-        "required": false
+        "required": false,
+        "overflow": "visible"
       },
       {
         "type": "table",
-        "position": { "x": 10, "y": 139.46 },
+        "position": {
+          "x": 10,
+          "y": 88
+        },
         "width": 280,
-        "height": 24.112000000000002,
-        "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\"]]",
+        "height": 27.640000000000004,
+        "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\",\"0002/001\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\",\"0000/000\"]]",
         "showHead": true,
-        "head": ["ISBN", "Titolo", "Materia", "Prezzo"],
-        "headWidthPercentages": [
-          12.695641670590623, 50.497683704951356, 26.13824409204264,
-          10.668430532479764
-        ],
-        "tableStyles": { "borderWidth": 0, "borderColor": "" },
+        "head": ["ISBN", "Titolo", "Materia", "Valore", "Codice magazzino"],
+        "headWidthPercentages": [12, 50, 20, 8, 10],
+        "tableStyles": {
+          "borderWidth": 0,
+          "borderColor": ""
+        },
         "headStyles": {
           "fontName": "NotoSerifJP-Regular",
           "fontSize": 10,
@@ -279,7 +254,12 @@
             "bottom": 0.5,
             "left": 0.5
           },
-          "padding": { "top": 1, "right": 1, "bottom": 1, "left": 1 }
+          "padding": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          }
         },
         "bodyStyles": {
           "fontName": "NotoSerifJP-Regular",
@@ -292,8 +272,18 @@
           "borderColor": "",
           "backgroundColor": "",
           "alternateBackgroundColor": "",
-          "borderWidth": { "top": 1, "right": 1, "bottom": 1, "left": 1 },
-          "padding": { "top": 2, "right": 1, "bottom": 2, "left": 1 }
+          "borderWidth": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          },
+          "padding": {
+            "top": 2,
+            "right": 1,
+            "bottom": 2,
+            "left": 1
+          }
         },
         "columnStyles": {},
         "readOnly": false,
@@ -301,10 +291,104 @@
       },
       {
         "type": "text",
-        "content": "Il totale ricevuto è: {totalPrice}",
-        "position": { "x": 10.05, "y": 166.81 },
-        "width": 279.95,
-        "height": 13.43,
+        "content": "Libri venduti",
+        "position": {
+          "x": 10,
+          "y": 120
+        },
+        "width": 280,
+        "height": 7,
+        "rotate": 0,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "fontSize": 14,
+        "lineHeight": 1,
+        "characterSpacing": 0,
+        "fontColor": "#000000",
+        "backgroundColor": "",
+        "opacity": 1,
+        "readOnly": true,
+        "fontName": "Roboto",
+        "name": "soldText",
+        "required": false,
+        "overflow": "visible"
+      },
+      {
+        "type": "table",
+        "position": {
+          "x": 10,
+          "y": 128
+        },
+        "width": 280,
+        "height": 27.640000000000004,
+        "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\",\"0002/001\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\",\"0000/000\"]]",
+        "showHead": true,
+        "head": ["ISBN", "Titolo", "Materia", "Valore", "Codice magazzino"],
+        "headWidthPercentages": [12, 50, 20, 8, 10],
+        "tableStyles": {
+          "borderWidth": 0,
+          "borderColor": ""
+        },
+        "headStyles": {
+          "fontName": "NotoSerifJP-Regular",
+          "fontSize": 10,
+          "characterSpacing": 0,
+          "alignment": "left",
+          "verticalAlignment": "middle",
+          "lineHeight": 1,
+          "fontColor": "#000000",
+          "borderColor": "",
+          "backgroundColor": "",
+          "borderWidth": {
+            "top": 0.5,
+            "right": 0.5,
+            "bottom": 0.5,
+            "left": 0.5
+          },
+          "padding": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          }
+        },
+        "bodyStyles": {
+          "fontName": "NotoSerifJP-Regular",
+          "fontSize": 10,
+          "characterSpacing": 0,
+          "alignment": "left",
+          "verticalAlignment": "middle",
+          "lineHeight": 1,
+          "fontColor": "#000000",
+          "borderColor": "",
+          "backgroundColor": "",
+          "alternateBackgroundColor": "",
+          "borderWidth": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          },
+          "padding": {
+            "top": 2,
+            "right": 1,
+            "bottom": 2,
+            "left": 1
+          }
+        },
+        "columnStyles": {},
+        "readOnly": false,
+        "name": "soldTable"
+      },
+      {
+        "type": "text",
+        "content": "Il totale ricevuto è: {totalSettledAmount} €",
+        "position": {
+          "x": 10,
+          "y": 160
+        },
+        "width": 280,
+        "height": 7,
         "rotate": 0,
         "alignment": "left",
         "verticalAlignment": "top",
@@ -315,12 +399,17 @@
         "backgroundColor": "",
         "opacity": 1,
         "fontName": "NotoSerifJP-Regular",
-        "name": "notice",
+        "name": "settlementAmount",
         "readOnly": true,
-        "required": false
+        "required": false,
+        "overflow": "visible"
       }
     ]
   ],
-  "basePdf": { "width": 300, "height": 215, "padding": [5, 10, 5, 10] },
-  "pdfmeVersion": "6.0.6"
+  "basePdf": {
+    "width": 300,
+    "height": 215,
+    "padding": [5, 10, 5, 10]
+  },
+  "pdfmeVersion": "6.1.5"
 }

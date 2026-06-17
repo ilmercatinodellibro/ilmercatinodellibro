@@ -947,19 +947,48 @@ export class UserResolver {
     }
 
     await this.prisma.$transaction(async (prisma) => {
-      if (remainingType !== SettleRemainingType.CASH_ONLY) {
-        const returnableCopies = bookCopies.filter(
-          ({ sales, returnedAt, donatedAt, reimbursedAt }) =>
-            returnedAt === null &&
-            donatedAt === null &&
-            reimbursedAt === null &&
-            sales.every(({ refundedAt }) => refundedAt !== null),
-        );
-        if (returnableCopies.length > 0) {
+      const settleableCopiesIds = bookCopies
+        .filter(({ sales }) =>
+          sales.some(({ refundedAt }) => refundedAt === null),
+        )
+        .map(({ id }) => id);
+
+      if (settleableCopiesIds.length > 0) {
+        // Settle all non-settled sold book copies
+        await prisma.bookCopy.updateMany({
+          where: {
+            id: {
+              in: settleableCopiesIds,
+            },
+          },
+          data: {
+            settledAt: new Date(),
+            settledById: operator.id,
+          },
+        });
+      }
+
+      const copiesIdsForReceipt = [...settleableCopiesIds];
+
+      if (
+        remainingType === SettleRemainingType.RETURN ||
+        remainingType === SettleRemainingType.DONATE
+      ) {
+        const returnableCopiesIds = bookCopies
+          .filter(
+            ({ sales, returnedAt, donatedAt, reimbursedAt }) =>
+              returnedAt === null &&
+              donatedAt === null &&
+              reimbursedAt === null &&
+              sales.every(({ refundedAt }) => refundedAt !== null),
+          )
+          .map(({ id }) => id);
+
+        if (returnableCopiesIds.length > 0) {
           await prisma.bookCopy.updateMany({
             where: {
               id: {
-                in: returnableCopies.map(({ id }) => id),
+                in: returnableCopiesIds,
               },
             },
             data: {
@@ -974,28 +1003,32 @@ export class UserResolver {
                   }),
             },
           });
+
+          copiesIdsForReceipt.push(...returnableCopiesIds);
         }
       }
 
-      // Settle all non-settled book copies
-      await prisma.bookCopy.updateMany({
+      // Get fresh copies only of book copies which has been settled/returned/donated at this time,
+      // not of copies which were already settled/returned/donated before this operation,
+      // since they had already been included in the receipt of a previous settlement.
+      const newlyUpdatedBookCopies = await prisma.bookCopy.findMany({
         where: {
           id: {
-            in: bookCopies
-              .filter(({ sales }) =>
-                sales.some(({ refundedAt }) => refundedAt === null),
-              )
-              .map(({ id }) => id),
+            in: copiesIdsForReceipt,
           },
         },
-        data: {
-          settledAt: new Date(),
-          settledById: operator.id,
+        include: {
+          book: true,
+          sales: true,
+        },
+        // Order copies by code to make the receipt coherent with the settlement GUI
+        orderBy: {
+          code: "asc",
         },
       });
 
-      await this.receiptService.createReceipt(this.prisma, {
-        data: bookCopies,
+      await this.receiptService.createReceipt(prisma, {
+        data: newlyUpdatedBookCopies,
         createdById: operator.id,
         retailLocationId,
         type: ReceiptType.SETTLEMENT,

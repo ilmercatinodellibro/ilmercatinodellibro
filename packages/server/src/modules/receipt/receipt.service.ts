@@ -23,11 +23,8 @@ import withdrawalTemplate from "./templates/withdrawal.json";
 import type { GenerateProps, GeneratorOptions } from "@pdfme/common";
 
 type BookCopyWithBook = BookCopy & { book: Book };
-export type CreateReceiptInput = {
-  userId: string;
-  retailLocationId: string;
-  createdById: string;
-} & (
+type BookCopyWithSales = BookCopy & { sales: Sale[] };
+type ReceiptPayload =
   | {
       type: ReceiptType.PURCHASE;
       data: (Sale & { bookCopy: BookCopyWithBook })[];
@@ -38,9 +35,13 @@ export type CreateReceiptInput = {
     }
   | {
       type: ReceiptType.SETTLEMENT;
-      data: BookCopyWithBook[];
-    }
-);
+      data: (BookCopyWithBook & BookCopyWithSales)[];
+    };
+export type CreateReceiptInput = {
+  userId: string;
+  retailLocationId: string;
+  createdById: string;
+} & ReceiptPayload;
 
 enum SettlementType {
   RETURNED = "returned",
@@ -143,7 +144,7 @@ export class ReceiptService {
     });
   }
 
-  #getSettlementType({ returnedAt, donatedAt }: BookCopy) {
+  #getSettlementType({ returnedAt, donatedAt, sales }: BookCopyWithSales) {
     if (returnedAt !== null) {
       return SettlementType.RETURNED;
     }
@@ -152,16 +153,30 @@ export class ReceiptService {
       return SettlementType.DONATED;
     }
 
-    return SettlementType.SOLD;
+    if (
+      sales.length > 0 &&
+      sales.some(({ refundedAt }) => refundedAt === null)
+    ) {
+      return SettlementType.SOLD;
+    }
+
+    // If the book copy has not been returned, donated or sold, it means that it is not part of the settlement (e.g. still in stock)
+    // and should not be included in the receipt
+    return undefined;
   }
 
   async createReceipt(
     prisma: Prisma.TransactionClient,
-    { userId, retailLocationId, createdById, type, data }: CreateReceiptInput,
+    {
+      userId,
+      retailLocationId,
+      createdById,
+      ...receiptPayload
+    }: CreateReceiptInput,
   ) {
     const receipt = await prisma.receipt.create({
       data: {
-        type,
+        type: receiptPayload.type,
         userId,
         retailLocationId,
         createdById,
@@ -172,23 +187,7 @@ export class ReceiptService {
       },
     });
 
-    const bookCopies =
-      type === ReceiptType.PURCHASE
-        ? data.map(({ bookCopy }) => bookCopy)
-        : data;
-
-    const books: ReceiptBook[] = bookCopies.map(({ book, ...bookCopy }) => ({
-      isbnCode: book.isbnCode,
-      title: book.title,
-      subject: book.subject,
-      originalPrice: book.originalPrice,
-      code: bookCopy.code,
-      ...(type === ReceiptType.SETTLEMENT
-        ? {
-            settlementType: this.#getSettlementType(bookCopy),
-          }
-        : {}),
-    }));
+    const books = this.#getReceiptBooks(receiptPayload);
 
     const receiptInput: GenerateReceiptInput = {
       creationDate: receipt.createdAt,
@@ -197,14 +196,17 @@ export class ReceiptService {
       books,
     };
 
-    const { template, inputs, title } = this.#getPDFInput(receiptInput, type);
+    const { template, inputs, title } = this.#getPDFInput(
+      receiptInput,
+      receiptPayload.type,
+    );
 
     const receiptPdf = (await generate({
       template,
       inputs,
       options: {
         creationDate: receiptInput.creationDate,
-        language: "it",
+        lang: "it",
         title,
         // TODO: Use appropriate fonts, weights, etc.
       },
@@ -225,6 +227,41 @@ export class ReceiptService {
     await this.sendReceiptToUser(receipt, Buffer.from(receiptPdf));
 
     return receipt;
+  }
+
+  #getReceiptBooks({ type, data }: ReceiptPayload): ReceiptBook[] {
+    switch (type) {
+      case ReceiptType.WITHDRAWAL:
+        return data.map(({ book, ...bookCopy }) => ({
+          isbnCode: book.isbnCode,
+          title: book.title,
+          subject: book.subject,
+          originalPrice: book.originalPrice,
+          code: bookCopy.code,
+        }));
+      case ReceiptType.PURCHASE: {
+        return data
+          .map(({ bookCopy }) => bookCopy)
+          .map(({ book, ...bookCopy }) => ({
+            isbnCode: book.isbnCode,
+            title: book.title,
+            subject: book.subject,
+            originalPrice: book.originalPrice,
+            code: bookCopy.code,
+          }));
+      }
+      // This must be managed on its own from others because we need the sales list to determine the settlement type of each book copy
+      case ReceiptType.SETTLEMENT: {
+        return data.map(({ book, ...bookCopy }) => ({
+          isbnCode: book.isbnCode,
+          title: book.title,
+          subject: book.subject,
+          originalPrice: book.originalPrice,
+          code: bookCopy.code,
+          settlementType: this.#getSettlementType(bookCopy),
+        }));
+      }
+    }
   }
 
   #getPDFInput(receiptInput: GenerateReceiptInput, type: ReceiptType) {
@@ -264,7 +301,9 @@ export class ReceiptService {
     )?.content;
 
     return {
-      template: withdrawalTemplate,
+      // JSON import broadens tuples like [number, number, number, number] to number[],
+      // breaking TS compatibility due to template.basePDF.padding type
+      template: withdrawalTemplate as unknown as PDFInput["template"],
       inputs: [
         {
           location: location.name,
@@ -306,7 +345,9 @@ export class ReceiptService {
     )?.content;
 
     return {
-      template: purchaseTemplate,
+      // JSON import broadens tuples like [number, number, number, number] to number[],
+      // breaking TS compatibility due to template.basePDF.padding type
+      template: purchaseTemplate as unknown as PDFInput["template"],
       inputs: [
         {
           location: location.name,
@@ -329,11 +370,12 @@ export class ReceiptService {
       ({ settlementType }) => type === settlementType,
     );
 
-    return tableBooks.map(({ isbnCode, buyPrice, subject, title }) => [
+    return tableBooks.map(({ isbnCode, buyPrice, subject, title, code }) => [
       isbnCode,
       title,
       subject,
       buyPrice.toFixed(2),
+      code,
     ]);
   }
 
@@ -350,30 +392,41 @@ export class ReceiptService {
       buyPrice: (book.originalPrice * location.buyRate) / 100,
     }));
 
+    const soldTableRows = this.#generateSettlementTableRows(
+      booksWithBuyPrice,
+      SettlementType.SOLD,
+    );
+    const returnedTableRows = this.#generateSettlementTableRows(
+      booksWithBuyPrice,
+      SettlementType.RETURNED,
+    );
+    const donatedTableRows = this.#generateSettlementTableRows(
+      booksWithBuyPrice,
+      SettlementType.DONATED,
+    );
+
+    const soldBooks = booksWithBuyPrice.filter(
+      ({ settlementType }) => settlementType === SettlementType.SOLD,
+    );
+    const totalSettledAmount = sumBy(soldBooks, "buyPrice").toFixed(2);
+
     const headerTitle = settlementTemplate.schemas[0].find(
       ({ name }) => name === "headerTitle",
     )?.content;
 
     return {
-      template: settlementTemplate,
+      // JSON import broadens tuples like [number, number, number, number] to number[],
+      // breaking TS compatibility due to template.basePDF.padding type
+      template: settlementTemplate as unknown as PDFInput["template"],
       inputs: [
         {
           location: location.name,
           date: formattedDate,
           email: user.email,
-          soldTable: this.#generateSettlementTableRows(
-            booksWithBuyPrice,
-            SettlementType.SOLD,
-          ),
-          returnedTable: this.#generateSettlementTableRows(
-            booksWithBuyPrice,
-            SettlementType.RETURNED,
-          ),
-          donatedTable: this.#generateSettlementTableRows(
-            booksWithBuyPrice,
-            SettlementType.DONATED,
-          ),
-          totalPrice: sumBy(booksWithBuyPrice, "buyPrice").toFixed(2),
+          soldTable: soldTableRows,
+          returnedTable: returnedTableRows,
+          donatedTable: donatedTableRows,
+          totalSettledAmount,
         },
       ],
       title: headerTitle,

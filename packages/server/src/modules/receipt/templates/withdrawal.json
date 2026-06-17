@@ -3,7 +3,10 @@
     [
       {
         "type": "text",
-        "position": { "x": 10, "y": 6.5 },
+        "position": {
+          "x": 10,
+          "y": 6.5
+        },
         "content": "Ricevuta di ritiro",
         "width": 100,
         "height": 5.5,
@@ -23,7 +26,10 @@
       {
         "type": "text",
         "content": "Il Mercatino del Libro - {location}",
-        "position": { "x": 10, "y": 12 },
+        "position": {
+          "x": 10,
+          "y": 12
+        },
         "width": 100,
         "height": 5.5,
         "rotate": 0,
@@ -43,7 +49,10 @@
       {
         "type": "text",
         "content": "{date}",
-        "position": { "x": 220, "y": 9.04 },
+        "position": {
+          "x": 220,
+          "y": 9.04
+        },
         "width": 70,
         "height": 5.75,
         "rotate": 0,
@@ -62,7 +71,10 @@
       },
       {
         "type": "line",
-        "position": { "x": 10, "y": 18.7 },
+        "position": {
+          "x": 10,
+          "y": 18.7
+        },
         "width": 280,
         "height": 0.5,
         "rotate": 0,
@@ -75,9 +87,12 @@
       {
         "type": "text",
         "content": "Ricevuta di {email}",
-        "position": { "x": 10, "y": 27.76 },
+        "position": {
+          "x": 10,
+          "y": 28
+        },
         "width": 280,
-        "height": 10,
+        "height": 7,
         "rotate": 0,
         "alignment": "left",
         "verticalAlignment": "top",
@@ -90,27 +105,31 @@
         "name": "title",
         "readOnly": true,
         "required": false,
-        "fontName": "Roboto"
+        "fontName": "Roboto",
+        "overflow": "visible"
       },
       {
         "type": "table",
-        "position": { "x": 10, "y": 43 },
+        "position": {
+          "x": 10,
+          "y": 40
+        },
         "width": 280,
-        "height": 31.168000000000003,
+        "height": 34.696000000000005,
         "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\",\"0001/001\"],[\"9788893241403\",\"COME SCINTILLE VOLUME 3 + TEMI\",\"ITALIANO ANTOLOGIA\",\"33.00\",\"0002/001\"]]",
         "showHead": true,
         "head": [
           "ISBN",
           "Titolo",
           "Materia",
-          "Prezzo riconosciuto in caso di vendita",
-          "Numero assegnato"
+          "Valore riconosciuto in caso di vendita",
+          "Codice magazzino"
         ],
-        "headWidthPercentages": [
-          10.676530459990623, 48.478572494351354, 24.119132881442642,
-          8.649319321879764, 8.076444842335613
-        ],
-        "tableStyles": { "borderWidth": 0, "borderColor": "" },
+        "headWidthPercentages": [12, 50, 20, 8, 10],
+        "tableStyles": {
+          "borderWidth": 0,
+          "borderColor": ""
+        },
         "headStyles": {
           "fontName": "NotoSerifJP-Regular",
           "fontSize": 10,
@@ -127,7 +146,12 @@
             "bottom": 0.5,
             "left": 0.5
           },
-          "padding": { "top": 1, "right": 1, "bottom": 1, "left": 1 }
+          "padding": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          }
         },
         "bodyStyles": {
           "fontName": "NotoSerifJP-Regular",
@@ -140,18 +164,32 @@
           "borderColor": "",
           "backgroundColor": "",
           "alternateBackgroundColor": "",
-          "borderWidth": { "top": 1, "right": 1, "bottom": 1, "left": 1 },
-          "padding": { "top": 2, "right": 1, "bottom": 2, "left": 1 }
+          "borderWidth": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          },
+          "padding": {
+            "top": 2,
+            "right": 1,
+            "bottom": 2,
+            "left": 1
+          }
         },
         "columnStyles": {},
-        "name": "table"
+        "name": "table",
+        "readOnly": false
       },
       {
         "type": "text",
-        "content": "Ricordiamo che dal {from} al {to} sarà possibile venire a ritirare i libri invenduti e i soldi dei libri venduti. Non saranno prese in considerazione richieste di ritiro nei giorni successivi a quella data.",
-        "position": { "x": 10, "y": 76.32 },
-        "width": 279.95,
-        "height": 13.43,
+        "content": "Ricordiamo che dal {from} al {to} è possibile ritirare i libri invenduti e i soldi dei libri venduti.\nLe richieste di ritiro di libri e soldi pervenute nei giorni successivi al periodo indicato non saranno prese in considerazione.",
+        "position": {
+          "x": 10,
+          "y": 80
+        },
+        "width": 280,
+        "height": 10,
         "rotate": 0,
         "alignment": "left",
         "verticalAlignment": "top",
@@ -164,10 +202,15 @@
         "fontName": "NotoSerifJP-Regular",
         "name": "notice",
         "readOnly": true,
-        "required": false
+        "required": false,
+        "overflow": "visible"
       }
     ]
   ],
-  "basePdf": { "width": 300, "height": 215, "padding": [5, 10, 5, 10] },
-  "pdfmeVersion": "6.0.6"
+  "basePdf": {
+    "width": 300,
+    "height": 215,
+    "padding": [5, 10, 5, 10]
+  },
+  "pdfmeVersion": "6.1.5"
 }
