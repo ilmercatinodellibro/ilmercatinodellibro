@@ -52,10 +52,13 @@ const { t } = useI18n();
 const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
 
 const { selectedLocation } = useRetailLocationService();
-const { receipts } = useGetReceiptsQuery(() => ({
-  userId: props.user.id,
-  retailLocationId: selectedLocation.value.id,
-}));
+const { receipts } = useGetReceiptsQuery(
+  () => ({
+    userId: props.user.id,
+    retailLocationId: selectedLocation.value.id,
+  }),
+  { fetchPolicy: "network-only" },
+);
 
 const withdrawalReceipts = computed(() =>
   receipts.value.filter(({ type }) => type === "WITHDRAWAL"),

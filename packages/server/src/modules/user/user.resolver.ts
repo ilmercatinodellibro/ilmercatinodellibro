@@ -962,6 +962,8 @@ export class UserResolver {
             },
           },
           data: {
+            updatedAt: new Date(),
+            updatedById: operator.id,
             settledAt: new Date(),
             settledById: operator.id,
           },
@@ -992,6 +994,8 @@ export class UserResolver {
               },
             },
             data: {
+              updatedAt: new Date(),
+              updatedById: operator.id,
               ...(remainingType === SettleRemainingType.RETURN
                 ? {
                     returnedAt: new Date(),
