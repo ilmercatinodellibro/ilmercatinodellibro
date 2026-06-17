@@ -46,6 +46,7 @@ export type CreateReceiptInput = {
 enum SettlementType {
   RETURNED = "returned",
   DONATED = "donated",
+  REIMBURSED = "reimbursed",
   SOLD = "sold",
 }
 
@@ -144,13 +145,22 @@ export class ReceiptService {
     });
   }
 
-  #getSettlementType({ returnedAt, donatedAt, sales }: BookCopyWithSales) {
+  #getSettlementType({
+    returnedAt,
+    donatedAt,
+    reimbursedAt,
+    sales,
+  }: BookCopyWithSales) {
     if (returnedAt !== null) {
       return SettlementType.RETURNED;
     }
 
     if (donatedAt !== null) {
       return SettlementType.DONATED;
+    }
+
+    if (reimbursedAt !== null) {
+      return SettlementType.REIMBURSED;
     }
 
     if (
@@ -392,10 +402,6 @@ export class ReceiptService {
       buyPrice: (book.originalPrice * location.buyRate) / 100,
     }));
 
-    const soldTableRows = this.#generateSettlementTableRows(
-      booksWithBuyPrice,
-      SettlementType.SOLD,
-    );
     const returnedTableRows = this.#generateSettlementTableRows(
       booksWithBuyPrice,
       SettlementType.RETURNED,
@@ -404,11 +410,23 @@ export class ReceiptService {
       booksWithBuyPrice,
       SettlementType.DONATED,
     );
-
-    const soldBooks = booksWithBuyPrice.filter(
-      ({ settlementType }) => settlementType === SettlementType.SOLD,
+    const soldTableRows = this.#generateSettlementTableRows(
+      booksWithBuyPrice,
+      SettlementType.SOLD,
     );
-    const totalSettledAmount = sumBy(soldBooks, "buyPrice").toFixed(2);
+    const reimbursedTableRows = this.#generateSettlementTableRows(
+      booksWithBuyPrice,
+      SettlementType.REIMBURSED,
+    );
+
+    const soldOrReimbursedBooks = booksWithBuyPrice.filter(
+      ({ settlementType }) =>
+        settlementType === SettlementType.SOLD ||
+        settlementType === SettlementType.REIMBURSED,
+    );
+    const totalSettledAmount = sumBy(soldOrReimbursedBooks, "buyPrice").toFixed(
+      2,
+    );
 
     const headerTitle = settlementTemplate.schemas[0].find(
       ({ name }) => name === "headerTitle",
@@ -426,6 +444,7 @@ export class ReceiptService {
           soldTable: soldTableRows,
           returnedTable: returnedTableRows,
           donatedTable: donatedTableRows,
+          reimbursedTable: reimbursedTableRows,
           totalSettledAmount,
         },
       ],

@@ -382,10 +382,101 @@
       },
       {
         "type": "text",
-        "content": "Il totale ricevuto è: {totalSettledAmount} €",
+        "content": "Libri rimborsati",
         "position": {
           "x": 10,
           "y": 160
+        },
+        "width": 280,
+        "height": 7,
+        "rotate": 0,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "fontSize": 14,
+        "lineHeight": 1,
+        "characterSpacing": 0,
+        "fontColor": "#000000",
+        "backgroundColor": "",
+        "opacity": 1,
+        "readOnly": true,
+        "fontName": "Roboto",
+        "name": "reimbursedText",
+        "required": false,
+        "overflow": "visible"
+      },
+      {
+        "type": "table",
+        "position": {
+          "x": 10,
+          "y": 168
+        },
+        "width": 280,
+        "height": 27.640000000000004,
+        "content": "[[\"9788820372262\",\"TECNICHE DI ORGANIZZAZIONE E GESTIONE DEI PROCESSI PRODUTTIVI ND\",\"ORGANIZ. GESTIONE PRODUZIONE INDUSTRIALE\",\"26.00\",\"0002/001\"],[\"*\",\"QUOTA ISCRIZIONE MERCATINO\",\"*\",\"0.00\",\"0000/000\"]]",
+        "showHead": true,
+        "head": ["ISBN", "Titolo", "Materia", "Valore", "Codice magazzino"],
+        "headWidthPercentages": [12, 50, 20, 8, 10],
+        "tableStyles": {
+          "borderWidth": 0,
+          "borderColor": ""
+        },
+        "headStyles": {
+          "fontName": "NotoSerifJP-Regular",
+          "fontSize": 10,
+          "characterSpacing": 0,
+          "alignment": "left",
+          "verticalAlignment": "middle",
+          "lineHeight": 1,
+          "fontColor": "#000000",
+          "borderColor": "",
+          "backgroundColor": "",
+          "borderWidth": {
+            "top": 0.5,
+            "right": 0.5,
+            "bottom": 0.5,
+            "left": 0.5
+          },
+          "padding": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          }
+        },
+        "bodyStyles": {
+          "fontName": "NotoSerifJP-Regular",
+          "fontSize": 10,
+          "characterSpacing": 0,
+          "alignment": "left",
+          "verticalAlignment": "middle",
+          "lineHeight": 1,
+          "fontColor": "#000000",
+          "borderColor": "",
+          "backgroundColor": "",
+          "alternateBackgroundColor": "",
+          "borderWidth": {
+            "top": 1,
+            "right": 1,
+            "bottom": 1,
+            "left": 1
+          },
+          "padding": {
+            "top": 2,
+            "right": 1,
+            "bottom": 2,
+            "left": 1
+          }
+        },
+        "columnStyles": {},
+        "readOnly": false,
+        "name": "reimbursedTable"
+      },
+      {
+        "type": "text",
+        "content": "Il totale ricevuto è: {totalSettledAmount} €",
+        "position": {
+          "x": 10,
+          "y": 200
         },
         "width": 280,
         "height": 7,
