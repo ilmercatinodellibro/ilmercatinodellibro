@@ -381,13 +381,13 @@ import {
   BookCopyDetailsFragment,
   GetSoldBookCopiesDocument,
   ProblemDetailsFragment,
-  useDonateBookCopyMutation,
+  useDonateBookCopiesMutation,
   useGetBookCopiesInStockQuery,
   useGetReturnedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
-  useReimburseBookCopyMutation,
+  useReimburseBookCopiesMutation,
   useReportProblemMutation,
-  useReturnBookCopyMutation,
+  useReturnBookCopiesMutation,
 } from "src/services/book-copy.graphql";
 import { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -657,19 +657,15 @@ function removeBookCopiesAfterAction(bookCopies: BookCopyDetailsFragment[]) {
   }
 }
 
-const { returnBookCopy } = useReturnBookCopyMutation();
+const { returnBookCopies } = useReturnBookCopiesMutation();
 async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
   try {
-    await Promise.all(
-      bookCopies.map(({ id: bookCopyId }) =>
-        returnBookCopy({
-          input: {
-            bookCopyId,
-            retailLocationId: selectedLocation.value.id,
-          },
-        }),
-      ),
-    );
+    await returnBookCopies({
+      input: {
+        bookCopyIds: bookCopies.map(({ id }) => id),
+        retailLocationId: selectedLocation.value.id,
+      },
+    });
 
     await Promise.all([
       refetchBookCopiesInStock(),
@@ -683,28 +679,7 @@ async function returnBooks(bookCopies: BookCopyDetailsFragment[]) {
   }
 }
 
-async function donateBookCopies(bookCopies: BookCopyDetailsFragment[]) {
-  try {
-    await Promise.all(
-      bookCopies.map(({ id: bookCopyId }) =>
-        donateBookCopy({
-          input: {
-            bookCopyId,
-            retailLocationId: selectedLocation.value.id,
-          },
-        }),
-      ),
-    );
-    await refetchBookCopiesInStock();
-    removeBookCopiesAfterAction(bookCopies);
-  } catch {
-    notifyError(
-      t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Donated`),
-    );
-  }
-}
-
-const { donateBookCopy } = useDonateBookCopyMutation();
+const { donateBookCopies } = useDonateBookCopiesMutation();
 function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
   Dialog.create({
     title: t(
@@ -722,11 +697,24 @@ function donateBooks(bookCopies: BookCopyDetailsFragment[]) {
     cancel: t("common.cancel"),
     persistent: true,
   }).onOk(async () => {
-    await donateBookCopies(bookCopies);
+    try {
+      await donateBookCopies({
+        input: {
+          bookCopyIds: bookCopies.map(({ id }) => id),
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
+      await refetchBookCopiesInStock();
+      removeBookCopiesAfterAction(bookCopies);
+    } catch {
+      notifyError(
+        t(`bookErrors.not${bookCopies.length > 1 ? "All" : ""}Donated`),
+      );
+    }
   });
 }
 
-const { reimburseBookCopy } = useReimburseBookCopyMutation();
+const { reimburseBookCopies } = useReimburseBookCopiesMutation();
 function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
   Dialog.create({
     title: t(
@@ -745,16 +733,12 @@ function reimburseBooks(bookCopies: BookCopyDetailsFragment[]) {
     persistent: true,
   }).onOk(async () => {
     try {
-      await Promise.all(
-        bookCopies.map(({ id: bookCopyId }) =>
-          reimburseBookCopy({
-            input: {
-              bookCopyId,
-              retailLocationId: selectedLocation.value.id,
-            },
-          }),
-        ),
-      );
+      await reimburseBookCopies({
+        input: {
+          bookCopyIds: bookCopies.map(({ id }) => id),
+          retailLocationId: selectedLocation.value.id,
+        },
+      });
       await refetchBookCopiesInStock();
       removeBookCopiesAfterAction(bookCopies);
     } catch {

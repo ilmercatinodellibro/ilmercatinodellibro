@@ -24,10 +24,10 @@ import {
 import { AuthService } from "src/modules/auth/auth.service";
 import {
   BookCopyCreateInput,
-  DonateBookCopyInput,
+  DonateBookCopiesInput,
   RefundBookCopyInput,
-  ReimburseBookCopyInput,
-  ReturnBookCopyInput,
+  ReimburseBookCopiesInput,
+  ReturnBookCopiesInput,
 } from "src/modules/book-copy/book-copy.input";
 import { ReceiptService } from "src/modules/receipt/receipt.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
@@ -539,10 +539,10 @@ export class BookCopyResolver {
   @Mutation(() => [BookCopy])
   async createBookCopies(
     @Input() { bookIds, ownerId, retailLocationId }: BookCopyCreateInput,
-    @CurrentUser() { id: userId }: User,
+    @CurrentUser("id") operatorId: string,
   ) {
     await this.authService.assertMembership({
-      userId,
+      userId: operatorId,
       retailLocationId,
       message:
         "You don't have the necessary permissions to create a new book for this retail location.",
@@ -577,9 +577,9 @@ export class BookCopyResolver {
         data: booksCodes.map((generatedCode, index) => ({
           bookId: bookIds[index],
           code: generatedCode,
-          createdById: userId,
+          createdById: operatorId,
           ownerId,
-          updatedById: userId,
+          updatedById: operatorId,
         })),
       });
 
@@ -603,7 +603,7 @@ export class BookCopyResolver {
         type: ReceiptType.WITHDRAWAL,
         userId: ownerId,
         retailLocationId,
-        createdById: userId,
+        createdById: operatorId,
         data: _bookCopies,
       });
 
@@ -615,49 +615,24 @@ export class BookCopyResolver {
     return bookCopies;
   }
 
-  // Consider checking for donated book copies, as they can technically no longer be reimbursed or returned
-  // Left out for now as donations should only ever occur at the end of the Mercatino's activity period
+  // This hasn't been adapted to be a batch operation for now as it doesn't require generating a receipt
+  // Also, the fact that deals with nested sales entities makes it harder to be converted to a batch operation
   @Mutation(() => BookCopy, {
     description: "Refund the book copy to the buyer",
   })
   async refundBookCopy(
-    @Input() { bookCopyId, retailLocationId }: RefundBookCopyInput,
-    @CurrentUser() { id: userId }: User,
+    @Input()
+    { bookCopyId, retailLocationId }: RefundBookCopyInput,
+    @CurrentUser("id") operatorId: string,
   ) {
-    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
-      where: {
-        id: bookCopyId,
-      },
-      include: {
-        book: {
-          select: {
-            retailLocationId: true,
-          },
-        },
-        sales: {
-          where: {
-            refundedAt: null,
-          },
-        },
-      },
-    });
+    const { bookCopies } = await this.#assertBookCopiesCanBeOperatedOn(
+      [bookCopyId],
+      operatorId,
+      retailLocationId,
+      "copiesMustBeSold",
+    );
 
-    await this.authService.assertMembership({
-      userId,
-      retailLocationId: bookCopy.book.retailLocationId,
-      message:
-        "You don't have the necessary permissions to refund this book copy.",
-    });
-
-    if (bookCopy.sales.length === 0) {
-      throw new ConflictException("The book copy has not been sold.");
-    }
-
-    if (bookCopy.sales.length > 1) {
-      throw new InternalServerErrorException(
-        "There are multiple active sales for the same book copy that are not refunded. This should not have happened.",
-      );
-    }
+    const bookCopy = bookCopies[0];
 
     return this.prisma.$transaction(async (prisma) => {
       const codes = await this.bookService.calculateBookCodes(
@@ -677,7 +652,7 @@ export class BookCopyResolver {
           // Original code must be updated only the first time a book is returned, so when there is no original code set.
           ...(bookCopy.originalCode ? {} : { originalCode: bookCopy.code }),
           updatedAt: new Date(),
-          updatedById: userId,
+          updatedById: operatorId,
           sales: {
             update: {
               where: {
@@ -685,7 +660,7 @@ export class BookCopyResolver {
               },
               data: {
                 refundedAt: new Date(),
-                refundedById: userId,
+                refundedById: operatorId,
               },
             },
           },
@@ -694,137 +669,149 @@ export class BookCopyResolver {
     });
   }
 
-  @Mutation(() => BookCopy, {
-    description: "Return the book copy to the owner",
+  @Mutation(() => [BookCopy], {
+    description: "Return the book copies to the owner",
   })
-  async returnBookCopy(
-    @Input() { bookCopyId }: ReturnBookCopyInput,
-    @CurrentUser() { id: userId }: User,
+  async returnBookCopies(
+    @Input() { bookCopyIds, retailLocationId }: ReturnBookCopiesInput,
+    @CurrentUser("id") operatorId: string,
   ) {
-    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
-      where: {
-        id: bookCopyId,
-      },
-      include: {
-        book: {
-          select: {
-            retailLocationId: true,
+    const { ownerId } = await this.#assertBookCopiesCanBeOperatedOn(
+      bookCopyIds,
+      operatorId,
+      retailLocationId,
+      "copiesMustNotBeSold",
+    );
+
+    return await this.prisma.$transaction(async (prisma) => {
+      await prisma.bookCopy.updateMany({
+        where: {
+          id: {
+            in: bookCopyIds,
           },
         },
-        sales: {
-          where: {
-            refundedAt: null,
-          },
+        data: {
+          updatedAt: new Date(),
+          updatedById: operatorId,
+          returnedAt: new Date(),
+          returnedById: operatorId,
         },
-      },
-    });
+      });
 
-    await this.authService.assertMembership({
-      userId,
-      retailLocationId: bookCopy.book.retailLocationId,
-      message:
-        "You don't have the necessary permissions to return this book copy.",
-    });
-
-    if (bookCopy.sales.length > 0) {
-      throw new ConflictException(
-        "The book copy has been sold. It must be refunded to the buyer first, before it can be returned to the owner.",
+      return this.#refreshBookCopiesAndSendReceipt(
+        prisma,
+        bookCopyIds,
+        operatorId,
+        ownerId,
+        retailLocationId,
       );
-    }
-
-    if (bookCopy.returnedAt) {
-      throw new ConflictException("The book copy has already been returned.");
-    }
-
-    if (bookCopy.reimbursedAt) {
-      throw new ConflictException("The book copy has already been reimbursed.");
-    }
-
-    return this.prisma.bookCopy.update({
-      where: {
-        id: bookCopyId,
-      },
-      data: {
-        updatedAt: new Date(),
-        updatedById: userId,
-        returnedAt: new Date(),
-        returnedById: userId,
-      },
     });
   }
 
-  @Mutation(() => BookCopy, {
+  @Mutation(() => [BookCopy], {
     description:
-      "Reimburse the owner of the book copy that got damaged/lost/etc. under Mercatino's responsibility.",
+      "Reimburse the owner of the book copies that got damaged/lost/etc. under Mercatino's responsibility.",
   })
-  async reimburseBookCopy(
-    @Input() { bookCopyId }: ReimburseBookCopyInput,
-    @CurrentUser() { id: userId }: User,
+  async reimburseBookCopies(
+    @Input() { bookCopyIds, retailLocationId }: ReimburseBookCopiesInput,
+    @CurrentUser("id") operatorId: string,
   ) {
-    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
-      where: {
-        id: bookCopyId,
-      },
-      include: {
-        book: {
-          select: {
-            retailLocationId: true,
+    const { ownerId } = await this.#assertBookCopiesCanBeOperatedOn(
+      bookCopyIds,
+      operatorId,
+      retailLocationId,
+      "copiesMustNotBeSold",
+    );
+
+    return await this.prisma.$transaction(async (prisma) => {
+      await prisma.bookCopy.updateMany({
+        where: {
+          id: {
+            in: bookCopyIds,
           },
         },
-        sales: {
-          where: {
-            refundedAt: null,
-          },
+        data: {
+          updatedAt: new Date(),
+          updatedById: operatorId,
+          reimbursedAt: new Date(),
+          reimbursedById: operatorId,
         },
-      },
-    });
+      });
 
-    await this.authService.assertMembership({
-      userId,
-      retailLocationId: bookCopy.book.retailLocationId,
-      message:
-        "You don't have the necessary permissions to reimburse this book copy.",
-    });
-
-    if (bookCopy.sales.length > 0) {
-      throw new ConflictException(
-        "The book copy has been sold. It must be refunded to the buyer first, before it can be reimbursed to the owner.",
+      return this.#refreshBookCopiesAndSendReceipt(
+        prisma,
+        bookCopyIds,
+        operatorId,
+        ownerId,
+        retailLocationId,
       );
-    }
-
-    if (bookCopy.reimbursedAt) {
-      throw new ConflictException("The book copy has already been reimbursed.");
-    }
-
-    if (bookCopy.returnedAt) {
-      throw new ConflictException("The book copy has already been returned.");
-    }
-
-    return this.prisma.bookCopy.update({
-      where: {
-        id: bookCopyId,
-      },
-      data: {
-        updatedAt: new Date(),
-        updatedById: userId,
-        reimbursedAt: new Date(),
-        reimbursedById: userId,
-      },
     });
   }
 
-  @Mutation(() => BookCopy, {
-    description: "Donate the book copy to the Mercatino.",
+  @Mutation(() => [BookCopy], {
+    description: "Donate the book copies to the Mercatino.",
   })
-  async donateBookCopy(
-    @Input() { bookCopyId }: DonateBookCopyInput,
-    @CurrentUser() { id: userId }: User,
+  async donateBookCopies(
+    @Input() { bookCopyIds, retailLocationId }: DonateBookCopiesInput,
+    @CurrentUser("id") operatorId: string,
   ) {
-    const bookCopy = await this.prisma.bookCopy.findUniqueOrThrow({
+    const { ownerId } = await this.#assertBookCopiesCanBeOperatedOn(
+      bookCopyIds,
+      operatorId,
+      retailLocationId,
+      "copiesMustNotBeSold",
+    );
+
+    return await this.prisma.$transaction(async (prisma) => {
+      await prisma.bookCopy.updateMany({
+        where: {
+          id: {
+            in: bookCopyIds,
+          },
+        },
+        data: {
+          updatedAt: new Date(),
+          updatedById: operatorId,
+          donatedAt: new Date(),
+          donatedById: operatorId,
+        },
+      });
+
+      return this.#refreshBookCopiesAndSendReceipt(
+        prisma,
+        bookCopyIds,
+        operatorId,
+        ownerId,
+        retailLocationId,
+      );
+    });
+  }
+
+  async #assertBookCopiesCanBeOperatedOn(
+    bookCopyIds: string[],
+    operatorId: string,
+    retailLocationId: string,
+    salesStatus: "copiesMustBeSold" | "copiesMustNotBeSold",
+  ) {
+    await this.authService.assertMembership({
+      userId: operatorId,
+      retailLocationId,
+      message:
+        "You don't have the necessary permissions operate on book copies of the given retail location.",
+    });
+
+    const bookCopies = await this.prisma.bookCopy.findMany({
       where: {
-        id: bookCopyId,
+        id: {
+          in: bookCopyIds,
+        },
       },
       include: {
+        owner: {
+          select: {
+            id: true,
+          },
+        },
         book: {
           select: {
             retailLocationId: true,
@@ -838,41 +825,113 @@ export class BookCopyResolver {
       },
     });
 
-    await this.authService.assertMembership({
-      userId,
-      retailLocationId: bookCopy.book.retailLocationId,
-      message:
-        "You don't have the necessary permissions to donate this book copy.",
-    });
-
-    if (bookCopy.sales.length > 0) {
-      throw new ConflictException(
-        "The book copy has been sold. It must be refunded to the buyer first, before it can be reimbursed to the owner.",
+    if (bookCopies.length === 0) {
+      throw new InternalServerErrorException(
+        "No book copies has been found for the given IDs. This should have not happened.",
       );
     }
 
-    if (bookCopy.returnedAt) {
-      throw new ConflictException("The book copy has already been returned.");
+    if (
+      bookCopies.some(
+        (bookCopy) => bookCopy.book.retailLocationId !== retailLocationId,
+      )
+    ) {
+      throw new InternalServerErrorException(
+        "The book copies belong to different retail locations. Batch operations aren't permitted for different retail locations at the same time.",
+      );
     }
 
-    if (bookCopy.reimbursedAt) {
-      throw new ConflictException("The book copy has already been reimbursed.");
+    const ownerId = bookCopies[0].owner.id;
+
+    if (bookCopies.some((bookCopy) => bookCopy.owner.id !== ownerId)) {
+      throw new InternalServerErrorException(
+        "The book copies have different owners. Batch operations aren't permitted for different owners at the same time.",
+      );
     }
 
-    if (bookCopy.donatedAt) {
-      throw new ConflictException("The book copy has already been donated.");
+    for (const bookCopy of bookCopies) {
+      switch (salesStatus) {
+        case "copiesMustBeSold": {
+          if (bookCopy.sales.length === 0) {
+            throw new ConflictException(
+              "The book copy has not been sold. It must be sold to a buyer before being operated on.",
+            );
+          }
+
+          if (bookCopy.sales.length > 1) {
+            throw new InternalServerErrorException(
+              "There are multiple active sales for the same book copy that are not refunded. This should not have happened.",
+            );
+          }
+          break;
+        }
+        case "copiesMustNotBeSold": {
+          if (bookCopy.sales.length > 0) {
+            throw new ConflictException(
+              "The book copy has been sold. It must be refunded to the buyer before being operated on.",
+            );
+          }
+          break;
+        }
+      }
+
+      if (bookCopy.returnedAt) {
+        throw new ConflictException(
+          "The book copy has already been returned to its owner.",
+        );
+      }
+
+      if (bookCopy.reimbursedAt) {
+        throw new ConflictException(
+          "The book copy has already been reimbursed to its owner.",
+        );
+      }
+
+      if (bookCopy.donatedAt) {
+        throw new ConflictException(
+          "The book copy has already been donated to Mercatino by its owner.",
+        );
+      }
     }
 
-    return this.prisma.bookCopy.update({
+    return { bookCopies, ownerId };
+  }
+
+  async #refreshBookCopiesAndSendReceipt(
+    prisma: Prisma.TransactionClient,
+    bookCopyIds: string[],
+    operatorId: string,
+    ownerId: string,
+    retailLocationId: string,
+  ) {
+    const newlyUpdatedBookCopies = await prisma.bookCopy.findMany({
       where: {
-        id: bookCopy.id,
+        id: {
+          in: bookCopyIds,
+        },
       },
-      data: {
-        updatedAt: new Date(),
-        updatedById: userId,
-        donatedAt: new Date(),
-        donatedById: userId,
+      include: {
+        book: true,
+        sales: true,
+      },
+      // Order copies by code to make the receipt coherent with the settlement GUI
+      orderBy: {
+        code: "asc",
       },
     });
+
+    await this.receiptService.createReceipt(prisma, {
+      data: newlyUpdatedBookCopies,
+      createdById: operatorId,
+      retailLocationId,
+      type: ReceiptType.SETTLEMENT,
+      userId: ownerId,
+    });
+
+    return newlyUpdatedBookCopies.map(
+      // Removes relations which are only needed for the receipt generation, but aren't needed for the return value of this mutation
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
+      ({ book, sales, ...bookCopyToReturn }) => bookCopyToReturn,
+    );
   }
 }

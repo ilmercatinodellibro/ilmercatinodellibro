@@ -17,19 +17,19 @@ export class RefundBookCopyInput extends LocationBoundInput {
 }
 
 @InputType()
-export class ReturnBookCopyInput extends LocationBoundInput {
-  @Field(() => String)
-  bookCopyId!: string;
+export class ReturnBookCopiesInput extends LocationBoundInput {
+  @Field(() => [String], { nullable: false })
+  bookCopyIds!: string[];
 }
 
 @InputType()
-export class ReimburseBookCopyInput extends LocationBoundInput {
-  @Field(() => String)
-  bookCopyId!: string;
+export class ReimburseBookCopiesInput extends LocationBoundInput {
+  @Field(() => [String], { nullable: false })
+  bookCopyIds!: string[];
 }
 
 @InputType()
-export class DonateBookCopyInput extends LocationBoundInput {
-  @Field(() => String)
-  bookCopyId!: string;
+export class DonateBookCopiesInput extends LocationBoundInput {
+  @Field(() => [String], { nullable: false })
+  bookCopyIds!: string[];
 }

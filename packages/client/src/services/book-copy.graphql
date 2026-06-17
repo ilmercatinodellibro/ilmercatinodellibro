@@ -136,26 +136,26 @@ mutation resolveProblem($input: ProblemResolveInput!) {
   }
 }
 
-mutation returnBookCopy($input: ReturnBookCopyInput!) {
-  returnBookCopy(input: $input) {
-    ...BookCopySummary
-  }
-}
-
-mutation reimburseBookCopy($input: ReimburseBookCopyInput!) {
-  reimburseBookCopy(input: $input) {
-    ...BookCopySummary
-  }
-}
-
 mutation refundBookCopy($input: RefundBookCopyInput!) {
   refundBookCopy(input: $input) {
     ...BookCopySummary
   }
 }
 
-mutation donateBookCopy($input: DonateBookCopyInput!) {
-  donateBookCopy(input: $input) {
+mutation returnBookCopies($input: ReturnBookCopiesInput!) {
+  returnBookCopies(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation reimburseBookCopies($input: ReimburseBookCopiesInput!) {
+  reimburseBookCopies(input: $input) {
+    ...BookCopySummary
+  }
+}
+
+mutation donateBookCopies($input: DonateBookCopiesInput!) {
+  donateBookCopies(input: $input) {
     ...BookCopySummary
   }
 }
