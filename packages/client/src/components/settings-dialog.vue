@@ -107,10 +107,9 @@ import {
   allowOnlyIntegerNumbers,
   nonNegativeNumberRule,
 } from "src/helpers/rules";
-import { SettingsUpdate } from "src/models/book";
 import { useAuthService } from "src/services/auth";
 import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
-import { type SettingsDialogProps } from "./settings-dialog";
+import { SettingsUpdate, type SettingsDialogProps } from "./settings-dialog";
 
 const props = defineProps<SettingsDialogProps>();
 
