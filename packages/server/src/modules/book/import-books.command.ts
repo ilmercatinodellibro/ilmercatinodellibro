@@ -228,6 +228,13 @@ export class ImportBooksCommand extends CommandRunner {
     ) as IngestedCsvRow;
   }
 
+  // Some fields contains commas or double quotes, so we need to enclose the field
+  // value and escape them properly for CSV format
+  #toCsvField(value: string | undefined | null): string {
+    const safeValue = (value ?? "").replace(/"/g, '""');
+    return `"${safeValue}"`;
+  }
+
   async #parseCsvBooksContent(
     locationsPrefixes: string[] = ["MO", "RE"],
     booksAlreadyPresent = false,
@@ -313,12 +320,14 @@ export class ImportBooksCommand extends CommandRunner {
           : ` - ${rowSubtitle}`;
       return (
         [
-          row[6], // Be aware that there may be some books which do not have a proper ISBN code. This is because those books are older than when the ISBN system was first introduced. Example: Divina Commedia.
-          `"${row[5]}"`, // [1] - Mandatory: there are some lines that needs this on order to escape the comma inside titles
-          `"${row[7]}"`, // [1]
-          `"${row[8] + subtitle}"`, // [1]
-          `"${row[12].replace(",", ".")}"`, // Needs the escape because the italian CSV uses commas instead of periods. And anyway the commas needs to be replaced bt periods to avoid SQL throwing an error.
-          row[11],
+          this.#toCsvField(row[6]), // Be aware that there may be some books which do not have a proper ISBN code. This is because those books are older than when the ISBN system was first introduced. Example: Divina Commedia.
+          this.#toCsvField(row[5]),
+          this.#toCsvField(row[7]),
+          this.#toCsvField(row[8] + subtitle),
+          // We must replace commas because the italian CSV uses commas instead of periods for decimal points.
+          // Commas need to be replaced with periods anyway to avoid SQL throwing an error.
+          this.#toCsvField(row[12].replace(",", ".")),
+          this.#toCsvField(row[11]),
           row[0].substring(0, 2).toLocaleLowerCase(),
         ].join(",") + "\n"
       );
