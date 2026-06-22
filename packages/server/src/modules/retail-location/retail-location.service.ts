@@ -99,6 +99,15 @@ export class RetailLocationService {
 
   async cleanupLocation(locationId: string) {
     await this.prisma.$transaction([
+      // Notifications don't cascade when deleting related events,
+      // we must delete them beforehand
+      this.prisma.notification.deleteMany({
+        where: {
+          event: {
+            locationId,
+          },
+        },
+      }),
       this.prisma.retailLocation.update({
         where: {
           id: locationId,
@@ -120,6 +129,9 @@ export class RetailLocationService {
               // - requestQueue
             },
           },
+          events: {
+            deleteMany: {},
+          },
         },
       }),
       this.prisma.school.deleteMany({
@@ -128,6 +140,19 @@ export class RetailLocationService {
             equals: locationId,
             mode: "insensitive",
           },
+        },
+      }),
+      // Users aren't associated to a location, but we can clean up unverified users and soft deleted ones
+      this.prisma.user.deleteMany({
+        where: {
+          OR: [
+            {
+              deletedAt: {
+                not: null,
+              },
+            },
+            { emailVerified: false },
+          ],
         },
       }),
     ]);
