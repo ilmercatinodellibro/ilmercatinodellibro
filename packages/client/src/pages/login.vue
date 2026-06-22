@@ -66,7 +66,12 @@
 
       <span
         class="privacy-links"
-        v-html="t('auth.privacyAndToSLogin', [selectedLocation.id])"
+        v-html="
+          t('auth.privacyAndToSLogin', {
+            retailLocationId: selectedLocation.id,
+            locale,
+          })
+        "
       />
 
       <template v-if="SOCIAL_LOGIN_ENABLED">
@@ -131,7 +136,7 @@ const props = defineProps<{
   emailVerified?: boolean;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
 

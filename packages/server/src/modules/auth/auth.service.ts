@@ -125,6 +125,7 @@ export class AuthService {
           url,
         },
         template: "invite-user",
+        retailLocationId: locationId,
         locale,
       });
     } catch {
@@ -145,6 +146,7 @@ export class AuthService {
           url,
         },
         template: "welcome",
+        retailLocationId: locationId,
         locale: user.locale,
       });
     } catch {
@@ -168,6 +170,7 @@ export class AuthService {
           url,
         },
         template: "forgot-password",
+        retailLocationId: locationId,
         locale: user.locale,
       });
     } catch {

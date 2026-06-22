@@ -141,6 +141,7 @@ export class ReceiptService {
             receiptPdf ?? (await readFile(this.getReceiptPath(receipt).file)),
         },
       ],
+      retailLocationId: receipt.retailLocationId,
       locale: user.locale,
     });
   }

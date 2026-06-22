@@ -15,5 +15,8 @@ export class FeedbackRequestPayload {
   message!: string;
 
   @Field()
+  retailLocationId!: string;
+
+  @Field()
   locale!: string;
 }

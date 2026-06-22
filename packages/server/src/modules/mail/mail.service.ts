@@ -43,6 +43,7 @@ export type SendMailOptions = Omit<ISendMailOptions, AddressableField> & {
   inReplyTo?: Address;
   from?: Address;
   sender?: Address;
+  retailLocationId: string;
   // TODO: make this type safe
   locale?: string | null;
 };
@@ -74,13 +75,17 @@ export class MailService {
 
       const i18nMailDetails = this.applyInternationalization(mailDetails);
 
+      // Validating actual existence of these files is hard because we're not dealing with local paths but with URLs
+      // Paths change in development and production environments, and even in development they can change if we run different scripts
+      const privacyPolicyUrl = `${this.rootConfig.clientUrl}/tos-privacy/privacy-policy-${i18nMailDetails.locale}.pdf`;
+      const tosUrl = `${this.rootConfig.clientUrl}/tos-privacy/tos-${i18nMailDetails.retailLocationId}-${i18nMailDetails.locale}.pdf`;
+
       return (await this.mailerService.sendMail({
         ...(i18nMailDetails as ISendMailOptions),
         ...addressOverrides,
         context: {
-          privacyPolicyUrl: `${this.rootConfig.clientUrl}/tos-privacy/privacy-policy.pdf`,
-          // TODO: right now we don't have unified TOS for Modena and Reggio, and we don't have them in english version
-          tosUrl: `${this.rootConfig.clientUrl}/tos-privacy/tos-${i18nMailDetails.locale}.pdf`,
+          privacyPolicyUrl,
+          tosUrl,
           ...i18nMailDetails.context,
         },
       })) as SentMessageInfo;

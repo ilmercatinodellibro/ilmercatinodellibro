@@ -81,6 +81,7 @@ export class SendEmailNotificationListener {
           reserveUrl,
         },
         template: "event-trigger-notification",
+        retailLocationId: location.id,
         locale,
       });
     } catch {

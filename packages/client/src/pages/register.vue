@@ -76,7 +76,12 @@
 
       <span
         class="privacy-links text-center"
-        v-html="t('auth.privacyAndToSRegister', [selectedLocation.id])"
+        v-html="
+          t('auth.privacyAndToSRegister', {
+            retailLocationId: selectedLocation.id,
+            locale,
+          })
+        "
       />
 
       <template v-if="SOCIAL_LOGIN_ENABLED">

@@ -19,7 +19,14 @@ export class FeedbackResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async feedback(
     @Input()
-    { firstname, lastname, email, message, locale }: FeedbackRequestPayload,
+    {
+      firstname,
+      lastname,
+      email,
+      message,
+      retailLocationId,
+      locale,
+    }: FeedbackRequestPayload,
   ) {
     const fullName = `${firstname} ${lastname}`;
     try {
@@ -35,6 +42,7 @@ export class FeedbackResolver {
           message,
         },
         template: "feedback-request",
+        retailLocationId,
         locale,
       });
     } catch {

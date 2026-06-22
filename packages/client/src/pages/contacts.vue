@@ -165,6 +165,7 @@ async function submitFeedback() {
       input: {
         ...contactData,
         message: message.value,
+        retailLocationId: selectedLocation.value.id,
         locale: locale.value,
       },
     });

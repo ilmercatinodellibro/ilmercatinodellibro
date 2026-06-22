@@ -61,7 +61,7 @@ export default {
     deleteAccount: "Delete account",
   },
   privacyAndToSRegister:
-    "By clicking Register or registering through a third party you accept the Mercatino's <a class='text-accent' href='/tos-privacy/tos-{0}.pdf'>Terms of Service</a> and <a class='text-accent' href='/tos-privacy/privacy-policy.pdf'>Privacy Policy</a>.",
+    "By clicking Register or registering through a third party you accept the Mercatino's <a class='text-accent' href='/tos-privacy/tos-{retailLocationId}-{locale}.pdf' target='_blank'>Terms of Service</a> and <a class='text-accent' href='/tos-privacy/privacy-policy-{locale}.pdf' target='_blank'>Privacy Policy</a>.",
   privacyAndToSLogin:
-    "By clicking Login or logging in through a third party you accept the Mercatino's <a class='text-accent' href='/tos-privacy/tos-{0}.pdf'>Terms of Service</a> and <a class='text-accent' href='/tos-privacy/privacy-policy.pdf'>Privacy Policy</a>.",
+    "By clicking Login or logging in through a third party you accept the Mercatino's <a class='text-accent' href='/tos-privacy/tos-{retailLocationId}-{locale}.pdf' target='_blank'>Terms of Service</a> and <a class='text-accent' href='/tos-privacy/privacy-policy-{locale}.pdf' target='_blank'>Privacy Policy</a>.",
 };
