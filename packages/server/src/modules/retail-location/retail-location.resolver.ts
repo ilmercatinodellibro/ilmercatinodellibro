@@ -352,10 +352,28 @@ export class RetailLocationResolver {
       },
     });
 
+    const getTotalReservationsCount = this.prisma.reservation.count({
+      where: {
+        ...retailLocationFilter,
+      },
+    });
+
     const getActiveReservationsCount = this.prisma.reservation.count({
       where: {
         ...retailLocationFilter,
+        saleId: {
+          not: null,
+        },
         deletedAt: null,
+      },
+    });
+
+    const getReservationsWhichLedToASaleCount = this.prisma.reservation.count({
+      where: {
+        ...retailLocationFilter,
+        sale: {
+          refundedAt: null,
+        },
       },
     });
 
@@ -581,6 +599,8 @@ export class RetailLocationResolver {
       activeSalesCount,
       refundedSalesCount,
       activeReservationsCount,
+      totalReservationsCount,
+      reservationsWhichLedToASaleCount,
       activeRequestsCount,
       activeUsersCount,
       buyingCustomersCount,
@@ -615,6 +635,8 @@ export class RetailLocationResolver {
       getActiveSalesCount,
       getRefundedSalesCount,
       getActiveReservationsCount,
+      getTotalReservationsCount,
+      getReservationsWhichLedToASaleCount,
       getActiveRequestsCount,
       getActiveUsersCount,
       getBuyingCustomersCount,
@@ -682,6 +704,8 @@ export class RetailLocationResolver {
       activeSalesCount,
       refundedSalesCount,
       activeReservationsCount,
+      totalReservationsCount,
+      reservationsWhichLedToASaleCount,
       activeRequestsCount,
       activeUsersCount,
       settleableAmount,
