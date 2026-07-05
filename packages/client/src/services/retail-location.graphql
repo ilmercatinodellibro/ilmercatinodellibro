@@ -68,6 +68,8 @@ fragment Statistics on StatisticsQueryResult {
   activeSalesCount
   refundedSalesCount
   activeReservationsCount
+  totalReservationsCount
+  reservationsWhichLedToASaleCount
   activeRequestsCount
   activeUsersCount
   settleableAmount

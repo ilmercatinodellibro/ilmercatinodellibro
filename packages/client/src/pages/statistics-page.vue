@@ -160,8 +160,17 @@ const statistics = computed<StatisticsEntry[]>(() => [
     value: retailLocationStatistics.value?.activeRequestsCount.toString(),
   },
   {
+    label: t("retailLocation.statistics.totalReservations"),
+    value: retailLocationStatistics.value?.totalReservationsCount.toString(),
+  },
+  {
     label: t("retailLocation.statistics.activeReservations"),
     value: retailLocationStatistics.value?.activeReservationsCount.toString(),
+  },
+  {
+    label: t("retailLocation.statistics.reservationsWhichLedToASale"),
+    value:
+      retailLocationStatistics.value?.reservationsWhichLedToASaleCount.toString(),
   },
   {
     label: t("retailLocation.statistics.sales"),
