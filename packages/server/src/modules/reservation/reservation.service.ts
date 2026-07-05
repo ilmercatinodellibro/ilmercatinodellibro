@@ -29,6 +29,7 @@ export class ReservationService {
 
     const reservationsToDelete = await this.prisma.reservation.findMany({
       where: {
+        saleId: null,
         expiresAt: {
           lte: now,
         },
