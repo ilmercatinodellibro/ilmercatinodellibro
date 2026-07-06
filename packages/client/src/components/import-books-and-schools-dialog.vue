@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-card
       :title="t('general.settings.importBooksAndSchools.title')"
       class="width-700"
