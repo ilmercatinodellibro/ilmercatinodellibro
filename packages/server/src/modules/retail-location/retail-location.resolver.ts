@@ -361,9 +361,7 @@ export class RetailLocationResolver {
     const getActiveReservationsCount = this.prisma.reservation.count({
       where: {
         ...retailLocationFilter,
-        saleId: {
-          not: null,
-        },
+        saleId: null,
         deletedAt: null,
       },
     });
@@ -373,6 +371,43 @@ export class RetailLocationResolver {
         ...retailLocationFilter,
         sale: {
           refundedAt: null,
+        },
+      },
+    });
+
+    const getReservationsWhichLedToARefundedSaleCount =
+      this.prisma.reservation.count({
+        where: {
+          ...retailLocationFilter,
+          sale: {
+            refundedAt: {
+              not: null,
+            },
+          },
+        },
+      });
+
+    // As an additional safe measure, we could also verify that expiredAt is lower than deletedAt,
+    // but Prisma ORM doesn't support this kind of comparison between fields.
+    // What we know is that expired reservations are deleted without setting the deletedBy field.
+    const getExpiredReservationsCount = this.prisma.reservation.count({
+      where: {
+        ...retailLocationFilter,
+        deletedAt: {
+          not: null,
+        },
+        deletedById: null,
+      },
+    });
+
+    const getReservationsDeletedByUsersCount = this.prisma.reservation.count({
+      where: {
+        ...retailLocationFilter,
+        deletedAt: {
+          not: null,
+        },
+        deletedById: {
+          not: null,
         },
       },
     });
@@ -598,9 +633,12 @@ export class RetailLocationResolver {
       salesCount,
       activeSalesCount,
       refundedSalesCount,
-      activeReservationsCount,
       totalReservationsCount,
+      activeReservationsCount,
       reservationsWhichLedToASaleCount,
+      reservationsWhichLedToARefundedSaleCount,
+      expiredReservationsCount,
+      reservationsDeletedByUsersCount,
       activeRequestsCount,
       activeUsersCount,
       buyingCustomersCount,
@@ -634,9 +672,12 @@ export class RetailLocationResolver {
       getSalesCount,
       getActiveSalesCount,
       getRefundedSalesCount,
-      getActiveReservationsCount,
       getTotalReservationsCount,
+      getActiveReservationsCount,
       getReservationsWhichLedToASaleCount,
+      getReservationsWhichLedToARefundedSaleCount,
+      getExpiredReservationsCount,
+      getReservationsDeletedByUsersCount,
       getActiveRequestsCount,
       getActiveUsersCount,
       getBuyingCustomersCount,
@@ -703,9 +744,12 @@ export class RetailLocationResolver {
       salesCount,
       activeSalesCount,
       refundedSalesCount,
-      activeReservationsCount,
       totalReservationsCount,
+      activeReservationsCount,
       reservationsWhichLedToASaleCount,
+      reservationsWhichLedToARefundedSaleCount,
+      expiredReservationsCount,
+      reservationsDeletedByUsersCount,
       activeRequestsCount,
       activeUsersCount,
       settleableAmount,

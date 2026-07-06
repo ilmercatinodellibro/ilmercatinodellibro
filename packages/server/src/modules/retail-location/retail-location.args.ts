@@ -84,17 +84,29 @@ export class StatisticsQueryResult {
   @Field(() => Int)
   refundedSalesCount!: number;
 
+  // Count of total reservations, which includes active reservations, deleted reservations, expired reservations and reservations which led to a sale.
+  @Field(() => Int)
+  totalReservationsCount!: number;
+
   // Count of active reservations, which haven't led to a sale or expired yet.
   @Field(() => Int)
   activeReservationsCount!: number;
 
-  // Count of total reservations, which includes active reservations, expired reservations and reservations which led to a sale.
-  @Field(() => Int)
-  totalReservationsCount!: number;
-
   // Count of reservations which led to a sale and that wasn't refunded.
   @Field(() => Int)
   reservationsWhichLedToASaleCount!: number;
+
+  // Count of reservations which led to a sale, but for which the sale was refunded.
+  @Field(() => Int)
+  reservationsWhichLedToARefundedSaleCount!: number;
+
+  // Count of reservations which has been deleted after expiring.
+  @Field(() => Int)
+  expiredReservationsCount!: number;
+
+  // Count of reservations which has been deleted by a user or an operator.
+  @Field(() => Int)
+  reservationsDeletedByUsersCount!: number;
 
   // Count of active book requests, which haven't been deleted by the user.
   @Field(() => Int)
