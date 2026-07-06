@@ -349,6 +349,7 @@ export class ReceiptService {
       book.title,
       book.subject,
       book.sellPrice.toFixed(2),
+      book.code,
     ]);
 
     const headerTitle = purchaseTemplate.schemas[0].find(

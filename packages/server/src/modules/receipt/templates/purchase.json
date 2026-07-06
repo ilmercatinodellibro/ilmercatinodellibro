@@ -204,8 +204,7 @@
   "basePdf": {
     "width": 300,
     "height": 215,
-    "padding": [5, 10, 5, 10],
-    "staticSchema": []
+    "padding": [5, 10, 5, 10]
   },
   "pdfmeVersion": "6.1.5"
 }
