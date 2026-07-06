@@ -89,6 +89,23 @@ export default {
       "Il download della lista degli utenti inizierà a breve",
     downloadUserListFailed:
       "Non è stato possibile scaricare la lista degli utenti. Contattate il supporto tecnico.",
+    general: "Generali",
+    importBooksAndSchools: {
+      title: "Import libri e scuole",
+      pasteUrlBooksDescription:
+        "Incolla l'URL nel campo qui sotto e clicca il bottone per importare gli elenchi dei libri resi disponibile dal Ministero. Puoi recuperare l'URL per ottenere gli elenchi dei libri da questo link:",
+      booksUrlLabel: "URL CSV Della Lista dei Libri dell'Emilia Romagna",
+      importBooksButton: "Importa gli elenchi dei libri",
+      pasteUrlSchoolsDescription:
+        "Incolla gli URL nei campi qui sotto e clicca il bottone per importare gli elenchi delle scuole resi disponibili dal Ministero. Puoi recuperare gli URL per ottenere gli elenchi delle scuole da questo link:",
+      schoolsImportWarning:
+        "Importante: prima di poter importare gli elenchi delle scuole devi avere già importato l'elenco dei libri usando il campo qui sopra.",
+      schoolsUrlLabel:
+        "URL CSV della Lista Delle Scuole Statali dell'Emilia Romagna",
+      schoolsPrivateUrlLabel:
+        "URL CSV Della Lista Delle Scuole Paritarie dell'Emilia Romagna",
+      importSchoolsButton: "Importa gli elenchi delle scuole",
+    },
   },
   role: "Ruolo",
   rolesAndPermissions: {

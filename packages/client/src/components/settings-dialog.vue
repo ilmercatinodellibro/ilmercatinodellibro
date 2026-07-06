@@ -1,7 +1,7 @@
 <template>
   <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-form-card
-      :title="t('sidebar.settings')"
+      :title="t('general.settings.general')"
       actions-padding
       class="full-width max-width-700"
       size="fullscreen"
