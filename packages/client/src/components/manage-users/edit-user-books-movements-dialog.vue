@@ -217,6 +217,7 @@ const { purchasedBookCopies, loading: purchasedLoading } =
     }),
     () => ({
       enabled: props.type === "purchased",
+      fetchPolicy: "network-only",
     }),
   );
 
