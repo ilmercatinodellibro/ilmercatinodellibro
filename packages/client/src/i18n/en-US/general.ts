@@ -104,6 +104,16 @@ export default {
       schoolsPrivateUrlLabel:
         "CSV URL for the List of Private Schools of Emilia Romagna",
       importSchoolsButton: "Import school lists",
+      importSuccess: "Import successful",
+      importBooksSuccessMessage:
+        "The import process has been completed. There are now {currentDbBooksCount} books in the database.",
+      importError: "Import failed",
+      importBooksErrorMessage:
+        "Something went wrong, the import operation failed. Check that you entered the correct URL.",
+      importSchoolsSuccessMessage:
+        "{schoolCount} schools were imported, for a total of {coursesCount} courses containing a total of {booksOnCoursesCount} books.",
+      importSchoolsErrorMessage:
+        "Something went wrong, the import operation failed. Check that you entered the correct URLs.",
     },
   },
   role: "Role",

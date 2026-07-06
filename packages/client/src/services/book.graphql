@@ -91,3 +91,17 @@ mutation createNewBook($input: BookCreateInput!) {
     ...BookSummary
   }
 }
+
+mutation importBooks($input: ImportBooksInput!) {
+  importBooks(input: $input) {
+    currentDbBooksCount
+  }
+}
+
+mutation importSchools($input: ImportSchoolsInput!) {
+  importSchools(input: $input) {
+    schoolCount
+    coursesCount
+    booksOnCoursesCount
+  }
+}
