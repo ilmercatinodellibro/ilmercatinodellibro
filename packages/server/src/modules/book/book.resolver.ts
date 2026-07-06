@@ -471,20 +471,20 @@ export class BookResolver {
   @Mutation(() => ImportBooksResult)
   async importBooks(
     @Input() { booksUrl }: ImportBooksInput,
-    @CurrentUser() { id: userId }: User,
+    @CurrentUser("id") currentUserId: string,
   ): Promise<ImportBooksResult> {
-    return this.importService.importBooksFromUrl(booksUrl, userId);
+    return this.importService.importBooksFromUrl(booksUrl, currentUserId);
   }
 
   @Mutation(() => ImportSchoolsResult)
   async importSchools(
     @Input() { publicSchoolsUrl, privateSchoolsUrl }: ImportSchoolsInput,
-    @CurrentUser() { id: userId }: User,
+    @CurrentUser("id") currentUserId: string,
   ): Promise<ImportSchoolsResult> {
     return this.importService.importSchoolsFromUrls(
       publicSchoolsUrl,
       privateSchoolsUrl,
-      userId,
+      currentUserId,
     );
   }
 }
