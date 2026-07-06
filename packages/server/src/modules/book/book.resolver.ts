@@ -17,13 +17,25 @@ import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator"
 import { BookUtility } from "src/modules/book/book-utility";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
-import { BookCreateInput, BookQueryArgs, BookQueryResult } from "./book.args";
+import {
+  BookCreateInput,
+  BookQueryArgs,
+  BookQueryResult,
+  ImportBooksInput,
+  ImportBooksResult,
+  ImportSchoolsInput,
+  ImportSchoolsResult,
+} from "./book.args";
+import { ImportBooksAndSchoolsService } from "./import-books-and-schools.service";
 
 const MAX_ROWS_PER_PAGE = 100;
 
 @Resolver(() => Book)
 export class BookResolver {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly importService: ImportBooksAndSchoolsService,
+  ) {}
 
   @Query(() => BookQueryResult)
   async books(
@@ -454,5 +466,25 @@ export class BookResolver {
         title,
       },
     });
+  }
+
+  @Mutation(() => ImportBooksResult)
+  async importBooks(
+    @Input() { booksUrl }: ImportBooksInput,
+    @CurrentUser() { id: userId }: User,
+  ): Promise<ImportBooksResult> {
+    return this.importService.importBooksFromUrl(booksUrl, userId);
+  }
+
+  @Mutation(() => ImportSchoolsResult)
+  async importSchools(
+    @Input() { publicSchoolsUrl, privateSchoolsUrl }: ImportSchoolsInput,
+    @CurrentUser() { id: userId }: User,
+  ): Promise<ImportSchoolsResult> {
+    return this.importService.importSchoolsFromUrls(
+      publicSchoolsUrl,
+      privateSchoolsUrl,
+      userId,
+    );
   }
 }

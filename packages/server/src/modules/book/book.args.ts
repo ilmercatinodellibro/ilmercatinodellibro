@@ -67,3 +67,36 @@ export class BookCreateInput extends IntersectionType(
   LocationBoundInput,
   InputType,
 ) {}
+
+@InputType()
+export class ImportBooksInput {
+  @Field()
+  booksUrl!: string;
+}
+
+@ObjectType()
+export class ImportBooksResult {
+  @Field(() => Int)
+  currentDbBooksCount!: number;
+}
+
+@InputType()
+export class ImportSchoolsInput {
+  @Field()
+  publicSchoolsUrl!: string;
+
+  @Field()
+  privateSchoolsUrl!: string;
+}
+
+@ObjectType()
+export class ImportSchoolsResult {
+  @Field(() => Int)
+  schoolCount!: number;
+
+  @Field(() => Int)
+  coursesCount!: number;
+
+  @Field(() => Int)
+  booksOnCoursesCount!: number;
+}
