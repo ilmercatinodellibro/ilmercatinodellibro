@@ -2,14 +2,12 @@
   <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-card
       :title="t('general.settings.importBooksAndSchools.title')"
-      class="width-700"
       no-actions
-      size="fullscreen"
     >
       <q-card-section
-        class="column gap-24 no-wrap q-pa-lg scroll-y text-black-54 text-size-16"
+        class="column full-width gap-24 max-width-700 no-wrap q-pa-lg scroll-y text-black-54 text-size-16"
       >
-        <q-form class="column gap-8" @submit="handleImportBooks">
+        <q-form class="column gap-8 no-wrap" @submit="handleImportBooks">
           <span>
             {{
               t(
@@ -48,7 +46,7 @@
           />
         </q-form>
 
-        <q-form class="column gap-8" @submit="handleImportSchools">
+        <q-form class="column gap-8 no-wrap" @submit="handleImportSchools">
           <span>
             {{
               t(
@@ -72,7 +70,7 @@
 
           <q-input
             v-model.trim="publicSchoolListUrlModel"
-            :disable="importSchoolsLoading"
+            :disable="importSchoolsLoading || !areBooksImported"
             :label="t('general.settings.importBooksAndSchools.schoolsUrlLabel')"
             :rules="[
               requiredRule,
@@ -85,7 +83,7 @@
 
           <q-input
             v-model.trim="privateSchoolListUrlModel"
-            :disable="importSchoolsLoading"
+            :disable="importSchoolsLoading || !areBooksImported"
             :label="
               t('general.settings.importBooksAndSchools.schoolsPrivateUrlLabel')
             "
@@ -105,6 +103,7 @@
             "
             :disabled="!areSchoolUrlsFilled || !areBooksImported"
             :loading="importSchoolsLoading"
+            class="full-width"
             color="accent"
             type="submit"
           />
@@ -256,6 +255,7 @@ async function handleImportSchools() {
 
 <style scoped lang="scss">
 .wrap-break-word {
+  text-wrap: wrap;
   word-wrap: break-word;
 }
 </style>
