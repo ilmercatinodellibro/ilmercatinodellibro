@@ -88,6 +88,23 @@ export default {
     downloadUserListSuccess: "The user list will be downloaded shortly",
     downloadUserListFailed:
       "Could not download the user list. Please contact the support.",
+    general: "General",
+    importBooksAndSchools: {
+      title: "Import books and schools",
+      pasteUrlBooksDescription:
+        "Paste the URL in the field below and click the button to import the book lists made available by the Ministry. You can retrieve the URL to obtain the book lists from this link:",
+      booksUrlLabel: "CSV URL for the Book List of Emilia Romagna",
+      importBooksButton: "Import book lists",
+      pasteUrlSchoolsDescription:
+        "Paste the URLs in the fields below and click the button to import the school lists made available by the Ministry. You can retrieve the URLs to obtain the school lists from this link:",
+      schoolsImportWarning:
+        "Important: before you can import the school lists, you must have already imported the book list using the field above.",
+      schoolsUrlLabel:
+        "CSV URL for the List of State Schools of Emilia Romagna",
+      schoolsPrivateUrlLabel:
+        "CSV URL for the List of Private Schools of Emilia Romagna",
+      importSchoolsButton: "Import school lists",
+    },
   },
   role: "Role",
   rolesAndPermissions: {

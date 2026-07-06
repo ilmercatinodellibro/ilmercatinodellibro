@@ -325,24 +325,61 @@
         <template v-if="hasAdminRole">
           <q-separator />
 
-          <q-item
-            v-ripple
-            active-class="bg-black-activated-light"
-            clickable
-            @click="openSettings()"
-          >
-            <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
-              {{ t(`sidebar.settings`) }}
-            </q-tooltip>
-            <q-item-section side>
-              <q-icon :name="mdiCog" color="black-54" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="ellipsis text-size-16">
+          <q-expansion-item :expand-icon="mdiChevronDown">
+            <template #header>
+              <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
                 {{ t("sidebar.settings") }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+              </q-tooltip>
+              <q-item-section side>
+                <q-icon :name="mdiCog" color="black-54" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="ellipsis text-size-16">
+                  {{ t("sidebar.settings") }}
+                </q-item-label>
+              </q-item-section>
+            </template>
+
+            <q-list>
+              <q-item
+                v-ripple
+                active-class="bg-black-activated-light"
+                clickable
+                @click="openSettings()"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.settings.general") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiTune" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.settings.general") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item
+                v-ripple
+                active-class="bg-black-activated-light"
+                clickable
+                @click="openImportDialog()"
+              >
+                <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
+                  {{ t("general.settings.importBooksAndSchools.title") }}
+                </q-tooltip>
+                <q-item-section side>
+                  <q-icon :name="mdiDownload" color="black-54" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="ellipsis text-size-16">
+                    {{ t("general.settings.importBooksAndSchools.title") }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-expansion-item>
 
           <q-separator />
 
@@ -479,10 +516,12 @@ import {
   mdiBookshelf,
   mdiChartLine,
   mdiCheckDecagram,
+  mdiChevronDown,
   mdiCloudCheckOutline,
   mdiCloudOffOutline,
   mdiCog,
   mdiCurrencyEur,
+  mdiDownload,
   mdiExitToApp,
   mdiFrequentlyAskedQuestions,
   mdiHandshake,
@@ -493,6 +532,7 @@ import {
   mdiMenuDown,
   mdiPencilCircle,
   mdiPhone,
+  mdiTune,
   mdiWeb,
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
@@ -502,6 +542,7 @@ import { useI18n } from "vue-i18n";
 import { setLanguage } from "src/boot/i18n";
 import AppDrawer from "src/components/app-drawer.vue";
 import HeaderBar from "src/components/header-bar.vue";
+import ImportBooksAndSchoolsDialog from "src/components/import-books-and-schools-dialog.vue";
 import {
   type SettingsDialogProps,
   type SettingsUpdate,
@@ -677,6 +718,12 @@ function openSettings() {
         message: t("general.settings.downloadUserListSuccess"),
       });
     }
+  });
+}
+
+function openImportDialog() {
+  Dialog.create({
+    component: ImportBooksAndSchoolsDialog,
   });
 }
 </script>

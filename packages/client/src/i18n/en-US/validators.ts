@@ -8,6 +8,7 @@ export default {
   exactLength: "The value must be exactly {exactLength} characters long",
   nonValidEmail: "The email is not valid",
   nonValidDomain: "The domain is not valid",
+  nonValidAddress: "The address is not valid",
   password: {
     atLeastOneNumber: "The password should contain at least one number",
     atLeastOneLowercase:
