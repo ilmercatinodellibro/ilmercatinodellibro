@@ -133,10 +133,24 @@ export class ImportBooksAndSchoolsService {
 
       this.logger.log("Starting schools import from URLs");
 
-      await Promise.all([
-        this.downloadFile(publicSchoolsUrl, PUBLIC_SCHOOLS_IMPORT_FILENAME),
-        this.downloadFile(privateSchoolsUrl, PRIVATE_SCHOOLS_IMPORT_FILENAME),
-      ]);
+      const schoolsController = new AbortController();
+      try {
+        await Promise.all([
+          this.downloadFile(
+            publicSchoolsUrl,
+            PUBLIC_SCHOOLS_IMPORT_FILENAME,
+            schoolsController,
+          ),
+          this.downloadFile(
+            privateSchoolsUrl,
+            PRIVATE_SCHOOLS_IMPORT_FILENAME,
+            schoolsController,
+          ),
+        ]);
+      } catch (error) {
+        schoolsController.abort();
+        throw error;
+      }
 
       await this.importBooksCommand.loadSchools();
 
@@ -172,10 +186,14 @@ export class ImportBooksAndSchoolsService {
     return new InternalServerErrorException(context);
   }
 
-  private async downloadFile(sourceUrl: string, destinationFilename: string) {
+  private async downloadFile(
+    sourceUrl: string,
+    destinationFilename: string,
+    sharedController?: AbortController,
+  ) {
     this.logger.log(`Downloading ${destinationFilename} from ${sourceUrl}`);
 
-    const controller = new AbortController();
+    const controller = sharedController ?? new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
     }, this.FETCH_TIMEOUT_MS);
