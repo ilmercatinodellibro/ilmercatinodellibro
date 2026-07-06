@@ -10,6 +10,7 @@ export default {
   nonValidEmail: "La mail inserita non è valida",
   nonValidDomain: "Il dominio inserito non è valido",
   nonValidAddress: "L'indirizzo inserito non è valido",
+  nonValidUrlFormat: "Il formato dell'URL non è valido",
   password: {
     atLeastOneNumber: "La password deve contenere almeno un numero",
     atLeastOneLowercase:

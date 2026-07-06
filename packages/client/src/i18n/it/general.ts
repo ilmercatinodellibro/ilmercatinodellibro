@@ -105,6 +105,16 @@ export default {
       schoolsPrivateUrlLabel:
         "URL CSV Della Lista Delle Scuole Paritarie dell'Emilia Romagna",
       importSchoolsButton: "Importa gli elenchi delle scuole",
+      importSuccess: "Import riuscito",
+      importBooksSuccessMessage:
+        "Il processo di import è stato completato. Ora sono presenti {currentDbBooksCount} libri nel database.",
+      importError: "Import non riuscito",
+      importBooksErrorMessage:
+        "Qualcosa è andato storto, l'operazione di import non è riuscita. Controlla di aver inserito l'URL corretto.",
+      importSchoolsSuccessMessage:
+        "Sono state importate {schoolCount} scuole, per un totale di {coursesCount} corsi comprendenti un totale di {booksOnCoursesCount} libri.",
+      importSchoolsErrorMessage:
+        "Qualcosa è andato storto, l'operazione di import non è riuscita. Controlla di aver inserito gli URL corretti.",
     },
   },
   role: "Ruolo",
