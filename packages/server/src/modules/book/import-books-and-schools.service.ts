@@ -19,10 +19,6 @@ import {
 } from "src/modules/book/book-import.constants";
 import { ImportBooksCommand } from "src/modules/book/import-books.command";
 import { PrismaService } from "src/modules/prisma/prisma.service";
-import type {
-  ImportBooksResult,
-  ImportSchoolsResult,
-} from "src/modules/book/book.args";
 
 @Injectable()
 export class ImportBooksAndSchoolsService {
@@ -50,14 +46,9 @@ export class ImportBooksAndSchoolsService {
     this.tmpPath = resolve(rootConfig.storagePath, "./tmp");
   }
 
-  async importBooksFromUrl(
-    booksUrl: string,
-    userId: string,
-    retailLocationId?: string,
-  ): Promise<ImportBooksResult> {
+  async importBooksFromUrl(booksUrl: string, userId: string) {
     await this.authService.assertMembership({
       userId,
-      retailLocationId,
       role: Role.ADMIN,
     });
 
@@ -95,11 +86,9 @@ export class ImportBooksAndSchoolsService {
     publicSchoolsUrl: string,
     privateSchoolsUrl: string,
     userId: string,
-    retailLocationId?: string,
-  ): Promise<ImportSchoolsResult> {
+  ) {
     await this.authService.assertMembership({
       userId,
-      retailLocationId,
       role: Role.ADMIN,
     });
 
@@ -231,7 +220,7 @@ export class ImportBooksAndSchoolsService {
       this.logger.log(`File ${destinationFilename} downloaded successfully`);
     } catch (error) {
       // See https://developer.mozilla.org/en-US/docs/Web/API/Window/fetch#exceptions
-      if (error instanceof DOMException && error.name === "AbortError") {
+      if (error instanceof Error && error.name === "AbortError") {
         throw new BadRequestException(
           `Download timeout: request took longer than ${this.FETCH_TIMEOUT_MS / 1000} seconds`,
         );
