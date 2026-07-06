@@ -28,6 +28,7 @@
 
           <q-input
             v-model.trim="bookListUrlModel"
+            :disable="importBooksLoading"
             :label="t('general.settings.importBooksAndSchools.booksUrlLabel')"
             :rules="[requiredRule, makeValidateUrlRule(BOOKS_URL_PATTERN)]"
             clearable
@@ -71,6 +72,7 @@
 
           <q-input
             v-model.trim="publicSchoolListUrlModel"
+            :disable="importSchoolsLoading"
             :label="t('general.settings.importBooksAndSchools.schoolsUrlLabel')"
             :rules="[
               requiredRule,
@@ -83,6 +85,7 @@
 
           <q-input
             v-model.trim="privateSchoolListUrlModel"
+            :disable="importSchoolsLoading"
             :label="
               t('general.settings.importBooksAndSchools.schoolsPrivateUrlLabel')
             "
