@@ -2,6 +2,7 @@
   <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
     <k-dialog-card
       :title="t('general.settings.importBooksAndSchools.title')"
+      size="fullscreen"
       no-actions
     >
       <q-card-section
@@ -26,7 +27,7 @@
 
           <q-input
             v-model.trim="bookListUrlModel"
-            :disable="importBooksLoading"
+            :disable="importBooksLoading || importSchoolsLoading"
             :label="t('general.settings.importBooksAndSchools.booksUrlLabel')"
             :rules="[requiredRule, makeValidateUrlRule(BOOKS_URL_PATTERN)]"
             clearable
@@ -39,7 +40,7 @@
             :label="
               t('general.settings.importBooksAndSchools.importBooksButton')
             "
-            :disabled="!isBookUrlFilled"
+            :disabled="!isBookUrlFilled || importSchoolsLoading"
             :loading="importBooksLoading"
             color="accent"
             type="submit"
@@ -124,9 +125,12 @@ import { mdiDownload } from "@quasar/extras/mdi-v7";
 import { useDialogPluginComponent, Dialog } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { evictQuery } from "src/apollo/cache";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { requiredRule } from "src/helpers/rules";
+import { useBookService } from "src/services/book";
 import {
+  GetBooksDocument,
   useImportBooksMutation,
   useImportSchoolsMutation,
 } from "src/services/book.graphql";
@@ -181,20 +185,22 @@ function makeValidateUrlRule(pattern: RegExp) {
   };
 }
 
-const areBooksImported = ref(false);
+const { booksPaginationDetails } = useBookService(ref(0), ref(1));
+const areBooksImported = computed(
+  () => booksPaginationDetails.value.rowCount > 0,
+);
 async function handleImportBooks() {
   if (!bookListUrlModel.value) {
     return;
   }
 
   try {
-    const { data } = await importBooks({
+    const { data, cache } = await importBooks({
       input: {
         booksUrl: bookListUrlModel.value,
       },
     });
 
-    areBooksImported.value = true;
     Dialog.create({
       title: t("general.settings.importBooksAndSchools.importSuccess"),
       message: t(
@@ -204,6 +210,9 @@ async function handleImportBooks() {
         },
       ),
     });
+
+    evictQuery(cache, GetBooksDocument);
+    cache.gc();
   } catch {
     Dialog.create({
       title: t("general.settings.importBooksAndSchools.importError"),
