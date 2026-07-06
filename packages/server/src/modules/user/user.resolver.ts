@@ -510,23 +510,12 @@ export class UserResolver {
           select: {
             reservations: {
               where: {
+                saleId: null,
                 deletedAt: null,
                 cartItem: null,
                 book: {
                   retailLocationId,
                 },
-                OR: [
-                  {
-                    sale: {
-                      refundedAt: {
-                        not: null,
-                      },
-                    },
-                  },
-                  {
-                    saleId: null,
-                  },
-                ],
               },
             },
           },

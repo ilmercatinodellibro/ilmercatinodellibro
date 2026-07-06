@@ -49,18 +49,7 @@ export class ReservationResolver {
         userId,
         deletedAt: null,
         cartItem: null,
-        OR: [
-          {
-            saleId: null,
-          },
-          {
-            sale: {
-              refundedAt: {
-                not: null,
-              },
-            },
-          },
-        ],
+        saleId: null,
         book: {
           retailLocationId,
         },
