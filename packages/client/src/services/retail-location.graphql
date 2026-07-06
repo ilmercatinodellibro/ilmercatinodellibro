@@ -67,9 +67,12 @@ fragment Statistics on StatisticsQueryResult {
   salesCount
   activeSalesCount
   refundedSalesCount
-  activeReservationsCount
   totalReservationsCount
+  activeReservationsCount
   reservationsWhichLedToASaleCount
+  reservationsWhichLedToARefundedSaleCount
+  expiredReservationsCount
+  reservationsDeletedByUsersCount
   activeRequestsCount
   activeUsersCount
   settleableAmount
