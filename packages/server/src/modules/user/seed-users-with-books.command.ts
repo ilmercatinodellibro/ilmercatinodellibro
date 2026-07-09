@@ -520,6 +520,12 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       },
     });
 
+    await this.prisma.locationMember.deleteMany({
+      where: {
+        user: seedUserFilter,
+      },
+    });
+
     await this.prisma.user.deleteMany({
       where: seedUserFilter,
     });
