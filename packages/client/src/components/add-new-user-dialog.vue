@@ -36,7 +36,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import { useRetailLocationService } from "src/services/retail-location";
-import { useGetAllCustomersQuery } from "src/services/user.graphql";
+import { useGetAllCustomersEmailsQuery } from "src/services/user.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 defineEmits(useDialogPluginComponent.emitsObject);
@@ -49,7 +49,7 @@ const { t } = useI18n();
 const email = ref("");
 
 const { selectedLocation } = useRetailLocationService();
-const { allUsers: customers } = useGetAllCustomersQuery(() => ({
+const { allUsers: customers } = useGetAllCustomersEmailsQuery(() => ({
   retailLocationId: selectedLocation.value.id,
 }));
 
