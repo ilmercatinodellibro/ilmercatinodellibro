@@ -77,10 +77,10 @@ query getCustomers(
   }
 }
 
-query getAllCustomers($retailLocationId: String!) {
+query getAllCustomersEmails($retailLocationId: String!) {
   allUsers(retailLocationId: $retailLocationId) {
-    ...Customer
-    ...Member
+    id
+    email
   }
 }
 
