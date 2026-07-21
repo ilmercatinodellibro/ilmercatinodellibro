@@ -506,6 +506,14 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       },
     });
 
+    await this.prisma.requestQueue.deleteMany({
+      where: {
+        currentRequest: {
+          user: seedUserFilter,
+        },
+      },
+    });
+
     await this.prisma.bookRequest.deleteMany({
       where: {
         user: seedUserFilter,
