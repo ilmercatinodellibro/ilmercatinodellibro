@@ -239,6 +239,13 @@ export class BookRequestService {
 
       await Promise.all(batch.map((queue) => this.#handleQueue(queue)));
 
+      this.logger.log(
+        `Processed batch ${batchIndex + 1} of ${numberOfBatches}`,
+      );
+      this.logger.log(
+        `Remaining emails for the day: ${this.currentlyAvailableReservationEmails}`,
+      );
+
       // If there are no more batches left, don't wait for any delay and just exit
       if (batchIndex === numberOfBatches - 1) {
         break;
