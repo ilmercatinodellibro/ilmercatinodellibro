@@ -17,8 +17,8 @@ import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator"
 import { BookUtility } from "src/modules/book/book-utility";
 import {
   availableBookCopyFilter,
-  noProblemsFilter,
-  noSalesFilter,
+  noProblemsOrResolvedProblemsFilter,
+  noSalesOrRefundedSalesFilter,
 } from "src/modules/book-copy/book-copy.filters";
 import { Input } from "../auth/decorators/input.decorator";
 import { PrismaService } from "../prisma/prisma.service";
@@ -267,14 +267,14 @@ export class BookResolver {
       bookRelationQuery("copies", {
         where: {
           bookId: book.id,
-          ...noProblemsFilter,
+          ...noProblemsOrResolvedProblemsFilter,
         },
       }),
       bookRelationQuery("copies", {
         where: {
           bookId: book.id,
           returnedAt: null,
-          NOT: noSalesFilter,
+          NOT: noSalesOrRefundedSalesFilter,
         },
       }),
       bookRelationQuery("requests", {

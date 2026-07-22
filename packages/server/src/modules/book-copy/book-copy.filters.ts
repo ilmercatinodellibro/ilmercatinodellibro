@@ -1,22 +1,22 @@
 import type { Prisma } from "@prisma/client";
 
-export const noSalesFilter: Prisma.BookCopyWhereInput = {
+export const noSalesOrRefundedSalesFilter = {
   sales: {
     none: {
       refundedAt: null,
     },
   },
-};
-export const noProblemsFilter: Prisma.BookCopyWhereInput = {
+} satisfies Prisma.BookCopyWhereInput;
+export const noProblemsOrResolvedProblemsFilter = {
   problems: {
     none: {
       resolvedAt: null,
     },
   },
-};
+} satisfies Prisma.BookCopyWhereInput;
 
-export const availableBookCopyFilter: Prisma.BookCopyWhereInput = {
+export const availableBookCopyFilter = {
   returnedAt: null,
   donatedAt: null,
-  AND: [noSalesFilter, noProblemsFilter],
-};
+  AND: [noSalesOrRefundedSalesFilter, noProblemsOrResolvedProblemsFilter],
+} satisfies Prisma.BookCopyWhereInput;
