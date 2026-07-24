@@ -202,6 +202,8 @@ export default {
   goToCart: "Go to the cart",
   returnBookTitle: "Return the Book",
   returnBook: "Return Book",
+  returnBookSuccessTitle: "Return completed",
+  newBookCodeLabel: "New warehouse code is",
   moneyToGive: "Money to return to the Customer",
   iseeInfoTooltip:
     "Is this user entitled to the discount and does the total to be returned take it into account?",

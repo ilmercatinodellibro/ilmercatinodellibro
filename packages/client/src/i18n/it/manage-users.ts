@@ -205,6 +205,8 @@ export default {
   goToCart: "Vai al carrello",
   returnBookTitle: "Effettua il Reso del Libro",
   returnBook: "Effettua Reso",
+  returnBookSuccessTitle: "Reso effettuato",
+  newBookCodeLabel: "Il nuovo codice di magazzino è",
   moneyToGive: "Soldi da rendere al Cliente",
   iseeInfoTooltip:
     "Questo utente ha diritto allo sconto e il totale da rendere ne tiene conto?",
