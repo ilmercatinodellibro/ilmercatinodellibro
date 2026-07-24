@@ -168,6 +168,7 @@ import ChipButton from "./chip-button.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsHistoryDialog from "./problems-history-dialog.vue";
 import ReturnBookDialog from "./return-book-dialog.vue";
+import ReturnBookSuccessDialog from "./return-book-success-dialog.vue";
 import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
 
 // sold and purchased means the same thing, it's just a different perspective depending on which side the user is
@@ -353,10 +354,18 @@ function openReturnDialog(bookCopy: BookCopyDetailsFragment) {
     },
   }).onOk(async (bookCopyId: string) => {
     try {
-      await refundBookCopy({
+      const { data } = await refundBookCopy({
         input: {
           bookCopyId,
           retailLocationId: selectedLocation.value.id,
+        },
+      });
+
+      Dialog.create({
+        component: ReturnBookSuccessDialog,
+        componentProps: {
+          bookTitle: bookCopy.book.title,
+          newCode: data.code,
         },
       });
     } catch {
