@@ -202,6 +202,7 @@ export default {
   goToCart: "Go to the cart",
   returnBookTitle: "Return the Book",
   returnBook: "Return Book",
+  returnBookAdminOnly: "Only an administrator can process a return.",
   returnBookNewCodeLabel: "The new code for the returned book is",
   moneyToGive: "Money to return to the Customer",
   iseeInfoTooltip:
