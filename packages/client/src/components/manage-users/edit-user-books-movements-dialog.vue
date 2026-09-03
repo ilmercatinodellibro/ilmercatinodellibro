@@ -115,13 +115,19 @@
           <q-td :props="cellProps">
             <chip-button
               v-if="!isMobile"
+              :disable="!hasAdminRole"
               :label="t('book.return')"
               color="primary"
               @click="openReturnDialog(cellProps.row)"
-            />
+            >
+              <q-tooltip v-if="!hasAdminRole">
+                {{ t("manageUsers.returnBookAdminOnly") }}
+              </q-tooltip>
+            </chip-button>
             <actions-list-button v-else>
               <q-item
                 v-close-popup
+                :disable="!hasAdminRole"
                 clickable
                 @click="openReturnDialog(cellProps.row)"
               >
@@ -154,6 +160,7 @@ import KDialogCard from "src/components/k-dialog-card.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { hasProblem, reportOrSolveProblem } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
+import { useAuthService } from "src/services/auth";
 import {
   BookCopyDetailsFragment,
   useGetPurchasedBookCopiesQuery,
@@ -186,6 +193,8 @@ defineEmits(useDialogPluginComponent.emitsObject);
 const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
+
+const { hasAdminRole } = useAuthService();
 
 const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
