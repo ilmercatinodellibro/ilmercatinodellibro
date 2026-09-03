@@ -12,7 +12,7 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import {
   Book,
   BookCopy,
@@ -603,6 +603,7 @@ export class BookCopyResolver {
       operatorId,
       retailLocationId,
       "copiesMustBeSold",
+      Role.ADMIN,
     );
 
     const bookCopy = bookCopies[0];
@@ -765,10 +766,12 @@ export class BookCopyResolver {
     operatorId: string,
     retailLocationId: string,
     salesStatus: "copiesMustBeSold" | "copiesMustNotBeSold",
+    role?: Role,
   ) {
     await this.authService.assertMembership({
       userId: operatorId,
       retailLocationId,
+      role,
       message:
         "You don't have the necessary permissions operate on book copies of the given retail location.",
     });
