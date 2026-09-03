@@ -205,6 +205,7 @@ export default {
   goToCart: "Vai al carrello",
   returnBookTitle: "Effettua il Reso del Libro",
   returnBook: "Effettua Reso",
+  returnBookAdminOnly: "Solo un amministratore può effettuare il reso.",
   returnBookNewCodeLabel: "Il nuovo codice per il libro reso è",
   moneyToGive: "Soldi da rendere al Cliente",
   iseeInfoTooltip:
