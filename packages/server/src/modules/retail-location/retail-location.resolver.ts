@@ -132,7 +132,7 @@ export class RetailLocationResolver {
       );
     }
 
-    // Cleanup reservations and request queues when reservations are disabled
+    // Cleanup the request queues and expire the active reservations when reservations are disabled
     if (maxBookingDays === 0) {
       await this.prisma.requestQueue.deleteMany({
         where: {
@@ -142,11 +142,22 @@ export class RetailLocationResolver {
         },
       });
 
-      await this.prisma.reservation.deleteMany({
+      const endOfToday = new Date();
+      endOfToday.setHours(23, 59, 59, 999);
+
+      await this.prisma.reservation.updateMany({
         where: {
           book: {
             retailLocationId,
           },
+          saleId: null,
+          deletedAt: null,
+          expiresAt: {
+            gt: endOfToday,
+          },
+        },
+        data: {
+          expiresAt: endOfToday,
         },
       });
     }
