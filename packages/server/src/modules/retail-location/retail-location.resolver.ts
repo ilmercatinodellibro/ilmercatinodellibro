@@ -142,6 +142,8 @@ export class RetailLocationResolver {
         },
       });
 
+      // One millisecond before midnight, so reservations stay valid all day but are already
+      // expired when the midnight cron in `ReservationService` closes them. Keep in sync with its schedule
       const endOfToday = new Date();
       endOfToday.setHours(23, 59, 59, 999);
 

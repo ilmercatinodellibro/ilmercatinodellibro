@@ -22,7 +22,7 @@ export class ReservationService {
 
     return expiration.toISOString();
   }
-
+  // Keep in sync with the end-of-day expiration set in `RetailLocationResolver.updateRetailLocationSettings`
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async deleteExpiredReservations() {
     const now = new Date();
