@@ -40,7 +40,7 @@
     "firebase": "^12.19.0",
     "graphql": "catalog:",
     "graphql-ws": "catalog:",
-    "jwt-decode": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "lodash-es": "^4.18.1",
     "quasar": "^2.35.3",
     "vue": "^3.5.45",

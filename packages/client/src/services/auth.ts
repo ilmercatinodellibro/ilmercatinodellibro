@@ -1,6 +1,6 @@
 import { useApolloClient } from "@vue/apollo-composable";
 import { until } from "@vueuse/core";
-import jwtDecode, { type JwtPayload } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { merge } from "lodash-es";
 import { LocalStorage } from "quasar";
 import { computed, readonly, ref, watch } from "vue";
@@ -156,8 +156,9 @@ export function initTokenRefresh(router: Router) {
       return;
     }
 
-    const { iat: tokenIssueTime, exp: tokenExpirationTime } =
-      jwtDecode<JwtPayload>(token.value);
+    const { iat: tokenIssueTime, exp: tokenExpirationTime } = jwtDecode(
+      token.value,
+    );
 
     if (!tokenIssueTime || !tokenExpirationTime) {
       logout();
