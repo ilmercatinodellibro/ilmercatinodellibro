@@ -114,7 +114,7 @@ export default {
     lastYear: "Anno scorso",
     custom: "Personalizzato",
   } satisfies Record<
-    AvailableQuickRanges & AdditionalMacroIntervalDurationNames,
+    AvailableQuickRanges | Lowercase<AdditionalMacroIntervalDurationNames>,
     string
   >,
   pushNotifications: {

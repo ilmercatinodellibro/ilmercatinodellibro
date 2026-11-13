@@ -112,7 +112,7 @@ export default {
     lastYear: "Last year",
     custom: "Custom",
   } satisfies Record<
-    AvailableQuickRanges & AdditionalMacroIntervalDurationNames,
+    AvailableQuickRanges | Lowercase<AdditionalMacroIntervalDurationNames>,
     string
   >,
   pushNotifications: {
