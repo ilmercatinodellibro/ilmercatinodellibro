@@ -193,7 +193,7 @@ overrides:
 
 patchedDependencies:
   '@nestjs-modules/mailer@1.9.1': 76637d7f1047b9ee9ec8da009661868097c6ba402b6d523297806c3dcb811065
-  prisma-nestjs-graphql@19.2.0: b6904d0a230f81d7385793de72e9c8a33fdebb2e36ad3a6e173ace6c25d51a94
+  prisma-nestjs-graphql@21.2.0: 805007e246416671e976ac846aac123bf02a695f620292f74399a46aa9aa7aea
 
 importers:
 
@@ -601,8 +601,8 @@ importers:
         specifier: ^5.12.1
         version: 5.12.1
       prisma-nestjs-graphql:
-        specifier: 19.2.0
-        version: 19.2.0(patch_hash=b6904d0a230f81d7385793de72e9c8a33fdebb2e36ad3a6e173ace6c25d51a94)(supports-color@8.1.1)
+        specifier: ^21.2.0
+        version: 21.2.0(patch_hash=805007e246416671e976ac846aac123bf02a695f620292f74399a46aa9aa7aea)(supports-color@8.1.1)
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -8586,8 +8586,8 @@ packages:
   ospath@1.2.2:
     resolution: {integrity: sha512-o6E5qJV5zkAbIDNhGSIlyOhScKXgQrSRMilfph0clDfM0nEnBOlKlH4sWDmG95BW/CvwNz0vmm7dJVtU2KlMiA==}
 
-  outmatch@0.7.0:
-    resolution: {integrity: sha512-w1ybiTBffGiwxOO7JJBVVOsIiWwzcfSl/D80amWAU2UDe1o9/SySOUzAwDuN3+jGKQRs0UCDTS8rndFiroJgVQ==}
+  outmatch@1.0.0:
+    resolution: {integrity: sha512-Dro+1hlvosA7DUKFqeHUA2g+xdWGoGTGZ+19go5vwxqS7iSTXQtajrEdhTdBXdahzGBEV2NH89vouFWpLyOuPg==}
 
   p-cancelable@3.0.0:
     resolution: {integrity: sha512-mlVgR3PGuzlo0MmTdk4cXqXWlwQDLnONTAg6sm62XkMJEiRxN3GL3SffkYvqwonbkJBcrI7Uvv5Zh9yjvn2iUw==}
@@ -8907,8 +8907,8 @@ packages:
     resolution: {integrity: sha512-DBS3Nir18YtKc8loYCCOGitmiaQ0vTdahPoiXxwNweJDpmVZo+w3tppufOhoK0m8skpRxT56llYLs3VrORnmNQ==}
     engines: {node: '>=14'}
 
-  prisma-nestjs-graphql@19.2.0:
-    resolution: {integrity: sha512-ydg2vgek59/gw0eiFIZ3bRplOGjmJS5qjKjCazA5H/1HywuHFkWcn9rrZojfyJ3t9I/HubTVugOrkhdhgWQQfg==}
+  prisma-nestjs-graphql@21.2.0:
+    resolution: {integrity: sha512-Mkb4brKW8NF3f7fq+H4ypdbbESxDnWdaszss2OIBxqutPV8N7DttdbKlmLnxo3Srk6fgW58nYQ4H5PJRKqKZxw==}
     hasBin: true
 
   prisma@5.12.1:
@@ -20825,7 +20825,7 @@ snapshots:
 
   ospath@1.2.2: {}
 
-  outmatch@0.7.0: {}
+  outmatch@1.0.0: {}
 
   p-cancelable@3.0.0: {}
 
@@ -21147,7 +21147,7 @@ snapshots:
       pug: 3.0.2
       uuid: 9.0.1
 
-  prisma-nestjs-graphql@19.2.0(patch_hash=b6904d0a230f81d7385793de72e9c8a33fdebb2e36ad3a6e173ace6c25d51a94)(supports-color@8.1.1):
+  prisma-nestjs-graphql@21.2.0(patch_hash=805007e246416671e976ac846aac123bf02a695f620292f74399a46aa9aa7aea)(supports-color@8.1.1):
     dependencies:
       '@prisma/generator-helper': 5.5.1(supports-color@8.1.1)
       await-event-emitter: 2.0.2
@@ -21157,7 +21157,7 @@ snapshots:
       graceful-fs: 4.2.11
       json5: 2.2.3
       lodash: 4.17.21
-      outmatch: 0.7.0
+      outmatch: 1.0.0
       pluralize: 8.0.0
       pupa: 2.1.1
       ts-morph: 16.0.0
