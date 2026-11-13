@@ -94,7 +94,7 @@
     "ioredis": "^5.11.1",
     "lodash": "catalog:",
     "nest-commander": "^3.21.0",
-    "node-notifier": "^10.0.1",
+    "node-notifier": "^11.0.0",
     "nodemailer": "^10.5.0",
     "passport": "^0.6.0",
     "passport-facebook": "^3.0.0",
