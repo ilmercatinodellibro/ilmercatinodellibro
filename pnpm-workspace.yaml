@@ -24,6 +24,7 @@ allowBuilds:
   "@apollo/protobufjs": true
   "@firebase/util": true # coming from firebase-admin, only writes defaults when FIREBASE_WEBAPP_CONFIG is set
   "@nestjs/core": false # Just prints Open Collective information
+  "@parcel/watcher": false # Only compiles itself when npm_config_build_from_source is set, the binaries come from its optional dependencies
   "@swc/core": true # Checks its native binary, used by @swc-node/register to run the server TypeScript scripts
   "@prisma/client": true
   "@prisma/engines": true
