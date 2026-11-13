@@ -11,9 +11,9 @@
     "Alessandro Vandelli <a.vandelli@dreamonkey.com>"
   ],
   "description": "Il Mercatino del Libro monorepo",
-  "packageManager": "pnpm@11.28.9+sha512.35421cea2720eca3f5ad722b67e8ef18f4d3cd4745ed2fcfeb0dc288d4e9437fad3870d91ee6e83f268f0f6f7e0f62723317b19617bb45ee4333172ef51159f8",
+  "packageManager": "pnpm@12.18.0+sha512.9d7882d5dc82147ecfc4e062aa34834e0ad0296710a1837a1115ae012127d36b7109e321ac1598a1dd0a65597681b1e99917e12ed0d749eae91187943363beb3",
   "scriptsComments": {
-    "clean": "pnpm has a built-in `clean` command that deletes node_modules. pnpm 11 runs it instead of this script for `pnpm --filter <selector> clean`, so the script is always invoked with an explicit `run`."
+    "clean": "pnpm has a built-in `clean` command that deletes node_modules. Which one `pnpm clean` runs has changed between pnpm versions (pnpm 11 runs the built-in for `pnpm --filter <selector> clean`), so the script is always invoked with an explicit `run`."
   },
   "scripts": {
     "clean": "pnpm --filter \"./packages/**\" run clean",
@@ -67,6 +67,7 @@
     "@nestjs-modules/mailer": "Allows to use Nodemailer plugins by exposing the transporters. See https://github.com/nest-modules/mailer/issues/1171#issuecomment-2141411992"
   },
   "engines": {
-    "node": "^24.22.3"
+    "node": "^24.22.3",
+    "pnpm": "^12"
   }
 }
