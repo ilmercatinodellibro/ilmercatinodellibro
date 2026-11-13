@@ -1,6 +1,11 @@
 shellEmulator: true
 strictPeerDependencies: false
 publicHoistPattern:
+  # ESLint-related
+  # Dependencies of "eslint-config-coralloy" imported by the ESLint configs, kept transitive so they match the versions it uses
+  - eslint-import-resolver-typescript
+  - globals
+
   # "jsonwebtoken" is a "@nestjs/jwt" transitive dependency, which we have to reference directly because "@nestjs/jwt" doesn't re-export relevant parts
   # We are not installing it ourselves to avoid potential incompatibilities
   - jsonwebtoken
@@ -31,7 +36,6 @@ allowBuilds:
 overrides:
   vite: ^5.0.10
   "@vitejs/plugin-vue": ^4.5.2
-  stylelint@16>meow: ^9.0.0
 
 patchedDependencies:
   prisma-nestjs-graphql@19.2.0: patches/prisma-nestjs-graphql@19.2.0.patch

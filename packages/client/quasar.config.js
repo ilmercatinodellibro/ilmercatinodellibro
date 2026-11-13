@@ -1,4 +1,3 @@
-/* eslint-env node */
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 /*
@@ -9,8 +8,8 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-const { existsSync, rmSync, renameSync } = require("fs");
-const path = require("path");
+const { existsSync, rmSync, renameSync } = require("node:fs");
+const path = require("node:path");
 
 // Be careful about how/what you expose here, process.env has access to root envs here
 require("dotenv-expand").expand(
@@ -21,7 +20,8 @@ require("dotenv-expand").expand(
 
 const { configure } = require("quasar/wrappers");
 
-const vitePluginChecker = require("vite-plugin-checker");
+// vite-plugin-checker is ESM-only since 0.9.0, require() returns its module namespace
+const { checker: vitePluginChecker } = require("vite-plugin-checker");
 
 function getVueTscTsconfigPath(isPwa) {
   return path.join(
@@ -101,20 +101,22 @@ module.exports = configure(function (ctx) {
 
       afterBuild() {
         // Backup the existing dist folder, then perform the hot-swap
-        if (BUILD_WITH_HOT_SWAP && existsSync(CLIENT_DIST_HOT_SWAP_PATH)) {
-          // eslint-disable-next-line no-console
-          console.log("Hot-swapping the dist folder...");
-
-          if (existsSync(CLIENT_DIST_BACKUP_PATH)) {
-            rmSync(CLIENT_DIST_BACKUP_PATH, { recursive: true, force: true });
-          }
-
-          if (existsSync(CLIENT_DIST_PATH)) {
-            renameSync(CLIENT_DIST_PATH, CLIENT_DIST_BACKUP_PATH);
-          }
-
-          renameSync(CLIENT_DIST_HOT_SWAP_PATH, CLIENT_DIST_PATH);
+        if (!BUILD_WITH_HOT_SWAP || !existsSync(CLIENT_DIST_HOT_SWAP_PATH)) {
+          return;
         }
+
+        // eslint-disable-next-line no-console
+        console.log("Hot-swapping the dist folder...");
+
+        if (existsSync(CLIENT_DIST_BACKUP_PATH)) {
+          rmSync(CLIENT_DIST_BACKUP_PATH, { recursive: true, force: true });
+        }
+
+        if (existsSync(CLIENT_DIST_PATH)) {
+          renameSync(CLIENT_DIST_PATH, CLIENT_DIST_BACKUP_PATH);
+        }
+
+        renameSync(CLIENT_DIST_HOT_SWAP_PATH, CLIENT_DIST_PATH);
       },
 
       target: {
@@ -197,6 +199,9 @@ module.exports = configure(function (ctx) {
         [
           vitePluginChecker,
           {
+            // vite-plugin-checker 0.6 didn't fail `quasar build` on lint or type errors, 0.14 does
+            // TODO: enable once the client typechecks without errors
+            enableBuild: false,
             vueTsc: {
               // This path is provided to tsc via --project flag under the hood
               // This causes problems when on Windows and the name of any folder into the path contains spaces
@@ -208,7 +213,7 @@ module.exports = configure(function (ctx) {
                   : getVueTscTsconfigPath(ctx.mode.pwa),
             },
             eslint: {
-              lintCommand: "eslint --ext .js,.cjs,.mjs,.ts,.vue ./",
+              lintCommand: "eslint ./",
             },
             stylelint:
               // Stylelint limits config file search to the current directory on "test" environment for some reason
