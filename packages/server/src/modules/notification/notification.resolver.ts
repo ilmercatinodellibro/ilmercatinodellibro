@@ -1,7 +1,15 @@
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import { Args, Mutation, Query, Resolver, Subscription } from "@nestjs/graphql";
+import {
+  Args,
+  Mutation,
+  Query,
+  ResolveField,
+  Resolver,
+  Root,
+  Subscription,
+} from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Notification } from "src/@generated/graphql/index.js";
+import { Event, Notification } from "src/@generated/graphql/index.js";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener.js";
 import { GraphQLContext } from "../auth/auth.models.js";
 import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
@@ -37,6 +45,15 @@ export class NotificationResolver {
   })
   newNotification() {
     return this.pubSub.asyncIterableIterator("newNotification");
+  }
+
+  @ResolveField(() => Event)
+  async event(@Root() notification: Notification) {
+    return this.prisma.event.findUniqueOrThrow({
+      where: {
+        id: notification.eventId,
+      },
+    });
   }
 
   @Mutation(() => Notification)
