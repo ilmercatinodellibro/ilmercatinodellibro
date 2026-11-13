@@ -2,8 +2,5 @@
   "@quasar/apollo": {
     "subscriptions": true,
     "subscriptionsTransport": "ws"
-  },
-  "@quasar/testing-e2e-cypress": {
-    "options": ["scripts", "typescript", "code-coverage"]
   }
 }

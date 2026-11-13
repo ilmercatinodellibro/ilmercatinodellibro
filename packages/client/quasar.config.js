@@ -210,14 +210,7 @@ module.exports = configure(function (ctx) {
             eslint: {
               lintCommand: "eslint ./",
             },
-            stylelint:
-              // Stylelint limits config file search to the current directory on "test" environment for some reason
-              // Because of this, it can't find the config file in the monorepo root directory
-              // --config arg is broken, similar arguments are not working either
-              // So, we simply disable it when running tests, not a big deal
-              process.env.NODE_ENV === "test"
-                ? undefined
-                : { lintCommand: "stylelint ./src/**/*.{scss,css,vue}" },
+            stylelint: { lintCommand: "stylelint ./src/**/*.{scss,css,vue}" },
           },
         ],
         ["@dreamonkey/graphql-codegen-near-operation-file", {}],

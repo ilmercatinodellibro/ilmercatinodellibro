@@ -21,15 +21,8 @@
     "build:pwa:hot-swap": "cross-env BUILD_WITH_HOT_SWAP='true' pnpm run build:pwa",
     "serve": "./node_modules/@quasar/cli/bin/quasar.js serve ../server/client-dist/ --history",
     "start": "pnpm build && pnpm serve",
-    "start:test": "pnpm start --port 8080 --silent",
-    "start:server": "cross-env CLIENT_URL='http://localhost:8080' MAIL_HOST=localhost MAIL_PORT=7777 pnpm --filter @ilmercatinodellibro/server start",
     "generate": "graphql-codegen --config codegen.ts",
-    "generate:watch": "pnpm generate --watch",
-    "test:e2e": "cross-env NODE_ENV=test start-test start:test 8080 \"cypress open --e2e\"",
-    "test:e2e:dev": "cross-env NODE_ENV=test start-test \"quasar dev\" 8080 \"cypress open --e2e\"",
-    "test:e2e:ci": "cross-env NODE_ENV=test start-test start:test 8080 \"cypress run --e2e\"",
-    "test:component": "cross-env NODE_ENV=test cypress open --component",
-    "test:component:ci": "cross-env NODE_ENV=test cypress run --component"
+    "generate:watch": "pnpm generate --watch"
   },
   "overridesComments": {
     "_root": "See root package.json => overridesComments for more info."
@@ -57,7 +50,6 @@
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@cypress/code-coverage": "^3.12.22",
     "@dreamonkey/graphql-codegen-near-operation-file": "^0.1.2",
     "@dreamonkey/graphql-codegen-vue-apollo-plugin": "^0.1.2",
     "@graphql-codegen/cli": "^5.0.2",
@@ -67,18 +59,11 @@
     "@quasar/app-vite": "^1.8.0",
     "@quasar/cli": "^2.4.0",
     "@quasar/quasar-app-extension-apollo": "^2.2.4",
-    "@quasar/quasar-app-extension-testing-e2e-cypress": "^5.2.1",
-    "@types/lodash": "catalog:",
     "@types/lodash-es": "^4.17.12",
     "autoprefixer": "^10.4.19",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
-    "cypress": "^13.7.2",
-    "eslint-plugin-cypress": "^7.0.4",
     "fast-glob": "catalog:",
-    "lodash": "catalog:",
-    "smtp-tester": "^2.1.0",
-    "start-server-and-test": "^2.0.0",
     "vite-plugin-checker": "^0.14.5",
     "vue-tsc": "^2.2.10",
     "workbox-build": "^7.0.0",

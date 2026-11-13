@@ -22,25 +22,6 @@ On the live server, you can use `pnpm run build:pwa:hot-swap` to build the produ
 
 It will generate the new bundle and start using it only once the build process is done, leaving a backup of the previous build in case an emergency rollback is needed.
 
-## Test
-
-```bash
-# component tests
-$ pnpm run test:component
-
-# e2e tests
-# - build&serve the app then launch Cypress in "open" mode (interactive)
-$ pnpm run test:e2e
-# - launch dev server then open Cypress in "open" mode (interactive)
-# Pages take longer to load initially on Vite dev server, so tests may fail, just re-run them
-$ pnpm run test:e2e:dev
-# - build&serve the app then launch Cypress in "run" mode (headless)
-$ pnpm run test:e2e:ci
-
-# keep this running in a separate terminal while running e2e tests
-$ pnpm start:server # start the server app with the related env variables overridden, to use with e2e tests
-```
-
 ## Push notifications
 
 We are using [FCM(Firebase Cloud Messaging)](https://firebase.google.com/docs/cloud-messaging) to send push notifications to the users.

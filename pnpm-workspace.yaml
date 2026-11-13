@@ -11,7 +11,7 @@ publicHoistPattern:
   - "@jest/globals"
 
   # Transitive dependency of "@quasar/app-vite", not installed separately so it always matches the version Quasar runs
-  # The client references its "vite/client" types and the Cypress preprocessor imports it
+  # The client references its "vite/client" types
   - vite
 
 # Versions shared by more than one package
@@ -21,8 +21,6 @@ catalog:
   fast-glob: ^3.3.3
   graphql: ^16.14.2
   graphql-ws: ^6.4.2
-  lodash: ^4.17.21
-  "@types/lodash": ^4.17.7
 
 allowBuilds:
   "@apollo/protobufjs": true
@@ -32,7 +30,6 @@ allowBuilds:
   "@prisma/client": true
   "@prisma/engines": true
   argon2: true
-  cypress: true
   esbuild: true
   msgpackr-extract: true # coming from bullmq
   prisma: true

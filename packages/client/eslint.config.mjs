@@ -2,7 +2,6 @@ import { join } from "node:path";
 import { defineConfig } from "eslint/config";
 import configCoralloy from "eslint-config-coralloy";
 import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
-import pluginCypress from "eslint-plugin-cypress";
 import globals from "globals";
 import { version as vueVersion } from "vue";
 
@@ -136,33 +135,6 @@ export default defineConfig(
     rules: {
       // Quasar Dialog plugin custom components are created one-off, so `props` isn't reactive
       "vue/no-setup-props-reactivity-loss": "off",
-    },
-  },
-
-  {
-    name: "custom/cypress",
-
-    files: ["**/*.cy.{js,jsx,ts,tsx}"],
-    extends: [
-      // Add Cypress-specific lint rules, globals and Cypress plugin
-      // See https://github.com/cypress-io/eslint-plugin-cypress#rules
-      pluginCypress.configs.recommended,
-    ],
-
-    rules: {
-      // Allow chai-style assertions, e.g. `expect(foo).to.be.true`
-      "@typescript-eslint/no-unused-expressions": "off",
-    },
-  },
-  {
-    name: "custom/cypress-chains",
-
-    files: ["test/cypress/**"],
-
-    rules: {
-      // Cypress chains have a then() method, but they aren't promises
-      "promise/catch-or-return": "off",
-      "promise/no-callback-in-promise": "off",
     },
   },
 );
