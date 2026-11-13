@@ -32,7 +32,7 @@
   "dependencies": {
     "@apollo/client": "^3.14.1",
     "@graphql-typed-document-node/core": "^3.2.0",
-    "@quasar/extras": "^1.16.11",
+    "@quasar/extras": "^2.1.0",
     "@vue/apollo-composable": "^4.2.2",
     "@vueuse/components": "^10.9.0",
     "@vueuse/core": "^10.9.0",

@@ -233,8 +233,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.15.0)
       '@quasar/extras':
-        specifier: ^1.16.11
-        version: 1.16.11
+        specifier: ^2.1.0
+        version: 2.1.0
       '@vue/apollo-composable':
         specifier: ^4.2.2
         version: 4.2.2(@apollo/client@3.14.1(@types/react@19.3.0)(graphql-ws@6.4.2(graphql@16.15.0)(ws@8.22.2))(graphql@16.15.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.15.0)))(graphql@16.15.0)(typescript@6.0.3)(vue@3.5.45(typescript@6.0.3))
@@ -3827,8 +3827,8 @@ packages:
     engines: {node: '>= 20.20.0'}
     hasBin: true
 
-  '@quasar/extras@1.16.11':
-    resolution: {integrity: sha512-sbTBHOA+Hi7ah0P6qSm+xfRXqwJ94ct3NKA3Lkq3iNPYuHD7VXbSWtP2eA7Cu9Fd0WjVoPbngf6yFGg46U3IfQ==}
+  '@quasar/extras@2.1.0':
+    resolution: {integrity: sha512-WCqHXr3loA9bP1DUuzmCwuNXnHa9GKosAtjwJnr1DpngO68a0JoiyVuoXzc760tCBArdFLD/YAUHvItPbk6V2Q==}
 
   '@quasar/quasar-app-extension-apollo@2.3.0-beta.1':
     resolution: {integrity: sha512-kjvdQtqnC8OKoXpNGBWSmVNKuALDiBXIYV65c33EICeNpb+d4+mHTe0dfz5tmMph/YEd7JHjxWFq5FKyEQP6FQ==}
@@ -14682,7 +14682,7 @@ snapshots:
       kolorist: 1.8.0
       open: 11.0.4
 
-  '@quasar/extras@1.16.11': {}
+  '@quasar/extras@2.1.0': {}
 
   '@quasar/quasar-app-extension-apollo@2.3.0-beta.1(@apollo/client@3.14.1(@types/react@19.3.0)(graphql-ws@6.4.2(graphql@16.15.0)(ws@8.22.2))(graphql@16.15.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.15.0)))(@vue/apollo-composable@4.2.2(@apollo/client@3.14.1(@types/react@19.3.0)(graphql-ws@6.4.2(graphql@16.15.0)(ws@8.22.2))(graphql@16.15.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(subscriptions-transport-ws@0.11.0(graphql@16.15.0)))(graphql@16.15.0)(typescript@6.0.3)(vue@3.5.45(typescript@6.0.3)))(graphql-ws@6.4.2(graphql@16.15.0)(ws@8.22.2))(graphql@16.15.0)(quasar@2.35.3)(vue@3.5.45(typescript@6.0.3))':
     dependencies:
