@@ -39,7 +39,7 @@ export class AddAdminUserCommand extends CommandRunner {
 
       const membershipsToAdd = retailLocations.filter(
         ({ id }) =>
-          !currentAdmin.memberships.find(
+          !currentAdmin.memberships.some(
             ({ retailLocationId, role }) =>
               retailLocationId === id && role === Role.ADMIN,
           ),

@@ -923,7 +923,7 @@ export class RetailLocationResolver {
       }
     }
 
-    return transformedData.sort(
+    return transformedData.toSorted(
       ({ timestamp: timestampA }, { timestamp: timestampB }) =>
         timestampA.valueOf() - timestampB.valueOf(),
     );

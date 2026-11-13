@@ -24,6 +24,7 @@ import { CartService } from "./cart.service";
 
 @Resolver(() => Cart)
 export class CartResolver {
+  // eslint-disable-next-line @typescript-eslint/max-params -- NestJS injects each dependency as a constructor parameter
   constructor(
     private readonly prisma: PrismaService,
     private readonly cartService: CartService,
@@ -116,6 +117,8 @@ export class CartResolver {
     }
 
     let book: PrismaBook;
+    let bookRequestId = fromBookRequestId;
+    let reservationId = fromReservationId;
 
     // throw new XException("CODE", { description: "Description" }) is used for known custom cases
 
@@ -151,7 +154,7 @@ export class CartResolver {
 
       // DB query already returns non-deleted requests
       if (bookDetails.requests.length === 0) {
-        ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
+        ({ id: bookRequestId } = await this.prisma.bookRequest.create({
           data: {
             userId: cart.userId,
             bookId: bookDetails.id,
@@ -166,7 +169,7 @@ export class CartResolver {
           });
         }
       } else {
-        fromBookRequestId = bookDetails.requests[0].id;
+        bookRequestId = bookDetails.requests[0].id;
       }
 
       // The book availability applies to all users, so we first check if this specific user already has a reservation for the book
@@ -178,8 +181,8 @@ export class CartResolver {
           description: "The book is not available",
         });
       } else if (bookDetails.reservations.length > 0) {
-        fromReservationId = bookDetails.reservations[0].id;
-        fromBookRequestId = undefined;
+        reservationId = bookDetails.reservations[0].id;
+        bookRequestId = undefined;
       }
     } else if (fromBookRequestId) {
       const request = await this.prisma.bookRequest.findUniqueOrThrow({
@@ -203,7 +206,7 @@ export class CartResolver {
         );
       }
 
-      book = request.book;
+      ({ book } = request);
     } else if (fromReservationId) {
       const reservation = await this.prisma.reservation.findUniqueOrThrow({
         where: { id: fromReservationId },
@@ -226,12 +229,12 @@ export class CartResolver {
         );
       }
 
-      book = reservation.book;
+      ({ book } = reservation);
     } else {
       throw new Error("Unreachable code"); // to satisfy TypeScript
     }
 
-    if (cart.items.find(({ bookId }) => bookId === book.id)) {
+    if (cart.items.some(({ bookId }) => bookId === book.id)) {
       throw new UnprocessableEntityException(
         "The book was already added to the cart",
       );
@@ -242,8 +245,8 @@ export class CartResolver {
         cartId,
         bookId: book.id,
 
-        fromBookRequestId,
-        fromReservationId,
+        fromBookRequestId: bookRequestId,
+        fromReservationId: reservationId,
       },
     });
 

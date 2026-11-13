@@ -85,7 +85,9 @@ export class ImportBooksCommand extends CommandRunner {
       return currentDatabaseBooksCount;
     } catch (error) {
       this.logger.error("Cannot load books, error: ", error);
-      throw new Error("Cannot import or process files on server.");
+      throw new Error("Cannot import or process files on server.", {
+        cause: error,
+      });
     }
   }
 
@@ -116,6 +118,7 @@ export class ImportBooksCommand extends CommandRunner {
       this.logger.error("Cannot load schools, error: ", error);
       throw new Error(
         "Could not find/process the CSV files or create DB entries.",
+        { cause: error },
       );
     }
   }
@@ -306,8 +309,8 @@ export class ImportBooksCommand extends CommandRunner {
       },
     });
 
-    const transformer = transform((row: IngestedCsvRow) => {
-      row = this.#removeUnprintableCharsFromCsvRow(row);
+    const transformer = transform((rawRow: IngestedCsvRow) => {
+      const row = this.#removeUnprintableCharsFromCsvRow(rawRow);
 
       const rowSubtitle = row[9];
       const subtitle =
@@ -369,6 +372,7 @@ export class ImportBooksCommand extends CommandRunner {
         if (possibleError) {
           this.logger.error("Error during execution of 'writeStreamPromise'.");
           reject(possibleError);
+          return;
         }
 
         resolve();
@@ -380,15 +384,14 @@ export class ImportBooksCommand extends CommandRunner {
     this.logger.log("Begin importing schools and courses...");
 
     // If the code of a school has already been inserted, skip it.
-    const schoolCodesList: string[] = (
-      await this.prisma.school.findMany({
-        select: {
-          code: true,
-        },
-      })
-    ).map(({ code }) => code);
+    const schools = await this.prisma.school.findMany({
+      select: {
+        code: true,
+      },
+    });
+    const schoolCodesList = schools.map(({ code }) => code);
     const schoolCodesFromBooksCsv = new Set(
-      readFileSync(this.resolveTmpPath("./school_codes.csv"), "utf-8").split(
+      readFileSync(this.resolveTmpPath("./school_codes.csv"), "utf8").split(
         "\n",
       ),
     );
@@ -657,7 +660,7 @@ export class ImportBooksCommand extends CommandRunner {
             .filter(
               ({ bookId, schoolCourseId }) =>
                 !!bookId &&
-                !savedCourse.books.find(
+                !savedCourse.books.some(
                   (boc) =>
                     boc.bookId === bookId &&
                     boc.schoolCourseId === schoolCourseId,

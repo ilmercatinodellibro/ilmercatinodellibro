@@ -15,11 +15,15 @@ async function main() {
   await seedEvents(prisma);
 }
 
-main()
-  .catch((error: unknown) => {
+async function run() {
+  try {
+    await main();
+  } catch (error) {
     console.error(error);
     process.exit(1);
-  })
-  .finally(async () => {
+  } finally {
     await prisma.$disconnect();
-  });
+  }
+}
+
+void run();

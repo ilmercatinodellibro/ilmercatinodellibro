@@ -73,7 +73,7 @@ export class RetailLocationService {
     for (const [key, value] of Object.entries(backup)) {
       const stringifier = stringify(value, { header: true });
       const file = resolve(backupDirectory, `./${key}.csv`);
-      filePromises.push(writeFile(file, stringifier, { encoding: "utf-8" }));
+      filePromises.push(writeFile(file, stringifier, { encoding: "utf8" }));
     }
 
     const receiptsDirectory = this.resolveStoragePath(locationId, "./receipts");

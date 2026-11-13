@@ -31,6 +31,7 @@ interface SendInvitePayload {
 
 @Injectable()
 export class AuthService {
+  // eslint-disable-next-line @typescript-eslint/max-params -- NestJS injects each dependency as a constructor parameter
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -73,7 +74,7 @@ export class AuthService {
         },
       });
       if (options.role !== undefined && role !== options.role) {
-        throw new Error();
+        throw new Error("The user doesn't have the required role");
       }
     } catch {
       throw new ForbiddenException(options.message);

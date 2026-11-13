@@ -320,26 +320,27 @@ export class BookResolver {
 
     let utilityIndex = 0;
 
-    switch (true) {
+    switch (booksInWarehouse) {
       // No books in the warehouse is a big bonus
-      case booksInWarehouse === 0: {
+      case 0: {
         utilityIndex += 1;
         break;
       }
       // Only one book in the warehouse is a good bonus
-      case booksInWarehouse === 1: {
+      case 1: {
         utilityIndex += 0.7;
         break;
       }
       // Four books in the warehouse is a little malus
-      case booksInWarehouse === 4: {
+      case 4: {
         utilityIndex -= 0.25;
         break;
       }
-      // Too many books in the warehouse is a severe malus
-      case booksInWarehouse >= 5: {
-        utilityIndex -= 0.6;
-        break;
+      default: {
+        // Too many books in the warehouse is a severe malus
+        if (booksInWarehouse >= 5) {
+          utilityIndex -= 0.6;
+        }
       }
     }
 

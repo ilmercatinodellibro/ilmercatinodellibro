@@ -201,20 +201,19 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     retailLocation: RetailLocation,
   ) {
     try {
-      const bookIds = (
-        await this.prisma.book.findMany({
-          take: randomInt(
-            BOOKS_PER_USER_BASE,
-            BOOKS_PER_USER_BASE + additionalBooksPerUser,
-          ),
-          where: {
-            retailLocationId: retailLocation.id,
-          },
-          orderBy: {
-            isbnCode: "asc",
-          },
-        })
-      ).map(({ id }) => id);
+      const books = await this.prisma.book.findMany({
+        take: randomInt(
+          BOOKS_PER_USER_BASE,
+          BOOKS_PER_USER_BASE + additionalBooksPerUser,
+        ),
+        where: {
+          retailLocationId: retailLocation.id,
+        },
+        orderBy: {
+          isbnCode: "asc",
+        },
+      });
+      const bookIds = books.map(({ id }) => id);
 
       if (bookIds.length === 0) {
         throw new Error(

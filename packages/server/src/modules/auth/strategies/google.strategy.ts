@@ -42,8 +42,9 @@ export class GoogleStrategy extends PassportStrategy(
   }
 
   authenticate(request: Request, options?: Record<string, unknown>): void {
-    options ??= {};
-    options.state = request.query.locationId;
-    super.authenticate(request, options);
+    super.authenticate(request, {
+      ...options,
+      state: request.query.locationId,
+    });
   }
 }

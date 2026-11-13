@@ -19,7 +19,7 @@ import { ProblemModule } from "src/modules/problem/problem.module";
 import { ReceiptModule } from "src/modules/receipt/receipt.module";
 import { DateScalar } from "./date.scalar";
 import {
-  GraphQLConnectionParams as GraphQLConnectionParameters,
+  GraphQLConnectionParameters,
   GraphQLContext,
   GraphQLWebSocketExtra,
 } from "./modules/auth/auth.models";
@@ -98,11 +98,13 @@ import { UserModule } from "./modules/user/user.module";
           },
           onNext: (ctx, message) => {
             const errors = message.payload.errors ?? [];
-            if (errors.some(({ message }) => message === "Unauthorized")) {
-              const { socket } = ctx.extra as { socket: WebSocket };
-
-              void socket.close(CloseCode.Forbidden, "Forbidden");
+            if (!errors.some(({ message }) => message === "Unauthorized")) {
+              return;
             }
+
+            const { socket } = ctx.extra as { socket: WebSocket };
+
+            void socket.close(CloseCode.Forbidden, "Forbidden");
           },
         },
       },

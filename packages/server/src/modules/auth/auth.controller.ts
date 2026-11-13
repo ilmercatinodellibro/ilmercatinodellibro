@@ -35,12 +35,12 @@ export class AuthController {
   async validateEmail(
     @Query("locationId") locationId: string,
     @Query("token") token: string,
-    @Res() res: Response,
+    @Res() response: Response,
   ) {
     await this.authService.validateEmailVerificationToken(token);
 
     // TODO: login the user automatically
-    res.redirect(
+    response.redirect(
       `${this.rootConfig.clientUrl}/${locationId}/login?emailVerified=true`,
     );
   }
@@ -59,7 +59,7 @@ export class AuthController {
   @Public()
   @UseGuards(FacebookAuthGuard)
   @Get("auth/facebook/callback")
-  facebookAuthCallback(@Req() request: Request, @Res() res: Response) {
+  facebookAuthCallback(@Req() request: Request, @Res() response: Response) {
     // TODO: not saving the phone number nor birthday
     const user = request.user as User | undefined;
     if (!user) {
@@ -69,7 +69,7 @@ export class AuthController {
     const locationId = request.query.state as string;
 
     const jwt = this.authService.createAccessToken(user.id);
-    res.redirect(
+    response.redirect(
       `${this.rootConfig.clientUrl}/${locationId}/login/social?token=${jwt}`,
     );
   }
@@ -88,7 +88,7 @@ export class AuthController {
   @Public()
   @UseGuards(GoogleAuthGuard)
   @Get("auth/google/callback")
-  googleAuthCallback(@Req() request: Request, @Res() res: Response) {
+  googleAuthCallback(@Req() request: Request, @Res() response: Response) {
     // TODO: not saving the phone number nor birthday
 
     const user = request.user as User | undefined;
@@ -99,7 +99,7 @@ export class AuthController {
     const locationId = request.query.state as string;
 
     const jwt = this.authService.createAccessToken(user.id);
-    res.redirect(
+    response.redirect(
       `${this.rootConfig.clientUrl}/${locationId}/login/social?token=${jwt}`,
     );
   }

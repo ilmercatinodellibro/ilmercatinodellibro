@@ -135,12 +135,12 @@ export class MailService {
   }
 
   private applyInternationalization({
-    locale,
+    locale: requestedLocale,
     subject,
     template,
     ...mailDetails
   }: SendMailOptions) {
-    locale = locale ?? "it";
+    const locale = requestedLocale ?? "it";
 
     return {
       locale,

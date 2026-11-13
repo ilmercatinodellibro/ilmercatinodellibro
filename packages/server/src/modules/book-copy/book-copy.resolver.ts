@@ -44,6 +44,7 @@ import { BookCopyService } from "./book-copy.service";
 
 @Resolver(() => BookCopy)
 export class BookCopyResolver {
+  // eslint-disable-next-line @typescript-eslint/max-params -- NestJS injects each dependency as a constructor parameter
   constructor(
     private readonly prisma: PrismaService,
     private readonly bookService: BookCopyService,
@@ -671,13 +672,12 @@ export class BookCopyResolver {
         },
       });
 
-      return this.#refreshBookCopiesAndSendReceipt(
-        prisma,
+      return this.#refreshBookCopiesAndSendReceipt(prisma, {
         bookCopyIds,
         operatorId,
         ownerId,
         retailLocationId,
-      );
+      });
     });
   }
 
@@ -711,13 +711,12 @@ export class BookCopyResolver {
         },
       });
 
-      return this.#refreshBookCopiesAndSendReceipt(
-        prisma,
+      return this.#refreshBookCopiesAndSendReceipt(prisma, {
         bookCopyIds,
         operatorId,
         ownerId,
         retailLocationId,
-      );
+      });
     });
   }
 
@@ -750,13 +749,12 @@ export class BookCopyResolver {
         },
       });
 
-      return this.#refreshBookCopiesAndSendReceipt(
-        prisma,
+      return this.#refreshBookCopiesAndSendReceipt(prisma, {
         bookCopyIds,
         operatorId,
         ownerId,
         retailLocationId,
-      );
+      });
     });
   }
 
@@ -872,10 +870,17 @@ export class BookCopyResolver {
 
   async #refreshBookCopiesAndSendReceipt(
     prisma: Prisma.TransactionClient,
-    bookCopyIds: string[],
-    operatorId: string,
-    ownerId: string,
-    retailLocationId: string,
+    {
+      bookCopyIds,
+      operatorId,
+      ownerId,
+      retailLocationId,
+    }: {
+      bookCopyIds: string[];
+      operatorId: string;
+      ownerId: string;
+      retailLocationId: string;
+    },
   ) {
     const newlyUpdatedBookCopies = await prisma.bookCopy.findMany({
       where: {

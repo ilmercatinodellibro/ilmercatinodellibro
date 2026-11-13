@@ -49,7 +49,7 @@ export const pushNotificationConfiguration = registerAs(
     }
     const fileContents = readFileSync(
       process.env.PUSH_NOTIFICATIONS_FIREBASE_CREDENTIALS_PATH,
-      "utf-8",
+      "utf8",
     );
     const parsedRawContents = JSON.parse(fileContents) as unknown;
     const rawResult = rawFirebaseCredentialsSchema.safeParse(parsedRawContents);

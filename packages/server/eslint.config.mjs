@@ -44,6 +44,11 @@ export default defineConfig(
       // null has special meaning for Prisma and GraphQL
       // Since there is no specific whitelist, we disable this rule
       "unicorn/no-null": "off",
+
+      // The server is compiled to CommonJS, which has neither import.meta nor top-level await
+      // TODO: remove when migrating the server to ESM
+      "unicorn/prefer-module": "off",
+      "unicorn/prefer-top-level-await": "off",
     },
 
     settings: {
@@ -52,6 +57,23 @@ export default defineConfig(
           project: [projectTsConfig],
         }),
       ],
+    },
+  },
+
+  {
+    name: "custom/entrypoints",
+
+    files: [
+      "src/main.ts",
+      "src/repl.ts",
+      "src/generate.ts",
+      "src/commander.ts",
+      "prisma/**/*.ts",
+    ],
+
+    rules: {
+      // It's fine to use process.exit in entrypoints
+      "unicorn/no-process-exit": "off",
     },
   },
 );

@@ -6,6 +6,8 @@ import type { Prisma, PrismaClient } from "@prisma/client";
  * It also doesn't allow null, so we need to convert it to undefined.
  */
 export const toPrismaJSONInput = (input: unknown) =>
+  // structuredClone() would keep the values Prisma doesn't accept, e.g. Date and undefined
+  // eslint-disable-next-line unicorn/prefer-structured-clone
   (JSON.parse(JSON.stringify(input)) ?? undefined) as Prisma.InputJsonValue;
 
 // Prisma doesn't export a specific type for this. We need it because we are passing the client around within transactions.

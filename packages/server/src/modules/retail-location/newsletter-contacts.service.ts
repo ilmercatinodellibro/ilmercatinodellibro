@@ -63,7 +63,7 @@ export class NewsletterContactsService {
       }
 
       const listId = Number.parseInt(brevoContactsListId);
-      if (isNaN(listId)) {
+      if (Number.isNaN(listId)) {
         this.logger.warn(
           `The provided Brevo contacts list ID isn't numeric and thus is invalid for location ${name}`,
         );

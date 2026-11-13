@@ -28,7 +28,7 @@ export const htmlToTextPlugin: PluginFunction = (mail, done) => {
     try {
       let html = value as string | Buffer;
       if (typeof html !== "string") {
-        html = html.toString("utf-8");
+        html = html.toString("utf8");
       }
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

@@ -5,7 +5,7 @@ export interface GraphQLContext {
   req: IncomingMessage & { body?: Record<string, string>; user: User };
 }
 
-export interface GraphQLConnectionParams {
+export interface GraphQLConnectionParameters {
   authorization: string;
 }
 
