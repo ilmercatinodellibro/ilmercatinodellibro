@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { random, startCase, times } from "lodash";
 import RETAIL_LOCATIONS from "test/fixtures/retail-locations";
 import { createUser } from "./user";

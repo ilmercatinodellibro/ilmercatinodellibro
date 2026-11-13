@@ -1,8 +1,8 @@
 import { until } from "@vueuse/core";
-import { LocalStorage, Quasar, QuasarLanguage } from "quasar";
+import { LocalStorage, Quasar, type QuasarLanguage } from "quasar";
 import { boot } from "quasar/wrappers";
-import { IntlDateTimeFormat, createI18n } from "vue-i18n";
-import { UpdateUserPayload } from "src/@generated/graphql";
+import { type IntlDateTimeFormat, createI18n } from "vue-i18n";
+import type { UpdateUserPayload } from "src/@generated/graphql";
 import messages from "src/i18n";
 import { useAuthService } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
@@ -74,11 +74,9 @@ export default boot(async ({ app }) => {
   }
   // calls directly if already logged in
   onLogin(async (user) => {
-    if (user.locale) {
-      await setLanguage(user.locale as MessageLanguages);
-    } else {
-      await updateUserLocale(i18n.global.locale.value);
-    }
+    await (user.locale
+      ? setLanguage(user.locale as MessageLanguages)
+      : updateUserLocale(i18n.global.locale.value));
   });
   // Set i18n instance on app
   app.use(i18n);

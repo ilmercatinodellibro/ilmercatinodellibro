@@ -76,12 +76,12 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloError } from "@apollo/client";
+import type { ApolloError } from "@apollo/client";
 import { mdiPlus } from "@quasar/extras/mdi-v7";
-import { Dialog, Notify, QTableColumn, QTableProps } from "quasar";
+import { Dialog, Notify, type QTableColumn, type QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { Role } from "src/@generated/graphql";
+import type { Role } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
 import ActionsListButton from "src/components/actions-list-button.vue";
 import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
@@ -97,7 +97,7 @@ import { useMembersService } from "src/services/member";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
   GetMembersDocument,
-  MemberFragment,
+  type MemberFragment,
   useGetMembersQuery,
 } from "src/services/user.graphql";
 
@@ -156,10 +156,10 @@ const columns = computed<QTableColumn<MemberFragment>[]>(() => [
     label: t("general.role"),
     name: "role",
     align: "left",
-    format: (val: Role) => t(`roleMap.${val}`),
+    format: (value: Role) => t(`roleMap.${value}`),
   },
   {
-    field: () => undefined,
+    field: () => {},
     label: "",
     name: "actions",
     align: "center",
@@ -185,8 +185,8 @@ function deleteUser(id: string) {
       });
 
       pagination.value.rowsNumber--;
-    } catch (e) {
-      const { message } = e as ApolloError;
+    } catch (error) {
+      const { message } = error as ApolloError;
 
       // TODO: implement centralized error handling
 
@@ -217,8 +217,8 @@ function addUser() {
         pagination.value.rowsNumber++;
         cache.gc();
       }
-    } catch (e) {
-      const { message } = e as ApolloError;
+    } catch (error) {
+      const { message } = error as ApolloError;
 
       // TODO: implement centralized error handling
 

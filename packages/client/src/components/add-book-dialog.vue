@@ -73,7 +73,7 @@
 import { useDialogPluginComponent } from "quasar";
 import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
-import { BookCreateInput } from "src/@generated/graphql";
+import type { BookCreateInput } from "src/@generated/graphql";
 import { notifyError } from "src/helpers/error-messages";
 import { greaterThanZeroRule, requiredRule } from "src/helpers/rules";
 import { useCreateNewBookMutation } from "src/services/book.graphql";

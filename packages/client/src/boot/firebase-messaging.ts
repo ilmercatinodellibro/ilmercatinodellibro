@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { Messaging, getMessaging } from "firebase/messaging";
+import { type Messaging, getMessaging } from "firebase/messaging";
 import { boot } from "quasar/wrappers";
-import { InjectionKey, inject } from "vue";
+import { type InjectionKey, inject } from "vue";
 
 const FIREBASE_MESSAGING_KEY: InjectionKey<Messaging> =
   Symbol("firebase-messaging");

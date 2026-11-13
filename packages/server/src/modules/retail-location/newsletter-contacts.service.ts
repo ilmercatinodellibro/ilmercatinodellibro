@@ -6,10 +6,10 @@ import {
 } from "@getbrevo/brevo";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import type { User } from "@prisma/client";
 import { BrevoConfiguration, brevoConfiguration } from "src/config/brevo";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
-import type { User } from "@prisma/client";
 
 @Injectable()
 export class NewsletterContactsService {
@@ -37,7 +37,7 @@ export class NewsletterContactsService {
     // so this is a good compromise to make sure we're actually sending the newsletter to all new registered users.
     // TODO: add a system which marks users as "active" after their first login using a given retail location
     const sevenDaysAgo = new Date(
-      new Date().getTime() -
+      Date.now() -
         // 7 days in ms
         7 * 24 * 60 * 60 * 1000,
     );
@@ -62,7 +62,7 @@ export class NewsletterContactsService {
         continue;
       }
 
-      const listId = parseInt(brevoContactsListId);
+      const listId = Number.parseInt(brevoContactsListId);
       if (isNaN(listId)) {
         this.logger.warn(
           `The provided Brevo contacts list ID isn't numeric and thus is invalid for location ${name}`,

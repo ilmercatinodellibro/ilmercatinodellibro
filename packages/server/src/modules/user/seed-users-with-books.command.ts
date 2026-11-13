@@ -1,4 +1,4 @@
-import { randomInt } from "crypto";
+import { randomInt } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { Logger } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
@@ -61,8 +61,8 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     description:
       "The amount of book copies which could be generated per user\nAccepted values: natural numbers (default: 5)",
   })
-  parseAdditionalBooksPerUsers(val?: string) {
-    const parsedInteger = toInteger(val);
+  parseAdditionalBooksPerUsers(value?: string) {
+    const parsedInteger = toInteger(value);
 
     if (parsedInteger > 0) {
       return parsedInteger;
@@ -87,8 +87,8 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     description:
       "How many users should be generated\nAccepted values: natural numbers (default: 5)",
   })
-  parseUsers(val?: string) {
-    const parsedInteger = toInteger(val);
+  parseUsers(value?: string) {
+    const parsedInteger = toInteger(value);
 
     if (parsedInteger > 0) {
       return parsedInteger;
@@ -406,7 +406,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
       };
     } & Sale,
   ) {
-    const book = sale.bookCopy.book;
+    const { book } = sale.bookCopy;
 
     if (book.requests.length > 0) {
       const request = book.requests.find(

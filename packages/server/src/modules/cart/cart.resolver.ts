@@ -359,9 +359,9 @@ export class CartResolver {
       },
     });
 
-    const cartBookIds = books.map(({ id }) => id);
+    const cartBookIds = new Set(books.map(({ id }) => id));
     const selectedBookIds = bookCopies.map(({ bookId }) => bookId);
-    if (!selectedBookIds.every((id) => cartBookIds.includes(id))) {
+    if (!selectedBookIds.every((id) => cartBookIds.has(id))) {
       throw new BadRequestException(
         "Given book copies do not match the list of books in the cart",
       );

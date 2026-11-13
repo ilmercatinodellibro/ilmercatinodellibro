@@ -19,7 +19,7 @@ import { ProblemModule } from "src/modules/problem/problem.module";
 import { ReceiptModule } from "src/modules/receipt/receipt.module";
 import { DateScalar } from "./date.scalar";
 import {
-  GraphQLConnectionParams,
+  GraphQLConnectionParams as GraphQLConnectionParameters,
   GraphQLContext,
   GraphQLWebSocketExtra,
 } from "./modules/auth/auth.models";
@@ -92,7 +92,7 @@ import { UserModule } from "./modules/user/user.module";
               "request"
             >;
             const { authorization } =
-              context.connectionParams as unknown as GraphQLConnectionParams;
+              context.connectionParams as unknown as GraphQLConnectionParameters;
 
             extra.authorizationHeader = authorization;
           },

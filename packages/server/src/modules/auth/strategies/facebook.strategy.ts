@@ -43,9 +43,9 @@ export class FacebookStrategy extends PassportStrategy(
     });
   }
 
-  authenticate(req: Request, options?: Record<string, unknown>): void {
+  authenticate(request: Request, options?: Record<string, unknown>): void {
     options ??= {};
-    options.state = req.query.locationId;
-    super.authenticate(req, options);
+    options.state = request.query.locationId;
+    super.authenticate(request, options);
   }
 }

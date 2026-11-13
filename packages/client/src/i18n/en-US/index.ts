@@ -1,6 +1,6 @@
-import { Role } from "src/@generated/graphql";
+import type { Role } from "src/@generated/graphql";
 import retailLocation from "src/i18n/en-US/retailLocation";
-import {
+import type {
   AdditionalMacroIntervalDurationNames,
   AvailableQuickRanges,
 } from "src/models/date-time";

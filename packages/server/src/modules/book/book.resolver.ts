@@ -56,8 +56,8 @@ export class BookResolver {
     // TODO: Use Prisma full-text search
     // handle spaces by replacing them with % for the search
     const searchText = filter.search?.trim().replaceAll(" ", "%");
-    const schoolCodes = filter.schoolCodes;
-    const schoolCourseIds = filter.schoolCourseIds;
+    const { schoolCodes } = filter;
+    const { schoolCourseIds } = filter;
 
     if (rowsPerPage > MAX_ROWS_PER_PAGE) {
       throw new UnprocessableEntityException(
@@ -228,14 +228,14 @@ export class BookResolver {
       TKey extends keyof T,
     >(
       key: TKey,
-      params: T[TKey],
+      parameters: T[TKey],
     ) =>
       this.prisma.book.findUniqueOrThrow({
         where: { id: book.id },
         select: {
           _count: {
             select: {
-              [key]: params,
+              [key]: parameters,
             },
           },
         },
@@ -322,21 +322,25 @@ export class BookResolver {
 
     switch (true) {
       // No books in the warehouse is a big bonus
-      case booksInWarehouse === 0:
+      case booksInWarehouse === 0: {
         utilityIndex += 1;
         break;
+      }
       // Only one book in the warehouse is a good bonus
-      case booksInWarehouse === 1:
+      case booksInWarehouse === 1: {
         utilityIndex += 0.7;
         break;
+      }
       // Four books in the warehouse is a little malus
-      case booksInWarehouse === 4:
+      case booksInWarehouse === 4: {
         utilityIndex -= 0.25;
         break;
+      }
       // Too many books in the warehouse is a severe malus
-      case booksInWarehouse >= 5:
+      case booksInWarehouse >= 5: {
         utilityIndex -= 0.6;
         break;
+      }
     }
 
     // If there are no current requests we give a small malus

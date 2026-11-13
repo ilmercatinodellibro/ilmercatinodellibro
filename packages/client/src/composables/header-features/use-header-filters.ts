@@ -1,5 +1,5 @@
-import { QSelectOption } from "quasar";
-import { Ref, ref, watch } from "vue";
+import type { QSelectOption } from "quasar";
+import { type Ref, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { injectorFactory } from "src/helpers/injector-factory";
 

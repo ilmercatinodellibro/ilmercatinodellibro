@@ -79,7 +79,7 @@ import {
   mdiHelpCircle,
   mdiPhone,
 } from "@quasar/extras/mdi-v7";
-import { QTooltipProps } from "quasar";
+import type { QTooltipProps } from "quasar";
 import { useI18n } from "vue-i18n";
 import AppDrawer from "src/components/app-drawer.vue";
 import HeaderBar from "src/components/header-bar.vue";

@@ -207,7 +207,7 @@ import {
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
 import { sumBy } from "lodash-es";
-import { Notify, QChipProps, QTab, QTableColumn } from "quasar";
+import { Notify, type QChipProps, QTab, type QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -223,18 +223,18 @@ import { BooksTab } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import {
-  BookCopyDetailsFragment,
+  type BookCopyDetailsFragment,
   useGetBookCopiesByOwnerQuery,
   useGetPurchasedBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 import {
   GetRequestsDocument,
-  RequestSummaryFragment,
+  type RequestSummaryFragment,
   useDeleteRequestMutation,
   useGetRequestsQuery,
 } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
-import { ReservationSummaryFragment } from "src/services/reservation.graphql";
+import type { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
 const { t } = useI18n();
@@ -343,7 +343,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
     [BooksTab.DELIVERED]: [
       {
         name: "status",
-        field: () => undefined,
+        field: () => {},
         label: t("book.fields.status"),
         align: "left",
       },
@@ -402,15 +402,15 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         label: "",
         classes: isMobile.value ? "no-padding" : "",
       },
-      ...(!isMobile.value
-        ? [
+      ...(isMobile.value
+        ? []
+        : [
             {
               name: "cancel-request",
-              field: () => undefined,
+              field: () => {},
               label: "",
             } satisfies QTableColumn<TablesRowsTypes>,
-          ]
-        : []),
+          ]),
     ],
     [BooksTab.RESERVED]: [
       ...commonColumns.value,
@@ -424,7 +424,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       },
       {
         name: "actions",
-        field: () => undefined,
+        field: () => {},
         label: "",
         classes: isMobile.value ? "no-padding" : "",
       },
@@ -545,11 +545,11 @@ async function reserveBook(request: RequestSummaryFragment) {
       },
     );
     cache.gc();
-  } catch (e) {
+  } catch (error) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
         t("reserveBooks.reservation"),
-        e,
+        error,
       ]),
     );
   } finally {

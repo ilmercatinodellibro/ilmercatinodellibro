@@ -1,18 +1,18 @@
-import { inject, InjectionKey, provide } from "vue";
+import { inject, type InjectionKey, provide } from "vue";
 
 function getValueFromMaybeFunction<Args extends unknown[], Provided>(
-  params: Args,
-  valueOrFn: Provided,
+  parameters: Args,
+  valueOrFunction: Provided,
 ): Provided extends (...args: Args) => infer R ? R : Provided {
   // TS isn't able to narrow down correctly `T | () => T` types as infer `ReturnType<Function>` as any
   // See: https://github.com/microsoft/TypeScript/issues/37663
   // See: https://github.com/microsoft/TypeScript/issues/37993#issuecomment-615369691
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return valueOrFn instanceof Function
+  return typeof valueOrFunction === "function"
     ? // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      valueOrFn(params)
+      valueOrFunction(parameters)
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any -- it was working on TS 5.6 without `as any`, not sure at this point and not worth the time
-      (valueOrFn as any);
+      (valueOrFunction as any);
 }
 
 /**

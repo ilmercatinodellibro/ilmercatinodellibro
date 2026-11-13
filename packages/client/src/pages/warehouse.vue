@@ -217,7 +217,7 @@ import {
   mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, QTableColumn, QTableProps } from "quasar";
+import { Dialog, type QTableColumn, type QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import ActionsListButton from "src/components/actions-list-button.vue";
@@ -239,11 +239,11 @@ import { notifyError } from "src/helpers/error-messages";
 import { getFieldValue } from "src/helpers/table-helpers";
 import { fetchBooksWithCopies } from "src/services/book";
 import { fetchBooksCopies } from "src/services/book-copy";
-import {
+import type {
   BookCopyDetailsFragment,
   PaginatedBookCopyResultFragment,
 } from "src/services/book-copy.graphql";
-import {
+import type {
   BookSummaryFragment,
   PaginatedBookResultFragment,
 } from "src/services/book.graphql";
@@ -313,12 +313,14 @@ async function fetchBooks({
     });
 
     switch (result.__typename) {
-      case "BookQueryResult":
+      case "BookQueryResult": {
         paginatedBooksWithCopies.value = result;
         break;
-      case "PaginatedBookCopyQueryResult":
+      }
+      case "PaginatedBookCopyQueryResult": {
         paginatedBookCopies.value = result;
         break;
+      }
     }
 
     pagination.value.rowsNumber = result.rowsCount;
@@ -407,7 +409,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
     },
     {
       name: "status",
-      field: () => undefined,
+      field: () => {},
       label: t("book.fields.status"),
       align: "left",
     },
@@ -439,19 +441,19 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
       align: "left",
       classes: "max-width-160 ellipsis",
     },
-    ...((!isMobile.value
-      ? [
+    ...((isMobile.value
+      ? []
+      : [
           {
             name: "problems",
             field: "problems",
             label: "",
             align: "center",
           },
-        ]
-      : []) satisfies QTableColumn<BookCopyDetailsFragment>[]),
+        ]) satisfies QTableColumn<BookCopyDetailsFragment>[]),
     {
       name: "history",
-      field: () => undefined,
+      field: () => {},
       label: "",
       classes: isMobile.value ? "no-padding" : "",
     },

@@ -20,11 +20,9 @@
 
 <script setup lang="ts">
 import { mdiEye, mdiEyeOff } from "@quasar/extras/mdi-v7";
-import { QInput, ValidationRule } from "quasar";
+import { QInput, type ValidationRule } from "quasar";
 
 type Slots = QInput["$slots"];
-
-const slots = defineSlots<Slots>();
 
 defineProps({
   rules: {
@@ -36,6 +34,8 @@ defineProps({
     required: true,
   },
 });
+
+const slots = defineSlots<Slots>();
 
 const password = defineModel<string>();
 const showPassword = defineModel<boolean>("show", { default: false });

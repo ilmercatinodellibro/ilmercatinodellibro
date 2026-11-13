@@ -10,7 +10,7 @@ import { AvailableRouteNames } from "src/models/routes";
 import { useSocialLogin } from "src/services/auth";
 
 const router = useRouter();
-const { query, params } = useRoute();
+const { query, params: parameters } = useRoute();
 const { login } = useSocialLogin();
 
 void (async () => {
@@ -19,7 +19,7 @@ void (async () => {
     await router.push({
       name: AvailableRouteNames.Home,
       params: {
-        locationId: params.locationId,
+        locationId: parameters.locationId,
       },
     });
   } catch (error) {

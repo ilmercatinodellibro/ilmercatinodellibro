@@ -1,7 +1,7 @@
 import "reflect-metadata";
 
-import { writeFile } from "fs/promises";
-import { join } from "path";
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import {
@@ -36,7 +36,7 @@ async function getResolvers(source: string | string[]) {
   const sourceArray = Array.isArray(source) ? source : [source];
   // https://github.com/mrmlnc/fast-glob/tree/3.2.12#how-to-write-patterns-on-windows
   const normalizedSource = sourceArray.map((source) =>
-    source.replace(/\\/g, "/"),
+    source.replaceAll("\\", "/"),
   );
   for await (const path of glob.stream(normalizedSource)) {
     // May contain multiple resolvers
@@ -55,12 +55,12 @@ async function getResolvers(source: string | string[]) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isClass(obj: any): obj is typeof Function {
+function isClass(object: any): object is typeof Function {
   /* eslint-disable @typescript-eslint/no-unsafe-member-access */
   return (
-    !!obj.prototype &&
-    !!obj.prototype.constructor &&
-    !!obj.prototype.constructor.name
+    !!object.prototype &&
+    !!object.prototype.constructor &&
+    !!object.prototype.constructor.name
   );
   /* eslint-enable @typescript-eslint/no-unsafe-member-access */
 }

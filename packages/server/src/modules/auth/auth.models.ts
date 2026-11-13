@@ -1,5 +1,5 @@
-import { IncomingMessage } from "http";
-import { User } from "src/@generated";
+import type { IncomingMessage } from "node:http";
+import type { User } from "src/@generated";
 
 export interface GraphQLContext {
   req: IncomingMessage & { body?: Record<string, string>; user: User };

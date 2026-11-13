@@ -52,7 +52,7 @@ import { mdiClose } from "@quasar/extras/mdi-v7";
 import { QCard } from "quasar";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { CommonDialogProps } from "./dialog-models";
+import type { CommonDialogProps } from "./dialog-models";
 
 withDefaults(
   defineProps<

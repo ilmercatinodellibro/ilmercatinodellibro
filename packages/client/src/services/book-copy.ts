@@ -1,7 +1,7 @@
 import { useApolloClient } from "@vue/apollo-composable";
 import {
   GetPaginatedBookCopiesDocument,
-  GetPaginatedBookCopiesQueryVariables,
+  type GetPaginatedBookCopiesQueryVariables,
 } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 

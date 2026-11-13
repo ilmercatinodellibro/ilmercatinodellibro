@@ -44,6 +44,6 @@ async function filterFilesToLint(files, cwd) {
       return eslint.isPathIgnored(file);
     }),
   );
-  const filteredFiles = files.filter((_, i) => !isIgnored[i]);
+  const filteredFiles = files.filter((_, index) => !isIgnored[index]);
   return filteredFiles.join(" ");
 }

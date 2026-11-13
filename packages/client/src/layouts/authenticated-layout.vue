@@ -536,16 +536,22 @@ import {
   mdiWeb,
 } from "@quasar/extras/mdi-v7";
 import { useOnline } from "@vueuse/core";
-import { Dialog, Loading, Notify, QTooltipProps, exportFile } from "quasar";
+import {
+  Dialog,
+  Loading,
+  Notify,
+  type QTooltipProps,
+  exportFile,
+} from "quasar";
 import { watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { setLanguage } from "src/boot/i18n";
 import AppDrawer from "src/components/app-drawer.vue";
 import HeaderBar from "src/components/header-bar.vue";
 import ImportBooksAndSchoolsDialog from "src/components/import-books-and-schools-dialog.vue";
-import {
-  type SettingsDialogProps,
-  type SettingsUpdate,
+import type {
+  SettingsDialogProps,
+  SettingsUpdate,
 } from "src/components/settings-dialog";
 import SettingsDialog from "src/components/settings-dialog.vue";
 import { provideHeaderActions } from "src/composables/header-features/use-header-actions";
@@ -675,7 +681,7 @@ function openSettings() {
             retailLocationId: selectedLocation.value.id,
           },
         });
-        window.location.reload();
+        globalThis.location.reload();
       } catch {
         notifyError(t("common.genericErrorMessage"));
       }

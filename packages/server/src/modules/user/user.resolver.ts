@@ -701,7 +701,7 @@ export class UserResolver {
     );
 
     try {
-      //TODO: use queues instead of doing await
+      // TODO: use queues instead of doing await
       await this.authService.sendVerificationLink(
         payload.retailLocationId,
         user,

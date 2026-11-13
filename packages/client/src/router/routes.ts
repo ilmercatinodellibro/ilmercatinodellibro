@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 import { AvailableRouteNames } from "src/models/routes";
 import ErrorNotFoundPage from "src/pages/error-not-found.vue";
 import {

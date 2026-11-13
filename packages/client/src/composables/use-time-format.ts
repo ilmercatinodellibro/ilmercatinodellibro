@@ -19,14 +19,18 @@ export function useTimeFormat() {
     const DAY = HOUR * 24;
 
     switch (true) {
-      case diffInMinutes < HOUR:
+      case diffInMinutes < HOUR: {
         return formatter.format(-diffInMinutes, "minute");
-      case diffInMinutes < DAY:
+      }
+      case diffInMinutes < DAY: {
         return formatter.format(-Math.round(diffInMinutes / HOUR), "hour");
-      case diffInMinutes < DAY * 2:
+      }
+      case diffInMinutes < DAY * 2: {
         return formatter.format(-Math.round(diffInMinutes / DAY), "day");
-      default:
+      }
+      default: {
         return d(date, "full");
+      }
     }
   }
 

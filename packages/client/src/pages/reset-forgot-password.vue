@@ -54,13 +54,13 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloError } from "@apollo/client/core";
+import type { ApolloError } from "@apollo/client/core";
 import { Notify, QForm } from "quasar";
 import { reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import PasswordStrengthBar from "components/password-strength-bar.vue";
-import { ResetForgottenPasswordPayload } from "src/@generated/graphql";
+import type { ResetForgottenPasswordPayload } from "src/@generated/graphql";
 import KPasswordInput from "src/components/k-password-input.vue";
 import { STRENGTH_BAR_STEPS } from "src/components/models";
 import { notifyError } from "src/helpers/error-messages";

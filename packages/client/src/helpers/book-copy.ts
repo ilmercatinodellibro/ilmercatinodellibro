@@ -1,12 +1,12 @@
 import { Dialog } from "quasar";
-import { ProblemType } from "src/@generated/graphql";
+import type { ProblemType } from "src/@generated/graphql";
 import { useI18nOutsideSetup } from "src/boot/i18n";
 import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
 import { notifyError } from "src/helpers/error-messages";
 import {
-  BookCopyDetailsFragment,
+  type BookCopyDetailsFragment,
   BookCopyDetailsFragmentDoc,
-  ProblemSummaryFragment,
+  type ProblemSummaryFragment,
   useReportProblemMutation,
   useResolveProblemMutation,
 } from "src/services/book-copy.graphql";
@@ -52,9 +52,9 @@ export function getStatus(bookCopy: BookCopyDetailsFragment): BookCopyStatus {
         : bookCopy.donatedAt
           ? "donated"
           : problemType
-            ? problemType !== "CUSTOM"
-              ? problemType
-              : "not-available"
+            ? problemType === "CUSTOM"
+              ? "not-available"
+              : problemType
             : "available";
 }
 
@@ -109,14 +109,14 @@ export const reportOrSolveProblem = (bookCopy: BookCopyDetailsFragment) =>
               ...book,
               problems: activeProblem
                 ? book.problems?.map((problem) =>
-                    !problem.resolvedAt ? data : problem,
+                    problem.resolvedAt ? problem : data,
                   )
                 : [...(book.problems ?? []), data],
             };
           },
         );
-      } catch (e) {
-        const error = e as Error;
+      } catch (error_) {
+        const error = error_ as Error;
         notifyError(
           t(
             activeProblem

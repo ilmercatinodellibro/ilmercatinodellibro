@@ -1,4 +1,4 @@
-import { parse, transform } from "csv";
+import type { parse, transform } from "csv";
 
 export type IngestedCsvRow = [
   school_code: string,

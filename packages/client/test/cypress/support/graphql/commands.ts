@@ -1,3 +1,4 @@
+import type { TypedDocumentNode } from "@apollo/client/core";
 import { clone } from "lodash"; // lodash-es doesn't work for some reason
 import {
   WaitGraphqlError,
@@ -6,7 +7,6 @@ import {
   getActiveAliasForOperation,
   hasOperationName,
 } from "./utils";
-import type { TypedDocumentNode } from "@apollo/client/core";
 
 type CypressWaitOptions = Parameters<Cypress.Chainable["wait"]>[1];
 type WaitOptions = CypressWaitOptions & {
@@ -154,7 +154,7 @@ const waitGraphqlCommand: Cypress.CommandFn<"waitGraphql"> = (
 
         if (
           result instanceof WaitGraphqlError &&
-          !(allowGraphqlErrors && result.cause === "GRAPHQL_ERROR")
+          (!allowGraphqlErrors || result.cause !== "GRAPHQL_ERROR")
         ) {
           const { request, response } = result;
 
@@ -172,14 +172,14 @@ const waitGraphqlCommand: Cypress.CommandFn<"waitGraphql"> = (
 
         // Promise.resolve() is needed to be able to use cy commands in this block
         // The next block will receive the resolved value
-        return Promise.resolve(result);
+        return result;
       })
       // After the Cypress execution in the previous then() blocks are done,
       // throw the error if it's an instance of WaitGraphqlError, otherwise return the result
       .then((result) => {
         if (
           result instanceof WaitGraphqlError &&
-          !(allowGraphqlErrors && result.cause === "GRAPHQL_ERROR")
+          (!allowGraphqlErrors || result.cause !== "GRAPHQL_ERROR")
         ) {
           throw result;
         }
@@ -219,9 +219,9 @@ const withinGraphqlOperationsCommand: Cypress.CommandFn<
     throw new Error("No operations provided");
   }
 
-  graphqlOperationDescriptors.forEach((operation) => {
+  for (const operation of graphqlOperationDescriptors) {
     cy.interceptGraphql(operation);
-  });
+  }
 
   callback();
 

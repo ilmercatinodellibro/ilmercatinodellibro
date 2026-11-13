@@ -106,9 +106,9 @@ export class RetailLocationController {
 
     await Promise.all(
       Object.values(this.mimeTypeExtensionMap)
-        .filter((ext) => ext !== extension)
-        .map((ext) =>
-          rm(resolve(logoDirectory, `./logo.${ext}`), { force: true }),
+        .filter((extension_) => extension_ !== extension)
+        .map((extension_) =>
+          rm(resolve(logoDirectory, `./logo.${extension_}`), { force: true }),
         ),
     );
 

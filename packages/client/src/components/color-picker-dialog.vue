@@ -39,14 +39,12 @@ import { useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 
-const { t } = useI18n();
-const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
-  useDialogPluginComponent();
-defineEmits(useDialogPluginComponent.emits);
-
 const props = defineProps<{
   color: string;
 }>();
-
+defineEmits(useDialogPluginComponent.emits);
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
+  useDialogPluginComponent();
+const { t } = useI18n();
 const colorRef = ref(props.color);
 </script>

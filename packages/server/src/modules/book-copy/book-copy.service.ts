@@ -67,7 +67,7 @@ export class BookCopyService {
           code: "asc",
         },
       })
-    ).map(({ code }) => parseInt(code.split("/")[0]));
+    ).map(({ code }) => Number.parseInt(code.split("/")[0]));
 
     if (currentlyAssignedCodes.length === 0 || !useFragmentation) {
       // When registering new books at the end of the current codes, we must consider also books that have been sold/returned.
@@ -84,9 +84,9 @@ export class BookCopyService {
       });
 
       const currentMaxAssignedNumber = storedMaxCode._max.code ?? "0000/000";
-      let shelfCode = parseInt(currentMaxAssignedNumber.split("/")[0]);
+      let shelfCode = Number.parseInt(currentMaxAssignedNumber.split("/")[0]);
       const generatedCodes: string[] = [];
-      for (let i = 0; i < numberOfCodesToGenerate; i++) {
+      for (let index = 0; index < numberOfCodesToGenerate; index++) {
         shelfCode++;
         generatedCodes.push(`${shelfCode}`.padStart(4, "0") + "/001");
       }
@@ -95,9 +95,9 @@ export class BookCopyService {
     }
 
     const foundSlots: string[] = [];
-    for (let i = 1; foundSlots.length < numberOfCodesToGenerate; i++) {
-      if (!currentlyAssignedCodes.includes(i)) {
-        foundSlots.push(`${i}`.padStart(4, "0"));
+    for (let index = 1; foundSlots.length < numberOfCodesToGenerate; index++) {
+      if (!currentlyAssignedCodes.includes(index)) {
+        foundSlots.push(`${index}`.padStart(4, "0"));
       }
     }
 
@@ -128,7 +128,7 @@ export class BookCopyService {
       const [slotShelfCode, booksPassedByThisSlotShelf] =
         prismaCode._max.code.split("/");
 
-      return `${slotShelfCode}/${(parseInt(booksPassedByThisSlotShelf) + 1).toString().padStart(3, "0")}`;
+      return `${slotShelfCode}/${(Number.parseInt(booksPassedByThisSlotShelf) + 1).toString().padStart(3, "0")}`;
     });
   }
 }

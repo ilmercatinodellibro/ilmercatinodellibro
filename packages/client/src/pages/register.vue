@@ -127,19 +127,19 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloError } from "@apollo/client/core";
+import type { ApolloError } from "@apollo/client/core";
 import {
   mdiEye,
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
 import { omit } from "lodash-es";
-import { Notify, QInputProps, uid } from "quasar";
+import { Notify, type QInputProps, uid } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import SocialAuthButtons from "components/social-auth-buttons.vue";
-import { RegisterUserPayload } from "src/@generated/graphql";
+import type { RegisterUserPayload } from "src/@generated/graphql";
 import { STRENGTH_BAR_STEPS } from "src/components/models";
 import PasswordStrengthBar from "src/components/password-strength-bar.vue";
 import { useTheme } from "src/composables/use-theme";
@@ -254,8 +254,9 @@ const formData = computed<FormField[]>(() => [
       readonly: !!props.email,
     },
   },
-  ...(!props.email
-    ? [
+  ...(props.email
+    ? []
+    : [
         {
           field: "confirmEmail",
           inputData: {
@@ -263,8 +264,7 @@ const formData = computed<FormField[]>(() => [
             rules: [requiredRule, emailMatchRule],
           },
         } satisfies FormField,
-      ]
-    : []),
+      ]),
   {
     field: "password",
     inputData: {
@@ -298,15 +298,15 @@ async function onSubmit() {
       },
     };
 
-    if (!props.token) {
-      await register(registrationData);
-    } else {
+    if (props.token) {
       await registerWithToken(
         registrationData,
         // We override the request context to add the one-shot JWT token header
         // See https://www.apollographql.com/docs/react/data/mutations#context
         { context: { headers: getJwtHeader(props.token) } },
       );
+    } else {
+      await register(registrationData);
     }
 
     await router.push({ name: "login" });

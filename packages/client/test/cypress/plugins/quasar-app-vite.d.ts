@@ -14,7 +14,7 @@ declare module "@quasar/app-vite/lib/helpers/get-quasar-ctx" {
 }
 
 declare module "@quasar/app-vite/lib/quasar-config-file" {
-  class QuasarConfFile {
+  class QuasarConfigFile {
     constructor(options: {
       ctx: Record<string, any>;
       host?: string;
@@ -24,10 +24,10 @@ declare module "@quasar/app-vite/lib/quasar-config-file" {
     read(): Promise<Record<string, any>>;
   }
 
-  export default QuasarConfFile;
+  export default QuasarConfigFile;
 }
 
 declare module "@quasar/app-vite/lib/modes/spa/spa-config" {
-  const generateConfig: { vite: (quasarConf: Record<string, any>) => any };
+  const generateConfig: { vite: (quasarConfig: Record<string, any>) => any };
   export default generateConfig;
 }

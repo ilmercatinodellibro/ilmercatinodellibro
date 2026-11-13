@@ -115,12 +115,12 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloError } from "@apollo/client/core";
+import type { ApolloError } from "@apollo/client/core";
 import { mdiArrowDown, mdiArrowLeft } from "@quasar/extras/mdi-v7";
 import { Notify, QCard } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { LoginPayload } from "src/@generated/graphql";
+import type { LoginPayload } from "src/@generated/graphql";
 import FaqInfo from "src/components/faq-info.vue";
 import KPasswordInput from "src/components/k-password-input.vue";
 import SocialAuthButtons from "src/components/social-auth-buttons.vue";

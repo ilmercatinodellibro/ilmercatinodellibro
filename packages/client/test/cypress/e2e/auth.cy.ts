@@ -247,7 +247,7 @@ describe("Authentication", () => {
       cy.dataCy("submit-button").click();
     });
     cy.testRoute(DASHBOARD_PAGE_WITH_POSSIBLE_DASHBOARD_ID);
-    cy.dataCy("user-item", { timeout: 15000 }).contains(TEST_USER.email);
+    cy.dataCy("user-item", { timeout: 15_000 }).contains(TEST_USER.email);
 
     // Try to visit the login page while logged in
     cy.visit("/login");

@@ -158,9 +158,7 @@
                 :key="colName"
                 :key-td="colName"
                 :props
-                :clickable-when-zero="
-                  alwaysClickableColsNames.includes(colName)
-                "
+                :clickable-when-zero="alwaysClickableColsNames.has(colName)"
                 :disable="willBeDeleted(props.row)"
                 :secondary-value="
                   colName === 'requested'
@@ -431,8 +429,14 @@ import {
   mdiPlus,
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, Notify, QTable, QTableColumn, QTableProps } from "quasar";
-import { Ref, computed, onMounted, ref } from "vue";
+import {
+  Dialog,
+  Notify,
+  QTable,
+  type QTableColumn,
+  type QTableProps,
+} from "quasar";
+import { type Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import ActionsListButton from "src/components/actions-list-button.vue";
 import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
@@ -453,13 +457,13 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { notifyError } from "src/helpers/error-messages";
 import { getColValue } from "src/helpers/table-helpers";
-import { UserDialogPayload } from "src/models/user";
+import type { UserDialogPayload } from "src/models/user";
 import { useAuthService } from "src/services/auth";
 import { useCustomerService } from "src/services/customer";
 import { useRetailLocationService } from "src/services/retail-location";
 import { useDownloadUserData } from "src/services/user";
 import {
-  CustomerFragment,
+  type CustomerFragment,
   useAddUserMutation,
   useCancelUserAccountDeletionMutation,
   useDeleteUserAccountMutation,
@@ -515,12 +519,14 @@ function updateSelectedStatus(
   }
 
   switch (newStatus) {
-    case "selected":
+    case "selected": {
       tableRow.classList.add("bg-primary-selected");
       break;
-    case "deselected":
+    }
+    case "deselected": {
       tableRow.classList.remove("bg-primary-selected");
       break;
+    }
   }
 }
 
@@ -547,9 +553,11 @@ const columnTooltip = computed(() => ({
 
 // The "satisfies QTableColumn<...>" is needed to avoid a TS mismatch caused by `computed` type
 const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
-  ...((!isMobile.value
-    ? [{ name: "edit", field: () => undefined, label: "" }]
-    : []) satisfies QTableColumn<CustomerFragment>[]),
+  ...((isMobile.value
+    ? []
+    : [
+        { name: "edit", field: () => {}, label: "" },
+      ]) satisfies QTableColumn<CustomerFragment>[]),
   {
     name: "email",
     field: "email",
@@ -611,21 +619,21 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: t("manageUsers.fields.purchased"),
     align: "left",
   },
-  ...((!isMobile.value
-    ? [
+  ...((isMobile.value
+    ? []
+    : [
         {
           name: "shopping-cart",
           field: "booksInCart",
           label: t("manageUsers.fields.cart"),
           align: "center",
         },
-      ]
-    : []) satisfies QTableColumn<CustomerFragment>[]),
+      ]) satisfies QTableColumn<CustomerFragment>[]),
   {
     name: "creation-date",
     field: "createdAt",
-    format: (val: string) =>
-      new Date(val)
+    format: (value: string) =>
+      new Date(value)
         .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
           hour12: false,
           hour: "2-digit",
@@ -637,29 +645,27 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: t("manageUsers.fields.creationDate"),
     align: "left",
   },
-  ...((!isMobile.value
+  ...((isMobile.value
     ? [
         {
+          name: "actions",
+          field: () => {},
+          label: "",
+          classes: ({ emailVerified }) =>
+            `no-padding ${emailVerified ? "" : "bg-blue-grey-1 text-black-54"}`,
+        },
+      ]
+    : [
+        {
           name: "receipts",
-          field: () => undefined,
+          field: () => {},
           label: t("manageUsers.fields.receipts"),
           align: "center",
         },
         {
           name: "pay-off",
-          field: () => undefined,
+          field: () => {},
           label: "",
-        },
-      ]
-    : [
-        {
-          name: "actions",
-          field: () => undefined,
-          label: "",
-          classes: ({ emailVerified }) =>
-            `no-padding ${
-              !emailVerified ? "bg-blue-grey-1 text-black-54" : ""
-            }`,
         },
       ]) satisfies QTableColumn<CustomerFragment>[]),
 ]);
@@ -801,7 +807,7 @@ function openEdit({
 }
 
 // cells to always be clickable
-const alwaysClickableColsNames = ["in-stock", "reserved", "requested"];
+const alwaysClickableColsNames = new Set(["in-stock", "reserved", "requested"]);
 
 function openCellEditDialog(
   userData: CustomerFragment,
@@ -810,13 +816,13 @@ function openCellEditDialog(
 ) {
   if (
     !selectedLocation.value.id ||
-    (value <= 0 && !alwaysClickableColsNames.includes(colName))
+    (value <= 0 && !alwaysClickableColsNames.has(colName))
   ) {
     return;
   }
 
   switch (colName) {
-    case "in-stock":
+    case "in-stock": {
       Dialog.create({
         component: EditUserStockdataDialog,
         componentProps: { userData },
@@ -824,7 +830,8 @@ function openCellEditDialog(
         tableRef.value.requestServerInteraction();
       });
       break;
-    case "reserved":
+    }
+    case "reserved": {
       Dialog.create({
         component: EditUserReservedDialog,
         componentProps: {
@@ -839,7 +846,8 @@ function openCellEditDialog(
           tableRef.value.requestServerInteraction();
         });
       break;
-    case "requested":
+    }
+    case "requested": {
       Dialog.create({
         component: EditUserRequestedDialog,
         componentProps: {
@@ -854,6 +862,7 @@ function openCellEditDialog(
           tableRef.value.requestServerInteraction();
         });
       break;
+    }
     case "sold":
     case "purchased": {
       if (value === 0) {

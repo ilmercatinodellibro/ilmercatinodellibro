@@ -92,7 +92,12 @@ import {
   mdiChevronRight,
 } from "@quasar/extras/mdi-v7";
 import { clamp, omit } from "lodash-es";
-import { QTable, QTableColumn, QTableProps, QTableSlots } from "quasar";
+import {
+  QTable,
+  type QTableColumn,
+  type QTableProps,
+  type QTableSlots,
+} from "quasar";
 import { computed, onMounted, ref, type Slot } from "vue";
 import { useI18n } from "vue-i18n";
 import NumberInput from "src/components/manage-users/number-input.vue";
@@ -113,17 +118,17 @@ withDefaults(
   },
 );
 
-type PaginationScope =
-  QTableSlots["pagination"] extends Slot<infer Scope> ? Scope : never;
+const slots = defineSlots<QTableSlots>();
 
 const pagination =
   defineModel<NonNullable<QTableProps["pagination"]>>("pagination");
 
+type PaginationScope =
+  QTableSlots["pagination"] extends Slot<infer Scope> ? Scope : never;
+
 onMounted(() => {
   tableRef.value?.requestServerInteraction();
 });
-
-const slots = defineSlots<QTableSlots>();
 
 const filteredSlots = omit(slots, "pagination");
 

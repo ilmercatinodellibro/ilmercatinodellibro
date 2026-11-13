@@ -1,7 +1,7 @@
+import { relative, resolve } from "node:path";
 import { configDotenv } from "dotenv";
 import { expand } from "dotenv-expand";
 import type { IGraphQLProject } from "graphql-config";
-import { relative, resolve } from "node:path";
 
 const { SERVER_URL } = expand(configDotenv()).parsed ?? {};
 

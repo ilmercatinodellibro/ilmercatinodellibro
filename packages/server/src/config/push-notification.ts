@@ -1,6 +1,6 @@
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { registerAs } from "@nestjs/config";
-import { ServiceAccount } from "firebase-admin";
+import type { ServiceAccount } from "firebase-admin";
 import { z } from "zod";
 
 // Output from the Firebase Console uses snake_case

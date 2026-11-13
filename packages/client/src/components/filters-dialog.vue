@@ -53,12 +53,12 @@ import {
   Notify,
   QCheckbox,
   QRadio,
-  QSelectOption,
+  type QSelectOption,
   useDialogPluginComponent,
 } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
+import type { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 interface HeaderFiltersProps {
@@ -75,10 +75,10 @@ const props = withDefaults(defineProps<HeaderFiltersProps>(), {
 
 defineEmits(useDialogPluginComponent.emits);
 
-const { t } = useI18n();
-
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent<HeaderFilterModel<TOptionValue>>();
+
+const { t } = useI18n();
 
 const clonedInitialModel = cloneDeep(props.initialModel);
 
@@ -106,17 +106,7 @@ function removeFilters() {
 }
 
 function onSubmit(filterValuesToSubmit: unknown) {
-  if (filterValuesToSubmit !== undefined) {
-    const filtersToReturn = isArray(filterValuesToSubmit)
-      ? props.options.filter(({ value: optionValue }) =>
-          filterValuesToSubmit.some(
-            (filterValue) => filterValue === optionValue,
-          ),
-        )
-      : props.options.find(({ value }) => value === filterValuesToSubmit);
-
-    onDialogOK(filtersToReturn);
-  } else {
+  if (filterValuesToSubmit === undefined) {
     Notify.create({
       message: t("actions.selectAtLeastOneOption"),
       color: "secondary",
@@ -125,6 +115,14 @@ function onSubmit(filterValuesToSubmit: unknown) {
       badgeTextColor: "primary-54",
       timeout: 500,
     });
+  } else {
+    const filtersToReturn = isArray(filterValuesToSubmit)
+      ? props.options.filter(({ value: optionValue }) =>
+          filterValuesToSubmit.includes(optionValue),
+        )
+      : props.options.find(({ value }) => value === filterValuesToSubmit);
+
+    onDialogOK(filtersToReturn);
   }
 }
 </script>

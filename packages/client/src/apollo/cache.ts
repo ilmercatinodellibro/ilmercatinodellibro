@@ -1,9 +1,9 @@
-import { ApolloCache } from "@apollo/client/core";
-import {
+import type { ApolloCache } from "@apollo/client/core";
+import type {
   TypedDocumentNode,
   VariablesOf,
 } from "@graphql-typed-document-node/core";
-import { Kind, OperationDefinitionNode, OperationTypeNode } from "graphql";
+import { Kind, type OperationDefinitionNode, OperationTypeNode } from "graphql";
 
 /**
  * Evicts a query from the cache.

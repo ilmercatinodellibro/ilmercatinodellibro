@@ -1,4 +1,4 @@
-import { Role } from "src/@generated/graphql";
+import type { Role } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
 import { useRetailLocationService } from "src/services/retail-location";
 import {

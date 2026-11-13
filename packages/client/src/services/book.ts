@@ -1,11 +1,11 @@
 import { useApolloClient } from "@vue/apollo-composable";
-import { ComputedRef, Ref, computed } from "vue";
-import { BookQueryFilter } from "src/@generated/graphql";
+import { type ComputedRef, type Ref, computed } from "vue";
+import type { BookQueryFilter } from "src/@generated/graphql";
 import {
   GetBookByIsbnDocument,
-  GetBooksQueryVariables,
+  type GetBooksQueryVariables,
   GetBooksWithCopiesDocument,
-  GetBooksWithCopiesQueryVariables,
+  type GetBooksWithCopiesQueryVariables,
   useGetBooksQuery,
 } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";

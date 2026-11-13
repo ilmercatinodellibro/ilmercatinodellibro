@@ -1,5 +1,5 @@
-import { PipeTransform, Type } from "@nestjs/common";
-import { Args, ArgsOptions } from "@nestjs/graphql";
+import type { PipeTransform, Type } from "@nestjs/common";
+import { Args, type ArgsOptions } from "@nestjs/graphql";
 
 /**
  * Decorator that marks a method parameter as an input parameter named as 'input' for a GraphQL mutation.

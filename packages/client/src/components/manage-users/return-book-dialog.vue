@@ -64,9 +64,9 @@
 import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import type { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UserFragment } from "src/services/user.graphql";
+import type { UserFragment } from "src/services/user.graphql";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
 const { user, bookCopy } = defineProps<{

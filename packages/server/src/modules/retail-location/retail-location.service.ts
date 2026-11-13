@@ -65,7 +65,7 @@ export class RetailLocationService {
     const filePromises = [];
     const backupDirectory = this.resolveStoragePath(
       locationId,
-      `./backups/${new Date().toISOString().replace(/:/g, "_").replace(/\./g, "_")}`,
+      `./backups/${new Date().toISOString().replaceAll(":", "_").replaceAll(".", "_")}`,
     );
     // Ensure the directory exists
     await mkdir(backupDirectory, { recursive: true });

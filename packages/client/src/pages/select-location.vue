@@ -35,7 +35,7 @@ import ActionBox from "src/components/action-box.vue";
 import LanguageDropdownBtn from "src/components/language-dropdown-btn.vue";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
-import { RetailLocationFragment } from "src/services/retail-location.graphql";
+import type { RetailLocationFragment } from "src/services/retail-location.graphql";
 
 const { retailLocations, loading, selectedLocationId } =
   useRetailLocationService();

@@ -20,10 +20,10 @@
 >
 import { mdiFilter } from "@quasar/extras/mdi-v7";
 import { isArray } from "lodash-es";
-import { Dialog, QSelectOption } from "quasar";
+import { Dialog, type QSelectOption } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
+import type { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
 import FiltersDialog from "./filters-dialog.vue";
 
 const props = defineProps<{
@@ -31,11 +31,11 @@ const props = defineProps<{
   compareFunction?: (value1: TOptionValue, value2: TOptionValue) => boolean;
 }>();
 
-const { t } = useI18n();
-
 const modelValueProxy = defineModel<TModelValue>({
   required: true,
 });
+
+const { t } = useI18n();
 
 const isModelValueEmpty = computed(
   () =>

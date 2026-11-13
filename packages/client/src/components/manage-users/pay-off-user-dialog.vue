@@ -364,12 +364,12 @@ import { cloneDeep, sumBy } from "lodash-es";
 import {
   Dialog,
   QDialog,
-  QTableColumn,
+  type QTableColumn,
   useDialogPluginComponent,
 } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { SettleRemainingType } from "src/@generated/graphql";
+import type { SettleRemainingType } from "src/@generated/graphql";
 import { evictQuery } from "src/apollo/cache";
 import KDialogCard from "src/components/k-dialog-card.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
@@ -378,9 +378,9 @@ import { notifyError } from "src/helpers/error-messages";
 import { formatPrice } from "src/helpers/formatting";
 import { getColValue } from "src/helpers/table-helpers";
 import {
-  BookCopyDetailsFragment,
+  type BookCopyDetailsFragment,
   GetSoldBookCopiesDocument,
-  ProblemDetailsFragment,
+  type ProblemDetailsFragment,
   useDonateBookCopiesMutation,
   useGetBookCopiesInStockQuery,
   useGetReturnedBookCopiesQuery,
@@ -389,9 +389,12 @@ import {
   useReportProblemMutation,
   useReturnBookCopiesMutation,
 } from "src/services/book-copy.graphql";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import type { BookSummaryFragment } from "src/services/book.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UserFragment, useSettleUserMutation } from "src/services/user.graphql";
+import {
+  type UserFragment,
+  useSettleUserMutation,
+} from "src/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";
@@ -404,16 +407,17 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { t } = useI18n();
-
 const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
   useDialogPluginComponent<SettleRemainingType>();
+
+const { t } = useI18n();
+
 const { isMobile } = useLateralDrawer();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
     name: "select",
-    field: () => undefined,
+    field: () => {},
     label: "",
   },
   {
@@ -488,7 +492,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "actions",
-    field: () => undefined,
+    field: () => {},
     label: "",
   },
 ]);
@@ -571,7 +575,7 @@ interface EmptyRow {
   id: "EMPTY";
 }
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const getCodeIndex = (code: string) => parseInt(code.split("/")[0]!);
+const getCodeIndex = (code: string) => Number.parseInt(code.split("/")[0]!);
 const sortByCopyCode = (copies: BookCopyDetailsFragment[]) =>
   [...copies].sort((copyA, copyB) =>
     getCodeIndex(copyA.code) < getCodeIndex(copyB.code)

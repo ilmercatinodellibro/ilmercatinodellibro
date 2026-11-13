@@ -1,4 +1,4 @@
-import { Prisma, Role } from "@prisma/client";
+import { type Prisma, Role } from "@prisma/client";
 
 export function getPrismaRetailLocationFilters(retailLocationId: string) {
   const retailLocationFilter = {

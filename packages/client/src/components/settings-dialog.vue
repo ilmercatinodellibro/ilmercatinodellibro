@@ -108,8 +108,8 @@ import {
   nonNegativeNumberRule,
 } from "src/helpers/rules";
 import { useAuthService } from "src/services/auth";
-import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
-import { SettingsUpdate, type SettingsDialogProps } from "./settings-dialog";
+import type { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
+import type { SettingsUpdate, SettingsDialogProps } from "./settings-dialog";
 
 const props = defineProps<SettingsDialogProps>();
 

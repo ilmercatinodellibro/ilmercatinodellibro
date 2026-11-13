@@ -1,4 +1,4 @@
-import { BookQueryFilter } from "src/@generated/graphql";
+import type { BookQueryFilter } from "src/@generated/graphql";
 
 export const enum BookCopyStatuses {
   LOST = "lost",
@@ -8,7 +8,7 @@ export const enum BookCopyStatuses {
   NOT_AVAILABLE = "not-available",
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
+// eslint-disable-next-line unused-imports/no-unused-vars
 enum BookUtilityCategory {
   LOW_UTILITY,
   MEDIUM_UTILITY,
@@ -21,7 +21,7 @@ export type BookCompleteFilters = Exclude<
   keyof BookQueryFilter,
   "search" | "schoolCodes" | "schoolCourseIds"
 >;
-/*| UtilityCategory*/
+/* | UtilityCategory */
 
 export interface SchoolFilters {
   selectedSchoolCodes: string[];

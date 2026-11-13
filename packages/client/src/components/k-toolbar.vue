@@ -58,12 +58,12 @@
 
 <script setup lang="ts" generic="TFilterOptionValue = any">
 import { mdiArrowLeft, mdiMenu } from "@quasar/extras/mdi-v7";
-import { QSelectOption } from "quasar";
+import type { QSelectOption } from "quasar";
 import { ref } from "vue";
-import { RouteLocationRaw } from "vue-router";
+import type { RouteLocationRaw } from "vue-router";
 import HeaderFilters from "src/components/header-filters.vue";
 import HeaderSearchBar from "src/components/header-search-bar.vue";
-import { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
+import type { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 
 defineProps<{

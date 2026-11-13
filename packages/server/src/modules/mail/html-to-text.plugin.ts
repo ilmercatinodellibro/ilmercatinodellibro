@@ -1,5 +1,5 @@
-import { compile, compiledFunction } from "html-to-text";
-import { PluginFunction } from "nodemailer/lib/mailer";
+import { compile, type compiledFunction } from "html-to-text";
+import type { PluginFunction } from "nodemailer/lib/mailer";
 
 let htmlToText: compiledFunction | undefined;
 

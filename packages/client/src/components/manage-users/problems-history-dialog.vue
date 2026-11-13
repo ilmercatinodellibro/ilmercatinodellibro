@@ -23,15 +23,15 @@
 </template>
 
 <script setup lang="ts">
-import { QTableColumn, date, useDialogPluginComponent } from "quasar";
+import { type QTableColumn, date, useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { ProblemType } from "src/@generated/graphql";
-import {
+import type { ProblemType } from "src/@generated/graphql";
+import type {
   BookCopyDetailsFragment,
   ProblemDetailsFragment,
 } from "src/services/book-copy.graphql";
-import { UserSummaryFragment } from "src/services/user.graphql";
+import type { UserSummaryFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 

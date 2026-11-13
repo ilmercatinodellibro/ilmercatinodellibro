@@ -47,7 +47,7 @@ import { isArray } from "lodash-es";
 import {
   QCheckbox,
   QRadio,
-  QSelectOption,
+  type QSelectOption,
   useDialogPluginComponent,
 } from "quasar";
 import { computed, ref } from "vue";
@@ -62,10 +62,6 @@ interface ListDialogProps<T = unknown> {
   confirmLabel?: string;
 }
 
-const { t } = useI18n();
-
-defineEmits(useDialogPluginComponent.emits);
-
 const props = withDefaults(defineProps<ListDialogProps>(), {
   initialModelValue: undefined,
   maxHeight: "unset",
@@ -75,8 +71,12 @@ const props = withDefaults(defineProps<ListDialogProps>(), {
   confirmLabel: undefined,
 });
 
+defineEmits(useDialogPluginComponent.emits);
+
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent<ListDialogProps["initialModelValue"]>();
+
+const { t } = useI18n();
 
 const modelValue = ref<unknown>(props.initialModelValue);
 

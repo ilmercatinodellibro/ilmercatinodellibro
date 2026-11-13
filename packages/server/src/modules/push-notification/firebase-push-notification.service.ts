@@ -11,7 +11,7 @@ import {
 declare module "async" {
   // If no callback is provided as the 4th argument, a promise is returned. This overload is missing from @types/async.
   export function mapLimit<T, R, E = Error>(
-    arr: IterableCollection<T>,
+    array: IterableCollection<T>,
     limit: number,
     iterator: AsyncResultIterator<T, R, E>,
   ): Promise<R[]>;

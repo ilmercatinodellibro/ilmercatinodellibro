@@ -91,11 +91,7 @@ async function toggleSubscription() {
   const isSubscribing = !isSubscribed.value;
 
   try {
-    if (isSubscribing) {
-      await subscribe();
-    } else {
-      await unsubscribe();
-    }
+    await (isSubscribing ? subscribe() : unsubscribe());
   } catch (error) {
     console.error(error);
     Notify.create({

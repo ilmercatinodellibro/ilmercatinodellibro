@@ -2,8 +2,8 @@
 // IMPORTANT: Every rule should consider a possible "null" type since default cleared q-select returns that.
 
 import { isInteger } from "lodash-es";
-import { ValidationRule, date } from "quasar";
-import { MaybeRefOrGetter, toValue } from "vue";
+import { type ValidationRule, date } from "quasar";
+import { type MaybeRefOrGetter, toValue } from "vue";
 import { useI18nOutsideSetup } from "src/boot/i18n";
 
 const { t } = useI18nOutsideSetup();
@@ -106,29 +106,35 @@ export const validatePasswordRule: ValidationRule<string | null> = (
 
   switch (true) {
     // Between 8 and 25 characters
-    case password.length < 8 || password.length > 25:
+    case password.length < 8 || password.length > 25: {
       return t("validators.password.atLeast8AndMaximum25Characters");
+    }
 
     // At least a number
-    case !/^(?=.*\d)/.test(password):
+    case !/^(?=.*\d)/.test(password): {
       return t("validators.password.atLeastOneNumber");
+    }
 
     // At least a lower case
-    case !/^(?=.*[a-z])/.test(password):
+    case !/^(?=.*[a-z])/.test(password): {
       return t("validators.password.atLeastOneLowercase");
+    }
 
     // At least a upper case
-    case !/^(?=.*[A-Z])/.test(password):
+    case !/^(?=.*[A-Z])/.test(password): {
       return t("validators.password.atLeastOneUppercase");
+    }
 
     // At least a special character
-    case !SPECIAL_CHARACTERS_PATTERN.test(password):
+    case !SPECIAL_CHARACTERS_PATTERN.test(password): {
       return `${t(
         "validators.password.atLeastOneSpecialCharacter",
       )}: (${SPECIAL_CHARACTERS.toString()},?)`;
+    }
 
-    default:
+    default: {
       return true;
+    }
   }
 };
 
@@ -140,7 +146,8 @@ export const greaterThanZeroRule: ValidationRule<number | string | null> = (
     return requiredRule(value, rules);
   }
 
-  const numericValue = typeof value === "string" ? parseFloat(value) : value;
+  const numericValue =
+    typeof value === "string" ? Number.parseFloat(value) : value;
   return (
     (!isNaN(numericValue) && numericValue > 0) ||
     t("validators.greaterThanZero")
@@ -153,7 +160,8 @@ export const validISBN: ValidationRule<string> = (value) =>
 export const numberBetween =
   (min: number, max: number): ValidationRule<string | number | null> =>
   (value) => {
-    const numericValue = typeof value === "string" ? parseFloat(value) : value;
+    const numericValue =
+      typeof value === "string" ? Number.parseFloat(value) : value;
     return (
       (!(numericValue === null) &&
         numericValue >= min &&
@@ -166,7 +174,7 @@ export const allowOnlyIntegerNumbers: ValidationRule<string | number | null> = (
   value,
 ) =>
   (!(value === null) &&
-    isInteger(typeof value === "string" ? parseFloat(value) : value)) ||
+    isInteger(typeof value === "string" ? Number.parseFloat(value) : value)) ||
   t("validators.onlyIntegers");
 
 const getAge = (birthDate: string): number =>
@@ -189,18 +197,19 @@ export const domainRule = (value: string) =>
   ) || "Il dominio inserito non è valido";
 
 export const subdomainRule = (domain: string, subdomain: string) =>
-  new RegExp(`(^|\\.)${domain}$`).test(subdomain);
+  new RegExp(String.raw`(^|\.)${domain}$`).test(subdomain);
 
 export const vatNumberRule = (value: string) =>
   /^[0-9]{11}$/.test(value) || "Formato non ammesso";
 
 export const nonNegativeNumberRule = (value: string) =>
-  parseFloat(value) >= 0 || "Numeri negativi non supportati";
+  Number.parseFloat(value) >= 0 || "Numeri negativi non supportati";
 
 export function allowPositiveNumberOrDefaultZero(
   value: number | null | string,
 ): number {
-  const parsedValue = typeof value === "string" ? parseFloat(value) : value;
+  const parsedValue =
+    typeof value === "string" ? Number.parseFloat(value) : value;
 
   return parsedValue !== null && parsedValue >= 0 ? parsedValue : 0;
 }

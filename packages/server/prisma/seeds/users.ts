@@ -1,4 +1,4 @@
-import { PrismaClient, User } from "@prisma/client";
+import type { PrismaClient, User } from "@prisma/client";
 import { times } from "lodash";
 import { createUser } from "prisma/factories/user";
 import { TEST_ADMIN, TEST_USER, TEST_USERS } from "test/fixtures/users";

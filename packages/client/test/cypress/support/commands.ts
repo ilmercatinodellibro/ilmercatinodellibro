@@ -25,6 +25,6 @@ Cypress.Commands.add("login", (email, password = DEFAULT_PASSWORD) => {
       cy.dataCy("password-field").type(password);
       cy.dataCy("submit-button").click();
     });
-    cy.dataCy("user-item", { timeout: 15000 }).contains(email);
+    cy.dataCy("user-item", { timeout: 15_000 }).contains(email);
   });
 });

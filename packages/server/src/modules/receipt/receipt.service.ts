@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Injectable } from "@nestjs/common";
+import type { GenerateProps, GeneratorOptions } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, table, text } from "@pdfme/schemas";
 import {
@@ -20,7 +21,6 @@ import { RetailLocationService } from "src/modules/retail-location/retail-locati
 import purchaseTemplate from "./templates/purchase.json";
 import settlementTemplate from "./templates/settlement.json";
 import withdrawalTemplate from "./templates/withdrawal.json";
-import type { GenerateProps, GeneratorOptions } from "@pdfme/common";
 
 type BookCopyWithBook = BookCopy & { book: Book };
 type BookCopyWithSales = BookCopy & { sales: Sale[] };
@@ -164,16 +164,13 @@ export class ReceiptService {
       return SettlementType.REIMBURSED;
     }
 
-    if (
-      sales.length > 0 &&
-      sales.some(({ refundedAt }) => refundedAt === null)
-    ) {
+    if (sales.some(({ refundedAt }) => refundedAt === null)) {
       return SettlementType.SOLD;
     }
 
     // If the book copy has not been returned, donated or sold, it means that it is not part of the settlement (e.g. still in stock)
     // and should not be included in the receipt
-    return undefined;
+    return;
   }
 
   async createReceipt(
@@ -242,7 +239,7 @@ export class ReceiptService {
 
   #getReceiptBooks({ type, data }: ReceiptPayload): ReceiptBook[] {
     switch (type) {
-      case ReceiptType.WITHDRAWAL:
+      case ReceiptType.WITHDRAWAL: {
         return data.map(({ book, ...bookCopy }) => ({
           isbnCode: book.isbnCode,
           title: book.title,
@@ -250,6 +247,7 @@ export class ReceiptService {
           originalPrice: book.originalPrice,
           code: bookCopy.code,
         }));
+      }
       case ReceiptType.PURCHASE: {
         return data
           .map(({ bookCopy }) => bookCopy)

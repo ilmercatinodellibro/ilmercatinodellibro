@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { mdiChevronUp } from "@quasar/extras/mdi-v7";
-import { QFabProps, QFabSlots } from "quasar";
+import type { QFabProps, QFabSlots } from "quasar";
 import { ref } from "vue";
 
 type Props = Omit<QFabProps, "modelValue" | "onUpdate:modelValue"> & {

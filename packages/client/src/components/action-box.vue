@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { mdiArrowRight } from "@quasar/extras/mdi-v7";
-import { RouteLocationRaw } from "vue-router";
+import type { RouteLocationRaw } from "vue-router";
 
 defineProps<{
   buttonLabel: string;

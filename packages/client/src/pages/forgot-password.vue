@@ -38,7 +38,7 @@ import { useRouter } from "vue-router";
 import { useTheme } from "src/composables/use-theme";
 import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
-import { ServerError } from "src/models/server";
+import type { ServerError } from "src/models/server";
 import { useSendPasswordResetLinkMutation } from "src/services/auth.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
 
@@ -63,16 +63,16 @@ async function onSubmit() {
       },
     });
     void router.push({ name: "reset-password-link-sent" });
-  } catch (e) {
+  } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-deprecated
-    const { message, status } = e as ServerError;
+    const { message, status } = error as ServerError;
 
     // TODO: implement centralized error handling
 
     notifyError(message);
 
     if (![401, 422].includes(status)) {
-      throw e;
+      throw error;
     }
   }
 }

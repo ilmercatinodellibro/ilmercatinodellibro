@@ -26,14 +26,13 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { BookUtility } from "src/@generated/graphql";
-
-const UTILITY_LOW_THRESHOLD = 0.4;
-const UTILITY_HIGH_THRESHOLD = 1;
+import type { BookUtility } from "src/@generated/graphql";
 
 const props = defineProps<{
   utility: BookUtility;
 }>();
+const UTILITY_LOW_THRESHOLD = 0.4;
+const UTILITY_HIGH_THRESHOLD = 1;
 
 interface ColorChipData {
   color: "negative" | "warning" | "positive";

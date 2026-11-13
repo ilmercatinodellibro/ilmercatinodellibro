@@ -24,16 +24,16 @@
 </template>
 
 <script setup lang="ts">
-import { Dialog, colors, colorsRgba } from "quasar";
+import { Dialog, colors, type colorsRgba } from "quasar";
 import { useI18n } from "vue-i18n";
 import ColorPickerDialog from "src/components/color-picker-dialog.vue";
-import { ThemeColor, useTheme } from "src/composables/use-theme";
-
-const { hexToRgb } = colors;
+import { type ThemeColor, useTheme } from "src/composables/use-theme";
 
 defineProps<{
   name: ThemeColor;
 }>();
+
+const { hexToRgb } = colors;
 
 const { t } = useI18n();
 

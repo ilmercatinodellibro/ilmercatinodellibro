@@ -19,6 +19,7 @@ const adminData: Pick<User, "email" | "password" | "firstname" | "lastname"> = {
 })
 export class AddAdminUserCommand extends CommandRunner {
   private readonly logger = new Logger(AddAdminUserCommand.name);
+
   constructor(private readonly prisma: PrismaService) {
     super();
   }

@@ -187,7 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloCache, isApolloError } from "@apollo/client/core";
+import { type ApolloCache, isApolloError } from "@apollo/client/core";
 import {
   mdiChevronDown,
   mdiChevronUp,
@@ -199,7 +199,7 @@ import {
   Dialog,
   Notify,
   QDialog,
-  QTableColumn,
+  type QTableColumn,
   date,
   useDialogPluginComponent,
 } from "quasar";
@@ -212,13 +212,13 @@ import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { notifyError } from "src/helpers/error-messages";
 import { formatPrice } from "src/helpers/formatting";
 import { GetBookCopiesInStockDocument } from "src/services/book-copy.graphql";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import type { BookSummaryFragment } from "src/services/book.graphql";
 import { useCartService } from "src/services/cart";
-import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
+import type { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { GetRequestsDocument } from "src/services/request.graphql";
 import { GetReservationsDocument } from "src/services/reservation.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { CustomerFragment } from "src/services/user.graphql";
+import type { CustomerFragment } from "src/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -231,17 +231,18 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+
 const { t } = useI18n();
 
 const { selectedLocation: retailLocation } = useRetailLocationService();
 
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
 
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "selection",
-    field: () => undefined,
+    field: () => {},
     label: "",
   },
   {
@@ -300,7 +301,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "delete",
-    field: () => undefined,
+    field: () => {},
     label: "",
     classes: isMobile.value ? "no-padding" : "",
   },
@@ -351,7 +352,7 @@ const {
   useRemoveFromCartMutation,
 } = useCartService();
 
-let interval: number | undefined;
+let interval: ReturnType<typeof setInterval> | undefined;
 const { openCart, loading } = useOpenCartMutation();
 onMounted(async () => {
   const { data: cart } = await openCart({
@@ -368,9 +369,9 @@ onMounted(async () => {
   );
   emptyCartTimer.value = cartExpiryInSeconds;
 
-  interval = window.setInterval(() => {
+  interval = globalThis.setInterval(() => {
     if (emptyCartTimer.value === 0) {
-      window.clearInterval(interval);
+      globalThis.clearInterval(interval);
       // The server automatically deletes outdated carts, the cart component only closes itself
       onDialogHide();
     } else {
@@ -379,7 +380,7 @@ onMounted(async () => {
   }, 1000);
 });
 onUnmounted(() => {
-  window.clearInterval(interval);
+  globalThis.clearInterval(interval);
 });
 
 const { addToCart, loading: addToCartLoading } = useAddToCartMutation();
@@ -404,18 +405,21 @@ async function addBookToCart(fromBookIsbn?: string) {
       return;
     }
 
-    error.graphQLErrors.forEach((graphQLError) => {
+    for (const graphQLError of error.graphQLErrors) {
       switch (graphQLError.message) {
-        case "BOOK_NOT_FOUND":
+        case "BOOK_NOT_FOUND": {
           notifyError(t("bookErrors.noBook"));
           break;
-        case "BOOK_NOT_AVAILABLE":
+        }
+        case "BOOK_NOT_AVAILABLE": {
           notifyError(t("bookErrors.notInStock"));
           break;
-        default:
+        }
+        default: {
           notifyError(t("bookErrors.addBookToCart"));
+        }
       }
-    });
+    }
   }
 }
 
@@ -537,14 +541,14 @@ function sellBooks() {
             ({ book, id }) => selectedBookCopies.value[book.id] === id,
           )?.owner,
       );
-      ownersToUpdate.forEach((user) => {
+      for (const user of ownersToUpdate) {
         if (user) {
           evictQuery(cache, GetBookCopiesInStockDocument, {
             retailLocationId: retailLocation.value.id,
             userId: user.id,
           });
         }
-      });
+      }
       cache.gc();
 
       evictRequestsReservationsQueries(cache);

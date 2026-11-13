@@ -79,9 +79,9 @@ import { mdiCloseCircle, mdiMagnify } from "@quasar/extras/mdi-v7";
 import { Dialog } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useTranslatedFilters } from "src/composables/use-filter-translations";
+import type { useTranslatedFilters } from "src/composables/use-filter-translations";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { SchoolFilters, TableFilters } from "src/models/book";
+import type { SchoolFilters, TableFilters } from "src/models/book";
 import FilterBySchoolDialog from "./filter-by-school-dialog.vue";
 
 const props = defineProps<{

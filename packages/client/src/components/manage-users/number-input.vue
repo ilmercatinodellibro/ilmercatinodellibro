@@ -23,16 +23,16 @@
 <script setup lang="ts">
 import {
   QInput,
-  QInputProps,
+  type QInputProps,
   type EmbeddedValidationRule,
   type EmbeddedValidationRuleFn,
 } from "quasar";
 import { ref } from "vue";
 
-const modelValue = defineModel<number>({ required: true });
-
 const props =
   defineProps<Omit<QInputProps, "modelValue" | "onUpdate:modelValue">>();
+
+const modelValue = defineModel<number>({ required: true });
 
 const inputRef = ref<QInput>();
 
@@ -60,7 +60,9 @@ const validate: HTMLInputElement["onbeforeinput"] = (event) => {
   }
 
   const newValue =
-    target.value.substring(0, start) + event.data + target.value.substring(end);
+    target.value.slice(0, Math.max(0, start)) +
+    event.data +
+    target.value.slice(Math.max(0, end));
 
   const doesNotSatisfyRules = props.rules?.some(
     (rule) =>

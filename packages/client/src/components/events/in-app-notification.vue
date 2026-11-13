@@ -37,7 +37,7 @@ import { mdiClose } from "@quasar/extras/mdi-v7";
 import { useI18n } from "vue-i18n";
 import { useTimeFormat } from "src/composables/use-time-format";
 import { useNotificationService } from "src/services/notification";
-import { NotificationFragment } from "src/services/notification.graphql";
+import type { NotificationFragment } from "src/services/notification.graphql";
 
 const props = defineProps<{
   notification: NotificationFragment;

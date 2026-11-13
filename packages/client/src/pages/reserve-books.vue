@@ -119,7 +119,13 @@ import {
   mdiPlus,
 } from "@quasar/extras/mdi-v7";
 import { cloneDeep } from "lodash-es";
-import { Dialog, Notify, QBtnProps, QTableColumn, QTableProps } from "quasar";
+import {
+  Dialog,
+  Notify,
+  type QBtnProps,
+  type QTableColumn,
+  type QTableProps,
+} from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -135,12 +141,12 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { formatPrice } from "src/helpers/formatting";
-import { BooksTab, SchoolFilters } from "src/models/book";
+import { BooksTab, type SchoolFilters } from "src/models/book";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
-import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
+import type { BookSummaryFragment } from "src/services/book.graphql";
+import type { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import { useRequestService } from "src/services/request";
 import { GetRequestsDocument } from "src/services/request.graphql";
 import { useReservationService } from "src/services/reservation";
@@ -231,7 +237,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "actions",
-    field: () => undefined,
+    field: () => {},
     label: "",
     align: "center",
     classes: isMobile.value ? "no-padding" : "",
@@ -328,7 +334,10 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
 };
 
 function swapView() {
-  if (!showByClass.value) {
+  if (showByClass.value) {
+    showByClass.value = false;
+    tableFilter.schoolFilters = undefined;
+  } else {
     Dialog.create({
       component: FilterBySchoolDialog,
       componentProps: {
@@ -346,9 +355,6 @@ function swapView() {
         tableFilter.schoolFilters = cloneDeep(newFilters);
       }
     });
-  } else {
-    showByClass.value = false;
-    tableFilter.schoolFilters = undefined;
   }
 }
 
@@ -369,11 +375,11 @@ async function reserveBook(id: string) {
       userId: user.value!.id,
     });
     cache.gc();
-  } catch (e) {
+  } catch (error) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
         t("reserveBooks.reservation"),
-        e,
+        error,
       ]),
     );
   }
@@ -398,11 +404,11 @@ function requestBook(bookId: string) {
         userId: user.value!.id,
       });
       cache.gc();
-    } catch (e) {
+    } catch (error) {
       Notify.create(
         t("reserveBooks.reservationOrRequestError", [
           t("reserveBooks.request"),
-          e,
+          error,
         ]),
       );
     }
@@ -432,11 +438,11 @@ function openReserveAllDialog() {
         userId: user.value!.id,
       });
       cache.gc();
-    } catch (e) {
+    } catch (error) {
       Notify.create(
         t("reserveBooks.reservationOrRequestError", [
           t("reserveBooks.reservation"),
-          e,
+          error,
         ]),
       );
     } finally {

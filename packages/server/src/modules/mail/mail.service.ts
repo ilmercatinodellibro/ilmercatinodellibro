@@ -96,6 +96,7 @@ export class MailService {
   }
 
   private readonly nameAddrPattern = /(?<name>.*) <(?<address>.*)>/;
+
   private convertToAddressObject(
     value: Address | Address[],
   ): AddressObject | AddressObject[] {

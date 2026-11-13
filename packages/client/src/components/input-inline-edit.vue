@@ -28,8 +28,8 @@
 
 <script setup lang="ts">
 import { mdiPencil } from "@quasar/extras/mdi-v7";
-import { QInput, QInputProps, QInputSlots } from "quasar";
-import { Ref, computed, ref } from "vue";
+import { QInput, type QInputProps, type QInputSlots } from "quasar";
+import { type Ref, computed, ref } from "vue";
 
 // eslint-disable-next-line vue/prop-name-casing
 const props = withDefaults(defineProps<QInputProps>(), {

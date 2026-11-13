@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { QSelectSlots } from "quasar";
+import type { QSelectSlots } from "quasar";
 import { useI18n } from "vue-i18n";
 
 interface Props {
@@ -44,9 +44,9 @@ const slots = defineSlots<QSelectSlots>();
 
 const { t } = useI18n();
 
-function onUpdateModelValue(newVal: Props["modelValue"] | null) {
-  if (newVal !== null) {
-    emit("update:modelValue", newVal);
+function onUpdateModelValue(newValue: Props["modelValue"] | null) {
+  if (newValue !== null) {
+    emit("update:modelValue", newValue);
   }
 }
 </script>

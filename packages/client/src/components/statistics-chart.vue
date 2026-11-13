@@ -15,24 +15,29 @@
 </template>
 
 <script setup lang="ts">
-import { EChartsInitOpts, EChartsOption } from "echarts";
+import type { EChartsInitOpts, EChartsOption } from "echarts";
 import { LineChart } from "echarts/charts";
 import {
   DatasetComponent,
   GridComponent,
   TooltipComponent,
 } from "echarts/components";
-import { use } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
-import { computed } from "vue";
-import VChart from "vue-echarts";
-import { useI18n } from "vue-i18n";
-import { ChartElement } from "src/@generated/graphql";
 import type {
   DatasetComponentOption,
   TooltipComponentOption,
 } from "echarts/components";
+import { use } from "echarts/core";
 import type { ComposeOption } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { computed } from "vue";
+import VChart from "vue-echarts";
+import { useI18n } from "vue-i18n";
+import type { ChartElement } from "src/@generated/graphql";
+
+const props = defineProps<{
+  data: ChartElement[];
+  loading: boolean;
+}>();
 
 use([
   DatasetComponent,
@@ -41,11 +46,6 @@ use([
   LineChart,
   CanvasRenderer,
 ]);
-
-const props = defineProps<{
-  data: ChartElement[];
-  loading: boolean;
-}>();
 
 const { t, locale } = useI18n();
 

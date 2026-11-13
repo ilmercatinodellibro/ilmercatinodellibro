@@ -1,5 +1,5 @@
-import { QForm } from "quasar";
-import { nextTick, onMounted, Ref, ref } from "vue";
+import type { QForm } from "quasar";
+import { nextTick, onMounted, type Ref, ref } from "vue";
 
 export interface Step {
   name: number | string;
@@ -30,9 +30,7 @@ export function useStepperFormValidate(
   onMounted(async () => {
     const initialStep = stepperModel.value;
 
-    for (let id = 0; id < steps.length; id++) {
-      const currentStep = steps[id];
-
+    for (const [id, currentStep] of steps.entries()) {
       if (currentStep === undefined) {
         throw new Error(`Step at position "${id}" is not defined`);
       }
@@ -65,7 +63,7 @@ export function useStepperFormValidate(
       name === stepperModel.value ? -1 : 0,
     );
 
-    let firstStepWithValidationErrors: Step | undefined = undefined;
+    let firstStepWithValidationErrors: Step | undefined;
 
     for (
       let id = 0;

@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { mdiMenuDown, mdiMenuUp } from "@quasar/extras/mdi-v7";
-import { QBtnProps, QBtnSlots } from "quasar";
+import type { QBtnProps, QBtnSlots } from "quasar";
 import { ref } from "vue";
 
 defineProps<
@@ -36,9 +36,9 @@ defineProps<
   } & Pick<QBtnProps, "color" | "label" | "icon">
 >();
 
-const menu = ref(false);
-
 const btnSlots = defineSlots<QBtnSlots>();
+
+const menu = ref(false);
 </script>
 
 <style scoped lang="scss">

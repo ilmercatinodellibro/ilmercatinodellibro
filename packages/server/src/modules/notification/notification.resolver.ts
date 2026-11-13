@@ -32,8 +32,8 @@ export class NotificationResolver {
   @Subscription(() => Notification, {
     // We don't publish like { newNotification: { ... } }, so we resolve the whole payload
     resolve: (payload: Notification) => payload,
-    filter: ({ userId }: Notification, _, { req }: GraphQLContext) =>
-      userId === req.user.id,
+    filter: ({ userId }: Notification, _, { req: request }: GraphQLContext) =>
+      userId === request.user.id,
   })
   newNotification() {
     return this.pubSub.asyncIterator("newNotification");

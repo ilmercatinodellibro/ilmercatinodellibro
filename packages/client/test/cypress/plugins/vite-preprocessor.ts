@@ -18,7 +18,7 @@ async function extractViteConfigFromQuasar() {
   const { default: getQuasarCtx } = await import(
     "@quasar/app-vite/lib/helpers/get-quasar-ctx"
   );
-  const { default: QuasarConfFile } = await import(
+  const { default: QuasarConfigFile } = await import(
     "@quasar/app-vite/lib/quasar-config-file"
   );
 
@@ -33,18 +33,18 @@ async function extractViteConfigFromQuasar() {
   // register app extensions
   await extensionRunner.registerExtensions(ctx);
 
-  const quasarConfFile = new QuasarConfFile({ ctx });
+  const quasarConfigFile = new QuasarConfigFile({ ctx });
 
-  const quasarConf = await quasarConfFile.read();
-  if (quasarConf.error !== undefined) {
-    console.error(quasarConf.error);
+  const quasarConfig = await quasarConfigFile.read();
+  if (quasarConfig.error !== undefined) {
+    console.error(quasarConfig.error);
   }
 
   const { default: generateConfig } = await import(
     "@quasar/app-vite/lib/modes/spa/spa-config"
   );
 
-  return generateConfig.vite(quasarConf) as UserConfig;
+  return generateConfig.vite(quasarConfig) as UserConfig;
 }
 
 /**

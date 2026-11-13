@@ -1,5 +1,5 @@
-import { Ref, ref, watch } from "vue";
-import { RouteLocationRaw, useRoute } from "vue-router";
+import { type Ref, ref, watch } from "vue";
+import { type RouteLocationRaw, useRoute } from "vue-router";
 import { injectorFactory } from "src/helpers/injector-factory";
 
 type HeaderBackButtonRouteLocation = Ref<RouteLocationRaw | undefined>;

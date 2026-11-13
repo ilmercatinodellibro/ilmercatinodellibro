@@ -4,14 +4,14 @@ import {
   InMemoryCache,
   split,
 } from "@apollo/client/core";
+import type { ApolloClientOptions } from "@apollo/client/core";
 import { setContext } from "@apollo/client/link/context";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { Kind, OperationTypeNode } from "graphql";
 import { createClient } from "graphql-ws";
-import { StrictTypedTypePolicies } from "src/@generated/apollo-helpers";
+import type { StrictTypedTypePolicies } from "src/@generated/apollo-helpers";
 import { useAuthService } from "src/services/auth";
-import type { ApolloClientOptions } from "@apollo/client/core";
 
 const { getJwtHeader } = useAuthService();
 

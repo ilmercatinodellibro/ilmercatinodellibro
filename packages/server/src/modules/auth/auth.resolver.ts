@@ -88,7 +88,7 @@ export class AuthResolver {
     );
 
     try {
-      //TODO: use queues instead of doing await
+      // TODO: use queues instead of doing await
       await this.authService.sendVerificationLink(
         payload.retailLocationId,
         user,
@@ -291,15 +291,15 @@ export class AuthResolver {
       });
 
     if (currentOperatorMembership?.role) {
-      if (currentOperatorMembership.role === Role.OPERATOR) {
-        throw new UnprocessableEntityException(
-          "You cannot promote to operator someone who already is an operator in this location.",
-        );
-      } else {
-        throw new UnprocessableEntityException(
-          "The selected user is already an admin.",
-        );
-      }
+      const error =
+        currentOperatorMembership.role === Role.OPERATOR
+          ? new UnprocessableEntityException(
+              "You cannot promote to operator someone who already is an operator in this location.",
+            )
+          : new UnprocessableEntityException(
+              "The selected user is already an admin.",
+            );
+      throw error;
     }
 
     if (!existingUser.emailVerified) {

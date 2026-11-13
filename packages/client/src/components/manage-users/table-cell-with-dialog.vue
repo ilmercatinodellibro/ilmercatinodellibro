@@ -36,10 +36,10 @@
 
 <script setup lang="ts">
 import RoundBadge from "./round-badge.vue";
-import { QTdKeyProp } from "./table-cell-key-prop";
+import type { QTdKeyProp as QTdKeyProperty } from "./table-cell-key-prop";
 
 defineProps<
-  QTdKeyProp & {
+  QTdKeyProperty & {
     value: number;
     secondaryValue?: number;
     clickableWhenZero?: boolean;

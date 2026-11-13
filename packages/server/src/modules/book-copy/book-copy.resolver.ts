@@ -903,7 +903,7 @@ export class BookCopyResolver {
 
     return newlyUpdatedBookCopies.map(
       // Removes relations which are only needed for the receipt generation, but aren't needed for the return value of this mutation
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
+      // eslint-disable-next-line unused-imports/no-unused-vars
       ({ book, sales, ...bookCopyToReturn }) => bookCopyToReturn,
     );
   }

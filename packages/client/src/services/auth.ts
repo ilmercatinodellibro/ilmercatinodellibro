@@ -1,16 +1,16 @@
 import { useApolloClient } from "@vue/apollo-composable";
 import { until } from "@vueuse/core";
-import jwtDecode, { JwtPayload } from "jwt-decode";
+import jwtDecode, { type JwtPayload } from "jwt-decode";
 import { merge } from "lodash-es";
 import { LocalStorage } from "quasar";
 import { computed, readonly, ref, watch } from "vue";
-import { NavigationGuard, Router, useRouter } from "vue-router";
-import { MessageLanguages, STORAGE_LOCALE_KEY } from "src/boot/i18n";
+import { type NavigationGuard, type Router, useRouter } from "vue-router";
+import { type MessageLanguages, STORAGE_LOCALE_KEY } from "src/boot/i18n";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UpdatableUserInfoFragment } from "src/services/user.graphql";
+import type { UpdatableUserInfoFragment } from "src/services/user.graphql";
 import {
-  CurrentUserFragment,
+  type CurrentUserFragment,
   GetCurrentUserDocument,
   useLoginMutation as useBaseLoginMutation,
   useRegisterMutation as useBaseRegisterMutation,
@@ -26,10 +26,10 @@ const isAuthenticated = ref(LocalStorage.has(AUTH_TOKEN_KEY));
 // "?? undefined" bit is to remove null values and replace them with undefined
 const token = ref(LocalStorage.getItem<string>(AUTH_TOKEN_KEY) ?? undefined);
 watch(token, (newToken) => {
-  if (newToken !== undefined) {
-    LocalStorage.set(AUTH_TOKEN_KEY, newToken);
-  } else {
+  if (newToken === undefined) {
     LocalStorage.remove(AUTH_TOKEN_KEY);
+  } else {
+    LocalStorage.set(AUTH_TOKEN_KEY, newToken);
   }
 
   isAuthenticated.value = newToken !== undefined;
@@ -40,10 +40,10 @@ const user = ref(
   LocalStorage.getItem<CurrentUserFragment>(AUTH_USER_KEY) ?? undefined,
 );
 watch(user, (newUser) => {
-  if (newUser !== undefined) {
-    LocalStorage.set(AUTH_USER_KEY, newUser);
-  } else {
+  if (newUser === undefined) {
     LocalStorage.remove(AUTH_USER_KEY);
+  } else {
+    LocalStorage.set(AUTH_USER_KEY, newUser);
   }
 });
 
@@ -59,13 +59,13 @@ export function useLoginMutation() {
   const loginMutationComposable = useBaseLoginMutation();
 
   async function login(
-    ...params: Parameters<typeof loginMutationComposable.login>
+    ...parameters: Parameters<typeof loginMutationComposable.login>
   ) {
     if (isAuthenticated.value) {
       throw new Error("Already authenticated, can't login again");
     }
 
-    const { data } = await loginMutationComposable.login(...params);
+    const { data } = await loginMutationComposable.login(...parameters);
 
     token.value = data.jwt;
     user.value = data.user;
@@ -107,12 +107,12 @@ export function useRegisterMutation() {
   const registerMutationComposable = useBaseRegisterMutation();
 
   async function register(
-    ...params: Parameters<typeof registerMutationComposable.register>
+    ...parameters: Parameters<typeof registerMutationComposable.register>
   ) {
     if (isAuthenticated.value) {
       throw new Error("Already authenticated, can't register");
     }
-    await registerMutationComposable.register(...params);
+    await registerMutationComposable.register(...parameters);
     void router.push({
       name: REGISTRATION_SENT_ROUTE_NAME,
       params: { locationId: selectedLocation.value.id },
@@ -127,14 +127,14 @@ export function useRegisterWithTokenMutation() {
     useBaseRegisterWithTokenMutation();
 
   async function registerWithToken(
-    ...params: Parameters<
+    ...parameters: Parameters<
       typeof registerWithTokenMutationComposable.registerWithToken
     >
   ) {
     if (isAuthenticated.value) {
       throw new Error("Already authenticated, can't register");
     }
-    await registerWithTokenMutationComposable.registerWithToken(...params);
+    await registerWithTokenMutationComposable.registerWithToken(...parameters);
   }
 
   return { ...registerWithTokenMutationComposable, registerWithToken };
@@ -146,7 +146,7 @@ export function initTokenRefresh(router: Router) {
     return;
   }
 
-  let accessTokenRefreshTimeout: number | undefined;
+  let accessTokenRefreshTimeout: ReturnType<typeof setTimeout> | undefined;
 
   async function keepAccessTokenFresh() {
     const { logout } = useLogoutMutation(router);
@@ -187,7 +187,7 @@ export function initTokenRefresh(router: Router) {
     }
 
     // Refresh the access token when it reaches its half-life
-    accessTokenRefreshTimeout = window.setTimeout(
+    accessTokenRefreshTimeout = globalThis.setTimeout(
       keepAccessTokenFresh,
       (tokenValidityDuration / 2) * 1000,
     );

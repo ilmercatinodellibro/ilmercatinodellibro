@@ -37,7 +37,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGetReceiptsQuery } from "src/services/receipt.graphql";
 import { useRetailLocationService } from "src/services/retail-location";
-import { UserFragment } from "src/services/user.graphql";
+import type { UserFragment } from "src/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import ReceiptsTable from "./receipts-table.vue";
 
@@ -47,9 +47,9 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { t } = useI18n();
-
 const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
+
+const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
 const { receipts } = useGetReceiptsQuery(

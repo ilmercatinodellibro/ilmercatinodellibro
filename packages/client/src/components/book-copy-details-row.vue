@@ -5,7 +5,7 @@
     </q-td>
   </q-tr>
 
-  <q-tr v-else-if="!bookCopies.length">
+  <q-tr v-else-if="bookCopies.length === 0">
     <q-td :colspan="tableWidth" class="no-pointer-events text-left">
       {{ t("book.noResult") }}
     </q-td>
@@ -106,7 +106,7 @@
 
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
-import { QTableColumn } from "quasar";
+import type { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
@@ -119,7 +119,7 @@ import {
 } from "src/helpers/book-copy";
 import { getFieldValue } from "src/helpers/table-helpers";
 import {
-  BookCopyDetailsFragment,
+  type BookCopyDetailsFragment,
   useGetBookCopiesQuery,
 } from "src/services/book-copy.graphql";
 import ActionsListButton from "./actions-list-button.vue";
@@ -160,23 +160,23 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    field: () => undefined,
+    field: () => {},
     label: t("book.fields.status"),
     align: "left",
   },
-  ...((!isMobile.value
-    ? [
+  ...((isMobile.value
+    ? []
+    : [
         {
           name: "problems",
           field: "problems",
           label: "",
           align: "center",
         },
-      ]
-    : []) satisfies QTableColumn<BookCopyDetailsFragment>[]),
+      ]) satisfies QTableColumn<BookCopyDetailsFragment>[]),
   {
     name: "history",
-    field: () => undefined,
+    field: () => {},
     label: "",
     classes: isMobile.value ? "no-padding" : "",
   },

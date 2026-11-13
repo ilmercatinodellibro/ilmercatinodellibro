@@ -83,13 +83,13 @@
 
 <script setup lang="ts">
 import { cloneDeep, remove } from "lodash-es";
-import { QTableColumn, useDialogPluginComponent } from "quasar";
+import { type QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { formatPrice } from "src/helpers/formatting";
-import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
+import type { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
 import ActionsListButton from "./actions-list-button.vue";
 import KDialogCard from "./k-dialog-card.vue";
 import chipButton from "./manage-users/chip-button.vue";
@@ -103,10 +103,10 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { t } = useI18n();
-
 const { dialogRef, onDialogHide, onDialogCancel, onDialogOK } =
   useDialogPluginComponent<BookWithAvailableCopiesFragment[]>();
+
+const { t } = useI18n();
 
 const { isMobile } = useLateralDrawer();
 
@@ -169,7 +169,7 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
     },
     {
       name: "actions",
-      field: () => undefined,
+      field: () => {},
       label: "",
       classes: isMobile.value ? "no-padding" : "",
     },

@@ -1,10 +1,10 @@
-import { getOperationDefinition } from "@apollo/client/utilities";
-import { Kind } from "graphql";
 import type { TypedDocumentNode } from "@apollo/client/core";
+import { getOperationDefinition } from "@apollo/client/utilities";
 import type { CyHttpMessages } from "cypress/types/net-stubbing";
+import { Kind } from "graphql";
 
 // Overriding body type since we know it can't be undefined or binary in GraphQL requests
-type Req = Omit<CyHttpMessages.IncomingHttpRequest, "body"> & {
+type Request_ = Omit<CyHttpMessages.IncomingHttpRequest, "body"> & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body: Record<string, any>;
 };
@@ -28,7 +28,7 @@ export const extractOperationInfo = (
   return { operationName, fieldName };
 };
 
-export const hasOperationName = ({ body }: Req, operationName: string) => {
+export const hasOperationName = ({ body }: Request_, operationName: string) => {
   return (
     Object.hasOwn(body, "operationName") && body.operationName === operationName
   );

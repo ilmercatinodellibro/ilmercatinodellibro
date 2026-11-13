@@ -68,10 +68,10 @@ import {
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
-import { QInputProps, date, useDialogPluginComponent } from "quasar";
+import { type QInputProps, date, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { UpdateUserPayload } from "src/@generated/graphql";
+import type { UpdateUserPayload } from "src/@generated/graphql";
 import {
   emailRule,
   makeValueMatchRule,
@@ -80,20 +80,20 @@ import {
   requiredRule,
   validatePasswordRule,
 } from "src/helpers/rules";
-import { UserData } from "src/models/user";
+import type { UserData } from "src/models/user";
 import { useAuthService } from "src/services/auth";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { t } = useI18n();
-
-const { user } = useAuthService();
-
 const { dialogRef, onDialogOK, onDialogCancel, onDialogHide } =
   useDialogPluginComponent<
     Omit<UpdateUserPayload, "id" | "retailLocationId">
   >();
+
+const { t } = useI18n();
+
+const { user } = useAuthService();
 
 const newUserData = ref<
   Omit<UserData, "dateOfBirth"> & { dateOfBirth: string }

@@ -31,10 +31,10 @@ import { useDialogPluginComponent } from "quasar";
 import { useI18n } from "vue-i18n";
 import kDialogCard from "./k-dialog-card.vue";
 
-const { t } = useI18n();
-
 defineEmits(useDialogPluginComponent.emitsObject);
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
   useDialogPluginComponent();
+
+const { t } = useI18n();
 </script>

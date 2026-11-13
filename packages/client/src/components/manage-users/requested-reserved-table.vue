@@ -49,14 +49,14 @@
 
 <script setup lang="ts">
 import { startCase, toLower } from "lodash-es";
-import { QTableColumn, QTableProps } from "quasar";
+import type { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { calculateBookCopyPrice } from "src/helpers/book-copy";
 import { formatPrice } from "src/helpers/formatting";
-import { RequestSummaryFragment } from "src/services/request.graphql";
-import { ReservationSummaryFragment } from "src/services/reservation.graphql";
+import type { RequestSummaryFragment } from "src/services/request.graphql";
+import type { ReservationSummaryFragment } from "src/services/reservation.graphql";
 import UtilityChip from "../utility-chip.vue";
 import DialogTable from "./dialog-table.vue";
 import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
@@ -95,7 +95,7 @@ const columns = computed<
     field: ({ book: { subject } }) => subject,
     label: t("book.fields.subject"),
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "max-width-160 ellipsis",
   },
   {
@@ -103,7 +103,7 @@ const columns = computed<
     field: ({ book: { title } }) => title,
     label: t("book.fields.title"),
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "text-wrap",
   },
   {
@@ -111,7 +111,7 @@ const columns = computed<
     field: ({ book: { authorsFullName } }) => authorsFullName,
     label: t("book.fields.author"),
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "max-width-160 ellipsis",
   },
   {
@@ -119,7 +119,7 @@ const columns = computed<
     field: ({ book: { publisherName } }) => publisherName,
     label: t("book.fields.publisher"),
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
   },
   {
     name: "price",
@@ -137,7 +137,7 @@ const columns = computed<
   },
   {
     name: "actions",
-    field: () => undefined,
+    field: () => {},
     label: t("manageUsers.actions"),
     align: "center",
     classes: isMobile.value ? "no-padding" : "",

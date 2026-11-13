@@ -5,11 +5,11 @@
 */
 
 import {
-  Component,
-  ComputedRef,
-  InjectionKey,
-  Plugin,
-  Ref,
+  type Component,
+  type ComputedRef,
+  type InjectionKey,
+  type Plugin,
+  type Ref,
   TransitionGroup,
   computed,
   createApp,
@@ -44,7 +44,7 @@ export function createInAppNotifications<TNotification>({
 }: CreateInAppNotificationsOptions<TNotification>): InAppNotifications<TNotification> &
   Plugin {
   const getKey = (notification: TNotification) =>
-    notificationKey instanceof Function
+    typeof notificationKey === "function"
       ? notificationKey(notification)
       : notification[notificationKey];
 
@@ -104,7 +104,7 @@ export function createInAppNotifications<TNotification>({
 
       const element = document.createElement("div");
       element.id = "in-app-notifications";
-      document.body.appendChild(element);
+      document.body.append(element);
 
       const app = createApp(RootComponent);
       app.config.globalProperties = parentApp.config.globalProperties;

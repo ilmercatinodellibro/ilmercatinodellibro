@@ -67,15 +67,10 @@
 
 <script setup lang="ts">
 import { uid } from "quasar";
-import { Component } from "vue";
+import type { Component } from "vue";
 import { useI18n } from "vue-i18n";
-import { CommonDialogProps } from "./dialog-models";
+import type { CommonDialogProps } from "./dialog-models";
 import KDialogCard from "./k-dialog-card.vue";
-
-const { t } = useI18n();
-
-// Avoids collisions when there's more than one active component instance at the same time
-const uniqueFormId = `dialog-form-${uid()}`;
 
 withDefaults(
   defineProps<
@@ -99,4 +94,9 @@ const emit = defineEmits<{
   cancel: [];
   validationError: [Component];
 }>();
+
+const { t } = useI18n();
+
+// Avoids collisions when there's more than one active component instance at the same time
+const uniqueFormId = `dialog-form-${uid()}`;
 </script>

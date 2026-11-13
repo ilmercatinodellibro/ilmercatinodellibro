@@ -1,7 +1,7 @@
 import { syncRef } from "@vueuse/core";
 import { ref } from "vue";
 import { useHeaderSearch } from "src/composables/header-features/use-header-search";
-import { EventFragment } from "src/services/event.graphql";
+import type { EventFragment } from "src/services/event.graphql";
 
 export function useEventFilters() {
   const textFilter = ref("");

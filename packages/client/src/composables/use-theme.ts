@@ -5,7 +5,7 @@ import { ref, watch } from "vue";
 import { useAuthService } from "src/services/auth";
 import { useRetailLocationService } from "src/services/retail-location";
 import {
-  ThemeFragment,
+  type ThemeFragment,
   useUpdateRetailLocationThemeMutation,
 } from "src/services/retail-location.graphql";
 

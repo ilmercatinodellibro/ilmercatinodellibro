@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
-import { Dialog, QTable, QTableColumn } from "quasar";
+import { Dialog, QTable, type QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import AddBookDialog from "src/components/add-book-dialog.vue";
@@ -71,7 +71,7 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTableFilters } from "src/composables/use-table-filters";
 import { formatPrice } from "src/helpers/formatting";
 import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import type { BookSummaryFragment } from "src/services/book.graphql";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -109,7 +109,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.subject"),
     field: "subject",
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "max-width-160 ellipsis",
   },
   {
@@ -117,7 +117,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.title"),
     field: "title",
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "text-wrap",
   },
   {
@@ -125,7 +125,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.author"),
     field: "authorsFullName",
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "max-width-160 ellipsis",
   },
   {
@@ -133,7 +133,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.publisher"),
     field: "publisherName",
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
   },
   {
     name: "price",
