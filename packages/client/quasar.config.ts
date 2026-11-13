@@ -29,11 +29,18 @@ export default defineConfig((ctx) => {
     ctx.prod && process.env.BUILD_WITH_HOT_SWAP === "true";
 
   // The generated ImportMetaEnv types the variables as the client code sees them, after "defineEnv" below.
-  // Here they are still the strings from the .env files, or undefined when not set.
-  const rawEnv = import.meta.env as unknown as Partial<Record<string, string>>;
-
-  const FACEBOOK_LOGIN_ENABLED = rawEnv.FACEBOOK_LOGIN_ENABLED === "true";
-  const GOOGLE_LOGIN_ENABLED = rawEnv.GOOGLE_LOGIN_ENABLED === "true";
+  // In this file, app-vite replaces each "import.meta.env.KEY" with the .env value as a JS literal:
+  // true/false become booleans, digit-only values become numbers, and unset variables are undefined
+  // (see "getStrDefineValue" in @quasar/app-vite/lib/utils/env.js).
+  // A bare "import.meta.env" is always "{}", so the keys must be read one by one.
+  const FACEBOOK_LOGIN_ENABLED =
+    (import.meta.env.FACEBOOK_LOGIN_ENABLED as boolean | undefined) === true;
+  const GOOGLE_LOGIN_ENABLED =
+    (import.meta.env.GOOGLE_LOGIN_ENABLED as boolean | undefined) === true;
+  const WEB_PUSH_ENABLED =
+    (import.meta.env.WEB_PUSH_ENABLED as boolean | undefined) === true;
+  const FIREBASE_MESSAGING_SENDER_ID = import.meta.env
+    .FIREBASE_MESSAGING_SENDER_ID as string | number | undefined;
 
   return {
     sourceFiles: {
@@ -166,12 +173,12 @@ export default defineConfig((ctx) => {
         GRAPHQL_WS_URL: import.meta.env.GRAPHQL_WS_URL,
 
         // the service worker is only available in PWA mode, so force disable it otherwise
-        WEB_PUSH_ENABLED: ctx.mode.pwa && rawEnv.WEB_PUSH_ENABLED === "true",
+        WEB_PUSH_ENABLED: ctx.mode.pwa && WEB_PUSH_ENABLED,
         WEB_PUSH_VAPID_KEY: import.meta.env.WEB_PUSH_VAPID_KEY,
         FIREBASE_API_KEY: import.meta.env.FIREBASE_API_KEY,
         FIREBASE_APP_ID: import.meta.env.FIREBASE_APP_ID,
-        FIREBASE_MESSAGING_SENDER_ID: import.meta.env
-          .FIREBASE_MESSAGING_SENDER_ID,
+        // Firebase expects a string, while a digit-only sender ID arrives as a number
+        FIREBASE_MESSAGING_SENDER_ID: FIREBASE_MESSAGING_SENDER_ID?.toString(),
         FIREBASE_PROJECT_ID: import.meta.env.FIREBASE_PROJECT_ID,
 
         SOCIAL_LOGIN_ENABLED: FACEBOOK_LOGIN_ENABLED || GOOGLE_LOGIN_ENABLED,
