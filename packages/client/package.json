@@ -64,6 +64,6 @@
     "cross-env": "^7.0.3",
     "fast-glob": "catalog:",
     "vite-plugin-checker": "^0.14.5",
-    "vue-tsc": "^2.2.10"
+    "vue-tsc": "~3.3.14"
   }
 }

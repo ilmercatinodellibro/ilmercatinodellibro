@@ -59,7 +59,7 @@
     "rimraf": "^6.1.4",
     "stylelint": "^16.26.1",
     "stylelint-config-coralloy": "^0.5.2",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.3"
   },
   "overridesComments": {
     "nest-commander>@golevelup/nestjs-discovery": "nest-commander 3.21.0 pins 7.0.3, whose peers stop at Nest 11. 7.1.0 only widens them to Nest 12. Remove when nest-commander releases https://github.com/jmcdo29/nest-commander/pull/1268"

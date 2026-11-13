@@ -23,13 +23,6 @@ export default defineConfig(
       globals: {
         ...globals.node,
       },
-
-      parserOptions: {
-        projectService: {
-          // Dotfiles aren't matched by the tsconfig "include" default
-          allowDefaultProject: [".*"],
-        },
-      },
     },
 
     settings: {
