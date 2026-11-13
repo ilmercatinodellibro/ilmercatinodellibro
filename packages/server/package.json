@@ -115,7 +115,7 @@
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",
     "@types/lodash": "catalog:",
-    "@types/multer": "^1.4.13",
+    "@types/multer": "^2.3.0",
     "@types/node-notifier": "^8.0.5",
     "@types/passport": "^1.0.17",
     "@types/passport-facebook": "^3.0.4",

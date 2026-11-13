@@ -558,8 +558,8 @@ importers:
         specifier: 'catalog:'
         version: 4.17.7
       '@types/multer':
-        specifier: ^1.4.13
-        version: 1.4.13
+        specifier: ^2.3.0
+        version: 2.3.0
       '@types/node-notifier':
         specifier: ^8.0.5
         version: 8.0.5
@@ -4110,8 +4110,8 @@ packages:
   '@types/ms@0.7.31':
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
 
-  '@types/multer@1.4.13':
-    resolution: {integrity: sha512-bhhdtPw7JqCiEfC9Jimx5LqX9BDIPJEh2q/fQ4bqbBPtyEZYr3cvF22NwG0DmPZNYA0CAf2CnqDB4KIGGpJcaw==}
+  '@types/multer@2.3.0':
+    resolution: {integrity: sha512-i7STIm9V4K2MPH4ZYMtrZAwNxs3kglk2LgleaTuB9pUXgADBcQYQuYMd7+6xgTIxfoggIkFA/DkkvycdZpIARA==}
 
   '@types/node-notifier@8.0.5':
     resolution: {integrity: sha512-LX7+8MtTsv6szumAp6WOy87nqMEdGhhry/Qfprjm1Ma6REjVzeF7SCyvPtp5RaF6IkXCS9V4ra8g5fwvf2ZAYg==}
@@ -15310,7 +15310,7 @@ snapshots:
 
   '@types/ms@0.7.31': {}
 
-  '@types/multer@1.4.13':
+  '@types/multer@2.3.0':
     dependencies:
       '@types/express': 5.0.6
 
