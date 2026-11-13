@@ -103,9 +103,6 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
-  "dependencyComments": {
-    "undici": "Node 18+ uses undici for its fetch implementation, but without shipping appropriate types. Volar pick up DOM typings for server workspace too making things worse. We resolved to use undici fetch as a separate package for now, to avoid TS errors during the compilation"
-  },
   "devDependencies": {
     "@dotenvx/dotenvx": "^2.38.2",
     "@faker-js/faker": "^8.4.1",
@@ -141,7 +138,6 @@
     "ts-loader": "^9.6.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "undici": "^5.28.4",
     "zod": "^3.22.4"
   },
   "jest": {
