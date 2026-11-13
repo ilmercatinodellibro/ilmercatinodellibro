@@ -336,7 +336,12 @@ export default defineConfig((ctx) => {
       useCredentialsForManifestTag: false,
       // useFilenameHashes: true,
       // extendPWAGenerateSWOptions (cfg) {}
-      // extendPWAInjectManifestOptions (cfg) {},
+      extendPWAInjectManifestOptions(cfg) {
+        // The server answers /location/:id/logo/:name from its storage, also through the dev proxy,
+        // so these public files are never served. Fetching them for the precache fails, which discards the service worker.
+        cfg.globIgnores ??= [];
+        cfg.globIgnores.push("location/**");
+      },
       // extendPWAManifestJson (json) {}
       // extendPWACustomSWConf (rolldownConf) {}
       // extendPWASwTsConfig (tsConfig) {}
