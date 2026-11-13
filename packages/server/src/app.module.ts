@@ -58,8 +58,9 @@ import { UserModule } from "./modules/user/user.module";
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "../..", "/client-dist"),
       exclude: [
-        // /(.*) is required to allow access to the playground
-        "/graphql/(.*)",
+        // Also match bare /graphql: with Express 5 the static fallback catches it, so GET requests to the endpoint
+        // (queries and the GraphQL IDE page) would otherwise be served the SPA
+        "/graphql{/*subpath}",
         "/subscriptions",
       ],
     }),
@@ -67,8 +68,6 @@ import { UserModule } from "./modules/user/user.module";
     EventEmitterModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      // See https://www.apollographql.com/docs/apollo-server/migration/#appropriate-400-status-codes
-      status400ForVariableCoercionErrors: true,
       autoSchemaFile: join(process.cwd(), "src/@generated/schema.graphql"),
       sortSchema: true,
       buildSchemaOptions: {
@@ -96,8 +95,9 @@ import { UserModule } from "./modules/user/user.module";
 
             extra.authorizationHeader = authorization;
           },
-          onNext: (ctx, message) => {
-            const errors = message.payload.errors ?? [];
+          // eslint-disable-next-line @typescript-eslint/max-params -- the signature is imposed by graphql-ws
+          onNext: (ctx, _id, _payload, _args, result) => {
+            const errors = result.errors ?? [];
             if (!errors.some(({ message }) => message === "Unauthorized")) {
               return;
             }

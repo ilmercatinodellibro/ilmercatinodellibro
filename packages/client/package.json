@@ -35,7 +35,7 @@
     "_root": "See root package.json => overridesComments for more info."
   },
   "dependencies": {
-    "@apollo/client": "^3.9.10",
+    "@apollo/client": "^3.14.1",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@quasar/extras": "^1.16.11",
     "@vue/apollo-composable": "^4.0.2",
@@ -66,7 +66,7 @@
     "@parcel/watcher": "^2.4.1",
     "@quasar/app-vite": "^1.8.0",
     "@quasar/cli": "^2.4.0",
-    "@quasar/quasar-app-extension-apollo": "^2.2.0",
+    "@quasar/quasar-app-extension-apollo": "^2.2.4",
     "@quasar/quasar-app-extension-testing-e2e-cypress": "^5.2.1",
     "@types/lodash": "catalog:",
     "@types/lodash-es": "^4.17.12",

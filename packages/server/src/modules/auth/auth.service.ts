@@ -180,9 +180,8 @@ export class AuthService {
   }
 
   async validateEmailVerificationToken(token: string) {
-    const { email, locationId } = this.jwtService.decode(
-      token,
-    ) as VerificationTokenPayload;
+    const { email, locationId } =
+      this.jwtService.decode<VerificationTokenPayload>(token);
     const user = await this.userService.findUserByEmail(email);
 
     if (!user) {

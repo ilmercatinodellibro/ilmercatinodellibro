@@ -24,8 +24,8 @@ catalog:
   dotenv: ^16.4.5
   dotenv-expand: ^10.0.0
   fast-glob: ^3.3.3
-  graphql: ^16.8.1
-  graphql-ws: ^5.16.0
+  graphql: ^16.14.2
+  graphql-ws: ^6.4.2
   lodash: ^4.17.21
   "@types/lodash": ^4.17.7
 
