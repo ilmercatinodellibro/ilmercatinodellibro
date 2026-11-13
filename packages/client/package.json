@@ -63,7 +63,7 @@
     "@quasar/quasar-app-extension-apollo": "^2.3.0-beta.1",
     "@types/lodash-es": "^4.17.12",
     "autoprefixer": "^10.6.2",
-    "concurrently": "^8.2.2",
+    "concurrently": "^10.0.7",
     "cross-env": "^7.0.3",
     "tinyglobby": "catalog:",
     "vite-plugin-checker": "^0.14.5",
