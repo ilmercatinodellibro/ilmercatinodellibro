@@ -1,18 +1,29 @@
+shellEmulator: true
+shamefullyHoist: true
+strictPeerDependencies: false
+
+allowBuilds:
+  "@apollo/protobufjs": true
+  "@nestjs/core": false # Just prints Open Collective information
+  "@prisma/client": true
+  "@prisma/engines": true
+  argon2: true
+  cypress: true
+  esbuild: true
+  msgpackr-extract: true # coming from bullmq
+  prisma: true
+  protobufjs: true # coming from firebase
+  unrs-resolver: true
+  vue-demi: true
+
+overrides:
+  vite: ^5.0.10
+  "@vitejs/plugin-vue": ^4.5.2
+  stylelint@16>meow: ^9.0.0
+
+patchedDependencies:
+  prisma-nestjs-graphql@19.2.0: patches/prisma-nestjs-graphql@19.2.0.patch
+  "@nestjs-modules/mailer@1.9.1": patches/@nestjs-modules__mailer@1.9.1.patch
+
 packages:
   - "packages/**"
-
-ignoredBuiltDependencies:
-  - "@nestjs/core" # Just prints Open Collective information
-
-onlyBuiltDependencies:
-  - "@apollo/protobufjs"
-  - "@prisma/client"
-  - "@prisma/engines"
-  - argon2
-  - cypress
-  - esbuild
-  - msgpackr-extract # coming from bullmq
-  - prisma
-  - protobufjs # coming from firebase
-  - unrs-resolver
-  - vue-demi

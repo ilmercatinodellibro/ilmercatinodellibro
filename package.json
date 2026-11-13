@@ -11,16 +11,19 @@
     "Alessandro Vandelli <a.vandelli@dreamonkey.com>"
   ],
   "description": "Il Mercatino del Libro monorepo",
-  "packageManager": "pnpm@10.34.9+sha512.f49b5a8ea0fdedb44bb3c0c1d6575092a53c2950d95b7ad15df11f17974877a2de3a01c07e934e9b28ce716e51c09a94962c7306d09be2e1e4b18a8c8762fd32",
+  "packageManager": "pnpm@11.28.9+sha512.35421cea2720eca3f5ad722b67e8ef18f4d3cd4745ed2fcfeb0dc288d4e9437fad3870d91ee6e83f268f0f6f7e0f62723317b19617bb45ee4333172ef51159f8",
+  "scriptsComments": {
+    "clean": "pnpm has a built-in `clean` command that deletes node_modules. pnpm 11 runs it instead of this script for `pnpm --filter <selector> clean`, so the script is always invoked with an explicit `run`."
+  },
   "scripts": {
-    "clean": "pnpm --filter \"./packages/**\" clean",
+    "clean": "pnpm --filter \"./packages/**\" run clean",
     "generate": "pnpm --filter \"./packages/server\" generate && pnpm --filter \"./packages/client\" generate",
     "lint": "pnpm --filter \"./packages/**\" lint",
     "format:root": "prettier --write \"**/*.{json,md,graphql,vue,js,ts,yml}\" \"!packages/**\" --ignore-path .gitignore",
     "format": "pnpm format:root && pnpm --filter \"./packages/**\" format",
     "client:build": "pnpm --filter \"./packages/client\" build:pwa",
     "server:build": "pnpm --filter \"./packages/server\" build",
-    "build": "pnpm clean && pnpm generate && pnpm client:build && pnpm server:build",
+    "build": "pnpm run clean && pnpm generate && pnpm client:build && pnpm server:build",
     "serve": "pnpm --filter \"./packages/server\" start:prod",
     "test": "echo \"See package.json => scripts for available tests.\" && exit 0",
     "client:dev": "pnpm --filter \"./packages/client\" dev",
@@ -62,17 +65,6 @@
   },
   "patchesComments": {
     "@nestjs-modules/mailer": "Allows to use Nodemailer plugins by exposing the transporters. See https://github.com/nest-modules/mailer/issues/1171#issuecomment-2141411992"
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "^5.0.10",
-      "@vitejs/plugin-vue": "^4.5.2",
-      "stylelint@16>meow": "^9.0.0"
-    },
-    "patchedDependencies": {
-      "prisma-nestjs-graphql@19.2.0": "patches/prisma-nestjs-graphql@19.2.0.patch",
-      "@nestjs-modules/mailer@1.9.1": "patches/@nestjs-modules__mailer@1.9.1.patch"
-    }
   },
   "engines": {
     "node": "^24.22.3"

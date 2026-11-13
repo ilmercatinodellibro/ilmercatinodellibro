@@ -48,7 +48,7 @@ $ pnpm db:stop
 ```bash
 # Cleans all generated NestJS/GraphQL helpers, GraphQL schema, dist bundles, etc.
 # Helpful when switching branches or when the client code generator fails
-$ pnpm clean
+$ pnpm run clean
 
 # Generate all NestJS/GraphQL helpers and GraphQL schema which you'd need to run the app
 $ pnpm generate
