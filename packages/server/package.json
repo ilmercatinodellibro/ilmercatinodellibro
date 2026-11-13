@@ -12,7 +12,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "clean": "rimraf dist && rimraf client-dist && rimraf src/@generated",
-    "prebuild": "pnpm clean && pnpm generate",
     "build": "nest build",
     "add-admin": "node dist/src/commander add-admin",
     "import:books": "node dist/src/commander import",
