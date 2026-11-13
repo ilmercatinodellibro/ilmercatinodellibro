@@ -64,12 +64,16 @@ Replace values into `.env` with production ones, then execute the following comm
 ```bash
 # Clean all generated files, re-generate them anew, then build the app
 $ pnpm build
+# Apply the pending database migrations
+$ pnpm server:migrate:deploy
 # Serve the production build
 $ pnpm serve
 
 # You can now access the app on the URL specified into .env file
 # If you're serving it locally, you can access it at http://localhost:3000 by default
 ```
+
+Compare the server `.env` with `.env.example` before building: Prisma reads `PRISMA_DATABASE_URL` while generating code, so the build fails when a variable it needs is missing.
 
 ## Backup feature
 

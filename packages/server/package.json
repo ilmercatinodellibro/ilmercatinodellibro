@@ -28,6 +28,7 @@
     "generate": "pnpm run generate:prisma && pnpm run generate:graphql",
     "migrate:dev": "prisma migrate dev",
     "migrate:reset": "prisma migrate reset -f && pnpm db:seed",
+    "migrate:deploy": "prisma migrate deploy",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",

@@ -30,6 +30,7 @@
     "client:dev": "pnpm --filter \"./packages/client\" dev",
     "server:dev": "pnpm --filter \"./packages/server\" dev",
     "server:migrate:reset": "pnpm --filter \"./packages/server\" migrate:reset",
+    "server:migrate:deploy": "pnpm --filter \"./packages/server\" migrate:deploy",
     "docker:start": "pnpm --filter \"./packages/server\" docker:start",
     "docker:stop": "pnpm --filter \"./packages/server\" docker:stop",
     "db:start": "pnpm --filter \"./packages/server\" db:start",
