@@ -197,9 +197,6 @@ module.exports = configure(function (ctx) {
         [
           vitePluginChecker,
           {
-            // vite-plugin-checker 0.6 didn't fail `quasar build` on lint or type errors, 0.14 does
-            // TODO: enable once the client typechecks without errors
-            enableBuild: false,
             vueTsc: {
               // This path is provided to tsc via --project flag under the hood
               // This causes problems when on Windows and the name of any folder into the path contains spaces
