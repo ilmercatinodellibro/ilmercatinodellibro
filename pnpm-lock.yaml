@@ -290,9 +290,18 @@ importers:
       '@graphql-codegen/near-operation-file-preset':
         specifier: ^3.1.0
         version: 3.1.0(graphql@16.15.0)(supports-color@8.1.1)
+      '@graphql-codegen/typed-document-node':
+        specifier: ^5.1.2
+        version: 5.1.2(graphql@16.15.0)(supports-color@8.1.1)
+      '@graphql-codegen/typescript':
+        specifier: ^4.1.6
+        version: 4.1.6(graphql@16.15.0)(supports-color@8.1.1)
       '@graphql-codegen/typescript-apollo-client-helpers':
         specifier: ^3.0.1
         version: 3.0.1(graphql@16.15.0)(supports-color@8.1.1)
+      '@graphql-codegen/typescript-operations':
+        specifier: ^4.6.1
+        version: 4.6.1(graphql@16.15.0)(supports-color@8.1.1)
       '@parcel/watcher':
         specifier: ^2.6.0
         version: 2.6.0
@@ -13276,7 +13285,7 @@ snapshots:
   '@graphql-tools/optimize@2.0.0(graphql@16.15.0)':
     dependencies:
       graphql: 16.15.0
-      tslib: 2.9.1
+      tslib: 2.6.2
 
   '@graphql-tools/prisma-loader@8.0.1(@types/node@24.19.2)(graphql@16.15.0)(supports-color@8.1.1)':
     dependencies:
@@ -13321,7 +13330,7 @@ snapshots:
       '@ardatan/relay-compiler': 12.0.0(graphql@16.15.0)(supports-color@8.1.1)
       '@graphql-tools/utils': 10.8.6(graphql@16.15.0)
       graphql: 16.15.0
-      tslib: 2.9.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
       - supports-color
