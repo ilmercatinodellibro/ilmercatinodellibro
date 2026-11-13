@@ -1,5 +1,5 @@
 import { Field, InputType, IntersectionType, PickType } from "@nestjs/graphql";
-import { RetailLocation } from "src/@generated";
+import { RetailLocation } from "src/@generated/graphql";
 import { LocationBoundInput } from "src/modules/retail-location/retail-location.args";
 
 // When put into retail-location.args.ts, it gives a random reflection error for an unknown reason

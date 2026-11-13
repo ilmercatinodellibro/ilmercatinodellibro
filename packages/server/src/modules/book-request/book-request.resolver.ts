@@ -8,7 +8,7 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Book, BookRequest, Sale, User } from "src/@generated";
+import { Book, BookRequest, Sale, User } from "src/@generated/graphql";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";

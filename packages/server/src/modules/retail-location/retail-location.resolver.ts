@@ -3,7 +3,7 @@ import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Prisma, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { merge } from "lodash";
-import { RetailLocation } from "src/@generated/retail-location";
+import { RetailLocation } from "src/@generated/graphql/retail-location";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Input } from "src/modules/auth/decorators/input.decorator";

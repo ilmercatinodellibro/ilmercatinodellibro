@@ -1,5 +1,5 @@
 import { Query, Resolver } from "@nestjs/graphql";
-import { Event } from "src/@generated";
+import { Event } from "src/@generated/graphql";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Resolver(() => Event)

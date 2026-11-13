@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
-import { Notification } from "src/@generated";
+import { Notification } from "src/@generated/graphql";
 import { NotificationPubSub } from "./notification.pubsub";
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { Field, InputType, IntersectionType, PickType } from "@nestjs/graphql";
-import { User } from "src/@generated";
+import { User } from "src/@generated/graphql";
 import { LocationBoundInput } from "src/modules/retail-location";
 
 @InputType()

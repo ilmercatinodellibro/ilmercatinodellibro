@@ -11,8 +11,9 @@ generator client {
 
 generator nestgraphql {
   provider                              = "node node_modules/prisma-nestjs-graphql"
-  output                                = "../src/@generated"
-  // We need to import directly from 'src/@generated' instead of subfolders to avoid circular dependencies
+  // Do not generate anything else in this folder as prisma-nestjs-graphql does not play along with anything it does not generate
+  output                                = "../src/@generated/graphql"
+  // We need to import directly from 'src/@generated/graphql' instead of subfolders to avoid circular dependencies
   // So, we enable this option to make it possible to import everything from the same folder
   // This is why we need the patch applied to PNPM on PrismaNestJSGraphQL
   reExport                              = All

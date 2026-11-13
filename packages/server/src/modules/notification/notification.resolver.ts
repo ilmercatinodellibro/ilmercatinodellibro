@@ -1,7 +1,7 @@
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Args, Mutation, Query, Resolver, Subscription } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Notification } from "src/@generated";
+import { Notification } from "src/@generated/graphql";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { GraphQLContext } from "../auth/auth.models";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";

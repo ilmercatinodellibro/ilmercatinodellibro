@@ -3,7 +3,7 @@ import { Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
-import { User as GraphQLUser } from "src/@generated";
+import { User as GraphQLUser } from "src/@generated/graphql";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { RegisterUserPayload } from "src/modules/user/user.args";
 import { UserService } from "../user/user.service";

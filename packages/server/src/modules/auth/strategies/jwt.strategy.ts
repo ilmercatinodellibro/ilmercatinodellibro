@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { User } from "src/@generated";
+import { User } from "src/@generated/graphql";
 import { AuthConfiguration, authConfiguration } from "src/config/auth";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 

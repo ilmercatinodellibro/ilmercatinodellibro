@@ -9,8 +9,8 @@ import {
   PickType,
   registerEnumType,
 } from "@nestjs/graphql";
-import { User } from "src/@generated";
-import { Role } from "src/@generated/prisma";
+import { User } from "src/@generated/graphql";
+import { Role } from "src/@generated/graphql/prisma";
 import {
   LocationBoundInput,
   LocationBoundQueryArgs,

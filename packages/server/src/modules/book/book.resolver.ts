@@ -11,8 +11,8 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { Prisma, User } from "@prisma/client";
-import { BookCopy, BookMeta } from "src/@generated";
-import { Book } from "src/@generated/book";
+import { BookCopy, BookMeta } from "src/@generated/graphql";
+import { Book } from "src/@generated/graphql/book";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { BookUtility } from "src/modules/book/book-utility";
 import {

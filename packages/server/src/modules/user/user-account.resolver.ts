@@ -4,7 +4,7 @@ import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { Role } from "@prisma/client";
 import { GraphQLJSONObject } from "graphql-scalars";
-import { User } from "src/@generated/user";
+import { User } from "src/@generated/graphql/user";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";

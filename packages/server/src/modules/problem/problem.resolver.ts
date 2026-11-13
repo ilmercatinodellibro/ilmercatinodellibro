@@ -1,7 +1,7 @@
 import { ForbiddenException } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { BookCopy, Problem, User } from "src/@generated";
+import { BookCopy, Problem, User } from "src/@generated/graphql";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { Input } from "../auth/decorators/input.decorator";

@@ -14,7 +14,7 @@ import {
   User,
 } from "@prisma/client";
 import { sumBy } from "lodash";
-import { ReceiptType } from "src/@generated";
+import { ReceiptType } from "src/@generated/graphql";
 import { MailService } from "src/modules/mail/mail.service";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { RetailLocationService } from "src/modules/retail-location/retail-location.service";

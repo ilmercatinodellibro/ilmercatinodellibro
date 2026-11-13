@@ -1,5 +1,5 @@
 import { Args, Query, Resolver } from "@nestjs/graphql";
-import { School, SchoolCourse } from "src/@generated";
+import { School, SchoolCourse } from "src/@generated/graphql";
 import {
   SchoolCoursesArgs,
   SchoolQueryPayload,

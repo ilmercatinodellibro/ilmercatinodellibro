@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Notification } from "src/@generated";
+import { Notification } from "src/@generated/graphql";
 import { TypedPubSub } from "src/helpers/typed-pub-sub";
 
 // TODO: replace with a Redis based one

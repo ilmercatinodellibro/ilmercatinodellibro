@@ -8,7 +8,7 @@ import {
   RequestQueue as PrismaRequestQueue,
   RetailLocation,
 } from "@prisma/client";
-import { BookMeta } from "src/@generated";
+import { BookMeta } from "src/@generated/graphql";
 import { availableBookCopyFilter } from "src/modules/book-copy/book-copy.filters";
 import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.module";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";

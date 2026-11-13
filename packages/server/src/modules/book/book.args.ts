@@ -7,7 +7,7 @@ import {
   ObjectType,
   PickType,
 } from "@nestjs/graphql";
-import { Book } from "src/@generated";
+import { Book } from "src/@generated/graphql";
 import { BookCopyQueryFilter } from "src/modules/book-copy/book-copy.args";
 import {
   LocationBoundInput,

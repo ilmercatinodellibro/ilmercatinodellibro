@@ -20,7 +20,7 @@ import {
   ReceiptType,
   Sale,
   User,
-} from "src/@generated";
+} from "src/@generated/graphql";
 import { AuthService } from "src/modules/auth/auth.service";
 import {
   BookCopyCreateInput,
