@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "../fixtures";
 
-/** An e2e test scopes its fields to the page, a component test to the mounted story */
+/** A test scopes its fields to the page, or to a part of it such as a dialog */
 type FormRoot = Page | Locator;
 
 /** Focuses then leaves the field empty. Leaving a field triggers its validation. */
@@ -39,15 +39,4 @@ export async function fieldShouldHaveError(
   await expect(
     fieldOf(root, dataTestId).getByRole("alert").filter({ hasText: error }),
   ).toBeVisible();
-}
-
-/**
- * The field shows no validation message. Assert a message first, so that this
- * waits for its removal instead of passing on a field which was never validated.
- */
-export async function fieldShouldHaveNoError(
-  root: FormRoot,
-  dataTestId: string,
-) {
-  await expect(fieldOf(root, dataTestId).getByRole("alert")).toHaveCount(0);
 }

@@ -26,7 +26,7 @@ describe("NotificationResolver", () => {
     resolver = moduleRef.get(NotificationResolver);
   });
 
-  it("should only list the notifications of the current user", async () => {
+  it("should only list the notifications of the given user", async () => {
     await resolver.notifications("user-id");
 
     expect(prisma.notification.findMany).toHaveBeenCalledWith({

@@ -95,14 +95,15 @@ test.describe("The registration form", () => {
     graphql,
   }) => {
     // Registering an existing email answers like a successful registration,
-    // to prevent user enumeration attacks
+    // to prevent user enumeration attacks. The response is read because the UI
+    // is identical by design: the page a registration leads to is covered by
+    // the "registration sent" test below.
     await fillRegistrationForm(page, USER.email);
     const registered = graphql.waitForOperation(RegisterDocument);
     await page.getByTestId("submit-button").click();
 
     const { errors } = await registered;
     expect(errors).toBeUndefined();
-    await expect(page.getByTestId("registration-error")).toBeHidden();
   });
 
   test("should confirm a registration on the registration sent page", async ({

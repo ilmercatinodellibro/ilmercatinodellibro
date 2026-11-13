@@ -76,8 +76,13 @@ test.describe("A password reset link", { tag: "@mail" }, () => {
     await fillField(page, "password-confirmation-field", USER.password);
     await page.getByTestId("submit-button").click();
 
+    // The message tells this refusal apart from other failures, such as an expired token
     const { errors } = await refused;
-    expect(errors).toBeDefined();
+    expect(errors).toEqual([
+      expect.objectContaining({
+        message: "Invalid password, Try something else!",
+      }),
+    ]);
     await expect(page.getByTestId("error-notification")).toBeVisible();
   });
 
