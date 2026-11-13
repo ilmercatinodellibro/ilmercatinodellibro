@@ -56,7 +56,7 @@
     "rimraf": "^6.0.1",
     "stylelint": "^16.20.0",
     "stylelint-config-coralloy": "^0.5.2",
-    "typescript": "~5.4.4"
+    "typescript": "~5.9.3"
   },
   "overridesComments": {
     "vite": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077",

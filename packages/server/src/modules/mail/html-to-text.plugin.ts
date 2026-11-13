@@ -27,7 +27,7 @@ export const htmlToTextPlugin: PluginFunction = (mail, done) => {
 
     try {
       let html = value as string | Buffer;
-      if (html instanceof Buffer) {
+      if (typeof html !== "string") {
         html = html.toString("utf-8");
       }
 
