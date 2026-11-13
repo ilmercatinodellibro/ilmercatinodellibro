@@ -1,2 +1,18 @@
 packages:
   - "packages/**"
+
+ignoredBuiltDependencies:
+  - "@nestjs/core" # Just prints Open Collective information
+
+onlyBuiltDependencies:
+  - "@apollo/protobufjs"
+  - "@prisma/client"
+  - "@prisma/engines"
+  - argon2
+  - cypress
+  - esbuild
+  - msgpackr-extract # coming from bullmq
+  - prisma
+  - protobufjs # coming from firebase
+  - unrs-resolver
+  - vue-demi

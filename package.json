@@ -11,7 +11,7 @@
     "Alessandro Vandelli <a.vandelli@dreamonkey.com>"
   ],
   "description": "Il Mercatino del Libro monorepo",
-  "packageManager": "pnpm@9.15.9+sha512.68046141893c66fad01c079231128e9afb89ef87e2691d69e4d40eee228988295fd4682181bae55b58418c3a253bde65a505ec7c5f9403ece5cc3cd37dcf2531",
+  "packageManager": "pnpm@10.34.9+sha512.f49b5a8ea0fdedb44bb3c0c1d6575092a53c2950d95b7ad15df11f17974877a2de3a01c07e934e9b28ce716e51c09a94962c7306d09be2e1e4b18a8c8762fd32",
   "scripts": {
     "clean": "pnpm --filter \"./packages/**\" clean",
     "generate": "pnpm --filter \"./packages/server\" generate && pnpm --filter \"./packages/client\" generate",
