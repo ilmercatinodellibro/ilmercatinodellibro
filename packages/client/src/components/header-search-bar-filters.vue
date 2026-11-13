@@ -12,7 +12,9 @@
         debounce="1000"
         outlined
         type="search"
-        @update:model-value="(query) => updateSearch(query as string)"
+        @update:model-value="
+          (query: string | number | null) => updateSearch(query as string)
+        "
       >
         <template v-if="newFilters.searchQuery.length === 0" #append>
           <q-icon :name="mdiMagnify" />

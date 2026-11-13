@@ -58,7 +58,7 @@ const { isMobile } = useLateralDrawer();
 onMounted(() => {
   // Forces usage of inline CSS style for text color and background color
   // eslint-disable-next-line @typescript-eslint/no-deprecated
-  document.execCommand("styleWithCSS", false, true);
+  document.execCommand("styleWithCSS", false, "true");
 });
 
 const editorRef = ref() as Ref<QEditor>;

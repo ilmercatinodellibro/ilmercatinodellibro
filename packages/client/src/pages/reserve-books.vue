@@ -17,7 +17,8 @@
           outlined
           type="search"
           @update:model-value="
-            (value) => (tableFilter.searchQuery = (value as string) ?? '')
+            (value: string | number | null) =>
+              (tableFilter.searchQuery = (value as string) ?? '')
           "
         >
           <template v-if="tableFilter.searchQuery.length === 0" #append>

@@ -39,7 +39,8 @@
           option-value="code"
           outlined
           @update:model-value="
-            (newModel) => (selectedSchoolCodes = newModel ?? [])
+            (newModel: string[] | null) =>
+              (selectedSchoolCodes = newModel ?? [])
           "
         />
 
@@ -73,7 +74,8 @@
           option-value="id"
           outlined
           @update:model-value="
-            (newModel) => (selectedSchoolCourseIds = newModel ?? [])
+            (newModel: string[] | null) =>
+              (selectedSchoolCourseIds = newModel ?? [])
           "
         />
       </q-card-section>

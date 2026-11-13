@@ -30,7 +30,6 @@ export default {
     reservationsWhichLedToARefundedSale: "Reservations with refunded sale",
     expiredReservations: "Expired reservations",
     reservationsDeletedByUsers: "Reservations deleted by users",
-    requests: "Requests",
     sales: "Sales",
     activeSales: "Successful sales",
     refundedSales: "Sales with refund",
