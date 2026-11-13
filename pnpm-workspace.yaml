@@ -6,10 +6,6 @@ publicHoistPattern:
   - eslint-import-resolver-typescript
   - globals
 
-  # Imported by the server Jest specs; transitive dependency of "jest"
-  # Remove when the server tests move off Jest
-  - "@jest/globals"
-
   # Transitive dependency of "@quasar/app-vite", not installed separately so it always matches the version Quasar runs
   # The client references its "vite/client" types
   - vite
@@ -25,7 +21,7 @@ allowBuilds:
   "@firebase/util": true # coming from firebase-admin, only writes defaults when FIREBASE_WEBAPP_CONFIG is set
   "@nestjs/core": false # Just prints Open Collective information
   "@parcel/watcher": false # Only compiles itself when npm_config_build_from_source is set, the binaries come from its optional dependencies
-  "@swc/core": true # Checks its native binary, used by @swc-node/register to run the server TypeScript scripts
+  "@swc/core": true # Checks its native binary, used by @swc-node/register to run the server TypeScript scripts and by unplugin-swc in the server tests
   "@prisma/client": true
   "@prisma/engines": true
   argon2: true
