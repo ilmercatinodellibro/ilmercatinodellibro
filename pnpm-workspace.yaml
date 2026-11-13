@@ -26,6 +26,7 @@ catalog:
 
 allowBuilds:
   "@apollo/protobufjs": true
+  "@firebase/util": true # coming from firebase-admin, only writes defaults when FIREBASE_WEBAPP_CONFIG is set
   "@nestjs/core": false # Just prints Open Collective information
   "@prisma/client": true
   "@prisma/engines": true

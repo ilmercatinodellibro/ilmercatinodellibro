@@ -87,7 +87,7 @@
     "csv": "^6.6.4",
     "dotenv": "catalog:",
     "ejs": "^7.0.2",
-    "firebase-admin": "^11.11.1",
+    "firebase-admin": "^14.5.1",
     "graphql": "catalog:",
     "graphql-subscriptions": "^2.0.0",
     "graphql-ws": "catalog:",

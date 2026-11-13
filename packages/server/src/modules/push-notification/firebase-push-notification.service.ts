@@ -43,7 +43,11 @@ export class FirebasePushNotificationService implements PushNotificationService 
       BatchResponse
     >(chunks, this.PARALLEL_REQUESTS, async (chunk) => {
       try {
+        // firebase-admin 14.1 deprecates the `tokens` field in favor of `fids`, which are Firebase Installation IDs.
+        // Switching requires the client to register FIDs instead of FCM tokens.
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         return await this.messaging.sendEachForMulticast({
+          // eslint-disable-next-line @typescript-eslint/no-deprecated -- see above
           tokens: subscriptions.map(({ deviceToken }) => deviceToken),
           // Most common basic options
           notification: {
