@@ -1,9 +1,11 @@
 import { UnprocessableEntityException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { Prisma, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { merge } from "lodash";
 import { RetailLocation } from "src/@generated/graphql/retail-location";
+import { Prisma } from "src/@generated/prisma/client";
+import { Role } from "src/@generated/prisma/enums";
+import type { UserModel } from "src/@generated/prisma/models";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { Input } from "src/modules/auth/decorators/input.decorator";
@@ -62,7 +64,7 @@ export class RetailLocationResolver {
   @Mutation(() => RetailLocation)
   async updateRetailLocationTheme(
     @Input() { retailLocationId, theme }: UpdateRetailLocationThemeInput,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: user.id,
@@ -108,7 +110,7 @@ export class RetailLocationResolver {
       buyRate,
       sellRate,
     }: UpdateRetailLocationSettingsInput,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: user.id,
@@ -182,7 +184,7 @@ export class RetailLocationResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async resetRetailLocation(
     @Input() { retailLocationId }: ResetRetailLocationInput,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: user.id,
@@ -239,7 +241,7 @@ export class RetailLocationResolver {
   @Query(() => StatisticsQueryResult)
   async retailLocationStatistics(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -793,7 +795,7 @@ export class RetailLocationResolver {
   @Query(() => [ChartElement])
   async deliveriesChartData(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ): Promise<ChartElement[]> {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -818,7 +820,7 @@ export class RetailLocationResolver {
   @Query(() => [ChartElement])
   async salesChartData(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ): Promise<ChartElement[]> {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -846,7 +848,7 @@ export class RetailLocationResolver {
   @Query(() => [ChartElement])
   async settlementsChartData(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ): Promise<ChartElement[]> {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -877,7 +879,7 @@ export class RetailLocationResolver {
   @Query(() => [ChartElement])
   async returningsChartData(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ): Promise<ChartElement[]> {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -939,7 +941,7 @@ export class RetailLocationResolver {
       whoAreWeContent,
       joinUsContent,
     }: UpdateRetailLocationInfoInput,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: currentUser.id,

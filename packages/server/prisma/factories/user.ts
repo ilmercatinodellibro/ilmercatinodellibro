@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import type { Prisma } from "@prisma/client";
 import * as argon2 from "argon2";
+import type { Prisma } from "src/@generated/prisma/client";
 import RETAIL_LOCATIONS from "test/fixtures/retail-locations";
 import type { SeedUserCreateInput } from "test/fixtures/users";
 

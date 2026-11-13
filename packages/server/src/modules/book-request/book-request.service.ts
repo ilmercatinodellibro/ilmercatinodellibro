@@ -1,22 +1,25 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import {
-  Book,
-  BookRequest,
-  Prisma,
-  RequestQueue as PrismaRequestQueue,
-  RetailLocation,
-} from "@prisma/client";
 import { BookMeta } from "src/@generated/graphql";
+import { Prisma } from "src/@generated/prisma/client";
+import type {
+  BookModel,
+  BookRequestModel,
+  RequestQueueModel as PrismaRequestQueue,
+  RetailLocationModel,
+} from "src/@generated/prisma/models";
 import { availableBookCopyFilter } from "src/modules/book-copy/book-copy.filters";
 import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.module";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 
 type RequestQueue = PrismaRequestQueue & {
-  book: Book & { meta: BookMeta | null; retailLocation: RetailLocation };
-  currentRequest: BookRequest;
+  book: BookModel & {
+    meta: BookMeta | null;
+    retailLocation: RetailLocationModel;
+  };
+  currentRequest: BookRequestModel;
 };
 
 /**
@@ -319,8 +322,8 @@ export class BookRequestService {
   }
 
   async #notifyUser(
-    request: BookRequest,
-    book: Book & { retailLocation: RetailLocation },
+    request: BookRequestModel,
+    book: BookModel & { retailLocation: RetailLocationModel },
   ) {
     const { id: userId, locale } = await this.prisma.user.findUniqueOrThrow({
       where: {

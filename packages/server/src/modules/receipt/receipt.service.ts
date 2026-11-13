@@ -4,17 +4,17 @@ import { Injectable } from "@nestjs/common";
 import type { GenerateProps, GeneratorOptions } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, table, text } from "@pdfme/schemas";
-import {
-  Book,
-  BookCopy,
-  Prisma,
-  Receipt,
-  RetailLocation,
-  Sale,
-  User,
-} from "@prisma/client";
 import { sumBy } from "lodash";
 import { ReceiptType } from "src/@generated/graphql";
+import { Prisma } from "src/@generated/prisma/client";
+import type {
+  BookModel,
+  BookCopyModel,
+  ReceiptModel,
+  RetailLocationModel,
+  SaleModel,
+  UserModel,
+} from "src/@generated/prisma/models";
 import { MailService } from "src/modules/mail/mail.service";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
@@ -22,12 +22,12 @@ import purchaseTemplate from "./templates/purchase.json";
 import settlementTemplate from "./templates/settlement.json";
 import withdrawalTemplate from "./templates/withdrawal.json";
 
-type BookCopyWithBook = BookCopy & { book: Book };
-type BookCopyWithSales = BookCopy & { sales: Sale[] };
+type BookCopyWithBook = BookCopyModel & { book: BookModel };
+type BookCopyWithSales = BookCopyModel & { sales: SaleModel[] };
 type ReceiptPayload =
   | {
       type: ReceiptType.PURCHASE;
-      data: (Sale & { bookCopy: BookCopyWithBook })[];
+      data: (SaleModel & { bookCopy: BookCopyWithBook })[];
     }
   | {
       type: ReceiptType.WITHDRAWAL;
@@ -52,15 +52,15 @@ enum SettlementType {
 
 export interface ReceiptBook
   extends
-    Pick<Book, "isbnCode" | "title" | "subject" | "originalPrice">,
-    Pick<BookCopy, "code"> {
+    Pick<BookModel, "isbnCode" | "title" | "subject" | "originalPrice">,
+    Pick<BookCopyModel, "code"> {
   settlementType?: SettlementType;
 }
 
 export interface GenerateReceiptInput {
   creationDate: Date;
-  user: User;
-  location: RetailLocation;
+  user: UserModel;
+  location: RetailLocationModel;
   books: ReceiptBook[];
 }
 
@@ -111,7 +111,7 @@ export class ReceiptService {
     private readonly locationService: RetailLocationService,
   ) {}
 
-  getReceiptPath(receipt: Receipt) {
+  getReceiptPath(receipt: ReceiptModel) {
     const directory = this.locationService.resolveStoragePath(
       receipt.retailLocationId,
       "./receipts",
@@ -120,7 +120,7 @@ export class ReceiptService {
     return { directory, file };
   }
 
-  async sendReceiptToUser(receipt: Receipt, receiptPdf?: Buffer) {
+  async sendReceiptToUser(receipt: ReceiptModel, receiptPdf?: Buffer) {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: receipt.userId },
     });

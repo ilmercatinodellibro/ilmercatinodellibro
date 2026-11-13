@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { Cart } from "@prisma/client";
+import type { CartModel } from "src/@generated/prisma/models";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -13,7 +13,7 @@ export class CartService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  isCartExpired(cart: Cart) {
+  isCartExpired(cart: CartModel) {
     return cart.createdAt < this.#getExpirationTimeAgo();
   }
 

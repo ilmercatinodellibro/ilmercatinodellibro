@@ -1,5 +1,5 @@
-import type { Prisma } from "@prisma/client";
-import type { Theme } from "src/modules/retail-location/theme.args";
+import type { Prisma } from "../../src/@generated/prisma/client";
+import type { Theme } from "../../src/modules/retail-location/theme.args";
 
 const IT_WHO_ARE_WE = `Il Mercatino del Libro è un progetto nato nel 2013 e portato avanti negli anni da diverse associazioni di Reggio Emilia. A partire dal 2019 il progetto è promosso dal <b>Comune di Reggio Emilia</b> che ne ha permesso lo svolgimento all'interno dello spazio giovani di <b> <a href="https://maps.app.goo.gl/KhNMGXo12Xci1Pwn8" target="_blank">Via Cassoli 1</a></b>. Attualmente il progetto è portato avanti dall'associazione <b>The Spots</b>, capofila della rete di associazioni giovanili che abitano lo spazio comunale.<br /><br />
 Il Mercatino del Libro si occupa di compravendita di testi scolastici destinati a istituti superiori di primo e secondo grado. <b>I libri sono ritirati in conto vendita, e venduti al 55% del prezzo di copertina. Alla fine di ogni edizione vengono restituiti agli utenti i libri invenduti e parte dei profitti derivati dalla vendita, pari al 30% del prezzo di copertina.</b> <br /><br />

@@ -6,7 +6,7 @@ import {
 } from "@getbrevo/brevo";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import type { User } from "@prisma/client";
+import type { UserModel } from "src/@generated/prisma/models";
 import { BrevoConfiguration, brevoConfiguration } from "src/config/brevo";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
@@ -115,7 +115,10 @@ export class NewsletterContactsService {
   }
 
   async importContacts(
-    users: Pick<User, "firstname" | "lastname" | "email" | "phoneNumber">[],
+    users: Pick<
+      UserModel,
+      "firstname" | "lastname" | "email" | "phoneNumber"
+    >[],
     listId: number,
   ) {
     this.logger.log(

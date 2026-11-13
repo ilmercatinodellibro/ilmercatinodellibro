@@ -12,7 +12,6 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Prisma } from "@prisma/client";
 import {
   Book,
   BookCopy,
@@ -21,6 +20,7 @@ import {
   Sale,
   User,
 } from "src/@generated/graphql";
+import { Prisma } from "src/@generated/prisma/client";
 import { AuthService } from "src/modules/auth/auth.service";
 import {
   BookCopyCreateInput,

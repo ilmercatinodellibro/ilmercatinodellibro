@@ -4,14 +4,18 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
-import { Event, RetailLocation, User } from "@prisma/client";
+import type {
+  EventModel,
+  RetailLocationModel,
+  UserModel,
+} from "src/@generated/prisma/models";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
 import { MailService } from "../mail/mail.service";
 import { PrismaService } from "../prisma/prisma.service";
 
-type EmailPayload = Pick<Event, "name" | "description" | "createdAt"> & {
-  location: RetailLocation;
+type EmailPayload = Pick<EventModel, "name" | "description" | "createdAt"> & {
+  location: RetailLocationModel;
   locale: string;
 };
 
@@ -56,7 +60,7 @@ export class SendEmailNotificationListener {
   }
 
   async #sendEventEmail(
-    user: Pick<User, "firstname" | "lastname" | "email">,
+    user: Pick<UserModel, "firstname" | "lastname" | "email">,
     { name, description, createdAt, location, locale }: EmailPayload,
   ) {
     const reserveUrl = `${this.rootConfig.clientUrl}/${location.id}/reserve-books`;

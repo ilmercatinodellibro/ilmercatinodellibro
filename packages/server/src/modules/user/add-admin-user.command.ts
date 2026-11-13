@@ -1,10 +1,14 @@
 import { Logger } from "@nestjs/common";
-import { Role, User } from "@prisma/client";
 import { Command, CommandRunner } from "nest-commander";
+import { Role } from "src/@generated/prisma/enums";
+import type { UserModel } from "src/@generated/prisma/models";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import retailLocations from "test/fixtures/retail-locations";
 
-const adminData: Pick<User, "email" | "password" | "firstname" | "lastname"> = {
+const adminData: Pick<
+  UserModel,
+  "email" | "password" | "firstname" | "lastname"
+> = {
   email: "info@ilmercatinodellibro.com",
   password:
     "$argon2id$v=19$m=65536,t=3,p=4$Ae3q36sm3zzXuh9IOFigaA$orXmayUt1IKLZC8TXGPXdb2osyBzZspVToEmeMYgvU8",

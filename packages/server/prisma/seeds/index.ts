@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "src/@generated/prisma/client";
 import { seedE2eTests } from "./e2e-tests";
 import { seedEvents } from "./events";
 import { seedRetailLocations } from "./retail-locations";

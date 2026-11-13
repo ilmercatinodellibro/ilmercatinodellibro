@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import type { Prisma } from "@prisma/client";
 import { random, startCase, times } from "lodash";
+import type { Prisma } from "src/@generated/prisma/client";
 import RETAIL_LOCATIONS from "test/fixtures/retail-locations";
 import { createUser } from "./user";
 

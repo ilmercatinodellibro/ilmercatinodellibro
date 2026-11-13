@@ -5,7 +5,8 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { JwtService, TokenExpiredError } from "@nestjs/jwt";
-import { Role, User } from "@prisma/client";
+import { Role } from "src/@generated/prisma/enums";
+import type { UserModel } from "src/@generated/prisma/models";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { MailService } from "../mail/mail.service";
 import { PrismaService } from "../prisma/prisma.service";
@@ -20,7 +21,7 @@ interface VerificationTokenPayload {
 
 interface SendInvitePayload {
   toEmail: string;
-  invitedBy: User;
+  invitedBy: UserModel;
   token: string;
   locationId: string;
   locale: string;
@@ -131,7 +132,11 @@ export class AuthService {
     }
   }
 
-  async sendVerificationLink(locationId: string, user: User, token: string) {
+  async sendVerificationLink(
+    locationId: string,
+    user: UserModel,
+    token: string,
+  ) {
     const url = `${this.rootConfig.serverUrl}/${EMAIL_VERIFICATION_ENDPOINT}?locationId=${locationId}&token=${token}`;
 
     try {
@@ -154,7 +159,11 @@ export class AuthService {
     }
   }
 
-  async sendPasswordResetLink(locationId: string, user: User, token: string) {
+  async sendPasswordResetLink(
+    locationId: string,
+    user: UserModel,
+    token: string,
+  ) {
     // Make sure the URL below is in sync with `AvailableRouteNames.ChangePassword` in the client project
     const url = `${this.rootConfig.clientUrl}/${locationId}/change-password?token=${token}`;
 

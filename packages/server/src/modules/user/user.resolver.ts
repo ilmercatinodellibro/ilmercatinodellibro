@@ -11,12 +11,12 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Prisma } from "@prisma/client";
 import * as argon2 from "argon2";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
 import { ReceiptType, Role } from "src/@generated/graphql";
 import { User } from "src/@generated/graphql/user";
+import { Prisma } from "src/@generated/prisma/client";
 import { AuthService } from "src/modules/auth/auth.service";
 import { ReceiptService } from "src/modules/receipt/receipt.service";
 import { LocationBoundQueryArgs } from "src/modules/retail-location";

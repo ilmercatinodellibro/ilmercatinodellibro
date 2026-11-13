@@ -76,4 +76,27 @@ export default defineConfig(
       "unicorn/no-process-exit": "off",
     },
   },
+
+  {
+    name: "custom/fixtures",
+
+    // The client tests import these fixtures. There, "src/" means the client sources.
+    files: ["test/fixtures/**/*.ts"],
+
+    rules: {
+      // This replaces the shared options, so deep relative imports are allowed here
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["src/*"],
+              message:
+                "The client tests import this file. In the client, src/ resolves to the client sources. Import server code with a relative path.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

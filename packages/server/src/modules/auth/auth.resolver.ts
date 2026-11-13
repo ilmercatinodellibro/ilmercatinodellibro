@@ -1,9 +1,10 @@
 import { UnprocessableEntityException, UseGuards } from "@nestjs/common";
 import { Mutation, Query, Resolver } from "@nestjs/graphql";
-import { Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { omit } from "lodash";
 import { User as GraphQLUser } from "src/@generated/graphql";
+import { Role } from "src/@generated/prisma/enums";
+import type { UserModel } from "src/@generated/prisma/models";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { RegisterUserPayload } from "src/modules/user/user.args";
 import { UserService } from "../user/user.service";
@@ -32,7 +33,7 @@ export class AuthResolver {
   ) {}
 
   @Query(() => GraphQLUser)
-  currentUser(@CurrentUser() user: User) {
+  currentUser(@CurrentUser() user: UserModel) {
     return user;
   }
 
@@ -141,7 +142,7 @@ export class AuthResolver {
     // We need it here to autogenerate the GraphQL schema
     // That's why it's defined as a param but not used within this method
     @Input() _loginPayload: LoginPayload,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ): AuthPayload {
     const jwt = this.authService.createAccessToken(user.id);
 
@@ -171,7 +172,7 @@ export class AuthResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async resetForgottenPassword(
     @Input() { newPassword, confirmNewPassword }: ResetForgottenPasswordPayload,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     if (newPassword !== confirmNewPassword) {
       throw new UnprocessableEntityException(
@@ -190,14 +191,14 @@ export class AuthResolver {
   }
 
   @Mutation(() => String)
-  refreshToken(@CurrentUser() user: User) {
+  refreshToken(@CurrentUser() user: UserModel) {
     return this.authService.createAccessToken(user.id);
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async sendVerificationLink(
     @Input() { userId, retailLocationId }: EmailVerificationPayload,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: currentUser.id,
@@ -227,7 +228,7 @@ export class AuthResolver {
   async resetPassword(
     @Input()
     { currentPassword, newPassword, confirmNewPassword }: PasswordResetPayload,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     if (
       !(await this.userService.verifyPassword(user.password, currentPassword))
@@ -255,7 +256,7 @@ export class AuthResolver {
   @Mutation(() => GraphQLUser, { nullable: true })
   async addOrInviteOperator(
     @Input() { email, retailLocationId }: RegistrationInviteLinkPayload,
-    @CurrentUser() actor: User,
+    @CurrentUser() actor: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: actor.id,

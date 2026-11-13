@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
-import { User } from "@prisma/client";
 import { Address as AddressObject } from "nodemailer/lib/mailer";
+import type { UserModel } from "src/@generated/prisma/models";
 import { nameAddrSchema } from "src/config/email";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { htmlToTextPlugin } from "src/modules/mail/html-to-text.plugin";
@@ -22,7 +22,7 @@ type SentMessageInfo =
   | false;
 
 type Address =
-  string | AddressObject | Pick<User, "email" | "firstname" | "lastname">;
+  string | AddressObject | Pick<UserModel, "email" | "firstname" | "lastname">;
 const addressableFields = [
   "to",
   "cc",

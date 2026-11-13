@@ -1,12 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
-import { Event, Notification } from "@prisma/client";
+import type {
+  EventModel,
+  NotificationModel,
+} from "src/@generated/prisma/models";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 import { PushNotificationService } from "../push-notification/push-notification-service.abstract";
 
 export interface NewNotificationPayload {
-  event: Event;
-  notification: Notification;
+  event: EventModel;
+  notification: NotificationModel;
 }
 
 @Injectable()

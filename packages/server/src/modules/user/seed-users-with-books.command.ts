@@ -2,18 +2,18 @@ import { randomInt } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { Logger } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import {
-  Book,
-  BookCopy,
-  BookRequest,
-  Prisma,
-  Reservation,
-  RetailLocation,
-  Sale,
-} from "@prisma/client";
 import { cloneDeep, find, remove, toInteger } from "lodash";
 import { Command, CommandRunner, Option } from "nest-commander";
 import { PASSWORD_STUB_HASH } from "prisma/factories/user";
+import { Prisma } from "src/@generated/prisma/client";
+import type {
+  BookModel,
+  BookCopyModel,
+  BookRequestModel,
+  ReservationModel,
+  RetailLocationModel,
+  SaleModel,
+} from "src/@generated/prisma/models";
 import { BookCopyService } from "src/modules/book-copy/book-copy.service";
 import { PrismaService } from "src/modules/prisma/prisma.service";
 
@@ -198,7 +198,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
   async #createBuyerAndSeller(
     index: number,
     additionalBooksPerUser: number,
-    retailLocation: RetailLocation,
+    retailLocation: RetailLocationModel,
   ) {
     try {
       const books = await this.prisma.book.findMany({
@@ -399,11 +399,11 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     sale: {
       bookCopy: {
         book: {
-          reservations: Reservation[];
-          requests: BookRequest[];
-        } & Book;
+          reservations: ReservationModel[];
+          requests: BookRequestModel[];
+        } & BookModel;
       };
-    } & Sale,
+    } & SaleModel,
   ) {
     const { book } = sale.bookCopy;
 
@@ -447,7 +447,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
   }
 
   async #refundBookCopy(
-    { id, bookCopyId, bookCopy }: Sale & { bookCopy: BookCopy },
+    { id, bookCopyId, bookCopy }: SaleModel & { bookCopy: BookCopyModel },
     retailLocationId: string,
   ) {
     const [newBookCopyCode] = await this.bookService.calculateBookCodes(

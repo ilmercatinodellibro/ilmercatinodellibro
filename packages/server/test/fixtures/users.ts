@@ -1,7 +1,11 @@
-// Don't import stuff from src/ here, because this file is also used by the client tests
-// If possible, don't use any imports at all, and prefer type-only imports if you have to
-// Preprocessing of the test files might break or take longer otherwise
-import type { Prisma, Role } from "@prisma/client";
+// This file is also used by the client tests, so keep it free of server-only code:
+// - Import nothing from src/. The alias points at the client's src/ in the client tests.
+// - Prefer no imports at all, and type-only ones when needed, or preprocessing the
+//   test files may break or take longer.
+// - Avoid `process.env` and Node-specific APIs, they are not available in the browser.
+// The Prisma types cannot use the alias, hence the relative path.
+import type { Prisma } from "../../src/@generated/prisma/client";
+import type { Role } from "../../src/@generated/prisma/enums";
 
 /** @see {@link file://./../../prisma/factories/user.ts#PASSWORD_STUB_HASH} */
 export const DEFAULT_PASSWORD = "longSecret123!";

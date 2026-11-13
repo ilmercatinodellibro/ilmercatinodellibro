@@ -9,7 +9,7 @@ import {
   ConflictException,
   HttpException,
 } from "@nestjs/common";
-import { Role } from "@prisma/client";
+import { Role } from "src/@generated/prisma/enums";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { AuthService } from "src/modules/auth/auth.service";
 import {

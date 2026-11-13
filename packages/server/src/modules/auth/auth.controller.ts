@@ -9,8 +9,8 @@ import {
   UseGuards,
   forwardRef,
 } from "@nestjs/common";
-import { User } from "@prisma/client";
 import { Request, Response } from "express";
+import type { UserModel } from "src/@generated/prisma/models";
 import { RootConfiguration, rootConfiguration } from "src/config/root";
 import { FacebookAuthGuard } from "src/modules/auth/guards/facebook.guard";
 import { GoogleAuthGuard } from "src/modules/auth/guards/google.guard";
@@ -61,7 +61,7 @@ export class AuthController {
   @Get("auth/facebook/callback")
   facebookAuthCallback(@Req() request: Request, @Res() response: Response) {
     // TODO: not saving the phone number nor birthday
-    const user = request.user as User | undefined;
+    const user = request.user as UserModel | undefined;
     if (!user) {
       throw new ForbiddenException();
     }
@@ -91,7 +91,7 @@ export class AuthController {
   googleAuthCallback(@Req() request: Request, @Res() response: Response) {
     // TODO: not saving the phone number nor birthday
 
-    const user = request.user as User | undefined;
+    const user = request.user as UserModel | undefined;
     if (!user) {
       throw new ForbiddenException();
     }

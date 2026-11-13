@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "src/@generated/prisma/client";
 import { seedTestUsers } from "./users";
 
 export async function seedE2eTests(prisma: PrismaClient) {

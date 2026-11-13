@@ -10,9 +10,10 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Prisma, User } from "@prisma/client";
 import { BookCopy, BookMeta } from "src/@generated/graphql";
 import { Book } from "src/@generated/graphql/book";
+import { Prisma } from "src/@generated/prisma/client";
+import type { UserModel } from "src/@generated/prisma/models";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { BookUtility } from "src/modules/book/book-utility";
 import {
@@ -390,7 +391,7 @@ export class BookResolver {
       subject,
       title,
     }: BookCreateInput,
-    @CurrentUser() { id: userId }: User,
+    @CurrentUser() { id: userId }: UserModel,
   ) {
     try {
       await this.prisma.locationMember.findFirstOrThrow({

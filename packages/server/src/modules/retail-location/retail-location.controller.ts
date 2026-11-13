@@ -15,8 +15,10 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { Prisma, Role, User } from "@prisma/client";
 import { upperCase } from "lodash";
+import { Prisma } from "src/@generated/prisma/client";
+import { Role } from "src/@generated/prisma/enums";
+import type { UserModel } from "src/@generated/prisma/models";
 import { rootConfiguration, type RootConfiguration } from "src/config/root";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
@@ -75,7 +77,7 @@ export class RetailLocationController {
   async uploadRetailLocationLogo(
     @Param("id") retailLocationId: string,
     @UploadedFile() file: Express.Multer.File,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     const location = await this.prisma.retailLocation.findUniqueOrThrow({
       where: {
@@ -145,7 +147,7 @@ export class RetailLocationController {
   @Header("Content-Type", "text/csv")
   async exportActiveUsers(
     @Param("id") retailLocationId: string,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: currentUser.id,

@@ -5,9 +5,13 @@ import {
 } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { Prisma, Book as PrismaBook, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
 import { Book, Cart, ReceiptType } from "src/@generated/graphql";
+import { Prisma } from "src/@generated/prisma/client";
+import type {
+  BookModel as PrismaBook,
+  UserModel,
+} from "src/@generated/prisma/models";
 import { AuthService } from "src/modules/auth/auth.service";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { PrismaService } from "src/modules/prisma/prisma.service";
@@ -52,7 +56,7 @@ export class CartResolver {
   })
   async openCart(
     @Input() { userId, retailLocationId }: OpenCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() operator: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: operator.id,
@@ -96,7 +100,7 @@ export class CartResolver {
       fromBookRequestId,
       fromReservationId,
     }: AddToCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() operator: UserModel,
   ) {
     const cart = await this.cartService.ensureCartNotExpired(cartId);
 
@@ -256,7 +260,7 @@ export class CartResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async removeFromCart(
     @Input() { cartId, bookId }: RemoveFromCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() operator: UserModel,
   ) {
     const cart = await this.cartService.ensureCartNotExpired(cartId);
 
@@ -282,7 +286,7 @@ export class CartResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async finalizeCart(
     @Input() input: FinalizeCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() operator: UserModel,
   ) {
     const cart = await this.cartService.ensureCartNotExpired(input.cartId);
 
@@ -301,7 +305,7 @@ export class CartResolver {
   async #finalizeCart(
     prisma: Prisma.TransactionClient,
     { cartId, bookCopyIds }: FinalizeCartInput,
-    operator: User,
+    operator: UserModel,
   ) {
     const cart = await prisma.cart.findUniqueOrThrow({
       where: { id: cartId },
@@ -445,7 +449,7 @@ export class CartResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteCart(
     @Input() { cartId }: DeleteCartInput,
-    @CurrentUser() { id: userId }: User,
+    @CurrentUser() { id: userId }: UserModel,
   ) {
     const cart = await this.prisma.cart.findUniqueOrThrow({
       where: { id: cartId },
