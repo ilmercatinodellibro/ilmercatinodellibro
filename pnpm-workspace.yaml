@@ -6,11 +6,6 @@ publicHoistPattern:
   - eslint-import-resolver-typescript
   - globals
 
-  # "jsonwebtoken" is a "@nestjs/jwt" transitive dependency, which we have to reference directly because "@nestjs/jwt" doesn't re-export relevant parts
-  # We are not installing it ourselves to avoid potential incompatibilities
-  - jsonwebtoken
-  - "@types/jsonwebtoken"
-
   # Imported by the server Jest specs; transitive dependency of "jest"
   # Remove when the server tests move off Jest
   - "@jest/globals"
