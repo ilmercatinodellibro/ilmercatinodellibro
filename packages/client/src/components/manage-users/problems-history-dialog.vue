@@ -53,7 +53,7 @@ const columns = computed<QTableColumn<ProblemDetailsFragment>[]>(() => [
     field: "createdAt",
     name: "createdAt",
     align: "left",
-    format: (date: number) => formatDate(date, "DD/MM/YYYY[ - ]hh:mm"),
+    format: (date: number) => formatDate(date, "DD/MM/YYYY[ - ]HH:mm"),
   },
   {
     label: t("manageUsers.booksMovementsDialog.problemType"),
@@ -82,7 +82,7 @@ const columns = computed<QTableColumn<ProblemDetailsFragment>[]>(() => [
     field: "resolvedAt",
     name: "resolved-at",
     align: "left",
-    format: (date: number) => formatDate(date, "DD/MM/YYYY[ - ]hh:mm"),
+    format: (date: number) => formatDate(date, "DD/MM/YYYY[ - ]HH:mm"),
   },
   {
     label: t("manageUsers.booksMovementsDialog.solution"),
