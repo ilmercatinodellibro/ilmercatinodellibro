@@ -101,7 +101,7 @@ Run `pnpm nest g resource modules/<resource-name>`, select the following options
 
 Feel free to delete `<resource-name>.service.ts` and related test files, if you don't need them.
 Add `import { beforeEach, describe, expect, it } from "@jest/globals";` at the beginning of all test files, since we don't rely on global typings.
-Add `imports: [PrismaService]` into the newly generated `<resource-name>.module.ts` file and inject it into your resolver construct method `constructor(private readonly prisma: PrismaService) {}`.
+Add `imports: [PrismaModule]` into the newly generated `<resource-name>.module.ts` file and inject it into your resolver construct method `constructor(private readonly prisma: PrismaService) {}`.
 
 ## NestJS + Prisma + GraphQL stack
 

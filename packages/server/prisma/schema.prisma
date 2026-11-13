@@ -4,9 +4,9 @@
 // TODO: automatically transform camelCase column names to snake_case while generating
 
 generator client {
-  provider      = "prisma-client"
-  output        = "../src/@generated/prisma"
-  binaryTargets = ["native"]
+  provider   = "prisma-client"
+  output     = "../src/@generated/prisma"
+  engineType = "client"
 }
 
 generator nestgraphql {
@@ -31,7 +31,7 @@ generator nestgraphql {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("PRISMA_DATABASE_URL")
 }
 
 enum Role {
