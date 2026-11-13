@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { Profile, Strategy, StrategyOptions } from "passport-facebook";
-import { UserService } from "src/modules/user/user.service";
+import { UserService } from "src/modules/user/user.service.js";
 
 export const FACEBOOK_STRATEGY_NAME = "facebook";
 
@@ -43,9 +43,10 @@ export class FacebookStrategy extends PassportStrategy(
     });
   }
 
-  authenticate(req: Request, options?: Record<string, unknown>): void {
-    options ??= {};
-    options.state = req.query.locationId;
-    super.authenticate(req, options);
+  authenticate(request: Request, options?: Record<string, unknown>): void {
+    super.authenticate(request, {
+      ...options,
+      state: request.query.locationId,
+    });
   }
 }

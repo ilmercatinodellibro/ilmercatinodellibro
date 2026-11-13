@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { Notification } from "src/@generated";
-import { TypedPubSub } from "src/helpers/typed-pub-sub";
+import { Notification } from "src/@generated/graphql/index.js";
+import { TypedPubSub } from "src/helpers/typed-pub-sub.js";
 
 // TODO: replace with a Redis based one
 // See https://github.com/davidyaha/graphql-redis-subscriptions

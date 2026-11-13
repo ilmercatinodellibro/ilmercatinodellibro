@@ -24,22 +24,28 @@ It will generate the new bundle and start using it only once the build process i
 
 ## Test
 
+The e2e tests run with [Playwright](https://playwright.dev) through the [Quasar Playwright App Extension](https://github.com/quasarframework/quasar-testing/tree/dev/packages/playwright).
+Playwright starts the server app and the client dev server it needs, unless they already run on its ports. See `webServer` in `playwright.config.ts`, which keeps every port of a run in one place and passes them to both apps over their `.env` files.
+
 ```bash
-# component tests
-$ pnpm run test:component
+# the server app reads the database and the queue from its .env, ensure they are running and seeded
+$ pnpm db:start # at the monorepo root
+$ pnpm --filter @ilmercatinodellibro/server db:seed
 
-# e2e tests
-# - build&serve the app then launch Cypress in "open" mode (interactive)
-$ pnpm run test:e2e
-# - launch dev server then open Cypress in "open" mode (interactive)
-# Pages take longer to load initially on Vite dev server, so tests may fail, just re-run them
-$ pnpm run test:e2e:dev
-# - build&serve the app then launch Cypress in "run" mode (headless)
-$ pnpm run test:e2e:ci
+# install the browser once
+$ pnpm exec playwright install chromium
 
-# keep this running in a separate terminal while running e2e tests
-$ pnpm start:server # start the server app with the related env variables overridden, to use with e2e tests
+# e2e tests, in Playwright UI mode (interactive) or headless
+$ pnpm test:e2e
+$ pnpm test:e2e:ci
+
+# HTML report of the last run, and coverage report of the last runs, generated into coverage/
+$ pnpm test:report
+$ pnpm test:coverage:report
 ```
+
+The tests capture the emails the server sends through a local SMTP server, see `test/playwright/fixtures/mail.ts`. The `@mail` tag marks the tests which read them, select or skip them with `--grep=@mail` or `--grep-invert=@mail`.
+They use the seeded users of `packages/server/test/fixtures/users.ts` and the `mo` retail location. The registration tests enable its registration for their duration, through the API as the seeded admin.
 
 ## Push notifications
 

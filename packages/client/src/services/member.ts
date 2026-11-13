@@ -1,13 +1,13 @@
-import { Role } from "@prisma/client";
-import { evictQuery } from "src/apollo/cache";
-import { useRetailLocationService } from "src/services/retail-location";
+import type { Role } from "@/@generated/graphql";
+import { evictQuery } from "@/apollo/cache";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
   GetMembersDocument,
   MemberFragmentDoc,
   useGetMembersQuery,
   useRemoveMemberMutation,
   useUpdateRoleMutation,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 
 export function useMembersService() {
   const { selectedLocation } = useRetailLocationService();

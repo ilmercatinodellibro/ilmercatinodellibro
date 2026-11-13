@@ -39,7 +39,8 @@
           option-value="code"
           outlined
           @update:model-value="
-            (newModel) => (selectedSchoolCodes = newModel ?? [])
+            (newModel: string[] | null) =>
+              (selectedSchoolCodes = newModel ?? [])
           "
         />
 
@@ -73,7 +74,8 @@
           option-value="id"
           outlined
           @update:model-value="
-            (newModel) => (selectedSchoolCourseIds = newModel ?? [])
+            (newModel: string[] | null) =>
+              (selectedSchoolCourseIds = newModel ?? [])
           "
         />
       </q-card-section>
@@ -85,18 +87,16 @@
 import { useDialogPluginComponent } from "quasar";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { requiredRule } from "src/helpers/rules";
-import { SchoolFilters } from "src/models/book";
-import { useRetailLocationService } from "src/services/retail-location";
+import { requiredRule } from "@/helpers/rules";
+import type { SchoolFilters } from "@/models/book";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
-  SchoolCourseFragment,
-  SchoolFragment,
+  type SchoolCourseFragment,
+  type SchoolFragment,
   useGetSchoolCoursesQuery,
   useGetSchoolsQuery,
-} from "src/services/school.graphql";
+} from "@/services/school.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
-
-const { t } = useI18n();
 
 const props = defineProps<{
   title: string;
@@ -106,6 +106,11 @@ const props = defineProps<{
 }>();
 
 defineEmits(useDialogPluginComponent.emitsObject);
+
+const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
+  useDialogPluginComponent<SchoolFilters>();
+
+const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
 const { schools, loading: isSchoolsLoading } = useGetSchoolsQuery(() => ({
@@ -129,9 +134,6 @@ const selectedSchoolCourseIds = ref(
 watch(selectedSchoolCodes, () => {
   selectedSchoolCourseIds.value = [];
 });
-
-const { dialogRef, onDialogCancel, onDialogOK, onDialogHide } =
-  useDialogPluginComponent<SchoolFilters>();
 </script>
 
 <style scoped lang="scss">

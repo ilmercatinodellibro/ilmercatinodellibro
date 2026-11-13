@@ -1,10 +1,10 @@
 import { join } from "node:path";
 import { Module } from "@nestjs/common";
 import { MailerModule } from "@nestjs-modules/mailer";
-import { EjsAdapter } from "@nestjs-modules/mailer/dist/adapters/ejs.adapter";
+import { EjsAdapter } from "@nestjs-modules/mailer/adapters/ejs.adapter";
 import { Options as EjsOptions } from "ejs";
-import { EmailConfiguration, emailConfiguration } from "src/config/email";
-import { MailService } from "./mail.service";
+import { EmailConfiguration, emailConfiguration } from "src/config/email.js";
+import { MailService } from "./mail.service.js";
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { MailService } from "./mail.service";
           from: emailConfiguration.fromDefault,
         },
         template: {
-          dir: join(__dirname, "templates"),
+          dir: join(import.meta.dirname, "templates"),
           adapter: new EjsAdapter(),
           options: {
             strict: false,

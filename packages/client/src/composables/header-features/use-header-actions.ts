@@ -1,7 +1,7 @@
+import type { QBtnProps } from "quasar";
 import { ref, watch, type Ref } from "vue";
 import { useRoute } from "vue-router";
-import { injectorFactory } from "src/helpers/injector-factory";
-import type { QBtnProps } from "quasar";
+import { injectorFactory } from "@/helpers/injector-factory";
 
 const { provider: _provideHeaderActions, injector: injectHeaderActions } =
   injectorFactory<Ref<QBtnProps[]>>("header-actions");

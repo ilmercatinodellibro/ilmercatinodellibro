@@ -1,10 +1,14 @@
 import { Logger } from "@nestjs/common";
-import { Role, User } from "@prisma/client";
 import { Command, CommandRunner } from "nest-commander";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import retailLocations from "test/fixtures/retail-locations";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import retailLocations from "test/fixtures/retail-locations.js";
 
-const adminData: Pick<User, "email" | "password" | "firstname" | "lastname"> = {
+const adminData: Pick<
+  UserModel,
+  "email" | "password" | "firstname" | "lastname"
+> = {
   email: "info@ilmercatinodellibro.com",
   password:
     "$argon2id$v=19$m=65536,t=3,p=4$Ae3q36sm3zzXuh9IOFigaA$orXmayUt1IKLZC8TXGPXdb2osyBzZspVToEmeMYgvU8",
@@ -19,6 +23,7 @@ const adminData: Pick<User, "email" | "password" | "firstname" | "lastname"> = {
 })
 export class AddAdminUserCommand extends CommandRunner {
   private readonly logger = new Logger(AddAdminUserCommand.name);
+
   constructor(private readonly prisma: PrismaService) {
     super();
   }
@@ -38,7 +43,7 @@ export class AddAdminUserCommand extends CommandRunner {
 
       const membershipsToAdd = retailLocations.filter(
         ({ id }) =>
-          !currentAdmin.memberships.find(
+          !currentAdmin.memberships.some(
             ({ retailLocationId, role }) =>
               retailLocationId === id && role === Role.ADMIN,
           ),

@@ -1,8 +1,8 @@
 import { syncRef } from "@vueuse/core";
 import { date } from "quasar";
 import { ref } from "vue";
-import { useHeaderSearch } from "src/composables/header-features/use-header-search";
-import { NotificationFragment } from "src/services/notification.graphql";
+import { useHeaderSearch } from "@/composables/header-features/use-header-search";
+import type { NotificationFragment } from "@/services/notification.graphql";
 
 const { formatDate } = date;
 

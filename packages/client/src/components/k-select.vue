@@ -8,7 +8,7 @@
     <!-- Carry over all the slots -->
     <template v-for="(_, name) in slots" #[name]="slotData">
       <!-- Due to an unknown reason, Volar complains here, so we cast slotData to any below -->
-      <slot :name="name" v-bind="/* prettier-ignore */(slotData as any)" />
+      <slot :name="name" v-bind="/* prettier-ignore */ slotData as any" />
     </template>
 
     <template #no-option>
@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { QSelectSlots } from "quasar";
+import type { QSelectSlots } from "quasar";
 import { useI18n } from "vue-i18n";
 
 interface Props {
@@ -44,9 +44,9 @@ const slots = defineSlots<QSelectSlots>();
 
 const { t } = useI18n();
 
-function onUpdateModelValue(newVal: Props["modelValue"] | null) {
-  if (newVal !== null) {
-    emit("update:modelValue", newVal);
+function onUpdateModelValue(newValue: Props["modelValue"] | null) {
+  if (newValue !== null) {
+    emit("update:modelValue", newValue);
   }
 }
 </script>

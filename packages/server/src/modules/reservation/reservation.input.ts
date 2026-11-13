@@ -1,5 +1,5 @@
 import { Field, InputType } from "@nestjs/graphql";
-import { LocationBoundInput } from "src/modules/retail-location";
+import { LocationBoundInput } from "src/modules/retail-location/index.js";
 
 @InputType()
 export class CreateReservationInput extends LocationBoundInput {

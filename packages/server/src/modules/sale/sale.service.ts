@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaTransactionClient } from "src/helpers/prisma";
-import { PrismaService } from "../prisma/prisma.service";
+import type { Prisma } from "src/@generated/prisma/client.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 
 @Injectable()
 export class SaleService {
@@ -35,7 +35,7 @@ export class SaleService {
   }
 
   async refundSale(
-    prisma: PrismaTransactionClient,
+    prisma: Prisma.TransactionClient,
     saleId: string,
     refundingOperatorId: string,
   ) {

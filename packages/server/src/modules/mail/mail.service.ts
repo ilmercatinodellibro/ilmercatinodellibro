@@ -1,30 +1,14 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
-import { User } from "@prisma/client";
-import { Address as AddressObject } from "nodemailer/lib/mailer";
-import { nameAddrSchema } from "src/config/email";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { htmlToTextPlugin } from "src/modules/mail/html-to-text.plugin";
+import { type ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
+import type { SentMessageInfo } from "nodemailer";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { nameAddrSchema } from "src/config/email.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
 
-// We should be using the default but it's any so we need to override it
-// import { SentMessageInfo } from 'nodemailer';
-type SentMessageInfo =
-  | {
-      accepted: string[];
-      envelope: { from: string; to: string };
-      envelopeTime: number;
-      messageId: string;
-      messageSize: number;
-      messageTime: number;
-      rejected: string[];
-      response: string;
-    }
-  | false;
-
+// The mailer package doesn't export its address type, so we take it from the "from" field
+type AddressObject = Exclude<NonNullable<ISendMailOptions["from"]>, string>;
 type Address =
-  | string
-  | AddressObject
-  | Pick<User, "email" | "firstname" | "lastname">;
+  string | AddressObject | Pick<UserModel, "email" | "firstname" | "lastname">;
 const addressableFields = [
   "to",
   "cc",
@@ -35,7 +19,11 @@ const addressableFields = [
   "sender",
 ] as const;
 type AddressableField = (typeof addressableFields)[number];
-export type SendMailOptions = Omit<ISendMailOptions, AddressableField> & {
+// We resolve the locale ourselves, so it can be null, unlike the mailer one
+export type SendMailOptions = Omit<
+  ISendMailOptions,
+  AddressableField | "locale"
+> & {
   to?: Address | Address[];
   cc?: Address | Address[];
   bcc?: Address | Address[];
@@ -54,10 +42,7 @@ export class MailService {
     private readonly mailerService: MailerService,
     @Inject(rootConfiguration.KEY)
     private readonly rootConfig: RootConfiguration,
-  ) {
-    const transporters = mailerService.getTransporters();
-    transporters.default.use("compile", htmlToTextPlugin);
-  }
+  ) {}
 
   async sendMail(mailDetails: SendMailOptions): Promise<SentMessageInfo> {
     const addressOverrides: Partial<Record<AddressableField, AddressObject>> =
@@ -80,7 +65,7 @@ export class MailService {
       const privacyPolicyUrl = `${this.rootConfig.clientUrl}/tos-privacy/privacy-policy-${i18nMailDetails.locale}.pdf`;
       const tosUrl = `${this.rootConfig.clientUrl}/tos-privacy/tos-${i18nMailDetails.retailLocationId}-${i18nMailDetails.locale}.pdf`;
 
-      return (await this.mailerService.sendMail({
+      return await this.mailerService.sendMail({
         ...(i18nMailDetails as ISendMailOptions),
         ...addressOverrides,
         context: {
@@ -88,7 +73,7 @@ export class MailService {
           tosUrl,
           ...i18nMailDetails.context,
         },
-      })) as SentMessageInfo;
+      });
     } catch (error) {
       Logger.error("Error sending email", "MailService", error);
       throw error;
@@ -96,6 +81,7 @@ export class MailService {
   }
 
   private readonly nameAddrPattern = /(?<name>.*) <(?<address>.*)>/;
+
   private convertToAddressObject(
     value: Address | Address[],
   ): AddressObject | AddressObject[] {
@@ -134,12 +120,12 @@ export class MailService {
   }
 
   private applyInternationalization({
-    locale,
+    locale: requestedLocale,
     subject,
     template,
     ...mailDetails
   }: SendMailOptions) {
-    locale = locale ?? "it";
+    const locale = requestedLocale ?? "it";
 
     return {
       locale,

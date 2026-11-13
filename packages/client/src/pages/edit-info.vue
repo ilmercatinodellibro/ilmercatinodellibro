@@ -46,12 +46,12 @@ import { Dialog } from "quasar";
 import { computed, ref, watch, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteLeave } from "vue-router";
-import InfoEditor from "src/components/info-editor.vue";
-import { useHeaderActions } from "src/composables/header-features/use-header-actions";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { RetailLocationInfo } from "src/models/retail-location";
-import { useRetailLocationService } from "src/services/retail-location";
-import { useUpdateRetailLocationInfoMutation } from "src/services/retail-location.graphql";
+import InfoEditor from "@/components/info-editor.vue";
+import { useHeaderActions } from "@/composables/header-features/use-header-actions";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { RetailLocationInfo } from "@/models/retail-location";
+import { useRetailLocationService } from "@/services/retail-location";
+import { useUpdateRetailLocationInfoMutation } from "@/services/retail-location.graphql";
 
 const { t, locale } = useI18n();
 
@@ -71,6 +71,8 @@ const currentInfo = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return infoPagesContent[locale.value]!;
 });
+// Reset to the current info whenever the tab or the locale changes
+// eslint-disable-next-line vue/no-ref-object-reactivity-loss
 const editorModel = ref(currentInfo.value[selectedTab.value]);
 const isModified = computed(
   () => currentInfo.value[selectedTab.value] !== editorModel.value,
@@ -159,17 +161,20 @@ watch(locale, (_, previousLocale) => {
 });
 
 onBeforeRouteLeave(async () => {
-  if (isModified.value) {
-    await new Promise<void>((resolve) => {
-      openConfirmDialog()
-        .onOk(async () => {
-          await updateInfo();
-          resolve();
-        })
-        .onCancel(resolve);
-    });
+  if (!isModified.value) {
     return;
   }
+
+  await new Promise<void>((resolve) => {
+    openConfirmDialog()
+      .onOk(async () => {
+        await updateInfo();
+        resolve();
+      })
+      .onCancel(() => {
+        resolve();
+      });
+  });
 });
 </script>
 

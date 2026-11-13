@@ -62,20 +62,20 @@
 
 <script setup lang="ts">
 import { Notify, QForm } from "quasar";
-import { Ref, reactive, ref } from "vue";
+import { type Ref, reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import PasswordStrengthBar from "components/password-strength-bar.vue";
-import { PasswordResetPayload } from "src/@generated/graphql";
-import KPasswordInput from "src/components/k-password-input.vue";
-import { STRENGTH_BAR_STEPS } from "src/components/models";
-import { notifyError } from "src/helpers/error-messages";
+import type { PasswordResetPayload } from "@/@generated/graphql";
+import KPasswordInput from "@/components/k-password-input.vue";
+import { STRENGTH_BAR_STEPS } from "@/components/models";
+import PasswordStrengthBar from "@/components/password-strength-bar.vue";
+import { notifyError } from "@/helpers/error-messages";
 import {
   makeValueMatchRule,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import { ServerError } from "src/models/server";
-import { useResetPasswordMutation } from "src/services/auth.graphql";
+} from "@/helpers/rules";
+import type { ServerError } from "@/models/server";
+import { useResetPasswordMutation } from "@/services/auth.graphql";
 
 const showPassword = ref(false);
 
@@ -110,16 +110,16 @@ async function onSubmit() {
     passwordPayload.currentPassword = "";
     passwordPayload.newPassword = "";
     passwordPayload.confirmNewPassword = "";
-  } catch (e) {
+  } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-deprecated
-    const { message, status } = e as ServerError;
+    const { message, status } = error as ServerError;
 
     // TODO: implement centralized error handling
 
     notifyError(message);
 
     if (![400, 404].includes(status)) {
-      throw e;
+      throw error;
     }
   }
 }

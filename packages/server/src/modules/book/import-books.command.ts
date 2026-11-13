@@ -11,16 +11,16 @@ import { resolve } from "node:path";
 import { Inject, Logger } from "@nestjs/common";
 import { parse, transform } from "csv";
 import { Command, CommandRunner, Option } from "nest-commander";
-import { School } from "src/@generated";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { School } from "src/@generated/graphql/index.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 import {
   IngestedCsvRow,
   IngestedEquivalentSchoolRow,
   IngestedStateSchoolRow,
   SchoolCourseDto,
   SchoolCsvConfiguration,
-} from "./book-csv.types";
+} from "./book-csv.types.js";
 
 interface ImportBooksCommandOptions {
   school?: string;
@@ -53,17 +53,13 @@ export class ImportBooksCommand extends CommandRunner {
     description:
       "Use this option if the app needs to import Schools instead of books",
   })
-  parseString(val: string): string {
-    return val;
+  parseString(value: string): string {
+    return value;
   }
 
   async run(_: string[], options?: ImportBooksCommandOptions): Promise<void> {
     try {
-      if (options?.school) {
-        await this.loadSchools();
-      } else {
-        await this.loadBooks();
-      }
+      await (options?.school ? this.loadSchools() : this.loadBooks());
     } catch (error) {
       this.logger.fatal("An error occurred during the import process.", error);
     }
@@ -81,15 +77,17 @@ export class ImportBooksCommand extends CommandRunner {
         );
       }
 
-      const currentDbBooksCount = await this.prisma.book.count();
+      const currentDatabaseBooksCount = await this.prisma.book.count();
       this.logger.log(
-        `Import process complete: there are ${currentDbBooksCount} books inside the database`,
+        `Import process complete: there are ${currentDatabaseBooksCount} books inside the database`,
       );
 
-      return currentDbBooksCount;
+      return currentDatabaseBooksCount;
     } catch (error) {
       this.logger.error("Cannot load books, error: ", error);
-      throw new Error("Cannot import or process files on server.");
+      throw new Error("Cannot import or process files on server.", {
+        cause: error,
+      });
     }
   }
 
@@ -120,6 +118,7 @@ export class ImportBooksCommand extends CommandRunner {
       this.logger.error("Cannot load schools, error: ", error);
       throw new Error(
         "Could not find/process the CSV files or create DB entries.",
+        { cause: error },
       );
     }
   }
@@ -148,7 +147,7 @@ export class ImportBooksCommand extends CommandRunner {
       return false;
     }
 
-    const prefixes = locations.map(({ id }) => id.substring(0, 2)); // Ensures that we have exactly the code belonging to the province of where that retail location is located
+    const prefixes = locations.map(({ id }) => id.slice(0, 2)); // Ensures that we have exactly the code belonging to the province of where that retail location is located
     const uppercasePrefixes = prefixes.map((prefix) =>
       prefix.toLocaleUpperCase(),
     );
@@ -224,14 +223,14 @@ export class ImportBooksCommand extends CommandRunner {
   #removeUnprintableCharsFromCsvRow(row: IngestedCsvRow): IngestedCsvRow {
     return row.map((value) =>
       // eslint-disable-next-line no-control-regex
-      value.replace(/[\u0000-\u001F\u007F-\u009F]/g, "").trim(),
+      value.replaceAll(/[\u0000-\u001F\u007F-\u009F]/g, "").trim(),
     ) as IngestedCsvRow;
   }
 
   // Some fields contains commas or double quotes, so we need to enclose the field
   // value and escape them properly for CSV format
   #toCsvField(value: string | undefined | null): string {
-    const safeValue = (value ?? "").replace(/"/g, '""');
+    const safeValue = (value ?? "").replaceAll('"', '""');
     return `"${safeValue}"`;
   }
 
@@ -261,7 +260,10 @@ export class ImportBooksCommand extends CommandRunner {
     const csvParser = parse({
       skip_empty_lines: true,
       skipRecordsWithError: true,
-      on_record: (record: IngestedCsvRow, { lines }) => {
+      on_record: (rawRecord, { lines }) => {
+        // csv-parse types records as string[] when the "columns" option isn't set
+        const record = rawRecord as IngestedCsvRow;
+
         // Skips header parsing
         if (lines === 1) {
           return null;
@@ -274,7 +276,7 @@ export class ImportBooksCommand extends CommandRunner {
         }
 
         const schoolCode = record[0];
-        const provinceCode = schoolCode.substring(0, 2);
+        const provinceCode = schoolCode.slice(0, 2);
         if (locationsPrefixes.includes(provinceCode)) {
           const bookIsbn = record[6];
 
@@ -310,8 +312,8 @@ export class ImportBooksCommand extends CommandRunner {
       },
     });
 
-    const transformer = transform((row: IngestedCsvRow) => {
-      row = this.#removeUnprintableCharsFromCsvRow(row);
+    const transformer = transform((rawRow: IngestedCsvRow) => {
+      const row = this.#removeUnprintableCharsFromCsvRow(rawRow);
 
       const rowSubtitle = row[9];
       const subtitle =
@@ -328,7 +330,7 @@ export class ImportBooksCommand extends CommandRunner {
           // Commas need to be replaced with periods anyway to avoid SQL throwing an error.
           this.#toCsvField(row[12].replace(",", ".")),
           this.#toCsvField(row[11]),
-          row[0].substring(0, 2).toLocaleLowerCase(),
+          row[0].slice(0, 2).toLocaleLowerCase(),
         ].join(",") + "\n"
       );
     });
@@ -346,7 +348,7 @@ export class ImportBooksCommand extends CommandRunner {
 
         writeFileSync(
           this.resolveTmpPath("./school_codes.csv"),
-          Array.from(schoolCoursesMap.keys()).join("\n"),
+          [...schoolCoursesMap.keys()].join("\n"),
         );
 
         writeFileSync(
@@ -373,6 +375,7 @@ export class ImportBooksCommand extends CommandRunner {
         if (possibleError) {
           this.logger.error("Error during execution of 'writeStreamPromise'.");
           reject(possibleError);
+          return;
         }
 
         resolve();
@@ -384,17 +387,17 @@ export class ImportBooksCommand extends CommandRunner {
     this.logger.log("Begin importing schools and courses...");
 
     // If the code of a school has already been inserted, skip it.
-    const schoolCodesList: string[] = (
-      await this.prisma.school.findMany({
-        select: {
-          code: true,
-        },
-      })
-    ).map(({ code }) => code);
-    const schoolCodesFromBooksCsv = readFileSync(
-      this.resolveTmpPath("./school_codes.csv"),
-      "utf-8",
-    ).split("\n");
+    const schools = await this.prisma.school.findMany({
+      select: {
+        code: true,
+      },
+    });
+    const schoolCodesList = schools.map(({ code }) => code);
+    const schoolCodesFromBooksCsv = new Set(
+      readFileSync(this.resolveTmpPath("./school_codes.csv"), "utf8").split(
+        "\n",
+      ),
+    );
 
     const schoolsToInsert: School[] = [];
 
@@ -407,18 +410,21 @@ export class ImportBooksCommand extends CommandRunner {
       csvParser: parse({
         skip_empty_lines: true,
         skipRecordsWithError: true,
-        on_record: (record: IngestedStateSchoolRow, { lines }) => {
+        on_record: (rawRecord, { lines }) => {
+          // csv-parse types records as string[] when the "columns" option isn't set
+          const record = rawRecord as IngestedStateSchoolRow;
+
           // Skips header parsing
           if (lines === 1) {
             return null;
           }
 
           const schoolCode = record[6];
-          const provinceCode = schoolCode.substring(0, 2);
+          const provinceCode = schoolCode.slice(0, 2);
           if (
             provinceCode &&
             locationsPrefixes.includes(provinceCode) &&
-            schoolCodesFromBooksCsv.includes(schoolCode) &&
+            schoolCodesFromBooksCsv.has(schoolCode) &&
             !schoolCodesList.includes(schoolCode)
           ) {
             schoolCodesList.push(schoolCode);
@@ -434,11 +440,11 @@ export class ImportBooksCommand extends CommandRunner {
           code: row[6],
           name: row[7],
           address: row[8],
-          provinceCode: row[6].substring(0, 2),
+          provinceCode: row[6].slice(0, 2),
         });
         return (
           // See [1]
-          [row[6], row[7], row[8], row[6].substring(0, 2)].join(",") + "\n"
+          [row[6], row[7], row[8], row[6].slice(0, 2)].join(",") + "\n"
         );
       }),
     });
@@ -451,18 +457,21 @@ export class ImportBooksCommand extends CommandRunner {
       csvParser: parse({
         skip_empty_lines: true,
         skipRecordsWithError: true,
-        on_record: (record: IngestedEquivalentSchoolRow, { lines }) => {
+        on_record: (rawRecord, { lines }) => {
+          // csv-parse types records as string[] when the "columns" option isn't set
+          const record = rawRecord as IngestedEquivalentSchoolRow;
+
           // Skips header parsing
           if (lines === 1) {
             return null;
           }
 
           const schoolCode = record[4];
-          const provinceCode = schoolCode.substring(0, 2);
+          const provinceCode = schoolCode.slice(0, 2);
           if (
             provinceCode &&
             locationsPrefixes.includes(provinceCode) &&
-            schoolCodesFromBooksCsv.includes(schoolCode) &&
+            schoolCodesFromBooksCsv.has(schoolCode) &&
             !schoolCodesList.includes(schoolCode)
           ) {
             schoolCodesList.push(schoolCode);
@@ -478,11 +487,11 @@ export class ImportBooksCommand extends CommandRunner {
           code: row[4],
           name: row[5],
           address: row[6],
-          provinceCode: row[4].substring(0, 2),
+          provinceCode: row[4].slice(0, 2),
         });
         return (
           // See [1]
-          [row[4], row[5], row[6], row[4].substring(0, 2)].join(",") + "\n"
+          [row[4], row[5], row[6], row[4].slice(0, 2)].join(",") + "\n"
         );
       }),
     });
@@ -515,8 +524,8 @@ export class ImportBooksCommand extends CommandRunner {
       await this.#loadCoursesIntoDb(locationsPrefixes);
 
       return true;
-    } catch (e) {
-      this.logger.error("Error occurred during import of Schools.", e);
+    } catch (error) {
+      this.logger.error("Error occurred during import of Schools.", error);
       return false;
     }
   }
@@ -636,14 +645,14 @@ export class ImportBooksCommand extends CommandRunner {
         for (const course of schoolCourses) {
           const savedCourse = storedCourses.find(
             ({ grade, section, schoolCode: csc }) =>
-              grade === parseInt(course.year) &&
+              grade === Number.parseInt(course.year) &&
               section === course.section &&
               csc === schoolCode,
           ) ?? {
             ...(await this.prisma.schoolCourse.create({
               data: {
                 section: course.section,
-                grade: parseInt(course.year),
+                grade: Number.parseInt(course.year),
                 schoolCode,
               },
             })),
@@ -660,7 +669,7 @@ export class ImportBooksCommand extends CommandRunner {
             .filter(
               ({ bookId, schoolCourseId }) =>
                 !!bookId &&
-                !savedCourse.books.find(
+                !savedCourse.books.some(
                   (boc) =>
                     boc.bookId === bookId &&
                     boc.schoolCourseId === schoolCourseId,

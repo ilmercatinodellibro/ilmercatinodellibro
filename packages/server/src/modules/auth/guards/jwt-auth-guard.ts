@@ -2,12 +2,10 @@ import { ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { GqlContextType, GqlExecutionContext } from "@nestjs/graphql";
 import { AuthGuard } from "@nestjs/passport";
-import { IS_PUBLIC_KEY } from "src/modules/auth/decorators/public-route.decorator";
+import { IS_PUBLIC_KEY } from "src/modules/auth/decorators/public-route.decorator.js";
 
-// canActivate requires types from rxjs to be loaded, even if we don't directly use it
-import type {} from "rxjs";
-import { GraphQLContext } from "../auth.models";
-import { JWT_STRATEGY_NAME } from "../strategies/jwt.strategy";
+import { GraphQLContext } from "../auth.models.js";
+import { JWT_STRATEGY_NAME } from "../strategies/jwt.strategy.js";
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard(JWT_STRATEGY_NAME) {

@@ -12,7 +12,6 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Prisma } from "@prisma/client";
 import {
   Book,
   BookCopy,
@@ -20,30 +19,32 @@ import {
   ReceiptType,
   Sale,
   User,
-} from "src/@generated";
-import { AuthService } from "src/modules/auth/auth.service";
+} from "src/@generated/graphql/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
 import {
   BookCopyCreateInput,
   DonateBookCopiesInput,
   RefundBookCopyInput,
   ReimburseBookCopiesInput,
   ReturnBookCopiesInput,
-} from "src/modules/book-copy/book-copy.input";
-import { ReceiptService } from "src/modules/receipt/receipt.service";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
+} from "src/modules/book-copy/book-copy.input.js";
+import { ReceiptService } from "src/modules/receipt/receipt.service.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   BookCopyByUserQueryArgs,
   BookCopyQueryArgs,
   PaginatedBookCopiesQueryArgs,
   PaginatedBookCopyQueryResult,
-} from "./book-copy.args";
-import { availableBookCopyFilter } from "./book-copy.filters";
-import { BookCopyService } from "./book-copy.service";
+} from "./book-copy.args.js";
+import { availableBookCopyFilter } from "./book-copy.filters.js";
+import { BookCopyService } from "./book-copy.service.js";
 
 @Resolver(() => BookCopy)
 export class BookCopyResolver {
+  // eslint-disable-next-line @typescript-eslint/max-params -- NestJS injects each dependency as a constructor parameter
   constructor(
     private readonly prisma: PrismaService,
     private readonly bookService: BookCopyService,
@@ -671,13 +672,12 @@ export class BookCopyResolver {
         },
       });
 
-      return this.#refreshBookCopiesAndSendReceipt(
-        prisma,
+      return this.#refreshBookCopiesAndSendReceipt(prisma, {
         bookCopyIds,
         operatorId,
         ownerId,
         retailLocationId,
-      );
+      });
     });
   }
 
@@ -711,13 +711,12 @@ export class BookCopyResolver {
         },
       });
 
-      return this.#refreshBookCopiesAndSendReceipt(
-        prisma,
+      return this.#refreshBookCopiesAndSendReceipt(prisma, {
         bookCopyIds,
         operatorId,
         ownerId,
         retailLocationId,
-      );
+      });
     });
   }
 
@@ -750,13 +749,12 @@ export class BookCopyResolver {
         },
       });
 
-      return this.#refreshBookCopiesAndSendReceipt(
-        prisma,
+      return this.#refreshBookCopiesAndSendReceipt(prisma, {
         bookCopyIds,
         operatorId,
         ownerId,
         retailLocationId,
-      );
+      });
     });
   }
 
@@ -872,10 +870,17 @@ export class BookCopyResolver {
 
   async #refreshBookCopiesAndSendReceipt(
     prisma: Prisma.TransactionClient,
-    bookCopyIds: string[],
-    operatorId: string,
-    ownerId: string,
-    retailLocationId: string,
+    {
+      bookCopyIds,
+      operatorId,
+      ownerId,
+      retailLocationId,
+    }: {
+      bookCopyIds: string[];
+      operatorId: string;
+      ownerId: string;
+      retailLocationId: string;
+    },
   ) {
     const newlyUpdatedBookCopies = await prisma.bookCopy.findMany({
       where: {
@@ -903,7 +908,7 @@ export class BookCopyResolver {
 
     return newlyUpdatedBookCopies.map(
       // Removes relations which are only needed for the receipt generation, but aren't needed for the return value of this mutation
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
+      // eslint-disable-next-line unused-imports/no-unused-vars
       ({ book, sales, ...bookCopyToReturn }) => bookCopyToReturn,
     );
   }

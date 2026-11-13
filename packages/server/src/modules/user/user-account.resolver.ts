@@ -2,18 +2,18 @@ import { randomUUID } from "node:crypto";
 import { ForbiddenException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { Role } from "@prisma/client";
 import { GraphQLJSONObject } from "graphql-scalars";
-import { User } from "src/@generated/user";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
+import { User } from "src/@generated/graphql/user/index.js";
+import { Role } from "src/@generated/prisma/enums.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   CancelUserAccountDeletionInput,
   DeleteUserAccountInput,
   GetUserDataArgs,
-} from "./user-account.input";
+} from "./user-account.input.js";
 
 @Resolver(() => User)
 export class UserAccountResolver {

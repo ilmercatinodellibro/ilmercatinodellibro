@@ -206,36 +206,36 @@ import {
   mdiGift,
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
-import { sumBy } from "lodash-es";
-import { Notify, QChipProps, QTab, QTableColumn } from "quasar";
+import { noop, sumBy } from "lodash-es";
+import { Notify, type QChipProps, QTab, type QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
-import ActionsListButton from "src/components/actions-list-button.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
-import DialogTable from "src/components/manage-users/dialog-table.vue";
-import StatusChip from "src/components/manage-users/status-chip.vue";
-import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { calculateBookCopyPrice } from "src/helpers/book-copy";
-import { formatPrice } from "src/helpers/formatting";
-import { BooksTab } from "src/models/book";
-import { AvailableRouteNames } from "src/models/routes";
-import { useAuthService } from "src/services/auth";
+import ActionsListButton from "@/components/actions-list-button.vue";
+import ChipButton from "@/components/manage-users/chip-button.vue";
+import DialogTable from "@/components/manage-users/dialog-table.vue";
+import StatusChip from "@/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "@/components/manage-users/table-cell-with-tooltip.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { calculateBookCopyPrice } from "@/helpers/book-copy";
+import { formatPrice } from "@/helpers/formatting";
+import { BooksTab } from "@/models/book";
+import { AvailableRouteNames } from "@/models/routes";
+import { useAuthService } from "@/services/auth";
 import {
-  BookCopyDetailsFragment,
+  type BookCopyDetailsFragment,
   useGetBookCopiesByOwnerQuery,
   useGetPurchasedBookCopiesQuery,
-} from "src/services/book-copy.graphql";
+} from "@/services/book-copy.graphql";
 import {
   GetRequestsDocument,
-  RequestSummaryFragment,
+  type RequestSummaryFragment,
   useDeleteRequestMutation,
   useGetRequestsQuery,
-} from "src/services/request.graphql";
-import { useReservationService } from "src/services/reservation";
-import { ReservationSummaryFragment } from "src/services/reservation.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/services/request.graphql";
+import { useReservationService } from "@/services/reservation";
+import type { ReservationSummaryFragment } from "@/services/reservation.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -281,9 +281,7 @@ const { purchasedBookCopies } = useGetPurchasedBookCopiesQuery({
 });
 
 type TablesRowsTypes =
-  | BookCopyDetailsFragment
-  | ReservationSummaryFragment
-  | RequestSummaryFragment;
+  BookCopyDetailsFragment | ReservationSummaryFragment | RequestSummaryFragment;
 
 interface TableRowsByTab {
   [BooksTab.DELIVERED]: BookCopyDetailsFragment[];
@@ -343,7 +341,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
     [BooksTab.DELIVERED]: [
       {
         name: "status",
-        field: () => undefined,
+        field: noop,
         label: t("book.fields.status"),
         align: "left",
       },
@@ -402,15 +400,15 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         label: "",
         classes: isMobile.value ? "no-padding" : "",
       },
-      ...(!isMobile.value
-        ? [
+      ...(isMobile.value
+        ? []
+        : [
             {
               name: "cancel-request",
-              field: () => undefined,
+              field: noop,
               label: "",
             } satisfies QTableColumn<TablesRowsTypes>,
-          ]
-        : []),
+          ]),
     ],
     [BooksTab.RESERVED]: [
       ...commonColumns.value,
@@ -424,7 +422,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       },
       {
         name: "actions",
-        field: () => undefined,
+        field: noop,
         label: "",
         classes: isMobile.value ? "no-padding" : "",
       },
@@ -433,6 +431,8 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
 );
 
 const selectedTab = ref(
+  // Not validated, the tab query param is set by the app own links (e.g. in reserve-books.vue)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-assignment
   (route.query.tab as BooksTab | undefined) ?? BooksTab.REQUESTED,
 );
 
@@ -545,11 +545,11 @@ async function reserveBook(request: RequestSummaryFragment) {
       },
     );
     cache.gc();
-  } catch (e) {
+  } catch (error) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
         t("reserveBooks.reservation"),
-        e,
+        error,
       ]),
     );
   } finally {

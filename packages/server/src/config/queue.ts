@@ -1,5 +1,5 @@
-import { ConfigType, registerAs } from "@nestjs/config";
-import { z } from "zod";
+import { type ConfigType, registerAs } from "@nestjs/config";
+import { z } from "./zod.js";
 
 const queueSchema = z.object({
   host: z.string(),

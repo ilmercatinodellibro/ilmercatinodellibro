@@ -1,20 +1,20 @@
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { registerAs } from "@nestjs/config";
-import { ServiceAccount } from "firebase-admin";
-import { z } from "zod";
+import type { ServiceAccount } from "firebase-admin";
+import { z } from "./zod.js";
 
 // Output from the Firebase Console uses snake_case
 const rawFirebaseCredentialsSchema = z.object({
   project_id: z.string(),
   private_key: z.string(),
-  client_email: z.string().email(),
+  client_email: z.email(),
 });
 
 // Firebase SDK uses this structure (import("firebase-admin").ServiceAccount)
 const firebaseCredentialsSchema = z.object({
   projectId: z.string(),
   privateKey: z.string(),
-  clientEmail: z.string().email(),
+  clientEmail: z.email(),
 });
 
 const pushNotificationSchema = z.discriminatedUnion("driver", [
@@ -49,7 +49,7 @@ export const pushNotificationConfiguration = registerAs(
     }
     const fileContents = readFileSync(
       process.env.PUSH_NOTIFICATIONS_FIREBASE_CREDENTIALS_PATH,
-      "utf-8",
+      "utf8",
     );
     const parsedRawContents = JSON.parse(fileContents) as unknown;
     const rawResult = rawFirebaseCredentialsSchema.safeParse(parsedRawContents);

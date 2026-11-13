@@ -1,5 +1,5 @@
 import { Field, InputType, PickType } from "@nestjs/graphql";
-import { Problem } from "src/@generated";
+import { Problem } from "src/@generated/graphql/index.js";
 
 @InputType()
 export class ProblemCreateInput extends PickType(

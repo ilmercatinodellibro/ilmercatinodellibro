@@ -1,0 +1,15 @@
+diff --git a/prisma-nestjs-graphql.mjs b/prisma-nestjs-graphql.mjs
+index db05275..9306817 100644
+--- a/prisma-nestjs-graphql.mjs
++++ b/prisma-nestjs-graphql.mjs
+@@ -1236,7 +1236,9 @@ function getGraphqlImport(args) {
+   }).getFilePath()), config.importExtension);
+   return {
+     name: typeName,
+-    specifier
++    specifier: config.reExport === ReExport.All && specifier.startsWith('../')
++      ? (config.importExtension ? '../index.' + config.importExtension : '../')
++      : specifier
+   };
+ }
+ 

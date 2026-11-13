@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { PrismaService } from "../prisma/prisma.service";
+import { PrismaService } from "../prisma/prisma.service.js";
 
 @Injectable()
 export class ReservationService {
@@ -22,6 +22,7 @@ export class ReservationService {
 
     return expiration.toISOString();
   }
+
   // Keep in sync with the end-of-day expiration set in `RetailLocationResolver.updateRetailLocationSettings`
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async deleteExpiredReservations() {

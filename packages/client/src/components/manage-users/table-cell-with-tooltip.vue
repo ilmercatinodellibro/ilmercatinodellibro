@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { QTdKeyProp } from "./table-cell-key-prop";
+import type { QTdKeyProps } from "./table-cell-key-props";
 
-defineProps<QTdKeyProp & { value: string }>();
+defineProps<QTdKeyProps & { value: string }>();
 </script>

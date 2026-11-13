@@ -43,22 +43,22 @@
 <script setup lang="ts">
 import { mdiColorHelper, mdiFormatColorText } from "@quasar/extras/mdi-v7";
 import { QEditor, useQuasar } from "quasar";
-import { ref, Ref, onMounted } from "vue";
+import { ref, type Ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
 
 defineEmits<{ "update:modelValue": [newValue: string] }>();
+
+const editorModel = defineModel<string>({ required: true });
 
 const { t } = useI18n();
 
 const { isMobile } = useLateralDrawer();
 
-const editorModel = defineModel<string>({ required: true });
-
 onMounted(() => {
   // Forces usage of inline CSS style for text color and background color
   // eslint-disable-next-line @typescript-eslint/no-deprecated
-  document.execCommand("styleWithCSS", false, true);
+  document.execCommand("styleWithCSS", false, "true");
 });
 
 const editorRef = ref() as Ref<QEditor>;

@@ -12,6 +12,7 @@ The following instructions are meant only for development.
 3. Once the container is running, run the following commands:
    ```bash
    $ pnpm migrate:dev
+   $ pnpm db:seed
    $ pnpm dev
    ```
 
@@ -42,7 +43,7 @@ Code generators are executed automatically:
 - After installing the dependencies
 - Before building the app
 
-Seeding is performed automatically after a migration reset
+`pnpm migrate:reset` also runs the seeders. `prisma migrate dev` and `prisma migrate reset` don't seed on their own since Prisma 7
 
 ## Running the app
 
@@ -63,7 +64,7 @@ $ pnpm start:prod
 # unit tests
 $ pnpm test
 
-# e2e tests
+# e2e tests, they start the app, so the database and Redis must be running
 $ pnpm test:e2e
 
 # test coverage
@@ -100,8 +101,8 @@ Run `pnpm nest g resource modules/<resource-name>`, select the following options
 - `Would you like to generate CRUD entry points?` -> `n`
 
 Feel free to delete `<resource-name>.service.ts` and related test files, if you don't need them.
-Add `import { beforeEach, describe, expect, it } from "@jest/globals";` at the beginning of all test files, since we don't rely on global typings.
-Add `imports: [PrismaService]` into the newly generated `<resource-name>.module.ts` file and inject it into your resolver construct method `constructor(private readonly prisma: PrismaService) {}`.
+Add `import { beforeEach, describe, expect, it } from "vitest";` at the beginning of all test files, since we don't rely on global typings.
+Add `imports: [PrismaModule]` into the newly generated `<resource-name>.module.ts` file and inject it into your resolver construct method `constructor(private readonly prisma: PrismaService) {}`.
 
 ## NestJS + Prisma + GraphQL stack
 

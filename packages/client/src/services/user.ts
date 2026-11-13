@@ -1,8 +1,8 @@
 import { useApolloClient } from "@vue/apollo-composable";
 import { Notify, exportFile } from "quasar";
 import { useI18n } from "vue-i18n";
-import { notifyError } from "src/helpers/error-messages";
-import { GetUserDataDocument } from "src/services/user.graphql";
+import { notifyError } from "@/helpers/error-messages";
+import { GetUserDataDocument } from "@/services/user.graphql";
 
 export function useDownloadUserData() {
   const { t } = useI18n();
@@ -22,7 +22,7 @@ export function useDownloadUserData() {
       return;
     }
 
-    const stringifiedData = JSON.stringify(data.userData, null, 2);
+    const stringifiedData = JSON.stringify(data.userData, undefined, 2);
     const result = exportFile("userData.json", stringifiedData, {
       mimeType: "application/json",
     });

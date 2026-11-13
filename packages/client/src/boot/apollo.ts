@@ -1,9 +1,9 @@
+import { defineBoot } from "#q-app";
 import { ApolloClient } from "@apollo/client/core";
 import { provideApolloClient } from "@vue/apollo-composable";
-import { boot } from "quasar/wrappers";
-import { getClientOptions } from "src/apollo";
+import { getClientOptions } from "@/apollo";
 
-export default boot(() => {
+export default defineBoot(() => {
   const options = getClientOptions();
   const apolloClient = new ApolloClient(options);
 

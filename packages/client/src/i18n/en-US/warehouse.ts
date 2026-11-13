@@ -1,5 +1,5 @@
-import { BookCopyQueryFilter } from "src/@generated/graphql";
-import { BookCopyStatus } from "src/helpers/book-copy";
+import type { BookCopyQueryFilter } from "@/@generated/graphql";
+import type { BookCopyStatus } from "@/helpers/book-copy";
 
 export default {
   searchPlaceholder: "Write at least 3 characters to search",

@@ -1,5 +1,5 @@
 import { InputType, PickType } from "@nestjs/graphql";
-import { Sale } from "src/@generated";
+import { Sale } from "src/@generated/graphql/index.js";
 
 @InputType()
 export class RefundSaleInput extends PickType(Sale, ["id"], InputType) {}

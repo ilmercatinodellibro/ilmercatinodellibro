@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { QFabAction, QFabActionProps } from "quasar";
+import { QFabAction, type QFabActionProps } from "quasar";
 
 const props = withDefaults(defineProps<QFabActionProps>(), {
   color: "accent",

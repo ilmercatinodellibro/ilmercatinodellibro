@@ -1,7 +1,8 @@
-import { PrismaClient, User } from "@prisma/client";
-import { times } from "lodash";
-import { createUser } from "prisma/factories/user";
-import { TEST_ADMIN, TEST_USER, TEST_USERS } from "test/fixtures/users";
+import { times } from "lodash-es";
+import { createUser } from "prisma/factories/user.js";
+import type { PrismaClient } from "src/@generated/prisma/client.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { TEST_ADMIN, TEST_USER, TEST_USERS } from "test/fixtures/users.js";
 
 const USER_COUNT = 5;
 
@@ -17,7 +18,7 @@ export async function seedTestUsers(
   prisma: PrismaClient,
   prefix?: string,
   password?: string,
-): Promise<User[]> {
+): Promise<UserModel[]> {
   const users = [];
 
   for (const user of TEST_USERS) {

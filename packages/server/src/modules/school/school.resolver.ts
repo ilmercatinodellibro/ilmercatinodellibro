@@ -1,10 +1,10 @@
 import { Args, Query, Resolver } from "@nestjs/graphql";
-import { School, SchoolCourse } from "src/@generated";
+import { School, SchoolCourse } from "src/@generated/graphql/index.js";
 import {
   SchoolCoursesArgs,
   SchoolQueryPayload,
-} from "src/modules/school/school.args";
-import { PrismaService } from "../prisma/prisma.service";
+} from "src/modules/school/school.args.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 
 @Resolver()
 export class SchoolResolver {

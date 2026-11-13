@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
-import { ConfigType, registerAs } from "@nestjs/config";
-import { z } from "zod";
+import { type ConfigType, registerAs } from "@nestjs/config";
+import { z } from "./zod.js";
 
 enum Environment {
   Development = "development",
@@ -9,10 +9,10 @@ enum Environment {
 }
 
 const rootSchema = z.object({
-  nodeEnv: z.nativeEnum(Environment),
-  clientUrl: z.string().url(),
-  serverUrl: z.string().url(),
-  storagePath: z.string().default("./storage"),
+  nodeEnv: z.enum(Environment),
+  clientUrl: z.url(),
+  serverUrl: z.url(),
+  storagePath: z.prefault(z.string(), "./storage"),
 });
 
 export const rootConfiguration = registerAs("root", () => {

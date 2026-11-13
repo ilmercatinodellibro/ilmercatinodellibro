@@ -1,9 +1,9 @@
-import { ApolloCache } from "@apollo/client/core";
-import {
+import type { ApolloCache } from "@apollo/client/core";
+import type {
   TypedDocumentNode,
   VariablesOf,
 } from "@graphql-typed-document-node/core";
-import { Kind, OperationDefinitionNode, OperationTypeNode } from "graphql";
+import { Kind, type OperationDefinitionNode, OperationTypeNode } from "graphql";
 
 /**
  * Evicts a query from the cache.
@@ -28,7 +28,7 @@ export function evictQuery<
     throw new Error("Document does not contain a query operation");
   }
   const selection = definition.selectionSet.selections[0];
-  if (!selection || selection.kind !== Kind.FIELD) {
+  if (selection?.kind !== Kind.FIELD) {
     throw new Error("Query must select a field");
   }
 

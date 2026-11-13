@@ -7,6 +7,6 @@
 </template>
 
 <script setup lang="ts">
-import FaqInfo from "src/components/faq-info.vue";
-import HeaderBar from "src/components/header-bar.vue";
+import FaqInfo from "@/components/faq-info.vue";
+import HeaderBar from "@/components/header-bar.vue";
 </script>

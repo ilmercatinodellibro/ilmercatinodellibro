@@ -15,16 +15,18 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { Prisma, Role, User } from "@prisma/client";
-import { upperCase } from "lodash";
-import { rootConfiguration, type RootConfiguration } from "src/config/root";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { Public } from "src/modules/auth/decorators/public-route.decorator";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
-import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
-import { Theme } from "src/modules/retail-location/theme.args";
+import { upperCase } from "lodash-es";
+import { Prisma } from "src/@generated/prisma/client.js";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { rootConfiguration, type RootConfiguration } from "src/config/root.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator.js";
+import { Public } from "src/modules/auth/decorators/public-route.decorator.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers.js";
+import { RetailLocationService } from "src/modules/retail-location/retail-location.service.js";
+import { Theme } from "src/modules/retail-location/theme.args.js";
 
 @Controller("location")
 export class RetailLocationController {
@@ -75,7 +77,7 @@ export class RetailLocationController {
   async uploadRetailLocationLogo(
     @Param("id") retailLocationId: string,
     @UploadedFile() file: Express.Multer.File,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     const location = await this.prisma.retailLocation.findUniqueOrThrow({
       where: {
@@ -106,9 +108,11 @@ export class RetailLocationController {
 
     await Promise.all(
       Object.values(this.mimeTypeExtensionMap)
-        .filter((ext) => ext !== extension)
-        .map((ext) =>
-          rm(resolve(logoDirectory, `./logo.${ext}`), { force: true }),
+        .filter((otherExtension) => otherExtension !== extension)
+        .map((otherExtension) =>
+          rm(resolve(logoDirectory, `./logo.${otherExtension}`), {
+            force: true,
+          }),
         ),
     );
 
@@ -143,7 +147,7 @@ export class RetailLocationController {
   @Header("Content-Type", "text/csv")
   async exportActiveUsers(
     @Param("id") retailLocationId: string,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: currentUser.id,

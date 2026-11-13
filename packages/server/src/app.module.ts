@@ -9,37 +9,37 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { ScheduleModule } from "@nestjs/schedule";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { CloseCode, WebSocket } from "graphql-ws";
-import { authConfiguration } from "src/config/auth";
-import { brevoConfiguration } from "src/config/brevo";
-import { databaseConfiguration } from "src/config/database";
-import { emailConfiguration } from "src/config/email";
-import { QueueConfiguration, queueConfiguration } from "src/config/queue";
-import { rootConfiguration } from "src/config/root";
-import { ProblemModule } from "src/modules/problem/problem.module";
-import { ReceiptModule } from "src/modules/receipt/receipt.module";
-import { DateScalar } from "./date.scalar";
+import { authConfiguration } from "src/config/auth.js";
+import { brevoConfiguration } from "src/config/brevo.js";
+import { databaseConfiguration } from "src/config/database.js";
+import { emailConfiguration } from "src/config/email.js";
+import { QueueConfiguration, queueConfiguration } from "src/config/queue.js";
+import { rootConfiguration } from "src/config/root.js";
+import { ProblemModule } from "src/modules/problem/problem.module.js";
+import { ReceiptModule } from "src/modules/receipt/receipt.module.js";
+import { DateScalar } from "./date.scalar.js";
 import {
-  GraphQLConnectionParams,
+  GraphQLConnectionParameters,
   GraphQLContext,
   GraphQLWebSocketExtra,
-} from "./modules/auth/auth.models";
-import { AuthModule } from "./modules/auth/auth.module";
-import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth-guard";
-import { BookModule } from "./modules/book/book.module";
-import { BookCopyModule } from "./modules/book-copy/book-copy.module";
-import { BookRequestModule } from "./modules/book-request/book-request.module";
-import { CartModule } from "./modules/cart/cart.module";
-import { EventModule } from "./modules/event/event.module";
-import { FeedbackModule } from "./modules/feedback/feedback.module";
-import { MailModule } from "./modules/mail/mail.module";
-import { NotificationModule } from "./modules/notification/notification.module";
-import { PrismaModule } from "./modules/prisma/prisma.module";
-import { PushNotificationModule } from "./modules/push-notification/push-notification.module";
-import { ReservationModule } from "./modules/reservation/reservation.module";
-import { RetailLocationModule } from "./modules/retail-location/retail-location.module";
-import { SaleModule } from "./modules/sale/sale.module";
-import { SchoolModule } from "./modules/school/school.module";
-import { UserModule } from "./modules/user/user.module";
+} from "./modules/auth/auth.models.js";
+import { AuthModule } from "./modules/auth/auth.module.js";
+import { JwtAuthGuard } from "./modules/auth/guards/jwt-auth-guard.js";
+import { BookModule } from "./modules/book/book.module.js";
+import { BookCopyModule } from "./modules/book-copy/book-copy.module.js";
+import { BookRequestModule } from "./modules/book-request/book-request.module.js";
+import { CartModule } from "./modules/cart/cart.module.js";
+import { EventModule } from "./modules/event/event.module.js";
+import { FeedbackModule } from "./modules/feedback/feedback.module.js";
+import { MailModule } from "./modules/mail/mail.module.js";
+import { NotificationModule } from "./modules/notification/notification.module.js";
+import { PrismaModule } from "./modules/prisma/prisma.module.js";
+import { PushNotificationModule } from "./modules/push-notification/push-notification.module.js";
+import { ReservationModule } from "./modules/reservation/reservation.module.js";
+import { RetailLocationModule } from "./modules/retail-location/retail-location.module.js";
+import { SaleModule } from "./modules/sale/sale.module.js";
+import { SchoolModule } from "./modules/school/school.module.js";
+import { UserModule } from "./modules/user/user.module.js";
 
 @Module({
   imports: [
@@ -56,10 +56,11 @@ import { UserModule } from "./modules/user/user.module";
       expandVariables: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, "../..", "/client-dist"),
+      rootPath: join(import.meta.dirname, "../..", "/client-dist"),
       exclude: [
-        // /(.*) is required to allow access to the playground
-        "/graphql/(.*)",
+        // The SPA fallback registers its route before Apollo does, so it must exclude bare /graphql too.
+        // Otherwise GET requests to it, which are queries and the GraphiQL page, receive the SPA.
+        "/graphql{/*subpath}",
         "/subscriptions",
       ],
     }),
@@ -67,8 +68,6 @@ import { UserModule } from "./modules/user/user.module";
     EventEmitterModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      // See https://www.apollographql.com/docs/apollo-server/migration/#appropriate-400-status-codes
-      status400ForVariableCoercionErrors: true,
       autoSchemaFile: join(process.cwd(), "src/@generated/schema.graphql"),
       sortSchema: true,
       buildSchemaOptions: {
@@ -92,17 +91,20 @@ import { UserModule } from "./modules/user/user.module";
               "request"
             >;
             const { authorization } =
-              context.connectionParams as unknown as GraphQLConnectionParams;
+              context.connectionParams as unknown as GraphQLConnectionParameters;
 
             extra.authorizationHeader = authorization;
           },
-          onNext: (ctx, message) => {
-            const errors = message.payload.errors ?? [];
-            if (errors.some(({ message }) => message === "Unauthorized")) {
-              const { socket } = ctx.extra as { socket: WebSocket };
-
-              void socket.close(CloseCode.Forbidden, "Forbidden");
+          // eslint-disable-next-line @typescript-eslint/max-params -- the signature is imposed by graphql-ws
+          onNext: (ctx, _id, _payload, _args, result) => {
+            const errors = result.errors ?? [];
+            if (!errors.some(({ message }) => message === "Unauthorized")) {
+              return;
             }
+
+            const { socket } = ctx.extra as { socket: WebSocket };
+
+            void socket.close(CloseCode.Forbidden, "Forbidden");
           },
         },
       },

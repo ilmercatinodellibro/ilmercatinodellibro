@@ -1,21 +1,21 @@
-import { randomInt } from "crypto";
+import { randomInt } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { Logger } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import {
-  Book,
-  BookCopy,
-  BookRequest,
-  Prisma,
-  Reservation,
-  RetailLocation,
-  Sale,
-} from "@prisma/client";
-import { cloneDeep, find, remove, toInteger } from "lodash";
+import { cloneDeep, find, remove, toInteger } from "lodash-es";
 import { Command, CommandRunner, Option } from "nest-commander";
-import { PASSWORD_STUB_HASH } from "prisma/factories/user";
-import { BookCopyService } from "src/modules/book-copy/book-copy.service";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { PASSWORD_STUB_HASH } from "prisma/factories/user.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import type {
+  BookModel,
+  BookCopyModel,
+  BookRequestModel,
+  ReservationModel,
+  RetailLocationModel,
+  SaleModel,
+} from "src/@generated/prisma/models.js";
+import { BookCopyService } from "src/modules/book-copy/book-copy.service.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 
 interface SeedUsersWithBooksCommandOptions {
   additionalBooksPerUser: number;
@@ -61,8 +61,8 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     description:
       "The amount of book copies which could be generated per user\nAccepted values: natural numbers (default: 5)",
   })
-  parseAdditionalBooksPerUsers(val?: string) {
-    const parsedInteger = toInteger(val);
+  parseAdditionalBooksPerUsers(value?: string) {
+    const parsedInteger = toInteger(value);
 
     if (parsedInteger > 0) {
       return parsedInteger;
@@ -87,8 +87,8 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     description:
       "How many users should be generated\nAccepted values: natural numbers (default: 5)",
   })
-  parseUsers(val?: string) {
-    const parsedInteger = toInteger(val);
+  parseUsers(value?: string) {
+    const parsedInteger = toInteger(value);
 
     if (parsedInteger > 0) {
       return parsedInteger;
@@ -198,23 +198,22 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
   async #createBuyerAndSeller(
     index: number,
     additionalBooksPerUser: number,
-    retailLocation: RetailLocation,
+    retailLocation: RetailLocationModel,
   ) {
     try {
-      const bookIds = (
-        await this.prisma.book.findMany({
-          take: randomInt(
-            BOOKS_PER_USER_BASE,
-            BOOKS_PER_USER_BASE + additionalBooksPerUser,
-          ),
-          where: {
-            retailLocationId: retailLocation.id,
-          },
-          orderBy: {
-            isbnCode: "asc",
-          },
-        })
-      ).map(({ id }) => id);
+      const books = await this.prisma.book.findMany({
+        take: randomInt(
+          BOOKS_PER_USER_BASE,
+          BOOKS_PER_USER_BASE + additionalBooksPerUser,
+        ),
+        where: {
+          retailLocationId: retailLocation.id,
+        },
+        orderBy: {
+          isbnCode: "asc",
+        },
+      });
+      const bookIds = books.map(({ id }) => id);
 
       if (bookIds.length === 0) {
         throw new Error(
@@ -400,13 +399,13 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
     sale: {
       bookCopy: {
         book: {
-          reservations: Reservation[];
-          requests: BookRequest[];
-        } & Book;
+          reservations: ReservationModel[];
+          requests: BookRequestModel[];
+        } & BookModel;
       };
-    } & Sale,
+    } & SaleModel,
   ) {
-    const book = sale.bookCopy.book;
+    const { book } = sale.bookCopy;
 
     if (book.requests.length > 0) {
       const request = book.requests.find(
@@ -448,7 +447,7 @@ export class SeedUsersWithBooksCommand extends CommandRunner {
   }
 
   async #refundBookCopy(
-    { id, bookCopyId, bookCopy }: Sale & { bookCopy: BookCopy },
+    { id, bookCopyId, bookCopy }: SaleModel & { bookCopy: BookCopyModel },
     retailLocationId: string,
   ) {
     const [newBookCopyCode] = await this.bookService.calculateBookCodes(

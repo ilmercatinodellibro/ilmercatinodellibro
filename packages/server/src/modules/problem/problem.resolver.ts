@@ -1,12 +1,12 @@
 import { ForbiddenException } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { BookCopy, Problem, User } from "src/@generated";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
-import { ProblemCreateInput, ProblemResolveInput } from "./problem.args";
+import { BookCopy, Problem, User } from "src/@generated/graphql/index.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { ProblemCreateInput, ProblemResolveInput } from "./problem.args.js";
 
 @Resolver(() => Problem)
 export class ProblemResolver {

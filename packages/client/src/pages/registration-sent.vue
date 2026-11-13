@@ -17,7 +17,7 @@
           class="full-width"
           color="primary"
           :to="{ name: 'login' }"
-          data-cy="back-to-login-link"
+          data-testid="back-to-login-link"
         />
       </q-card-section>
     </q-card>
@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { useTheme } from "src/composables/use-theme";
+import { useTheme } from "@/composables/use-theme";
 
 const { t } = useI18n();
 const { theme } = useTheme();

@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
-import { AuthModule } from "src/modules/auth/auth.module";
-import { PrismaModule } from "src/modules/prisma/prisma.module";
-import { ReceiptModule } from "src/modules/receipt/receipt.module";
-import { CartResolver } from "./cart.resolver";
-import { CartService } from "./cart.service";
+import { AuthModule } from "src/modules/auth/auth.module.js";
+import { PrismaModule } from "src/modules/prisma/prisma.module.js";
+import { ReceiptModule } from "src/modules/receipt/receipt.module.js";
+import { CartResolver } from "./cart.resolver.js";
+import { CartService } from "./cart.service.js";
 
 @Module({
   imports: [PrismaModule, AuthModule, ReceiptModule],

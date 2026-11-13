@@ -1,6 +1,6 @@
-import { Ref, ref, watch } from "vue";
+import { type Ref, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { injectorFactory } from "src/helpers//injector-factory";
+import { injectorFactory } from "@/helpers/injector-factory";
 
 interface HeaderSearchInjectable {
   isHeaderSearchEnabled: Ref<boolean>;

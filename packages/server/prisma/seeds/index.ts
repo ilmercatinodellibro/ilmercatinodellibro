@@ -1,13 +1,13 @@
-import { PrismaClient } from "@prisma/client";
-import { seedE2eTests } from "./e2e-tests";
-import { seedEvents } from "./events";
-import { seedRetailLocations } from "./retail-locations";
-
-const prisma = new PrismaClient();
+import { NestFactory } from "@nestjs/core";
+import { PrismaModule } from "src/modules/prisma/prisma.module.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { seedE2eTests } from "./e2e-tests.js";
+import { seedEvents } from "./events.js";
+import { seedRetailLocations } from "./retail-locations.js";
 
 // Be careful about the execution/completion order with relations
 // Ideally create and connect the related entities in the same seed file
-async function main() {
+async function main(prisma: PrismaService) {
   await seedRetailLocations(prisma);
 
   await seedE2eTests(prisma);
@@ -15,11 +15,21 @@ async function main() {
   await seedEvents(prisma);
 }
 
-main()
-  .catch((error: unknown) => {
+async function run() {
+  // The client needs the driver adapter that PrismaModule configures
+  const nestApp = await NestFactory.create(PrismaModule, {
+    logger: ["error", "warn"],
+  });
+  nestApp.enableShutdownHooks();
+
+  try {
+    await main(nestApp.get(PrismaService));
+  } catch (error) {
     console.error(error);
     process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  } finally {
+    await nestApp.close();
+  }
+}
+
+await run();

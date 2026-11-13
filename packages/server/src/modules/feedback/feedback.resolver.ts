@@ -1,11 +1,14 @@
 import { Inject, UnprocessableEntityException } from "@nestjs/common";
 import { Mutation, Resolver } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { EmailConfiguration, emailConfiguration } from "src/config/email";
-import { Public } from "src/modules/auth/decorators/public-route.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { MailService } from "../mail/mail.service";
-import { FeedbackRequestPayload } from "./feedback.args";
+import {
+  type EmailConfiguration,
+  emailConfiguration,
+} from "src/config/email.js";
+import { Public } from "src/modules/auth/decorators/public-route.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { MailService } from "../mail/mail.service.js";
+import { FeedbackRequestPayload } from "./feedback.args.js";
 
 @Resolver()
 export class FeedbackResolver {

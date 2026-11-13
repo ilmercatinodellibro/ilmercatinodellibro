@@ -48,7 +48,7 @@ $ pnpm db:stop
 ```bash
 # Cleans all generated NestJS/GraphQL helpers, GraphQL schema, dist bundles, etc.
 # Helpful when switching branches or when the client code generator fails
-$ pnpm clean
+$ pnpm run clean
 
 # Generate all NestJS/GraphQL helpers and GraphQL schema which you'd need to run the app
 $ pnpm generate
@@ -64,12 +64,16 @@ Replace values into `.env` with production ones, then execute the following comm
 ```bash
 # Clean all generated files, re-generate them anew, then build the app
 $ pnpm build
+# Apply the pending database migrations
+$ pnpm server:migrate:deploy
 # Serve the production build
 $ pnpm serve
 
 # You can now access the app on the URL specified into .env file
 # If you're serving it locally, you can access it at http://localhost:3000 by default
 ```
+
+Compare the server `.env` with `.env.example` before building: Prisma reads `PRISMA_DATABASE_URL` while generating code, so the build fails when a variable it needs is missing.
 
 ## Backup feature
 
@@ -204,7 +208,7 @@ pnpm restore:app <backup_file_name>
 This section is meant to describe the setup steps for a production installation of the software or anyway the installation on a machine that needs to be configured from scratch.
 It will list the minimal requirements needed to be able to install the code and make it run in production mode.
 
-1. Install [Node.js](https://nodejs.org/en/download/prebuilt-binaries) version 18.20(LTS) or 20.12(LTS) on the server machine.
+1. Install [Node.js](https://nodejs.org/en/download/prebuilt-binaries) version 24.22.3 (LTS) or a later 24.x release on the server machine.
    1. Notice that if you do not have access to a graphical UI but just to a CLI, it is better to follow [these instructions](https://nodejs.org/en/download/package-manager) instead.
 2. Verify Node.js installation by running `node -v` in the terminal. It shall return its version.
 3. From an elevated terminal (or using the `sudo` prefix on Linux/Mac), run `corepack enable`. This will make sure that Node.js can install `pnpm` autonomously.

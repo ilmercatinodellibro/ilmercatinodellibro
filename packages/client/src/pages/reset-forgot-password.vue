@@ -18,7 +18,7 @@
             outlined
             lazy-rules
             autocomplete="password"
-            data-cy="password-field"
+            data-testid="password-field"
           />
         </q-card-section>
         <q-card-section class="q-pt-none">
@@ -36,7 +36,7 @@
             outlined
             lazy-rules
             autocomplete="password"
-            data-cy="password-confirmation-field"
+            data-testid="password-confirmation-field"
           />
         </q-card-section>
         <q-card-actions align="center">
@@ -45,7 +45,7 @@
             :label="t('auth.reset')"
             type="submit"
             :loading="isResettingPassword"
-            data-cy="submit-button"
+            data-testid="submit-button"
           />
         </q-card-actions>
       </q-form>
@@ -54,23 +54,25 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloError } from "@apollo/client/core";
 import { Notify, QForm } from "quasar";
 import { reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import PasswordStrengthBar from "components/password-strength-bar.vue";
-import { ResetForgottenPasswordPayload } from "src/@generated/graphql";
-import KPasswordInput from "src/components/k-password-input.vue";
-import { STRENGTH_BAR_STEPS } from "src/components/models";
-import { notifyError } from "src/helpers/error-messages";
+import type { ResetForgottenPasswordPayload } from "@/@generated/graphql";
+import KPasswordInput from "@/components/k-password-input.vue";
+import { STRENGTH_BAR_STEPS } from "@/components/models";
+import PasswordStrengthBar from "@/components/password-strength-bar.vue";
+import {
+  isExpectedServerError,
+  notifyServerError,
+} from "@/helpers/error-messages";
 import {
   makeValueMatchRule,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import { useAuthService } from "src/services/auth";
-import { useResetForgottenPasswordMutation } from "src/services/auth.graphql";
+} from "@/helpers/rules";
+import { useAuthService } from "@/services/auth";
+import { useResetForgottenPasswordMutation } from "@/services/auth.graphql";
 
 const props = defineProps<{
   token: string;
@@ -113,15 +115,9 @@ async function onSubmit() {
     });
     void router.push({ name: "login" });
   } catch (error) {
-    const { message, graphQLErrors } = error as ApolloError;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- we're not sure if this a false positive or not
-    const status = graphQLErrors[0]?.extensions?.status as number | undefined;
+    notifyServerError(error);
 
-    // TODO: implement centralized error handling
-
-    notifyError(message);
-
-    if (!status || ![400, 404].includes(status)) {
+    if (!isExpectedServerError(error)) {
       throw error;
     }
   }

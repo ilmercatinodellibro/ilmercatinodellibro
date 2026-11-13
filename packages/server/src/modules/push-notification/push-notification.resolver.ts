@@ -1,11 +1,11 @@
 import { Args, Mutation, Resolver } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { Public } from "../auth/decorators/public-route.decorator";
-import { PrismaService } from "../prisma/prisma.service";
-import { PushNotificationService } from "./push-notification-service.abstract";
-import { PushSubscriptionInput } from "./push-subscription.input";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { Public } from "../auth/decorators/public-route.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { PushNotificationService } from "./push-notification-service.abstract.js";
+import { PushSubscriptionInput } from "./push-subscription.input.js";
 
 @Resolver()
 export class PushNotificationResolver {

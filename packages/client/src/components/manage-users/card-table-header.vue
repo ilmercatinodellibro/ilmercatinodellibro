@@ -36,8 +36,8 @@
 <script setup lang="ts">
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { ref } from "vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { validISBN } from "src/helpers/rules";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { validISBN } from "@/helpers/rules";
 
 defineProps<{
   searchLabel?: string;

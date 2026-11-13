@@ -125,15 +125,15 @@ import { mdiDownload } from "@quasar/extras/mdi-v7";
 import { useDialogPluginComponent, Dialog } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { evictQuery } from "src/apollo/cache";
-import KDialogCard from "src/components/k-dialog-card.vue";
-import { requiredRule } from "src/helpers/rules";
-import { useBookService } from "src/services/book";
+import { evictQuery } from "@/apollo/cache";
+import KDialogCard from "@/components/k-dialog-card.vue";
+import { requiredRule } from "@/helpers/rules";
+import { useBookService } from "@/services/book";
 import {
   GetBooksDocument,
   useImportBooksMutation,
   useImportSchoolsMutation,
-} from "src/services/book.graphql";
+} from "@/services/book.graphql";
 
 defineEmits(useDialogPluginComponent.emitsObject);
 

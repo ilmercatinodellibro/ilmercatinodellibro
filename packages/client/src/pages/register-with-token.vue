@@ -85,33 +85,31 @@ import { Notify } from "quasar";
 import { reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import PasswordStrengthBar from "components/password-strength-bar.vue";
-import { RegisterPayload } from "src/@generated/graphql";
-import KPasswordInput from "src/components/k-password-input.vue";
-import { STRENGTH_BAR_STEPS } from "src/components/models";
-import { notifyError } from "src/helpers/error-messages";
+import type { RegisterPayload } from "@/@generated/graphql";
+import KPasswordInput from "@/components/k-password-input.vue";
+import { STRENGTH_BAR_STEPS } from "@/components/models";
+import PasswordStrengthBar from "@/components/password-strength-bar.vue";
+import { notifyError } from "@/helpers/error-messages";
 import {
   emailRule,
   makeValueMatchRule,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import { ServerError } from "src/models/server";
-import {
-  useAuthService,
-  useRegisterWithTokenMutation,
-} from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
-
-const { t } = useI18n();
-
-const showPassword = ref(false);
+} from "@/helpers/rules";
+import type { ServerError } from "@/models/server";
+import { useAuthService, useRegisterWithTokenMutation } from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const props = defineProps<{
   token: string;
   email: string;
 }>();
 
+const { t } = useI18n();
+
+const showPassword = ref(false);
+
+// eslint-disable-next-line vue/no-setup-props-reactivity-loss -- the props only fill in the initial form values
 const user = reactive<Omit<RegisterPayload, "retailLocationId">>({
   email: props.email,
   firstname: "",
@@ -155,16 +153,16 @@ async function onSubmit() {
         message: t("auth.registeredSuccessfully"),
       });
     }
-  } catch (e) {
+  } catch (error) {
     // eslint-disable-next-line @typescript-eslint/no-deprecated
-    const { message, status } = e as ServerError;
+    const { message, status } = error as ServerError;
 
     // TODO: implement centralized error handling
 
     notifyError(message);
 
     if (![400, 404].includes(status)) {
-      throw e;
+      throw error;
     }
   }
 }

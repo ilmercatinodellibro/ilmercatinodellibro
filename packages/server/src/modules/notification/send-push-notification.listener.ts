@@ -1,12 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
-import { Event, Notification } from "@prisma/client";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { PushNotificationService } from "../push-notification/push-notification-service.abstract";
+import type {
+  EventModel,
+  NotificationModel,
+} from "src/@generated/prisma/models.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { PushNotificationService } from "../push-notification/push-notification-service.abstract.js";
+import { NEW_NOTIFICATION_EVENT } from "./notification.events.js";
 
 export interface NewNotificationPayload {
-  event: Event;
-  notification: Notification;
+  event: EventModel;
+  notification: NotificationModel;
 }
 
 @Injectable()
@@ -16,7 +20,7 @@ export class SendPushNotificationListener {
     private readonly prisma: PrismaService,
   ) {}
 
-  @OnEvent("newNotification")
+  @OnEvent(NEW_NOTIFICATION_EVENT)
   async handleNewNotification({ event, notification }: NewNotificationPayload) {
     const location = await this.prisma.retailLocation.findUniqueOrThrow({
       where: {

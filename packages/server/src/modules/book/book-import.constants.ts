@@ -1,7 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
-import type { ImportBooksAndSchoolsService } from "src/modules/book/import-books-and-schools.service";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-imports
-import type { ImportBooksCommand } from "src/modules/book/import-books.command";
+import type { ImportBooksAndSchoolsService } from "src/modules/book/import-books-and-schools.service.js";
+
+import type { ImportBooksCommand } from "src/modules/book/import-books.command.js";
 
 /**
  * Filenames for book and school CSV imports from the ministry.

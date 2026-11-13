@@ -1,10 +1,10 @@
+import { defineBoot } from "#q-app";
 import { until } from "@vueuse/core";
-import { boot } from "quasar/wrappers";
 import { nextTick, watch } from "vue";
-import { useTheme } from "src/composables/use-theme";
-import { useRetailLocationService } from "src/services/retail-location";
+import { useTheme } from "@/composables/use-theme";
+import { useRetailLocationService } from "@/services/retail-location";
 
-export default boot(({ router }) => {
+export default defineBoot(({ router }) => {
   const { loading, selectedLocationId, selectedLocation, retailLocations } =
     useRetailLocationService();
 
@@ -51,10 +51,12 @@ export default boot(({ router }) => {
   );
 
   router.beforeEach(async (to) => {
-    if (to.params.locationId) {
-      selectedLocationId.value = to.params.locationId as string;
-      await ensureLocationInitialized;
+    if (!to.params.locationId) {
+      return;
     }
+
+    selectedLocationId.value = to.params.locationId as string;
+    await ensureLocationInitialized;
   });
 
   // TODO: Use and enforce the user's preferred location (when implemented)

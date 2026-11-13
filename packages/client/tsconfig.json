@@ -1,8 +1,6 @@
 {
-  "extends": "@quasar/app-vite/tsconfig-preset",
+  "extends": "./.quasar/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "noUncheckedIndexedAccess": true,
     // Needed to import types from server @generated folder
     "experimentalDecorators": true
   }

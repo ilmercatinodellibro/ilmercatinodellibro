@@ -11,18 +11,18 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { Prisma } from "@prisma/client";
 import * as argon2 from "argon2";
 import { GraphQLVoid } from "graphql-scalars";
-import { omit } from "lodash";
-import { ReceiptType, Role } from "src/@generated";
-import { User } from "src/@generated/user";
-import { AuthService } from "src/modules/auth/auth.service";
-import { ReceiptService } from "src/modules/receipt/receipt.service";
-import { LocationBoundQueryArgs } from "src/modules/retail-location";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
+import { omit } from "lodash-es";
+import { ReceiptType, Role } from "src/@generated/graphql/index.js";
+import { User } from "src/@generated/graphql/user/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { ReceiptService } from "src/modules/receipt/receipt.service.js";
+import { LocationBoundQueryArgs } from "src/modules/retail-location/index.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   MembersQueryArgs,
   RegisterUserPayload,
@@ -33,8 +33,8 @@ import {
   UpdateUserPayload,
   UsersQueryArgs,
   UsersQueryResult,
-} from "./user.args";
-import { UserService } from "./user.service";
+} from "./user.args.js";
+import { UserService } from "./user.service.js";
 
 @Resolver(() => User)
 export class UserResolver {
@@ -701,7 +701,7 @@ export class UserResolver {
     );
 
     try {
-      //TODO: use queues instead of doing await
+      // TODO: use queues instead of doing await
       await this.authService.sendVerificationLink(
         payload.retailLocationId,
         user,

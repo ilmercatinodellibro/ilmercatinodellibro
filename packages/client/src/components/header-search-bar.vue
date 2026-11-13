@@ -40,16 +40,16 @@
 <script setup lang="ts">
 import { mdiClose, mdiMagnify } from "@quasar/extras/mdi-v7";
 import { QInput } from "quasar";
-import { Ref, ref, watch } from "vue";
+import { type Ref, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const emit = defineEmits<{
   searchBarActiveStateToggled: [state: boolean];
 }>();
 
-const { t } = useI18n();
-
 const searchText = defineModel<string>({ required: true });
+
+const { t } = useI18n();
 
 const searchInputBarRef = ref() as Ref<QInput>;
 const isSearchBarActive = ref(false);

@@ -6,7 +6,7 @@ import {
   Int,
   ObjectType,
 } from "@nestjs/graphql";
-import { Locales } from "test/fixtures/retail-locations";
+import type { Locales } from "test/fixtures/retail-locations.js";
 
 @ArgsType()
 export class RetailLocationQueryArgs {

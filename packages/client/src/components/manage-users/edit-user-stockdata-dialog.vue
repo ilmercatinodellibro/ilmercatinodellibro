@@ -159,29 +159,29 @@
 
 <script setup lang="ts">
 import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
-import { startCase, toLower } from "lodash-es";
-import { Dialog, QTableColumn, useDialogPluginComponent } from "quasar";
+import { noop, startCase, toLower } from "lodash-es";
+import { Dialog, type QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { evictQuery } from "src/apollo/cache";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { calculateBookCopyPrice } from "src/helpers/book-copy";
-import { notifyError } from "src/helpers/error-messages";
-import { formatPrice } from "src/helpers/formatting";
-import { fetchBookByISBN } from "src/services/book";
+import { evictQuery } from "@/apollo/cache";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { calculateBookCopyPrice } from "@/helpers/book-copy";
+import { notifyError } from "@/helpers/error-messages";
+import { formatPrice } from "@/helpers/formatting";
+import { fetchBookByISBN } from "@/services/book";
 import {
-  BookCopyDetailsFragment,
+  type BookCopyDetailsFragment,
   GetBookCopiesInStockDocument,
   useCreateBookCopiesMutation,
   useGetBookCopiesInStockQuery,
-} from "src/services/book-copy.graphql";
-import { BookSummaryFragment } from "src/services/book.graphql";
-import { GetReceiptsDocument } from "src/services/receipt.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/services/book-copy.graphql";
+import type { BookSummaryFragment } from "@/services/book.graphql";
+import { GetReceiptsDocument } from "@/services/receipt.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
-  CustomerFragment,
+  type CustomerFragment,
   CustomerFragmentDoc,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
@@ -198,9 +198,10 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+
 const { t } = useI18n();
 
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
 
 const { createBookCopies } = useCreateBookCopiesMutation();
@@ -224,17 +225,17 @@ const { bookCopiesInStock: copiesInStock, loading: inStockLoading } =
 // TODO: Totally agree, this must be simplified
 function getCommonColumns<
   const TEntity extends "book" | "copy",
-  TFragment extends TEntity extends "book"
+  TFragment extends (TEntity extends "book"
     ? BookSummaryFragment
-    : BookCopyDetailsFragment,
+    : BookCopyDetailsFragment),
 >(entity: TEntity): QTableColumn<TFragment>[] {
   const getField = (
-    field: QTableColumn<BookSummaryFragment>["field"],
+    field: NonNullable<QTableColumn<BookSummaryFragment>["field"]>,
   ): QTableColumn<TFragment>["field"] =>
     entity === "book"
       ? (field as QTableColumn<TFragment>["field"])
       : (row) => {
-          const book = (row as BookCopyDetailsFragment).book;
+          const { book } = row as BookCopyDetailsFragment;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return typeof field === "function" ? field(book) : book[field];
         };
@@ -245,7 +246,7 @@ function getCommonColumns<
       field: getField("subject"),
       name: "subject",
       align: "left",
-      format: (val: string) => startCase(toLower(val)),
+      format: (value: string) => startCase(toLower(value)),
       classes: "max-width-160 ellipsis",
     },
     {
@@ -253,7 +254,7 @@ function getCommonColumns<
       field: getField("title"),
       name: "title",
       align: "left",
-      format: (val: string) => startCase(toLower(val)),
+      format: (value: string) => startCase(toLower(value)),
       classes: "text-wrap",
     },
     {
@@ -261,7 +262,7 @@ function getCommonColumns<
       field: getField("authorsFullName"),
       name: "author",
       align: "left",
-      format: (val: string) => startCase(toLower(val)),
+      format: (value: string) => startCase(toLower(value)),
       classes: "max-width-160 ellipsis",
     },
     {
@@ -269,7 +270,7 @@ function getCommonColumns<
       field: getField("publisherName"),
       name: "publisher",
       align: "left",
-      format: (val: string) => startCase(toLower(val)),
+      format: (value: string) => startCase(toLower(value)),
     },
     {
       label: t("book.fields.price"),
@@ -310,14 +311,14 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
       field: "isbnCode",
       name: "isbn",
       align: "left",
-      format: (val: string) => startCase(toLower(val)),
+      format: (value: string) => startCase(toLower(value)),
     },
 
     ...getCommonColumns("book"),
 
     {
       label: t("manageUsers.actions"),
-      field: () => undefined,
+      field: noop,
       name: "actions",
       align: "center",
       classes: isMobile.value ? "no-padding" : "",

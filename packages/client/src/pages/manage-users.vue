@@ -158,9 +158,7 @@
                 :key="colName"
                 :key-td="colName"
                 :props
-                :clickable-when-zero="
-                  alwaysClickableColsNames.includes(colName)
-                "
+                :clickable-when-zero="alwaysClickableColsNames.has(colName)"
                 :disable="willBeDeleted(props.row)"
                 :secondary-value="
                   colName === 'requested'
@@ -431,40 +429,47 @@ import {
   mdiPlus,
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
-import { Dialog, Notify, QTable, QTableColumn, QTableProps } from "quasar";
-import { Ref, computed, onMounted, ref } from "vue";
-import { useI18n } from "vue-i18n";
-import ActionsListButton from "src/components/actions-list-button.vue";
-import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
-import CartDialog from "src/components/manage-users/cart-dialog.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
-import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
-import EditUserDetailsDialog from "src/components/manage-users/edit-user-details-dialog.vue";
-import EditUserRequestedDialog from "src/components/manage-users/edit-user-requested-dialog.vue";
-import EditUserReservedDialog from "src/components/manage-users/edit-user-reserved-dialog.vue";
-import EditUserStockdataDialog from "src/components/manage-users/edit-user-stockdata-dialog.vue";
-import PayOffUserDialog from "src/components/manage-users/pay-off-user-dialog.vue";
-import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
-import RoundBadge from "src/components/manage-users/round-badge.vue";
-import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
-import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
-import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTableFilters } from "src/composables/use-table-filters";
-import { notifyError } from "src/helpers/error-messages";
-import { getColValue } from "src/helpers/table-helpers";
-import { UserDialogPayload } from "src/models/user";
-import { useAuthService } from "src/services/auth";
-import { useCustomerService } from "src/services/customer";
-import { useRetailLocationService } from "src/services/retail-location";
-import { useDownloadUserData } from "src/services/user";
+import { noop } from "lodash-es";
 import {
-  CustomerFragment,
+  Dialog,
+  Notify,
+  QTable,
+  type QTableColumn,
+  type QTableProps,
+} from "quasar";
+import { type Ref, computed, onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import ActionsListButton from "@/components/actions-list-button.vue";
+import HeaderSearchBarFilters from "@/components/header-search-bar-filters.vue";
+import CartDialog from "@/components/manage-users/cart-dialog.vue";
+import ChipButton from "@/components/manage-users/chip-button.vue";
+import EditUserBooksMovementsDialog from "@/components/manage-users/edit-user-books-movements-dialog.vue";
+import EditUserDetailsDialog from "@/components/manage-users/edit-user-details-dialog.vue";
+import EditUserRequestedDialog from "@/components/manage-users/edit-user-requested-dialog.vue";
+import EditUserReservedDialog from "@/components/manage-users/edit-user-reserved-dialog.vue";
+import EditUserStockdataDialog from "@/components/manage-users/edit-user-stockdata-dialog.vue";
+import PayOffUserDialog from "@/components/manage-users/pay-off-user-dialog.vue";
+import ReceiptsDialog from "@/components/manage-users/receipts-dialog.vue";
+import RoundBadge from "@/components/manage-users/round-badge.vue";
+import TableCellWithDialog from "@/components/manage-users/table-cell-with-dialog.vue";
+import TableCellWithTooltip from "@/components/manage-users/table-cell-with-tooltip.vue";
+import TableHeaderWithInfo from "@/components/manage-users/table-header-with-info.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTableFilters } from "@/composables/use-table-filters";
+import { notifyError } from "@/helpers/error-messages";
+import { getColValue } from "@/helpers/table-helpers";
+import type { UserDialogPayload } from "@/models/user";
+import { useAuthService } from "@/services/auth";
+import { useCustomerService } from "@/services/customer";
+import { useRetailLocationService } from "@/services/retail-location";
+import { useDownloadUserData } from "@/services/user";
+import {
+  type CustomerFragment,
   useAddUserMutation,
   useCancelUserAccountDeletionMutation,
   useDeleteUserAccountMutation,
   useUpdateUserMutation,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
 
@@ -509,18 +514,20 @@ function updateSelectedStatus(
   rowId: string,
   newStatus: "selected" | "deselected",
 ) {
-  const tableRow = document.getElementsByClassName(`user-row-${rowId}`)[0];
+  const tableRow = document.querySelector(`.user-row-${rowId}`);
   if (!tableRow) {
     return;
   }
 
   switch (newStatus) {
-    case "selected":
+    case "selected": {
       tableRow.classList.add("bg-primary-selected");
       break;
-    case "deselected":
+    }
+    case "deselected": {
       tableRow.classList.remove("bg-primary-selected");
       break;
+    }
   }
 }
 
@@ -547,9 +554,11 @@ const columnTooltip = computed(() => ({
 
 // The "satisfies QTableColumn<...>" is needed to avoid a TS mismatch caused by `computed` type
 const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
-  ...((!isMobile.value
-    ? [{ name: "edit", field: () => undefined, label: "" }]
-    : []) satisfies QTableColumn<CustomerFragment>[]),
+  ...((isMobile.value
+    ? []
+    : [
+        { name: "edit", field: noop, label: "" },
+      ]) satisfies QTableColumn<CustomerFragment>[]),
   {
     name: "email",
     field: "email",
@@ -611,21 +620,21 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: t("manageUsers.fields.purchased"),
     align: "left",
   },
-  ...((!isMobile.value
-    ? [
+  ...((isMobile.value
+    ? []
+    : [
         {
           name: "shopping-cart",
           field: "booksInCart",
           label: t("manageUsers.fields.cart"),
           align: "center",
         },
-      ]
-    : []) satisfies QTableColumn<CustomerFragment>[]),
+      ]) satisfies QTableColumn<CustomerFragment>[]),
   {
     name: "creation-date",
     field: "createdAt",
-    format: (val: string) =>
-      new Date(val)
+    format: (value: string) =>
+      new Date(value)
         .toLocaleDateString(locale.value === "it" ? "it-IT" : "en-US", {
           hour12: false,
           hour: "2-digit",
@@ -637,29 +646,27 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     label: t("manageUsers.fields.creationDate"),
     align: "left",
   },
-  ...((!isMobile.value
+  ...((isMobile.value
     ? [
         {
+          name: "actions",
+          field: noop,
+          label: "",
+          classes: ({ emailVerified }) =>
+            `no-padding ${emailVerified ? "" : "bg-blue-grey-1 text-black-54"}`,
+        },
+      ]
+    : [
+        {
           name: "receipts",
-          field: () => undefined,
+          field: noop,
           label: t("manageUsers.fields.receipts"),
           align: "center",
         },
         {
           name: "pay-off",
-          field: () => undefined,
+          field: noop,
           label: "",
-        },
-      ]
-    : [
-        {
-          name: "actions",
-          field: () => undefined,
-          label: "",
-          classes: ({ emailVerified }) =>
-            `no-padding ${
-              !emailVerified ? "bg-blue-grey-1 text-black-54" : ""
-            }`,
         },
       ]) satisfies QTableColumn<CustomerFragment>[]),
 ]);
@@ -801,7 +808,7 @@ function openEdit({
 }
 
 // cells to always be clickable
-const alwaysClickableColsNames = ["in-stock", "reserved", "requested"];
+const alwaysClickableColsNames = new Set(["in-stock", "reserved", "requested"]);
 
 function openCellEditDialog(
   userData: CustomerFragment,
@@ -810,13 +817,13 @@ function openCellEditDialog(
 ) {
   if (
     !selectedLocation.value.id ||
-    (value <= 0 && !alwaysClickableColsNames.includes(colName))
+    (value <= 0 && !alwaysClickableColsNames.has(colName))
   ) {
     return;
   }
 
   switch (colName) {
-    case "in-stock":
+    case "in-stock": {
       Dialog.create({
         component: EditUserStockdataDialog,
         componentProps: { userData },
@@ -824,7 +831,8 @@ function openCellEditDialog(
         tableRef.value.requestServerInteraction();
       });
       break;
-    case "reserved":
+    }
+    case "reserved": {
       Dialog.create({
         component: EditUserReservedDialog,
         componentProps: {
@@ -839,7 +847,8 @@ function openCellEditDialog(
           tableRef.value.requestServerInteraction();
         });
       break;
-    case "requested":
+    }
+    case "requested": {
       Dialog.create({
         component: EditUserRequestedDialog,
         componentProps: {
@@ -854,6 +863,7 @@ function openCellEditDialog(
           tableRef.value.requestServerInteraction();
         });
       break;
+    }
     case "sold":
     case "purchased": {
       if (value === 0) {

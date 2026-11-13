@@ -1,9 +1,9 @@
-import { boot } from "quasar/wrappers";
-import InAppNotification from "src/components/events/in-app-notification.vue";
-import { createInAppNotifications } from "src/composables/in-app-notifications";
-import { NotificationFragment } from "src/services/notification.graphql";
+import { defineBoot } from "#q-app";
+import InAppNotification from "@/components/events/in-app-notification.vue";
+import { createInAppNotifications } from "@/composables/in-app-notifications";
+import type { NotificationFragment } from "@/services/notification.graphql";
 
-export default boot(({ app }) => {
+export default defineBoot(({ app }) => {
   app.use(
     createInAppNotifications<NotificationFragment>({
       component: InAppNotification,

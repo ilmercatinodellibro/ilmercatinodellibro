@@ -6,20 +6,22 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { AvailableRouteNames } from "src/models/routes";
-import { useSocialLogin } from "src/services/auth";
+import { AvailableRouteNames } from "@/models/routes";
+import { useSocialLogin } from "@/services/auth";
 
 const router = useRouter();
-const { query, params } = useRoute();
+const { query, params: parameters } = useRoute();
 const { login } = useSocialLogin();
 
+// Top-level await in <script setup> would make this an async component, which requires <Suspense>
+// eslint-disable-next-line unicorn/prefer-top-level-await
 void (async () => {
   try {
     await login(query.token as string);
     await router.push({
       name: AvailableRouteNames.Home,
       params: {
-        locationId: params.locationId,
+        locationId: parameters.locationId,
       },
     });
   } catch (error) {

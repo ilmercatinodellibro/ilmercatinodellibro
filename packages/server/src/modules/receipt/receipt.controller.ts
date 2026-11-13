@@ -1,10 +1,10 @@
 import { createReadStream } from "node:fs";
 import { Controller, Get, Header, Param, StreamableFile } from "@nestjs/common";
-import { User } from "@prisma/client";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { ReceiptService } from "src/modules/receipt/receipt.service";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { ReceiptService } from "src/modules/receipt/receipt.service.js";
 
 @Controller("/receipts")
 export class ReceiptController {
@@ -16,7 +16,10 @@ export class ReceiptController {
 
   @Get(":id")
   @Header("Content-Type", "application/pdf")
-  async viewReceipt(@Param("id") receiptId: string, @CurrentUser() user: User) {
+  async viewReceipt(
+    @Param("id") receiptId: string,
+    @CurrentUser() user: UserModel,
+  ) {
     const receipt = await this.prisma.receipt.findUniqueOrThrow({
       where: {
         id: receiptId,

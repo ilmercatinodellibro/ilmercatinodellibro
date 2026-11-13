@@ -142,26 +142,27 @@
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
 import { formatDate } from "@vueuse/core";
+import { noop } from "lodash-es";
 import {
   Dialog,
   QDialog,
-  QTableColumn,
+  type QTableColumn,
   useDialogPluginComponent,
 } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import KDialogCard from "src/components/k-dialog-card.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { hasProblem, reportOrSolveProblem } from "src/helpers/book-copy";
-import { notifyError } from "src/helpers/error-messages";
+import KDialogCard from "@/components/k-dialog-card.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { hasProblem, reportOrSolveProblem } from "@/helpers/book-copy";
+import { notifyError } from "@/helpers/error-messages";
 import {
-  BookCopyDetailsFragment,
+  type BookCopyDetailsFragment,
   useGetPurchasedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
   useRefundBookCopyMutation,
-} from "src/services/book-copy.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
-import { UserSummaryFragment } from "src/services/user.graphql";
+} from "@/services/book-copy.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
+import type { UserSummaryFragment } from "@/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import ProblemsButton from "../problems-button.vue";
 import ChipButton from "./chip-button.vue";
@@ -183,11 +184,12 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
+
 const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
 
-const { dialogRef, onDialogCancel, onDialogHide } = useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
 
 const title = computed(() =>
@@ -269,7 +271,7 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     field: "originalCode",
     name: "original-code",
     align: "left",
-    format: (val?: string) => val ?? "/",
+    format: (value?: string) => value ?? "/",
   },
   ...bookMiddleInfoColumns.value,
   // TODO: not in the mockups, but should we add the date? (as an alternative to opening the history)
@@ -279,19 +281,19 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     name: "sold-to",
     align: "left",
   },
-  ...((!isMobile.value
-    ? [
+  ...((isMobile.value
+    ? []
+    : [
         {
           label: "",
-          field: () => undefined,
+          field: noop,
           name: "problems",
           align: "center",
         },
-      ]
-    : []) satisfies QTableColumn<SoldBookCopy>[]),
+      ]) satisfies QTableColumn<SoldBookCopy>[]),
   {
     label: "",
-    field: () => undefined,
+    field: noop,
     name: "history",
     classes: isMobile.value ? "no-padding" : "",
   },
@@ -327,7 +329,7 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   },
   {
     label: t("manageUsers.actions"),
-    field: () => undefined,
+    field: noop,
     name: "return",
     align: "center",
     classes: isMobile.value ? "no-padding" : "",

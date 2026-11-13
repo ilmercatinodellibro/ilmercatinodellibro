@@ -23,15 +23,15 @@
 </template>
 
 <script setup lang="ts">
-import { QTableColumn, date, useDialogPluginComponent } from "quasar";
+import { type QTableColumn, date, useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { ProblemType } from "src/@generated/graphql";
-import {
+import type { ProblemType } from "@/@generated/graphql";
+import type {
   BookCopyDetailsFragment,
   ProblemDetailsFragment,
-} from "src/services/book-copy.graphql";
-import { UserSummaryFragment } from "src/services/user.graphql";
+} from "@/services/book-copy.graphql";
+import type { UserSummaryFragment } from "@/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 
@@ -53,7 +53,7 @@ const columns = computed<QTableColumn<ProblemDetailsFragment>[]>(() => [
     field: "createdAt",
     name: "createdAt",
     align: "left",
-    format: (date: number) => formatDate(date, "DD/MM/YYYY[ - ]hh:mm"),
+    format: (date: number) => formatDate(date, "DD/MM/YYYY[ - ]HH:mm"),
   },
   {
     label: t("manageUsers.booksMovementsDialog.problemType"),
@@ -82,7 +82,7 @@ const columns = computed<QTableColumn<ProblemDetailsFragment>[]>(() => [
     field: "resolvedAt",
     name: "resolved-at",
     align: "left",
-    format: (date: number) => formatDate(date, "DD/MM/YYYY[ - ]hh:mm"),
+    format: (date: number) => formatDate(date, "DD/MM/YYYY[ - ]HH:mm"),
   },
   {
     label: t("manageUsers.booksMovementsDialog.solution"),

@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
+    // This is for root only, so no compilation happens here
+    "noEmit": true,
+
+    "lib": ["ES2024"],
     "allowJs": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
     "resolveJsonModule": true,
-    // Avoid cross-os errors due to inconsistent file casing
-    "forceConsistentCasingInFileNames": true,
-    "sourceMap": true,
-    "strict": true,
     "isolatedModules": true,
-    "useDefineForClassFields": true,
-    // Fix Volar issue https://github.com/johnsoncodehk/volar/issues/1153
-    "jsx": "preserve"
-  }
+
+    "strict": true
+  },
+  // include root files (with and without a dot prefix)
+  // also include the roots of packages to allow importing from each other
+  "include": ["./*", "./.*", "./packages/*/*", "./packages/*/.*"]
 }

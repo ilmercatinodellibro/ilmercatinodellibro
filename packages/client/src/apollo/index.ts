@@ -4,16 +4,19 @@ import {
   InMemoryCache,
   split,
 } from "@apollo/client/core";
+import type { ApolloClientOptions } from "@apollo/client/core";
 import { setContext } from "@apollo/client/link/context";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { Kind, OperationTypeNode } from "graphql";
 import { createClient } from "graphql-ws";
-import { StrictTypedTypePolicies } from "src/@generated/apollo-helpers";
-import { useAuthService } from "src/services/auth";
-import type { ApolloClientOptions } from "@apollo/client/core";
+import type { StrictTypedTypePolicies } from "@/@generated/apollo-helpers";
+import { useAuthService } from "@/services/auth";
 
 const { getJwtHeader } = useAuthService();
+
+// See https://github.com/apollographql/apollo-client/issues/6868#issuecomment-703282751
+const mergeIncoming = (_existing: unknown, incoming: unknown) => incoming;
 
 export function getClientOptions() {
   const authLink = setContext((_, { headers }) => {
@@ -29,7 +32,7 @@ export function getClientOptions() {
   });
 
   const httpLink = createHttpLink({
-    uri: process.env.GRAPHQL_URL,
+    uri: import.meta.env.GRAPHQL_URL,
   });
 
   // TODO: We could reference here "GraphQLConnectionParams" from backend to get a strong type-checking for connection params
@@ -37,7 +40,7 @@ export function getClientOptions() {
   // See https://devlms.com/react-apollo/8-subscriptions/
   const wsLink = new GraphQLWsLink(
     createClient({
-      url: process.env.GRAPHQL_WS_URL,
+      url: import.meta.env.GRAPHQL_WS_URL,
       lazy: true,
       connectionParams: () => getJwtHeader(),
     }),
@@ -58,9 +61,6 @@ export function getClientOptions() {
     wsLink,
     from([authLink, httpLink]),
   );
-
-  // See https://github.com/apollographql/apollo-client/issues/6868#issuecomment-703282751
-  const mergeIncoming = (_existing: unknown, incoming: unknown) => incoming;
 
   const typePolicies: StrictTypedTypePolicies = {
     Query: {
@@ -84,62 +84,62 @@ export function getClientOptions() {
       }),
     } as ApolloClientOptions<unknown>,
     // Specific Quasar mode options.
-    process.env.MODE === "spa"
+    import.meta.env.QUASAR_MODE === "spa"
       ? {
           //
         }
       : {},
-    process.env.MODE === "ssr"
+    import.meta.env.QUASAR_MODE === "ssr"
       ? {
           //
         }
       : {},
-    process.env.MODE === "pwa"
+    import.meta.env.QUASAR_MODE === "pwa"
       ? {
           //
         }
       : {},
-    process.env.MODE === "bex"
+    import.meta.env.QUASAR_MODE === "bex"
       ? {
           //
         }
       : {},
-    process.env.MODE === "cordova"
+    import.meta.env.QUASAR_MODE === "cordova"
       ? {
           //
         }
       : {},
-    process.env.MODE === "capacitor"
+    import.meta.env.QUASAR_MODE === "capacitor"
       ? {
           //
         }
       : {},
-    process.env.MODE === "electron"
+    import.meta.env.QUASAR_MODE === "electron"
       ? {
           //
         }
       : {},
 
     // dev/prod options.
-    process.env.DEV
+    import.meta.env.QUASAR_DEV
       ? {
           //
         }
       : {},
-    process.env.PROD
+    import.meta.env.QUASAR_PROD
       ? {
           //
         }
       : {},
 
     // For ssr mode, when on server.
-    process.env.MODE === "ssr" && process.env.SERVER
+    import.meta.env.QUASAR_SSR_MODE && import.meta.env.QUASAR_SERVER
       ? {
           ssrMode: true,
         }
       : {},
     // For ssr mode, when on client.
-    process.env.MODE === "ssr" && process.env.CLIENT
+    import.meta.env.QUASAR_SSR_MODE && import.meta.env.QUASAR_CLIENT
       ? {
           ssrForceFetchDelay: 100,
         }

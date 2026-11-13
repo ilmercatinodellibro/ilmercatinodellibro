@@ -1,12 +1,13 @@
 import { UnprocessableEntityException, UseGuards } from "@nestjs/common";
 import { Mutation, Query, Resolver } from "@nestjs/graphql";
-import { Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
-import { omit } from "lodash";
-import { User as GraphQLUser } from "src/@generated";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { RegisterUserPayload } from "src/modules/user/user.args";
-import { UserService } from "../user/user.service";
+import { omit } from "lodash-es";
+import { User as GraphQLUser } from "src/@generated/graphql/index.js";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { RegisterUserPayload } from "src/modules/user/user.args.js";
+import { UserService } from "../user/user.service.js";
 import {
   EmailVerificationPayload,
   LoginPayload,
@@ -15,13 +16,13 @@ import {
   RegisterPayload,
   RegistrationInviteLinkPayload,
   ResetForgottenPasswordPayload,
-} from "./auth.args";
-import { AuthPayload } from "./auth.entity";
-import { AuthService } from "./auth.service";
-import { CurrentUser } from "./decorators/current-user.decorator";
-import { Input } from "./decorators/input.decorator";
-import { Public } from "./decorators/public-route.decorator";
-import { LocalAuthGuard } from "./guards/local-auth.guard";
+} from "./auth.args.js";
+import { AuthPayload } from "./auth.entity.js";
+import { AuthService } from "./auth.service.js";
+import { CurrentUser } from "./decorators/current-user.decorator.js";
+import { Input } from "./decorators/input.decorator.js";
+import { Public } from "./decorators/public-route.decorator.js";
+import { LocalAuthGuard } from "./guards/local-auth.guard.js";
 
 @Resolver()
 export class AuthResolver {
@@ -32,7 +33,7 @@ export class AuthResolver {
   ) {}
 
   @Query(() => GraphQLUser)
-  currentUser(@CurrentUser() user: User) {
+  currentUser(@CurrentUser() user: UserModel) {
     return user;
   }
 
@@ -88,7 +89,7 @@ export class AuthResolver {
     );
 
     try {
-      //TODO: use queues instead of doing await
+      // TODO: use queues instead of doing await
       await this.authService.sendVerificationLink(
         payload.retailLocationId,
         user,
@@ -141,7 +142,7 @@ export class AuthResolver {
     // We need it here to autogenerate the GraphQL schema
     // That's why it's defined as a param but not used within this method
     @Input() _loginPayload: LoginPayload,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ): AuthPayload {
     const jwt = this.authService.createAccessToken(user.id);
 
@@ -171,7 +172,7 @@ export class AuthResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async resetForgottenPassword(
     @Input() { newPassword, confirmNewPassword }: ResetForgottenPasswordPayload,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     if (newPassword !== confirmNewPassword) {
       throw new UnprocessableEntityException(
@@ -190,14 +191,14 @@ export class AuthResolver {
   }
 
   @Mutation(() => String)
-  refreshToken(@CurrentUser() user: User) {
+  refreshToken(@CurrentUser() user: UserModel) {
     return this.authService.createAccessToken(user.id);
   }
 
   @Mutation(() => GraphQLVoid, { nullable: true })
   async sendVerificationLink(
     @Input() { userId, retailLocationId }: EmailVerificationPayload,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: currentUser.id,
@@ -227,7 +228,7 @@ export class AuthResolver {
   async resetPassword(
     @Input()
     { currentPassword, newPassword, confirmNewPassword }: PasswordResetPayload,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     if (
       !(await this.userService.verifyPassword(user.password, currentPassword))
@@ -255,7 +256,7 @@ export class AuthResolver {
   @Mutation(() => GraphQLUser, { nullable: true })
   async addOrInviteOperator(
     @Input() { email, retailLocationId }: RegistrationInviteLinkPayload,
-    @CurrentUser() actor: User,
+    @CurrentUser() actor: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: actor.id,
@@ -291,15 +292,15 @@ export class AuthResolver {
       });
 
     if (currentOperatorMembership?.role) {
-      if (currentOperatorMembership.role === Role.OPERATOR) {
-        throw new UnprocessableEntityException(
-          "You cannot promote to operator someone who already is an operator in this location.",
-        );
-      } else {
-        throw new UnprocessableEntityException(
-          "The selected user is already an admin.",
-        );
-      }
+      const error =
+        currentOperatorMembership.role === Role.OPERATOR
+          ? new UnprocessableEntityException(
+              "You cannot promote to operator someone who already is an operator in this location.",
+            )
+          : new UnprocessableEntityException(
+              "The selected user is already an admin.",
+            );
+      throw error;
     }
 
     if (!existingUser.emailVerified) {

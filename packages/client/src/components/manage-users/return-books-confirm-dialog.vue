@@ -85,11 +85,11 @@
 </template>
 
 <script setup lang="ts">
-import { QTableColumn, useDialogPluginComponent } from "quasar";
+import { type QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import type { BookCopyDetailsFragment } from "@/services/book-copy.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 import TableCellWithTooltip from "./table-cell-with-tooltip.vue";
@@ -107,10 +107,11 @@ defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { t } = useI18n();
-
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+
+const { t } = useI18n();
+
 const { isMobile } = useLateralDrawer();
 
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [

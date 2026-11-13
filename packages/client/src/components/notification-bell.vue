@@ -30,8 +30,8 @@ import {
 import { Dialog, Notify } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useFirebaseMessaging } from "src/boot/firebase-messaging";
-import { usePushNotificationService } from "src/services/push-notification";
+import { useFirebaseMessaging } from "@/boot/firebase-messaging";
+import { usePushNotificationService } from "@/services/push-notification";
 import NotificationPermissionInfoDialog from "./notification-permission-info-dialog.vue";
 
 const messaging = useFirebaseMessaging();
@@ -41,6 +41,8 @@ const isSubscribed = ref(false);
 const isLoading = ref(false);
 const token = useStorage<string | null>(
   "notification-subscription-token",
+  // useStorage() uses null for "no value", and removes the item from the storage when set to null
+  // eslint-disable-next-line unicorn/no-null
   null,
 );
 
@@ -84,18 +86,14 @@ const tooltip = computed(() => {
     : t("pushNotifications.subscribe");
 });
 
-const { vibrate } = useVibrate({ interval: 500 });
+const { vibrate } = useVibrate();
 async function toggleSubscription() {
   isLoading.value = true;
 
   const isSubscribing = !isSubscribed.value;
 
   try {
-    if (isSubscribing) {
-      await subscribe();
-    } else {
-      await unsubscribe();
-    }
+    await (isSubscribing ? subscribe() : unsubscribe());
   } catch (error) {
     console.error(error);
     Notify.create({
@@ -177,8 +175,10 @@ async function subscribe() {
 
 async function checkToken() {
   const oldToken = token.value;
+  // TODO: move to Firebase Installation ID based messaging with register() and onRegistered(), together with the server
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- see the TODO above
   const newToken = await getToken(messaging, {
-    vapidKey: process.env.WEB_PUSH_VAPID_KEY,
+    vapidKey: import.meta.env.WEB_PUSH_VAPID_KEY,
     serviceWorkerRegistration: await navigator.serviceWorker.getRegistration(),
   });
   if (oldToken !== newToken) {
@@ -192,11 +192,13 @@ async function checkToken() {
 }
 
 async function unsubscribe() {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- see the TODO in checkToken()
   await deleteToken(messaging);
 
   if (token.value !== null) {
     await removeTokenFromServer(token.value);
   }
+  // eslint-disable-next-line unicorn/no-null
   token.value = null;
 
   Notify.create({

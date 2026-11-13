@@ -1,4 +1,5 @@
-import { Prisma, Role } from "@prisma/client";
+import type { Prisma } from "src/@generated/prisma/client.js";
+import { Role } from "src/@generated/prisma/enums.js";
 
 export function getPrismaRetailLocationFilters(retailLocationId: string) {
   const retailLocationFilter = {

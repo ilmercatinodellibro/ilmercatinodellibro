@@ -1,32 +1,34 @@
 import { UnprocessableEntityException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { Prisma, Role, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
-import { merge } from "lodash";
-import { RetailLocation } from "src/@generated/retail-location";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { Input } from "src/modules/auth/decorators/input.decorator";
-import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
+import { merge } from "lodash-es";
+import { RetailLocation } from "src/@generated/graphql/retail-location/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator.js";
+import { Input } from "src/modules/auth/decorators/input.decorator.js";
+import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers.js";
 import {
   UpdateRetailLocationInfoInput,
   UpdateRetailLocationSettingsInput,
-} from "src/modules/retail-location/retail-location.input";
-import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
-import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
+} from "src/modules/retail-location/retail-location.input.js";
+import { RetailLocationService } from "src/modules/retail-location/retail-location.service.js";
+import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args.js";
 import {
   languageLocales,
   type RetailLocationInfo,
-} from "test/fixtures/retail-locations";
-import { Public } from "../auth/decorators/public-route.decorator";
-import { PrismaService } from "../prisma/prisma.service";
+} from "test/fixtures/retail-locations.js";
+import { Public } from "../auth/decorators/public-route.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   ChartElement,
   LocationBoundQueryArgs,
   ResetRetailLocationInput,
   RetailLocationQueryArgs,
   StatisticsQueryResult,
-} from "./retail-location.args";
+} from "./retail-location.args.js";
 
 const STATISTICS_FORBIDDEN_MESSAGE =
   "You do not have permission to view retail location statistics.";
@@ -62,7 +64,7 @@ export class RetailLocationResolver {
   @Mutation(() => RetailLocation)
   async updateRetailLocationTheme(
     @Input() { retailLocationId, theme }: UpdateRetailLocationThemeInput,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: user.id,
@@ -108,7 +110,7 @@ export class RetailLocationResolver {
       buyRate,
       sellRate,
     }: UpdateRetailLocationSettingsInput,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: user.id,
@@ -182,7 +184,7 @@ export class RetailLocationResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async resetRetailLocation(
     @Input() { retailLocationId }: ResetRetailLocationInput,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: user.id,
@@ -239,7 +241,7 @@ export class RetailLocationResolver {
   @Query(() => StatisticsQueryResult)
   async retailLocationStatistics(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -793,7 +795,7 @@ export class RetailLocationResolver {
   @Query(() => [ChartElement])
   async deliveriesChartData(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ): Promise<ChartElement[]> {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -818,7 +820,7 @@ export class RetailLocationResolver {
   @Query(() => [ChartElement])
   async salesChartData(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ): Promise<ChartElement[]> {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -846,7 +848,7 @@ export class RetailLocationResolver {
   @Query(() => [ChartElement])
   async settlementsChartData(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ): Promise<ChartElement[]> {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -877,7 +879,7 @@ export class RetailLocationResolver {
   @Query(() => [ChartElement])
   async returningsChartData(
     @Args() { retailLocationId }: LocationBoundQueryArgs,
-    @CurrentUser() { id: currentUserId }: User,
+    @CurrentUser() { id: currentUserId }: UserModel,
   ): Promise<ChartElement[]> {
     await this.authService.assertMembership({
       userId: currentUserId,
@@ -923,7 +925,7 @@ export class RetailLocationResolver {
       }
     }
 
-    return transformedData.sort(
+    return transformedData.toSorted(
       ({ timestamp: timestampA }, { timestamp: timestampB }) =>
         timestampA.valueOf() - timestampB.valueOf(),
     );
@@ -939,7 +941,7 @@ export class RetailLocationResolver {
       whoAreWeContent,
       joinUsContent,
     }: UpdateRetailLocationInfoInput,
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: currentUser.id,

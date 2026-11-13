@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "src/@generated/prisma/client.js";
 
 export const noSalesOrRefundedSalesFilter = {
   sales: {

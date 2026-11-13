@@ -102,14 +102,14 @@ import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
 import { Dialog, useDialogPluginComponent } from "quasar";
 import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
-import KDialogFormCard from "src/components/k-dialog-form-card.vue";
+import KDialogFormCard from "@/components/k-dialog-form-card.vue";
 import {
   allowOnlyIntegerNumbers,
   nonNegativeNumberRule,
-} from "src/helpers/rules";
-import { useAuthService } from "src/services/auth";
-import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
-import { SettingsUpdate, type SettingsDialogProps } from "./settings-dialog";
+} from "@/helpers/rules";
+import { useAuthService } from "@/services/auth";
+import type { RetailLocationSettingsFragment } from "@/services/retail-location.graphql";
+import type { SettingsUpdate, SettingsDialogProps } from "./settings-dialog";
 
 const props = defineProps<SettingsDialogProps>();
 

@@ -5,25 +5,30 @@ import {
 } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Mutation, ResolveField, Resolver, Root } from "@nestjs/graphql";
-import { Prisma, Book as PrismaBook, User } from "@prisma/client";
 import { GraphQLVoid } from "graphql-scalars";
-import { Book, Cart, ReceiptType } from "src/@generated";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { ReceiptService } from "src/modules/receipt/receipt.service";
-import { Input } from "../auth/decorators/input.decorator";
+import { Book, Cart, ReceiptType } from "src/@generated/graphql/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import type {
+  BookModel as PrismaBook,
+  UserModel,
+} from "src/@generated/prisma/models.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { ReceiptService } from "src/modules/receipt/receipt.service.js";
+import { Input } from "../auth/decorators/input.decorator.js";
 import {
   AddToCartInput,
   DeleteCartInput,
   FinalizeCartInput,
   OpenCartInput,
   RemoveFromCartInput,
-} from "./cart.input";
-import { CartService } from "./cart.service";
+} from "./cart.input.js";
+import { CartService } from "./cart.service.js";
 
 @Resolver(() => Cart)
 export class CartResolver {
+  // eslint-disable-next-line @typescript-eslint/max-params -- NestJS injects each dependency as a constructor parameter
   constructor(
     private readonly prisma: PrismaService,
     private readonly cartService: CartService,
@@ -51,7 +56,7 @@ export class CartResolver {
   })
   async openCart(
     @Input() { userId, retailLocationId }: OpenCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() operator: UserModel,
   ) {
     await this.authService.assertMembership({
       userId: operator.id,
@@ -95,7 +100,7 @@ export class CartResolver {
       fromBookRequestId,
       fromReservationId,
     }: AddToCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() operator: UserModel,
   ) {
     const cart = await this.cartService.ensureCartNotExpired(cartId);
 
@@ -116,6 +121,8 @@ export class CartResolver {
     }
 
     let book: PrismaBook;
+    let bookRequestId = fromBookRequestId;
+    let reservationId = fromReservationId;
 
     // throw new XException("CODE", { description: "Description" }) is used for known custom cases
 
@@ -151,7 +158,7 @@ export class CartResolver {
 
       // DB query already returns non-deleted requests
       if (bookDetails.requests.length === 0) {
-        ({ id: fromBookRequestId } = await this.prisma.bookRequest.create({
+        ({ id: bookRequestId } = await this.prisma.bookRequest.create({
           data: {
             userId: cart.userId,
             bookId: bookDetails.id,
@@ -160,26 +167,26 @@ export class CartResolver {
         }));
 
         // no requests means there can't be reservations either, so we can safely check the book availability
-        if (!bookDetails.meta.isAvailable) {
+        if (!bookDetails.meta?.isAvailable) {
           throw new UnprocessableEntityException("BOOK_NOT_AVAILABLE", {
             description: "The book is not available",
           });
         }
       } else {
-        fromBookRequestId = bookDetails.requests[0].id;
+        bookRequestId = bookDetails.requests[0].id;
       }
 
       // The book availability applies to all users, so we first check if this specific user already has a reservation for the book
       if (
         bookDetails.reservations.length === 0 &&
-        !bookDetails.meta.isAvailable
+        !bookDetails.meta?.isAvailable
       ) {
         throw new UnprocessableEntityException("BOOK_NOT_AVAILABLE", {
           description: "The book is not available",
         });
       } else if (bookDetails.reservations.length > 0) {
-        fromReservationId = bookDetails.reservations[0].id;
-        fromBookRequestId = undefined;
+        reservationId = bookDetails.reservations[0].id;
+        bookRequestId = undefined;
       }
     } else if (fromBookRequestId) {
       const request = await this.prisma.bookRequest.findUniqueOrThrow({
@@ -203,7 +210,7 @@ export class CartResolver {
         );
       }
 
-      book = request.book;
+      ({ book } = request);
     } else if (fromReservationId) {
       const reservation = await this.prisma.reservation.findUniqueOrThrow({
         where: { id: fromReservationId },
@@ -226,12 +233,12 @@ export class CartResolver {
         );
       }
 
-      book = reservation.book;
+      ({ book } = reservation);
     } else {
       throw new Error("Unreachable code"); // to satisfy TypeScript
     }
 
-    if (cart.items.find(({ bookId }) => bookId === book.id)) {
+    if (cart.items.some(({ bookId }) => bookId === book.id)) {
       throw new UnprocessableEntityException(
         "The book was already added to the cart",
       );
@@ -242,8 +249,8 @@ export class CartResolver {
         cartId,
         bookId: book.id,
 
-        fromBookRequestId,
-        fromReservationId,
+        fromBookRequestId: bookRequestId,
+        fromReservationId: reservationId,
       },
     });
 
@@ -253,7 +260,7 @@ export class CartResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async removeFromCart(
     @Input() { cartId, bookId }: RemoveFromCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() operator: UserModel,
   ) {
     const cart = await this.cartService.ensureCartNotExpired(cartId);
 
@@ -279,7 +286,7 @@ export class CartResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async finalizeCart(
     @Input() input: FinalizeCartInput,
-    @CurrentUser() operator: User,
+    @CurrentUser() operator: UserModel,
   ) {
     const cart = await this.cartService.ensureCartNotExpired(input.cartId);
 
@@ -298,7 +305,7 @@ export class CartResolver {
   async #finalizeCart(
     prisma: Prisma.TransactionClient,
     { cartId, bookCopyIds }: FinalizeCartInput,
-    operator: User,
+    operator: UserModel,
   ) {
     const cart = await prisma.cart.findUniqueOrThrow({
       where: { id: cartId },
@@ -359,9 +366,9 @@ export class CartResolver {
       },
     });
 
-    const cartBookIds = books.map(({ id }) => id);
+    const cartBookIds = new Set(books.map(({ id }) => id));
     const selectedBookIds = bookCopies.map(({ bookId }) => bookId);
-    if (!selectedBookIds.every((id) => cartBookIds.includes(id))) {
+    if (!selectedBookIds.every((id) => cartBookIds.has(id))) {
       throw new BadRequestException(
         "Given book copies do not match the list of books in the cart",
       );
@@ -442,7 +449,7 @@ export class CartResolver {
   @Mutation(() => GraphQLVoid, { nullable: true })
   async deleteCart(
     @Input() { cartId }: DeleteCartInput,
-    @CurrentUser() { id: userId }: User,
+    @CurrentUser() { id: userId }: UserModel,
   ) {
     const cart = await this.prisma.cart.findUniqueOrThrow({
       where: { id: cartId },

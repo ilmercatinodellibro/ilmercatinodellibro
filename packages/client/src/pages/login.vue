@@ -39,7 +39,7 @@
             lazy-rules
             outlined
             type="email"
-            data-cy="email-field"
+            data-testid="email-field"
           />
 
           <k-password-input
@@ -50,7 +50,7 @@
             outlined
             lazy-rules
             autocomplete="password"
-            data-cy="password-field"
+            data-testid="password-field"
           />
 
           <q-btn
@@ -58,7 +58,7 @@
             color="primary"
             :label="t('auth.login')"
             type="submit"
-            data-cy="submit-button"
+            data-testid="submit-button"
             :loading="isLoggingIn"
           />
         </q-form>
@@ -98,6 +98,7 @@
           class="full-width outline-black-12"
           color="black-87"
           outline
+          data-testid="registration-link"
         />
       </q-card-section>
 
@@ -106,7 +107,7 @@
       <router-link
         class="text-black-87 text-subtitle1"
         :to="{ name: 'forgot-password' }"
-        data-cy="forgot-password-link"
+        data-testid="forgot-password-link"
       >
         {{ t("auth.forgotPassword") }}
       </router-link>
@@ -115,22 +116,24 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloError } from "@apollo/client/core";
 import { mdiArrowDown, mdiArrowLeft } from "@quasar/extras/mdi-v7";
 import { Notify, QCard } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { LoginPayload } from "src/@generated/graphql";
-import FaqInfo from "src/components/faq-info.vue";
-import KPasswordInput from "src/components/k-password-input.vue";
-import SocialAuthButtons from "src/components/social-auth-buttons.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTheme } from "src/composables/use-theme";
-import { notifyError } from "src/helpers/error-messages";
-import { emailRule, requiredRule } from "src/helpers/rules";
-import { AvailableRouteNames } from "src/models/routes";
-import { useLoginMutation } from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
+import type { LoginPayload } from "@/@generated/graphql";
+import FaqInfo from "@/components/faq-info.vue";
+import KPasswordInput from "@/components/k-password-input.vue";
+import SocialAuthButtons from "@/components/social-auth-buttons.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTheme } from "@/composables/use-theme";
+import {
+  isExpectedServerError,
+  notifyServerError,
+} from "@/helpers/error-messages";
+import { emailRule, requiredRule } from "@/helpers/rules";
+import { AvailableRouteNames } from "@/models/routes";
+import { useLoginMutation } from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const props = defineProps<{
   emailVerified?: boolean;
@@ -144,7 +147,7 @@ const { isMobile } = useLateralDrawer();
 const { theme } = useTheme();
 
 const SOCIAL_LOGIN_ENABLED =
-  process.env.SOCIAL_LOGIN_ENABLED === "true" &&
+  import.meta.env.SOCIAL_LOGIN_ENABLED &&
   selectedLocation.value.registrationEnabled;
 
 if (props.emailVerified) {
@@ -152,7 +155,7 @@ if (props.emailVerified) {
     message: t("auth.emailVerified"),
     color: "positive",
     attrs: {
-      "data-cy": "email-verified-notification",
+      "data-testid": "email-verified-notification",
     },
   });
 }
@@ -183,15 +186,9 @@ async function onSubmit() {
       retailLocationId: selectedLocation.value.id,
     });
   } catch (error) {
-    const { message, graphQLErrors } = error as ApolloError;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- we're not sure if this a false positive or not
-    const status = graphQLErrors[0]?.extensions?.status as number | undefined;
+    notifyServerError(error, "login-error");
 
-    // TODO: implement centralized error handling
-
-    notifyError(message, "login-error");
-
-    if (!status || ![401, 422].includes(status)) {
+    if (!isExpectedServerError(error)) {
       console.error(error);
     }
   }

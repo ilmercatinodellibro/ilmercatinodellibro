@@ -172,7 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloCache } from "@apollo/client/core";
+import type { ApolloCache } from "@apollo/client/core";
 import {
   mdiCart,
   mdiCartPlus,
@@ -183,21 +183,21 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { Dialog, Notify, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { evictQuery } from "src/apollo/cache";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { notifyError } from "src/helpers/error-messages";
-import { WidthSize, useScreenWidth } from "src/helpers/screen";
-import { fetchBookByISBN } from "src/services/book";
-import { useCartService } from "src/services/cart";
-import { useRequestService } from "src/services/request";
+import { evictQuery } from "@/apollo/cache";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { notifyError } from "@/helpers/error-messages";
+import { WidthSize, useScreenWidth } from "@/helpers/screen";
+import { fetchBookByISBN } from "@/services/book";
+import { useCartService } from "@/services/cart";
+import { useRequestService } from "@/services/request";
 import {
   GetRequestsDocument,
-  RequestSummaryFragment,
-} from "src/services/request.graphql";
-import { useReservationService } from "src/services/reservation";
-import { GetReservationsDocument } from "src/services/reservation.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
-import { CustomerFragment } from "src/services/user.graphql";
+  type RequestSummaryFragment,
+} from "@/services/request.graphql";
+import { useReservationService } from "@/services/reservation";
+import { GetReservationsDocument } from "@/services/reservation.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
+import type { CustomerFragment } from "@/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -212,12 +212,13 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
+const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
+  useDialogPluginComponent();
+
 const { t } = useI18n();
 
 const { selectedLocation } = useRetailLocationService();
 
-const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
-  useDialogPluginComponent();
 const { isMobile } = useLateralDrawer();
 
 const SMALL_CUSTOM_BREAKPOINT = 1230;
@@ -290,14 +291,16 @@ async function deleteAllRequests() {
     notifyError(t("bookErrors.notAllRequestsDeleted"));
   }
 
-  const removedIds = results
-    .filter(
-      (result): result is PromiseFulfilledResult<string> =>
-        result.status === "fulfilled",
-    )
-    .map(({ value }) => value);
+  const removedIds = new Set(
+    results
+      .filter(
+        (result): result is PromiseFulfilledResult<string> =>
+          result.status === "fulfilled",
+      )
+      .map(({ value }) => value),
+  );
   updateRequestsCache(cache, (requests) =>
-    requests.filter(({ id }) => !removedIds.includes(id)),
+    requests.filter(({ id }) => !removedIds.has(id)),
   );
 }
 async function deleteRequest(request: RequestSummaryFragment) {

@@ -1,0 +1,49 @@
+import:
+  - "@cspell/dict-it-it/cspell-ext.json"
+language: it,en
+words:
+  - coralloy
+  - dreamonkey
+  - ilmercatinodellibro
+  - mercatino
+
+  # Tooling
+  - lintstagedrc
+
+  # Frameworks and libraries
+  - brevo
+  - codegen
+  - intlify
+  - itemprop
+  - objt
+  - qdate
+  - stringifier
+  - svguse
+  - themify
+  - viewports
+  - vnode
+  - webpush
+  - zoomin
+  - zoomout
+
+  # Domain terms
+  - ALTEMILIAROMAGNA
+  - ISEE
+  - malus
+  - paritary
+  - perc
+  - returnings
+  - settleable
+  - stockdata
+
+  # User model properties
+  - firstname
+  - lastname
+
+  # Names and addresses used in fixtures
+  - Cassoli
+  - thespots
+
+  # Italian words missing from the dictionary
+  - anonimizzate
+  - disiscritto

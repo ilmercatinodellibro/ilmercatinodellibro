@@ -20,21 +20,21 @@ import {
   mdiHelpCircle,
   mdiPuzzle,
 } from "@quasar/extras/mdi-v7";
-import { NamedColor } from "quasar";
+import type { NamedColor } from "quasar";
 import { useI18n } from "vue-i18n";
 import {
-  BookCopyStatus,
+  type BookCopyStatus,
   getCurrentActiveProblem,
   getStatus,
-} from "src/helpers/book-copy";
-import { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
-
-const { t } = useI18n();
+} from "@/helpers/book-copy";
+import type { BookCopyDetailsFragment } from "@/services/book-copy.graphql";
 
 const props = defineProps<{
   bookCopy: BookCopyDetailsFragment;
   hideIcon?: boolean;
 }>();
+
+const { t } = useI18n();
 
 function displayStatus(): Exclude<BookCopyStatus, "reimbursed" | "settled"> {
   const status = getStatus(props.bookCopy);

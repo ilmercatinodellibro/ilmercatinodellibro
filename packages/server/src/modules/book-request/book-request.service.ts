@@ -1,22 +1,25 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import {
-  Book,
-  BookRequest,
-  Prisma,
-  RequestQueue as PrismaRequestQueue,
-  RetailLocation,
-} from "@prisma/client";
-import { BookMeta } from "src/@generated";
-import { availableBookCopyFilter } from "src/modules/book-copy/book-copy.filters";
-import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.module";
-import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { BookMeta } from "src/@generated/graphql/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import type {
+  BookModel,
+  BookRequestModel,
+  RequestQueueModel as PrismaRequestQueue,
+  RetailLocationModel,
+} from "src/@generated/prisma/models.js";
+import { availableBookCopyFilter } from "src/modules/book-copy/book-copy.filters.js";
+import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.events.js";
+import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 
 type RequestQueue = PrismaRequestQueue & {
-  book: Book & { meta: BookMeta; retailLocation: RetailLocation };
-  currentRequest: BookRequest;
+  book: BookModel & {
+    meta: BookMeta | null;
+    retailLocation: RetailLocationModel;
+  };
+  currentRequest: BookRequestModel;
 };
 
 /**
@@ -111,7 +114,7 @@ export class BookRequestService {
       if (
         book.requests.length === 0 ||
         // check for availability just in case
-        !book.meta.isAvailable ||
+        !book.meta?.isAvailable ||
         book.requestQueue
       ) {
         continue;
@@ -277,7 +280,7 @@ export class BookRequestService {
     id: queueId,
     currentRequest,
   }: RequestQueue) {
-    if (!book.meta.isAvailable) {
+    if (!book.meta?.isAvailable) {
       await this.prisma.requestQueue.delete({
         where: { id: queueId },
       });
@@ -319,8 +322,8 @@ export class BookRequestService {
   }
 
   async #notifyUser(
-    request: BookRequest,
-    book: Book & { retailLocation: RetailLocation },
+    request: BookRequestModel,
+    book: BookModel & { retailLocation: RetailLocationModel },
   ) {
     const { id: userId, locale } = await this.prisma.user.findUniqueOrThrow({
       where: {

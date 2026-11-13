@@ -5,7 +5,7 @@
     </q-td>
   </q-tr>
 
-  <q-tr v-else-if="!bookCopies.length">
+  <q-tr v-else-if="bookCopies.length === 0">
     <q-td :colspan="tableWidth" class="no-pointer-events text-left">
       {{ t("book.noResult") }}
     </q-td>
@@ -106,22 +106,23 @@
 
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
-import { QTableColumn } from "quasar";
+import { noop } from "lodash-es";
+import type { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
-import ProblemsButton from "src/components/problems-button.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import BookCopyStatusChip from "@/components/book-copy-status-chip.vue";
+import ProblemsButton from "@/components/problems-button.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
 import {
   reportOrSolveProblem as _reportOrSolveProblem,
   hasProblem,
   isAvailable,
-} from "src/helpers/book-copy";
-import { getFieldValue } from "src/helpers/table-helpers";
+} from "@/helpers/book-copy";
+import { getFieldValue } from "@/helpers/table-helpers";
 import {
-  BookCopyDetailsFragment,
+  type BookCopyDetailsFragment,
   useGetBookCopiesQuery,
-} from "src/services/book-copy.graphql";
+} from "@/services/book-copy.graphql";
 import ActionsListButton from "./actions-list-button.vue";
 
 const props = defineProps<{
@@ -160,23 +161,23 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    field: () => undefined,
+    field: noop,
     label: t("book.fields.status"),
     align: "left",
   },
-  ...((!isMobile.value
-    ? [
+  ...((isMobile.value
+    ? []
+    : [
         {
           name: "problems",
           field: "problems",
           label: "",
           align: "center",
         },
-      ]
-    : []) satisfies QTableColumn<BookCopyDetailsFragment>[]),
+      ]) satisfies QTableColumn<BookCopyDetailsFragment>[]),
   {
     name: "history",
-    field: () => undefined,
+    field: noop,
     label: "",
     classes: isMobile.value ? "no-padding" : "",
   },

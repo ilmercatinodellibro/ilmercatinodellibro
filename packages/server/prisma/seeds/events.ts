@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { PrismaClient } from "@prisma/client";
-import { times } from "lodash";
-import { createEvent } from "prisma/factories/event";
+import { times } from "lodash-es";
+import { createEvent } from "prisma/factories/event.js";
+import type { PrismaClient } from "src/@generated/prisma/client.js";
 
 const EVENT_COUNT = 25;
 

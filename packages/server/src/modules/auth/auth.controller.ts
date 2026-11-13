@@ -9,15 +9,13 @@ import {
   UseGuards,
   forwardRef,
 } from "@nestjs/common";
-import { User } from "@prisma/client";
-import { Request, Response } from "express";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { FacebookAuthGuard } from "src/modules/auth/guards/facebook.guard";
-import { GoogleAuthGuard } from "src/modules/auth/guards/google.guard";
-import { AuthService } from "./auth.service";
-import { Public } from "./decorators/public-route.decorator";
-
-export const EMAIL_VERIFICATION_ENDPOINT = "auth/email/verification";
+import type { Request, Response } from "express";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { FacebookAuthGuard } from "src/modules/auth/guards/facebook.guard.js";
+import { GoogleAuthGuard } from "src/modules/auth/guards/google.guard.js";
+import { AuthService, EMAIL_VERIFICATION_ENDPOINT } from "./auth.service.js";
+import { Public } from "./decorators/public-route.decorator.js";
 
 @Controller()
 export class AuthController {
@@ -35,12 +33,12 @@ export class AuthController {
   async validateEmail(
     @Query("locationId") locationId: string,
     @Query("token") token: string,
-    @Res() res: Response,
+    @Res() response: Response,
   ) {
     await this.authService.validateEmailVerificationToken(token);
 
     // TODO: login the user automatically
-    res.redirect(
+    response.redirect(
       `${this.rootConfig.clientUrl}/${locationId}/login?emailVerified=true`,
     );
   }
@@ -59,9 +57,9 @@ export class AuthController {
   @Public()
   @UseGuards(FacebookAuthGuard)
   @Get("auth/facebook/callback")
-  facebookAuthCallback(@Req() request: Request, @Res() res: Response) {
+  facebookAuthCallback(@Req() request: Request, @Res() response: Response) {
     // TODO: not saving the phone number nor birthday
-    const user = request.user as User | undefined;
+    const user = request.user as UserModel | undefined;
     if (!user) {
       throw new ForbiddenException();
     }
@@ -69,7 +67,7 @@ export class AuthController {
     const locationId = request.query.state as string;
 
     const jwt = this.authService.createAccessToken(user.id);
-    res.redirect(
+    response.redirect(
       `${this.rootConfig.clientUrl}/${locationId}/login/social?token=${jwt}`,
     );
   }
@@ -88,10 +86,10 @@ export class AuthController {
   @Public()
   @UseGuards(GoogleAuthGuard)
   @Get("auth/google/callback")
-  googleAuthCallback(@Req() request: Request, @Res() res: Response) {
+  googleAuthCallback(@Req() request: Request, @Res() response: Response) {
     // TODO: not saving the phone number nor birthday
 
-    const user = request.user as User | undefined;
+    const user = request.user as UserModel | undefined;
     if (!user) {
       throw new ForbiddenException();
     }
@@ -99,7 +97,7 @@ export class AuthController {
     const locationId = request.query.state as string;
 
     const jwt = this.authService.createAccessToken(user.id);
-    res.redirect(
+    response.redirect(
       `${this.rootConfig.clientUrl}/${locationId}/login/social?token=${jwt}`,
     );
   }

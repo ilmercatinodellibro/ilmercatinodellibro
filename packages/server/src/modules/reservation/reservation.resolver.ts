@@ -12,16 +12,16 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Book, Reservation, Sale, User } from "src/@generated";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
-import { UserReservationsQueryArgs } from "./reservation.args";
+import { Book, Reservation, Sale, User } from "src/@generated/graphql/index.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { UserReservationsQueryArgs } from "./reservation.args.js";
 import {
   CreateReservationInput,
   DeleteReservationInput,
-} from "./reservation.input";
+} from "./reservation.input.js";
 
 @Resolver(() => Reservation)
 export class ReservationResolver {
@@ -207,7 +207,7 @@ export class ReservationResolver {
 
     if (
       books.some(
-        ({ meta, requests }) => !meta.isAvailable && requests.length > 0,
+        ({ meta, requests }) => !meta?.isAvailable && requests.length > 0,
       )
     ) {
       throw new UnprocessableEntityException(
@@ -235,13 +235,13 @@ export class ReservationResolver {
     }
 
     const booksToPromoteRequests = books.filter(
-      ({ meta, requests }) => meta.isAvailable && requests.length > 0,
+      ({ meta, requests }) => meta?.isAvailable && requests.length > 0,
     );
     const booksToRequestAndReserve = books.filter(
-      ({ meta, requests }) => meta.isAvailable && requests.length === 0,
+      ({ meta, requests }) => meta?.isAvailable && requests.length === 0,
     );
     const booksToRequest = books.filter(
-      ({ meta, requests }) => !meta.isAvailable && requests.length === 0,
+      ({ meta, requests }) => !meta?.isAvailable && requests.length === 0,
     );
 
     const retailLocation = await this.prisma.retailLocation.findUniqueOrThrow({

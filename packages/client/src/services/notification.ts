@@ -4,11 +4,11 @@ import {
   until,
   useStorage,
 } from "@vueuse/core";
-import { Ref, computed, watch } from "vue";
-import { useInAppNotifications } from "src/composables/in-app-notifications";
+import { type Ref, computed, watch } from "vue";
+import { useInAppNotifications } from "@/composables/in-app-notifications";
 import {
   NewNotificationDocument,
-  NotificationFragment,
+  type NotificationFragment,
   useGetNotificationsQuery,
   useSetNotificationReadStatusMutation,
 } from "./notification.graphql";
@@ -23,7 +23,7 @@ export const useNotificationService = createSharedComposable(() => {
     useGetNotificationsQuery();
 
   // TODO: decide which notifications to show
-  const { /*showInAppNotification, */ showInitialInAppNotifications } =
+  const { /* showInAppNotification, */ showInitialInAppNotifications } =
     useInAppEventsDisplay(notifications);
 
   // We need to restore ids from the local storage and match them with the notifications, so we have to wait until they are loaded.
@@ -118,11 +118,11 @@ function useInAppEventsDisplay(
   );
 
   function showInitialInAppNotifications() {
-    notifications.value.forEach((notification) => {
+    for (const notification of notifications.value) {
       if (inAppNotificationIds.value.includes(notification.id)) {
         notify(notification);
       }
-    });
+    }
   }
 
   return {

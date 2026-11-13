@@ -30,16 +30,23 @@
 
 <script lang="ts">
 import { mdiShield } from "@quasar/extras/mdi-v7";
-import { computed, defineComponent, PropType, ref, toRefs, watch } from "vue";
-import { notifyError } from "src/helpers/error-messages";
-import { ServerError } from "src/models/server";
-import { PasswordStrengthBarStep } from "./models";
+import {
+  computed,
+  defineComponent,
+  type PropType,
+  ref,
+  toRefs,
+  watch,
+} from "vue";
+import { notifyError } from "@/helpers/error-messages";
+import type { ServerError } from "@/models/server";
+import type { PasswordStrengthBarStep } from "./models";
 
 async function checkPassword(password: string) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
   const hashBuffer = await crypto.subtle.digest("SHA-1", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+  const hashArray = [...new Uint8Array(hashBuffer)]; // convert buffer to byte array
   const hashHex = hashArray
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("") // convert bytes to hex string
@@ -58,63 +65,73 @@ async function checkPassword(password: string) {
         secondHalf: string;
         numberOfOccurrences: number;
       }
-    | undefined = undefined;
-  if (resp.ok) {
-    const reader = resp.body?.getReader();
-    if (reader) {
-      try {
-        const { value } = await reader.read();
-        if (value) {
-          const arrayOfRawStrings = String.fromCharCode(...value).split("\r\n");
-          for (
-            let i = 0;
-            i < arrayOfRawStrings.length &&
-            secondHalfAndOccurrenceFound === undefined;
-            i++
-          ) {
+    | undefined;
+  if (!resp.ok) {
+    return secondHalfAndOccurrenceFound;
+  }
+
+  const reader = resp.body?.getReader();
+  if (!reader) {
+    return secondHalfAndOccurrenceFound;
+  }
+
+  try {
+    const { value } = await reader.read();
+    if (value) {
+      const arrayOfRawStrings = String.fromCodePoint(...value).split("\r\n");
+      for (
+        let index = 0;
+        index < arrayOfRawStrings.length &&
+        secondHalfAndOccurrenceFound === undefined;
+        index++
+      ) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const splittedString = arrayOfRawStrings[index]!.split(":");
+        if (splittedString[0] === secondHalf) {
+          secondHalfAndOccurrenceFound = {
+            secondHalf: splittedString[0],
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const splittedString = arrayOfRawStrings[i]!.split(":");
-            if (splittedString[0] === secondHalf) {
-              secondHalfAndOccurrenceFound = {
-                secondHalf: splittedString[0],
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                numberOfOccurrences: parseInt(splittedString[1]!),
-              };
-            }
-          }
+            numberOfOccurrences: Number.parseInt(splittedString[1]!),
+          };
         }
-      } catch (e) {
-        // eslint-disable-next-line @typescript-eslint/no-deprecated
-        const { message } = e as ServerError;
-
-        notifyError(message);
-
-        throw e;
       }
     }
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    const { message } = error as ServerError;
+
+    notifyError(message);
+
+    throw error;
   }
   return secondHalfAndOccurrenceFound;
 }
 
 function getPercentageFromInterval(value: number, start = 0, end = 100) {
-  value = Math.min(Math.max(start, value), end);
+  const clampedValue = Math.min(Math.max(start, value), end);
   const intervalDimension = end - start;
-  return ((value - start) * 100) / intervalDimension;
+  return ((clampedValue - start) * 100) / intervalDimension;
 }
 
 function getValueFromPercentage(perc: number, start = 0, end = 100) {
-  perc = Math.min(Math.max(start, perc), end);
+  const clampedPerc = Math.min(Math.max(start, perc), end);
   const intervalDimension = end - start;
-  return (perc * intervalDimension) / 100 + start;
+  return (clampedPerc * intervalDimension) / 100 + start;
 }
 
-function getPercentageFromOccurrences(
-  numberOfOccurrences: number,
-  minOccurrences: number,
-  maxOccurrences: number,
-  rangeStart: number,
-  rangeMax: number,
-) {
+function getPercentageFromOccurrences({
+  numberOfOccurrences,
+  minOccurrences,
+  maxOccurrences,
+  rangeStart,
+  rangeMax,
+}: {
+  numberOfOccurrences: number;
+  minOccurrences: number;
+  maxOccurrences: number;
+  rangeStart: number;
+  rangeMax: number;
+}) {
   const occurrencePercentage = getPercentageFromInterval(
     numberOfOccurrences,
     minOccurrences,
@@ -179,7 +196,7 @@ export default defineComponent({
     },
     expectedMaximumOccurrences: {
       type: Number,
-      default: 10000,
+      default: 10_000,
     },
   },
   setup(props) {
@@ -197,13 +214,13 @@ export default defineComponent({
             const resp = await checkPassword(newPassword);
             const numberOfOccurrences = resp?.numberOfOccurrences ?? 0;
             numberOfOccurrencesFounded.value = numberOfOccurrences;
-          } catch (e) {
+          } catch (error) {
             // eslint-disable-next-line @typescript-eslint/no-deprecated
-            const { message } = e as ServerError;
+            const { message } = error as ServerError;
 
             notifyError(message);
 
-            throw e;
+            throw error;
           }
         }
       },
@@ -212,7 +229,7 @@ export default defineComponent({
 
     const currentStep = computed(() => {
       if (numberOfOccurrencesFounded.value === undefined) {
-        return undefined;
+        return;
       }
 
       let stepToReturn: PasswordStrengthBarStep & {
@@ -220,22 +237,22 @@ export default defineComponent({
         occurrences: number;
       };
 
-      let i = 0;
+      let index = 0;
 
       do {
         stepToReturn = {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          ...steps.value[i]!,
+          ...steps.value[index]!,
           maxOccurrences:
-            steps.value[i + 1]?.minOccurrences ??
+            steps.value[index + 1]?.minOccurrences ??
             props.expectedMaximumOccurrences,
           occurrences: numberOfOccurrencesFounded.value,
         };
-        i++;
+        index++;
       } while (
-        i < steps.value.length &&
+        index < steps.value.length &&
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        steps.value[i]!.minOccurrences < numberOfOccurrencesFounded.value
+        steps.value[index]!.minOccurrences < numberOfOccurrencesFounded.value
       );
 
       return stepToReturn;
@@ -253,13 +270,13 @@ export default defineComponent({
             color: "primary",
           }
         : {
-            percentage: getPercentageFromOccurrences(
-              currentStep.value.occurrences,
-              currentStep.value.minOccurrences,
-              currentStep.value.maxOccurrences,
-              currentStep.value.start,
-              currentStep.value.end,
-            ),
+            percentage: getPercentageFromOccurrences({
+              numberOfOccurrences: currentStep.value.occurrences,
+              minOccurrences: currentStep.value.minOccurrences,
+              maxOccurrences: currentStep.value.maxOccurrences,
+              rangeStart: currentStep.value.start,
+              rangeMax: currentStep.value.end,
+            }),
             color: currentStep.value.color,
             message: currentStep.value.message,
             iconName: currentStep.value.icon,

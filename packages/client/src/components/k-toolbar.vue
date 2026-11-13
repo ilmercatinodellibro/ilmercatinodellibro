@@ -17,7 +17,7 @@
         round
         aria-controls="page-drawer"
         :aria-expanded="drawerProxy ? 'true' : 'false'"
-        data-cy="drawer-button"
+        data-testid="drawer-button"
         @click="drawerProxy = !drawerProxy"
       />
     </template>
@@ -58,13 +58,13 @@
 
 <script setup lang="ts" generic="TFilterOptionValue = any">
 import { mdiArrowLeft, mdiMenu } from "@quasar/extras/mdi-v7";
-import { QSelectOption } from "quasar";
+import type { QSelectOption } from "quasar";
 import { ref } from "vue";
-import { RouteLocationRaw } from "vue-router";
-import HeaderFilters from "src/components/header-filters.vue";
-import HeaderSearchBar from "src/components/header-search-bar.vue";
-import { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import type { RouteLocationRaw } from "vue-router";
+import HeaderFilters from "@/components/header-filters.vue";
+import HeaderSearchBar from "@/components/header-search-bar.vue";
+import type { HeaderFilterModel } from "@/composables/header-features/use-header-filters";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
 
 defineProps<{
   title?: string;

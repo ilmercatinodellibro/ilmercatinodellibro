@@ -1,8 +1,8 @@
-import {
+import type {
   ReceiptType,
   SettleRemainingType,
   UserQueryFilters,
-} from "src/@generated/graphql";
+} from "@/@generated/graphql";
 
 export default {
   createUser: "Crea nuovo utente",

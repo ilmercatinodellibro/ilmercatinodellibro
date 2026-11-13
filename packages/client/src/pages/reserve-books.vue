@@ -17,7 +17,8 @@
           outlined
           type="search"
           @update:model-value="
-            (value) => (tableFilter.searchQuery = (value as string) ?? '')
+            (value: string | number | null) =>
+              (tableFilter.searchQuery = (value as string) ?? '')
           "
         >
           <template v-if="tableFilter.searchQuery.length === 0" #append>
@@ -118,34 +119,40 @@ import {
   mdiMagnify,
   mdiPlus,
 } from "@quasar/extras/mdi-v7";
-import { cloneDeep } from "lodash-es";
-import { Dialog, Notify, QBtnProps, QTableColumn, QTableProps } from "quasar";
+import { cloneDeep, noop } from "lodash-es";
+import {
+  Dialog,
+  Notify,
+  type QBtnProps,
+  type QTableColumn,
+  type QTableProps,
+} from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import { evictQuery } from "src/apollo/cache";
-import ActionsListButton from "src/components/actions-list-button.vue";
-import FilterBySchoolDialog from "src/components/filter-by-school-dialog.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
-import DialogTable from "src/components/manage-users/dialog-table.vue";
-import StatusChip from "src/components/manage-users/status-chip.vue";
-import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
-import ReserveBooksByClassDialog from "src/components/reserve-books-by-class-dialog.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTableFilters } from "src/composables/use-table-filters";
-import { calculateBookCopyPrice } from "src/helpers/book-copy";
-import { formatPrice } from "src/helpers/formatting";
-import { BooksTab, SchoolFilters } from "src/models/book";
-import { AvailableRouteNames } from "src/models/routes";
-import { useAuthService } from "src/services/auth";
-import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
-import { BookWithAvailableCopiesFragment } from "src/services/cart.graphql";
-import { useRequestService } from "src/services/request";
-import { GetRequestsDocument } from "src/services/request.graphql";
-import { useReservationService } from "src/services/reservation";
-import { GetReservationsDocument } from "src/services/reservation.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+import { evictQuery } from "@/apollo/cache";
+import ActionsListButton from "@/components/actions-list-button.vue";
+import FilterBySchoolDialog from "@/components/filter-by-school-dialog.vue";
+import ChipButton from "@/components/manage-users/chip-button.vue";
+import DialogTable from "@/components/manage-users/dialog-table.vue";
+import StatusChip from "@/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "@/components/manage-users/table-cell-with-tooltip.vue";
+import ReserveBooksByClassDialog from "@/components/reserve-books-by-class-dialog.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTableFilters } from "@/composables/use-table-filters";
+import { calculateBookCopyPrice } from "@/helpers/book-copy";
+import { formatPrice } from "@/helpers/formatting";
+import { BooksTab, type SchoolFilters } from "@/models/book";
+import { AvailableRouteNames } from "@/models/routes";
+import { useAuthService } from "@/services/auth";
+import { useBookService } from "@/services/book";
+import type { BookSummaryFragment } from "@/services/book.graphql";
+import type { BookWithAvailableCopiesFragment } from "@/services/cart.graphql";
+import { useRequestService } from "@/services/request";
+import { GetRequestsDocument } from "@/services/request.graphql";
+import { useReservationService } from "@/services/reservation";
+import { GetReservationsDocument } from "@/services/reservation.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -231,7 +238,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "actions",
-    field: () => undefined,
+    field: noop,
     label: "",
     align: "center",
     classes: isMobile.value ? "no-padding" : "",
@@ -247,11 +254,14 @@ const {
   refetchBooks,
 } = useBookService(currentPage, rowsPerPage);
 
+// Initial values, onRequest keeps the pagination updated afterwards
+/* eslint-disable vue/no-ref-object-reactivity-loss */
 const tablePagination = ref({
   page: currentPage.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
   rowsPerPage: rowsPerPage.value,
 });
+/* eslint-enable vue/no-ref-object-reactivity-loss */
 
 const showByClass = ref(false);
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
@@ -262,7 +272,7 @@ const { refetchFilterProxy, tableFilter, filterMethod } = useTableFilters(
 );
 
 function getButtonData(book: BookSummaryFragment): QBtnProps {
-  if (userReservations.value.find(({ book: { id } }) => id === book.id)) {
+  if (userReservations.value.some(({ book: { id } }) => id === book.id)) {
     return {
       color: "grey-9",
       label: t("reserveBooks.goToReservations"),
@@ -277,7 +287,7 @@ function getButtonData(book: BookSummaryFragment): QBtnProps {
     };
   }
 
-  if (bookRequests.value.find(({ book: { id } }) => id === book.id)) {
+  if (bookRequests.value.some(({ book: { id } }) => id === book.id)) {
     return {
       color: "grey-9",
       label: t("reserveBooks.goToRequests"),
@@ -328,7 +338,10 @@ const onRequest: QTableProps["onRequest"] = async ({ pagination }) => {
 };
 
 function swapView() {
-  if (!showByClass.value) {
+  if (showByClass.value) {
+    showByClass.value = false;
+    tableFilter.schoolFilters = undefined;
+  } else {
     Dialog.create({
       component: FilterBySchoolDialog,
       componentProps: {
@@ -339,16 +352,15 @@ function swapView() {
       },
     }).onOk((newFilters: SchoolFilters) => {
       if (
-        newFilters.selectedSchoolCodes.length > 0 ||
-        newFilters.selectedSchoolCourseIds.length > 0
+        newFilters.selectedSchoolCodes.length === 0 &&
+        newFilters.selectedSchoolCourseIds.length === 0
       ) {
-        showByClass.value = true;
-        tableFilter.schoolFilters = cloneDeep(newFilters);
+        return;
       }
+
+      showByClass.value = true;
+      tableFilter.schoolFilters = cloneDeep(newFilters);
     });
-  } else {
-    showByClass.value = false;
-    tableFilter.schoolFilters = undefined;
   }
 }
 
@@ -369,11 +381,11 @@ async function reserveBook(id: string) {
       userId: user.value!.id,
     });
     cache.gc();
-  } catch (e) {
+  } catch (error) {
     Notify.create(
       t("reserveBooks.reservationOrRequestError", [
         t("reserveBooks.reservation"),
-        e,
+        error,
       ]),
     );
   }
@@ -398,11 +410,11 @@ function requestBook(bookId: string) {
         userId: user.value!.id,
       });
       cache.gc();
-    } catch (e) {
+    } catch (error) {
       Notify.create(
         t("reserveBooks.reservationOrRequestError", [
           t("reserveBooks.request"),
-          e,
+          error,
         ]),
       );
     }
@@ -432,11 +444,11 @@ function openReserveAllDialog() {
         userId: user.value!.id,
       });
       cache.gc();
-    } catch (e) {
+    } catch (error) {
       Notify.create(
         t("reserveBooks.reservationOrRequestError", [
           t("reserveBooks.reservation"),
-          e,
+          error,
         ]),
       );
     } finally {

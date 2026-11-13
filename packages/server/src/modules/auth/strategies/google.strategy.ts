@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { Profile, Strategy, StrategyOptions } from "passport-google-oauth20";
-import { UserService } from "src/modules/user/user.service";
+import { UserService } from "src/modules/user/user.service.js";
 
 export const GOOGLE_STRATEGY_NAME = "google";
 
@@ -41,9 +41,10 @@ export class GoogleStrategy extends PassportStrategy(
     });
   }
 
-  authenticate(req: Request, options?: Record<string, unknown>): void {
-    options ??= {};
-    options.state = req.query.locationId;
-    super.authenticate(req, options);
+  authenticate(request: Request, options?: Record<string, unknown>): void {
+    super.authenticate(request, {
+      ...options,
+      state: request.query.locationId,
+    });
   }
 }

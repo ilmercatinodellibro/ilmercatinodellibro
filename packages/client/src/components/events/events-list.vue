@@ -77,19 +77,19 @@ import {
 } from "@quasar/extras/mdi-v7";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useTimeFormat } from "src/composables/use-time-format";
-import { useNotificationService } from "src/services/notification";
-import { NotificationFragment } from "src/services/notification.graphql";
+import { useTimeFormat } from "@/composables/use-time-format";
+import { useNotificationService } from "@/services/notification";
+import type { NotificationFragment } from "@/services/notification.graphql";
 import { useNotificationFilters } from "./notification-filters";
+
+defineOptions({
+  inheritAttrs: false,
+});
 
 const props = defineProps<{
   notifications: NotificationFragment[];
   loading?: boolean;
 }>();
-
-defineOptions({
-  inheritAttrs: false,
-});
 
 const { textFilter, applyTextFilter } = useNotificationFilters();
 

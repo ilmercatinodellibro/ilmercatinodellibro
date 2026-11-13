@@ -1,9 +1,9 @@
 import { createSharedComposable } from "@vueuse/core";
-import { ComputedRef, computed, ref } from "vue";
+import { type ComputedRef, computed, ref } from "vue";
 import {
-  RetailLocationFragment,
+  type RetailLocationFragment,
   useGetRetailLocationsQuery,
-} from "src/services/retail-location.graphql";
+} from "@/services/retail-location.graphql";
 
 export const useRetailLocationService = createSharedComposable(() => {
   const { retailLocations, loading } = useGetRetailLocationsQuery();
@@ -14,7 +14,7 @@ export const useRetailLocationService = createSharedComposable(() => {
     const locations = retailLocations.value;
 
     if (locations.length === 0 || !locationId) {
-      return undefined;
+      return;
     }
 
     return locations.find(({ id }) => id === locationId);

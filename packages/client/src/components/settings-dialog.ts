@@ -1,4 +1,4 @@
-import { RetailLocationSettingsFragment } from "src/services/retail-location.graphql";
+import type { RetailLocationSettingsFragment } from "@/services/retail-location.graphql";
 
 export type SettingsUpdate =
   | {

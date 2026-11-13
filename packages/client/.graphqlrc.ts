@@ -1,5 +1,5 @@
-import type { IGraphQLProject } from "graphql-config";
 import { relative, resolve } from "node:path";
+import type { IGraphQLProject } from "graphql-config";
 import server from "../server/.graphqlrc";
 
 // graphql-config expects the paths to be relative to the root config file

@@ -59,19 +59,19 @@
 <script lang="ts" setup>
 import { mdiPlus } from "@quasar/extras/mdi-v7";
 import { startCase, toLower } from "lodash-es";
-import { Dialog, QTable, QTableColumn } from "quasar";
+import { Dialog, QTable, type QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import AddBookDialog from "src/components/add-book-dialog.vue";
-import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
-import StatusChip from "src/components/manage-users/status-chip.vue";
-import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
-import UtilityChip from "src/components/utility-chip.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTableFilters } from "src/composables/use-table-filters";
-import { formatPrice } from "src/helpers/formatting";
-import { useBookService } from "src/services/book";
-import { BookSummaryFragment } from "src/services/book.graphql";
+import AddBookDialog from "@/components/add-book-dialog.vue";
+import HeaderSearchBarFilters from "@/components/header-search-bar-filters.vue";
+import StatusChip from "@/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "@/components/manage-users/table-cell-with-tooltip.vue";
+import UtilityChip from "@/components/utility-chip.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTableFilters } from "@/composables/use-table-filters";
+import { formatPrice } from "@/helpers/formatting";
+import { useBookService } from "@/services/book";
+import type { BookSummaryFragment } from "@/services/book.graphql";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 
@@ -109,7 +109,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.subject"),
     field: "subject",
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "max-width-160 ellipsis",
   },
   {
@@ -117,7 +117,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.title"),
     field: "title",
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "text-wrap",
   },
   {
@@ -125,7 +125,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.author"),
     field: "authorsFullName",
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
     classes: "max-width-160 ellipsis",
   },
   {
@@ -133,7 +133,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
     label: t("book.fields.publisher"),
     field: "publisherName",
     align: "left",
-    format: (val: string) => startCase(toLower(val)),
+    format: (value: string) => startCase(toLower(value)),
   },
   {
     name: "price",
@@ -156,11 +156,14 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
+// Initial values, onRequest keeps the pagination updated afterwards
+/* eslint-disable vue/no-ref-object-reactivity-loss */
 const pagination = ref({
   rowsPerPage: numberOfRows.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
   page: currentPage.value,
 });
+/* eslint-enable vue/no-ref-object-reactivity-loss */
 
 onMounted(() => {
   tableRef.value?.requestServerInteraction();

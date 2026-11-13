@@ -139,8 +139,9 @@ export function fixToDuration(
       fixedDate = new Date(dateToFix.getFullYear(), 11, 31);
       break;
     }
-    default:
+    default: {
       fixedDate = new Date(dateToFix);
+    }
   }
   return date.formatDate(fixedDate, DATE_FORMAT);
 }

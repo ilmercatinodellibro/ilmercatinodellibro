@@ -38,24 +38,25 @@
 </template>
 
 <script setup lang="ts">
-import { Notify, QTableColumn, date } from "quasar";
+import { noop } from "lodash-es";
+import { Notify, type QTableColumn, date } from "quasar";
 import { computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { ReceiptType } from "src/@generated/graphql";
-import { useAuthService } from "src/services/auth";
+import type { ReceiptType } from "@/@generated/graphql";
+import { useAuthService } from "@/services/auth";
 import {
-  ReceiptFragment,
+  type ReceiptFragment,
   useResendReceiptMutation,
-} from "src/services/receipt.graphql";
+} from "@/services/receipt.graphql";
 import ChipButton from "./chip-button.vue";
-
-const { t } = useI18n();
 
 const props = defineProps<{
   receipts: ReceiptFragment[];
   noDataLabel: string;
   type: ReceiptType;
 }>();
+
+const { t } = useI18n();
 
 const { formatDate } = date;
 const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
@@ -76,7 +77,7 @@ const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
   },
   {
     label: "",
-    field: () => undefined,
+    field: noop,
     name: "resend",
     align: "center",
     classes: "width-0",

@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { Prisma } from "@prisma/client";
-import { random, startCase, times } from "lodash";
-import RETAIL_LOCATIONS from "test/fixtures/retail-locations";
-import { createUser } from "./user";
+import { random, startCase, times } from "lodash-es";
+import type { Prisma } from "src/@generated/prisma/client.js";
+import RETAIL_LOCATIONS from "test/fixtures/retail-locations.js";
+import { createUser } from "./user.js";
 
 export async function createEvent(
   overrides: Partial<Prisma.EventCreateInput> = {},

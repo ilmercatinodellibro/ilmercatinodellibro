@@ -79,19 +79,19 @@ import {
 import { Dialog, Notify, date } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { UpdateUserPayload } from "src/@generated/graphql";
-import DeleteAccountDialog from "src/components/delete-account-dialog.vue";
-import EditUserDataDialog from "src/components/edit-user-data-dialog.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { notifyError } from "src/helpers/error-messages";
-import { useAuthService, useLogoutMutation } from "src/services/auth";
-import { CurrentUserFragment } from "src/services/auth.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
-import { useDownloadUserData } from "src/services/user";
+import type { UpdateUserPayload } from "@/@generated/graphql";
+import DeleteAccountDialog from "@/components/delete-account-dialog.vue";
+import EditUserDataDialog from "@/components/edit-user-data-dialog.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { notifyError } from "@/helpers/error-messages";
+import { useAuthService, useLogoutMutation } from "@/services/auth";
+import type { CurrentUserFragment } from "@/services/auth.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
+import { useDownloadUserData } from "@/services/user";
 import {
   useDeleteUserAccountMutation,
   useUpdateUserMutation,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 
 const { t } = useI18n();
 

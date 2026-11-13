@@ -248,20 +248,20 @@ import {
 import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { notifyError } from "src/helpers/error-messages";
-import { WidthSize, useScreenWidth } from "src/helpers/screen";
-import { fetchBookByISBN } from "src/services/book";
-import { useCartService } from "src/services/cart";
-import { useRequestService } from "src/services/request";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { notifyError } from "@/helpers/error-messages";
+import { WidthSize, useScreenWidth } from "@/helpers/screen";
+import { fetchBookByISBN } from "@/services/book";
+import { useCartService } from "@/services/cart";
+import { useRequestService } from "@/services/request";
 import {
   GetRequestsDocument,
-  RequestSummaryFragment,
+  type RequestSummaryFragment,
   useCreateRequestMutation,
-} from "src/services/request.graphql";
-import { useReservationService } from "src/services/reservation";
-import { ReservationSummaryFragment } from "src/services/reservation.graphql";
-import { CustomerFragment } from "src/services/user.graphql";
+} from "@/services/request.graphql";
+import { useReservationService } from "@/services/reservation";
+import type { ReservationSummaryFragment } from "@/services/reservation.graphql";
+import type { CustomerFragment } from "@/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";
@@ -276,10 +276,11 @@ const props = defineProps<{
 
 defineEmits(useDialogPluginComponent.emitsObject);
 
-const { t } = useI18n();
-
 const { dialogRef, onDialogCancel, onDialogHide, onDialogOK } =
   useDialogPluginComponent();
+
+const { t } = useI18n();
+
 const { isMobile } = useLateralDrawer();
 
 const SMALL_CUSTOM_BREAKPOINT = 1440;
@@ -387,20 +388,7 @@ async function addReservationFromIsbn(isbnCode: string) {
     return;
   }
 
-  if (!book.meta.isAvailable) {
-    try {
-      await createBookRequest({
-        input: {
-          bookId: book.id,
-          userId: props.userData.id,
-        },
-      });
-    } catch {
-      notifyError(t("bookErrors.notRequested"));
-    } finally {
-      await refetchRequests();
-    }
-  } else {
+  if (book.meta.isAvailable) {
     try {
       await createReservations({
         input: {
@@ -413,6 +401,19 @@ async function addReservationFromIsbn(isbnCode: string) {
       notifyError(t("bookErrors.notReserved"));
     } finally {
       await refetchReservations();
+    }
+  } else {
+    try {
+      await createBookRequest({
+        input: {
+          bookId: book.id,
+          userId: props.userData.id,
+        },
+      });
+    } catch {
+      notifyError(t("bookErrors.notRequested"));
+    } finally {
+      await refetchRequests();
     }
   }
 }

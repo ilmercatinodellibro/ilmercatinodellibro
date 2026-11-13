@@ -1,30 +1,25 @@
-import {
-  ContactsApi,
-  ContactsApiApiKeys,
-  type ErrorModel,
-  type RequestContactImportJsonBodyInner,
-} from "@getbrevo/brevo";
+import { type Brevo, BrevoClient } from "@getbrevo/brevo";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { BrevoConfiguration, brevoConfiguration } from "src/config/brevo";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
-import type { User } from "@prisma/client";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import {
+  type BrevoConfiguration,
+  brevoConfiguration,
+} from "src/config/brevo.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers.js";
 
 @Injectable()
 export class NewsletterContactsService {
   private readonly logger = new Logger(NewsletterContactsService.name);
-  private readonly brevoContactsApi = new ContactsApi();
+  private readonly brevo: BrevoClient;
 
   constructor(
     private readonly prisma: PrismaService,
     @Inject(brevoConfiguration.KEY)
     readonly brevoConfig: BrevoConfiguration,
   ) {
-    this.brevoContactsApi.setApiKey(
-      ContactsApiApiKeys.apiKey,
-      brevoConfig.apiKey,
-    );
+    this.brevo = new BrevoClient({ apiKey: brevoConfig.apiKey });
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -37,7 +32,7 @@ export class NewsletterContactsService {
     // so this is a good compromise to make sure we're actually sending the newsletter to all new registered users.
     // TODO: add a system which marks users as "active" after their first login using a given retail location
     const sevenDaysAgo = new Date(
-      new Date().getTime() -
+      Date.now() -
         // 7 days in ms
         7 * 24 * 60 * 60 * 1000,
     );
@@ -62,8 +57,8 @@ export class NewsletterContactsService {
         continue;
       }
 
-      const listId = parseInt(brevoContactsListId);
-      if (isNaN(listId)) {
+      const listId = Number.parseInt(brevoContactsListId);
+      if (Number.isNaN(listId)) {
         this.logger.warn(
           `The provided Brevo contacts list ID isn't numeric and thus is invalid for location ${name}`,
         );
@@ -102,27 +97,27 @@ export class NewsletterContactsService {
 
       try {
         await this.importContacts(newOrUpdatedUsers, listId);
-      } catch (_error) {
-        const error = _error as Error | { body: ErrorModel };
-        const errorMessage =
-          error instanceof Error ? error.message : error.body.message;
-
+      } catch (error) {
+        // BrevoError, thrown for responses with a non-2xx status, has the status and the response body in its message
         this.logger.error(
-          `Could not update the contact list for location ${name}: ${errorMessage}`,
+          `Could not update the contact list for location ${name}: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
     }
   }
 
   async importContacts(
-    users: Pick<User, "firstname" | "lastname" | "email" | "phoneNumber">[],
+    users: Pick<
+      UserModel,
+      "firstname" | "lastname" | "email" | "phoneNumber"
+    >[],
     listId: number,
   ) {
     this.logger.log(
       `Uploading the user data to Brevo contact list with ID ${listId} `,
     );
 
-    const { response } = await this.brevoContactsApi.importContacts({
+    await this.brevo.contacts.importContacts({
       jsonBody: users.map(
         ({ email, phoneNumber, firstname, lastname }) =>
           ({
@@ -132,14 +127,10 @@ export class NewsletterContactsService {
               FIRSTNAME: firstname,
               LASTNAME: lastname,
             },
-          }) satisfies RequestContactImportJsonBodyInner,
+          }) satisfies Brevo.ImportContactsRequest.JsonBody.Item,
       ),
       listIds: [listId],
     });
-
-    if (response.statusCode !== 202) {
-      throw new Error(`Invalid response status: ${response.statusMessage}`);
-    }
 
     this.logger.log(`Update successful for list with ID ${listId}`);
   }

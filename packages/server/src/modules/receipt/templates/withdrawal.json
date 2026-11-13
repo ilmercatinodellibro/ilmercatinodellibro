@@ -20,7 +20,7 @@
         "backgroundColor": "",
         "opacity": 1,
         "readOnly": true,
-        "fontName": "NotoSerifJP-Regular",
+        "fontName": "Roboto",
         "name": "headerTitle"
       },
       {
@@ -41,7 +41,7 @@
         "fontColor": "#000000",
         "backgroundColor": "",
         "opacity": 1,
-        "fontName": "NotoSerifJP-Regular",
+        "fontName": "Roboto",
         "name": "headerSubtitle",
         "readOnly": true,
         "required": false
@@ -64,7 +64,7 @@
         "fontColor": "#000000",
         "backgroundColor": "",
         "opacity": 1,
-        "fontName": "NotoSerifJP-Regular",
+        "fontName": "Roboto",
         "name": "headerDate",
         "readOnly": true,
         "required": false
@@ -131,7 +131,7 @@
           "borderColor": ""
         },
         "headStyles": {
-          "fontName": "NotoSerifJP-Regular",
+          "fontName": "Roboto",
           "fontSize": 10,
           "characterSpacing": 0,
           "alignment": "left",
@@ -154,7 +154,7 @@
           }
         },
         "bodyStyles": {
-          "fontName": "NotoSerifJP-Regular",
+          "fontName": "Roboto",
           "fontSize": 10,
           "characterSpacing": 0,
           "alignment": "left",
@@ -199,7 +199,7 @@
         "fontColor": "#000000",
         "backgroundColor": "",
         "opacity": 1,
-        "fontName": "NotoSerifJP-Regular",
+        "fontName": "Roboto",
         "name": "notice",
         "readOnly": true,
         "required": false,

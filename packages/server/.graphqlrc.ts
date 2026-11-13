@@ -1,14 +1,13 @@
-import { configDotenv } from "dotenv";
-import { expand } from "dotenv-expand";
-import type { IGraphQLProject } from "graphql-config";
 import { relative, resolve } from "node:path";
+import { config } from "@dotenvx/dotenvx";
+import type { IGraphQLProject } from "graphql-config";
 
-const { SERVER_URL } = expand(configDotenv()).parsed ?? {};
+const { SERVER_URL } = config().parsed ?? {};
 
 // graphql-config expects the paths to be relative to the root config file
-const monorepoRoot = resolve(__dirname, "../..");
+const monorepoRoot = resolve(import.meta.dirname, "../..");
 const toProjectPath = (path: string) =>
-  relative(monorepoRoot, resolve(__dirname, path));
+  relative(monorepoRoot, resolve(import.meta.dirname, path));
 
 export default {
   schema: toProjectPath("./src/@generated/schema.graphql"),

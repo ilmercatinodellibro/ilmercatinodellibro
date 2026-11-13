@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { useRetailLocationService } from "src/services/retail-location";
+import { useRetailLocationService } from "@/services/retail-location";
 
 defineProps<{
   type: "login" | "register";
@@ -41,8 +41,7 @@ defineProps<{
 const { selectedLocation } = useRetailLocationService();
 const { t } = useI18n();
 
-const GOOGLE_LOGIN_ENABLED = process.env.GOOGLE_LOGIN_ENABLED === "true";
-const FACEBOOK_LOGIN_ENABLED = process.env.FACEBOOK_LOGIN_ENABLED === "true";
+const { GOOGLE_LOGIN_ENABLED, FACEBOOK_LOGIN_ENABLED } = import.meta.env;
 </script>
 
 <style lang="scss" scoped>

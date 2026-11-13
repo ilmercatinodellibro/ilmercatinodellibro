@@ -1,2 +1,41 @@
+shellEmulator: true
+strictPeerDependencies: false
+publicHoistPattern:
+  # ESLint-related
+  # Dependencies of "eslint-config-coralloy" imported by the ESLint configs, kept transitive so they match the versions it uses
+  - eslint-import-resolver-typescript
+  - globals
+
+  # Transitive dependency of "@quasar/app-vite", not installed separately so it always matches the version Quasar runs
+  # The client references its "vite/client" types
+  - vite
+
+# Versions shared by more than one package
+catalog:
+  graphql: ^16.14.2
+  graphql-ws: ^6.4.2
+  tinyglobby: ^0.2.17
+
+allowBuilds:
+  "@apollo/protobufjs": true
+  "@firebase/util": true # coming from firebase-admin, only writes defaults when FIREBASE_WEBAPP_CONFIG is set
+  "@nestjs/core": false # Just prints Open Collective information
+  "@parcel/watcher": false # Only compiles itself when npm_config_build_from_source is set, the binaries come from its optional dependencies
+  "@swc/core": true # Checks its native binary, used by @swc-node/register to run the server TypeScript scripts and by unplugin-swc in the server tests
+  "@prisma/client": true
+  "@prisma/engines": true
+  argon2: true
+  msgpackr-extract: true # coming from bullmq
+  prisma: true
+  protobufjs: true # coming from firebase
+  unrs-resolver: true
+  vue-demi: true
+
+overrides:
+  "nest-commander>@golevelup/nestjs-discovery": 7.1.0
+
+patchedDependencies:
+  prisma-nestjs-graphql@23.2.1: patches/prisma-nestjs-graphql.patch
+
 packages:
   - "packages/**"

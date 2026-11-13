@@ -9,14 +9,20 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { BookCopy, BookRequest, Reservation, Sale, User } from "src/@generated";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
-import { UserPurchasesQueryArgs, UserSalesQueryArgs } from "./sale.args";
-import { RefundSaleInput } from "./sale.input";
-import { SaleService } from "./sale.service";
+import {
+  BookCopy,
+  BookRequest,
+  Reservation,
+  Sale,
+  User,
+} from "src/@generated/graphql/index.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { UserPurchasesQueryArgs, UserSalesQueryArgs } from "./sale.args.js";
+import { RefundSaleInput } from "./sale.input.js";
+import { SaleService } from "./sale.service.js";
 
 @Resolver(() => Sale)
 export class SaleResolver {

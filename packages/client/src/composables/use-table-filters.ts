@@ -1,10 +1,13 @@
-import { QTableProps } from "quasar";
+import type { QTableProps } from "quasar";
 import { computed, reactive } from "vue";
 import {
-  FilterPath,
+  type FilterPath,
   useTranslatedFilters,
-} from "src/composables/use-filter-translations";
-import { TableFilters } from "src/models/book";
+} from "@/composables/use-filter-translations";
+import type { TableFilters } from "@/models/book";
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+const filterMethod: QTableProps["filterMethod"] = (rows) => rows;
 
 export function useTableFilters(
   filterPath: FilterPath,
@@ -26,13 +29,13 @@ export function useTableFilters(
   const booleanFilters = computed(() => {
     const areFiltersEmpty = tableFilter.filters.length === 0;
     if (areFiltersEmpty) {
-      return undefined;
+      return;
     }
 
     const extractedFiltersFromOptions: Record<string, boolean> = {};
-    Object.keys(filterOptions.value).forEach((key) => {
+    for (const key of Object.keys(filterOptions.value)) {
       extractedFiltersFromOptions[key] = tableFilter.filters.includes(key);
-    });
+    }
 
     return extractedFiltersFromOptions;
   });
@@ -58,9 +61,6 @@ export function useTableFilters(
       ...schoolFilters,
     };
   });
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const filterMethod: QTableProps["filterMethod"] = (rows) => rows;
 
   return {
     refetchFilterProxy,

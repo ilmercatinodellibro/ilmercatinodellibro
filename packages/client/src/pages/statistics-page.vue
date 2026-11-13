@@ -85,18 +85,18 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import StatisticsChart from "src/components/statistics-chart.vue";
-import { languages } from "src/models/language";
-import { AvailableRouteNames } from "src/models/routes";
-import { StatisticsTab } from "src/pages/statistics-page";
-import { useRetailLocationService } from "src/services/retail-location";
+import StatisticsChart from "@/components/statistics-chart.vue";
+import { languages } from "@/models/language";
+import { AvailableRouteNames } from "@/models/routes";
+import { StatisticsTab } from "@/pages/statistics-page";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
   useGetDeliveriesChartDataQuery,
   useGetReturningsChartDataQuery,
   useGetSalesChartDataQuery,
   useGetSettlementsChartDataQuery,
   useRetailLocationStatisticsQuery,
-} from "src/services/retail-location.graphql";
+} from "@/services/retail-location.graphql";
 
 interface StatisticsEntry {
   label: string;

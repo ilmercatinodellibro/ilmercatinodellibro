@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType, PartialType } from "@nestjs/graphql";
 import { GraphQLHexColorCode } from "graphql-scalars";
-import { LocationBoundInput } from "src/modules/retail-location/retail-location.args";
+import { LocationBoundInput } from "src/modules/retail-location/retail-location.args.js";
 
 @ObjectType()
 export class ThemeColors {

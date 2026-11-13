@@ -1,14 +1,10 @@
 import { Module } from "@nestjs/common";
-import { PrismaModule } from "../prisma/prisma.module";
-import { PushNotificationModule } from "../push-notification/push-notification.module";
-import { NotificationPubSub } from "./notification.pubsub";
-import { NotificationResolver } from "./notification.resolver";
-import { PublishToNotificationPubSubListener } from "./publish-to-notification-pubsub.listener";
-import { SendPushNotificationListener } from "./send-push-notification.listener";
-
-// This can't be used with @OnEvent() for some reason, use @OnEvent("newNotification") instead
-// and use this only when emitting the event
-export const NEW_NOTIFICATION_EVENT = "newNotification";
+import { PrismaModule } from "../prisma/prisma.module.js";
+import { PushNotificationModule } from "../push-notification/push-notification.module.js";
+import { NotificationPubSub } from "./notification.pubsub.js";
+import { NotificationResolver } from "./notification.resolver.js";
+import { PublishToNotificationPubSubListener } from "./publish-to-notification-pubsub.listener.js";
+import { SendPushNotificationListener } from "./send-push-notification.listener.js";
 
 @Module({
   imports: [PrismaModule, PushNotificationModule],

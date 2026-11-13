@@ -25,9 +25,9 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import EventsList from "src/components/events/events-list.vue";
-import EventsTable from "src/components/events/events-table.vue";
-import { useNotificationService } from "src/services/notification";
+import EventsList from "@/components/events/events-list.vue";
+import EventsTable from "@/components/events/events-table.vue";
+import { useNotificationService } from "@/services/notification";
 
 const { t } = useI18n();
 

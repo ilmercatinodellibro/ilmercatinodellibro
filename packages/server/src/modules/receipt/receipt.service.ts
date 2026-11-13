@@ -1,33 +1,33 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Injectable } from "@nestjs/common";
+import type { GenerateProps, GeneratorOptions } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, table, text } from "@pdfme/schemas";
-import {
-  Book,
-  BookCopy,
-  Prisma,
-  Receipt,
-  RetailLocation,
-  Sale,
-  User,
-} from "@prisma/client";
-import { sumBy } from "lodash";
-import { ReceiptType } from "src/@generated";
-import { MailService } from "src/modules/mail/mail.service";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
-import purchaseTemplate from "./templates/purchase.json";
-import settlementTemplate from "./templates/settlement.json";
-import withdrawalTemplate from "./templates/withdrawal.json";
-import type { GenerateProps, GeneratorOptions } from "@pdfme/common";
+import { sumBy } from "lodash-es";
+import { ReceiptType } from "src/@generated/graphql/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import type {
+  BookModel,
+  BookCopyModel,
+  ReceiptModel,
+  RetailLocationModel,
+  SaleModel,
+  UserModel,
+} from "src/@generated/prisma/models.js";
+import { MailService } from "src/modules/mail/mail.service.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { RetailLocationService } from "src/modules/retail-location/retail-location.service.js";
+import purchaseTemplate from "./templates/purchase.json" with { type: "json" };
+import settlementTemplate from "./templates/settlement.json" with { type: "json" };
+import withdrawalTemplate from "./templates/withdrawal.json" with { type: "json" };
 
-type BookCopyWithBook = BookCopy & { book: Book };
-type BookCopyWithSales = BookCopy & { sales: Sale[] };
+type BookCopyWithBook = BookCopyModel & { book: BookModel };
+type BookCopyWithSales = BookCopyModel & { sales: SaleModel[] };
 type ReceiptPayload =
   | {
       type: ReceiptType.PURCHASE;
-      data: (Sale & { bookCopy: BookCopyWithBook })[];
+      data: (SaleModel & { bookCopy: BookCopyWithBook })[];
     }
   | {
       type: ReceiptType.WITHDRAWAL;
@@ -51,15 +51,16 @@ enum SettlementType {
 }
 
 export interface ReceiptBook
-  extends Pick<Book, "isbnCode" | "title" | "subject" | "originalPrice">,
-    Pick<BookCopy, "code"> {
+  extends
+    Pick<BookModel, "isbnCode" | "title" | "subject" | "originalPrice">,
+    Pick<BookCopyModel, "code"> {
   settlementType?: SettlementType;
 }
 
 export interface GenerateReceiptInput {
   creationDate: Date;
-  user: User;
-  location: RetailLocation;
+  user: UserModel;
+  location: RetailLocationModel;
   books: ReceiptBook[];
 }
 
@@ -110,7 +111,7 @@ export class ReceiptService {
     private readonly locationService: RetailLocationService,
   ) {}
 
-  getReceiptPath(receipt: Receipt) {
+  getReceiptPath(receipt: ReceiptModel) {
     const directory = this.locationService.resolveStoragePath(
       receipt.retailLocationId,
       "./receipts",
@@ -119,7 +120,7 @@ export class ReceiptService {
     return { directory, file };
   }
 
-  async sendReceiptToUser(receipt: Receipt, receiptPdf?: Buffer) {
+  async sendReceiptToUser(receipt: ReceiptModel, receiptPdf?: Buffer) {
     const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: receipt.userId },
     });
@@ -164,16 +165,13 @@ export class ReceiptService {
       return SettlementType.REIMBURSED;
     }
 
-    if (
-      sales.length > 0 &&
-      sales.some(({ refundedAt }) => refundedAt === null)
-    ) {
+    if (sales.some(({ refundedAt }) => refundedAt === null)) {
       return SettlementType.SOLD;
     }
 
     // If the book copy has not been returned, donated or sold, it means that it is not part of the settlement (e.g. still in stock)
     // and should not be included in the receipt
-    return undefined;
+    return;
   }
 
   async createReceipt(
@@ -242,7 +240,7 @@ export class ReceiptService {
 
   #getReceiptBooks({ type, data }: ReceiptPayload): ReceiptBook[] {
     switch (type) {
-      case ReceiptType.WITHDRAWAL:
+      case ReceiptType.WITHDRAWAL: {
         return data.map(({ book, ...bookCopy }) => ({
           isbnCode: book.isbnCode,
           title: book.title,
@@ -250,6 +248,7 @@ export class ReceiptService {
           originalPrice: book.originalPrice,
           code: bookCopy.code,
         }));
+      }
       case ReceiptType.PURCHASE: {
         return data
           .map(({ bookCopy }) => bookCopy)

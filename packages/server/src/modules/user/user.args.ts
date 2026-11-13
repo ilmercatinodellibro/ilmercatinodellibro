@@ -9,12 +9,12 @@ import {
   PickType,
   registerEnumType,
 } from "@nestjs/graphql";
-import { User } from "src/@generated";
-import { Role } from "src/@generated/prisma";
+import { User } from "src/@generated/graphql/index.js";
+import { Role } from "src/@generated/graphql/prisma/index.js";
 import {
   LocationBoundInput,
   LocationBoundQueryArgs,
-} from "src/modules/retail-location";
+} from "src/modules/retail-location/index.js";
 
 @InputType()
 export class UserQueryFilters {
@@ -137,23 +137,24 @@ export class RegisterUserPayload extends IntersectionType(
 export class UpdateUserPayload extends IntersectionType(
   PickType(
     PartialType(User),
-    [
-      "firstname",
-      "lastname",
-      "email",
-      "phoneNumber",
-      "notes",
-      "delegate",
-      "dateOfBirth",
-      "discount",
-      "locale",
-    ],
+    ["firstname", "lastname", "email", "delegate", "dateOfBirth", "locale"],
     InputType,
   ),
   LocationBoundInput,
 ) {
   @Field()
   id!: string;
+
+  // These are declared here because the User model gives them a default value, which an update
+  // would apply to every field the client leaves out, e.g. clearing them when only the locale changes
+  @Field(() => String, { nullable: true })
+  phoneNumber?: string;
+
+  @Field(() => String, { nullable: true })
+  notes?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  discount?: boolean;
 
   @Field(() => String, { nullable: true })
   password?: string;

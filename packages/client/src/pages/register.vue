@@ -27,6 +27,7 @@
               "
               bottom-slots
               class="full-width"
+              :data-testid="`${kebabCase(fieldData.field)}-field`"
               lazy-rules
               outlined
             >
@@ -69,7 +70,7 @@
             :label="t('auth.register')"
             type="submit"
             :loading="isRegistering"
-            data-cy="submit-button"
+            data-testid="submit-button"
           />
         </q-form>
       </q-card-section>
@@ -118,7 +119,7 @@
       <router-link
         :to="{ name: AvailableRouteNames.ForgotPassword }"
         class="text-black-87 text-center text-subtitle1"
-        data-cy="forgot-password-link"
+        data-testid="forgot-password-link"
       >
         {{ t("auth.forgotPassword") }}
       </router-link>
@@ -127,23 +128,25 @@
 </template>
 
 <script setup lang="ts">
-import { ApolloError } from "@apollo/client/core";
 import {
   mdiEye,
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
-import { omit } from "lodash-es";
-import { Notify, QInputProps, uid } from "quasar";
+import { kebabCase, omit } from "lodash-es";
+import { Notify, type QInputProps, uid } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import SocialAuthButtons from "components/social-auth-buttons.vue";
-import { RegisterUserPayload } from "src/@generated/graphql";
-import { STRENGTH_BAR_STEPS } from "src/components/models";
-import PasswordStrengthBar from "src/components/password-strength-bar.vue";
-import { useTheme } from "src/composables/use-theme";
-import { notifyError } from "src/helpers/error-messages";
+import type { RegisterUserPayload } from "@/@generated/graphql";
+import { STRENGTH_BAR_STEPS } from "@/components/models";
+import PasswordStrengthBar from "@/components/password-strength-bar.vue";
+import SocialAuthButtons from "@/components/social-auth-buttons.vue";
+import { useTheme } from "@/composables/use-theme";
+import {
+  isExpectedServerError,
+  notifyServerError,
+} from "@/helpers/error-messages";
 import {
   emailRule,
   makeValueMatchRule,
@@ -151,18 +154,18 @@ import {
   requireIfUnderage,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import { AvailableRouteNames } from "src/models/routes";
-import { useAuthService, useRegisterMutation } from "src/services/auth";
-import { useRegisterWithTokenMutation } from "src/services/auth.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/helpers/rules";
+import { AvailableRouteNames } from "@/models/routes";
+import { useAuthService, useRegisterMutation } from "@/services/auth";
+import { useRegisterWithTokenMutation } from "@/services/auth.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const props = defineProps<{
   token?: string;
   email?: string;
 }>();
 
-const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
+const { SOCIAL_LOGIN_ENABLED } = import.meta.env;
 
 const { t, locale } = useI18n();
 
@@ -178,6 +181,7 @@ type UserRegistrationData = Omit<
   dateOfBirth: string;
 };
 
+// eslint-disable-next-line vue/no-setup-props-reactivity-loss -- the props only fill in the initial form values
 const user = ref<UserRegistrationData>({
   email: props.email ?? "",
   firstname: "",
@@ -254,8 +258,9 @@ const formData = computed<FormField[]>(() => [
       readonly: !!props.email,
     },
   },
-  ...(!props.email
-    ? [
+  ...(props.email
+    ? []
+    : [
         {
           field: "confirmEmail",
           inputData: {
@@ -263,8 +268,7 @@ const formData = computed<FormField[]>(() => [
             rules: [requiredRule, emailMatchRule],
           },
         } satisfies FormField,
-      ]
-    : []),
+      ]),
   {
     field: "password",
     inputData: {
@@ -298,16 +302,14 @@ async function onSubmit() {
       },
     };
 
-    if (!props.token) {
-      await register(registrationData);
-    } else {
-      await registerWithToken(
-        registrationData,
-        // We override the request context to add the one-shot JWT token header
-        // See https://www.apollographql.com/docs/react/data/mutations#context
-        { context: { headers: getJwtHeader(props.token) } },
-      );
-    }
+    await (props.token
+      ? registerWithToken(
+          registrationData,
+          // We override the request context to add the one-shot JWT token header
+          // See https://www.apollographql.com/docs/react/data/mutations#context
+          { context: { headers: getJwtHeader(props.token) } },
+        )
+      : register(registrationData));
 
     await router.push({ name: "login" });
 
@@ -316,15 +318,9 @@ async function onSubmit() {
       color: "positive",
     });
   } catch (error) {
-    const { message, graphQLErrors } = error as ApolloError;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- we're not sure if this a false positive or not
-    const status = graphQLErrors[0]?.extensions?.status as number | undefined;
+    notifyServerError(error, "registration-error");
 
-    // TODO: implement centralized error handling
-
-    notifyError(message, "registration-error");
-
-    if (!status || ![401, 422].includes(status)) {
+    if (!isExpectedServerError(error)) {
       console.error(error);
     }
   }

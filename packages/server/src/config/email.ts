@@ -1,11 +1,11 @@
-import { ConfigType, registerAs } from "@nestjs/config";
-import { z } from "zod";
+import { type ConfigType, registerAs } from "@nestjs/config";
+import { z } from "./zod.js";
 
 export type EmailConfiguration = ConfigType<typeof emailConfiguration>;
 
 // RFC 5322 - name-addr
 // Example: John Doe <john@doe.com>
-const emailAddressSchema = z.string().email();
+const emailAddressSchema = z.email();
 export const nameAddrSchema = z.custom<`${string} <${string}>`>((value) => {
   if (typeof value !== "string") {
     return false;
@@ -23,7 +23,7 @@ const mailboxSchema = z.union([emailAddressSchema, nameAddrSchema]);
 const emailSchema = z.object({
   host: z.string(),
   port: z.coerce.number(),
-  isSecure: z.enum(["true", "false"]).transform((value) => value === "true"),
+  isSecure: z.stringbool(),
   user: z.string(),
   pass: z.string(),
   fromDefault: mailboxSchema,

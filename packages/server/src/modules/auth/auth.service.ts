@@ -4,17 +4,14 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-// "jsonwebtoken" is a "@nestjs/jwt" transitive dependency, which reference directly because "@nestjs/jwt" don't re-export the error class
-// Adding the dependency to our package.json is a risk as it could break our code in a subtle way if upstream transitive dependency is upgraded
-import { Role, User } from "@prisma/client";
-import { TokenExpiredError } from "jsonwebtoken";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { MailService } from "../mail/mail.service";
-import { PrismaService } from "../prisma/prisma.service";
-import { UserService } from "../user/user.service";
-import { EMAIL_VERIFICATION_ENDPOINT } from "./auth.controller";
-import { VERIFICATION_TOKEN_EXPIRATION_TIME } from "./strategies/jwt.strategy";
+import { JwtService, TokenExpiredError } from "@nestjs/jwt";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { MailService } from "../mail/mail.service.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { UserService } from "../user/user.service.js";
+import { VERIFICATION_TOKEN_EXPIRATION_TIME } from "./strategies/jwt.strategy.js";
 
 interface VerificationTokenPayload {
   email: string;
@@ -23,14 +20,17 @@ interface VerificationTokenPayload {
 
 interface SendInvitePayload {
   toEmail: string;
-  invitedBy: User;
+  invitedBy: UserModel;
   token: string;
   locationId: string;
   locale: string;
 }
 
+export const EMAIL_VERIFICATION_ENDPOINT = "auth/email/verification";
+
 @Injectable()
 export class AuthService {
+  // eslint-disable-next-line @typescript-eslint/max-params -- NestJS injects each dependency as a constructor parameter
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -73,7 +73,7 @@ export class AuthService {
         },
       });
       if (options.role !== undefined && role !== options.role) {
-        throw new Error();
+        throw new Error("The user doesn't have the required role");
       }
     } catch {
       throw new ForbiddenException(options.message);
@@ -133,7 +133,11 @@ export class AuthService {
     }
   }
 
-  async sendVerificationLink(locationId: string, user: User, token: string) {
+  async sendVerificationLink(
+    locationId: string,
+    user: UserModel,
+    token: string,
+  ) {
     const url = `${this.rootConfig.serverUrl}/${EMAIL_VERIFICATION_ENDPOINT}?locationId=${locationId}&token=${token}`;
 
     try {
@@ -156,7 +160,11 @@ export class AuthService {
     }
   }
 
-  async sendPasswordResetLink(locationId: string, user: User, token: string) {
+  async sendPasswordResetLink(
+    locationId: string,
+    user: UserModel,
+    token: string,
+  ) {
     // Make sure the URL below is in sync with `AvailableRouteNames.ChangePassword` in the client project
     const url = `${this.rootConfig.clientUrl}/${locationId}/change-password?token=${token}`;
 
@@ -179,9 +187,24 @@ export class AuthService {
   }
 
   async validateEmailVerificationToken(token: string) {
-    const { email, locationId } = this.jwtService.decode(
-      token,
-    ) as VerificationTokenPayload;
+    let payload: VerificationTokenPayload;
+    let isExpired = false;
+
+    try {
+      payload = this.jwtService.verify<VerificationTokenPayload>(token);
+    } catch (error) {
+      if (!(error instanceof TokenExpiredError)) {
+        throw new UnprocessableEntityException(
+          "Verification token is not valid",
+        );
+      }
+
+      isExpired = true;
+      // The signature is checked before the expiration, so the payload of an expired token can be trusted
+      payload = this.jwtService.decode<VerificationTokenPayload>(token);
+    }
+
+    const { email, locationId } = payload;
     const user = await this.userService.findUserByEmail(email);
 
     if (!user) {
@@ -192,17 +215,14 @@ export class AuthService {
       throw new UnprocessableEntityException("Email has already been verified");
     }
 
-    try {
-      this.jwtService.verify(token);
-    } catch (error) {
-      if (error instanceof TokenExpiredError) {
-        const token = this.createVerificationToken(locationId, user.email);
-        await this.sendVerificationLink(locationId, user, token);
-        throw new UnprocessableEntityException(
-          "Verification token Expired. We sent you a new verification link, please check your inbox.",
-        );
-      }
+    if (isExpired) {
+      const newToken = this.createVerificationToken(locationId, user.email);
+      await this.sendVerificationLink(locationId, user, newToken);
+      throw new UnprocessableEntityException(
+        "Verification token Expired. We sent you a new verification link, please check your inbox.",
+      );
     }
+
     return this.prisma.user.update({
       where: {
         id: user.id,

@@ -5,6 +5,8 @@ node_modules
 # Quasar core related directories
 .quasar
 /dist
+/quasar.config.*.temporary.compiled*
+.env.local*
 
 # Cordova related directories and files
 /src-cordova/node_modules
@@ -37,3 +39,8 @@ coverage/
 
 src/@generated
 src/**/*.graphql.ts
+
+# Playwright related
+test-results/
+playwright-report/
+blob-report/

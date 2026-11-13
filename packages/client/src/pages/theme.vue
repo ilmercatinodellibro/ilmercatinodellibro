@@ -81,13 +81,13 @@
 
 <script setup lang="ts">
 import { Dialog, Notify, QFile, Screen } from "quasar";
-import { Ref, computed, ref, watch } from "vue";
+import { type Ref, computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteLeave } from "vue-router";
-import ConfirmDialog from "src/components/confirm-dialog.vue";
-import ThemeColorSection from "src/components/theme-color-section.vue";
-import { useTheme } from "src/composables/use-theme";
-import { notifyError } from "src/helpers/error-messages";
+import ConfirmDialog from "@/components/confirm-dialog.vue";
+import ThemeColorSection from "@/components/theme-color-section.vue";
+import { useTheme } from "@/composables/use-theme";
+import { notifyError } from "@/helpers/error-messages";
 
 const { t } = useI18n();
 const { theme, defaultTheme, hasPendingChanges, saveChanges, setDefaults } =
@@ -142,12 +142,12 @@ watch(imagePickerModel, (newImage) => {
   }
 
   const reader = new FileReader();
-  reader.onload = (event) => {
+  reader.addEventListener("load", (event) => {
     const base64Data = event.target?.result as string | undefined;
     if (base64Data) {
       theme.value.logo = base64Data;
     }
-  };
+  });
   reader.readAsDataURL(newImage);
 });
 </script>

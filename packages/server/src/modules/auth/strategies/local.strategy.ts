@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-local";
-import { UserService } from "src/modules/user/user.service";
+import { UserService } from "src/modules/user/user.service.js";
 
 export const LOCAL_STRATEGY_NAME = "local";
 

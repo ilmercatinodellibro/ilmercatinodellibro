@@ -4,21 +4,20 @@
 import { ESLint } from "eslint";
 
 /**
+ * @param {string} baseDirectory
+ *
  * @example
- * import { URL } from 'url';
  * import { createLintHandler } from '../../.lintstagedrc.mjs';
  *
- * const __dirname = new URL('.', import.meta.url).pathname;
- *
  * export default {
- *   '*.{js,ts,vue}': createLintHandler(__dirname),
+ *   '*.{js,ts,vue}': createLintHandler(import.meta.dirname),
  * }
  */
-export function createLintHandler(baseDir) {
-  return async (files) => {
-    const filesToLint = await filterFilesToLint(files, baseDir);
+export function createLintHandler(baseDirectory) {
+  return async (/** @type {string[]} */ files) => {
+    const filesToLint = await filterFilesToLint(files, baseDirectory);
 
-    return `eslint --fix --report-unused-disable-directives --max-warnings=0 ${filesToLint}`;
+    return `eslint --cache --fix --max-warnings=0 ${filesToLint}`;
   };
 }
 
@@ -27,7 +26,7 @@ export function createFormatHandler() {
 }
 
 export function createStylelintHandler() {
-  return "stylelint --fix --report-needless-disables --max-warnings=0";
+  return "stylelint --cache --fix --report-needless-disables --max-warnings=0";
 }
 
 export default {
@@ -36,7 +35,12 @@ export default {
   "*.{js,ts,cjs,mjs}": [createFormatHandler(), createLintHandler()],
 };
 
-// https://github.com/okonet/lint-staged/tree/v12.3.4#how-can-i-ignore-files-from-eslintignore
+/**
+ * @param {string[]} files
+ * @param {string} cwd
+ *
+ * @see https://github.com/okonet/lint-staged/tree/v12.3.4#how-can-i-ignore-files-from-eslintignore
+ */
 async function filterFilesToLint(files, cwd) {
   const eslint = new ESLint({ cwd });
   const isIgnored = await Promise.all(
@@ -44,6 +48,6 @@ async function filterFilesToLint(files, cwd) {
       return eslint.isPathIgnored(file);
     }),
   );
-  const filteredFiles = files.filter((_, i) => !isIgnored[i]);
+  const filteredFiles = files.filter((_, index) => !isIgnored[index]);
   return filteredFiles.join(" ");
 }

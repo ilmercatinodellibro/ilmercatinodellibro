@@ -73,11 +73,11 @@
 import { useDialogPluginComponent } from "quasar";
 import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
-import { BookCreateInput } from "src/@generated/graphql";
-import { notifyError } from "src/helpers/error-messages";
-import { greaterThanZeroRule, requiredRule } from "src/helpers/rules";
-import { useCreateNewBookMutation } from "src/services/book.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+import type { BookCreateInput } from "@/@generated/graphql";
+import { notifyError } from "@/helpers/error-messages";
+import { greaterThanZeroRule, requiredRule } from "@/helpers/rules";
+import { useCreateNewBookMutation } from "@/services/book.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 defineEmits(useDialogPluginComponent.emitsObject);

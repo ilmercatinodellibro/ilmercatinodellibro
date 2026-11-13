@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable-next-line vue/no-unused-refs -- "dialogRef" is returned by useDialogPluginComponent() in setup() -->
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
       :cancel-label="cancel"
@@ -17,7 +18,7 @@
 <script lang="ts">
 import { useDialogPluginComponent } from "quasar";
 import { defineComponent } from "vue";
-import { useI18nOutsideSetup } from "src/boot/i18n";
+import { useI18nOutsideSetup } from "@/boot/i18n";
 import KDialogCard from "./k-dialog-card.vue";
 
 const { t } = useI18nOutsideSetup();

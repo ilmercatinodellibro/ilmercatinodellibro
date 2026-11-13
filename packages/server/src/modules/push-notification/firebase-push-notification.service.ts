@@ -1,26 +1,24 @@
 import { Injectable } from "@nestjs/common";
 import { mapLimit } from "async";
 import { BatchResponse, Messaging } from "firebase-admin/messaging";
-import { chunk } from "lodash";
-import { PrismaService } from "../prisma/prisma.service";
+import { chunk } from "lodash-es";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   NotificationPayload,
   PushNotificationService,
-} from "./push-notification-service.abstract";
+} from "./push-notification-service.abstract.js";
 
 declare module "async" {
   // If no callback is provided as the 4th argument, a promise is returned. This overload is missing from @types/async.
   export function mapLimit<T, R, E = Error>(
-    arr: IterableCollection<T>,
+    array: IterableCollection<T>,
     limit: number,
     iterator: AsyncResultIterator<T, R, E>,
   ): Promise<R[]>;
 }
 
 @Injectable()
-export class FirebasePushNotificationService
-  implements PushNotificationService
-{
+export class FirebasePushNotificationService implements PushNotificationService {
   // This may depend on the server resources.
   // If this doesn't work or we discover it can be improved, we can accept this via configuration.
   private readonly PARALLEL_REQUESTS = 4;
@@ -45,7 +43,11 @@ export class FirebasePushNotificationService
       BatchResponse
     >(chunks, this.PARALLEL_REQUESTS, async (chunk) => {
       try {
+        // firebase-admin 14.1 deprecates the `tokens` field in favor of `fids`, which are Firebase Installation IDs.
+        // Switching requires the client to register FIDs instead of FCM tokens.
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         return await this.messaging.sendEachForMulticast({
+          // eslint-disable-next-line @typescript-eslint/no-deprecated -- see above
           tokens: subscriptions.map(({ deviceToken }) => deviceToken),
           // Most common basic options
           notification: {

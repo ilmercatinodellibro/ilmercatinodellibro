@@ -1,8 +1,16 @@
 export const getFieldValue = <T>(
-  getterOrKey: keyof T | ((row: T) => T[keyof T]),
+  // Quasar types the column field as optional, QTable reads row[undefined] when it's missing
+  getterOrKey: keyof T | ((row: T) => T[keyof T]) | undefined,
   object: T,
-) =>
-  typeof getterOrKey === "function" ? getterOrKey(object) : object[getterOrKey];
+) => {
+  if (getterOrKey === undefined) {
+    return;
+  }
+
+  return typeof getterOrKey === "function"
+    ? getterOrKey(object)
+    : object[getterOrKey];
+};
 
 // To be imported into table components that use the #body slot
 export function getColValue(

@@ -4,32 +4,20 @@
 // TODO: automatically transform camelCase column names to snake_case while generating
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions", "views"]
-  binaryTargets   = ["native"]
+  provider            = "prisma-client"
+  output              = "../src/@generated/prisma"
+  engineType          = "client"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
 }
 
-generator nestgraphql {
-  provider                              = "node node_modules/prisma-nestjs-graphql"
-  output                                = "../src/@generated"
-  // We need to import directly from 'src/@generated' instead of subfolders to avoid circular dependencies
-  // So, we enable this option to make it possible to import everything from the same folder
-  // This is why we need the patch applied to PNPM on PrismaNestJSGraphQL
-  reExport                              = All
-  requireSingleFieldsInWhereUniqueInput = true
-  noAtomicOperations                    = true
-  purgeOutput                           = true
-  omitModelsCount                       = true
-  emitBlocks                            = ["models", "enums"]
-
-  // Use JSON scalar from graphql-scalars instead of the default (graphql-type-json)
-  graphqlScalars_Json_name      = "GraphQLJSON"
-  graphqlScalars_Json_specifier = "graphql-scalars"
+generator nestjsGraphql {
+  provider   = "prisma-nestjs-graphql"
+  configFile = "./nestjs-graphql.config.mjs"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -158,9 +146,9 @@ model RetailLocation {
   sellRate              Float @default(55) @map("sell_rate")
   maxBookingDays        Int   @default(7) @map("max_booking_days")
   warehouseMaxBlockSize Int   @default(10) @map("warehouse_max_block_size")
-  /// @FieldType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', output: true })
-  /// @FieldType({ name: 'ThemeInput', from: 'src/modules/retail-location/theme.args', input: true, match: '*Input' })
-  /// @PropertyType({ name: 'Theme', from: 'src/modules/retail-location/theme.args', namedImport: true, output: true, input: true })
+  /// @FieldType({ name: 'Theme', from: 'src/modules/retail-location/theme.args.js', output: true })
+  /// @FieldType({ name: 'ThemeInput', from: 'src/modules/retail-location/theme.args.js', input: true, match: '*Input' })
+  /// @PropertyType({ name: 'Theme', from: 'src/modules/retail-location/theme.args.js', namedImport: true, output: true, input: true })
   // We can't set the default to a string containing JSON due to prisma-nestjs-graphql limitations, so have to use dbgenerated(), using jsonb_ because Prisma uses jsonb for Json type
   theme                 Json  @default(dbgenerated("jsonb_build_object('colors', jsonb_build_object('primary', '#798aa8', 'secondary', '#76e1a7', 'accent', '#c2664d'))"))
 
@@ -202,7 +190,10 @@ model Book {
   retailLocation   RetailLocation @relation("RetailLocationBooks", fields: [retailLocationId], references: [id])
 
   // Defining the relation from this side to be able to define it as non-nullable
-  meta BookMeta @relation(fields: [id], references: [id])
+  // Optional only because the relation is declared on BookMeta, the view always has a row for each book
+  // Hidden from the generated model, BookResolver.meta resolves it as non-nullable
+  /// @HideField()
+  meta BookMeta?
 
   copies       BookCopy[]
   reservations Reservation[]    @relation("BookReservations")
@@ -214,9 +205,15 @@ model Book {
   @@unique([isbnCode, retailLocationId])
 }
 
-view BookMeta {
+// This is the "BookMeta" database view, created and updated by hand-written migrations
+// It's declared as a model, not a view, because Prisma 6.13 disallows @id and relations on views
+// It's listed in tables.external of prisma.config.ts, so Prisma Migrate ignores it
+// The relation is declared here so that its foreign key would be on the view, which Prisma never creates
+model BookMeta {
   id   String @id @map("book_id") @db.Uuid
-  book Book?
+  // Not exposed in GraphQL, nothing resolves it
+  /// @HideField()
+  book Book   @relation(fields: [id], references: [id])
 
   copiesCount       Int @map("copies_count")
   problemsCount     Int @map("problems_count")

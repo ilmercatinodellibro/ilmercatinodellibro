@@ -1,10 +1,14 @@
-import { useNow } from "@vueuse/core";
+import { useIntervalFn, useNow } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
+
+const TIME_UPDATE_INTERVAL = 30_000;
 
 export function useTimeFormat() {
   const { d, locale } = useI18n();
 
-  const now = useNow({ interval: 30_000 });
+  const now = useNow({
+    scheduler: (updateNow) => useIntervalFn(updateNow, TIME_UPDATE_INTERVAL),
+  });
   function formatRelativeTime(date: string | number): string {
     const formatter = new Intl.RelativeTimeFormat(locale.value, {
       numeric: "auto",
@@ -18,16 +22,16 @@ export function useTimeFormat() {
     const HOUR = 60;
     const DAY = HOUR * 24;
 
-    switch (true) {
-      case diffInMinutes < HOUR:
-        return formatter.format(-diffInMinutes, "minute");
-      case diffInMinutes < DAY:
-        return formatter.format(-Math.round(diffInMinutes / HOUR), "hour");
-      case diffInMinutes < DAY * 2:
-        return formatter.format(-Math.round(diffInMinutes / DAY), "day");
-      default:
-        return d(date, "full");
+    if (diffInMinutes < HOUR) {
+      return formatter.format(-diffInMinutes, "minute");
     }
+    if (diffInMinutes < DAY) {
+      return formatter.format(-Math.round(diffInMinutes / HOUR), "hour");
+    }
+    if (diffInMinutes < DAY * 2) {
+      return formatter.format(-Math.round(diffInMinutes / DAY), "day");
+    }
+    return d(date, "full");
   }
 
   return {

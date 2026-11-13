@@ -46,18 +46,18 @@
 
 <script setup lang="ts">
 import { mdiCalendar } from "@quasar/extras/mdi-v7";
-import { QFieldProps, date } from "quasar";
+import { type QFieldProps, date } from "quasar";
 import { useI18n } from "vue-i18n";
-import { AvailableQuickRanges } from "src/models/date-time";
-
-const { formatDate } = date;
-
-type Model = { from: string; to: string } | undefined;
+import { AvailableQuickRanges } from "@/models/date-time";
 
 const props =
   defineProps<Omit<QFieldProps, "modelValue" | "onUpdate:modelValue">>();
 
 const model = defineModel<Model>({ required: true });
+
+const { formatDate } = date;
+
+type Model = { from: string; to: string } | undefined;
 
 const { t } = useI18n();
 
@@ -102,37 +102,44 @@ function getQuickRange(preset: AvailableQuickRanges) {
   const to = new Date();
 
   switch (preset) {
-    case AvailableQuickRanges.Today:
+    case AvailableQuickRanges.Today: {
       break;
-    case AvailableQuickRanges.Yesterday:
+    }
+    case AvailableQuickRanges.Yesterday: {
       from.setDate(now.getDate() - 1);
       to.setDate(now.getDate() - 1);
       break;
-    case AvailableQuickRanges.ThisWeek:
+    }
+    case AvailableQuickRanges.ThisWeek: {
       from.setDate(now.getDate() - now.getDay());
       to.setDate(now.getDate() + (6 - now.getDay()));
       break;
-    case AvailableQuickRanges.LastWeek:
+    }
+    case AvailableQuickRanges.LastWeek: {
       from.setDate(now.getDate() - now.getDay() - 7);
       to.setDate(now.getDate() - now.getDay() - 1);
       break;
-    case AvailableQuickRanges.ThisMonth:
+    }
+    case AvailableQuickRanges.ThisMonth: {
       from.setDate(1);
       to.setMonth(now.getMonth() + 1);
       to.setDate(0);
       break;
-    case AvailableQuickRanges.LastMonth:
+    }
+    case AvailableQuickRanges.LastMonth: {
       from.setMonth(now.getMonth() - 1);
       from.setDate(1);
       to.setDate(0);
       break;
-    case AvailableQuickRanges.ThisYear:
+    }
+    case AvailableQuickRanges.ThisYear: {
       from.setMonth(0);
       from.setDate(1);
       to.setMonth(11);
       to.setDate(31);
       break;
-    case AvailableQuickRanges.LastYear:
+    }
+    case AvailableQuickRanges.LastYear: {
       from.setFullYear(now.getFullYear() - 1);
       from.setMonth(0);
       from.setDate(1);
@@ -140,6 +147,7 @@ function getQuickRange(preset: AvailableQuickRanges) {
       to.setMonth(11);
       to.setDate(31);
       break;
+    }
   }
 
   return {

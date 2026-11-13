@@ -1,10 +1,10 @@
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRetailLocationService } from "src/services/retail-location";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
-  GetCustomersQueryVariables,
+  type GetCustomersQueryVariables,
   useGetCustomersLazyQuery,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 
 export function useCustomerService() {
   const { selectedLocation } = useRetailLocationService();
