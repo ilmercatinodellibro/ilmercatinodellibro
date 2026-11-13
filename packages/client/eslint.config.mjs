@@ -86,9 +86,9 @@ export default defineConfig(
     name: "custom",
 
     rules: {
-      // It suggests Array#toSorted(), which needs Chrome 110, Firefox 115 and Safari 16,
-      // while the quasar.config file build.target still includes older browsers
-      // TODO: enable when raising build.target
+      // It suggests Array#toSorted(), which needs Firefox 115, while the "baseline-widely-available"
+      // build.target of the quasar.config file still includes Firefox 114 (as of Vite 8)
+      // TODO: enable when build.target no longer includes Firefox 114
       "unicorn/no-array-sort": "off",
     },
 

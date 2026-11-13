@@ -97,7 +97,7 @@ export default defineConfig((ctx) => {
       },
 
       target: {
-        browser: ["es2019", "edge88", "firefox78", "chrome87", "safari13.1"],
+        browser: "baseline-widely-available",
         node: `node${NODE_VERSION}`,
       },
 
