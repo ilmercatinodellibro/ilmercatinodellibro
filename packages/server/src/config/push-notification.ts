@@ -1,20 +1,20 @@
 import { readFileSync } from "node:fs";
 import { registerAs } from "@nestjs/config";
 import type { ServiceAccount } from "firebase-admin";
-import { z } from "zod";
+import * as z from "zod/mini";
 
 // Output from the Firebase Console uses snake_case
 const rawFirebaseCredentialsSchema = z.object({
   project_id: z.string(),
   private_key: z.string(),
-  client_email: z.string().email(),
+  client_email: z.email(),
 });
 
 // Firebase SDK uses this structure (import("firebase-admin").ServiceAccount)
 const firebaseCredentialsSchema = z.object({
   projectId: z.string(),
   privateKey: z.string(),
-  clientEmail: z.string().email(),
+  clientEmail: z.email(),
 });
 
 const pushNotificationSchema = z.discriminatedUnion("driver", [

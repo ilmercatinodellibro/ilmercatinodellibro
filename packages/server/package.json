@@ -103,7 +103,8 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^2.38.2",
@@ -138,8 +139,7 @@
     "ts-jest": "28.0.8",
     "ts-loader": "^9.6.2",
     "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
-    "zod": "^3.25.76"
+    "tsconfig-paths": "^4.2.0"
   },
   "jest": {
     "moduleFileExtensions": [

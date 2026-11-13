@@ -1,22 +1,22 @@
 import { type ConfigType, registerAs } from "@nestjs/config";
-import { z } from "zod";
+import * as z from "zod/mini";
 
 const authSchema = z.object({
   applicationSecret: z.string(),
   tokenExpirationTime: z.string(),
 
-  facebook: z
-    .object({
+  facebook: z.partial(
+    z.object({
       clientId: z.string(),
       clientSecret: z.string(),
-    })
-    .partial(),
-  google: z
-    .object({
+    }),
+  ),
+  google: z.partial(
+    z.object({
       clientId: z.string(),
       clientSecret: z.string(),
-    })
-    .partial(),
+    }),
+  ),
 });
 
 export const authConfiguration = registerAs("auth", () =>

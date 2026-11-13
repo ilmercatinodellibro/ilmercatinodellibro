@@ -1,5 +1,5 @@
 import { type ConfigType, registerAs } from "@nestjs/config";
-import { z } from "zod";
+import * as z from "zod/mini";
 
 const brevoSchema = z.object({
   apiKey: z.string(),
