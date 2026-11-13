@@ -7,18 +7,20 @@ import {
 import { Prisma } from "src/@generated/prisma/client";
 
 interface DriverAdapterErrorMeta {
-  cause?: { constraint?: { fields?: string[] } };
+  cause?: { constraint?: { fields?: string[]; index?: string } };
 }
 
 function getUniqueConstraintFields({
   meta,
 }: Prisma.PrismaClientKnownRequestError) {
-  // With a driver adapter, P2002 has no `target`, the fields are in `driverAdapterError` instead
+  // With a driver adapter, P2002 has no `target`, the constraint is described in `driverAdapterError` instead:
+  // by its fields on Prisma 6, by its index name on Prisma 7
   const driverAdapterError = meta?.driverAdapterError as
     DriverAdapterErrorMeta | undefined;
+  const constraint = driverAdapterError?.cause?.constraint;
   return (meta?.target ??
-    driverAdapterError?.cause?.constraint?.fields ??
-    []) as string[];
+    constraint?.fields ??
+    (constraint?.index ? [constraint.index] : [])) as string[];
 }
 
 @Catch(Prisma.PrismaClientKnownRequestError)

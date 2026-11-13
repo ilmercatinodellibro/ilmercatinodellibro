@@ -12,6 +12,7 @@ The following instructions are meant only for development.
 3. Once the container is running, run the following commands:
    ```bash
    $ pnpm migrate:dev
+   $ pnpm db:seed
    $ pnpm dev
    ```
 
@@ -42,7 +43,7 @@ Code generators are executed automatically:
 - After installing the dependencies
 - Before building the app
 
-Seeding is performed automatically after a migration reset
+`pnpm migrate:reset` also runs the seeders. `prisma migrate dev` and `prisma migrate reset` don't seed on their own since Prisma 7
 
 ## Running the app
 
