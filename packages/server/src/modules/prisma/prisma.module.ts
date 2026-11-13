@@ -23,6 +23,10 @@ import { PrismaService } from "./prisma.service";
             user: config.user,
             password: config.password,
             database: config.name,
+            // pg waits forever and drops idle connections after 10s by default, Prisma 6 used these values
+            // See https://www.prisma.io/docs/orm/v7/prisma-client/setup-and-configuration/databases-connections/connection-pool#prisma-orm-v7-driver-adapter-defaults
+            connectionTimeoutMillis: 5000,
+            idleTimeoutMillis: 300_000,
           },
           {
             schema: config.schema,
