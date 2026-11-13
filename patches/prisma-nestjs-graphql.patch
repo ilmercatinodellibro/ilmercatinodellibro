@@ -1,18 +1,15 @@
-diff --git a/generate.cjs b/generate.cjs
-index 88c5599f18855adc519a73e0ff5ca05cfe75045d..70e58a5b9f1df0d67fad5a8dd54928d813f72e2b 100755
---- a/generate.cjs
-+++ b/generate.cjs
-@@ -469,7 +469,12 @@ function getGraphqlImport(args) {
-       type: sourceFileType
-     }).getFilePath()
-   );
--  return { name: typeName, specifier };
-+  return {
-+    name: typeName,
-+    specifier: config.reExport === 'All' && specifier.startsWith('../')
+diff --git a/prisma-nestjs-graphql.mjs b/prisma-nestjs-graphql.mjs
+index db05275..9306817 100644
+--- a/prisma-nestjs-graphql.mjs
++++ b/prisma-nestjs-graphql.mjs
+@@ -1236,7 +1236,9 @@ function getGraphqlImport(args) {
+   }).getFilePath()), config.importExtension);
+   return {
+     name: typeName,
+-    specifier
++    specifier: config.reExport === ReExport.All && specifier.startsWith('../')
 +      ? '../'
 +      : specifier
-+  };
+   };
  }
  
- function getGraphqlInputType(inputTypes, pattern) {

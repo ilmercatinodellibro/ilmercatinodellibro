@@ -44,7 +44,7 @@ overrides:
   "nest-commander>@golevelup/nestjs-discovery": 7.1.0
 
 patchedDependencies:
-  prisma-nestjs-graphql@21.2.0: patches/prisma-nestjs-graphql.patch
+  prisma-nestjs-graphql@23.2.1: patches/prisma-nestjs-graphql.patch
   "@nestjs-modules/mailer@1.9.1": patches/@nestjs-modules__mailer@1.9.1.patch
 
 packages:
