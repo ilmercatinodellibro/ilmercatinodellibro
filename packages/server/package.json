@@ -62,7 +62,7 @@
   "dependencies": {
     "@apollo/server": "^5.5.2",
     "@as-integrations/express5": "^1.1.2",
-    "@getbrevo/brevo": "^2.5.0",
+    "@getbrevo/brevo": "^6.2.0",
     "@nestjs-modules/mailer": "^4.0.0",
     "@nestjs/apollo": "^14.2.0",
     "@nestjs/bullmq": "^12.0.1",

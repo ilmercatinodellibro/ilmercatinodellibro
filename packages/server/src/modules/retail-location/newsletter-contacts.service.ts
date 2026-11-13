@@ -1,9 +1,4 @@
-import {
-  ContactsApi,
-  ContactsApiApiKeys,
-  type ErrorModel,
-  type RequestContactImportJsonBodyInner,
-} from "@getbrevo/brevo";
+import { type Brevo, BrevoClient } from "@getbrevo/brevo";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import type { UserModel } from "src/@generated/prisma/models";
@@ -14,17 +9,14 @@ import { getPrismaRetailLocationFilters } from "src/modules/retail-location/reta
 @Injectable()
 export class NewsletterContactsService {
   private readonly logger = new Logger(NewsletterContactsService.name);
-  private readonly brevoContactsApi = new ContactsApi();
+  private readonly brevo: BrevoClient;
 
   constructor(
     private readonly prisma: PrismaService,
     @Inject(brevoConfiguration.KEY)
     readonly brevoConfig: BrevoConfiguration,
   ) {
-    this.brevoContactsApi.setApiKey(
-      ContactsApiApiKeys.apiKey,
-      brevoConfig.apiKey,
-    );
+    this.brevo = new BrevoClient({ apiKey: brevoConfig.apiKey });
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -102,13 +94,10 @@ export class NewsletterContactsService {
 
       try {
         await this.importContacts(newOrUpdatedUsers, listId);
-      } catch (_error) {
-        const error = _error as Error | { body: ErrorModel };
-        const errorMessage =
-          error instanceof Error ? error.message : error.body.message;
-
+      } catch (error) {
+        // BrevoError, thrown for responses with a non-2xx status, has the status and the response body in its message
         this.logger.error(
-          `Could not update the contact list for location ${name}: ${errorMessage}`,
+          `Could not update the contact list for location ${name}: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
     }
@@ -125,7 +114,7 @@ export class NewsletterContactsService {
       `Uploading the user data to Brevo contact list with ID ${listId} `,
     );
 
-    const { response } = await this.brevoContactsApi.importContacts({
+    await this.brevo.contacts.importContacts({
       jsonBody: users.map(
         ({ email, phoneNumber, firstname, lastname }) =>
           ({
@@ -135,14 +124,10 @@ export class NewsletterContactsService {
               FIRSTNAME: firstname,
               LASTNAME: lastname,
             },
-          }) satisfies RequestContactImportJsonBodyInner,
+          }) satisfies Brevo.ImportContactsRequest.JsonBody.Item,
       ),
       listIds: [listId],
     });
-
-    if (response.statusCode !== 202) {
-      throw new Error(`Invalid response status: ${response.statusMessage}`);
-    }
 
     this.logger.log(`Update successful for list with ID ${listId}`);
   }
