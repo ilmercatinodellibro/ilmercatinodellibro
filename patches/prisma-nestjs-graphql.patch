@@ -8,7 +8,7 @@ index db05275..9306817 100644
      name: typeName,
 -    specifier
 +    specifier: config.reExport === ReExport.All && specifier.startsWith('../')
-+      ? '../'
++      ? (config.importExtension ? '../index.' + config.importExtension : '../')
 +      : specifier
    };
  }

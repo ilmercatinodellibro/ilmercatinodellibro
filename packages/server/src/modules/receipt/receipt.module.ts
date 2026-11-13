@@ -1,11 +1,11 @@
 import { Module, forwardRef } from "@nestjs/common";
-import { AuthModule } from "src/modules/auth/auth.module";
-import { MailModule } from "src/modules/mail/mail.module";
-import { ReceiptController } from "src/modules/receipt/receipt.controller";
-import { RetailLocationModule } from "src/modules/retail-location/retail-location.module";
-import { PrismaModule } from "../prisma/prisma.module";
-import { ReceiptResolver } from "./receipt.resolver";
-import { ReceiptService } from "./receipt.service";
+import { AuthModule } from "src/modules/auth/auth.module.js";
+import { MailModule } from "src/modules/mail/mail.module.js";
+import { ReceiptController } from "src/modules/receipt/receipt.controller.js";
+import { RetailLocationModule } from "src/modules/retail-location/retail-location.module.js";
+import { PrismaModule } from "../prisma/prisma.module.js";
+import { ReceiptResolver } from "./receipt.resolver.js";
+import { ReceiptService } from "./receipt.service.js";
 
 @Module({
   imports: [

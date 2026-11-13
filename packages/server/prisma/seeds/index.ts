@@ -1,9 +1,9 @@
 import { NestFactory } from "@nestjs/core";
-import { PrismaModule } from "src/modules/prisma/prisma.module";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { seedE2eTests } from "./e2e-tests";
-import { seedEvents } from "./events";
-import { seedRetailLocations } from "./retail-locations";
+import { PrismaModule } from "src/modules/prisma/prisma.module.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { seedE2eTests } from "./e2e-tests.js";
+import { seedEvents } from "./events.js";
+import { seedRetailLocations } from "./retail-locations.js";
 
 // Be careful about the execution/completion order with relations
 // Ideally create and connect the related entities in the same seed file
@@ -32,4 +32,4 @@ async function run() {
   }
 }
 
-void run();
+await run();

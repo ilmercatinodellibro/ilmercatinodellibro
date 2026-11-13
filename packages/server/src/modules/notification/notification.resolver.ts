@@ -1,16 +1,16 @@
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Args, Mutation, Query, Resolver, Subscription } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Notification } from "src/@generated/graphql";
-import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
-import { GraphQLContext } from "../auth/auth.models";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { Public } from "../auth/decorators/public-route.decorator";
-import { PrismaService } from "../prisma/prisma.service";
-import { NEW_NOTIFICATION_EVENT } from "./notification.module";
-import { NotificationPubSub } from "./notification.pubsub";
-import { SetNotificationReadStatusInput } from "./set-notification-read-status.input";
+import { Notification } from "src/@generated/graphql/index.js";
+import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener.js";
+import { GraphQLContext } from "../auth/auth.models.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { Public } from "../auth/decorators/public-route.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { NEW_NOTIFICATION_EVENT } from "./notification.events.js";
+import { NotificationPubSub } from "./notification.pubsub.js";
+import { SetNotificationReadStatusInput } from "./set-notification-read-status.input.js";
 
 @Resolver(() => Notification)
 export class NotificationResolver {

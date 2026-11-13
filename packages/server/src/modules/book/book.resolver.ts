@@ -10,19 +10,19 @@ import {
   Resolver,
   Root,
 } from "@nestjs/graphql";
-import { BookCopy, BookMeta } from "src/@generated/graphql";
-import { Book } from "src/@generated/graphql/book";
-import { Prisma } from "src/@generated/prisma/client";
-import type { UserModel } from "src/@generated/prisma/models";
-import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { BookUtility } from "src/modules/book/book-utility";
+import { Book } from "src/@generated/graphql/book/index.js";
+import { BookCopy, BookMeta } from "src/@generated/graphql/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator.js";
+import { BookUtility } from "src/modules/book/book-utility.js";
 import {
   availableBookCopyFilter,
   noProblemsOrResolvedProblemsFilter,
   noSalesOrRefundedSalesFilter,
-} from "src/modules/book-copy/book-copy.filters";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
+} from "src/modules/book-copy/book-copy.filters.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   BookCreateInput,
   BookQueryArgs,
@@ -31,8 +31,8 @@ import {
   ImportBooksResult,
   ImportSchoolsInput,
   ImportSchoolsResult,
-} from "./book.args";
-import { ImportBooksAndSchoolsService } from "./import-books-and-schools.service";
+} from "./book.args.js";
+import { ImportBooksAndSchoolsService } from "./import-books-and-schools.service.js";
 
 const MAX_ROWS_PER_PAGE = 100;
 

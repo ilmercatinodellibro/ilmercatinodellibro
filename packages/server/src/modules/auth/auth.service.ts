@@ -5,14 +5,13 @@ import {
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { JwtService, TokenExpiredError } from "@nestjs/jwt";
-import { Role } from "src/@generated/prisma/enums";
-import type { UserModel } from "src/@generated/prisma/models";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { MailService } from "../mail/mail.service";
-import { PrismaService } from "../prisma/prisma.service";
-import { UserService } from "../user/user.service";
-import { EMAIL_VERIFICATION_ENDPOINT } from "./auth.controller";
-import { VERIFICATION_TOKEN_EXPIRATION_TIME } from "./strategies/jwt.strategy";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { MailService } from "../mail/mail.service.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { UserService } from "../user/user.service.js";
+import { VERIFICATION_TOKEN_EXPIRATION_TIME } from "./strategies/jwt.strategy.js";
 
 interface VerificationTokenPayload {
   email: string;
@@ -26,6 +25,8 @@ interface SendInvitePayload {
   locationId: string;
   locale: string;
 }
+
+export const EMAIL_VERIFICATION_ENDPOINT = "auth/email/verification";
 
 @Injectable()
 export class AuthService {

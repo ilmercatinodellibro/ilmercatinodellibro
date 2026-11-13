@@ -1,6 +1,6 @@
 import { Query, Resolver } from "@nestjs/graphql";
-import { Event } from "src/@generated/graphql";
-import { PrismaService } from "../prisma/prisma.service";
+import { Event } from "src/@generated/graphql/index.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 
 @Resolver(() => Event)
 export class EventResolver {

@@ -2,19 +2,19 @@ import { Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
-import { AuthConfiguration, authConfiguration } from "src/config/auth";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { FacebookStrategy } from "src/modules/auth/strategies/facebook.strategy";
-import { GoogleStrategy } from "src/modules/auth/strategies/google.strategy";
-import { UserService } from "src/modules/user/user.service";
-import { MailModule } from "../mail/mail.module";
-import { PrismaModule } from "../prisma/prisma.module";
-import { UserModule } from "../user/user.module";
-import { AuthController } from "./auth.controller";
-import { AuthResolver } from "./auth.resolver";
-import { AuthService } from "./auth.service";
-import { JWT_STRATEGY_NAME, JwtStrategy } from "./strategies/jwt.strategy";
-import { LocalStrategy } from "./strategies/local.strategy";
+import { AuthConfiguration, authConfiguration } from "src/config/auth.js";
+import { RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { FacebookStrategy } from "src/modules/auth/strategies/facebook.strategy.js";
+import { GoogleStrategy } from "src/modules/auth/strategies/google.strategy.js";
+import { UserService } from "src/modules/user/user.service.js";
+import { MailModule } from "../mail/mail.module.js";
+import { PrismaModule } from "../prisma/prisma.module.js";
+import { UserModule } from "../user/user.module.js";
+import { AuthController } from "./auth.controller.js";
+import { AuthResolver } from "./auth.resolver.js";
+import { AuthService } from "./auth.service.js";
+import { JWT_STRATEGY_NAME, JwtStrategy } from "./strategies/jwt.strategy.js";
+import { LocalStrategy } from "./strategies/local.strategy.js";
 
 @Module({
   imports: [

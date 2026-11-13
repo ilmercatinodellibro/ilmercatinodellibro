@@ -1,6 +1,6 @@
-import type { ImportBooksAndSchoolsService } from "src/modules/book/import-books-and-schools.service";
+import type { ImportBooksAndSchoolsService } from "src/modules/book/import-books-and-schools.service.js";
 
-import type { ImportBooksCommand } from "src/modules/book/import-books.command";
+import type { ImportBooksCommand } from "src/modules/book/import-books.command.js";
 
 /**
  * Filenames for book and school CSV imports from the ministry.

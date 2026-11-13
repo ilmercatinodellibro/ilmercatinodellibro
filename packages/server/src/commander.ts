@@ -1,6 +1,6 @@
 import { ConsoleLogger, Logger } from "@nestjs/common";
 import { CommandFactory } from "nest-commander";
-import { CliModule } from "src/cli.module";
+import { CliModule } from "src/cli.module.js";
 
 async function bootstrap() {
   Logger.log("Mercatino del Libro Commands booting...", "Bootstrap");
@@ -18,4 +18,4 @@ async function bootstrap() {
   });
 }
 
-void bootstrap();
+await bootstrap();

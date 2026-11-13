@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { BookRequestService } from "src/modules/book-request/book-request.service";
-import { AddAdminUserCommand } from "src/modules/user/add-admin-user.command";
-import { SeedUsersWithBooksCommand } from "src/modules/user/seed-users-with-books.command";
-import { PrismaModule } from "../prisma/prisma.module";
+import { BookRequestService } from "src/modules/book-request/book-request.service.js";
+import { AddAdminUserCommand } from "src/modules/user/add-admin-user.command.js";
+import { SeedUsersWithBooksCommand } from "src/modules/user/seed-users-with-books.command.js";
+import { PrismaModule } from "../prisma/prisma.module.js";
 
 @Module({
   imports: [PrismaModule, ConfigModule],

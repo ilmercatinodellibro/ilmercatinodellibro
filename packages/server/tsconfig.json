@@ -1,17 +1,39 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
+    "paths": {
+      "src/*": ["./src/*"],
+      "prisma/*": ["./prisma/*"],
+      "test/*": ["./test/*"]
+    },
+
+    // Resolving/transpiling related options
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    // Avoid cross-os errors due to inconsistent file casing
+    "forceConsistentCasingInFileNames": true,
+
+    // Multer augments the Express namespace, so it must be loaded as a global type
+    "types": ["node", "multer"],
+
+    // Nest-JS related options
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "useDefineForClassFields": true,
+
+    // Checks
     "noUnusedLocals": true,
-    "target": "es2024",
+
+    // Output related options
+    // Keeps the dist/src layout that start:prod relies on
+    // Since Nest CLI v12 assets keep their path relative to rootDir, so their outDir in nest-cli.json is dist/
+    "rootDir": "./",
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
-    "skipLibCheck": true,
-    "lib": ["ES2024"]
+    "sourceMap": true,
+    "declaration": true,
+    "removeComments": true
   }
 }

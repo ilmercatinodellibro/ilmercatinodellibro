@@ -2,10 +2,10 @@ import { randomInt } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import { Logger } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import { cloneDeep, find, remove, toInteger } from "lodash";
+import { cloneDeep, find, remove, toInteger } from "lodash-es";
 import { Command, CommandRunner, Option } from "nest-commander";
-import { PASSWORD_STUB_HASH } from "prisma/factories/user";
-import { Prisma } from "src/@generated/prisma/client";
+import { PASSWORD_STUB_HASH } from "prisma/factories/user.js";
+import { Prisma } from "src/@generated/prisma/client.js";
 import type {
   BookModel,
   BookCopyModel,
@@ -13,9 +13,9 @@ import type {
   ReservationModel,
   RetailLocationModel,
   SaleModel,
-} from "src/@generated/prisma/models";
-import { BookCopyService } from "src/modules/book-copy/book-copy.service";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+} from "src/@generated/prisma/models.js";
+import { BookCopyService } from "src/modules/book-copy/book-copy.service.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 
 interface SeedUsersWithBooksCommandOptions {
   additionalBooksPerUser: number;

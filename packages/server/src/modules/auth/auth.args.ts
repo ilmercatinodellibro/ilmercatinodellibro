@@ -1,6 +1,6 @@
 import { Field, InputType, IntersectionType, PickType } from "@nestjs/graphql";
-import { User } from "src/@generated/graphql";
-import { LocationBoundInput } from "src/modules/retail-location";
+import { User } from "src/@generated/graphql/index.js";
+import { LocationBoundInput } from "src/modules/retail-location/index.js";
 
 @InputType()
 export class RegisterPayload extends IntersectionType(

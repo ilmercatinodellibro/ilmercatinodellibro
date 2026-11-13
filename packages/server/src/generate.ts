@@ -10,7 +10,7 @@ import {
 } from "@nestjs/graphql";
 import { printSchema } from "graphql";
 import { glob } from "tinyglobby";
-import { DateScalar } from "./date.scalar";
+import { DateScalar } from "./date.scalar.js";
 
 async function generate() {
   const app = await NestFactory.create(GraphQLSchemaBuilderModule);
@@ -18,18 +18,18 @@ async function generate() {
 
   const gqlSchemaFactory = app.get(GraphQLSchemaFactory);
   const resolvers = await getResolvers(
-    join(__dirname, "./modules/**/*.resolver.ts"),
+    join(import.meta.dirname, "./modules/**/*.resolver.ts"),
   );
   const schema = await gqlSchemaFactory.create(resolvers, [DateScalar], {
     // Keep this in sync with ./app.module.ts
   });
 
   const schemaContents = printSchema(schema);
-  const schemaPath = join(__dirname, "./@generated/schema.graphql");
+  const schemaPath = join(import.meta.dirname, "./@generated/schema.graphql");
   await writeFile(schemaPath, schemaContents);
   Logger.log(`Generated GraphQL schema at ${schemaPath}`);
 }
-void generate();
+await generate();
 
 async function getResolvers(source: string | string[]) {
   const resolvers: FunctionConstructor[] = [];

@@ -2,9 +2,9 @@ import { cp, mkdir, rm, writeFile, open } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Inject, Injectable } from "@nestjs/common";
 import { stringify } from "csv";
-import { omit } from "lodash";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { omit } from "lodash-es";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 
 @Injectable()
 export class RetailLocationService {

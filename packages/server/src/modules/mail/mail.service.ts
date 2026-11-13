@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { type ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
 import type { SentMessageInfo } from "nodemailer";
-import type { UserModel } from "src/@generated/prisma/models";
-import { nameAddrSchema } from "src/config/email";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { nameAddrSchema } from "src/config/email.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
 
 // The mailer package doesn't export its address type, so we take it from the "from" field
 type AddressObject = Exclude<NonNullable<ISendMailOptions["from"]>, string>;

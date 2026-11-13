@@ -9,15 +9,13 @@ import {
   UseGuards,
   forwardRef,
 } from "@nestjs/common";
-import { Request, Response } from "express";
-import type { UserModel } from "src/@generated/prisma/models";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { FacebookAuthGuard } from "src/modules/auth/guards/facebook.guard";
-import { GoogleAuthGuard } from "src/modules/auth/guards/google.guard";
-import { AuthService } from "./auth.service";
-import { Public } from "./decorators/public-route.decorator";
-
-export const EMAIL_VERIFICATION_ENDPOINT = "auth/email/verification";
+import type { Request, Response } from "express";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { FacebookAuthGuard } from "src/modules/auth/guards/facebook.guard.js";
+import { GoogleAuthGuard } from "src/modules/auth/guards/google.guard.js";
+import { AuthService, EMAIL_VERIFICATION_ENDPOINT } from "./auth.service.js";
+import { Public } from "./decorators/public-route.decorator.js";
 
 @Controller()
 export class AuthController {

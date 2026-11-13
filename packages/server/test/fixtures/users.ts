@@ -4,8 +4,8 @@
 //   test files may break or take longer.
 // - Avoid `process.env` and Node-specific APIs, they are not available in the browser.
 // The Prisma types cannot use the alias, hence the relative path.
-import type { Prisma } from "../../src/@generated/prisma/client";
-import type { Role } from "../../src/@generated/prisma/enums";
+import type { Prisma } from "../../src/@generated/prisma/client.js";
+import type { Role } from "../../src/@generated/prisma/enums.js";
 
 /** @see {@link file://./../../prisma/factories/user.ts#PASSWORD_STUB_HASH} */
 export const DEFAULT_PASSWORD = "longSecret123!";

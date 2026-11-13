@@ -5,9 +5,9 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import {
   databaseConfiguration,
   DatabaseConfiguration,
-} from "src/config/database";
-import { PrismaExceptionFilter } from "src/modules/prisma/prisma-exception.filter";
-import { PrismaService } from "./prisma.service";
+} from "src/config/database.js";
+import { PrismaExceptionFilter } from "src/modules/prisma/prisma-exception.filter.js";
+import { PrismaService } from "./prisma.service.js";
 
 @Module({
   imports: [ConfigModule.forFeature(databaseConfiguration)],

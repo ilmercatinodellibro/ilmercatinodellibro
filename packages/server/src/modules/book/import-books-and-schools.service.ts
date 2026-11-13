@@ -9,16 +9,16 @@ import {
   ConflictException,
   HttpException,
 } from "@nestjs/common";
-import { Role } from "src/@generated/prisma/enums";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { AuthService } from "src/modules/auth/auth.service";
+import { Role } from "src/@generated/prisma/enums.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
 import {
   BOOK_IMPORT_FILENAME,
   PUBLIC_SCHOOLS_IMPORT_FILENAME,
   PRIVATE_SCHOOLS_IMPORT_FILENAME,
-} from "src/modules/book/book-import.constants";
-import { ImportBooksCommand } from "src/modules/book/import-books.command";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+} from "src/modules/book/book-import.constants.js";
+import { ImportBooksCommand } from "src/modules/book/import-books.command.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 
 @Injectable()
 export class ImportBooksAndSchoolsService {

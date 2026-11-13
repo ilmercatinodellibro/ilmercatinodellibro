@@ -1,11 +1,11 @@
 import { Injectable, UnprocessableEntityException } from "@nestjs/common";
 import * as argon2 from "argon2";
 import { Profile } from "passport";
-import { PASSWORD_STUB_HASH } from "prisma/factories/user";
-import { FederationProvider } from "src/@generated/prisma/enums";
-import { RegisterPayload } from "src/modules/auth/auth.args";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { RegisterUserPayload } from "src/modules/user/user.args";
+import { PASSWORD_STUB_HASH } from "prisma/factories/user.js";
+import { FederationProvider } from "src/@generated/prisma/enums.js";
+import { RegisterPayload } from "src/modules/auth/auth.args.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { RegisterUserPayload } from "src/modules/user/user.args.js";
 
 @Injectable()
 export class UserService {

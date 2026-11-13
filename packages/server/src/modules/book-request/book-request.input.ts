@@ -1,5 +1,5 @@
 import { InputType, PickType } from "@nestjs/graphql";
-import { BookRequest } from "src/@generated/graphql";
+import { BookRequest } from "src/@generated/graphql/index.js";
 
 @InputType()
 export class CreateBookRequestInput extends PickType(

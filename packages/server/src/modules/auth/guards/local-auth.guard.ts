@@ -1,8 +1,8 @@
 import { ExecutionContext, Injectable } from "@nestjs/common";
 import { GqlContextType, GqlExecutionContext } from "@nestjs/graphql";
 import { AuthGuard } from "@nestjs/passport";
-import { GraphQLContext } from "../auth.models";
-import { LOCAL_STRATEGY_NAME } from "../strategies/local.strategy";
+import { GraphQLContext } from "../auth.models.js";
+import { LOCAL_STRATEGY_NAME } from "../strategies/local.strategy.js";
 
 @Injectable()
 export class LocalAuthGuard extends AuthGuard(LOCAL_STRATEGY_NAME) {

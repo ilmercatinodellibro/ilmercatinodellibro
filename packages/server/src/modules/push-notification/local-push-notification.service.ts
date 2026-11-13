@@ -3,7 +3,7 @@ import notifier from "node-notifier";
 import {
   NotificationPayload,
   PushNotificationService,
-} from "./push-notification-service.abstract";
+} from "./push-notification-service.abstract.js";
 
 @Injectable()
 export class LocalPushNotificationService implements PushNotificationService {

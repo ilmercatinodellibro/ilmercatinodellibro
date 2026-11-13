@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { Test, type TestingModule } from "@nestjs/testing";
-import { EventResolver } from "./event.resolver";
+import { EventResolver } from "./event.resolver.js";
 
 describe("EventResolver", () => {
   let resolver: EventResolver;

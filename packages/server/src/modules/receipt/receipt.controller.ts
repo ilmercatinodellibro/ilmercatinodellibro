@@ -1,10 +1,10 @@
 import { createReadStream } from "node:fs";
 import { Controller, Get, Header, Param, StreamableFile } from "@nestjs/common";
-import type { UserModel } from "src/@generated/prisma/models";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { ReceiptService } from "src/modules/receipt/receipt.service";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { ReceiptService } from "src/modules/receipt/receipt.service.js";
 
 @Controller("/receipts")
 export class ReceiptController {

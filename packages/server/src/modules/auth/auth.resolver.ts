@@ -1,13 +1,13 @@
 import { UnprocessableEntityException, UseGuards } from "@nestjs/common";
 import { Mutation, Query, Resolver } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { omit } from "lodash";
-import { User as GraphQLUser } from "src/@generated/graphql";
-import { Role } from "src/@generated/prisma/enums";
-import type { UserModel } from "src/@generated/prisma/models";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { RegisterUserPayload } from "src/modules/user/user.args";
-import { UserService } from "../user/user.service";
+import { omit } from "lodash-es";
+import { User as GraphQLUser } from "src/@generated/graphql/index.js";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { RegisterUserPayload } from "src/modules/user/user.args.js";
+import { UserService } from "../user/user.service.js";
 import {
   EmailVerificationPayload,
   LoginPayload,
@@ -16,13 +16,13 @@ import {
   RegisterPayload,
   RegistrationInviteLinkPayload,
   ResetForgottenPasswordPayload,
-} from "./auth.args";
-import { AuthPayload } from "./auth.entity";
-import { AuthService } from "./auth.service";
-import { CurrentUser } from "./decorators/current-user.decorator";
-import { Input } from "./decorators/input.decorator";
-import { Public } from "./decorators/public-route.decorator";
-import { LocalAuthGuard } from "./guards/local-auth.guard";
+} from "./auth.args.js";
+import { AuthPayload } from "./auth.entity.js";
+import { AuthService } from "./auth.service.js";
+import { CurrentUser } from "./decorators/current-user.decorator.js";
+import { Input } from "./decorators/input.decorator.js";
+import { Public } from "./decorators/public-route.decorator.js";
+import { LocalAuthGuard } from "./guards/local-auth.guard.js";
 
 @Resolver()
 export class AuthResolver {

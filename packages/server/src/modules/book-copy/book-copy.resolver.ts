@@ -19,28 +19,28 @@ import {
   ReceiptType,
   Sale,
   User,
-} from "src/@generated/graphql";
-import { Prisma } from "src/@generated/prisma/client";
-import { AuthService } from "src/modules/auth/auth.service";
+} from "src/@generated/graphql/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
 import {
   BookCopyCreateInput,
   DonateBookCopiesInput,
   RefundBookCopyInput,
   ReimburseBookCopiesInput,
   ReturnBookCopiesInput,
-} from "src/modules/book-copy/book-copy.input";
-import { ReceiptService } from "src/modules/receipt/receipt.service";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
+} from "src/modules/book-copy/book-copy.input.js";
+import { ReceiptService } from "src/modules/receipt/receipt.service.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   BookCopyByUserQueryArgs,
   BookCopyQueryArgs,
   PaginatedBookCopiesQueryArgs,
   PaginatedBookCopyQueryResult,
-} from "./book-copy.args";
-import { availableBookCopyFilter } from "./book-copy.filters";
-import { BookCopyService } from "./book-copy.service";
+} from "./book-copy.args.js";
+import { availableBookCopyFilter } from "./book-copy.filters.js";
+import { BookCopyService } from "./book-copy.service.js";
 
 @Resolver(() => BookCopy)
 export class BookCopyResolver {

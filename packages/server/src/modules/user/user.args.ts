@@ -9,12 +9,12 @@ import {
   PickType,
   registerEnumType,
 } from "@nestjs/graphql";
-import { User } from "src/@generated/graphql";
-import { Role } from "src/@generated/graphql/prisma";
+import { User } from "src/@generated/graphql/index.js";
+import { Role } from "src/@generated/graphql/prisma/index.js";
 import {
   LocationBoundInput,
   LocationBoundQueryArgs,
-} from "src/modules/retail-location";
+} from "src/modules/retail-location/index.js";
 
 @InputType()
 export class UserQueryFilters {

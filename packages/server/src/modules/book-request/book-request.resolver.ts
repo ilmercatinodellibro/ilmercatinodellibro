@@ -8,16 +8,16 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Book, BookRequest, Sale, User } from "src/@generated/graphql";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { Input } from "../auth/decorators/input.decorator";
-import { PrismaService } from "../prisma/prisma.service";
-import { BookRequestQueryArgs } from "./book-request.args";
+import { Book, BookRequest, Sale, User } from "src/@generated/graphql/index.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "../auth/decorators/current-user.decorator.js";
+import { Input } from "../auth/decorators/input.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { BookRequestQueryArgs } from "./book-request.args.js";
 import {
   CreateBookRequestInput,
   DeleteBookRequestInput,
-} from "./book-request.input";
+} from "./book-request.input.js";
 
 @Resolver(() => BookRequest)
 export class BookRequestResolver {

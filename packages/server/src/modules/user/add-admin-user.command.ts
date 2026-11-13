@@ -1,9 +1,9 @@
 import { Logger } from "@nestjs/common";
 import { Command, CommandRunner } from "nest-commander";
-import { Role } from "src/@generated/prisma/enums";
-import type { UserModel } from "src/@generated/prisma/models";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import retailLocations from "test/fixtures/retail-locations";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import retailLocations from "test/fixtures/retail-locations.js";
 
 const adminData: Pick<
   UserModel,

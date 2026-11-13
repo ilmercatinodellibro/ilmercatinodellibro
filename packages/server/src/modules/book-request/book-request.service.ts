@@ -1,18 +1,18 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { BookMeta } from "src/@generated/graphql";
-import { Prisma } from "src/@generated/prisma/client";
+import { BookMeta } from "src/@generated/graphql/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
 import type {
   BookModel,
   BookRequestModel,
   RequestQueueModel as PrismaRequestQueue,
   RetailLocationModel,
-} from "src/@generated/prisma/models";
-import { availableBookCopyFilter } from "src/modules/book-copy/book-copy.filters";
-import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.module";
-import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+} from "src/@generated/prisma/models.js";
+import { availableBookCopyFilter } from "src/modules/book-copy/book-copy.filters.js";
+import { NEW_NOTIFICATION_EVENT } from "src/modules/notification/notification.events.js";
+import { NewNotificationPayload } from "src/modules/notification/send-push-notification.listener.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 
 type RequestQueue = PrismaRequestQueue & {
   book: BookModel & {

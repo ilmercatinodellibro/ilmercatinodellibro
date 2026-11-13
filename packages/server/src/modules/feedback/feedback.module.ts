@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { MailModule } from "../mail/mail.module";
-import { FeedbackResolver } from "./feedback.resolver";
+import { MailModule } from "../mail/mail.module.js";
+import { FeedbackResolver } from "./feedback.resolver.js";
 
 @Module({
   imports: [MailModule],

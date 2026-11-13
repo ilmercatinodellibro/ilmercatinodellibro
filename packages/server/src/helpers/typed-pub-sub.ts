@@ -1,5 +1,5 @@
 import { PubSub } from "graphql-subscriptions";
-import type { PubSubAsyncIterableIterator } from "graphql-subscriptions/dist/pubsub-async-iterable-iterator";
+import type { PubSubAsyncIterableIterator } from "graphql-subscriptions/dist/pubsub-async-iterable-iterator.js";
 
 // `keyof Record<string, any>` gives `string | number | symbol`
 // so we need to filter it to only keep `string`

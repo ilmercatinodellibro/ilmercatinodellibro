@@ -5,6 +5,7 @@ import { createTypeScriptImportResolver } from "eslint-import-resolver-typescrip
 import globals from "globals";
 
 const projectTsConfig = join(import.meta.dirname, "tsconfig.json");
+const { noDeepRelative, noLodash } = configCoralloy.importPatterns;
 
 export default defineConfig(
   ...configCoralloy.configs.base(),
@@ -27,13 +28,16 @@ export default defineConfig(
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.jest,
       },
 
       parserOptions: {
         projectService: {
           // Dotfiles aren't matched by the tsconfig "include" default
-          allowDefaultProject: [".*"],
+          allowDefaultProject: [
+            "eslint.config.*",
+            ".*",
+            "prisma/nestjs-graphql.config.mjs",
+          ],
         },
       },
     },
@@ -45,10 +49,12 @@ export default defineConfig(
       // Since there is no specific whitelist, we disable this rule
       "unicorn/no-null": "off",
 
-      // The server is compiled to CommonJS, which has neither import.meta nor top-level await
-      // TODO: remove when migrating the server to ESM
-      "unicorn/prefer-module": "off",
-      "unicorn/prefer-top-level-await": "off",
+      // Node needs the full path to an index file in ES modules
+      "import-x/no-useless-path-segments": ["error", { noUselessIndex: false }],
+      "no-restricted-imports": [
+        "error",
+        { patterns: [noDeepRelative, noLodash] },
+      ],
     },
 
     settings: {
@@ -89,6 +95,7 @@ export default defineConfig(
         "error",
         {
           patterns: [
+            noLodash,
             {
               group: ["src/*"],
               message:

@@ -1,5 +1,5 @@
 import { type ConfigType, registerAs } from "@nestjs/config";
-import { z } from "./zod";
+import { z } from "./zod.js";
 
 export type EmailConfiguration = ConfigType<typeof emailConfiguration>;
 

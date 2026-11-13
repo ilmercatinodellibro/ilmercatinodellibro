@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { BaseExceptionFilter } from "@nestjs/core";
-import { Prisma } from "src/@generated/prisma/client";
+import { Prisma } from "src/@generated/prisma/client.js";
 
 interface DriverAdapterErrorMeta {
   cause?: { constraint?: { fields?: string[]; index?: string } };

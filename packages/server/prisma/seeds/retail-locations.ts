@@ -1,5 +1,5 @@
-import type { PrismaClient } from "src/@generated/prisma/client";
-import retailLocations from "test/fixtures/retail-locations";
+import type { PrismaClient } from "src/@generated/prisma/client.js";
+import retailLocations from "test/fixtures/retail-locations.js";
 
 export async function seedRetailLocations(prisma: PrismaClient) {
   await Promise.all(

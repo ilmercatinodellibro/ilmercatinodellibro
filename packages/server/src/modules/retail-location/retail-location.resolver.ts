@@ -1,34 +1,34 @@
 import { UnprocessableEntityException } from "@nestjs/common";
 import { Args, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { merge } from "lodash";
-import { RetailLocation } from "src/@generated/graphql/retail-location";
-import { Prisma } from "src/@generated/prisma/client";
-import { Role } from "src/@generated/prisma/enums";
-import type { UserModel } from "src/@generated/prisma/models";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { Input } from "src/modules/auth/decorators/input.decorator";
-import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers";
+import { merge } from "lodash-es";
+import { RetailLocation } from "src/@generated/graphql/retail-location/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
+import { Role } from "src/@generated/prisma/enums.js";
+import type { UserModel } from "src/@generated/prisma/models.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator.js";
+import { Input } from "src/modules/auth/decorators/input.decorator.js";
+import { getPrismaRetailLocationFilters } from "src/modules/retail-location/retail-location.helpers.js";
 import {
   UpdateRetailLocationInfoInput,
   UpdateRetailLocationSettingsInput,
-} from "src/modules/retail-location/retail-location.input";
-import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
-import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args";
+} from "src/modules/retail-location/retail-location.input.js";
+import { RetailLocationService } from "src/modules/retail-location/retail-location.service.js";
+import { UpdateRetailLocationThemeInput } from "src/modules/retail-location/theme.args.js";
 import {
   languageLocales,
   type RetailLocationInfo,
-} from "test/fixtures/retail-locations";
-import { Public } from "../auth/decorators/public-route.decorator";
-import { PrismaService } from "../prisma/prisma.service";
+} from "test/fixtures/retail-locations.js";
+import { Public } from "../auth/decorators/public-route.decorator.js";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   ChartElement,
   LocationBoundQueryArgs,
   ResetRetailLocationInput,
   RetailLocationQueryArgs,
   StatisticsQueryResult,
-} from "./retail-location.args";
+} from "./retail-location.args.js";
 
 const STATISTICS_FORBIDDEN_MESSAGE =
   "You do not have permission to view retail location statistics.";

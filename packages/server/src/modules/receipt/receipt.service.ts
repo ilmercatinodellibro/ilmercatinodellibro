@@ -4,9 +4,9 @@ import { Injectable } from "@nestjs/common";
 import type { GenerateProps, GeneratorOptions } from "@pdfme/common";
 import { generate } from "@pdfme/generator";
 import { line, table, text } from "@pdfme/schemas";
-import { sumBy } from "lodash";
-import { ReceiptType } from "src/@generated/graphql";
-import { Prisma } from "src/@generated/prisma/client";
+import { sumBy } from "lodash-es";
+import { ReceiptType } from "src/@generated/graphql/index.js";
+import { Prisma } from "src/@generated/prisma/client.js";
 import type {
   BookModel,
   BookCopyModel,
@@ -14,13 +14,13 @@ import type {
   RetailLocationModel,
   SaleModel,
   UserModel,
-} from "src/@generated/prisma/models";
-import { MailService } from "src/modules/mail/mail.service";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { RetailLocationService } from "src/modules/retail-location/retail-location.service";
-import purchaseTemplate from "./templates/purchase.json";
-import settlementTemplate from "./templates/settlement.json";
-import withdrawalTemplate from "./templates/withdrawal.json";
+} from "src/@generated/prisma/models.js";
+import { MailService } from "src/modules/mail/mail.service.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { RetailLocationService } from "src/modules/retail-location/retail-location.service.js";
+import purchaseTemplate from "./templates/purchase.json" with { type: "json" };
+import settlementTemplate from "./templates/settlement.json" with { type: "json" };
+import withdrawalTemplate from "./templates/withdrawal.json" with { type: "json" };
 
 type BookCopyWithBook = BookCopyModel & { book: BookModel };
 type BookCopyWithSales = BookCopyModel & { sales: SaleModel[] };

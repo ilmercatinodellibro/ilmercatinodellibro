@@ -5,14 +5,14 @@ import { getMessaging } from "firebase-admin/messaging";
 import {
   PushNotificationConfiguration,
   pushNotificationConfiguration,
-} from "src/config/push-notification";
-import { PrismaModule } from "../prisma/prisma.module";
-import { PrismaService } from "../prisma/prisma.service";
-import { FirebasePushNotificationService } from "./firebase-push-notification.service";
-import { LocalPushNotificationService } from "./local-push-notification.service";
-import { PushNotificationService } from "./push-notification-service.abstract";
-import { PushNotificationResolver } from "./push-notification.resolver";
-import { VoidPushNotificationService } from "./void-push-notification.service";
+} from "src/config/push-notification.js";
+import { PrismaModule } from "../prisma/prisma.module.js";
+import { PrismaService } from "../prisma/prisma.service.js";
+import { FirebasePushNotificationService } from "./firebase-push-notification.service.js";
+import { LocalPushNotificationService } from "./local-push-notification.service.js";
+import { PushNotificationService } from "./push-notification-service.abstract.js";
+import { PushNotificationResolver } from "./push-notification.resolver.js";
+import { VoidPushNotificationService } from "./void-push-notification.service.js";
 
 @Module({
   imports: [

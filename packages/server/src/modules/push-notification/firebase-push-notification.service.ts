@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { mapLimit } from "async";
 import { BatchResponse, Messaging } from "firebase-admin/messaging";
-import { chunk } from "lodash";
-import { PrismaService } from "../prisma/prisma.service";
+import { chunk } from "lodash-es";
+import { PrismaService } from "../prisma/prisma.service.js";
 import {
   NotificationPayload,
   PushNotificationService,
-} from "./push-notification-service.abstract";
+} from "./push-notification-service.abstract.js";
 
 declare module "async" {
   // If no callback is provided as the 4th argument, a promise is returned. This overload is missing from @types/async.

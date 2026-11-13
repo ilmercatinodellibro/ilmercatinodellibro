@@ -7,14 +7,14 @@ import {
   Root,
 } from "@nestjs/graphql";
 import { GraphQLVoid } from "graphql-scalars";
-import { Receipt, User } from "src/@generated/graphql";
-import { AuthService } from "src/modules/auth/auth.service";
-import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { Input } from "src/modules/auth/decorators/input.decorator";
-import { PrismaService } from "src/modules/prisma/prisma.service";
-import { GetReceiptsArgs } from "src/modules/receipt/receipt.args";
-import { ResendReceiptInput } from "src/modules/receipt/receipt.input";
-import { ReceiptService } from "src/modules/receipt/receipt.service";
+import { Receipt, User } from "src/@generated/graphql/index.js";
+import { AuthService } from "src/modules/auth/auth.service.js";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator.js";
+import { Input } from "src/modules/auth/decorators/input.decorator.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
+import { GetReceiptsArgs } from "src/modules/receipt/receipt.args.js";
+import { ResendReceiptInput } from "src/modules/receipt/receipt.input.js";
+import { ReceiptService } from "src/modules/receipt/receipt.service.js";
 
 @Resolver(() => Receipt)
 export class ReceiptResolver {

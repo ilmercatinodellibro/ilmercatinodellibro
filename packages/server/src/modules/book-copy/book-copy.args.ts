@@ -1,6 +1,6 @@
 import { ArgsType, Field, InputType, Int, ObjectType } from "@nestjs/graphql";
-import { BookCopy } from "src/@generated/graphql";
-import { LocationBoundQueryArgs } from "src/modules/retail-location";
+import { BookCopy } from "src/@generated/graphql/index.js";
+import { LocationBoundQueryArgs } from "src/modules/retail-location/index.js";
 
 @ArgsType()
 export class BookCopyQueryArgs {

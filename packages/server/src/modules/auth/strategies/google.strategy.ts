@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { Profile, Strategy, StrategyOptions } from "passport-google-oauth20";
-import { UserService } from "src/modules/user/user.service";
+import { UserService } from "src/modules/user/user.service.js";
 
 export const GOOGLE_STRATEGY_NAME = "google";
 

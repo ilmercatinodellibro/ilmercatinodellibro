@@ -1,9 +1,9 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { User } from "src/@generated/graphql";
-import { AuthConfiguration, authConfiguration } from "src/config/auth";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { User } from "src/@generated/graphql/index.js";
+import { type AuthConfiguration, authConfiguration } from "src/config/auth.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 
 // We return "sub" (subject) claim to align with JWT standard claims, it contains the user id
 // Other standard claims are added automatically by jwtService

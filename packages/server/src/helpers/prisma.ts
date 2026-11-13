@@ -1,4 +1,4 @@
-import type { Prisma } from "src/@generated/prisma/client";
+import type { Prisma } from "src/@generated/prisma/client.js";
 
 /**
  * Prisma doesn't allow everything to be used as an input value.

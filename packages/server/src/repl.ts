@@ -1,5 +1,5 @@
 import { repl } from "@nestjs/core";
-import { AppModule } from "./app.module";
+import { AppModule } from "./app.module.js";
 
 async function bootstrap() {
   const replServer = await repl(AppModule);
@@ -9,4 +9,4 @@ async function bootstrap() {
     }
   });
 }
-void bootstrap();
+await bootstrap();

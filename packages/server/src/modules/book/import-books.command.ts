@@ -11,16 +11,16 @@ import { resolve } from "node:path";
 import { Inject, Logger } from "@nestjs/common";
 import { parse, transform } from "csv";
 import { Command, CommandRunner, Option } from "nest-commander";
-import { School } from "src/@generated/graphql";
-import { RootConfiguration, rootConfiguration } from "src/config/root";
-import { PrismaService } from "src/modules/prisma/prisma.service";
+import { School } from "src/@generated/graphql/index.js";
+import { type RootConfiguration, rootConfiguration } from "src/config/root.js";
+import { PrismaService } from "src/modules/prisma/prisma.service.js";
 import {
   IngestedCsvRow,
   IngestedEquivalentSchoolRow,
   IngestedStateSchoolRow,
   SchoolCourseDto,
   SchoolCsvConfiguration,
-} from "./book-csv.types";
+} from "./book-csv.types.js";
 
 interface ImportBooksCommandOptions {
   school?: string;
