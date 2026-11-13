@@ -11,7 +11,7 @@
     dense
     no-wrap
   >
-    <template v-for="(_, slotName) in btnSlots" #[slotName]>
+    <template v-for="(_, slotName) in buttonSlots" #[slotName]>
       <q-menu
         v-if="showDropdown && slotName === 'default'"
         :key="slotName"
@@ -36,7 +36,7 @@ defineProps<
   } & Pick<QBtnProps, "color" | "label" | "icon">
 >();
 
-const btnSlots = defineSlots<QBtnSlots>();
+const buttonSlots = defineSlots<QBtnSlots>();
 
 const menu = ref(false);
 </script>

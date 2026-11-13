@@ -1,5 +1,5 @@
 import type { Role } from "src/@generated/graphql";
-import retailLocation from "src/i18n/en-US/retailLocation";
+import retailLocation from "src/i18n/en-US/retail-location";
 import type {
   AdditionalMacroIntervalDurationNames,
   AvailableQuickRanges,

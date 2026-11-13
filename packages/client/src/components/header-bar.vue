@@ -57,7 +57,7 @@
         />
       </div>
       <q-btn v-for="(button, key) in headerActions" v-bind="button" :key />
-      <language-dropdown-btn v-if="!isAuthenticated" />
+      <language-dropdown-button v-if="!isAuthenticated" />
     </k-toolbar>
   </q-header>
 </template>
@@ -75,7 +75,7 @@ import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { AvailableRouteNames } from "src/models/routes";
 import { useAuthService } from "src/services/auth";
 import kToolbar from "./k-toolbar.vue";
-import LanguageDropdownBtn from "./language-dropdown-btn.vue";
+import LanguageDropdownButton from "./language-dropdown-button.vue";
 
 const { t } = useI18n();
 const route = useRoute();

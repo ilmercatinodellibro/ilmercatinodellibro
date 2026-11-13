@@ -7,6 +7,6 @@
 // See https://github.com/quasarframework/quasar/issues/17830
 // See https://github.com/quasarframework/quasar/blob/26a30d72fea61c15f190c4dc52666f5f38a4d10a/ui/src/components/table/QTd.js#L28
 
-export interface QTdKeyProp {
+export interface QTdKeyProps {
   keyTd?: string;
 }

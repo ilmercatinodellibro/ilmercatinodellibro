@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-page-container class="layout-background">
       <q-page class="column fit flex-center q-pb-xl q-pt-64 q-px-md">
-        <language-dropdown-btn class="fixed-top-right q-ma-md" />
+        <language-dropdown-button class="fixed-top-right q-ma-md" />
         <q-spinner v-if="loading" />
 
         <h4 class="q-mb-36 q-mt-none text-accent text-center">
@@ -32,7 +32,7 @@
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import ActionBox from "src/components/action-box.vue";
-import LanguageDropdownBtn from "src/components/language-dropdown-btn.vue";
+import LanguageDropdownButton from "src/components/language-dropdown-button.vue";
 import { AvailableRouteNames } from "src/models/routes";
 import { useRetailLocationService } from "src/services/retail-location";
 import type { RetailLocationFragment } from "src/services/retail-location.graphql";
