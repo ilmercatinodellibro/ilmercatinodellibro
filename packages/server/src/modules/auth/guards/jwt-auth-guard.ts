@@ -4,8 +4,6 @@ import { GqlContextType, GqlExecutionContext } from "@nestjs/graphql";
 import { AuthGuard } from "@nestjs/passport";
 import { IS_PUBLIC_KEY } from "src/modules/auth/decorators/public-route.decorator";
 
-// canActivate requires types from rxjs to be loaded, even if we don't directly use it
-
 import { GraphQLContext } from "../auth.models";
 import { JWT_STRATEGY_NAME } from "../strategies/jwt.strategy";
 

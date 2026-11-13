@@ -172,8 +172,8 @@ const waitGraphqlCommand: Cypress.CommandFn<"waitGraphql"> = (
 
         // Promise.resolve() is needed to be able to use cy commands in this block
         // The next block will receive the resolved value
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return result;
+        // eslint-disable-next-line unicorn/no-useless-promise-resolve-reject, promise/no-return-wrap -- Cypress rejects a plain value after cy commands
+        return Promise.resolve(result);
       })
       // After the Cypress execution in the previous then() blocks are done,
       // throw the error if it's an instance of WaitGraphqlError, otherwise return the result
