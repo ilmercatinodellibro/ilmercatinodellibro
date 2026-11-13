@@ -32,7 +32,8 @@ declare module "vue-i18n" {
 const i18n = createI18n<[MessageSchema], MessageLanguages, false>({
   locale: "it",
   fallbackLocale: "en-US",
-  // vue-i18n 11 deprecates the option, but still defaults to the legacy mode. Remove it when upgrading to vue-i18n 12, which drops the legacy mode.
+  // vue-i18n 11 deprecates the option. app-vite already defines __VUE_I18N_LEGACY_API__ as false, which makes vue-i18n ignore it,
+  // but the option keeps the composition mode explicit should that flag not apply. Remove it when upgrading to vue-i18n 12, which drops the legacy mode.
   // eslint-disable-next-line @typescript-eslint/no-deprecated
   legacy: false,
   messages,

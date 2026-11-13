@@ -25,7 +25,6 @@ allowBuilds:
   "@prisma/client": true
   "@prisma/engines": true
   argon2: true
-  esbuild: true
   msgpackr-extract: true # coming from bullmq
   prisma: true
   protobufjs: true # coming from firebase

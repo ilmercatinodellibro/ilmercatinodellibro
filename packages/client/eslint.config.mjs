@@ -55,7 +55,7 @@ export default defineConfig(
   {
     name: "quasar/node",
 
-    files: ["quasar.config.ts", "src-ssr/**"],
+    files: ["quasar.config.ts"],
 
     languageOptions: {
       globals: {
