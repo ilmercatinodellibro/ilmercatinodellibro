@@ -1,0 +1,3 @@
+{
+  "extends": "@quasar/quasar-app-extension-testing-playwright/nyc-config-preset"
+}

@@ -2,5 +2,8 @@
   "@quasar/apollo": {
     "subscriptions": true,
     "subscriptionsTransport": "ws"
+  },
+  "@quasar/testing-playwright": {
+    "options": ["code-coverage"]
   }
 }

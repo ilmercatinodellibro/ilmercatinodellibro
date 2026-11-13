@@ -39,3 +39,8 @@ coverage/
 
 src/@generated
 src/**/*.graphql.ts
+
+# Playwright related
+test-results/
+playwright-report/
+blob-report/

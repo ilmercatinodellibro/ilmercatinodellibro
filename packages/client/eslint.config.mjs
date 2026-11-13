@@ -2,6 +2,7 @@ import { join } from "node:path";
 import { defineConfig } from "eslint/config";
 import configCoralloy from "eslint-config-coralloy";
 import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
+import pluginPlaywright from "eslint-plugin-playwright";
 import globals from "globals";
 import { version as vueVersion } from "vue";
 
@@ -34,6 +35,11 @@ export default defineConfig(
       // Test coverage related
       "coverage/**",
       ".nyc_output/**",
+
+      // Playwright output
+      "test-results/**",
+      "playwright-report/**",
+      "blob-report/**",
     ],
   },
 
@@ -125,6 +131,59 @@ export default defineConfig(
     rules: {
       // Quasar Dialog plugin custom components are created one-off, so `props` isn't reactive
       "vue/no-setup-props-reactivity-loss": "off",
+    },
+  },
+
+  {
+    name: "custom/playwright",
+
+    files: ["test/playwright/**/*.ts"],
+    extends: [
+      // Add Playwright-specific lint rules and globals
+      // See https://github.com/playwright-community/eslint-plugin-playwright#rules
+      pluginPlaywright.configs["flat/recommended"],
+    ],
+
+    rules: {
+      // The helpers of test/playwright/utils assert on behalf of the test which
+      // calls them. The rule only knows the names it is given.
+      "playwright/expect-expect": [
+        "warn",
+        {
+          assertFunctionNames: [
+            "expectLoginRefused",
+            "fieldShouldHaveError",
+            "openForgotPasswordForm",
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    name: "custom/playwright-imports",
+
+    // The fixtures directory is the one place that imports test and expect from the AE
+    files: ["test/playwright/**/*.ts"],
+    ignores: ["test/playwright/fixtures/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@playwright/test",
+              importNames: ["test", "expect"],
+              message: "Import test and expect from test/playwright/fixtures.",
+            },
+            {
+              name: "@quasar/quasar-app-extension-testing-playwright",
+              importNames: ["test", "expect"],
+              message: "Import test and expect from test/playwright/fixtures.",
+            },
+          ],
+        },
+      ],
     },
   },
 );

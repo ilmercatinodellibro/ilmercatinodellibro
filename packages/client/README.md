@@ -22,6 +22,31 @@ On the live server, you can use `pnpm run build:pwa:hot-swap` to build the produ
 
 It will generate the new bundle and start using it only once the build process is done, leaving a backup of the previous build in case an emergency rollback is needed.
 
+## Test
+
+The e2e tests run with [Playwright](https://playwright.dev) through the [Quasar Playwright App Extension](https://github.com/quasarframework/quasar-testing/tree/dev/packages/playwright).
+Playwright starts the server app and the client dev server it needs, unless they already run on its ports. See `webServer` in `playwright.config.ts`, which keeps every port of a run in one place and passes them to both apps over their `.env` files.
+
+```bash
+# the server app reads the database and the queue from its .env, ensure they are running and seeded
+$ pnpm db:start # at the monorepo root
+$ pnpm --filter @ilmercatinodellibro/server db:seed
+
+# install the browser once
+$ pnpm exec playwright install chromium
+
+# e2e tests, in Playwright UI mode (interactive) or headless
+$ pnpm test:e2e
+$ pnpm test:e2e:ci
+
+# HTML report of the last run, and coverage report of the last runs, generated into coverage/
+$ pnpm test:report
+$ pnpm test:coverage:report
+```
+
+The tests capture the emails the server sends through a local SMTP server, see `test/playwright/fixtures/mail.ts`. The `@mail` tag marks the tests which read them, select or skip them with `--grep=@mail` or `--grep-invert=@mail`.
+They use the seeded users of `packages/server/test/fixtures/users.ts` and the `mo` retail location. The registration tests enable its registration for their duration, through the API as the seeded admin.
+
 ## Push notifications
 
 We are using [FCM(Firebase Cloud Messaging)](https://firebase.google.com/docs/cloud-messaging) to send push notifications to the users.

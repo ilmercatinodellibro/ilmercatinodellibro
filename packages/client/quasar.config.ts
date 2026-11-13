@@ -8,6 +8,9 @@ import vitePluginChecker from "vite-plugin-checker";
 
 type VitePluginCheckerOptions = Parameters<typeof vitePluginChecker>[0];
 
+// Playwright sets it when it starts "quasar dev", see playwright.config.ts
+const IS_TEST_RUN = import.meta.env.QUASAR_TESTING_PLAYWRIGHT;
+
 const SERVER_RELATIVE_PATH = "../server";
 // Keep it in sync with "serve" script inside package.json
 const CLIENT_DIST_PATH = `${SERVER_RELATIVE_PATH}/client-dist/`;
@@ -214,7 +217,8 @@ export default defineConfig((ctx) => {
               lintCommand: "stylelint --cache ./src/**/*.{scss,css,vue}",
             },
           } satisfies VitePluginCheckerOptions,
-          { server: false },
+          // The error overlay would cover the page the tests drive
+          { client: !IS_TEST_RUN, server: false },
         ],
         ["@dreamonkey/graphql-codegen-near-operation-file", {}],
       ],

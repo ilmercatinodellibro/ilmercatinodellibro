@@ -1,0 +1,6 @@
+# Test coverage related
+coverage
+# Playwright related
+test-results
+playwright-report
+blob-report

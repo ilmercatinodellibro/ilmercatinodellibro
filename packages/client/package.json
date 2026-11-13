@@ -15,7 +15,6 @@
     "lint": "pnpm lint:script && pnpm lint:style",
     "format": "prettier --write \"**/*.{json,md,graphql,vue,js,ts,yml}\" --ignore-path .gitignore",
     "typecheck": "vue-tsc --noEmit && tsc --noEmit --project src-pwa/sw/tsconfig.json",
-    "test": "echo \"See package.json => scripts for available tests.\" && exit 0",
     "dev": "concurrently --raw --passthrough-arguments \"quasar dev {@}\" \"pnpm:generate:watch\" --",
     "dev:pwa": "pnpm dev -m pwa",
     "build": "quasar build",
@@ -24,7 +23,12 @@
     "serve": "./node_modules/@quasar/cli/bin/quasar.js serve ../server/client-dist/ --history",
     "start": "pnpm build && pnpm serve",
     "generate": "pnpm quasar prepare && graphql-codegen --config codegen.ts",
-    "generate:watch": "pnpm generate --watch"
+    "generate:watch": "pnpm generate --watch",
+    "test": "echo \"See package.json => scripts for available tests.\" && exit 0",
+    "test:e2e": "playwright test --project=e2e --ui",
+    "test:e2e:ci": "playwright test --project=e2e",
+    "test:report": "playwright show-report",
+    "test:coverage:report": "nyc report"
   },
   "overridesComments": {
     "_root": "See root package.json => overridesComments for more info."
@@ -58,13 +62,18 @@
     "@graphql-codegen/typescript-apollo-client-helpers": "^3.0.1",
     "@graphql-codegen/typescript-operations": "^4.6.1",
     "@parcel/watcher": "^2.6.0",
+    "@playwright/test": "^1.65.0",
     "@quasar/app-vite": "^3.10.4",
     "@quasar/cli": "^5.0.10",
     "@quasar/quasar-app-extension-apollo": "^2.3.0-beta.1",
+    "@quasar/quasar-app-extension-testing-playwright": "^1.0.0",
     "@types/lodash-es": "^4.17.12",
     "autoprefixer": "^10.6.2",
     "concurrently": "^10.0.7",
     "cross-env": "^10.1.0",
+    "eslint-plugin-playwright": "^2.12.2",
+    "nyc": "^18.0.0",
+    "smtp-tester": "^2.1.0",
     "tinyglobby": "catalog:",
     "vite-plugin-checker": "^0.14.5",
     "vue-tsc": "~3.3.14"
