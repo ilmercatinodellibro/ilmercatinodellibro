@@ -164,14 +164,15 @@ const waitGraphqlCommand: Cypress.CommandFn<"waitGraphql"> = (
           delete requestInfo.headers.authorization;
           cy.log(
             "Request info (except Authorization header):",
-            JSON.stringify(requestInfo, null, 2),
+            JSON.stringify(requestInfo, undefined, 2),
           );
 
-          cy.log("Response info:", JSON.stringify(response, null, 2));
+          cy.log("Response info:", JSON.stringify(response, undefined, 2));
         }
 
         // Promise.resolve() is needed to be able to use cy commands in this block
         // The next block will receive the resolved value
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return result;
       })
       // After the Cypress execution in the previous then() blocks are done,

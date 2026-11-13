@@ -1,4 +1,5 @@
 import { URL } from "node:url";
+// eslint-disable-next-line no-restricted-imports -- we can't really use aliases here
 import {
   createFormatHandler,
   createLintHandler,

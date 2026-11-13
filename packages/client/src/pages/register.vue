@@ -178,6 +178,7 @@ type UserRegistrationData = Omit<
   dateOfBirth: string;
 };
 
+// eslint-disable-next-line vue/no-setup-props-reactivity-loss -- the props only fill in the initial form values
 const user = ref<UserRegistrationData>({
   email: props.email ?? "",
   firstname: "",
@@ -298,16 +299,14 @@ async function onSubmit() {
       },
     };
 
-    if (props.token) {
-      await registerWithToken(
-        registrationData,
-        // We override the request context to add the one-shot JWT token header
-        // See https://www.apollographql.com/docs/react/data/mutations#context
-        { context: { headers: getJwtHeader(props.token) } },
-      );
-    } else {
-      await register(registrationData);
-    }
+    await (props.token
+      ? registerWithToken(
+          registrationData,
+          // We override the request context to add the one-shot JWT token header
+          // See https://www.apollographql.com/docs/react/data/mutations#context
+          { context: { headers: getJwtHeader(props.token) } },
+        )
+      : register(registrationData));
 
     await router.push({ name: "login" });
 

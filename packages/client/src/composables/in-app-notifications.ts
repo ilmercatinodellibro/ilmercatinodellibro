@@ -53,6 +53,8 @@ export function createInAppNotifications<TNotification>({
   const RootComponent = defineComponent({
     name: "InAppNotifications",
     setup() {
+      // The render function is returned from setup() as usual in Vue, even if it doesn't use anything from the setup() scope
+      // eslint-disable-next-line unicorn/consistent-function-scoping
       return () =>
         h(
           TransitionGroup,

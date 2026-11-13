@@ -18,20 +18,16 @@ export function useTimeFormat() {
     const HOUR = 60;
     const DAY = HOUR * 24;
 
-    switch (true) {
-      case diffInMinutes < HOUR: {
-        return formatter.format(-diffInMinutes, "minute");
-      }
-      case diffInMinutes < DAY: {
-        return formatter.format(-Math.round(diffInMinutes / HOUR), "hour");
-      }
-      case diffInMinutes < DAY * 2: {
-        return formatter.format(-Math.round(diffInMinutes / DAY), "day");
-      }
-      default: {
-        return d(date, "full");
-      }
+    if (diffInMinutes < HOUR) {
+      return formatter.format(-diffInMinutes, "minute");
     }
+    if (diffInMinutes < DAY) {
+      return formatter.format(-Math.round(diffInMinutes / HOUR), "hour");
+    }
+    if (diffInMinutes < DAY * 2) {
+      return formatter.format(-Math.round(diffInMinutes / DAY), "day");
+    }
+    return d(date, "full");
   }
 
   return {

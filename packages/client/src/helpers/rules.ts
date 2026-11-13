@@ -104,38 +104,34 @@ export const validatePasswordRule: ValidationRule<string | null> = (
     return requiredRule(password, rules);
   }
 
-  switch (true) {
-    // Between 8 and 25 characters
-    case password.length < 8 || password.length > 25: {
-      return t("validators.password.atLeast8AndMaximum25Characters");
-    }
-
-    // At least a number
-    case !/^(?=.*\d)/.test(password): {
-      return t("validators.password.atLeastOneNumber");
-    }
-
-    // At least a lower case
-    case !/^(?=.*[a-z])/.test(password): {
-      return t("validators.password.atLeastOneLowercase");
-    }
-
-    // At least a upper case
-    case !/^(?=.*[A-Z])/.test(password): {
-      return t("validators.password.atLeastOneUppercase");
-    }
-
-    // At least a special character
-    case !SPECIAL_CHARACTERS_PATTERN.test(password): {
-      return `${t(
-        "validators.password.atLeastOneSpecialCharacter",
-      )}: (${SPECIAL_CHARACTERS.toString()},?)`;
-    }
-
-    default: {
-      return true;
-    }
+  // Between 8 and 25 characters
+  if (password.length < 8 || password.length > 25) {
+    return t("validators.password.atLeast8AndMaximum25Characters");
   }
+
+  // At least a number
+  if (!/^(?=.*\d)/.test(password)) {
+    return t("validators.password.atLeastOneNumber");
+  }
+
+  // At least a lower case
+  if (!/^(?=.*[a-z])/.test(password)) {
+    return t("validators.password.atLeastOneLowercase");
+  }
+
+  // At least a upper case
+  if (!/^(?=.*[A-Z])/.test(password)) {
+    return t("validators.password.atLeastOneUppercase");
+  }
+
+  // At least a special character
+  if (!SPECIAL_CHARACTERS_PATTERN.test(password)) {
+    return `${t(
+      "validators.password.atLeastOneSpecialCharacter",
+    )}: (${SPECIAL_CHARACTERS.toString()},?)`;
+  }
+
+  return true;
 };
 
 export const greaterThanZeroRule: ValidationRule<number | string | null> = (
@@ -149,7 +145,7 @@ export const greaterThanZeroRule: ValidationRule<number | string | null> = (
   const numericValue =
     typeof value === "string" ? Number.parseFloat(value) : value;
   return (
-    (!isNaN(numericValue) && numericValue > 0) ||
+    (!Number.isNaN(numericValue) && numericValue > 0) ||
     t("validators.greaterThanZero")
   );
 };

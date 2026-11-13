@@ -71,6 +71,8 @@ const currentInfo = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return infoPagesContent[locale.value]!;
 });
+// Reset to the current info whenever the tab or the locale changes
+// eslint-disable-next-line vue/no-ref-object-reactivity-loss
 const editorModel = ref(currentInfo.value[selectedTab.value]);
 const isModified = computed(
   () => currentInfo.value[selectedTab.value] !== editorModel.value,
@@ -159,17 +161,18 @@ watch(locale, (_, previousLocale) => {
 });
 
 onBeforeRouteLeave(async () => {
-  if (isModified.value) {
-    await new Promise<void>((resolve) => {
-      openConfirmDialog()
-        .onOk(async () => {
-          await updateInfo();
-          resolve();
-        })
-        .onCancel(resolve);
-    });
+  if (!isModified.value) {
     return;
   }
+
+  await new Promise<void>((resolve) => {
+    openConfirmDialog()
+      .onOk(async () => {
+        await updateInfo();
+        resolve();
+      })
+      .onCancel(resolve);
+  });
 });
 </script>
 

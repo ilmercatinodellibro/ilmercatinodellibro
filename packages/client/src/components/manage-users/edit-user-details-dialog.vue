@@ -263,6 +263,8 @@ import KDialogFormCard from "../k-dialog-form-card.vue";
 
 // We don't need reactivity on the props as this is used through the Dialog plugin
 const { userData, scheduledForDeletion } = defineProps<{
+  // Without user data, the dialog creates a new user
+  // eslint-disable-next-line vue/require-default-prop
   userData?: UpdateUserPayload & Pick<CustomerFragment, "emailVerified">;
   scheduledForDeletion?: boolean;
 }>();
@@ -298,6 +300,7 @@ const newUserData = ref(
         password: "",
         passwordConfirmation: "",
         phoneNumber: "",
+        // eslint-disable-next-line vue/no-ref-object-reactivity-loss -- initial value of the form
         dateOfBirth: Date.parse(birthDate.value),
         delegate: "",
       } satisfies RegisterUserPayload),

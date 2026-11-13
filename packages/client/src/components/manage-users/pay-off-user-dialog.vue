@@ -360,7 +360,7 @@
 
 <script setup lang="ts">
 import { mdiDotsVertical, mdiInformationOutline } from "@quasar/extras/mdi-v7";
-import { cloneDeep, sumBy } from "lodash-es";
+import { cloneDeep, noop, sumBy } from "lodash-es";
 import {
   Dialog,
   QDialog,
@@ -417,7 +417,7 @@ const { isMobile } = useLateralDrawer();
 const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   {
     name: "select",
-    field: () => {},
+    field: noop,
     label: "",
   },
   {
@@ -492,7 +492,7 @@ const columns = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "actions",
-    field: () => {},
+    field: noop,
     label: "",
   },
 ]);

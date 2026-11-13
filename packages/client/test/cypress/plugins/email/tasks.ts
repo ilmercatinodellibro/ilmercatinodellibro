@@ -26,6 +26,7 @@ export function registerEmailTasks(
   });
 
   // cy.task cannot return undefined, so return null as a fallback when needed
+  /* eslint-disable unicorn/no-null */
   on("task", {
     getLastEmailFor(address: string) {
       if (emailsMap.has(address)) {
@@ -37,10 +38,12 @@ export function registerEmailTasks(
       return new Promise<string | null>((resolve) => {
         const interval = setInterval(() => {
           const email = emailsMap.get(address)?.at(-1);
-          if (email) {
-            clearInterval(interval);
-            resolve(email);
+          if (!email) {
+            return;
           }
+
+          clearInterval(interval);
+          resolve(email);
         }, config.taskTimeout / 10);
       });
     },
@@ -53,6 +56,7 @@ export function registerEmailTasks(
       return null;
     },
   });
+  /* eslint-enable unicorn/no-null */
 
   return config;
 }

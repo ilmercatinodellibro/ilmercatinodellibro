@@ -217,6 +217,7 @@ import {
   mdiHistory,
   mdiSort,
 } from "@quasar/extras/mdi-v7";
+import { noop } from "lodash-es";
 import { Dialog, type QTableColumn, type QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -321,6 +322,10 @@ async function fetchBooks({
         paginatedBookCopies.value = result;
         break;
       }
+      // Apollo Client always adds __typename, but the generated types mark it as optional
+      case undefined: {
+        break;
+      }
     }
 
     pagination.value.rowsNumber = result.rowsCount;
@@ -409,7 +414,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
     },
     {
       name: "status",
-      field: () => {},
+      field: noop,
       label: t("book.fields.status"),
       align: "left",
     },
@@ -453,7 +458,7 @@ const bookCopyColumns = computed<QTableColumn<BookCopyDetailsFragment>[]>(
         ]) satisfies QTableColumn<BookCopyDetailsFragment>[]),
     {
       name: "history",
-      field: () => {},
+      field: noop,
       label: "",
       classes: isMobile.value ? "no-padding" : "",
     },

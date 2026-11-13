@@ -142,6 +142,7 @@
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
 import { formatDate } from "@vueuse/core";
+import { noop } from "lodash-es";
 import {
   Dialog,
   QDialog,
@@ -285,14 +286,14 @@ const soldColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
     : [
         {
           label: "",
-          field: () => {},
+          field: noop,
           name: "problems",
           align: "center",
         },
       ]) satisfies QTableColumn<SoldBookCopy>[]),
   {
     label: "",
-    field: () => {},
+    field: noop,
     name: "history",
     classes: isMobile.value ? "no-padding" : "",
   },
@@ -328,7 +329,7 @@ const purchasedColumns = computed<QTableColumn<SoldBookCopy>[]>(() => [
   },
   {
     label: t("manageUsers.actions"),
-    field: () => {},
+    field: noop,
     name: "return",
     align: "center",
     classes: isMobile.value ? "no-padding" : "",

@@ -6,6 +6,9 @@ import {
 } from "src/composables/use-filter-translations";
 import type { TableFilters } from "src/models/book";
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+const filterMethod: QTableProps["filterMethod"] = (rows) => rows;
+
 export function useTableFilters(
   filterPath: FilterPath,
   useSchoolFilters = false,
@@ -58,9 +61,6 @@ export function useTableFilters(
       ...schoolFilters,
     };
   });
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const filterMethod: QTableProps["filterMethod"] = (rows) => rows;
 
   return {
     refetchFilterProxy,

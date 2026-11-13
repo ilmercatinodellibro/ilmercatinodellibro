@@ -103,7 +103,7 @@ async function openURL(url: URL | string) {
   // Check if there is already a window/tab open with the target URL
   for (const client of windowClients) {
     // If so, just focus it.
-    if (client.url === absoluteUrl.toString() && "focus" in client) {
+    if (client.url === absoluteUrl && "focus" in client) {
       return client.focus();
     }
   }

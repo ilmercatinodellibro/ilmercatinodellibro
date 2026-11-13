@@ -106,6 +106,7 @@
 
 <script setup lang="ts">
 import { mdiHistory } from "@quasar/extras/mdi-v7";
+import { noop } from "lodash-es";
 import type { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -160,7 +161,7 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
   },
   {
     name: "status",
-    field: () => {},
+    field: noop,
     label: t("book.fields.status"),
     align: "left",
   },
@@ -176,7 +177,7 @@ const bodyHeaderCols = computed<QTableColumn<BookCopyDetailsFragment>[]>(() => [
       ]) satisfies QTableColumn<BookCopyDetailsFragment>[]),
   {
     name: "history",
-    field: () => {},
+    field: noop,
     label: "",
     classes: isMobile.value ? "no-padding" : "",
   },

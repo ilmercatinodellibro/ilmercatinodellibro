@@ -41,6 +41,8 @@ const isSubscribed = ref(false);
 const isLoading = ref(false);
 const token = useStorage<string | null>(
   "notification-subscription-token",
+  // useStorage() uses null for "no value", and removes the item from the storage when set to null
+  // eslint-disable-next-line unicorn/no-null
   null,
 );
 
@@ -193,6 +195,7 @@ async function unsubscribe() {
   if (token.value !== null) {
     await removeTokenFromServer(token.value);
   }
+  // eslint-disable-next-line unicorn/no-null
   token.value = null;
 
   Notify.create({

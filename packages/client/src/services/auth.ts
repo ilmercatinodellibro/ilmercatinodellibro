@@ -250,11 +250,14 @@ watch(
     if (isNowAuthenticated && !wasAuthenticated) {
       await until(() => !!user.value).toBe(true);
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // Hooks can be either sync or async
+      // eslint-disable-next-line @typescript-eslint/await-thenable, @typescript-eslint/no-non-null-assertion
       await Promise.allSettled(onLoginHooks.map((hook) => hook(user.value!)));
     }
 
     if (!isNowAuthenticated && wasAuthenticated) {
+      // Hooks can be either sync or async
+      // eslint-disable-next-line @typescript-eslint/await-thenable
       await Promise.allSettled(onLogoutHooks.map((hook) => hook()));
     }
   },
@@ -318,17 +321,19 @@ export const redirectIfAuthenticated: NavigationGuard = (to) => {
   const { selectedLocation } = useRetailLocationService();
   const { isAuthenticated } = useAuthService();
 
-  if (isAuthenticated.value) {
-    const defaultRoute = hasUserRole.value
-      ? USER_DEFAULT_ROUTE_NAME
-      : OPERATOR_DEFAULT_ROUTE_NAME;
+  if (!isAuthenticated.value) {
+    return;
+  }
 
-    if (to.name !== defaultRoute) {
-      return {
-        name: defaultRoute,
-        params: { locationId: selectedLocation.value.id },
-      };
-    }
+  const defaultRoute = hasUserRole.value
+    ? USER_DEFAULT_ROUTE_NAME
+    : OPERATOR_DEFAULT_ROUTE_NAME;
+
+  if (to.name !== defaultRoute) {
+    return {
+      name: defaultRoute,
+      params: { locationId: selectedLocation.value.id },
+    };
   }
 };
 

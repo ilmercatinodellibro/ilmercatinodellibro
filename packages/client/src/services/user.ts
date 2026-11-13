@@ -22,7 +22,7 @@ export function useDownloadUserData() {
       return;
     }
 
-    const stringifiedData = JSON.stringify(data.userData, null, 2);
+    const stringifiedData = JSON.stringify(data.userData, undefined, 2);
     const result = exportFile("userData.json", stringifiedData, {
       mimeType: "application/json",
     });

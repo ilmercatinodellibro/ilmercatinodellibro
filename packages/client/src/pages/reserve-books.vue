@@ -119,7 +119,7 @@ import {
   mdiMagnify,
   mdiPlus,
 } from "@quasar/extras/mdi-v7";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, noop } from "lodash-es";
 import {
   Dialog,
   Notify,
@@ -238,7 +238,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "actions",
-    field: () => {},
+    field: noop,
     label: "",
     align: "center",
     classes: isMobile.value ? "no-padding" : "",
@@ -254,11 +254,14 @@ const {
   refetchBooks,
 } = useBookService(currentPage, rowsPerPage);
 
+// Initial values, onRequest keeps the pagination updated afterwards
+/* eslint-disable vue/no-ref-object-reactivity-loss */
 const tablePagination = ref({
   page: currentPage.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
   rowsPerPage: rowsPerPage.value,
 });
+/* eslint-enable vue/no-ref-object-reactivity-loss */
 
 const showByClass = ref(false);
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
@@ -269,7 +272,7 @@ const { refetchFilterProxy, tableFilter, filterMethod } = useTableFilters(
 );
 
 function getButtonData(book: BookSummaryFragment): QBtnProps {
-  if (userReservations.value.find(({ book: { id } }) => id === book.id)) {
+  if (userReservations.value.some(({ book: { id } }) => id === book.id)) {
     return {
       color: "grey-9",
       label: t("reserveBooks.goToReservations"),
@@ -284,7 +287,7 @@ function getButtonData(book: BookSummaryFragment): QBtnProps {
     };
   }
 
-  if (bookRequests.value.find(({ book: { id } }) => id === book.id)) {
+  if (bookRequests.value.some(({ book: { id } }) => id === book.id)) {
     return {
       color: "grey-9",
       label: t("reserveBooks.goToRequests"),
@@ -349,12 +352,14 @@ function swapView() {
       },
     }).onOk((newFilters: SchoolFilters) => {
       if (
-        newFilters.selectedSchoolCodes.length > 0 ||
-        newFilters.selectedSchoolCourseIds.length > 0
+        newFilters.selectedSchoolCodes.length === 0 &&
+        newFilters.selectedSchoolCourseIds.length === 0
       ) {
-        showByClass.value = true;
-        tableFilter.schoolFilters = cloneDeep(newFilters);
+        return;
       }
+
+      showByClass.value = true;
+      tableFilter.schoolFilters = cloneDeep(newFilters);
     });
   }
 }

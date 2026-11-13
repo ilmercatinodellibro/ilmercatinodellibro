@@ -73,6 +73,8 @@ export function vitePreprocessor() {
       outDir: dirname(outputPath),
       write: true,
       emptyOutDir: false,
+      // mergeConfig() skips undefined values, null is needed to disable watching
+      // eslint-disable-next-line unicorn/no-null
       watch: shouldWatch ? {} : null,
       minify: false,
       sourcemap: true,

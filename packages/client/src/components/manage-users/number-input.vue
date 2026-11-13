@@ -75,7 +75,8 @@ const validate: HTMLInputElement["onbeforeinput"] = (event) => {
 
   // If the new value does not respect rules validation or if the input
   // is not a plain text positive integer, prevent the change
-  const isInvalidNumber = isNaN(Number(newValue)) || !/^\d+$/.test(newValue);
+  const isInvalidNumber =
+    Number.isNaN(Number(newValue)) || !/^\d+$/.test(newValue);
   if (doesNotSatisfyRules || isInvalidNumber) {
     event.preventDefault();
 

@@ -112,6 +112,7 @@ const { t } = useI18n();
 
 const showPassword = ref(false);
 
+// eslint-disable-next-line vue/no-setup-props-reactivity-loss -- the props only fill in the initial form values
 const user = reactive<Omit<RegisterPayload, "retailLocationId">>({
   email: props.email,
   firstname: "",

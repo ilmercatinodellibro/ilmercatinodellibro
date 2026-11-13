@@ -22,7 +22,7 @@ function getValueFromMaybeFunction<Args extends unknown[], Provided>(
  * between a parent component and its children, especially when they're deeply nested.
  * Eg. instantiate a composable and provide its state to a deeply nested subtree of recursive components.
  *
- * Do not use this helper if you can get the same behaviour via props+events,
+ * Do not use this helper if you can get the same behavior via props+events,
  * eg. when you only need to share a ref.
  *
  * If you provide a function, the injector method will automatically call

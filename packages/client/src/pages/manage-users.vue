@@ -429,6 +429,7 @@ import {
   mdiPlus,
   mdiReceiptText,
 } from "@quasar/extras/mdi-v7";
+import { noop } from "lodash-es";
 import {
   Dialog,
   Notify,
@@ -513,7 +514,7 @@ function updateSelectedStatus(
   rowId: string,
   newStatus: "selected" | "deselected",
 ) {
-  const tableRow = document.getElementsByClassName(`user-row-${rowId}`)[0];
+  const tableRow = document.querySelector(`.user-row-${rowId}`);
   if (!tableRow) {
     return;
   }
@@ -556,7 +557,7 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
   ...((isMobile.value
     ? []
     : [
-        { name: "edit", field: () => {}, label: "" },
+        { name: "edit", field: noop, label: "" },
       ]) satisfies QTableColumn<CustomerFragment>[]),
   {
     name: "email",
@@ -649,7 +650,7 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     ? [
         {
           name: "actions",
-          field: () => {},
+          field: noop,
           label: "",
           classes: ({ emailVerified }) =>
             `no-padding ${emailVerified ? "" : "bg-blue-grey-1 text-black-54"}`,
@@ -658,13 +659,13 @@ const columns = computed<QTableColumn<CustomerFragment>[]>(() => [
     : [
         {
           name: "receipts",
-          field: () => {},
+          field: noop,
           label: t("manageUsers.fields.receipts"),
           align: "center",
         },
         {
           name: "pay-off",
-          field: () => {},
+          field: noop,
           label: "",
         },
       ]) satisfies QTableColumn<CustomerFragment>[]),

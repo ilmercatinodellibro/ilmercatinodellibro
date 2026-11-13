@@ -38,14 +38,16 @@ watch(
     lastCheckedScreenWidth = currentScreenWidth;
 
     if (
-      showLateralDrawer.value &&
-      previousValue <= DRAWER_BREAKPOINT &&
-      currentScreenWidth > DRAWER_BREAKPOINT
+      !showLateralDrawer.value ||
+      previousValue > DRAWER_BREAKPOINT ||
+      currentScreenWidth <= DRAWER_BREAKPOINT
     ) {
-      showLateralDrawer.value = false;
-
-      void nextTick(() => (showLateralDrawer.value = true));
+      return;
     }
+
+    showLateralDrawer.value = false;
+
+    void nextTick(() => (showLateralDrawer.value = true));
   }),
 );
 

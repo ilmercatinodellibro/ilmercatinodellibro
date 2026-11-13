@@ -15,9 +15,9 @@ export function useTranslatedFilters(key: FilterPath) {
   const { tm, rt } = useI18n();
   return computed(() => {
     const returnObject: Record<string, string> = {};
-    Object.entries(tm(key)).forEach(([key, value]) => {
-      returnObject[key] = rt(value);
-    });
+    for (const [filterKey, value] of Object.entries(tm(key))) {
+      returnObject[filterKey] = rt(value);
+    }
     return returnObject;
   });
 }

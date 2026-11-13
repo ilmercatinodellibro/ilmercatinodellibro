@@ -49,7 +49,7 @@ export default defineConfig(
   {
     name: "quasar/node",
 
-    files: ["quasar.config.js"],
+    files: ["quasar.config.js", "postcss.config.js"],
 
     languageOptions: {
       globals: {
@@ -58,9 +58,10 @@ export default defineConfig(
     },
 
     rules: {
-      // @quasar/app-vite 1 loads quasar.config.js as CommonJS
-      // TODO: remove when migrating to an ESM/TS Quasar config
+      // @quasar/app-vite 1 loads quasar.config.js as CommonJS, and the package isn't "type": "module"
+      // TODO: remove when migrating to ESM configs
       "unicorn/prefer-module": "off",
+      "@typescript-eslint/no-require-imports": "off",
     },
   },
   {
@@ -81,11 +82,22 @@ export default defineConfig(
     files: ["**/*.vue"],
     rules: {
       "vue/no-unsupported-features": ["error", { version: vueVersion }],
+
+      // It suggests useTemplateRef(), which is only available since Vue 3.5
+      // TODO: enable when upgrading to Vue 3.5
+      "vue/prefer-use-template-ref": "off",
     },
   },
 
   {
     name: "custom",
+
+    rules: {
+      // It suggests Array#toSorted(), which needs Chrome 110, Firefox 115 and Safari 16,
+      // while quasar.config.js build.target still includes older browsers
+      // TODO: enable when raising build.target
+      "unicorn/no-array-sort": "off",
+    },
 
     languageOptions: {
       parserOptions: {
@@ -117,6 +129,17 @@ export default defineConfig(
   },
 
   {
+    name: "custom/dialogs",
+
+    files: ["src/**/*-dialog.vue"],
+
+    rules: {
+      // Quasar Dialog plugin custom components are created one-off, so `props` isn't reactive
+      "vue/no-setup-props-reactivity-loss": "off",
+    },
+  },
+
+  {
     name: "custom/cypress",
 
     files: ["**/*.cy.{js,jsx,ts,tsx}"],
@@ -129,6 +152,17 @@ export default defineConfig(
     rules: {
       // Allow chai-style assertions, e.g. `expect(foo).to.be.true`
       "@typescript-eslint/no-unused-expressions": "off",
+    },
+  },
+  {
+    name: "custom/cypress-chains",
+
+    files: ["test/cypress/**"],
+
+    rules: {
+      // Cypress chains have a then() method, but they aren't promises
+      "promise/catch-or-return": "off",
+      "promise/no-callback-in-promise": "off",
     },
   },
 );

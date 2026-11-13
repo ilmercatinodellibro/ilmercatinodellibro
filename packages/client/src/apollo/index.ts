@@ -15,6 +15,9 @@ import { useAuthService } from "src/services/auth";
 
 const { getJwtHeader } = useAuthService();
 
+// See https://github.com/apollographql/apollo-client/issues/6868#issuecomment-703282751
+const mergeIncoming = (_existing: unknown, incoming: unknown) => incoming;
+
 export function getClientOptions() {
   const authLink = setContext((_, { headers }) => {
     return {
@@ -58,9 +61,6 @@ export function getClientOptions() {
     wsLink,
     from([authLink, httpLink]),
   );
-
-  // See https://github.com/apollographql/apollo-client/issues/6868#issuecomment-703282751
-  const mergeIncoming = (_existing: unknown, incoming: unknown) => incoming;
 
   const typePolicies: StrictTypedTypePolicies = {
     Query: {

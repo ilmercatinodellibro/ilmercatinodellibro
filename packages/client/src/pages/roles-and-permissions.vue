@@ -78,6 +78,7 @@
 <script setup lang="ts">
 import type { ApolloError } from "@apollo/client";
 import { mdiPlus } from "@quasar/extras/mdi-v7";
+import { noop } from "lodash-es";
 import { Dialog, Notify, type QTableColumn, type QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -159,7 +160,7 @@ const columns = computed<QTableColumn<MemberFragment>[]>(() => [
     format: (value: Role) => t(`roleMap.${value}`),
   },
   {
-    field: () => {},
+    field: noop,
     label: "",
     name: "actions",
     align: "center",

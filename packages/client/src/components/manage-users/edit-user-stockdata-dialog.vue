@@ -159,7 +159,7 @@
 
 <script setup lang="ts">
 import { mdiInformationOutline } from "@quasar/extras/mdi-v7";
-import { startCase, toLower } from "lodash-es";
+import { noop, startCase, toLower } from "lodash-es";
 import { Dialog, type QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -318,7 +318,7 @@ const booksToRegisterColumns = computed<QTableColumn<BookSummaryFragment>[]>(
 
     {
       label: t("manageUsers.actions"),
-      field: () => {},
+      field: noop,
       name: "actions",
       align: "center",
       classes: isMobile.value ? "no-padding" : "",

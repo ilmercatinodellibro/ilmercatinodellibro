@@ -4,6 +4,10 @@ import { join, resolve } from "node:path";
 import type { CodegenConfig } from "@graphql-codegen/cli";
 import glob from "fast-glob";
 
+// https://github.com/mrmlnc/fast-glob/tree/3.2.12#how-to-write-patterns-on-windows
+const normalizePaths = (paths: string[]) =>
+  paths.map((path) => path.replaceAll("\\", "/"));
+
 const config: CodegenConfig = {
   overwrite: true,
   schema: "../server/src/@generated/schema.graphql",
@@ -61,10 +65,6 @@ const config: CodegenConfig = {
      * @param filePaths array of file paths(relative&absolute mixed) that will be written
      */
     async beforeAllFileWrite(...filePaths: string[]) {
-      // https://github.com/mrmlnc/fast-glob/tree/3.2.12#how-to-write-patterns-on-windows
-      const normalizePaths = (paths: string[]) =>
-        paths.map((path) => path.replaceAll("\\", "/"));
-
       const pathsToStay = filePaths.map((file) => resolve(__dirname, file));
 
       const sources = [
@@ -74,7 +74,7 @@ const config: CodegenConfig = {
       const orphanPaths = await glob(normalizePaths(sources), {
         ignore: normalizePaths(pathsToStay),
       });
-      await Promise.all(orphanPaths.map((path) => unlink(path.toString())));
+      await Promise.all(orphanPaths.map((path) => unlink(path)));
     },
     afterAllFileWrite: [
       // 'eslint --fix' // ESLint has a ~3 seconds initial boot(?) time, it's not worth waiting for it, especially when launching the dev server

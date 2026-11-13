@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { Notify } from "quasar";
 import { defineAsyncComponent, reactive, ref } from "vue";
-import { useI18n } from "vue-i18n";
+import { I18nT, useI18n } from "vue-i18n";
 import SocialButton from "src/components/social-button.vue";
 import { notifyError } from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";

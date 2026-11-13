@@ -194,7 +194,7 @@ import {
   mdiDelete,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
-import { sumBy } from "lodash-es";
+import { noop, sumBy } from "lodash-es";
 import {
   Dialog,
   Notify,
@@ -242,7 +242,7 @@ const { isMobile } = useLateralDrawer();
 const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   {
     name: "selection",
-    field: () => {},
+    field: noop,
     label: "",
   },
   {
@@ -301,7 +301,7 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
   {
     name: "delete",
-    field: () => {},
+    field: noop,
     label: "",
     classes: isMobile.value ? "no-padding" : "",
   },

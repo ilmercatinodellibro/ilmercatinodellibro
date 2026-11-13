@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { cloneDeep, remove } from "lodash-es";
+import { cloneDeep, noop, remove } from "lodash-es";
 import { type QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -169,7 +169,7 @@ const columns = computed<QTableColumn<BookWithAvailableCopiesFragment>[]>(
     },
     {
       name: "actions",
-      field: () => {},
+      field: noop,
       label: "",
       classes: isMobile.value ? "no-padding" : "",
     },

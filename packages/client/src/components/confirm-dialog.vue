@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable-next-line vue/no-unused-refs -- "dialogRef" is returned by useDialogPluginComponent() in setup() -->
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <k-dialog-card
       :cancel-label="cancel"

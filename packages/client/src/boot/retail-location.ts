@@ -51,10 +51,12 @@ export default boot(({ router }) => {
   );
 
   router.beforeEach(async (to) => {
-    if (to.params.locationId) {
-      selectedLocationId.value = to.params.locationId as string;
-      await ensureLocationInitialized;
+    if (!to.params.locationId) {
+      return;
     }
+
+    selectedLocationId.value = to.params.locationId as string;
+    await ensureLocationInitialized;
   });
 
   // TODO: Use and enforce the user's preferred location (when implemented)

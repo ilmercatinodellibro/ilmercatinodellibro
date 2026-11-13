@@ -66,62 +66,72 @@ async function checkPassword(password: string) {
         numberOfOccurrences: number;
       }
     | undefined;
-  if (resp.ok) {
-    const reader = resp.body?.getReader();
-    if (reader) {
-      try {
-        const { value } = await reader.read();
-        if (value) {
-          const arrayOfRawStrings = String.fromCharCode(...value).split("\r\n");
-          for (
-            let index = 0;
-            index < arrayOfRawStrings.length &&
-            secondHalfAndOccurrenceFound === undefined;
-            index++
-          ) {
+  if (!resp.ok) {
+    return secondHalfAndOccurrenceFound;
+  }
+
+  const reader = resp.body?.getReader();
+  if (!reader) {
+    return secondHalfAndOccurrenceFound;
+  }
+
+  try {
+    const { value } = await reader.read();
+    if (value) {
+      const arrayOfRawStrings = String.fromCodePoint(...value).split("\r\n");
+      for (
+        let index = 0;
+        index < arrayOfRawStrings.length &&
+        secondHalfAndOccurrenceFound === undefined;
+        index++
+      ) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const splittedString = arrayOfRawStrings[index]!.split(":");
+        if (splittedString[0] === secondHalf) {
+          secondHalfAndOccurrenceFound = {
+            secondHalf: splittedString[0],
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const splittedString = arrayOfRawStrings[index]!.split(":");
-            if (splittedString[0] === secondHalf) {
-              secondHalfAndOccurrenceFound = {
-                secondHalf: splittedString[0],
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                numberOfOccurrences: Number.parseInt(splittedString[1]!),
-              };
-            }
-          }
+            numberOfOccurrences: Number.parseInt(splittedString[1]!),
+          };
         }
-      } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/no-deprecated
-        const { message } = error as ServerError;
-
-        notifyError(message);
-
-        throw error;
       }
     }
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    const { message } = error as ServerError;
+
+    notifyError(message);
+
+    throw error;
   }
   return secondHalfAndOccurrenceFound;
 }
 
 function getPercentageFromInterval(value: number, start = 0, end = 100) {
-  value = Math.min(Math.max(start, value), end);
+  const clampedValue = Math.min(Math.max(start, value), end);
   const intervalDimension = end - start;
-  return ((value - start) * 100) / intervalDimension;
+  return ((clampedValue - start) * 100) / intervalDimension;
 }
 
 function getValueFromPercentage(perc: number, start = 0, end = 100) {
-  perc = Math.min(Math.max(start, perc), end);
+  const clampedPerc = Math.min(Math.max(start, perc), end);
   const intervalDimension = end - start;
-  return (perc * intervalDimension) / 100 + start;
+  return (clampedPerc * intervalDimension) / 100 + start;
 }
 
-function getPercentageFromOccurrences(
-  numberOfOccurrences: number,
-  minOccurrences: number,
-  maxOccurrences: number,
-  rangeStart: number,
-  rangeMax: number,
-) {
+function getPercentageFromOccurrences({
+  numberOfOccurrences,
+  minOccurrences,
+  maxOccurrences,
+  rangeStart,
+  rangeMax,
+}: {
+  numberOfOccurrences: number;
+  minOccurrences: number;
+  maxOccurrences: number;
+  rangeStart: number;
+  rangeMax: number;
+}) {
   const occurrencePercentage = getPercentageFromInterval(
     numberOfOccurrences,
     minOccurrences,
@@ -260,13 +270,13 @@ export default defineComponent({
             color: "primary",
           }
         : {
-            percentage: getPercentageFromOccurrences(
-              currentStep.value.occurrences,
-              currentStep.value.minOccurrences,
-              currentStep.value.maxOccurrences,
-              currentStep.value.start,
-              currentStep.value.end,
-            ),
+            percentage: getPercentageFromOccurrences({
+              numberOfOccurrences: currentStep.value.occurrences,
+              minOccurrences: currentStep.value.minOccurrences,
+              maxOccurrences: currentStep.value.maxOccurrences,
+              rangeStart: currentStep.value.start,
+              rangeMax: currentStep.value.end,
+            }),
             color: currentStep.value.color,
             message: currentStep.value.message,
             iconName: currentStep.value.icon,

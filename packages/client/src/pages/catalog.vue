@@ -156,11 +156,14 @@ const columns = computed<QTableColumn<BookSummaryFragment>[]>(() => [
   },
 ]);
 
+// Initial values, onRequest keeps the pagination updated afterwards
+/* eslint-disable vue/no-ref-object-reactivity-loss */
 const pagination = ref({
   rowsPerPage: numberOfRows.value,
   rowsNumber: booksPaginationDetails.value.rowCount,
   page: currentPage.value,
 });
+/* eslint-enable vue/no-ref-object-reactivity-loss */
 
 onMounted(() => {
   tableRef.value?.requestServerInteraction();

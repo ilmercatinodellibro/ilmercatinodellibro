@@ -30,11 +30,7 @@ export function useStepperFormValidate(
   onMounted(async () => {
     const initialStep = stepperModel.value;
 
-    for (const [id, currentStep] of steps.entries()) {
-      if (currentStep === undefined) {
-        throw new Error(`Step at position "${id}" is not defined`);
-      }
-
+    for (const currentStep of steps) {
       // If the step form is not defined we need to visit the step, wait for next tick and then check if it is defined
       if (currentStep.formRef.value === undefined) {
         stepperModel.value = currentStep.name;

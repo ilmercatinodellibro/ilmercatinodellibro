@@ -28,7 +28,7 @@ export function evictQuery<
     throw new Error("Document does not contain a query operation");
   }
   const selection = definition.selectionSet.selections[0];
-  if (!selection || selection.kind !== Kind.FIELD) {
+  if (selection?.kind !== Kind.FIELD) {
     throw new Error("Query must select a field");
   }
 

@@ -38,6 +38,7 @@
 </template>
 
 <script setup lang="ts">
+import { noop } from "lodash-es";
 import { Notify, type QTableColumn, date } from "quasar";
 import { computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
@@ -76,7 +77,7 @@ const columns = computed<QTableColumn<ReceiptFragment>[]>(() => [
   },
   {
     label: "",
-    field: () => {},
+    field: noop,
     name: "resend",
     align: "center",
     classes: "width-0",

@@ -13,6 +13,8 @@ const router = useRouter();
 const { query, params: parameters } = useRoute();
 const { login } = useSocialLogin();
 
+// Top-level await in <script setup> would make this an async component, which requires <Suspense>
+// eslint-disable-next-line unicorn/prefer-top-level-await
 void (async () => {
   try {
     await login(query.token as string);

@@ -206,7 +206,7 @@ import {
   mdiGift,
   mdiMagnify,
 } from "@quasar/extras/mdi-v7";
-import { sumBy } from "lodash-es";
+import { noop, sumBy } from "lodash-es";
 import { Notify, type QChipProps, QTab, type QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -343,7 +343,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
     [BooksTab.DELIVERED]: [
       {
         name: "status",
-        field: () => {},
+        field: noop,
         label: t("book.fields.status"),
         align: "left",
       },
@@ -407,7 +407,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
         : [
             {
               name: "cancel-request",
-              field: () => {},
+              field: noop,
               label: "",
             } satisfies QTableColumn<TablesRowsTypes>,
           ]),
@@ -424,7 +424,7 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
       },
       {
         name: "actions",
-        field: () => {},
+        field: noop,
         label: "",
         classes: isMobile.value ? "no-padding" : "",
       },
@@ -433,6 +433,8 @@ const columns = computed<Record<BooksTab, QTableColumn<TablesRowsTypes>[]>>(
 );
 
 const selectedTab = ref(
+  // Not validated, the tab query param is set by the app own links (e.g. in reserve-books.vue)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-assignment
   (route.query.tab as BooksTab | undefined) ?? BooksTab.REQUESTED,
 );
 

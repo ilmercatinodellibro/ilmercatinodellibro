@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { startCase, toLower } from "lodash-es";
+import { noop, startCase, toLower } from "lodash-es";
 import type { QTableColumn, QTableProps } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -137,7 +137,7 @@ const columns = computed<
   },
   {
     name: "actions",
-    field: () => {},
+    field: noop,
     label: t("manageUsers.actions"),
     align: "center",
     classes: isMobile.value ? "no-padding" : "",

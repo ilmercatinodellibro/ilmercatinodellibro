@@ -15,6 +15,8 @@ export default defineComponent({
     },
   },
   setup(props) {
+    // The dialog is opened once with the props given at mount time
+    // eslint-disable-next-line vue/no-setup-props-reactivity-loss
     Dialog.create({
       component: props.component,
 
