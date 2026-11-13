@@ -8,8 +8,8 @@ import {
   GraphQLSchemaBuilderModule,
   GraphQLSchemaFactory,
 } from "@nestjs/graphql";
-import glob from "fast-glob";
 import { printSchema } from "graphql";
+import { glob } from "tinyglobby";
 import { DateScalar } from "./date.scalar";
 
 async function generate() {
@@ -34,13 +34,14 @@ void generate();
 async function getResolvers(source: string | string[]) {
   const resolvers: FunctionConstructor[] = [];
   const sourceArray = Array.isArray(source) ? source : [source];
-  // https://github.com/mrmlnc/fast-glob/tree/3.2.12#how-to-write-patterns-on-windows
+  // Backslashes are not portable glob path separators
   const normalizedSource = sourceArray.map((source) =>
     source.replaceAll("\\", "/"),
   );
-  for await (const path of glob.stream(normalizedSource)) {
+  const paths = await glob(normalizedSource);
+  for (const path of paths) {
     // May contain multiple resolvers
-    const module = (await import(path.toString())) as Record<string, unknown>;
+    const module = (await import(path)) as Record<string, unknown>;
 
     for (const member of Object.values(module)) {
       if (!isClass(member)) {

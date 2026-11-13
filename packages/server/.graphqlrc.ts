@@ -1,9 +1,8 @@
 import { relative, resolve } from "node:path";
-import { configDotenv } from "dotenv";
-import { expand } from "dotenv-expand";
+import { config } from "@dotenvx/dotenvx";
 import type { IGraphQLProject } from "graphql-config";
 
-const { SERVER_URL } = expand(configDotenv()).parsed ?? {};
+const { SERVER_URL } = config().parsed ?? {};
 
 // graphql-config expects the paths to be relative to the root config file
 const monorepoRoot = resolve(__dirname, "../..");
