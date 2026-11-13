@@ -162,6 +162,30 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@types/lodash':
+      specifier: ^4.17.7
+      version: 4.17.7
+    dotenv:
+      specifier: ^16.4.5
+      version: 16.4.5
+    dotenv-expand:
+      specifier: ^10.0.0
+      version: 10.0.0
+    fast-glob:
+      specifier: ^3.3.3
+      version: 3.3.3
+    graphql:
+      specifier: ^16.8.1
+      version: 16.8.1
+    graphql-ws:
+      specifier: ^5.16.0
+      version: 5.16.0
+    lodash:
+      specifier: ^4.17.21
+      version: 4.17.21
+
 overrides:
   vite: ^5.0.10
   '@vitejs/plugin-vue': ^4.5.2
@@ -235,10 +259,10 @@ importers:
         specifier: ^10.9.0
         version: 10.9.0(vue@3.4.19(typescript@5.9.3))
       dotenv:
-        specifier: ^16.4.5
+        specifier: 'catalog:'
         version: 16.4.5
       dotenv-expand:
-        specifier: ^10.0.0
+        specifier: 'catalog:'
         version: 10.0.0
       echarts:
         specifier: ^5.5.1
@@ -247,10 +271,10 @@ importers:
         specifier: ^10.10.0
         version: 10.10.0
       graphql:
-        specifier: ^16.8.1
+        specifier: 'catalog:'
         version: 16.8.1
       graphql-ws:
-        specifier: ^5.16.0
+        specifier: 'catalog:'
         version: 5.16.0(graphql@16.8.1)
       jwt-decode:
         specifier: ^3.1.2
@@ -311,7 +335,7 @@ importers:
         specifier: ^5.2.1
         version: 5.2.1(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.21.4(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(babel-loader@8.3.0(@babel/core@7.29.13(supports-color@8.1.1))(webpack@5.90.1(esbuild@0.21.5)(uglify-js@3.17.4)))(cypress@13.7.2)(eslint-plugin-cypress@7.0.4(@typescript-eslint/parser@8.72.2(eslint@10.14.0(jiti@2.4.2)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(eslint@10.14.0(jiti@2.4.2)(supports-color@8.1.1)))(supports-color@8.1.1)(vite@5.4.21(@types/node@24.19.2)(sass@1.70.0)(terser@5.29.2))(webpack@5.90.1(esbuild@0.21.5)(uglify-js@3.17.4))
       '@types/lodash':
-        specifier: ^4.17.7
+        specifier: 'catalog:'
         version: 4.17.7
       '@types/lodash-es':
         specifier: ^4.17.12
@@ -332,10 +356,10 @@ importers:
         specifier: ^7.0.4
         version: 7.0.4(@typescript-eslint/parser@8.72.2(eslint@10.14.0(jiti@2.4.2)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@5.9.3))(eslint@10.14.0(jiti@2.4.2)(supports-color@8.1.1))
       fast-glob:
-        specifier: ^3.3.3
+        specifier: 'catalog:'
         version: 3.3.3
       lodash:
-        specifier: ^4.17.21
+        specifier: 'catalog:'
         version: 4.17.21
       smtp-tester:
         specifier: ^2.1.0
@@ -443,7 +467,7 @@ importers:
         specifier: ^6.3.5
         version: 6.3.5
       dotenv:
-        specifier: ^16.4.5
+        specifier: 'catalog:'
         version: 16.4.5
       ejs:
         specifier: ^3.1.9
@@ -452,19 +476,19 @@ importers:
         specifier: ^11.11.0
         version: 11.11.0(supports-color@8.1.1)
       graphql:
-        specifier: ^16.8.1
+        specifier: 'catalog:'
         version: 16.8.1
       graphql-subscriptions:
         specifier: ^2.0.0
         version: 2.0.0(graphql@16.8.1)
       graphql-ws:
-        specifier: ^5.14.0
+        specifier: 'catalog:'
         version: 5.16.0(graphql@16.8.1)
       html-to-text:
         specifier: ^9.0.5
         version: 9.0.5
       lodash:
-        specifier: ^4.17.21
+        specifier: 'catalog:'
         version: 4.17.21
       nest-commander:
         specifier: ^3.12.5
@@ -522,7 +546,7 @@ importers:
         specifier: ^9.0.4
         version: 9.0.4
       '@types/lodash':
-        specifier: ^4.17.7
+        specifier: 'catalog:'
         version: 4.17.7
       '@types/multer':
         specifier: ^1.4.11
@@ -555,10 +579,10 @@ importers:
         specifier: ^0.5.1
         version: 0.5.1
       dotenv-expand:
-        specifier: ^10.0.0
+        specifier: 'catalog:'
         version: 10.0.0
       fast-glob:
-        specifier: ^3.3.3
+        specifier: 'catalog:'
         version: 3.3.3
       graphql-scalars:
         specifier: ^1.23.0

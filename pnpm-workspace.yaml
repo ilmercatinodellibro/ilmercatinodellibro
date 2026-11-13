@@ -19,6 +19,16 @@ publicHoistPattern:
   # The client references its "vite/client" types and the Cypress preprocessor imports it
   - vite
 
+# Versions shared by more than one package
+catalog:
+  dotenv: ^16.4.5
+  dotenv-expand: ^10.0.0
+  fast-glob: ^3.3.3
+  graphql: ^16.8.1
+  graphql-ws: ^5.16.0
+  lodash: ^4.17.21
+  "@types/lodash": ^4.17.7
+
 allowBuilds:
   "@apollo/protobufjs": true
   "@nestjs/core": false # Just prints Open Collective information
