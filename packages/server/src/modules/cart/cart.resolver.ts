@@ -163,7 +163,7 @@ export class CartResolver {
         }));
 
         // no requests means there can't be reservations either, so we can safely check the book availability
-        if (!bookDetails.meta.isAvailable) {
+        if (!bookDetails.meta?.isAvailable) {
           throw new UnprocessableEntityException("BOOK_NOT_AVAILABLE", {
             description: "The book is not available",
           });
@@ -175,7 +175,7 @@ export class CartResolver {
       // The book availability applies to all users, so we first check if this specific user already has a reservation for the book
       if (
         bookDetails.reservations.length === 0 &&
-        !bookDetails.meta.isAvailable
+        !bookDetails.meta?.isAvailable
       ) {
         throw new UnprocessableEntityException("BOOK_NOT_AVAILABLE", {
           description: "The book is not available",

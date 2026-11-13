@@ -15,7 +15,7 @@ import { NewNotificationPayload } from "src/modules/notification/send-push-notif
 import { PrismaService } from "src/modules/prisma/prisma.service";
 
 type RequestQueue = PrismaRequestQueue & {
-  book: Book & { meta: BookMeta; retailLocation: RetailLocation };
+  book: Book & { meta: BookMeta | null; retailLocation: RetailLocation };
   currentRequest: BookRequest;
 };
 
@@ -111,7 +111,7 @@ export class BookRequestService {
       if (
         book.requests.length === 0 ||
         // check for availability just in case
-        !book.meta.isAvailable ||
+        !book.meta?.isAvailable ||
         book.requestQueue
       ) {
         continue;
@@ -277,7 +277,7 @@ export class BookRequestService {
     id: queueId,
     currentRequest,
   }: RequestQueue) {
-    if (!book.meta.isAvailable) {
+    if (!book.meta?.isAvailable) {
       await this.prisma.requestQueue.delete({
         where: { id: queueId },
       });

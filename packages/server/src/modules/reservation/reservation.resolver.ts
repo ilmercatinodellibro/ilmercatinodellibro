@@ -207,7 +207,7 @@ export class ReservationResolver {
 
     if (
       books.some(
-        ({ meta, requests }) => !meta.isAvailable && requests.length > 0,
+        ({ meta, requests }) => !meta?.isAvailable && requests.length > 0,
       )
     ) {
       throw new UnprocessableEntityException(
@@ -235,13 +235,13 @@ export class ReservationResolver {
     }
 
     const booksToPromoteRequests = books.filter(
-      ({ meta, requests }) => meta.isAvailable && requests.length > 0,
+      ({ meta, requests }) => meta?.isAvailable && requests.length > 0,
     );
     const booksToRequestAndReserve = books.filter(
-      ({ meta, requests }) => meta.isAvailable && requests.length === 0,
+      ({ meta, requests }) => meta?.isAvailable && requests.length === 0,
     );
     const booksToRequest = books.filter(
-      ({ meta, requests }) => !meta.isAvailable && requests.length === 0,
+      ({ meta, requests }) => !meta?.isAvailable && requests.length === 0,
     );
 
     const retailLocation = await this.prisma.retailLocation.findUniqueOrThrow({
