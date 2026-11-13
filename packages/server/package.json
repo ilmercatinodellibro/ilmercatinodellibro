@@ -86,7 +86,7 @@
     "bullmq": "^6.7.5",
     "csv": "^6.6.4",
     "dotenv": "catalog:",
-    "ejs": "^3.1.10",
+    "ejs": "^7.0.2",
     "firebase-admin": "^11.11.1",
     "graphql": "catalog:",
     "graphql-subscriptions": "^2.0.0",
