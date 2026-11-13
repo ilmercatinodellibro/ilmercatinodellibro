@@ -65,7 +65,7 @@
     "autoprefixer": "^10.6.2",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
-    "fast-glob": "catalog:",
+    "tinyglobby": "catalog:",
     "vite-plugin-checker": "^0.14.5",
     "vue-tsc": "~3.3.14"
   }

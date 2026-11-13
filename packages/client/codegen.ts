@@ -2,9 +2,9 @@ import { unlink } from "node:fs/promises";
 import os from "node:os";
 import { join, resolve } from "node:path";
 import type { CodegenConfig } from "@graphql-codegen/cli";
-import glob from "fast-glob";
+import { glob } from "tinyglobby";
 
-// https://github.com/mrmlnc/fast-glob/tree/3.2.12#how-to-write-patterns-on-windows
+// In glob patterns "\" escapes the next character, so Windows paths need "/" as separator
 const normalizePaths = (paths: string[]) =>
   paths.map((path) => path.replaceAll("\\", "/"));
 

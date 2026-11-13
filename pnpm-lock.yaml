@@ -164,15 +164,15 @@ settings:
 
 catalogs:
   default:
-    fast-glob:
-      specifier: ^3.3.3
-      version: 3.3.3
     graphql:
       specifier: ^16.14.2
       version: 16.15.0
     graphql-ws:
       specifier: ^6.4.2
       version: 6.4.2
+    tinyglobby:
+      specifier: ^0.2.17
+      version: 0.2.17
 
 overrides:
   nest-commander>@golevelup/nestjs-discovery: 7.1.0
@@ -326,9 +326,9 @@ importers:
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
-      fast-glob:
+      tinyglobby:
         specifier: 'catalog:'
-        version: 3.3.3
+        version: 0.2.17
       vite-plugin-checker:
         specifier: ^0.14.5
         version: 0.14.5(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(meow@13.2.0)(stylelint@16.26.1(supports-color@8.1.1)(typescript@6.0.3))(typescript@6.0.3)(vite@8.3.8(@types/node@24.19.2)(jiti@2.7.0)(sass-embedded@1.108.2)(sass@1.108.2)(terser@5.51.2)(yaml@2.9.1))(vue-tsc@3.3.14(typescript@6.0.3))
@@ -590,7 +590,7 @@ importers:
         specifier: ^6.3.4
         version: 6.3.4(supports-color@8.1.1)
       tinyglobby:
-        specifier: ^0.2.17
+        specifier: 'catalog:'
         version: 0.2.17
       ts-jest:
         specifier: 28.0.8

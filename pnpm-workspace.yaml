@@ -16,9 +16,9 @@ publicHoistPattern:
 
 # Versions shared by more than one package
 catalog:
-  fast-glob: ^3.3.3
   graphql: ^16.14.2
   graphql-ws: ^6.4.2
+  tinyglobby: ^0.2.17
 
 allowBuilds:
   "@apollo/protobufjs": true
