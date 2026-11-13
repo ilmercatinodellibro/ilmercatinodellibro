@@ -1,10 +1,10 @@
 import { basename, dirname, extname } from "node:path";
 import { clone } from "lodash"; // lodash-es doesn't work for some reason
-import { RollupWatcher } from "rollup";
 import {
   mergeConfig,
   build as viteBuild,
   type BuildOptions,
+  type Rollup,
   type UserConfig,
 } from "vite";
 
@@ -99,7 +99,7 @@ export function vitePreprocessor() {
       }),
     );
     if (shouldWatch) {
-      const watcher = result as unknown as RollupWatcher;
+      const watcher = result as unknown as Rollup.RollupWatcher;
       watcher.on("event", (event) => {
         if (event.code === "END") {
           file.emit("rerun");
