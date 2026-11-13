@@ -1,12 +1,12 @@
+import { defineBoot } from "#q-app";
 import { until } from "@vueuse/core";
 import { LocalStorage, Quasar, type QuasarLanguage } from "quasar";
-import { boot } from "quasar/wrappers";
 import { type IntlDateTimeFormat, createI18n } from "vue-i18n";
-import type { UpdateUserPayload } from "src/@generated/graphql";
-import messages from "src/i18n";
-import { useAuthService } from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
-import { useUpdateUserMutation } from "src/services/user.graphql";
+import type { UpdateUserPayload } from "@/@generated/graphql";
+import messages from "@/i18n";
+import { useAuthService } from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
+import { useUpdateUserMutation } from "@/services/user.graphql";
 
 export type MessageLanguages = keyof typeof messages;
 // Type-define 'en-US' as the master schema for the resource
@@ -66,7 +66,7 @@ export function useI18nOutsideSetup() {
 
 export const STORAGE_LOCALE_KEY = "application-locale";
 
-export default boot(async ({ app }) => {
+export default defineBoot(async ({ app }) => {
   const { onLogin } = useAuthService();
   const locale = LocalStorage.getItem<MessageLanguages>(STORAGE_LOCALE_KEY);
   if (locale) {
@@ -84,13 +84,13 @@ export default boot(async ({ app }) => {
 
 const quasarLanguageList = import.meta.glob(
   // Keep the languages in sync with what's available in src/i18n/*
-  "../../node_modules/quasar/lang/(en-US|it).mjs",
+  "../../node_modules/quasar/lang/{en-US,it}.js",
 );
 export async function setLanguage(languageCode: MessageLanguages) {
   i18n.global.locale.value = languageCode;
 
   const { default: languagePack } = (await quasarLanguageList[
-    `../../node_modules/quasar/lang/${languageCode}.mjs`
+    `../../node_modules/quasar/lang/${languageCode}.js`
   ]?.()) as { default: QuasarLanguage };
   Quasar.lang.set(languagePack);
 

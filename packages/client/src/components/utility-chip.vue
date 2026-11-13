@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { BookUtility } from "src/@generated/graphql";
+import type { BookUtility } from "@/@generated/graphql";
 
 const props = defineProps<{
   utility: BookUtility;

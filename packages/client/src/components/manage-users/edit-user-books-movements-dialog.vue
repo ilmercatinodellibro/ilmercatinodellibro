@@ -151,18 +151,18 @@ import {
 } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import KDialogCard from "src/components/k-dialog-card.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { hasProblem, reportOrSolveProblem } from "src/helpers/book-copy";
-import { notifyError } from "src/helpers/error-messages";
+import KDialogCard from "@/components/k-dialog-card.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { hasProblem, reportOrSolveProblem } from "@/helpers/book-copy";
+import { notifyError } from "@/helpers/error-messages";
 import {
   type BookCopyDetailsFragment,
   useGetPurchasedBookCopiesQuery,
   useGetSoldBookCopiesQuery,
   useRefundBookCopyMutation,
-} from "src/services/book-copy.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
-import type { UserSummaryFragment } from "src/services/user.graphql";
+} from "@/services/book-copy.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
+import type { UserSummaryFragment } from "@/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import ProblemsButton from "../problems-button.vue";
 import ChipButton from "./chip-button.vue";

@@ -35,12 +35,12 @@
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import { useTheme } from "src/composables/use-theme";
-import { notifyError } from "src/helpers/error-messages";
-import { emailRule, requiredRule } from "src/helpers/rules";
-import type { ServerError } from "src/models/server";
-import { useSendPasswordResetLinkMutation } from "src/services/auth.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+import { useTheme } from "@/composables/use-theme";
+import { notifyError } from "@/helpers/error-messages";
+import { emailRule, requiredRule } from "@/helpers/rules";
+import type { ServerError } from "@/models/server";
+import { useSendPasswordResetLinkMutation } from "@/services/auth.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const { t } = useI18n();
 

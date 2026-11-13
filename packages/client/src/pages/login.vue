@@ -119,20 +119,20 @@ import { mdiArrowDown, mdiArrowLeft } from "@quasar/extras/mdi-v7";
 import { Notify, QCard } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import type { LoginPayload } from "src/@generated/graphql";
-import FaqInfo from "src/components/faq-info.vue";
-import KPasswordInput from "src/components/k-password-input.vue";
-import SocialAuthButtons from "src/components/social-auth-buttons.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTheme } from "src/composables/use-theme";
+import type { LoginPayload } from "@/@generated/graphql";
+import FaqInfo from "@/components/faq-info.vue";
+import KPasswordInput from "@/components/k-password-input.vue";
+import SocialAuthButtons from "@/components/social-auth-buttons.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTheme } from "@/composables/use-theme";
 import {
   isExpectedServerError,
   notifyServerError,
-} from "src/helpers/error-messages";
-import { emailRule, requiredRule } from "src/helpers/rules";
-import { AvailableRouteNames } from "src/models/routes";
-import { useLoginMutation } from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/helpers/error-messages";
+import { emailRule, requiredRule } from "@/helpers/rules";
+import { AvailableRouteNames } from "@/models/routes";
+import { useLoginMutation } from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const props = defineProps<{
   emailVerified?: boolean;
@@ -146,7 +146,7 @@ const { isMobile } = useLateralDrawer();
 const { theme } = useTheme();
 
 const SOCIAL_LOGIN_ENABLED =
-  process.env.SOCIAL_LOGIN_ENABLED === "true" &&
+  import.meta.env.SOCIAL_LOGIN_ENABLED &&
   selectedLocation.value.registrationEnabled;
 
 if (props.emailVerified) {

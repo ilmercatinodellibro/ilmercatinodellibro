@@ -3,8 +3,8 @@ import { computed, reactive } from "vue";
 import {
   type FilterPath,
   useTranslatedFilters,
-} from "src/composables/use-filter-translations";
-import type { TableFilters } from "src/models/book";
+} from "@/composables/use-filter-translations";
+import type { TableFilters } from "@/models/book";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 const filterMethod: QTableProps["filterMethod"] = (rows) => rows;

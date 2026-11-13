@@ -1,7 +1,7 @@
 import type { QSelectOption } from "quasar";
 import { type Ref, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { injectorFactory } from "src/helpers/injector-factory";
+import { injectorFactory } from "@/helpers/injector-factory";
 
 export type HeaderFilterModel<T> =
   QSelectOption<T> | QSelectOption<T>[] | undefined;

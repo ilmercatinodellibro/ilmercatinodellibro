@@ -545,27 +545,27 @@ import {
 } from "quasar";
 import { watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { setLanguage } from "src/boot/i18n";
-import AppDrawer from "src/components/app-drawer.vue";
-import HeaderBar from "src/components/header-bar.vue";
-import ImportBooksAndSchoolsDialog from "src/components/import-books-and-schools-dialog.vue";
+import { setLanguage } from "@/boot/i18n";
+import AppDrawer from "@/components/app-drawer.vue";
+import HeaderBar from "@/components/header-bar.vue";
+import ImportBooksAndSchoolsDialog from "@/components/import-books-and-schools-dialog.vue";
 import type {
   SettingsDialogProps,
   SettingsUpdate,
-} from "src/components/settings-dialog";
-import SettingsDialog from "src/components/settings-dialog.vue";
-import { provideHeaderActions } from "src/composables/header-features/use-header-actions";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { notifyError } from "src/helpers/error-messages";
-import { languages } from "src/models/language";
-import { AvailableRouteNames } from "src/models/routes";
-import { useAuthService, useLogoutMutation } from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/components/settings-dialog";
+import SettingsDialog from "@/components/settings-dialog.vue";
+import { provideHeaderActions } from "@/composables/header-features/use-header-actions";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { notifyError } from "@/helpers/error-messages";
+import { languages } from "@/models/language";
+import { AvailableRouteNames } from "@/models/routes";
+import { useAuthService, useLogoutMutation } from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
   RetailLocationFragmentDoc,
   useResetRetailLocationMutation,
   useUpdateRetailLocationSettingsMutation,
-} from "src/services/retail-location.graphql";
+} from "@/services/retail-location.graphql";
 
 // It would work with :inset-level="1" if we used "avatar" option instead of "side" for the header icon
 // but we only need 16px of margin from the icon, so we defined a value which would align the text accordingly

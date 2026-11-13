@@ -58,7 +58,7 @@ import {
 } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import type { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
+import type { HeaderFilterModel } from "@/composables/header-features/use-header-filters";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 interface HeaderFiltersProps {

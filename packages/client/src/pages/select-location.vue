@@ -31,11 +31,11 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import ActionBox from "src/components/action-box.vue";
-import LanguageDropdownButton from "src/components/language-dropdown-button.vue";
-import { AvailableRouteNames } from "src/models/routes";
-import { useRetailLocationService } from "src/services/retail-location";
-import type { RetailLocationFragment } from "src/services/retail-location.graphql";
+import ActionBox from "@/components/action-box.vue";
+import LanguageDropdownButton from "@/components/language-dropdown-button.vue";
+import { AvailableRouteNames } from "@/models/routes";
+import { useRetailLocationService } from "@/services/retail-location";
+import type { RetailLocationFragment } from "@/services/retail-location.graphql";
 
 const { retailLocations, loading, selectedLocationId } =
   useRetailLocationService();

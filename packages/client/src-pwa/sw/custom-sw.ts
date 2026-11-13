@@ -1,7 +1,7 @@
 /*
  * This file (which will be your service worker)
  * is picked up by the build system ONLY if
- * quasar.config.js > pwa > workboxMode is set to "injectManifest"
+ * quasar.config file > pwa > workboxMode is set to "injectManifest"
  */
 
 declare const self: ServiceWorkerGlobalScope & typeof globalThis;
@@ -28,14 +28,14 @@ cleanupOutdatedCaches();
 // Production SSR fallback to offline.html (except for dev)
 // app-vite doesn't precache the index.html file, so we disable the fallback on development until it is fixed:
 // https://github.com/quasarframework/quasar/issues/15030
-// if (process.env.MODE !== "ssr" || process.env.PROD) {
-if (process.env.PROD) {
+// if (import.meta.env.QUASAR_MODE !== "ssr" || import.meta.env.QUASAR_PROD) {
+if (import.meta.env.QUASAR_PROD) {
   registerRoute(
     new NavigationRoute(
-      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
+      createHandlerBoundToURL(import.meta.env.QUASAR_PWA_FALLBACK_HTML),
       {
         denylist: [
-          /sw\.js$/,
+          new RegExp(import.meta.env.QUASAR_PWA_SERVICE_WORKER_REGEX),
           /workbox-(.)*\.js$/,
           // Had to add this line to prevent Webworker from caching the response
           /auth\/*/,
@@ -48,12 +48,12 @@ if (process.env.PROD) {
   );
 }
 
-if (process.env.WEB_PUSH_ENABLED === "true") {
+if (import.meta.env.WEB_PUSH_ENABLED) {
   const firebaseApp = initializeApp({
-    apiKey: process.env.FIREBASE_API_KEY,
-    appId: process.env.FIREBASE_APP_ID,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    projectId: process.env.FIREBASE_PROJECT_ID,
+    apiKey: import.meta.env.FIREBASE_API_KEY,
+    appId: import.meta.env.FIREBASE_APP_ID,
+    messagingSenderId: import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
+    projectId: import.meta.env.FIREBASE_PROJECT_ID,
   });
 
   const messaging = getMessaging(firebaseApp);

@@ -163,25 +163,25 @@ import { noop, startCase, toLower } from "lodash-es";
 import { Dialog, type QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { evictQuery } from "src/apollo/cache";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { calculateBookCopyPrice } from "src/helpers/book-copy";
-import { notifyError } from "src/helpers/error-messages";
-import { formatPrice } from "src/helpers/formatting";
-import { fetchBookByISBN } from "src/services/book";
+import { evictQuery } from "@/apollo/cache";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { calculateBookCopyPrice } from "@/helpers/book-copy";
+import { notifyError } from "@/helpers/error-messages";
+import { formatPrice } from "@/helpers/formatting";
+import { fetchBookByISBN } from "@/services/book";
 import {
   type BookCopyDetailsFragment,
   GetBookCopiesInStockDocument,
   useCreateBookCopiesMutation,
   useGetBookCopiesInStockQuery,
-} from "src/services/book-copy.graphql";
-import type { BookSummaryFragment } from "src/services/book.graphql";
-import { GetReceiptsDocument } from "src/services/receipt.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/services/book-copy.graphql";
+import type { BookSummaryFragment } from "@/services/book.graphql";
+import { GetReceiptsDocument } from "@/services/receipt.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
   type CustomerFragment,
   CustomerFragmentDoc,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import UtilityChip from "../utility-chip.vue";
@@ -230,7 +230,7 @@ function getCommonColumns<
     : BookCopyDetailsFragment),
 >(entity: TEntity): QTableColumn<TFragment>[] {
   const getField = (
-    field: QTableColumn<BookSummaryFragment>["field"],
+    field: NonNullable<QTableColumn<BookSummaryFragment>["field"]>,
   ): QTableColumn<TFragment>["field"] =>
     entity === "book"
       ? (field as QTableColumn<TFragment>["field"])

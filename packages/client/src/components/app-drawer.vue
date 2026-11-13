@@ -40,8 +40,8 @@ import {
   DRAWER_BREAKPOINT,
   DRAWER_WIDTH,
   useLateralDrawer,
-} from "src/composables/use-lateral-drawer";
-import { useTheme } from "src/composables/use-theme";
+} from "@/composables/use-lateral-drawer";
+import { useTheme } from "@/composables/use-theme";
 
 const { t } = useI18n();
 

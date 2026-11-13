@@ -82,25 +82,25 @@ import { noop } from "lodash-es";
 import { Dialog, Notify, type QTableColumn, type QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import type { Role } from "src/@generated/graphql";
-import { evictQuery } from "src/apollo/cache";
-import ActionsListButton from "src/components/actions-list-button.vue";
-import AddNewUserDialog from "src/components/add-new-user-dialog.vue";
-import ConfirmDialog from "src/components/confirm-dialog.vue";
-import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
-import DialogTable from "src/components/manage-users/dialog-table.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTableFilters } from "src/composables/use-table-filters";
-import { notifyError } from "src/helpers/error-messages";
-import { useAddOrInviteOperatorMutation } from "src/services/auth.graphql";
-import { useMembersService } from "src/services/member";
-import { useRetailLocationService } from "src/services/retail-location";
+import type { Role } from "@/@generated/graphql";
+import { evictQuery } from "@/apollo/cache";
+import ActionsListButton from "@/components/actions-list-button.vue";
+import AddNewUserDialog from "@/components/add-new-user-dialog.vue";
+import ConfirmDialog from "@/components/confirm-dialog.vue";
+import HeaderSearchBarFilters from "@/components/header-search-bar-filters.vue";
+import ChipButton from "@/components/manage-users/chip-button.vue";
+import DialogTable from "@/components/manage-users/dialog-table.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTableFilters } from "@/composables/use-table-filters";
+import { notifyError } from "@/helpers/error-messages";
+import { useAddOrInviteOperatorMutation } from "@/services/auth.graphql";
+import { useMembersService } from "@/services/member";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
   GetMembersDocument,
   type MemberFragment,
   useGetMembersQuery,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 
 const { t } = useI18n();
 

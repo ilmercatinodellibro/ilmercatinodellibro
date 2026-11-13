@@ -221,33 +221,33 @@ import { noop } from "lodash-es";
 import { Dialog, type QTableColumn, type QTableProps } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import ActionsListButton from "src/components/actions-list-button.vue";
-import BookCopyDetailsRow from "src/components/book-copy-details-row.vue";
-import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
-import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
-import DialogTable from "src/components/manage-users/dialog-table.vue";
-import ProblemsHistoryDialog from "src/components/manage-users/problems-history-dialog.vue";
-import StatusChip from "src/components/manage-users/status-chip.vue";
-import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
-import ProblemsButton from "src/components/problems-button.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTableFilters } from "src/composables/use-table-filters";
+import ActionsListButton from "@/components/actions-list-button.vue";
+import BookCopyDetailsRow from "@/components/book-copy-details-row.vue";
+import BookCopyStatusChip from "@/components/book-copy-status-chip.vue";
+import HeaderSearchBarFilters from "@/components/header-search-bar-filters.vue";
+import DialogTable from "@/components/manage-users/dialog-table.vue";
+import ProblemsHistoryDialog from "@/components/manage-users/problems-history-dialog.vue";
+import StatusChip from "@/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "@/components/manage-users/table-cell-with-tooltip.vue";
+import ProblemsButton from "@/components/problems-button.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTableFilters } from "@/composables/use-table-filters";
 import {
   reportOrSolveProblem as _reportOrSolveProblem,
   hasProblem,
-} from "src/helpers/book-copy";
-import { notifyError } from "src/helpers/error-messages";
-import { getFieldValue } from "src/helpers/table-helpers";
-import { fetchBooksWithCopies } from "src/services/book";
-import { fetchBooksCopies } from "src/services/book-copy";
+} from "@/helpers/book-copy";
+import { notifyError } from "@/helpers/error-messages";
+import { getFieldValue } from "@/helpers/table-helpers";
+import { fetchBooksWithCopies } from "@/services/book";
+import { fetchBooksCopies } from "@/services/book-copy";
 import type {
   BookCopyDetailsFragment,
   PaginatedBookCopyResultFragment,
-} from "src/services/book-copy.graphql";
+} from "@/services/book-copy.graphql";
 import type {
   BookSummaryFragment,
   PaginatedBookResultFragment,
-} from "src/services/book.graphql";
+} from "@/services/book.graphql";
 
 const ROWS_PER_PAGE_OPTIONS = [30, 50, 100];
 

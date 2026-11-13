@@ -4,7 +4,7 @@ import {
   mdiAlertCircleOutline,
   mdiCheckCircle,
 } from "@quasar/extras/mdi-v7";
-import { useI18nOutsideSetup } from "src/boot/i18n";
+import { useI18nOutsideSetup } from "@/boot/i18n";
 
 const { t } = useI18nOutsideSetup();
 

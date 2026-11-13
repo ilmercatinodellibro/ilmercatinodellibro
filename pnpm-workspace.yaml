@@ -16,8 +16,6 @@ publicHoistPattern:
 
 # Versions shared by more than one package
 catalog:
-  dotenv: ^16.4.5
-  dotenv-expand: ^10.0.0
   fast-glob: ^3.3.3
   graphql: ^16.14.2
   graphql-ws: ^6.4.2
@@ -38,8 +36,6 @@ allowBuilds:
   vue-demi: true
 
 overrides:
-  vite: ^5.0.10
-  "@vitejs/plugin-vue": ^4.5.2
   "nest-commander>@golevelup/nestjs-discovery": 7.1.0
 
 patchedDependencies:

@@ -21,6 +21,7 @@ export default defineConfig(
 
       // Quasar CLI related
       ".quasar/**",
+      "quasar.config.*.temporary.compiled*",
       "dist/**",
       "src-capacitor/**",
       "src-cordova/**",
@@ -48,25 +49,18 @@ export default defineConfig(
   {
     name: "quasar/node",
 
-    files: ["quasar.config.js", "postcss.config.js"],
+    files: ["quasar.config.ts", "src-ssr/**"],
 
     languageOptions: {
       globals: {
         ...globals.node,
       },
     },
-
-    rules: {
-      // @quasar/app-vite 1 loads quasar.config.js as CommonJS, and the package isn't "type": "module"
-      // TODO: remove when migrating to ESM configs
-      "unicorn/prefer-module": "off",
-      "@typescript-eslint/no-require-imports": "off",
-    },
   },
   {
     name: "quasar/pwa-service-worker",
 
-    files: ["src-pwa/custom-service-worker.ts"],
+    files: ["src-pwa/sw/**/*.ts"],
 
     languageOptions: {
       globals: {
@@ -93,18 +87,9 @@ export default defineConfig(
 
     rules: {
       // It suggests Array#toSorted(), which needs Chrome 110, Firefox 115 and Safari 16,
-      // while quasar.config.js build.target still includes older browsers
+      // while the quasar.config file build.target still includes older browsers
       // TODO: enable when raising build.target
       "unicorn/no-array-sort": "off",
-    },
-
-    languageOptions: {
-      parserOptions: {
-        projectService: {
-          // Dotfiles aren't matched by the tsconfig "include" default
-          allowDefaultProject: [".*"],
-        },
-      },
     },
 
     settings: {
@@ -113,6 +98,11 @@ export default defineConfig(
           project: [projectTsConfig],
         }),
       ],
+      // import-x treats the nearest package.json as the package root, and src-pwa has its own.
+      // Without this, "@/" imports in src-pwa count as external packages.
+      // "@/" and "~/" can never be npm package names, so they always mean a local alias.
+      // TODO: move this to eslint-config-coralloy
+      "import-x/internal-regex": "^[@~]/",
     },
   },
 

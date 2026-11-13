@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { useTheme } from "src/composables/use-theme";
+import { useTheme } from "@/composables/use-theme";
 
 const { t } = useI18n();
 const { theme } = useTheme();

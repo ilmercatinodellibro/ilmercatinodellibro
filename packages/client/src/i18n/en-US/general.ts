@@ -1,4 +1,4 @@
-import type { Role } from "src/@generated/graphql";
+import type { Role } from "@/@generated/graphql";
 
 export default {
   mainNavigation: "Main",

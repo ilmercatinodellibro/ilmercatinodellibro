@@ -71,7 +71,7 @@ import {
 import { type QInputProps, date, useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import type { UpdateUserPayload } from "src/@generated/graphql";
+import type { UpdateUserPayload } from "@/@generated/graphql";
 import {
   emailRule,
   makeValueMatchRule,
@@ -79,9 +79,9 @@ import {
   requireIfUnderage,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import type { UserData } from "src/models/user";
-import { useAuthService } from "src/services/auth";
+} from "@/helpers/rules";
+import type { UserData } from "@/models/user";
+import { useAuthService } from "@/services/auth";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 defineEmits(useDialogPluginComponent.emitsObject);

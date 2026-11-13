@@ -1,10 +1,10 @@
-import type { Role } from "src/@generated/graphql";
-import retailLocation from "src/i18n/it/retail-location";
+import type { Role } from "@/@generated/graphql";
+import retailLocation from "@/i18n/it/retail-location";
 import type {
   AdditionalMacroIntervalDurationNames,
   AvailableQuickRanges,
-} from "src/models/date-time";
-import { AvailableRouteNames } from "src/models/routes";
+} from "@/models/date-time";
+import { AvailableRouteNames } from "@/models/routes";
 import actions from "./actions";
 import auth from "./auth";
 import book from "./book";

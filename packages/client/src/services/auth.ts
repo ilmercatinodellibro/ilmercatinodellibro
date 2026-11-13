@@ -5,10 +5,10 @@ import { merge } from "lodash-es";
 import { LocalStorage } from "quasar";
 import { computed, readonly, ref, watch } from "vue";
 import { type NavigationGuard, type Router, useRouter } from "vue-router";
-import { type MessageLanguages, STORAGE_LOCALE_KEY } from "src/boot/i18n";
-import { AvailableRouteNames } from "src/models/routes";
-import { useRetailLocationService } from "src/services/retail-location";
-import type { UpdatableUserInfoFragment } from "src/services/user.graphql";
+import { type MessageLanguages, STORAGE_LOCALE_KEY } from "@/boot/i18n";
+import { AvailableRouteNames } from "@/models/routes";
+import { useRetailLocationService } from "@/services/retail-location";
+import type { UpdatableUserInfoFragment } from "@/services/user.graphql";
 import {
   type CurrentUserFragment,
   GetCurrentUserDocument,

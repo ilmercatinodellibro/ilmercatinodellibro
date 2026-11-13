@@ -111,10 +111,10 @@ import {
 import type { QTableColumn, QTableProps, QTableSlots } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useTimeFormat } from "src/composables/use-time-format";
-import type { EventFragment } from "src/services/event.graphql";
-import { useNotificationService } from "src/services/notification";
-import type { NotificationFragment } from "src/services/notification.graphql";
+import { useTimeFormat } from "@/composables/use-time-format";
+import type { EventFragment } from "@/services/event.graphql";
+import { useNotificationService } from "@/services/notification";
+import type { NotificationFragment } from "@/services/notification.graphql";
 import DateSelector from "../date-selector.vue";
 import { useNotificationFilters } from "./notification-filters";
 

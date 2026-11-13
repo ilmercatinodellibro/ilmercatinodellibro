@@ -100,8 +100,8 @@ import {
 } from "quasar";
 import { computed, onMounted, ref, type Slot } from "vue";
 import { useI18n } from "vue-i18n";
-import NumberInput from "src/components/manage-users/number-input.vue";
-import { allowOnlyIntegerNumbers } from "src/helpers/rules";
+import NumberInput from "@/components/manage-users/number-input.vue";
+import { allowOnlyIntegerNumbers } from "@/helpers/rules";
 
 withDefaults(
   defineProps<

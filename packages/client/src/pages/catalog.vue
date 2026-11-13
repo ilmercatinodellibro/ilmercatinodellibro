@@ -62,16 +62,16 @@ import { startCase, toLower } from "lodash-es";
 import { Dialog, QTable, type QTableColumn } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import AddBookDialog from "src/components/add-book-dialog.vue";
-import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
-import StatusChip from "src/components/manage-users/status-chip.vue";
-import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
-import UtilityChip from "src/components/utility-chip.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTableFilters } from "src/composables/use-table-filters";
-import { formatPrice } from "src/helpers/formatting";
-import { useBookService } from "src/services/book";
-import type { BookSummaryFragment } from "src/services/book.graphql";
+import AddBookDialog from "@/components/add-book-dialog.vue";
+import HeaderSearchBarFilters from "@/components/header-search-bar-filters.vue";
+import StatusChip from "@/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "@/components/manage-users/table-cell-with-tooltip.vue";
+import UtilityChip from "@/components/utility-chip.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTableFilters } from "@/composables/use-table-filters";
+import { formatPrice } from "@/helpers/formatting";
+import { useBookService } from "@/services/book";
+import type { BookSummaryFragment } from "@/services/book.graphql";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200];
 

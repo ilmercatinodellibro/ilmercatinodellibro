@@ -1,16 +1,16 @@
 import { Dialog } from "quasar";
-import type { ProblemType } from "src/@generated/graphql";
-import { useI18nOutsideSetup } from "src/boot/i18n";
-import ProblemsDialog from "src/components/manage-users/problems-dialog.vue";
-import { notifyError } from "src/helpers/error-messages";
+import type { ProblemType } from "@/@generated/graphql";
+import { useI18nOutsideSetup } from "@/boot/i18n";
+import ProblemsDialog from "@/components/manage-users/problems-dialog.vue";
+import { notifyError } from "@/helpers/error-messages";
 import {
   type BookCopyDetailsFragment,
   BookCopyDetailsFragmentDoc,
   type ProblemSummaryFragment,
   useReportProblemMutation,
   useResolveProblemMutation,
-} from "src/services/book-copy.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/services/book-copy.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const { selectedLocation } = useRetailLocationService();
 

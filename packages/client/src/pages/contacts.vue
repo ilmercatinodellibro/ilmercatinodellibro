@@ -115,15 +115,15 @@
 import { Notify } from "quasar";
 import { defineAsyncComponent, reactive, ref } from "vue";
 import { I18nT, useI18n } from "vue-i18n";
-import SocialButton from "src/components/social-button.vue";
-import { notifyError } from "src/helpers/error-messages";
-import { emailRule, requiredRule } from "src/helpers/rules";
-import { useAuthService } from "src/services/auth";
-import { useFeedbackMutation } from "src/services/feedback.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+import SocialButton from "@/components/social-button.vue";
+import { notifyError } from "@/helpers/error-messages";
+import { emailRule, requiredRule } from "@/helpers/rules";
+import { useAuthService } from "@/services/auth";
+import { useFeedbackMutation } from "@/services/feedback.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const HeaderBar = defineAsyncComponent(
-  () => import("src/components/header-bar.vue"),
+  () => import("@/components/header-bar.vue"),
 );
 
 const contactData = reactive({

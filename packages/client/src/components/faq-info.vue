@@ -11,8 +11,8 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useRetailLocationService } from "src/services/retail-location";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const { t, locale } = useI18n();
 const { selectedLocation } = useRetailLocationService();

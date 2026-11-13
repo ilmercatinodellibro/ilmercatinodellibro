@@ -1,7 +1,7 @@
 import { type Ref, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import { injectorFactory } from "src/helpers/injector-factory";
+import { injectorFactory } from "@/helpers/injector-factory";
 
 type HeaderName = Ref<string | undefined>;
 
@@ -23,9 +23,9 @@ export function provideHeaderName() {
     () => route.name,
     (currentRouteName) => {
       headerName.value =
-        currentRouteName !== null && currentRouteName !== undefined
-          ? t(`routesNames.${currentRouteName.toString()}`)
-          : undefined;
+        currentRouteName === undefined
+          ? undefined
+          : t(`routesNames.${currentRouteName.toString()}`);
     },
     { immediate: true },
   );

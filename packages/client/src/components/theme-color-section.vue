@@ -26,8 +26,8 @@
 <script setup lang="ts">
 import { Dialog, colors, type colorsRgba } from "quasar";
 import { useI18n } from "vue-i18n";
-import ColorPickerDialog from "src/components/color-picker-dialog.vue";
-import { type ThemeColor, useTheme } from "src/composables/use-theme";
+import ColorPickerDialog from "@/components/color-picker-dialog.vue";
+import { type ThemeColor, useTheme } from "@/composables/use-theme";
 
 defineProps<{
   name: ThemeColor;

@@ -5,7 +5,7 @@ import {
   useStorage,
 } from "@vueuse/core";
 import { type Ref, computed, watch } from "vue";
-import { useInAppNotifications } from "src/composables/in-app-notifications";
+import { useInAppNotifications } from "@/composables/in-app-notifications";
 import {
   NewNotificationDocument,
   type NotificationFragment,

@@ -99,12 +99,12 @@ import { mdiMagnify } from "@quasar/extras/mdi-v7";
 import { Notify, type QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import DialogTable from "src/components/manage-users/dialog-table.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { notifyError } from "src/helpers/error-messages";
-import { requiredRule, validISBN } from "src/helpers/rules";
-import { fetchBookByISBN } from "src/services/book";
-import type { BookSummaryFragment } from "src/services/book.graphql";
+import DialogTable from "@/components/manage-users/dialog-table.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { notifyError } from "@/helpers/error-messages";
+import { requiredRule, validISBN } from "@/helpers/rules";
+import { fetchBookByISBN } from "@/services/book";
+import type { BookSummaryFragment } from "@/services/book.graphql";
 
 const { t } = useI18n();
 

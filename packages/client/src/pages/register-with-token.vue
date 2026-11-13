@@ -85,23 +85,20 @@ import { Notify } from "quasar";
 import { reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import PasswordStrengthBar from "components/password-strength-bar.vue";
-import type { RegisterPayload } from "src/@generated/graphql";
-import KPasswordInput from "src/components/k-password-input.vue";
-import { STRENGTH_BAR_STEPS } from "src/components/models";
-import { notifyError } from "src/helpers/error-messages";
+import type { RegisterPayload } from "@/@generated/graphql";
+import KPasswordInput from "@/components/k-password-input.vue";
+import { STRENGTH_BAR_STEPS } from "@/components/models";
+import PasswordStrengthBar from "@/components/password-strength-bar.vue";
+import { notifyError } from "@/helpers/error-messages";
 import {
   emailRule,
   makeValueMatchRule,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import type { ServerError } from "src/models/server";
-import {
-  useAuthService,
-  useRegisterWithTokenMutation,
-} from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/helpers/rules";
+import type { ServerError } from "@/models/server";
+import { useAuthService, useRegisterWithTokenMutation } from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const props = defineProps<{
   token: string;

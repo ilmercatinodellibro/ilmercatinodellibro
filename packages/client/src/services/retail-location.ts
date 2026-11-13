@@ -3,7 +3,7 @@ import { type ComputedRef, computed, ref } from "vue";
 import {
   type RetailLocationFragment,
   useGetRetailLocationsQuery,
-} from "src/services/retail-location.graphql";
+} from "@/services/retail-location.graphql";
 
 export const useRetailLocationService = createSharedComposable(() => {
   const { retailLocations, loading } = useGetRetailLocationsQuery();

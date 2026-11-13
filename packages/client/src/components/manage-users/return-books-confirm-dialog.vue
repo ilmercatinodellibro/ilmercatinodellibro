@@ -88,8 +88,8 @@
 import { type QTableColumn, useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import type { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import type { BookCopyDetailsFragment } from "@/services/book-copy.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 import TableCellWithTooltip from "./table-cell-with-tooltip.vue";

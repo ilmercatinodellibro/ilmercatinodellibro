@@ -87,15 +87,15 @@
 import { useDialogPluginComponent } from "quasar";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { requiredRule } from "src/helpers/rules";
-import type { SchoolFilters } from "src/models/book";
-import { useRetailLocationService } from "src/services/retail-location";
+import { requiredRule } from "@/helpers/rules";
+import type { SchoolFilters } from "@/models/book";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
   type SchoolCourseFragment,
   type SchoolFragment,
   useGetSchoolCoursesQuery,
   useGetSchoolsQuery,
-} from "src/services/school.graphql";
+} from "@/services/school.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 const props = defineProps<{

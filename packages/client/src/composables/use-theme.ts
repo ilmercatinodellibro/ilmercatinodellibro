@@ -2,12 +2,12 @@ import { createSharedComposable } from "@vueuse/core";
 import { cloneDeep, isEqual, omit } from "lodash-es";
 import { setCssVar } from "quasar";
 import { ref, watch } from "vue";
-import { useAuthService } from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
+import { useAuthService } from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
   type ThemeFragment,
   useUpdateRetailLocationThemeMutation,
-} from "src/services/retail-location.graphql";
+} from "@/services/retail-location.graphql";
 
 export type ThemeColor = keyof Omit<ThemeFragment["colors"], "__typename">;
 

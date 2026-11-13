@@ -32,7 +32,7 @@ import { CanvasRenderer } from "echarts/renderers";
 import { computed } from "vue";
 import VChart from "vue-echarts";
 import { useI18n } from "vue-i18n";
-import type { ChartElement } from "src/@generated/graphql";
+import type { ChartElement } from "@/@generated/graphql";
 
 const props = defineProps<{
   data: ChartElement[];

@@ -26,12 +26,12 @@
 import { type QTableColumn, date, useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { ProblemType } from "src/@generated/graphql";
+import type { ProblemType } from "@/@generated/graphql";
 import type {
   BookCopyDetailsFragment,
   ProblemDetailsFragment,
-} from "src/services/book-copy.graphql";
-import type { UserSummaryFragment } from "src/services/user.graphql";
+} from "@/services/book-copy.graphql";
+import type { UserSummaryFragment } from "@/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import DialogTable from "./dialog-table.vue";
 

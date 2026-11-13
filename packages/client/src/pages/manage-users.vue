@@ -439,37 +439,37 @@ import {
 } from "quasar";
 import { type Ref, computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import ActionsListButton from "src/components/actions-list-button.vue";
-import HeaderSearchBarFilters from "src/components/header-search-bar-filters.vue";
-import CartDialog from "src/components/manage-users/cart-dialog.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
-import EditUserBooksMovementsDialog from "src/components/manage-users/edit-user-books-movements-dialog.vue";
-import EditUserDetailsDialog from "src/components/manage-users/edit-user-details-dialog.vue";
-import EditUserRequestedDialog from "src/components/manage-users/edit-user-requested-dialog.vue";
-import EditUserReservedDialog from "src/components/manage-users/edit-user-reserved-dialog.vue";
-import EditUserStockdataDialog from "src/components/manage-users/edit-user-stockdata-dialog.vue";
-import PayOffUserDialog from "src/components/manage-users/pay-off-user-dialog.vue";
-import ReceiptsDialog from "src/components/manage-users/receipts-dialog.vue";
-import RoundBadge from "src/components/manage-users/round-badge.vue";
-import TableCellWithDialog from "src/components/manage-users/table-cell-with-dialog.vue";
-import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
-import TableHeaderWithInfo from "src/components/manage-users/table-header-with-info.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { useTableFilters } from "src/composables/use-table-filters";
-import { notifyError } from "src/helpers/error-messages";
-import { getColValue } from "src/helpers/table-helpers";
-import type { UserDialogPayload } from "src/models/user";
-import { useAuthService } from "src/services/auth";
-import { useCustomerService } from "src/services/customer";
-import { useRetailLocationService } from "src/services/retail-location";
-import { useDownloadUserData } from "src/services/user";
+import ActionsListButton from "@/components/actions-list-button.vue";
+import HeaderSearchBarFilters from "@/components/header-search-bar-filters.vue";
+import CartDialog from "@/components/manage-users/cart-dialog.vue";
+import ChipButton from "@/components/manage-users/chip-button.vue";
+import EditUserBooksMovementsDialog from "@/components/manage-users/edit-user-books-movements-dialog.vue";
+import EditUserDetailsDialog from "@/components/manage-users/edit-user-details-dialog.vue";
+import EditUserRequestedDialog from "@/components/manage-users/edit-user-requested-dialog.vue";
+import EditUserReservedDialog from "@/components/manage-users/edit-user-reserved-dialog.vue";
+import EditUserStockdataDialog from "@/components/manage-users/edit-user-stockdata-dialog.vue";
+import PayOffUserDialog from "@/components/manage-users/pay-off-user-dialog.vue";
+import ReceiptsDialog from "@/components/manage-users/receipts-dialog.vue";
+import RoundBadge from "@/components/manage-users/round-badge.vue";
+import TableCellWithDialog from "@/components/manage-users/table-cell-with-dialog.vue";
+import TableCellWithTooltip from "@/components/manage-users/table-cell-with-tooltip.vue";
+import TableHeaderWithInfo from "@/components/manage-users/table-header-with-info.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { useTableFilters } from "@/composables/use-table-filters";
+import { notifyError } from "@/helpers/error-messages";
+import { getColValue } from "@/helpers/table-helpers";
+import type { UserDialogPayload } from "@/models/user";
+import { useAuthService } from "@/services/auth";
+import { useCustomerService } from "@/services/customer";
+import { useRetailLocationService } from "@/services/retail-location";
+import { useDownloadUserData } from "@/services/user";
 import {
   type CustomerFragment,
   useAddUserMutation,
   useCancelUserAccountDeletionMutation,
   useDeleteUserAccountMutation,
   useUpdateUserMutation,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 20, 50, 100, 200, 0];
 

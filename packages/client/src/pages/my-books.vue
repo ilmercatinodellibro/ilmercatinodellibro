@@ -211,31 +211,31 @@ import { Notify, type QChipProps, QTab, type QTableColumn } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
-import ActionsListButton from "src/components/actions-list-button.vue";
-import ChipButton from "src/components/manage-users/chip-button.vue";
-import DialogTable from "src/components/manage-users/dialog-table.vue";
-import StatusChip from "src/components/manage-users/status-chip.vue";
-import TableCellWithTooltip from "src/components/manage-users/table-cell-with-tooltip.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { calculateBookCopyPrice } from "src/helpers/book-copy";
-import { formatPrice } from "src/helpers/formatting";
-import { BooksTab } from "src/models/book";
-import { AvailableRouteNames } from "src/models/routes";
-import { useAuthService } from "src/services/auth";
+import ActionsListButton from "@/components/actions-list-button.vue";
+import ChipButton from "@/components/manage-users/chip-button.vue";
+import DialogTable from "@/components/manage-users/dialog-table.vue";
+import StatusChip from "@/components/manage-users/status-chip.vue";
+import TableCellWithTooltip from "@/components/manage-users/table-cell-with-tooltip.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { calculateBookCopyPrice } from "@/helpers/book-copy";
+import { formatPrice } from "@/helpers/formatting";
+import { BooksTab } from "@/models/book";
+import { AvailableRouteNames } from "@/models/routes";
+import { useAuthService } from "@/services/auth";
 import {
   type BookCopyDetailsFragment,
   useGetBookCopiesByOwnerQuery,
   useGetPurchasedBookCopiesQuery,
-} from "src/services/book-copy.graphql";
+} from "@/services/book-copy.graphql";
 import {
   GetRequestsDocument,
   type RequestSummaryFragment,
   useDeleteRequestMutation,
   useGetRequestsQuery,
-} from "src/services/request.graphql";
-import { useReservationService } from "src/services/reservation";
-import type { ReservationSummaryFragment } from "src/services/reservation.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/services/request.graphql";
+import { useReservationService } from "@/services/reservation";
+import type { ReservationSummaryFragment } from "@/services/reservation.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const { t } = useI18n();
 const route = useRoute();

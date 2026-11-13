@@ -58,21 +58,21 @@ import { Notify, QForm } from "quasar";
 import { reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import PasswordStrengthBar from "components/password-strength-bar.vue";
-import type { ResetForgottenPasswordPayload } from "src/@generated/graphql";
-import KPasswordInput from "src/components/k-password-input.vue";
-import { STRENGTH_BAR_STEPS } from "src/components/models";
+import type { ResetForgottenPasswordPayload } from "@/@generated/graphql";
+import KPasswordInput from "@/components/k-password-input.vue";
+import { STRENGTH_BAR_STEPS } from "@/components/models";
+import PasswordStrengthBar from "@/components/password-strength-bar.vue";
 import {
   isExpectedServerError,
   notifyServerError,
-} from "src/helpers/error-messages";
+} from "@/helpers/error-messages";
 import {
   makeValueMatchRule,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import { useAuthService } from "src/services/auth";
-import { useResetForgottenPasswordMutation } from "src/services/auth.graphql";
+} from "@/helpers/rules";
+import { useAuthService } from "@/services/auth";
+import { useResetForgottenPasswordMutation } from "@/services/auth.graphql";
 
 const props = defineProps<{
   token: string;

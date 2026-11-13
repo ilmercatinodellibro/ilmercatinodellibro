@@ -18,12 +18,12 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from "vue";
 import { useI18n } from "vue-i18n";
-import { useAuthService } from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
+import { useAuthService } from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const { user } = useAuthService();
 const HeaderBar = defineAsyncComponent(
-  () => import("src/components/header-bar.vue"),
+  () => import("@/components/header-bar.vue"),
 );
 
 const { selectedLocation } = useRetailLocationService();

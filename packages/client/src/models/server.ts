@@ -5,10 +5,10 @@
  * @see https://gist.github.com/slavafomin/b164e3e710a6fc9352c934b9073e7216#defining-our-own-base-class-for-errors - Potential source
  */
 export class ServerError extends Error {
-  public name: string;
+  public override name: string;
 
   constructor(
-    public message: string,
+    public override message: string,
     public status: number,
   ) {
     // Calling parent constructor of base Error class.

@@ -110,19 +110,19 @@ import { noop } from "lodash-es";
 import type { QTableColumn } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import BookCopyStatusChip from "src/components/book-copy-status-chip.vue";
-import ProblemsButton from "src/components/problems-button.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import BookCopyStatusChip from "@/components/book-copy-status-chip.vue";
+import ProblemsButton from "@/components/problems-button.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
 import {
   reportOrSolveProblem as _reportOrSolveProblem,
   hasProblem,
   isAvailable,
-} from "src/helpers/book-copy";
-import { getFieldValue } from "src/helpers/table-helpers";
+} from "@/helpers/book-copy";
+import { getFieldValue } from "@/helpers/table-helpers";
 import {
   type BookCopyDetailsFragment,
   useGetBookCopiesQuery,
-} from "src/services/book-copy.graphql";
+} from "@/services/book-copy.graphql";
 import ActionsListButton from "./actions-list-button.vue";
 
 const props = defineProps<{

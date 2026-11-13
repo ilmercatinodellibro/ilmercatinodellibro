@@ -244,8 +244,8 @@ import { useI18n } from "vue-i18n";
 import type {
   RegisterUserPayload,
   UpdateUserPayload,
-} from "src/@generated/graphql";
-import { notifyError } from "src/helpers/error-messages";
+} from "@/@generated/graphql";
+import { notifyError } from "@/helpers/error-messages";
 import {
   emailRule,
   makeValueMatchRule,
@@ -253,12 +253,12 @@ import {
   requireIfUnderage,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import type { UserDialogPayload } from "src/models/user";
-import { useAuthService } from "src/services/auth";
-import { useSendVerificationLinkMutation } from "src/services/auth.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
-import type { CustomerFragment } from "src/services/user.graphql";
+} from "@/helpers/rules";
+import type { UserDialogPayload } from "@/models/user";
+import { useAuthService } from "@/services/auth";
+import { useSendVerificationLinkMutation } from "@/services/auth.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
+import type { CustomerFragment } from "@/services/user.graphql";
 import KDialogFormCard from "../k-dialog-form-card.vue";
 
 // We don't need reactivity on the props as this is used through the Dialog plugin

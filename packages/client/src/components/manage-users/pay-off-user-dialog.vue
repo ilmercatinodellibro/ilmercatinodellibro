@@ -369,14 +369,14 @@ import {
 } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import type { SettleRemainingType } from "src/@generated/graphql";
-import { evictQuery } from "src/apollo/cache";
-import KDialogCard from "src/components/k-dialog-card.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { calculateBookCopyPrice, getStatus } from "src/helpers/book-copy";
-import { notifyError } from "src/helpers/error-messages";
-import { formatPrice } from "src/helpers/formatting";
-import { getColValue } from "src/helpers/table-helpers";
+import type { SettleRemainingType } from "@/@generated/graphql";
+import { evictQuery } from "@/apollo/cache";
+import KDialogCard from "@/components/k-dialog-card.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { calculateBookCopyPrice, getStatus } from "@/helpers/book-copy";
+import { notifyError } from "@/helpers/error-messages";
+import { formatPrice } from "@/helpers/formatting";
+import { getColValue } from "@/helpers/table-helpers";
 import {
   type BookCopyDetailsFragment,
   GetSoldBookCopiesDocument,
@@ -388,13 +388,13 @@ import {
   useReimburseBookCopiesMutation,
   useReportProblemMutation,
   useReturnBookCopiesMutation,
-} from "src/services/book-copy.graphql";
-import type { BookSummaryFragment } from "src/services/book.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/services/book-copy.graphql";
+import type { BookSummaryFragment } from "@/services/book.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 import {
   type UserFragment,
   useSettleUserMutation,
-} from "src/services/user.graphql";
+} from "@/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import DialogTable from "./dialog-table.vue";
 import ProblemsDialog from "./problems-dialog.vue";

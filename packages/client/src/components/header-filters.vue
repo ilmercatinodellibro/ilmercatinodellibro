@@ -23,7 +23,7 @@ import { isArray } from "lodash-es";
 import { Dialog, type QSelectOption } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
+import type { HeaderFilterModel } from "@/composables/header-features/use-header-filters";
 import FiltersDialog from "./filters-dialog.vue";
 
 const props = defineProps<{

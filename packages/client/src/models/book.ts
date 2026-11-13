@@ -1,4 +1,4 @@
-import type { BookQueryFilter } from "src/@generated/graphql";
+import type { BookQueryFilter } from "@/@generated/graphql";
 
 export const enum BookCopyStatuses {
   LOST = "lost",

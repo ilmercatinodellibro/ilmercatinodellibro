@@ -137,15 +137,15 @@ import { Notify, type QInputProps, uid } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import SocialAuthButtons from "components/social-auth-buttons.vue";
-import type { RegisterUserPayload } from "src/@generated/graphql";
-import { STRENGTH_BAR_STEPS } from "src/components/models";
-import PasswordStrengthBar from "src/components/password-strength-bar.vue";
-import { useTheme } from "src/composables/use-theme";
+import type { RegisterUserPayload } from "@/@generated/graphql";
+import { STRENGTH_BAR_STEPS } from "@/components/models";
+import PasswordStrengthBar from "@/components/password-strength-bar.vue";
+import SocialAuthButtons from "@/components/social-auth-buttons.vue";
+import { useTheme } from "@/composables/use-theme";
 import {
   isExpectedServerError,
   notifyServerError,
-} from "src/helpers/error-messages";
+} from "@/helpers/error-messages";
 import {
   emailRule,
   makeValueMatchRule,
@@ -153,18 +153,18 @@ import {
   requireIfUnderage,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import { AvailableRouteNames } from "src/models/routes";
-import { useAuthService, useRegisterMutation } from "src/services/auth";
-import { useRegisterWithTokenMutation } from "src/services/auth.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/helpers/rules";
+import { AvailableRouteNames } from "@/models/routes";
+import { useAuthService, useRegisterMutation } from "@/services/auth";
+import { useRegisterWithTokenMutation } from "@/services/auth.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const props = defineProps<{
   token?: string;
   email?: string;
 }>();
 
-const SOCIAL_LOGIN_ENABLED = process.env.SOCIAL_LOGIN_ENABLED === "true";
+const { SOCIAL_LOGIN_ENABLED } = import.meta.env;
 
 const { t, locale } = useI18n();
 

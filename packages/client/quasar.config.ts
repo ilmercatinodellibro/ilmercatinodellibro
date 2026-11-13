@@ -1,36 +1,12 @@
-/*
- * This file runs in a Node context (it's NOT transpiled by Babel), so use only
- * the ES6 features that are supported by your Node version. https://node.green/
- */
-
 // Configuration for your app
-// https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
+// https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
-const { existsSync, rmSync, renameSync } = require("node:fs");
-const path = require("node:path");
+import { existsSync, readFileSync, renameSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { defineConfig } from "#q-app";
+import vitePluginChecker from "vite-plugin-checker";
 
-// Be careful about how/what you expose here, process.env has access to root envs here
-require("dotenv-expand").expand(
-  require("dotenv").config({
-    path: path.join(__dirname, ".env"),
-  }),
-);
-
-const { configure } = require("quasar/wrappers");
-
-// vite-plugin-checker is ESM-only since 0.9.0, require() returns its module namespace
-const { checker: vitePluginChecker } = require("vite-plugin-checker");
-
-function getVueTscTsconfigPath(isPwa) {
-  return path.join(
-    "./",
-    // We have to ignore /src-pwa in root tsconfig.json because /src-pwa/tsconfig.json doesn't get picked up
-    // and cause errors in /src-pwa
-    // To have proper type checking in /src-pwa, we use the set of specific configurations when running PWA mode
-    isPwa ? "./src-pwa/" : "",
-    "./tsconfig.vue-tsc.json",
-  );
-}
+type VitePluginCheckerOptions = Parameters<typeof vitePluginChecker>[0];
 
 const SERVER_RELATIVE_PATH = "../server";
 // Keep it in sync with "serve" script inside package.json
@@ -38,26 +14,27 @@ const CLIENT_DIST_PATH = `${SERVER_RELATIVE_PATH}/client-dist/`;
 const CLIENT_DIST_HOT_SWAP_PATH = `${SERVER_RELATIVE_PATH}/client-dist-hot-swap/`;
 const CLIENT_DIST_BACKUP_PATH = `${SERVER_RELATIVE_PATH}/client-dist-backup/`;
 
-module.exports = configure(function (ctx) {
+const NODE_VERSION = readFileSync(
+  join(import.meta.dirname, "../../.node-version"),
+  "utf8",
+).trim();
+
+export default defineConfig((ctx) => {
   // Use a hot swap mechanism to avoid a service downtime while deploying a new client bundle
+  // The variable comes from the shell (see the "build:pwa:hot-swap" script), not from .env
   const BUILD_WITH_HOT_SWAP =
     ctx.prod && process.env.BUILD_WITH_HOT_SWAP === "true";
+
+  // The generated ImportMetaEnv types the variables as the client code sees them, after "defineEnv" below.
+  // Here they are still the strings from the .env files, or undefined when not set.
+  const rawEnv = import.meta.env as unknown as Partial<Record<string, string>>;
+
+  const FACEBOOK_LOGIN_ENABLED = rawEnv.FACEBOOK_LOGIN_ENABLED === "true";
+  const GOOGLE_LOGIN_ENABLED = rawEnv.GOOGLE_LOGIN_ENABLED === "true";
 
   return {
     sourceFiles: {
       rootComponent: "src/app.vue",
-    },
-
-    eslint: {
-      // fix: true,
-      // include = [],
-      // exclude = [],
-      // rawOptions = {},
-      // We are using vite-plugin-checker instead of Quasar's built-in ESLint checker
-      // because it's much faster(runs in worker thread), more configurable, and has more features (TS checking, vue-tsc, etc.)
-      // Quasar will probably start using this plugin in the future (https://github.com/quasarframework/quasar/issues/14448)
-      warnings: false,
-      errors: false,
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -75,7 +52,7 @@ module.exports = configure(function (ctx) {
       "retail-location",
     ],
 
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ["app.scss"],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
@@ -91,11 +68,13 @@ module.exports = configure(function (ctx) {
       // "material-icons", // optional, you are not bound to it
     ],
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
+    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
       distDir: BUILD_WITH_HOT_SWAP
         ? CLIENT_DIST_HOT_SWAP_PATH
         : CLIENT_DIST_PATH,
+      // The server serves the bundle, so it's built into the server package
+      allowOutsideProjectDistDir: true,
 
       afterBuild() {
         // Backup the existing dist folder, then perform the hot-swap
@@ -119,15 +98,13 @@ module.exports = configure(function (ctx) {
 
       target: {
         browser: ["es2019", "edge88", "firefox78", "chrome87", "safari13.1"],
-        node: "node16",
+        node: `node${NODE_VERSION}`,
       },
 
       vueRouterMode: "history", // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
       vueOptionsAPI: false,
-
-      // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
       // publicPath: '/',
       // analyze: true,
@@ -137,33 +114,40 @@ module.exports = configure(function (ctx) {
       // distDir
 
       // extendViteConf (viteConf) {},
-      viteVuePluginOptions: {
-        script: {
-          defineModel: true,
+
+      typescript: {
+        strict: true,
+        vueShim: true,
+        extendTsConfig(tsConfig) {
+          tsConfig.compilerOptions = {
+            ...tsConfig.compilerOptions,
+
+            // This makes everything extremely problematic to deal with due to external types not being
+            // set up with this in mind, including Quasar's component prop types
+            exactOptionalPropertyTypes: false,
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            paths: {
+              ...tsConfig.compilerOptions?.paths,
+
+              // @vue/apollo-composable doesn't expose all the types needed for DM graphql-codegen-stack
+              "@vue/apollo-composable/dist/*": [
+                "./../node_modules/@vue/apollo-composable/dist/*",
+              ],
+            },
+          };
+
+          tsConfig.include = [
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            ...tsConfig.include!,
+
+            // Dotfiles aren't matched by the default patterns, include them so ESLint type-checks them with this project
+            "./../.*",
+          ];
         },
       },
 
-      env: {
-        GRAPHQL_URL: process.env.GRAPHQL_URL,
-        GRAPHQL_WS_URL: process.env.GRAPHQL_WS_URL,
-
-        // the service worker is only available in PWA mode, so force disable it otherwise
-        WEB_PUSH_ENABLED: ctx.mode.pwa ? process.env.WEB_PUSH_ENABLED : "false",
-        WEB_PUSH_VAPID_KEY: process.env.WEB_PUSH_VAPID_KEY,
-        FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
-        FIREBASE_APP_ID: process.env.FIREBASE_APP_ID,
-        FIREBASE_MESSAGING_SENDER_ID: process.env.FIREBASE_MESSAGING_SENDER_ID,
-        FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
-
-        SOCIAL_LOGIN_ENABLED:
-          process.env.FACEBOOK_LOGIN_ENABLED === "true" ||
-          process.env.GOOGLE_LOGIN_ENABLED === "true"
-            ? "true"
-            : "false",
-        FACEBOOK_LOGIN_ENABLED: process.env.FACEBOOK_LOGIN_ENABLED || "false",
-        GOOGLE_LOGIN_ENABLED: process.env.GOOGLE_LOGIN_ENABLED || "false",
-      },
-      rawDefine: {
+      define: {
         // As pre-compilation doesn't work, we have to use runtime + compiler version of vue-i18n. (default)
         // The regular compiler version (AOT) violates CSP, so we use the JIT version.
         // JIT compilation doesn't do anything in development, it only produces warnings in browser console.
@@ -171,6 +155,25 @@ module.exports = configure(function (ctx) {
         __INTLIFY_JIT_COMPILATION__: ctx.prod,
         // When using this option, the app breaks with this error in browser console: `TypeError: Cannot read properties of undefined (reading 't')`
         // __INTLIFY_DROP_MESSAGE_COMPILER__: ctx.prod,
+      },
+
+      // Passing down to UI code from the quasar.config file
+      defineEnv: {
+        GRAPHQL_URL: import.meta.env.GRAPHQL_URL,
+        GRAPHQL_WS_URL: import.meta.env.GRAPHQL_WS_URL,
+
+        // the service worker is only available in PWA mode, so force disable it otherwise
+        WEB_PUSH_ENABLED: ctx.mode.pwa && rawEnv.WEB_PUSH_ENABLED === "true",
+        WEB_PUSH_VAPID_KEY: import.meta.env.WEB_PUSH_VAPID_KEY,
+        FIREBASE_API_KEY: import.meta.env.FIREBASE_API_KEY,
+        FIREBASE_APP_ID: import.meta.env.FIREBASE_APP_ID,
+        FIREBASE_MESSAGING_SENDER_ID: import.meta.env
+          .FIREBASE_MESSAGING_SENDER_ID,
+        FIREBASE_PROJECT_ID: import.meta.env.FIREBASE_PROJECT_ID,
+
+        SOCIAL_LOGIN_ENABLED: FACEBOOK_LOGIN_ENABLED || GOOGLE_LOGIN_ENABLED,
+        FACEBOOK_LOGIN_ENABLED,
+        GOOGLE_LOGIN_ENABLED,
       },
 
       vitePlugins: [
@@ -186,7 +189,7 @@ module.exports = configure(function (ctx) {
           "@intlify/unplugin-vue-i18n/vite",
           {
             // you need to set i18n resource paths
-            include: path.resolve(__dirname, "./src/i18n/**"),
+            include: join(import.meta.dirname, "./src/i18n/**"),
 
             // https://github.com/intlify/vue-i18n-next/issues/1059#issuecomment-1646097462
             jitCompilation: true,
@@ -197,60 +200,60 @@ module.exports = configure(function (ctx) {
         [
           vitePluginChecker,
           {
-            vueTsc: {
-              // This path is provided to tsc via --project flag under the hood
-              // This causes problems when on Windows and the name of any folder into the path contains spaces
-              // Enclosing the path in double quotes solves the problem for Windows, but breaks it for Linux
-              // TODO: open an issue on vue language-tools repo with a repro
-              tsconfigPath:
-                process.platform === "win32" && __dirname.includes(" ")
-                  ? `"${getVueTscTsconfigPath(ctx.mode.pwa)}"`
-                  : getVueTscTsconfigPath(ctx.mode.pwa),
+            vueTsc: true,
+            typescript: {
+              tsconfigPath: "./src-pwa/sw/tsconfig.json",
             },
             eslint: {
-              lintCommand: "eslint ./",
+              // We have to specify paths/patterns, otherwise it crashes or doesn't work on file updates
+              // Relevant: https://github.com/fi3ework/vite-plugin-checker/issues/462#issuecomment-2724798908
+              lintCommand: 'eslint --cache "./src*/**/*.{ts,js,mjs,cjs,vue}"',
+              useFlatConfig: true,
             },
-            stylelint: { lintCommand: "stylelint ./src/**/*.{scss,css,vue}" },
-          },
+            stylelint: {
+              lintCommand: "stylelint --cache ./src/**/*.{scss,css,vue}",
+            },
+          } satisfies VitePluginCheckerOptions,
+          { server: false },
         ],
         ["@dreamonkey/graphql-codegen-near-operation-file", {}],
       ],
     },
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
+    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devServer
     devServer: {
       // https: true
       open: true, // opens browser window automatically
       proxy: {
-        [`/${process.env.GRAPHQL_PATH}`]: {
+        [`/${import.meta.env.GRAPHQL_PATH}`]: {
           changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN,
+          target: import.meta.env.GRAPHQL_DOMAIN,
         },
         // TODO: try to understand why all of these are needed
         // https://github.com/chimurai/http-proxy-middleware/issues/112
-        [`/${process.env.GRAPHQL_WS_PATH}`]: {
+        [`/${import.meta.env.GRAPHQL_WS_PATH}`]: {
           changeOrigin: true,
-          target: process.env.GRAPHQL_WS_DOMAIN,
+          target: import.meta.env.GRAPHQL_WS_DOMAIN,
           secure: false,
           ws: true,
         },
 
         "/receipts": {
           changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN,
+          target: import.meta.env.GRAPHQL_DOMAIN,
         },
         "/location": {
           changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN,
+          target: import.meta.env.GRAPHQL_DOMAIN,
         },
         "/auth": {
           changeOrigin: true,
-          target: process.env.GRAPHQL_DOMAIN,
+          target: import.meta.env.GRAPHQL_DOMAIN,
         },
       },
     },
 
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
       config: {},
 
@@ -279,25 +282,26 @@ module.exports = configure(function (ctx) {
       "fadeIn",
     ],
 
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#sourcefiles
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#sourcefiles
     // sourceFiles: {
-    //   rootComponent: 'src/App.vue',
+    //   rootComponent: 'src/app.vue',
     //   router: 'src/router/index',
     //   store: 'src/store/index',
-    //   registerServiceWorker: 'src-pwa/register-service-worker',
-    //   serviceWorker: 'src-pwa/custom-service-worker',
+    //   pwaRegisterServiceWorker: 'src-pwa/register-sw',
+    //   pwaServiceWorker: 'src-pwa/sw/custom-sw',
     //   pwaManifestFile: 'src-pwa/manifest.json',
     //   electronMain: 'src-electron/electron-main',
-    //   electronPreload: 'src-electron/electron-preload'
+    //   electronPreload: 'src-electron/electron-preload',
+    //   bexManifestFile: 'src-bex/manifest.json',
     // },
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-ssr/configuring-ssr
     ssr: {
-      // ssrPwaHtmlFilename: 'offline.html', // do NOT use index.html as name!
+      // pwaOfflineHtmlFilename: 'offline.html', // do NOT use index.html as name!
       // will mess up SSR
 
-      // extendSSRWebserverConf (esbuildConf) {},
-      // extendPackageJson (json) {},
+      // extendSSRWebserverConf (rolldownConf) {},
+      // extendSSRPackageJson (json) {},
 
       pwa: false,
 
@@ -305,7 +309,7 @@ module.exports = configure(function (ctx) {
       // manualPostHydrationTrigger: true,
 
       prodPort: 3000, // The default port that the production server should use
-      // (gets superseded if process.env.PORT is specified at runtime)
+      // (gets superseded if import.meta.env.PORT is specified at runtime)
 
       middlewares: [
         "render", // keep this as last one
@@ -314,16 +318,17 @@ module.exports = configure(function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
     pwa: {
-      workboxMode: "injectManifest", // or 'generateSW'
-      injectPwaMetaTags: true,
+      workboxMode: "InjectManifest", // or 'GenerateSW'
+      injectPWAMetaTags: true,
       swFilename: "sw.js",
       manifestFilename: "manifest.json",
       useCredentialsForManifestTag: false,
       // useFilenameHashes: true,
-      // extendGenerateSWOptions (cfg) {}
-      // extendInjectManifestOptions (cfg) {},
-      // extendManifestJson (json) {}
-      // extendPWACustomSWConf (esbuildConf) {}
+      // extendPWAGenerateSWOptions (cfg) {}
+      // extendPWAInjectManifestOptions (cfg) {},
+      // extendPWAManifestJson (json) {}
+      // extendPWACustomSWConf (rolldownConf) {}
+      // extendPWASwTsConfig (tsConfig) {}
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-cordova-apps/configuring-cordova
@@ -338,8 +343,8 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron
     electron: {
-      // extendElectronMainConf (esbuildConf)
-      // extendElectronPreloadConf (esbuildConf)
+      // extendElectronMainConf (rolldownConf)
+      // extendElectronPreloadConf (rolldownConf)
 
       inspectPort: 5858,
 
@@ -365,9 +370,9 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
     bex: {
-      contentScripts: ["my-content-script"],
+      extraScripts: [],
 
-      // extendBexScriptsConf (esbuildConf) {}
+      // extendBexScriptsConf (rolldownConf) {}
       // extendBexManifestJson (json) {}
     },
   };

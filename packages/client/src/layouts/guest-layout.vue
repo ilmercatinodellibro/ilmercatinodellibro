@@ -81,11 +81,11 @@ import {
 } from "@quasar/extras/mdi-v7";
 import type { QTooltipProps } from "quasar";
 import { useI18n } from "vue-i18n";
-import AppDrawer from "src/components/app-drawer.vue";
-import HeaderBar from "src/components/header-bar.vue";
-import { provideHeaderActions } from "src/composables/header-features/use-header-actions";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { AvailableRouteNames } from "src/models/routes";
+import AppDrawer from "@/components/app-drawer.vue";
+import HeaderBar from "@/components/header-bar.vue";
+import { provideHeaderActions } from "@/composables/header-features/use-header-actions";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { AvailableRouteNames } from "@/models/routes";
 
 const TOOLTIP_SHARED_PROPS: QTooltipProps = {
   offset: [10, 20],

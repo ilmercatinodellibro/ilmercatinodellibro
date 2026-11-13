@@ -61,10 +61,10 @@ import { mdiArrowLeft, mdiMenu } from "@quasar/extras/mdi-v7";
 import type { QSelectOption } from "quasar";
 import { ref } from "vue";
 import type { RouteLocationRaw } from "vue-router";
-import HeaderFilters from "src/components/header-filters.vue";
-import HeaderSearchBar from "src/components/header-search-bar.vue";
-import type { HeaderFilterModel } from "src/composables/header-features/use-header-filters";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import HeaderFilters from "@/components/header-filters.vue";
+import HeaderSearchBar from "@/components/header-search-bar.vue";
+import type { HeaderFilterModel } from "@/composables/header-features/use-header-filters";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
 
 defineProps<{
   title?: string;

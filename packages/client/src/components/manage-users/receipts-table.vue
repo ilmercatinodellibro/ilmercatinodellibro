@@ -42,12 +42,12 @@ import { noop } from "lodash-es";
 import { Notify, type QTableColumn, date } from "quasar";
 import { computed, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
-import type { ReceiptType } from "src/@generated/graphql";
-import { useAuthService } from "src/services/auth";
+import type { ReceiptType } from "@/@generated/graphql";
+import { useAuthService } from "@/services/auth";
 import {
   type ReceiptFragment,
   useResendReceiptMutation,
-} from "src/services/receipt.graphql";
+} from "@/services/receipt.graphql";
 import ChipButton from "./chip-button.vue";
 
 const props = defineProps<{

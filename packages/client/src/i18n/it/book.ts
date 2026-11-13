@@ -1,4 +1,4 @@
-import type { BookCompleteFilters } from "src/models/book";
+import type { BookCompleteFilters } from "@/models/book";
 
 export default {
   noResult: "Nessun libro trovato",

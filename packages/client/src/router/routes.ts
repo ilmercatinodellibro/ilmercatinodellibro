@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from "vue-router";
-import { AvailableRouteNames } from "src/models/routes";
-import ErrorNotFoundPage from "src/pages/error-not-found.vue";
+import { AvailableRouteNames } from "@/models/routes";
+import ErrorNotFoundPage from "@/pages/error-not-found.vue";
 import {
   redirectIfAuthenticated,
   redirectIfGuest,
@@ -8,8 +8,8 @@ import {
   redirectIfNotOperatorOrAdmin,
   redirectIfNotUser,
   useAuthService,
-} from "src/services/auth";
-import { useRetailLocationService } from "src/services/retail-location";
+} from "@/services/auth";
+import { useRetailLocationService } from "@/services/retail-location";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -34,18 +34,17 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/select-location",
     name: AvailableRouteNames.SelectLocation,
-    component: () => import("src/pages/select-location.vue"),
+    component: () => import("@/pages/select-location.vue"),
     beforeEnter: redirectIfAuthenticated,
   },
 
   {
     path: "/:locationId",
+    // Vite only resolves aliases in import() calls with a static path, so each layout gets its own call
     component: () =>
-      import(
-        useAuthService().isAuthenticated.value
-          ? "layouts/authenticated-layout.vue"
-          : "layouts/guest-layout.vue"
-      ),
+      useAuthService().isAuthenticated.value
+        ? import("@/layouts/authenticated-layout.vue")
+        : import("@/layouts/guest-layout.vue"),
     children: [
       {
         path: "",
@@ -58,41 +57,41 @@ const routes: RouteRecordRaw[] = [
       {
         path: "contacts",
         name: AvailableRouteNames.Contacts,
-        component: () => import("pages/contacts.vue"),
+        component: () => import("@/pages/contacts.vue"),
       },
       {
         path: "join-us",
         name: AvailableRouteNames.JoinUs,
-        component: () => import("pages/join-us.vue"),
+        component: () => import("@/pages/join-us.vue"),
       },
       {
         path: "who-we-are",
         name: AvailableRouteNames.WhoWeAre,
-        component: () => import("pages/who-we-are.vue"),
+        component: () => import("@/pages/who-we-are.vue"),
       },
     ],
   },
 
   {
     path: "/:locationId",
-    component: () => import("layouts/guest-layout.vue"),
+    component: () => import("@/layouts/guest-layout.vue"),
     beforeEnter: redirectIfAuthenticated,
     children: [
       { path: "", redirect: { name: AvailableRouteNames.SelectLocation } },
       {
         path: "login",
         name: "login",
-        component: () => import("src/pages/login.vue"),
+        component: () => import("@/pages/login.vue"),
         props: ({ query }) => ({ emailVerified: !!query.emailVerified }),
       },
 
       // The server will redirect to this route after dealing with the social provider
-      ...(process.env.SOCIAL_LOGIN_ENABLED === "true"
+      ...(import.meta.env.SOCIAL_LOGIN_ENABLED
         ? [
             {
               path: "login/social",
               name: "social-login",
-              component: () => import("src/pages/social-login-redirect.vue"),
+              component: () => import("@/pages/social-login-redirect.vue"),
             },
           ]
         : []),
@@ -100,33 +99,33 @@ const routes: RouteRecordRaw[] = [
       {
         path: "registration",
         name: AvailableRouteNames.Registration,
-        component: () => import("src/pages/register.vue"),
+        component: () => import("@/pages/register.vue"),
       },
       {
         path: "registration-sent",
         name: AvailableRouteNames.RegistrationSent,
-        component: () => import("src/pages/registration-sent.vue"),
+        component: () => import("@/pages/registration-sent.vue"),
       },
       {
         path: "reset-password-link-sent",
         name: "reset-password-link-sent",
-        component: () => import("src/pages/reset-password-link-sent.vue"),
+        component: () => import("@/pages/reset-password-link-sent.vue"),
       },
       {
         path: "forgot-password",
         name: AvailableRouteNames.ForgotPassword,
-        component: () => import("src/pages/forgot-password.vue"),
+        component: () => import("@/pages/forgot-password.vue"),
       },
       {
         path: AvailableRouteNames.ChangePassword,
         name: AvailableRouteNames.ChangePassword,
-        component: () => import("src/pages/reset-forgot-password.vue"),
+        component: () => import("@/pages/reset-forgot-password.vue"),
         props: ({ query }) => ({ token: query.token as string }),
       },
       {
         path: AvailableRouteNames.RegisterWithToken,
         name: AvailableRouteNames.RegisterWithToken,
-        component: () => import("src/pages/register.vue"),
+        component: () => import("@/pages/register.vue"),
         props: ({ query }) => ({
           token: query.token as string,
           email: query.email as string,
@@ -137,7 +136,7 @@ const routes: RouteRecordRaw[] = [
 
   {
     path: "/:locationId",
-    component: () => import("layouts/authenticated-layout.vue"),
+    component: () => import("@/layouts/authenticated-layout.vue"),
     beforeEnter: redirectIfGuest,
     children: [
       { path: "", redirect: { name: AvailableRouteNames.Home } },
@@ -149,27 +148,27 @@ const routes: RouteRecordRaw[] = [
           {
             path: "home",
             name: AvailableRouteNames.Home,
-            component: () => import("src/pages/home.vue"),
+            component: () => import("@/pages/home.vue"),
           },
           {
             path: "reserve-books",
             name: AvailableRouteNames.ReserveBooks,
-            component: () => import("src/pages/reserve-books.vue"),
+            component: () => import("@/pages/reserve-books.vue"),
           },
           {
             path: "my-books",
             name: AvailableRouteNames.MyBooks,
-            component: () => import("src/pages/my-books.vue"),
+            component: () => import("@/pages/my-books.vue"),
           },
           {
             path: "salable-books",
             name: AvailableRouteNames.SalableBooks,
-            component: () => import("src/pages/salable-books.vue"),
+            component: () => import("@/pages/salable-books.vue"),
           },
           {
             path: "faq",
             name: AvailableRouteNames.FAQ,
-            component: () => import("src/pages/faq.vue"),
+            component: () => import("@/pages/faq.vue"),
           },
         ],
       },
@@ -181,17 +180,17 @@ const routes: RouteRecordRaw[] = [
           {
             path: "users-management",
             name: AvailableRouteNames.UsersManagement,
-            component: () => import("src/pages/manage-users.vue"),
+            component: () => import("@/pages/manage-users.vue"),
           },
           {
             path: "warehouse",
             name: AvailableRouteNames.Warehouse,
-            component: () => import("src/pages/warehouse.vue"),
+            component: () => import("@/pages/warehouse.vue"),
           },
           {
             path: "books-catalog",
             name: AvailableRouteNames.Catalog,
-            component: () => import("src/pages/catalog.vue"),
+            component: () => import("@/pages/catalog.vue"),
           },
         ],
       },
@@ -203,17 +202,17 @@ const routes: RouteRecordRaw[] = [
           {
             path: "edit-info",
             name: AvailableRouteNames.EditInfo,
-            component: () => import("src/pages/edit-info.vue"),
+            component: () => import("@/pages/edit-info.vue"),
           },
           {
             path: "roles-and-permissions",
             name: AvailableRouteNames.RolesAndPermissions,
-            component: () => import("src/pages/roles-and-permissions.vue"),
+            component: () => import("@/pages/roles-and-permissions.vue"),
           },
           {
             path: "statistics",
             name: AvailableRouteNames.Statistics,
-            component: () => import("src/pages/statistics-page.vue"),
+            component: () => import("@/pages/statistics-page.vue"),
           },
         ],
       },
@@ -221,12 +220,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: "my-data",
         name: AvailableRouteNames.MyData,
-        component: () => import("src/pages/my-data.vue"),
+        component: () => import("@/pages/my-data.vue"),
       },
       {
         path: "reset-password",
         name: AvailableRouteNames.ResetPassword,
-        component: () => import("src/pages/reset-password.vue"),
+        component: () => import("@/pages/reset-password.vue"),
       },
     ],
   },

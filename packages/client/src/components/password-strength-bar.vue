@@ -38,8 +38,8 @@ import {
   toRefs,
   watch,
 } from "vue";
-import { notifyError } from "src/helpers/error-messages";
-import type { ServerError } from "src/models/server";
+import { notifyError } from "@/helpers/error-messages";
+import type { ServerError } from "@/models/server";
 import type { PasswordStrengthBarStep } from "./models";
 
 async function checkPassword(password: string) {

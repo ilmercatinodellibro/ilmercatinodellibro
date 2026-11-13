@@ -48,7 +48,7 @@
 import { mdiCalendar } from "@quasar/extras/mdi-v7";
 import { type QFieldProps, date } from "quasar";
 import { useI18n } from "vue-i18n";
-import { AvailableQuickRanges } from "src/models/date-time";
+import { AvailableQuickRanges } from "@/models/date-time";
 
 const props =
   defineProps<Omit<QFieldProps, "modelValue" | "onUpdate:modelValue">>();

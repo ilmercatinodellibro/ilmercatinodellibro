@@ -1,10 +1,10 @@
+import { defineBoot } from "#q-app";
 import { until } from "@vueuse/core";
-import { boot } from "quasar/wrappers";
 import { nextTick, watch } from "vue";
-import { useTheme } from "src/composables/use-theme";
-import { useRetailLocationService } from "src/services/retail-location";
+import { useTheme } from "@/composables/use-theme";
+import { useRetailLocationService } from "@/services/retail-location";
 
-export default boot(({ router }) => {
+export default defineBoot(({ router }) => {
   const { loading, selectedLocationId, selectedLocation, retailLocations } =
     useRetailLocationService();
 

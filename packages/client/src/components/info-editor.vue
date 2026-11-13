@@ -45,7 +45,7 @@ import { mdiColorHelper, mdiFormatColorText } from "@quasar/extras/mdi-v7";
 import { QEditor, useQuasar } from "quasar";
 import { ref, type Ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
 
 defineEmits<{ "update:modelValue": [newValue: string] }>();
 

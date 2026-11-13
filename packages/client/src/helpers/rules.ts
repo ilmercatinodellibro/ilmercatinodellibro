@@ -4,7 +4,7 @@
 import { isInteger } from "lodash-es";
 import { type ValidationRule, date } from "quasar";
 import { type MaybeRefOrGetter, toValue } from "vue";
-import { useI18nOutsideSetup } from "src/boot/i18n";
+import { useI18nOutsideSetup } from "@/boot/i18n";
 
 const { t } = useI18nOutsideSetup();
 

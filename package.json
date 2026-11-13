@@ -62,8 +62,6 @@
     "typescript": "~5.9.3"
   },
   "overridesComments": {
-    "vite": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077",
-    "@vitejs/plugin-vue": "Manually added while we wait for Quasar app-vite to catch up: https://github.com/quasarframework/quasar/issues/14077",
     "nest-commander>@golevelup/nestjs-discovery": "nest-commander 3.21.0 pins 7.0.3, whose peers stop at Nest 11. 7.1.0 only widens them to Nest 12. Remove when nest-commander releases https://github.com/jmcdo29/nest-commander/pull/1268"
   },
   "patchesComments": {

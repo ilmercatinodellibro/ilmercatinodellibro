@@ -16,8 +16,8 @@ import { useI18n } from "vue-i18n";
 import {
   reportOrSolveProblem as _reportOrSolveProblem,
   hasProblem as hasProblemFunction,
-} from "src/helpers/book-copy";
-import type { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+} from "@/helpers/book-copy";
+import type { BookCopyDetailsFragment } from "@/services/book-copy.graphql";
 import ChipButton from "./manage-users/chip-button.vue";
 
 const props = defineProps<{

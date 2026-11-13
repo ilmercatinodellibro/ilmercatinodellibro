@@ -26,8 +26,8 @@ import {
   type BookCopyStatus,
   getCurrentActiveProblem,
   getStatus,
-} from "src/helpers/book-copy";
-import type { BookCopyDetailsFragment } from "src/services/book-copy.graphql";
+} from "@/helpers/book-copy";
+import type { BookCopyDetailsFragment } from "@/services/book-copy.graphql";
 
 const props = defineProps<{
   bookCopy: BookCopyDetailsFragment;

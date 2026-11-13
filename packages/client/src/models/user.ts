@@ -1,7 +1,7 @@
 import type {
   RegisterUserPayload,
   UpdateUserPayload,
-} from "src/@generated/graphql";
+} from "@/@generated/graphql";
 
 export type UserData = Omit<
   UpdateUserPayload,

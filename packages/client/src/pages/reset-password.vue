@@ -64,18 +64,18 @@
 import { Notify, QForm } from "quasar";
 import { type Ref, reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import PasswordStrengthBar from "components/password-strength-bar.vue";
-import type { PasswordResetPayload } from "src/@generated/graphql";
-import KPasswordInput from "src/components/k-password-input.vue";
-import { STRENGTH_BAR_STEPS } from "src/components/models";
-import { notifyError } from "src/helpers/error-messages";
+import type { PasswordResetPayload } from "@/@generated/graphql";
+import KPasswordInput from "@/components/k-password-input.vue";
+import { STRENGTH_BAR_STEPS } from "@/components/models";
+import PasswordStrengthBar from "@/components/password-strength-bar.vue";
+import { notifyError } from "@/helpers/error-messages";
 import {
   makeValueMatchRule,
   requiredRule,
   validatePasswordRule,
-} from "src/helpers/rules";
-import type { ServerError } from "src/models/server";
-import { useResetPasswordMutation } from "src/services/auth.graphql";
+} from "@/helpers/rules";
+import type { ServerError } from "@/models/server";
+import { useResetPasswordMutation } from "@/services/auth.graphql";
 
 const showPassword = ref(false);
 

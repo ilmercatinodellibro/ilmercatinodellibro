@@ -34,8 +34,8 @@
 <script setup lang="ts">
 import { mdiMenuDown } from "@quasar/extras/mdi-v7";
 import { useI18n } from "vue-i18n";
-import { AvailableRouteNames } from "src/models/routes";
-import type { CurrentUserFragment } from "src/services/auth.graphql";
+import { AvailableRouteNames } from "@/models/routes";
+import type { CurrentUserFragment } from "@/services/auth.graphql";
 
 defineProps<{
   user: CurrentUserFragment;

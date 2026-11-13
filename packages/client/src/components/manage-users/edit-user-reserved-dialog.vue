@@ -248,20 +248,20 @@ import {
 import { Dialog, QDialog, useDialogPluginComponent } from "quasar";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { notifyError } from "src/helpers/error-messages";
-import { WidthSize, useScreenWidth } from "src/helpers/screen";
-import { fetchBookByISBN } from "src/services/book";
-import { useCartService } from "src/services/cart";
-import { useRequestService } from "src/services/request";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { notifyError } from "@/helpers/error-messages";
+import { WidthSize, useScreenWidth } from "@/helpers/screen";
+import { fetchBookByISBN } from "@/services/book";
+import { useCartService } from "@/services/cart";
+import { useRequestService } from "@/services/request";
 import {
   GetRequestsDocument,
   type RequestSummaryFragment,
   useCreateRequestMutation,
-} from "src/services/request.graphql";
-import { useReservationService } from "src/services/reservation";
-import type { ReservationSummaryFragment } from "src/services/reservation.graphql";
-import type { CustomerFragment } from "src/services/user.graphql";
+} from "@/services/request.graphql";
+import { useReservationService } from "@/services/reservation";
+import type { ReservationSummaryFragment } from "@/services/reservation.graphql";
+import type { CustomerFragment } from "@/services/user.graphql";
 import ActionsListButton from "../actions-list-button.vue";
 import KDialogCard from "../k-dialog-card.vue";
 import CardTableHeader from "./card-table-header.vue";

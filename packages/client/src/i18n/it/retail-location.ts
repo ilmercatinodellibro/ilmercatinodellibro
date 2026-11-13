@@ -1,5 +1,5 @@
-import type { RetailLocationInfo } from "src/models/retail-location";
-import type { StatisticsTab } from "src/pages/statistics-page";
+import type { RetailLocationInfo } from "@/models/retail-location";
+import type { StatisticsTab } from "@/pages/statistics-page";
 
 export default {
   errors: {

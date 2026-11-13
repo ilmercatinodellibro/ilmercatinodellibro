@@ -30,8 +30,8 @@ import {
 import { Dialog, Notify } from "quasar";
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { useFirebaseMessaging } from "src/boot/firebase-messaging";
-import { usePushNotificationService } from "src/services/push-notification";
+import { useFirebaseMessaging } from "@/boot/firebase-messaging";
+import { usePushNotificationService } from "@/services/push-notification";
 import NotificationPermissionInfoDialog from "./notification-permission-info-dialog.vue";
 
 const messaging = useFirebaseMessaging();
@@ -176,7 +176,7 @@ async function subscribe() {
 async function checkToken() {
   const oldToken = token.value;
   const newToken = await getToken(messaging, {
-    vapidKey: process.env.WEB_PUSH_VAPID_KEY,
+    vapidKey: import.meta.env.WEB_PUSH_VAPID_KEY,
     serviceWorkerRegistration: await navigator.serviceWorker.getRegistration(),
   });
   if (oldToken !== newToken) {

@@ -45,10 +45,10 @@ import {
 } from "@quasar/extras/mdi-v7";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import ActionBox from "src/components/action-box.vue";
-import HeaderBar from "src/components/header-bar.vue";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { AvailableRouteNames } from "src/models/routes";
+import ActionBox from "@/components/action-box.vue";
+import HeaderBar from "@/components/header-bar.vue";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { AvailableRouteNames } from "@/models/routes";
 
 const { t } = useI18n();
 

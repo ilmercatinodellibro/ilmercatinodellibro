@@ -34,9 +34,9 @@
 import { useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { emailRule, requiredRule } from "src/helpers/rules";
-import { useRetailLocationService } from "src/services/retail-location";
-import { useGetAllCustomersEmailsQuery } from "src/services/user.graphql";
+import { emailRule, requiredRule } from "@/helpers/rules";
+import { useRetailLocationService } from "@/services/retail-location";
+import { useGetAllCustomersEmailsQuery } from "@/services/user.graphql";
 import KDialogFormCard from "./k-dialog-form-card.vue";
 
 defineEmits(useDialogPluginComponent.emitsObject);

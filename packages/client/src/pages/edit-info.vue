@@ -46,12 +46,12 @@ import { Dialog } from "quasar";
 import { computed, ref, watch, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteLeave } from "vue-router";
-import InfoEditor from "src/components/info-editor.vue";
-import { useHeaderActions } from "src/composables/header-features/use-header-actions";
-import { useLateralDrawer } from "src/composables/use-lateral-drawer";
-import { RetailLocationInfo } from "src/models/retail-location";
-import { useRetailLocationService } from "src/services/retail-location";
-import { useUpdateRetailLocationInfoMutation } from "src/services/retail-location.graphql";
+import InfoEditor from "@/components/info-editor.vue";
+import { useHeaderActions } from "@/composables/header-features/use-header-actions";
+import { useLateralDrawer } from "@/composables/use-lateral-drawer";
+import { RetailLocationInfo } from "@/models/retail-location";
+import { useRetailLocationService } from "@/services/retail-location";
+import { useUpdateRetailLocationInfoMutation } from "@/services/retail-location.graphql";
 
 const { t, locale } = useI18n();
 
@@ -171,7 +171,9 @@ onBeforeRouteLeave(async () => {
         await updateInfo();
         resolve();
       })
-      .onCancel(resolve);
+      .onCancel(() => {
+        resolve();
+      });
   });
 });
 </script>

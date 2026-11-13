@@ -35,9 +35,9 @@
 import { useDialogPluginComponent } from "quasar";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useGetReceiptsQuery } from "src/services/receipt.graphql";
-import { useRetailLocationService } from "src/services/retail-location";
-import type { UserFragment } from "src/services/user.graphql";
+import { useGetReceiptsQuery } from "@/services/receipt.graphql";
+import { useRetailLocationService } from "@/services/retail-location";
+import type { UserFragment } from "@/services/user.graphql";
 import KDialogCard from "../k-dialog-card.vue";
 import ReceiptsTable from "./receipts-table.vue";
 

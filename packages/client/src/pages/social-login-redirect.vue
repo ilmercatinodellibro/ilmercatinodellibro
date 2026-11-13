@@ -6,8 +6,8 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { AvailableRouteNames } from "src/models/routes";
-import { useSocialLogin } from "src/services/auth";
+import { AvailableRouteNames } from "@/models/routes";
+import { useSocialLogin } from "@/services/auth";
 
 const router = useRouter();
 const { query, params: parameters } = useRoute();

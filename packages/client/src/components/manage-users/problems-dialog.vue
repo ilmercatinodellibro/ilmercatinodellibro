@@ -54,14 +54,14 @@
 import { useDialogPluginComponent } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import type { ProblemType } from "src/@generated/graphql";
-import KDialogFormCard from "src/components/k-dialog-form-card.vue";
-import { hasProblem as hasProblemFunction } from "src/helpers/book-copy";
-import { requiredRule } from "src/helpers/rules";
+import type { ProblemType } from "@/@generated/graphql";
+import KDialogFormCard from "@/components/k-dialog-form-card.vue";
+import { hasProblem as hasProblemFunction } from "@/helpers/book-copy";
+import { requiredRule } from "@/helpers/rules";
 import type {
   BookCopyDetailsFragment,
   ProblemSummaryFragment,
-} from "src/services/book-copy.graphql";
+} from "@/services/book-copy.graphql";
 
 const props = defineProps<{
   bookCopy: BookCopyDetailsFragment;
