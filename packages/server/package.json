@@ -89,7 +89,7 @@
     "ejs": "^7.0.2",
     "firebase-admin": "^14.5.1",
     "graphql": "catalog:",
-    "graphql-subscriptions": "^2.0.0",
+    "graphql-subscriptions": "^3.0.0",
     "graphql-ws": "catalog:",
     "ioredis": "^5.11.1",
     "lodash": "catalog:",

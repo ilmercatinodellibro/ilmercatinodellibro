@@ -36,7 +36,7 @@ export class NotificationResolver {
       userId === request.user.id,
   })
   newNotification() {
-    return this.pubSub.asyncIterator("newNotification");
+    return this.pubSub.asyncIterableIterator("newNotification");
   }
 
   @Mutation(() => Notification)

@@ -485,8 +485,8 @@ importers:
         specifier: 'catalog:'
         version: 16.15.0
       graphql-subscriptions:
-        specifier: ^2.0.0
-        version: 2.0.0(graphql@16.15.0)
+        specifier: ^3.0.0
+        version: 3.0.0(graphql@16.15.0)
       graphql-ws:
         specifier: 'catalog:'
         version: 6.4.2(graphql@16.15.0)(ws@8.22.1)
@@ -7081,8 +7081,8 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  graphql-subscriptions@2.0.0:
-    resolution: {integrity: sha512-s6k2b8mmt9gF9pEfkxsaO1lTxaySfKoEJzEfmwguBbQ//Oq23hIXCfR1hm4kdh5hnR20RdwB+s3BCb+0duHSZA==}
+  graphql-subscriptions@3.0.0:
+    resolution: {integrity: sha512-kZCdevgmzDjGAOqH7GlDmQXYAkuHoKpMlJrqF40HMPhUhM5ZWSFSxCwD/nSi6AkaijmMfsFhoJRGJ27UseCvRA==}
     peerDependencies:
       graphql: ^15.7.2 || ^16.0.0
 
@@ -18886,10 +18886,9 @@ snapshots:
       graphql: 16.15.0
       tslib: 2.9.1
 
-  graphql-subscriptions@2.0.0(graphql@16.15.0):
+  graphql-subscriptions@3.0.0(graphql@16.15.0):
     dependencies:
       graphql: 16.15.0
-      iterall: 1.3.0
 
   graphql-tag@2.12.6(graphql@16.15.0):
     dependencies:
