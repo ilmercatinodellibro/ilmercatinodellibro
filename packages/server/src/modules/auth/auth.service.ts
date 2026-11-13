@@ -180,8 +180,24 @@ export class AuthService {
   }
 
   async validateEmailVerificationToken(token: string) {
-    const { email, locationId } =
-      this.jwtService.decode<VerificationTokenPayload>(token);
+    let payload: VerificationTokenPayload;
+    let isExpired = false;
+
+    try {
+      payload = this.jwtService.verify<VerificationTokenPayload>(token);
+    } catch (error) {
+      if (!(error instanceof TokenExpiredError)) {
+        throw new UnprocessableEntityException(
+          "Verification token is not valid",
+        );
+      }
+
+      isExpired = true;
+      // The signature is checked before the expiration, so the payload of an expired token can be trusted
+      payload = this.jwtService.decode<VerificationTokenPayload>(token);
+    }
+
+    const { email, locationId } = payload;
     const user = await this.userService.findUserByEmail(email);
 
     if (!user) {
@@ -192,17 +208,14 @@ export class AuthService {
       throw new UnprocessableEntityException("Email has already been verified");
     }
 
-    try {
-      this.jwtService.verify(token);
-    } catch (error) {
-      if (error instanceof TokenExpiredError) {
-        const token = this.createVerificationToken(locationId, user.email);
-        await this.sendVerificationLink(locationId, user, token);
-        throw new UnprocessableEntityException(
-          "Verification token Expired. We sent you a new verification link, please check your inbox.",
-        );
-      }
+    if (isExpired) {
+      const newToken = this.createVerificationToken(locationId, user.email);
+      await this.sendVerificationLink(locationId, user, newToken);
+      throw new UnprocessableEntityException(
+        "Verification token Expired. We sent you a new verification link, please check your inbox.",
+      );
     }
+
     return this.prisma.user.update({
       where: {
         id: user.id,
