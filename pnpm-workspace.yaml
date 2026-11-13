@@ -46,6 +46,7 @@ allowBuilds:
 overrides:
   vite: ^5.0.10
   "@vitejs/plugin-vue": ^4.5.2
+  "nest-commander>@golevelup/nestjs-discovery": 7.1.0
 
 patchedDependencies:
   prisma-nestjs-graphql@19.2.0: patches/prisma-nestjs-graphql@19.2.0.patch

@@ -58,8 +58,8 @@ import { UserModule } from "./modules/user/user.module";
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "../..", "/client-dist"),
       exclude: [
-        // Also match bare /graphql: with Express 5 the static fallback catches it, so GET requests to the endpoint
-        // (queries and the GraphQL IDE page) would otherwise be served the SPA
+        // The SPA fallback registers its route before Apollo does, so it must exclude bare /graphql too.
+        // Otherwise GET requests to it, which are queries and the GraphiQL page, receive the SPA.
         "/graphql{/*subpath}",
         "/subscriptions",
       ],
