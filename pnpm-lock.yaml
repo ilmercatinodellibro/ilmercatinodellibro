@@ -484,6 +484,9 @@ importers:
       graphql:
         specifier: 'catalog:'
         version: 16.15.0
+      graphql-scalars:
+        specifier: ^2.0.1
+        version: 2.0.1(graphql@16.15.0)
       graphql-subscriptions:
         specifier: ^3.0.0
         version: 3.0.0(graphql@16.15.0)
@@ -593,9 +596,6 @@ importers:
       fast-glob:
         specifier: 'catalog:'
         version: 3.3.3
-      graphql-scalars:
-        specifier: ^1.26.0
-        version: 1.26.0(graphql@16.15.0)
       identity-type:
         specifier: ^1.0.0
         version: 1.0.0
@@ -7072,11 +7072,11 @@ packages:
     peerDependencies:
       graphql: 14 - 16
 
-  graphql-scalars@1.26.0:
-    resolution: {integrity: sha512-o7BnU5yxAFUWTMKpC5yshB12DjzzoxLgEBO9OpOAcxodWrL3sPldD/fqVQoIfcqPH8OclyQilLtg3/7ZRqQUVQ==}
+  graphql-scalars@2.0.1:
+    resolution: {integrity: sha512-/BkY0J5/1L9e+mTfCTzmpV78mNh95ZpiJWfAkaIYHE5B7hrvgRpB5//rXVTFD1aaKGcRUCHj/vpNcgtrenwZNA==}
     engines: {node: '>=10'}
     peerDependencies:
-      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+      graphql: ^16.0.0 || ^17.0.0
 
   graphql-subscriptions@3.0.0:
     resolution: {integrity: sha512-kZCdevgmzDjGAOqH7GlDmQXYAkuHoKpMlJrqF40HMPhUhM5ZWSFSxCwD/nSi6AkaijmMfsFhoJRGJ27UseCvRA==}
@@ -18875,7 +18875,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  graphql-scalars@1.26.0(graphql@16.15.0):
+  graphql-scalars@2.0.1(graphql@16.15.0):
     dependencies:
       graphql: 16.15.0
       tslib: 2.9.1
