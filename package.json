@@ -67,7 +67,6 @@
     "nest-commander>@golevelup/nestjs-discovery": "nest-commander 3.21.0 pins 7.0.3, whose peers stop at Nest 11. 7.1.0 only widens them to Nest 12. Remove when nest-commander releases https://github.com/jmcdo29/nest-commander/pull/1268"
   },
   "patchesComments": {
-    "@nestjs-modules/mailer": "Allows to use Nodemailer plugins by exposing the transporters. See https://github.com/nest-modules/mailer/issues/1171#issuecomment-2141411992",
     "prisma-nestjs-graphql": "Enforces imports from the root barrel file to avoid circular dependencies"
   },
   "engines": {

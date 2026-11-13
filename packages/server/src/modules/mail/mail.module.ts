@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { Module } from "@nestjs/common";
 import { MailerModule } from "@nestjs-modules/mailer";
-import { EjsAdapter } from "@nestjs-modules/mailer/dist/adapters/ejs.adapter";
+import { EjsAdapter } from "@nestjs-modules/mailer/adapters/ejs.adapter";
 import { Options as EjsOptions } from "ejs";
 import { EmailConfiguration, emailConfiguration } from "src/config/email";
 import { MailService } from "./mail.service";
