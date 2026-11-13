@@ -51,7 +51,8 @@ enum SettlementType {
 }
 
 export interface ReceiptBook
-  extends Pick<Book, "isbnCode" | "title" | "subject" | "originalPrice">,
+  extends
+    Pick<Book, "isbnCode" | "title" | "subject" | "originalPrice">,
     Pick<BookCopy, "code"> {
   settlementType?: SettlementType;
 }

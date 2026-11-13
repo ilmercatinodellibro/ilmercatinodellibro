@@ -4,9 +4,7 @@ import { useRoute } from "vue-router";
 import { injectorFactory } from "src/helpers/injector-factory";
 
 export type HeaderFilterModel<T> =
-  | QSelectOption<T>
-  | QSelectOption<T>[]
-  | undefined;
+  QSelectOption<T> | QSelectOption<T>[] | undefined;
 
 type HeaderFilterCompareFunction<TOptionValue = unknown> = (
   value1: TOptionValue,
@@ -28,8 +26,8 @@ const { provider: _provideHeaderFilter, injector: injectHeaderFilter } =
 
 export function provideHeaderFilters<
   TOptionValue = unknown,
-  TModelValue extends
-    HeaderFilterModel<TOptionValue> = HeaderFilterModel<TOptionValue>,
+  TModelValue extends HeaderFilterModel<TOptionValue> =
+    HeaderFilterModel<TOptionValue>,
 >(): HeaderFilterInjectable<TOptionValue, TModelValue> {
   /** Used to show the feature only when required from the pages */
   const isHeaderFiltersEnabled = ref(false);
@@ -84,8 +82,8 @@ export function provideHeaderFilters<
  */
 export function useHeaderFilters<
   TOptionValue = unknown,
-  TModelValue extends
-    HeaderFilterModel<TOptionValue> = HeaderFilterModel<TOptionValue>,
+  TModelValue extends HeaderFilterModel<TOptionValue> =
+    HeaderFilterModel<TOptionValue>,
 >(
   options?: Ref<QSelectOption<TOptionValue>[]>,
   initialModel?: TModelValue,

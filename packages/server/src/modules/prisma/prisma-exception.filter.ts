@@ -7,9 +7,7 @@ import {
 import { Prisma } from "@prisma/client";
 
 @Catch(Prisma.PrismaClientKnownRequestError)
-export class PrismaExceptionFilter
-  implements ExceptionFilter<Prisma.PrismaClientKnownRequestError>
-{
+export class PrismaExceptionFilter implements ExceptionFilter<Prisma.PrismaClientKnownRequestError> {
   catch(exception: Prisma.PrismaClientKnownRequestError) {
     if (exception.code === "P2002") {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

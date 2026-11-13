@@ -65,8 +65,7 @@ defineProps<
   {
     isShowingReservations?: boolean;
     rows:
-      | readonly ReservationSummaryFragment[]
-      | readonly RequestSummaryFragment[];
+      readonly ReservationSummaryFragment[] | readonly RequestSummaryFragment[];
     // eslint-disable-next-line vue/no-unused-properties
   } & Pick<QTableProps, "loading">
 >();

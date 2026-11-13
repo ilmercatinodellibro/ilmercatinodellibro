@@ -22,9 +22,7 @@ type SentMessageInfo =
   | false;
 
 type Address =
-  | string
-  | AddressObject
-  | Pick<User, "email" | "firstname" | "lastname">;
+  string | AddressObject | Pick<User, "email" | "firstname" | "lastname">;
 const addressableFields = [
   "to",
   "cc",

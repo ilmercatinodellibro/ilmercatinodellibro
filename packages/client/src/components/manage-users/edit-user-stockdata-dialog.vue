@@ -225,9 +225,9 @@ const { bookCopiesInStock: copiesInStock, loading: inStockLoading } =
 // TODO: Totally agree, this must be simplified
 function getCommonColumns<
   const TEntity extends "book" | "copy",
-  TFragment extends TEntity extends "book"
+  TFragment extends (TEntity extends "book"
     ? BookSummaryFragment
-    : BookCopyDetailsFragment,
+    : BookCopyDetailsFragment),
 >(entity: TEntity): QTableColumn<TFragment>[] {
   const getField = (
     field: QTableColumn<BookSummaryFragment>["field"],

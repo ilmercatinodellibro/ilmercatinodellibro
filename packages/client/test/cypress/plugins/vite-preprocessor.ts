@@ -12,15 +12,12 @@ import {
  * @see https://github.com/quasarframework/quasar-testing/blob/fa2a0f88d4cba1f0583c00a5b03845ae2c1fd976/packages/e2e-cypress/src/helpers/cct-dev-server/index.ts#L12-L77
  */
 async function extractViteConfigFromQuasar() {
-  const { default: extensionRunner } = await import(
-    "@quasar/app-vite/lib/app-extension/extensions-runner"
-  );
-  const { default: getQuasarCtx } = await import(
-    "@quasar/app-vite/lib/helpers/get-quasar-ctx"
-  );
-  const { default: QuasarConfigFile } = await import(
-    "@quasar/app-vite/lib/quasar-config-file"
-  );
+  const { default: extensionRunner } =
+    await import("@quasar/app-vite/lib/app-extension/extensions-runner");
+  const { default: getQuasarCtx } =
+    await import("@quasar/app-vite/lib/helpers/get-quasar-ctx");
+  const { default: QuasarConfigFile } =
+    await import("@quasar/app-vite/lib/quasar-config-file");
 
   const ctx = getQuasarCtx({
     mode: "spa",
@@ -40,9 +37,8 @@ async function extractViteConfigFromQuasar() {
     console.error(quasarConfig.error);
   }
 
-  const { default: generateConfig } = await import(
-    "@quasar/app-vite/lib/modes/spa/spa-config"
-  );
+  const { default: generateConfig } =
+    await import("@quasar/app-vite/lib/modes/spa/spa-config");
 
   return generateConfig.vite(quasarConfig) as UserConfig;
 }

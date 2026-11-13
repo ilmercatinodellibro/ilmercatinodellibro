@@ -18,9 +18,7 @@ declare module "async" {
 }
 
 @Injectable()
-export class FirebasePushNotificationService
-  implements PushNotificationService
-{
+export class FirebasePushNotificationService implements PushNotificationService {
   // This may depend on the server resources.
   // If this doesn't work or we discover it can be improved, we can accept this via configuration.
   private readonly PARALLEL_REQUESTS = 4;

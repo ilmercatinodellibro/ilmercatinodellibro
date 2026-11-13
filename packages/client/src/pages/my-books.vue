@@ -281,9 +281,7 @@ const { purchasedBookCopies } = useGetPurchasedBookCopiesQuery({
 });
 
 type TablesRowsTypes =
-  | BookCopyDetailsFragment
-  | ReservationSummaryFragment
-  | RequestSummaryFragment;
+  BookCopyDetailsFragment | ReservationSummaryFragment | RequestSummaryFragment;
 
 interface TableRowsByTab {
   [BooksTab.DELIVERED]: BookCopyDetailsFragment[];
