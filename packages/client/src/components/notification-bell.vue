@@ -86,7 +86,7 @@ const tooltip = computed(() => {
     : t("pushNotifications.subscribe");
 });
 
-const { vibrate } = useVibrate({ interval: 500 });
+const { vibrate } = useVibrate();
 async function toggleSubscription() {
   isLoading.value = true;
 

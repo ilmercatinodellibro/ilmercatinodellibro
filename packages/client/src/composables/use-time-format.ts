@@ -1,10 +1,14 @@
-import { useNow } from "@vueuse/core";
+import { useIntervalFn, useNow } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
+
+const TIME_UPDATE_INTERVAL = 30_000;
 
 export function useTimeFormat() {
   const { d, locale } = useI18n();
 
-  const now = useNow({ interval: 30_000 });
+  const now = useNow({
+    scheduler: (updateNow) => useIntervalFn(updateNow, TIME_UPDATE_INTERVAL),
+  });
   function formatRelativeTime(date: string | number): string {
     const formatter = new Intl.RelativeTimeFormat(locale.value, {
       numeric: "auto",
