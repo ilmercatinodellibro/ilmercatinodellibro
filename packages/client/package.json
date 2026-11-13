@@ -64,7 +64,7 @@
     "@types/lodash-es": "^4.17.12",
     "autoprefixer": "^10.6.2",
     "concurrently": "^10.0.7",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "tinyglobby": "catalog:",
     "vite-plugin-checker": "^0.14.5",
     "vue-tsc": "~3.3.14"
