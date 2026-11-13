@@ -175,6 +175,8 @@ async function subscribe() {
 
 async function checkToken() {
   const oldToken = token.value;
+  // TODO: move to Firebase Installation ID based messaging with register() and onRegistered(), together with the server
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- see the TODO above
   const newToken = await getToken(messaging, {
     vapidKey: import.meta.env.WEB_PUSH_VAPID_KEY,
     serviceWorkerRegistration: await navigator.serviceWorker.getRegistration(),
@@ -190,6 +192,7 @@ async function checkToken() {
 }
 
 async function unsubscribe() {
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- see the TODO in checkToken()
   await deleteToken(messaging);
 
   if (token.value !== null) {
