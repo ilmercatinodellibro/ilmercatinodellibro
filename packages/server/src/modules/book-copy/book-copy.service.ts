@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaTransactionClient } from "src/helpers/prisma";
+import type { Prisma } from "src/@generated/prisma/client";
 
 @Injectable()
 export class BookCopyService {
   async calculateBookCodes(
-    prisma: PrismaTransactionClient,
+    prisma: Prisma.TransactionClient,
     bookIds: string[],
     retailLocationId: string,
   ) {
@@ -25,7 +25,7 @@ export class BookCopyService {
   }
 
   async #getMaxAssignedNumber(
-    prisma: PrismaTransactionClient,
+    prisma: Prisma.TransactionClient,
     retailLocationId: string,
     numberOfCodesToGenerate: number,
     useFragmentation: boolean,
