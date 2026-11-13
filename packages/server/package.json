@@ -106,7 +106,7 @@
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^2.38.2",
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^10.6.0",
     "@nestjs/cli": "^12.0.12",
     "@nestjs/schematics": "^12.0.13",
     "@nestjs/testing": "^12.4.2",
