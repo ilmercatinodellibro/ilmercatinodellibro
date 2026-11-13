@@ -435,7 +435,7 @@ importers:
         version: 12.0.4(@nestjs/common@12.4.2(class-transformer@0.5.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)(supports-color@8.1.1))
       '@nestjs/passport':
         specifier: ^12.0.1
-        version: 12.0.1(@nestjs/common@12.4.2(class-transformer@0.5.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)(supports-color@8.1.1))(passport@0.6.0)
+        version: 12.0.1(@nestjs/common@12.4.2(class-transformer@0.5.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)(supports-color@8.1.1))(passport@0.7.0)
       '@nestjs/platform-express':
         specifier: ^12.4.2
         version: 12.4.2(@nestjs/common@12.4.2(class-transformer@0.5.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.4.2)(rxjs@7.8.2)(supports-color@8.1.1)
@@ -506,8 +506,8 @@ importers:
         specifier: ^10.5.0
         version: 10.5.0
       passport:
-        specifier: ^0.6.0
-        version: 0.6.0
+        specifier: ^0.7.0
+        version: 0.7.0
       passport-facebook:
         specifier: ^3.0.0
         version: 3.0.0
@@ -8843,8 +8843,8 @@ packages:
     resolution: {integrity: sha512-CB97UUvDKJde2V0KDWWB3lyf6PC3FaZP7YxZ2G8OAtn9p4HI9j9JLP9qjOGZFvyl8uwNT8qM+hGnz/n16NI7oA==}
     engines: {node: '>= 0.4.0'}
 
-  passport@0.6.0:
-    resolution: {integrity: sha512-0fe+p3ZnrWRW74fe8+SvCyf4a3Pb2/h7gFkQ8yTJpAO50gDzlfjZUZTO1k5Eg9kUct22OxHLqDZoKUWRHOh9ug==}
+  passport@0.7.0:
+    resolution: {integrity: sha512-cPLl+qZpSc+ireUvt+IzqbED1cHHkDoVYMo30jbJIdOOjQ1MQYZBPiNvmi8UM6lJuOpTPXJGZQk0DtC4y61MYQ==}
     engines: {node: '>= 0.4.0'}
 
   path-browserify@1.0.1:
@@ -14375,10 +14375,10 @@ snapshots:
     optionalDependencies:
       class-transformer: 0.5.1
 
-  '@nestjs/passport@12.0.1(@nestjs/common@12.4.2(class-transformer@0.5.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)(supports-color@8.1.1))(passport@0.6.0)':
+  '@nestjs/passport@12.0.1(@nestjs/common@12.4.2(class-transformer@0.5.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)(supports-color@8.1.1))(passport@0.7.0)':
     dependencies:
       '@nestjs/common': 12.4.2(class-transformer@0.5.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)(supports-color@8.1.1)
-      passport: 0.6.0
+      passport: 0.7.0
 
   '@nestjs/platform-express@12.4.2(@nestjs/common@12.4.2(class-transformer@0.5.1)(reflect-metadata@0.1.14)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@12.4.2)(rxjs@7.8.2)(supports-color@8.1.1)':
     dependencies:
@@ -20809,7 +20809,7 @@ snapshots:
 
   passport-strategy@1.0.0: {}
 
-  passport@0.6.0:
+  passport@0.7.0:
     dependencies:
       passport-strategy: 1.0.0
       pause: 0.0.1
