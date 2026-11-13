@@ -39,7 +39,7 @@
             lazy-rules
             outlined
             type="email"
-            data-cy="email-field"
+            data-testid="email-field"
           />
 
           <k-password-input
@@ -50,7 +50,7 @@
             outlined
             lazy-rules
             autocomplete="password"
-            data-cy="password-field"
+            data-testid="password-field"
           />
 
           <q-btn
@@ -58,7 +58,7 @@
             color="primary"
             :label="t('auth.login')"
             type="submit"
-            data-cy="submit-button"
+            data-testid="submit-button"
             :loading="isLoggingIn"
           />
         </q-form>
@@ -98,6 +98,7 @@
           class="full-width outline-black-12"
           color="black-87"
           outline
+          data-testid="registration-link"
         />
       </q-card-section>
 
@@ -106,7 +107,7 @@
       <router-link
         class="text-black-87 text-subtitle1"
         :to="{ name: 'forgot-password' }"
-        data-cy="forgot-password-link"
+        data-testid="forgot-password-link"
       >
         {{ t("auth.forgotPassword") }}
       </router-link>
@@ -154,7 +155,7 @@ if (props.emailVerified) {
     message: t("auth.emailVerified"),
     color: "positive",
     attrs: {
-      "data-cy": "email-verified-notification",
+      "data-testid": "email-verified-notification",
     },
   });
 }

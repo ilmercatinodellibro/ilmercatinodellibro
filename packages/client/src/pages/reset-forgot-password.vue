@@ -18,7 +18,7 @@
             outlined
             lazy-rules
             autocomplete="password"
-            data-cy="password-field"
+            data-testid="password-field"
           />
         </q-card-section>
         <q-card-section class="q-pt-none">
@@ -36,7 +36,7 @@
             outlined
             lazy-rules
             autocomplete="password"
-            data-cy="password-confirmation-field"
+            data-testid="password-confirmation-field"
           />
         </q-card-section>
         <q-card-actions align="center">
@@ -45,7 +45,7 @@
             :label="t('auth.reset')"
             type="submit"
             :loading="isResettingPassword"
-            data-cy="submit-button"
+            data-testid="submit-button"
           />
         </q-card-actions>
       </q-form>

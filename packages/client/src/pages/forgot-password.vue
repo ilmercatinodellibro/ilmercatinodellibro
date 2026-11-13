@@ -15,14 +15,14 @@
             lazy-rules
             outlined
             type="email"
-            data-cy="email-field"
+            data-testid="email-field"
           />
           <q-btn
             class="full-width"
             color="primary"
             :label="t('actions.submit')"
             type="submit"
-            data-cy="submit-button"
+            data-testid="submit-button"
             :loading="isLoading"
           />
         </q-card-section>

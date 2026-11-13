@@ -1,12 +1,12 @@
 import type { GraphQLFormattedError } from "graphql";
 import { Notify } from "quasar";
 
-export function notifyError(message: string, dataCy = "error-notification") {
+export function notifyError(message: string, testId = "error-notification") {
   Notify.create({
     type: "negative",
     message,
     attrs: {
-      "data-cy": dataCy,
+      "data-testid": testId,
     },
   });
 }
@@ -36,8 +36,8 @@ export function getErrorStatus(error: unknown) {
 
 /** Shows the message of an error the server returned */
 // TODO: implement centralized error handling
-export function notifyServerError(error: unknown, dataCy?: string) {
-  notifyError(error instanceof Error ? error.message : String(error), dataCy);
+export function notifyServerError(error: unknown, testId?: string) {
+  notifyError(error instanceof Error ? error.message : String(error), testId);
 }
 
 // A 4xx status means the server refused the request on purpose, like an invalid input.

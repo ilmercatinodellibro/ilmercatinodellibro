@@ -50,7 +50,7 @@
         <q-btn
           :label="cancelLabel ?? t('common.cancel')"
           flat
-          data-cy="cancel-button"
+          data-testid="cancel-button"
           @click="emit('cancel')"
         />
         <q-btn
@@ -58,7 +58,7 @@
           :label="submitLabel ?? t('common.confirm')"
           flat
           type="submit"
-          data-cy="submit-button"
+          data-testid="submit-button"
         />
       </slot>
     </q-card-actions>

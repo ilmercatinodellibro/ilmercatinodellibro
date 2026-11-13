@@ -17,7 +17,7 @@
           :label="t('auth.emailAddress')"
           :options="emails"
           :rules="[requiredRule, emailRule]"
-          data-cy="email-field"
+          data-testid="email-field"
           clearable
           hide-dropdown-icon
           lazy-rules

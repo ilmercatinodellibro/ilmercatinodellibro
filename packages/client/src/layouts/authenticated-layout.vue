@@ -3,7 +3,7 @@
     <header-bar v-if="isMobile" />
 
     <app-drawer>
-      <q-item v-if="user" class="q-py-md">
+      <q-item v-if="user" class="q-py-md" data-testid="user-item">
         <q-item-section side>
           <q-icon :name="mdiAccountCircle" color="primary" />
         </q-item-section>
@@ -28,7 +28,7 @@
         :to="{ name: AvailableRouteNames.MyData }"
         active-class="bg-black-activated-light"
         clickable
-        data-cy="my-data"
+        data-testid="my-data"
       >
         <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
           {{ t("general.myData") }}
@@ -51,7 +51,7 @@
           active-class="bg-black-activated-light"
           clickable
           :to="{ name: AvailableRouteNames.Home }"
-          data-cy="home"
+          data-testid="home"
         >
           <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
             {{ t("general.home") }}
@@ -73,7 +73,7 @@
           :to="{ name: AvailableRouteNames.ReserveBooks }"
           active-class="bg-black-activated-light"
           clickable
-          data-cy="reserve-books"
+          data-testid="reserve-books"
         >
           <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
             {{ t("general.reserveBooks") }}
@@ -102,7 +102,7 @@
           :to="{ name: AvailableRouteNames.MyBooks }"
           active-class="bg-black-activated-light"
           clickable
-          data-cy="my-books"
+          data-testid="my-books"
         >
           <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
             {{ t("general.myBooks") }}
@@ -131,7 +131,7 @@
           :to="{ name: AvailableRouteNames.SalableBooks }"
           active-class="bg-black-activated-light"
           clickable
-          data-cy="salable-books"
+          data-testid="salable-books"
         >
           <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
             {{ t("general.salableBooks") }}
@@ -161,7 +161,7 @@
             :to="{ name: AvailableRouteNames.FAQ }"
             active-class="bg-black-activated-light"
             clickable
-            data-cy="faq"
+            data-testid="faq"
           >
             <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
               {{ t("general.faq") }}
@@ -242,7 +242,7 @@
           :to="{ name: AvailableRouteNames.UsersManagement }"
           active-class="bg-black-activated-light"
           clickable
-          data-cy="users-management"
+          data-testid="users-management"
         >
           <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
             {{ t(`routesNames.${AvailableRouteNames.UsersManagement}`) }}
@@ -271,7 +271,7 @@
           :to="{ name: AvailableRouteNames.Warehouse }"
           active-class="bg-black-activated-light"
           clickable
-          data-cy="warehouse"
+          data-testid="warehouse"
         >
           <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
             {{ t("general.tooltips.warehouse") }}
@@ -300,7 +300,7 @@
           :to="{ name: AvailableRouteNames.Catalog }"
           active-class="bg-black-activated-light"
           clickable
-          data-cy="books-catalog"
+          data-testid="books-catalog"
         >
           <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
             {{ t(`routesNames.${AvailableRouteNames.Catalog}`) }}
@@ -409,7 +409,7 @@
             :to="{ name: AvailableRouteNames.RolesAndPermissions }"
             active-class="bg-black-activated-light"
             clickable
-            data-cy="roles-and-permissions"
+            data-testid="roles-and-permissions"
           >
             <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
               {{ t(`routesNames.${AvailableRouteNames.RolesAndPermissions}`) }}
@@ -486,7 +486,7 @@
 
       <q-separator />
 
-      <q-item v-ripple clickable data-cy="logout-button" @click="logout()">
+      <q-item v-ripple clickable data-testid="logout-button" @click="logout()">
         <q-tooltip v-if="isDrawerMini" v-bind="TOOLTIP_SHARED_PROPS">
           {{ t("auth.logOut") }}
         </q-tooltip>

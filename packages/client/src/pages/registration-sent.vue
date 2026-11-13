@@ -17,7 +17,7 @@
           class="full-width"
           color="primary"
           :to="{ name: 'login' }"
-          data-cy="back-to-login-link"
+          data-testid="back-to-login-link"
         />
       </q-card-section>
     </q-card>

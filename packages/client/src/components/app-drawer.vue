@@ -10,7 +10,7 @@
     show-if-above
     role="navigation"
     bordered
-    data-cy="page-drawer"
+    data-testid="page-drawer"
     :aria-label="t('general.mainNavigation')"
   >
     <q-icon

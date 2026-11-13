@@ -27,6 +27,7 @@
               "
               bottom-slots
               class="full-width"
+              :data-testid="`${kebabCase(fieldData.field)}-field`"
               lazy-rules
               outlined
             >
@@ -69,7 +70,7 @@
             :label="t('auth.register')"
             type="submit"
             :loading="isRegistering"
-            data-cy="submit-button"
+            data-testid="submit-button"
           />
         </q-form>
       </q-card-section>
@@ -118,7 +119,7 @@
       <router-link
         :to="{ name: AvailableRouteNames.ForgotPassword }"
         class="text-black-87 text-center text-subtitle1"
-        data-cy="forgot-password-link"
+        data-testid="forgot-password-link"
       >
         {{ t("auth.forgotPassword") }}
       </router-link>
@@ -132,7 +133,7 @@ import {
   mdiEyeOff,
   mdiInformationOutline,
 } from "@quasar/extras/mdi-v7";
-import { omit } from "lodash-es";
+import { kebabCase, omit } from "lodash-es";
 import { Notify, type QInputProps, uid } from "quasar";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";

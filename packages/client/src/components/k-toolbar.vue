@@ -17,7 +17,7 @@
         round
         aria-controls="page-drawer"
         :aria-expanded="drawerProxy ? 'true' : 'false'"
-        data-cy="drawer-button"
+        data-testid="drawer-button"
         @click="drawerProxy = !drawerProxy"
       />
     </template>
