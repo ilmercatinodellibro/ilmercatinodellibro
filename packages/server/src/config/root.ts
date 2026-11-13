@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { type ConfigType, registerAs } from "@nestjs/config";
-import * as z from "zod/mini";
+import { z } from "./zod";
 
 enum Environment {
   Development = "development",

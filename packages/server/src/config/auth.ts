@@ -1,5 +1,5 @@
 import { type ConfigType, registerAs } from "@nestjs/config";
-import * as z from "zod/mini";
+import { z } from "./zod";
 
 const authSchema = z.object({
   applicationSecret: z.string(),

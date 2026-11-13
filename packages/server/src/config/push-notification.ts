@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { registerAs } from "@nestjs/config";
 import type { ServiceAccount } from "firebase-admin";
-import * as z from "zod/mini";
+import { z } from "./zod";
 
 // Output from the Firebase Console uses snake_case
 const rawFirebaseCredentialsSchema = z.object({
