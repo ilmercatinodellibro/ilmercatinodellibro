@@ -260,7 +260,10 @@ export class ImportBooksCommand extends CommandRunner {
     const csvParser = parse({
       skip_empty_lines: true,
       skipRecordsWithError: true,
-      on_record: (record: IngestedCsvRow, { lines }) => {
+      on_record: (rawRecord, { lines }) => {
+        // csv-parse types records as string[] when the "columns" option isn't set
+        const record = rawRecord as IngestedCsvRow;
+
         // Skips header parsing
         if (lines === 1) {
           return null;
@@ -407,7 +410,10 @@ export class ImportBooksCommand extends CommandRunner {
       csvParser: parse({
         skip_empty_lines: true,
         skipRecordsWithError: true,
-        on_record: (record: IngestedStateSchoolRow, { lines }) => {
+        on_record: (rawRecord, { lines }) => {
+          // csv-parse types records as string[] when the "columns" option isn't set
+          const record = rawRecord as IngestedStateSchoolRow;
+
           // Skips header parsing
           if (lines === 1) {
             return null;
@@ -451,7 +457,10 @@ export class ImportBooksCommand extends CommandRunner {
       csvParser: parse({
         skip_empty_lines: true,
         skipRecordsWithError: true,
-        on_record: (record: IngestedEquivalentSchoolRow, { lines }) => {
+        on_record: (rawRecord, { lines }) => {
+          // csv-parse types records as string[] when the "columns" option isn't set
+          const record = rawRecord as IngestedEquivalentSchoolRow;
+
           // Skips header parsing
           if (lines === 1) {
             return null;
