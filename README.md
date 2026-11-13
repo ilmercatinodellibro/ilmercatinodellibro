@@ -204,7 +204,7 @@ pnpm restore:app <backup_file_name>
 This section is meant to describe the setup steps for a production installation of the software or anyway the installation on a machine that needs to be configured from scratch.
 It will list the minimal requirements needed to be able to install the code and make it run in production mode.
 
-1. Install [Node.js](https://nodejs.org/en/download/prebuilt-binaries) version 18.20(LTS) or 20.12(LTS) on the server machine.
+1. Install [Node.js](https://nodejs.org/en/download/prebuilt-binaries) version 24.22.3 (LTS) or a later 24.x release on the server machine.
    1. Notice that if you do not have access to a graphical UI but just to a CLI, it is better to follow [these instructions](https://nodejs.org/en/download/package-manager) instead.
 2. Verify Node.js installation by running `node -v` in the terminal. It shall return its version.
 3. From an elevated terminal (or using the `sudo` prefix on Linux/Mac), run `corepack enable`. This will make sure that Node.js can install `pnpm` autonomously.
