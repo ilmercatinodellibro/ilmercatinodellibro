@@ -187,7 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { type ApolloCache, isApolloError } from "@apollo/client/core";
+import type { ApolloCache } from "@apollo/client/core";
 import {
   mdiChevronDown,
   mdiChevronUp,
@@ -209,7 +209,7 @@ import { evictQuery } from "src/apollo/cache";
 import ConfirmDialog from "src/components/confirm-dialog.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { calculateBookCopyPrice } from "src/helpers/book-copy";
-import { notifyError } from "src/helpers/error-messages";
+import { getGraphQLErrors, notifyError } from "src/helpers/error-messages";
 import { formatPrice } from "src/helpers/formatting";
 import { GetBookCopiesInStockDocument } from "src/services/book-copy.graphql";
 import type { BookSummaryFragment } from "src/services/book.graphql";
@@ -399,13 +399,13 @@ async function addBookToCart(fromBookIsbn?: string) {
 
     cartBooks.value.push(data);
   } catch (_error) {
-    const error = _error as Error;
-    if (!isApolloError(error)) {
+    const graphQLErrors = getGraphQLErrors(_error);
+    if (graphQLErrors.length === 0) {
       notifyError(t("bookErrors.addBookToCart"));
       return;
     }
 
-    for (const graphQLError of error.graphQLErrors) {
+    for (const graphQLError of graphQLErrors) {
       switch (graphQLError.message) {
         case "BOOK_NOT_FOUND": {
           notifyError(t("bookErrors.noBook"));

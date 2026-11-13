@@ -54,7 +54,6 @@
 </template>
 
 <script setup lang="ts">
-import type { ApolloError } from "@apollo/client/core";
 import { Notify, QForm } from "quasar";
 import { reactive, ref } from "vue";
 import { useI18n } from "vue-i18n";
@@ -63,7 +62,10 @@ import PasswordStrengthBar from "components/password-strength-bar.vue";
 import type { ResetForgottenPasswordPayload } from "src/@generated/graphql";
 import KPasswordInput from "src/components/k-password-input.vue";
 import { STRENGTH_BAR_STEPS } from "src/components/models";
-import { notifyError } from "src/helpers/error-messages";
+import {
+  isExpectedServerError,
+  notifyServerError,
+} from "src/helpers/error-messages";
 import {
   makeValueMatchRule,
   requiredRule,
@@ -113,15 +115,9 @@ async function onSubmit() {
     });
     void router.push({ name: "login" });
   } catch (error) {
-    const { message, graphQLErrors } = error as ApolloError;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- we're not sure if this a false positive or not
-    const status = graphQLErrors[0]?.extensions?.status as number | undefined;
+    notifyServerError(error);
 
-    // TODO: implement centralized error handling
-
-    notifyError(message);
-
-    if (!status || ![400, 404].includes(status)) {
+    if (!isExpectedServerError(error)) {
       throw error;
     }
   }

@@ -115,7 +115,6 @@
 </template>
 
 <script setup lang="ts">
-import type { ApolloError } from "@apollo/client/core";
 import { mdiArrowDown, mdiArrowLeft } from "@quasar/extras/mdi-v7";
 import { Notify, QCard } from "quasar";
 import { ref } from "vue";
@@ -126,7 +125,10 @@ import KPasswordInput from "src/components/k-password-input.vue";
 import SocialAuthButtons from "src/components/social-auth-buttons.vue";
 import { useLateralDrawer } from "src/composables/use-lateral-drawer";
 import { useTheme } from "src/composables/use-theme";
-import { notifyError } from "src/helpers/error-messages";
+import {
+  isExpectedServerError,
+  notifyServerError,
+} from "src/helpers/error-messages";
 import { emailRule, requiredRule } from "src/helpers/rules";
 import { AvailableRouteNames } from "src/models/routes";
 import { useLoginMutation } from "src/services/auth";
@@ -183,15 +185,9 @@ async function onSubmit() {
       retailLocationId: selectedLocation.value.id,
     });
   } catch (error) {
-    const { message, graphQLErrors } = error as ApolloError;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- we're not sure if this a false positive or not
-    const status = graphQLErrors[0]?.extensions?.status as number | undefined;
+    notifyServerError(error, "login-error");
 
-    // TODO: implement centralized error handling
-
-    notifyError(message, "login-error");
-
-    if (!status || ![401, 422].includes(status)) {
+    if (!isExpectedServerError(error)) {
       console.error(error);
     }
   }

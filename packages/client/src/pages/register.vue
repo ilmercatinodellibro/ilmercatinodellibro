@@ -127,7 +127,6 @@
 </template>
 
 <script setup lang="ts">
-import type { ApolloError } from "@apollo/client/core";
 import {
   mdiEye,
   mdiEyeOff,
@@ -143,7 +142,10 @@ import type { RegisterUserPayload } from "src/@generated/graphql";
 import { STRENGTH_BAR_STEPS } from "src/components/models";
 import PasswordStrengthBar from "src/components/password-strength-bar.vue";
 import { useTheme } from "src/composables/use-theme";
-import { notifyError } from "src/helpers/error-messages";
+import {
+  isExpectedServerError,
+  notifyServerError,
+} from "src/helpers/error-messages";
 import {
   emailRule,
   makeValueMatchRule,
@@ -315,15 +317,9 @@ async function onSubmit() {
       color: "positive",
     });
   } catch (error) {
-    const { message, graphQLErrors } = error as ApolloError;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- we're not sure if this a false positive or not
-    const status = graphQLErrors[0]?.extensions?.status as number | undefined;
+    notifyServerError(error, "registration-error");
 
-    // TODO: implement centralized error handling
-
-    notifyError(message, "registration-error");
-
-    if (!status || ![401, 422].includes(status)) {
+    if (!isExpectedServerError(error)) {
       console.error(error);
     }
   }
